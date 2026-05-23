@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-ink-950 text-white antialiased;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Segoe UI', sans-serif;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.09), transparent 24%),
+    radial-gradient(circle at 80% 0%, rgba(255, 255, 255, 0.05), transparent 22%),
+    linear-gradient(180deg, #090909 0%, #000000 45%, #060606 100%);
+}
+
+::selection {
+  background: rgba(255, 255, 255, 0.18);
+  color: white;
+}
+
+.glass-panel {
+  @apply border border-white/10 bg-white/[0.035] backdrop-blur-2xl shadow-glass;
+}
+
+.glass-nav {
+  @apply border border-white/10 bg-black/35 backdrop-blur-2xl shadow-glass;
+}
+
+.section-shell {
+  @apply mx-auto w-full max-w-7xl px-6 sm:px-8 lg:px-10;
+}
+
+.section-heading {
+  @apply text-balance text-3xl font-semibold tracking-tight text-white sm:text-4xl lg:text-5xl;
+}
+
+.section-copy {
+  @apply text-base leading-7 text-fog-500 sm:text-lg;
+}
+
+.muted-label {
+  @apply text-xs uppercase tracking-[0.28em] text-fog-500;
+}
+
+.pill-button {
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-medium transition duration-200 active:scale-[0.97];
+}
+
+.pill-button-primary {
+  @apply bg-white text-black hover:bg-white/90;
+}
+
+.pill-button-secondary {
+  @apply border border-white/15 bg-white/0 text-white hover:border-white/30 hover:bg-white/[0.04];
+}
+
+.floating-field {
+  @apply relative rounded-2xl border border-white/10 bg-white/[0.03] px-4 pb-3 pt-5 text-white outline-none transition focus-within:border-white/30 focus-within:bg-white/[0.05];
+}
+
+.floating-input {
+  @apply w-full bg-transparent text-sm text-white outline-none placeholder-transparent;
+}
+
+.floating-label {
+  @apply pointer-events-none absolute left-4 top-4 origin-left text-sm text-fog-500 transition-all;
+}
+
+.floating-input:not(:placeholder-shown) + .floating-label,
+.floating-input:focus + .floating-label {
+  @apply -translate-y-2 scale-90 text-white;
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 700ms ease, transform 700ms ease;
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.grid-noise {
+  background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 72px 72px;
+}
