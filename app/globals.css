@@ -25,7 +25,7 @@ body {
 }
 
 .glass-panel {
-  @apply border border-white/10 bg-white/[0.035] backdrop-blur-2xl shadow-glass;
+  @apply border border-white/10 bg-white/[0.035] backdrop-blur-2xl shadow-glass rounded-3xl p-6;
 }
 
 .glass-nav {
@@ -33,7 +33,8 @@ body {
 }
 
 .section-shell {
-  @apply mx-auto w-full max-w-7xl px-6 sm:px-8 lg:px-10;
+  @apply mx-auto w-full px-6 sm:px-8 lg:px-10;
+  max-width: 72rem;
 }
 
 .section-heading {
@@ -49,19 +50,19 @@ body {
 }
 
 .pill-button {
-  @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-medium transition duration-200 active:scale-[0.97];
+  @apply inline-flex items-center justify-center gap-2 rounded-full text-sm font-medium transition duration-200 active:scale-[0.97] px-5 py-3;
 }
 
 .pill-button-primary {
-  @apply bg-white text-black hover:bg-white/90;
+  @apply bg-white text-black shadow-md hover:bg-white/95 ring-1 ring-white/5;
 }
 
 .pill-button-secondary {
-  @apply border border-white/15 bg-white/0 text-white hover:border-white/30 hover:bg-white/[0.04];
+  @apply border border-white/15 bg-transparent text-white hover:border-white/30 hover:bg-white/[0.03];
 }
 
 .floating-field {
-  @apply relative rounded-2xl border border-white/10 bg-white/[0.03] px-4 pb-3 pt-5 text-white outline-none transition focus-within:border-white/30 focus-within:bg-white/[0.05];
+  @apply relative rounded-2xl border border-white/10 bg-white/[0.03] px-5 pb-4 pt-6 text-white outline-none transition focus-within:border-white/30 focus-within:bg-white/[0.05];
 }
 
 .floating-input {

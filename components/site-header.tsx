@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowUpRight, Download } from 'lucide-react';
 
@@ -14,8 +15,16 @@ export function SiteHeader() {
     <header className="sticky top-0 z-50 border-b border-white/5">
       <div className="section-shell py-4">
         <div className="glass-nav flex items-center justify-between rounded-full px-4 py-3 sm:px-5">
-          <Link href="/" className="text-lg font-semibold tracking-tight text-white">
-            HW.
+          <Link href="/" className="flex items-center gap-3">
+            <Image
+              src="/images/howard.jpg"
+              alt="Howard Woon"
+              width={40}
+              height={40}
+              className="rounded-full object-cover"
+              priority
+            />
+            <span className="hidden text-lg font-semibold tracking-tight text-white sm:inline">Howard</span>
           </Link>
 
           <nav className="hidden items-center gap-6 text-sm text-fog-500 md:flex">

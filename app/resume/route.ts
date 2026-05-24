@@ -13,16 +13,27 @@ function createResumePdf() {
     'Builder across software engineering, finance, AI systems, and smart energy products.',
     '',
     'Experience',
-    'Assistant Finance Executive - Kraiburg TPE Technology (M) Sdn. Bhd.',
-    'Treasurer & Leadership Roles - UM Alphathon 2025, MYTECH Career Fair 2026, PEKOM CODEFEST / Mental Health Week',
+    'Treasurer — MYTECH Career Fair (Feb 2026 — Present)',
+    'Executive Assistant Finance — KRAIBURG TPE (Jun 2025 — Sep 2025)',
+    'Treasurer — Code Fest X UM Alphathon (Oct 2025 — Dec 2025)',
+    "Committee Member, Sponsorship & PR — Dean's Cup (Oct 2025 — Dec 2025)",
+    'Treasurer — Mental Health Week (Sep 2025 — Nov 2025)',
+    'Finance Intern — KRAIBURG TPE (Mar 2024 — Jun 2024)',
+    'Assistant Head of Subject, Computer Science — KMNS PAL Leader Club (Jul 2024 — Dec 2024)',
+    'Chairperson — Village Sports Club (Jul 2024 — Dec 2024)',
+    'Representative — KPM Madani Leadership Course (Oct 2024)',
     '',
     'Projects',
-    'BILAHUJAN - Intelligent disaster response mobile application',
-    'Sensor X Sensei - Smart energy management system',
-    'BIOMELON - Population genetics data platform',
+    'BILAHUJAN — Intelligent disaster response mobile application (KitaHack 2026) — https://github.com/HowardWoon/BILAHUJAN-VHack2026.git',
+    'Kuliah F3 (UM Hackathon) — Project built during UM Hackathon 2026 — https://github.com/HowardWoon/Kuliah-F3---UM-Hackathon-2026.git',
+    'Catfish Detector (ML Models) — Machine learning models — https://github.com/HowardWoon/Catfish-Detector-ML-Models.git',
+    'Slotify — Music app prototype — https://github.com/HowardWoon/Slotify.git',
+    'Group Assignment — Buka — https://github.com/FSKTMCoders/group-assignment-5-5-buka.git',
+    'Sensor X Sensei — Smart energy management system (UM Technothon 2026)',
+    'BIOMELON — Population genetics data platform (PPAL 4.0 Innovation Day)',
     '',
     'Skills',
-    'Java, Python, React, Flutter, Node.js, Firebase, RESTful APIs, Ollama, Claude Code, Google Colab, Git/GitHub, Figma, Canva, Draw.io'
+    'Java, Python, JavaScript/TypeScript, React, Flutter, Node.js, Firebase, RESTful APIs, Ollama, Claude Code, Google Colab, Git/GitHub, Figma, Canva, Draw.io'
   ];
 
   const contentLines = [

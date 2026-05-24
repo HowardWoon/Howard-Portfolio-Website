@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createServerClient } from '@supabase/ssr';
 import type { NextRequest as RouteRequest } from 'next/server';
+import { ADMIN_USER_UUID } from '@/lib/admin-constants';
 
 export async function GET(request: NextRequest) {
   const authClient = createAuthClient(request);
@@ -46,6 +47,6 @@ function createAdminClient() {
 }
 
 function isAllowedAdmin(userId?: string, role?: string) {
-  return Boolean(userId && (userId === process.env.ADMIN_USER_UUID || role === 'admin'));
+  return Boolean(userId && (userId === ADMIN_USER_UUID || role === 'admin'));
 }
 

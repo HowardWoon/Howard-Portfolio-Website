@@ -2,6 +2,8 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
+import { ADMIN_USER_UUID } from '@/lib/admin-constants';
+import { hasSupabaseCredentials } from '@/lib/supabase/fallback';
 
 type AdminResource = 'experiences' | 'projects' | 'skills';
 
@@ -22,6 +24,10 @@ async function mutateResource(request: NextRequest, context: { params: Promise<{
 
   if (!isResource(resource)) {
     return NextResponse.json({ error: 'Unsupported resource' }, { status: 400 });
+  }
+
+  if (!hasSupabaseCredentials() || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return NextResponse.json({ error: 'Admin writes are temporarily unavailable.' }, { status: 503 });
   }
 
   const authClient = createServerClient(
@@ -80,7 +86,7 @@ function createAdminClient() {
 }
 
 function isAllowedAdmin(userId?: string, role?: string) {
-  return Boolean(userId && (userId === process.env.ADMIN_USER_UUID || role === 'admin'));
+  return Boolean(userId && (userId === ADMIN_USER_UUID || role === 'admin'));
 }
 
 function isResource(value: string): value is AdminResource {
