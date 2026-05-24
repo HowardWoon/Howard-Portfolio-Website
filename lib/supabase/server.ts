@@ -1,7 +1,12 @@
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
+import { createFallbackSupabaseClient, hasSupabaseCredentials } from '@/lib/supabase/fallback';
 
 export async function createSupabaseServerClient() {
+  if (!hasSupabaseCredentials()) {
+    return createFallbackSupabaseClient();
+  }
+
   const cookieStore = await cookies();
 
   return createServerClient(

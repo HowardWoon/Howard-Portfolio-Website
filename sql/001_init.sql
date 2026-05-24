@@ -16,7 +16,7 @@ language sql
 stable
 as $$
   select
-    user_id = '00000000-0000-0000-0000-000000000000'::uuid
+    user_id = '54c734ee-1e79-4e92-bf9b-8504a1854a31'::uuid
     or coalesce((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin', false)
 $$;
 
@@ -148,8 +148,8 @@ insert into public.profiles (id, full_name, bio, current_role)
 values (
   '11111111-1111-1111-1111-111111111111',
   'Howard Woon Hao Zhe',
-  'First-year Computer Science (Software Engineering) student at the University of Malaya. From managing corporate finance at Kraiburg TPE to architecting AI-driven applications and smart energy systems.',
-  'Computer Science student and builder across software, finance, and systems.'
+  'First-year Computer Science (Software Engineering) student at the University of Malaya.',
+  'Builder across software engineering, finance, AI systems, and smart energy products.'
 )
 on conflict (id) do update set
   updated_at = now(),
@@ -161,21 +161,84 @@ insert into public.experiences (id, role, company, description, start_date, end_
 values
   (
     '22222222-2222-2222-2222-222222222221',
-    'Assistant Finance Executive',
-    'Kraiburg TPE Technology (M) Sdn. Bhd.',
-    'Managed budgets, executed transactions, and maintained financial precision before transitioning to software engineering.',
-    '2024-01-01',
+    'Treasurer',
+    'MYTECH Career Fair',
+    'Oversaw budgeting, bank reconciliation, vendor payments, and financial reporting for MYTECH Career Fair 2026.',
+    '2026-02-01',
     null,
-    false
+    true
   ),
   (
     '22222222-2222-2222-2222-222222222222',
-    'Treasurer & Leadership Roles',
-    'UM Alphathon 2025, MYTECH Career Fair 2026, PEKOM CODEFEST / Mental Health Week',
-    'Led financial operations and kept event logistics disciplined across university initiatives and tech communities.',
-    '2025-01-01',
-    null,
-    true
+    'Executive Assistant Finance',
+    'KRAIBURG TPE Technology (M) Sdn. Bhd.',
+    'Supported account management, reconciliations, month-end close tasks, and financial reporting for the finance team.',
+    '2025-06-01',
+    '2025-09-30',
+    false
+  ),
+  (
+    '22222222-2222-2222-2222-222222222223',
+    'Treasurer',
+    'Code Fest X UM Alphathon 2025',
+    'Managed event budget, sponsorship funds, and vendor payments for Code Fest X UM Alphathon 2025.',
+    '2025-10-01',
+    '2025-12-31',
+    false
+  ),
+  (
+    '22222222-2222-2222-2222-222222222224',
+    'Committee Member, Sponsorship & Public Relations',
+    'Dean''s Cup 2025',
+    'Coordinated sponsor outreach, handled sponsorship agreements, and assisted with sponsorship reconciliation.',
+    '2025-10-01',
+    '2025-12-31',
+    false
+  ),
+  (
+    '22222222-2222-2222-2222-222222222225',
+    'Treasurer',
+    'Mental Health Week 2025',
+    'Managed budgeting, procurement, and bank reconciliation for Mental Health Week 2025.',
+    '2025-09-01',
+    '2025-11-30',
+    false
+  ),
+  (
+    '22222222-2222-2222-2222-222222222226',
+    'Finance Intern',
+    'KRAIBURG TPE',
+    'Assisted with financial analysis, project finance tracking, bookkeeping, and routine reconciliations.',
+    '2024-03-01',
+    '2024-06-30',
+    false
+  ),
+  (
+    '22222222-2222-2222-2222-222222222227',
+    'Assistant Head of Subject, Computer Science',
+    'Negeri Sembilan Matriculation College (KMNS) - PAL Leader Club',
+    'Led peer-assisted learning sessions, coordinated lesson plans, and mentored junior students in Computer Science topics.',
+    '2024-07-01',
+    '2024-12-31',
+    false
+  ),
+  (
+    '22222222-2222-2222-2222-222222222228',
+    'Chairperson',
+    'Village Sports Club',
+    'Organized sports events, managed club budgets, and led volunteer coordination.',
+    '2024-07-01',
+    '2024-12-31',
+    false
+  ),
+  (
+    '22222222-2222-2222-2222-222222222229',
+    'Representative',
+    'KMNS PAL Leaders - KPM Madani Leadership Course',
+    'Selected representative for the KPM Madani leadership course; participated in workshops and leadership training.',
+    '2024-10-01',
+    '2024-10-31',
+    false
   )
 on conflict (id) do update set
   role = excluded.role,
@@ -190,8 +253,8 @@ values
   (
     '33333333-3333-3333-3333-333333333331',
     'BILAHUJAN',
-    'Built for KitaHack 2026.',
-    'An intelligent disaster response mobile application.',
+    'KitaHack 2026',
+    'Intelligent disaster response mobile application.',
     array['Mobile', 'AI', 'Disaster Response'],
     null,
     1
@@ -199,8 +262,8 @@ values
   (
     '33333333-3333-3333-3333-333333333332',
     'Sensor X Sensei',
-    'UM Technothon 2026.',
-    'A smart energy management system engineered to drastically reduce electricity waste.',
+    'UM Technothon 2026',
+    'Smart energy management system engineered to reduce electricity waste.',
     array['IoT', 'Energy Management', 'Systems Architecture'],
     null,
     2
@@ -208,8 +271,8 @@ values
   (
     '33333333-3333-3333-3333-333333333333',
     'BIOMELON',
-    'PPAL 4.0 Innovation Day.',
-    'A population genetics data platform.',
+    'PPAL 4.0 Innovation Day',
+    'Population genetics data platform.',
     array['Data', 'Genetics', 'Innovation'],
     null,
     3
@@ -226,19 +289,20 @@ insert into public.skills (id, name, category)
 values
   ('44444444-4444-4444-4444-444444444441', 'Java', 'Languages'),
   ('44444444-4444-4444-4444-444444444442', 'Python', 'Languages'),
-  ('44444444-4444-4444-4444-444444444443', 'React', 'Languages'),
-  ('44444444-4444-4444-4444-444444444444', 'Flutter', 'Languages'),
-  ('44444444-4444-4444-4444-444444444445', 'Node.js', 'Languages'),
-  ('44444444-4444-4444-4444-444444444446', 'Firebase', 'Backend'),
-  ('44444444-4444-4444-4444-444444444447', 'RESTful APIs', 'Backend'),
-  ('44444444-4444-4444-4444-444444444448', 'Ollama', 'AI/ML'),
-  ('44444444-4444-4444-4444-444444444449', 'Claude Code', 'AI/ML'),
-  ('44444444-4444-4444-4444-444444444450', 'Google Colab', 'AI/ML'),
-  ('44444444-4444-4444-4444-444444444451', 'Learning Pipelines', 'AI/ML'),
-  ('44444444-4444-4444-4444-444444444452', 'Git/GitHub', 'Design'),
-  ('44444444-4444-4444-4444-444444444453', 'Figma', 'Design'),
-  ('44444444-4444-4444-4444-444444444454', 'Canva', 'Design'),
-  ('44444444-4444-4444-4444-444444444455', 'Draw.io', 'Design')
+  ('44444444-4444-4444-4444-444444444443', 'JavaScript/TypeScript', 'Languages'),
+  ('44444444-4444-4444-4444-444444444444', 'React', 'Frameworks'),
+  ('44444444-4444-4444-4444-444444444445', 'Flutter', 'Frameworks'),
+  ('44444444-4444-4444-4444-444444444446', 'Node.js', 'Frameworks'),
+  ('44444444-4444-4444-4444-444444444447', 'Firebase', 'Backend'),
+  ('44444444-4444-4444-4444-444444444448', 'RESTful APIs', 'Backend'),
+  ('44444444-4444-4444-4444-444444444449', 'Ollama', 'AI/ML'),
+  ('44444444-4444-4444-4444-444444444450', 'Claude Code', 'AI/ML'),
+  ('44444444-4444-4444-4444-444444444451', 'Google Colab', 'AI/ML'),
+  ('44444444-4444-4444-4444-444444444452', 'Learning Pipelines', 'AI/ML'),
+  ('44444444-4444-4444-4444-444444444453', 'Git/GitHub', 'Tools'),
+  ('44444444-4444-4444-4444-444444444454', 'Figma', 'Tools'),
+  ('44444444-4444-4444-4444-444444444455', 'Canva', 'Tools'),
+  ('44444444-4444-4444-4444-444444444456', 'Draw.io', 'Tools')
 on conflict (id) do update set
   name = excluded.name,
   category = excluded.category;
