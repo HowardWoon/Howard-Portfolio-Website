@@ -142,6 +142,52 @@ export const fallbackProjects: ProjectItem[] = [
     project_url: null,
     display_order: 3
   }
+  ,
+  {
+    id: 'project-4',
+    title: 'BILAHUJAN',
+    context: 'VHack / KitaHack 2026',
+    description: 'Intelligent disaster response mobile application.',
+    tags: ['Mobile', 'AI', 'Disaster Response'],
+    project_url: 'https://github.com/HowardWoon/BILAHUJAN-VHack2026.git',
+    display_order: 4
+  },
+  {
+    id: 'project-5',
+    title: 'Kuliah F3 (UM Hackathon)',
+    context: 'UM Hackathon 2026',
+    description: 'Project built during UM Hackathon 2026.',
+    tags: ['Hackathon', 'Mobile', 'Prototype'],
+    project_url: 'https://github.com/HowardWoon/Kuliah-F3---UM-Hackathon-2026.git',
+    display_order: 5
+  },
+  {
+    id: 'project-6',
+    title: 'Catfish Detector (ML Models)',
+    context: 'Machine Learning',
+    description: 'Models for detecting catfishing content and media.',
+    tags: ['Machine Learning', 'Models', 'Data'],
+    project_url: 'https://github.com/HowardWoon/Catfish-Detector-ML-Models.git',
+    display_order: 6
+  },
+  {
+    id: 'project-7',
+    title: 'Slotify',
+    context: 'Personal / Group Project',
+    description: 'Music-related app / prototype.',
+    tags: ['Web', 'Music', 'Full-stack'],
+    project_url: 'https://github.com/HowardWoon/Slotify.git',
+    display_order: 7
+  },
+  {
+    id: 'project-8',
+    title: 'Group Assignment — Buka',
+    context: 'FSKTMCoders Group Project',
+    description: 'Collaborative group assignment repository.',
+    tags: ['Collaboration', 'Web', 'Coursework'],
+    project_url: 'https://github.com/FSKTMCoders/group-assignment-5-5-buka.git',
+    display_order: 8
+  }
 ];
 
 export const fallbackSkills: SkillItem[] = [

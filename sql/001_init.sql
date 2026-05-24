@@ -277,6 +277,52 @@ values
     null,
     3
   )
+  ,
+  (
+    '33333333-3333-3333-3333-333333333334',
+    'BILAHUJAN',
+    'VHack / KitaHack 2026',
+    'Intelligent disaster response mobile application.',
+    array['Mobile', 'AI', 'Disaster Response'],
+    'https://github.com/HowardWoon/BILAHUJAN-VHack2026.git',
+    4
+  ),
+  (
+    '33333333-3333-3333-3333-333333333335',
+    'Kuliah F3 (UM Hackathon)',
+    'UM Hackathon 2026',
+    'Project built during UM Hackathon 2026.',
+    array['Hackathon', 'Mobile', 'Prototype'],
+    'https://github.com/HowardWoon/Kuliah-F3---UM-Hackathon-2026.git',
+    5
+  ),
+  (
+    '33333333-3333-3333-3333-333333333336',
+    'Catfish Detector (ML Models)',
+    'Machine Learning',
+    'Models for detecting catfishing content and media.',
+    array['Machine Learning', 'Models', 'Data'],
+    'https://github.com/HowardWoon/Catfish-Detector-ML-Models.git',
+    6
+  ),
+  (
+    '33333333-3333-3333-3333-333333333337',
+    'Slotify',
+    'Personal / Group Project',
+    'Music-related app / prototype.',
+    array['Web', 'Music', 'Full-stack'],
+    'https://github.com/HowardWoon/Slotify.git',
+    7
+  ),
+  (
+    '33333333-3333-3333-3333-333333333338',
+    'Group Assignment — Buka',
+    'FSKTMCoders Group Project',
+    'Collaborative group assignment repository.',
+    array['Collaboration', 'Web', 'Coursework'],
+    'https://github.com/FSKTMCoders/group-assignment-5-5-buka.git',
+    8
+  )
 on conflict (id) do update set
   title = excluded.title,
   context = excluded.context,
