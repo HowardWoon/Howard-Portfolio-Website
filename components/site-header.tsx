@@ -6,7 +6,6 @@ const links = [
   { href: '#experience', label: 'Experience' },
   { href: '#projects', label: 'Projects' },
   { href: '#stack', label: 'Stack' },
-  { href: '#leadership', label: 'Leadership' },
   { href: '#contact', label: 'Contact' }
 ];
 
@@ -23,7 +22,7 @@ export function SiteHeader() {
             className="rounded-full object-cover border border-white/20"
             priority
           />
-          <span className="hidden text-xs font-jetbrains font-bold uppercase tracking-widest text-white sm:inline">HowardOS</span>
+          <span className="hidden text-xs font-jetbrains font-bold uppercase tracking-widest text-white sm:inline">Howard Woon</span>
         </Link>
 
         <nav className="hidden items-center gap-4 md:flex">
