@@ -153,9 +153,9 @@ with check (public.is_admin(auth.uid()));
 insert into public.profiles (id, full_name, bio, current_role)
 values (
   '11111111-1111-1111-1111-111111111111',
-  'Howard Woon Hao Zhe',
-  'First-year Computer Science (Software Engineering) student at the University of Malaya.',
-  'Builder across software engineering, finance, AI systems, and smart energy products.'
+  'Howard Woon',
+  'Driven Software Engineering student (CGPA 4.00) specializing in full-stack development, AI/ML integration, and IoT solutions. Leveraging a background in corporate finance to engineer high-impact, production-ready systems.',
+  'Software Engineer'
 )
 on conflict (id) do update set
   updated_at = now(),
@@ -167,83 +167,38 @@ insert into public.experiences (id, role, company, description, start_date, end_
 values
   (
     '22222222-2222-2222-2222-222222222221',
-    'Treasurer',
-    'MYTECH Career Fair',
-    'Oversaw budgeting, bank reconciliation, vendor payments, and financial reporting for MYTECH Career Fair 2026.',
-    '2026-02-01',
-    null,
-    true
-  ),
-  (
-    '22222222-2222-2222-2222-222222222222',
-    'Executive Assistant Finance',
-    'KRAIBURG TPE Technology (M) Sdn. Bhd.',
-    'Supported account management, reconciliations, month-end close tasks, and financial reporting for the finance team.',
+    'Assistant Finance Executive',
+    'Kraiburg TPE Technology (M) Sdn. Bhd.',
+    'Managed high-volume financial data pipelines, executing complex financial reconciliations, and processed vendor payments.',
     '2025-06-01',
     '2025-09-30',
     false
   ),
   (
-    '22222222-2222-2222-2222-222222222223',
-    'Treasurer',
-    'Code Fest X UM Alphathon 2025',
-    'Managed event budget, sponsorship funds, and vendor payments for Code Fest X UM Alphathon 2025.',
-    '2025-10-01',
-    '2025-12-31',
-    false
-  ),
-  (
-    '22222222-2222-2222-2222-222222222224',
-    'Committee Member, Sponsorship & Public Relations',
-    'Dean''s Cup 2025',
-    'Coordinated sponsor outreach, handled sponsorship agreements, and assisted with sponsorship reconciliation.',
-    '2025-10-01',
-    '2025-12-31',
-    false
-  ),
-  (
-    '22222222-2222-2222-2222-222222222225',
-    'Treasurer',
-    'Mental Health Week 2025',
-    'Managed budgeting, procurement, and bank reconciliation for Mental Health Week 2025.',
-    '2025-09-01',
-    '2025-11-30',
-    false
-  ),
-  (
-    '22222222-2222-2222-2222-222222222226',
+    '22222222-2222-2222-2222-222222222222',
     'Finance Intern',
-    'KRAIBURG TPE',
-    'Assisted with financial analysis, project finance tracking, bookkeeping, and routine reconciliations.',
+    'Kraiburg TPE Technology (M) Sdn. Bhd.',
+    'Supported budget monitoring and expenditure tracking to improve financial planning accuracy. Gained early exposure to enterprise data systems.',
     '2024-03-01',
     '2024-06-30',
     false
   ),
   (
-    '22222222-2222-2222-2222-222222222227',
-    'Assistant Head of Subject, Computer Science',
-    'Negeri Sembilan Matriculation College (KMNS) - PAL Leader Club',
-    'Led peer-assisted learning sessions, coordinated lesson plans, and mentored junior students in Computer Science topics.',
-    '2024-07-01',
-    '2024-12-31',
-    false
+    '22222222-2222-2222-2222-222222222223',
+    'Finance Lead',
+    'Persatuan Komputer Universiti Malaya (PEKOM)',
+    'Lead the financial architecture and resource management for Universiti Malaya''s flagship technology community.',
+    '2026-06-01',
+    null,
+    true
   ),
   (
-    '22222222-2222-2222-2222-222222222228',
-    'Chairperson',
-    'Village Sports Club',
-    'Organized sports events, managed club budgets, and led volunteer coordination.',
-    '2024-07-01',
-    '2024-12-31',
-    false
-  ),
-  (
-    '22222222-2222-2222-2222-222222222229',
-    'Representative',
-    'KMNS PAL Leaders - KPM Madani Leadership Course',
-    'Selected representative for the KPM Madani leadership course; participated in workshops and leadership training.',
-    '2024-10-01',
-    '2024-10-31',
+    '22222222-2222-2222-2222-222222222224',
+    'Treasurer',
+    'MYTECH Career Fair 2026',
+    'Managed a RM50,200 budget, secured 30 corporate sponsors and RM46,200 in revenue, delivering a RM9,272.90 surplus.',
+    '2026-02-01',
+    '2026-06-30',
     false
   )
 on conflict (id) do update set
@@ -258,76 +213,30 @@ insert into public.projects (id, title, context, description, tags, project_url,
 values
   (
     '33333333-3333-3333-3333-333333333331',
-    'BILAHUJAN',
-    'KitaHack 2026',
-    'Intelligent disaster response mobile application.',
-    array['Mobile', 'AI', 'Disaster Response'],
+    'CATFISH.AI — Fraud Detection ML System',
+    'Machine Learning Project',
+    'Built a 6-model soft-voting ensemble on a 50,000-row dataset. Engineered a robust data pipeline using SMOTE-Tomek and PCA. Deployed predictive model via a Flask REST API hosted on Vercel.',
+    array['Machine Learning', 'Python', 'Flask', 'AI'],
     null,
     1
   ),
   (
     '33333333-3333-3333-3333-333333333332',
-    'Sensor X Sensei',
-    'UM Technothon 2026',
-    'Smart energy management system engineered to reduce electricity waste.',
-    array['IoT', 'Energy Management', 'Systems Architecture'],
+    'Sensor X Sensei — Smart Lecture Hall',
+    'UM Technothon 2026 Top 15 Finalist',
+    'Developed an end-to-end IoT solution leveraging ESP32 microcontrollers and multi-sensor data fusion to power a real-time occupancy dashboard. Automated kWh/CO2 calculations.',
+    array['IoT', 'ESP32', 'Sensors', 'Energy Management'],
     null,
     2
   ),
   (
     '33333333-3333-3333-3333-333333333333',
-    'BIOMELON',
-    'PPAL 4.0 Innovation Day',
-    'Population genetics data platform.',
-    array['Data', 'Genetics', 'Innovation'],
+    'Slotify — Parking Management System',
+    'Data Structures Project',
+    'Engineered a Spring Boot backend implementing 7 hand-built data structures unified into a single pipeline. Implemented Dijkstra''s shortest-path routing and a real-time interactive dashboard.',
+    array['Java', 'Spring Boot', 'Data Structures', 'Algorithms'],
     null,
     3
-  )
-  ,
-  (
-    '33333333-3333-3333-3333-333333333334',
-    'BILAHUJAN',
-    'VHack / KitaHack 2026',
-    'Intelligent disaster response mobile application.',
-    array['Mobile', 'AI', 'Disaster Response'],
-    'https://github.com/HowardWoon/BILAHUJAN-VHack2026.git',
-    4
-  ),
-  (
-    '33333333-3333-3333-3333-333333333335',
-    'Kuliah F3 (UM Hackathon)',
-    'UM Hackathon 2026',
-    'Project built during UM Hackathon 2026.',
-    array['Hackathon', 'Mobile', 'Prototype'],
-    'https://github.com/HowardWoon/Kuliah-F3---UM-Hackathon-2026.git',
-    5
-  ),
-  (
-    '33333333-3333-3333-3333-333333333336',
-    'Catfish Detector (ML Models)',
-    'Machine Learning',
-    'Models for detecting catfishing content and media.',
-    array['Machine Learning', 'Models', 'Data'],
-    'https://github.com/HowardWoon/Catfish-Detector-ML-Models.git',
-    6
-  ),
-  (
-    '33333333-3333-3333-3333-333333333337',
-    'Slotify',
-    'Personal / Group Project',
-    'Music-related app / prototype.',
-    array['Web', 'Music', 'Full-stack'],
-    'https://github.com/HowardWoon/Slotify.git',
-    7
-  ),
-  (
-    '33333333-3333-3333-3333-333333333338',
-    'Group Assignment — Buka',
-    'FSKTMCoders Group Project',
-    'Collaborative group assignment repository.',
-    array['Collaboration', 'Web', 'Coursework'],
-    'https://github.com/FSKTMCoders/group-assignment-5-5-buka.git',
-    8
   )
 on conflict (id) do update set
   title = excluded.title,
@@ -341,20 +250,18 @@ insert into public.skills (id, name, category)
 values
   ('44444444-4444-4444-4444-444444444441', 'Java', 'Languages'),
   ('44444444-4444-4444-4444-444444444442', 'Python', 'Languages'),
-  ('44444444-4444-4444-4444-444444444443', 'JavaScript/TypeScript', 'Languages'),
-  ('44444444-4444-4444-4444-444444444444', 'React', 'Frameworks'),
-  ('44444444-4444-4444-4444-444444444445', 'Flutter', 'Frameworks'),
+  ('44444444-4444-4444-4444-444444444443', 'JavaScript', 'Languages'),
+  ('44444444-4444-4444-4444-444444444444', 'TypeScript', 'Languages'),
+  ('44444444-4444-4444-4444-444444444445', 'React', 'Frameworks'),
   ('44444444-4444-4444-4444-444444444446', 'Node.js', 'Frameworks'),
-  ('44444444-4444-4444-4444-444444444447', 'Firebase', 'Backend'),
-  ('44444444-4444-4444-4444-444444444448', 'RESTful APIs', 'Backend'),
-  ('44444444-4444-4444-4444-444444444449', 'Ollama', 'AI/ML'),
-  ('44444444-4444-4444-4444-444444444450', 'Claude Code', 'AI/ML'),
-  ('44444444-4444-4444-4444-444444444451', 'Google Colab', 'AI/ML'),
-  ('44444444-4444-4444-4444-444444444452', 'Learning Pipelines', 'AI/ML'),
-  ('44444444-4444-4444-4444-444444444453', 'Git/GitHub', 'Tools'),
-  ('44444444-4444-4444-4444-444444444454', 'Figma', 'Tools'),
-  ('44444444-4444-4444-4444-444444444455', 'Canva', 'Tools'),
-  ('44444444-4444-4444-4444-444444444456', 'Draw.io', 'Tools')
+  ('44444444-4444-4444-4444-444444444447', 'Spring Boot', 'Frameworks'),
+  ('44444444-4444-4444-4444-444444444448', 'Flask', 'Frameworks'),
+  ('44444444-4444-4444-4444-444444444449', 'Firebase', 'Backend'),
+  ('44444444-4444-4444-4444-444444444450', 'RESTful APIs', 'Backend'),
+  ('44444444-4444-4444-4444-444444444451', 'Gemini API', 'AI/ML'),
+  ('44444444-4444-4444-4444-444444444452', 'Ollama', 'AI/ML'),
+  ('44444444-4444-4444-4444-444444444453', 'Generative AI', 'AI/ML'),
+  ('44444444-4444-4444-4444-444444444454', 'Git/GitHub', 'Tools')
 on conflict (id) do update set
   name = excluded.name,
   category = excluded.category;
