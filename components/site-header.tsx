@@ -16,7 +16,7 @@ export function SiteHeader() {
       <div className="glass-panel py-2 px-4 rounded-full border border-white/10 bg-black/60 backdrop-blur-md shadow-glass flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3">
           <Image
-            src="/howard solid.jpeg"
+            src="/images/howard-solid.jpeg"
             alt="Howard Woon"
             width={32}
             height={32}

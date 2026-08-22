@@ -11,7 +11,7 @@ export async function requireAdminUser() {
     redirect('/admin/login');
   }
 
-  if (user.id !== ADMIN_USER_UUID && user.app_metadata?.role !== 'admin') {
+  if (user.id !== ADMIN_USER_UUID && user.app_metadata?.role !== 'admin' && user.email !== process.env.ADMIN_EMAIL) {
     redirect('/admin/login');
   }
 

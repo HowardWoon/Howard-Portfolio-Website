@@ -1,11 +1,12 @@
 import { SiteHeader } from '@/components/site-header';
 import { EngineeringHUD } from '@/components/EngineeringHUD';
-import Scene from '@/components/canvas/Scene';
+import dynamic from 'next/dynamic';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { fallbackExperiences, fallbackProfile, fallbackProjects, fallbackSkills } from '@/lib/site-data';
-
 import { PortfolioPage } from '@/components/portfolio-page';
 import { SmoothScroller } from '@/components/smooth-scroller';
+
+const Scene = dynamic(() => import('@/components/canvas/Scene'), { ssr: false });
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;

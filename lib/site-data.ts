@@ -25,9 +25,11 @@ export type SkillItem = {
 };
 
 export const fallbackProfile = {
-  full_name: 'Howard Woon Hao Zhe',
-  bio: 'First-year Computer Science (Software Engineering) student at the University of Malaya.',
-  current_role: 'Builder across software engineering, finance, AI systems, and smart energy products.'
+  name: 'Howard Woon',
+  role: 'Software Engineer',
+  avatar_url: '/images/howard-solid.jpeg',
+  bio: 'Software Engineering student with a robust background in finance and enterprise IoT systems. Specializing in high-performance full-stack applications.',
+  github_url: 'https://github.com/HowardWoon'
 };
 
 export const fallbackExperiences: ExperienceItem[] = [

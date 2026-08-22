@@ -98,11 +98,30 @@ for select
 to anon, authenticated
 using (true);
 
-create policy "Public read projects"
-on public.projects
-for select
-to anon, authenticated
-using (true);
+-- Enable RLS on messages
+ALTER TABLE IF EXISTS public.contact_messages ENABLE ROW LEVEL SECURITY;
+
+-- 1. Allow public / anonymous visitors to submit contact messages
+CREATE POLICY "Allow public insert to messages"
+ON public.contact_messages
+FOR INSERT
+TO anon, authenticated
+WITH CHECK (true);
+
+-- 2. Allow only the designated admin user to view and manage messages
+CREATE POLICY "Allow admin full access to messages"
+ON public.contact_messages
+FOR ALL
+TO authenticated
+USING (auth.uid() = '54c734ee-1e79-4e92-bf9b-8504a1854a31'::uuid)
+WITH CHECK (auth.uid() = '54c734ee-1e79-4e92-bf9b-8504a1854a31'::uuid);
+
+-- Projects, Skills, Experiences: Public read, Admin write
+ALTER TABLE IF EXISTS public.projects ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read on projects" ON public.projects FOR SELECT USING (true);
+CREATE POLICY "Allow admin manage projects" ON public.projects FOR ALL TO authenticated
+USING (auth.uid() = '54c734ee-1e79-4e92-bf9b-8504a1854a31'::uuid)
+WITH CHECK (auth.uid() = '54c734ee-1e79-4e92-bf9b-8504a1854a31'::uuid);
 
 create policy "Public read skills"
 on public.skills
@@ -124,25 +143,12 @@ to authenticated
 using (public.is_admin(auth.uid()))
 with check (public.is_admin(auth.uid()));
 
-create policy "Admin manage projects"
-on public.projects
-for all
-to authenticated
-using (public.is_admin(auth.uid()))
-with check (public.is_admin(auth.uid()));
-
 create policy "Admin manage skills"
 on public.skills
 for all
 to authenticated
 using (public.is_admin(auth.uid()))
 with check (public.is_admin(auth.uid()));
-
-create policy "Admin read contact messages"
-on public.contact_messages
-for select
-to authenticated
-using (public.is_admin(auth.uid()));
 
 insert into public.profiles (id, full_name, bio, current_role)
 values (
