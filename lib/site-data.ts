@@ -1,196 +1,216 @@
-export type ExperienceItem = {
-  id: string;
-  role: string;
-  company: string;
-  description: string;
-  start_date: string | null;
-  end_date: string | null;
-  is_current: boolean;
-};
+// lib/site-data.ts
 
-export type ProjectItem = {
+export interface Project {
   id: string;
   title: string;
-  context: string;
+  tagline: string;
   description: string;
-  tags: string[];
-  project_url: string | null;
-  display_order: number;
-};
+  category: 'Distributed Systems' | 'AI & Agents' | 'Full-Stack' | 'IoT';
+  technologies: string[];
+  githubUrl?: string;
+  liveUrl?: string;
+  deckUrl?: string;
+  featured: boolean;
+  highlight?: string;
+}
 
-export type SkillItem = {
+export interface ExperienceItem {
   id: string;
-  name: string;
-  category: string;
-};
+  role: string;
+  organization: string;
+  period: string;
+  type: 'Work' | 'Leadership' | 'Academic';
+  description: string[];
+  skills: string[];
+}
 
-export const fallbackProfile = {
+export interface AwardItem {
+  id: string;
+  title: string;
+  issuer: string;
+  date: string;
+  highlight: string;
+  description: string;
+}
+
+export const personalDetails = {
   name: 'Howard Woon',
-  role: 'Software Engineer',
-  avatar_url: '/images/howard-solid.jpeg',
-  bio: 'Bachelor of Computer Science student at the University of Malaya, specializing in Software Engineering. Combining a strong technical appetite with hands-on leadership experience to engineer systems that are as efficient as they are impactful.',
-  github_url: 'https://github.com/HowardWoon'
+  fullName: 'Howard Woon Hao Zhe',
+  title: 'Software Engineer & Backend Systems Developer',
+  university: 'Universiti Malaya',
+  degree: 'Bachelor of Computer Science (Software Engineering)',
+  cgpa: '4.00 / 4.00',
+  bio: 'Software Engineering undergraduate at Universiti Malaya (4.00 CGPA) with a focus on backend architectures, distributed systems, algorithms, and agentic AI workflows. Experienced in shipping production-grade applications across Java, Kotlin, Python, and Spring Boot.',
+  email: 'howardwoonhz06@gmail.com',
+  github: 'https://github.com/HowardWoon',
+  linkedin: 'https://linkedin.com/in/howardwoon',
+  resumeUrl: '/resume',
+  avatarUrl: '/images/howard-solid.jpeg',
 };
 
-export const fallbackExperiences: ExperienceItem[] = [
+export const metrics = [
+  { label: 'Cumulative GPA', value: '4.00' },
+  { label: 'Shipped Projects', value: '15+' },
+  { label: 'Hackathon Track 2nd Place', value: 'AutoPilot 2026' },
+  { label: 'GitHub Commits', value: '1.2k+' },
+];
+
+export const experiences: ExperienceItem[] = [
   {
-    id: 'experience-1',
-    role: 'Finance Lead',
-    company: 'Persatuan Komputer Universiti Malaya (PEKOM)',
-    description: 'Architected the organization\'s financial portfolio, securing B2B corporate partnerships and spearheading an automated digital claims pipeline to scale operational efficiency.',
-    start_date: '2026-06-01',
-    end_date: null,
-    is_current: true
+    id: 'exp-kraiburg',
+    role: 'Assistant Finance Executive & Intern',
+    organization: 'KRAIBURG TPE Technology (M) Sdn. Bhd.',
+    period: 'Nov 2025 – Present',
+    type: 'Work',
+    description: [
+      'Engineered automated reconciliation workflows for high-volume corporate financial data pipelines, eliminating manual ledger verification discrepancies.',
+      'Managed vendor disbursement lifecycles, treasury audits, and enterprise resource planning integrations with cross-border precision.',
+    ],
+    skills: ['Financial Systems', 'Data Pipelines', 'ERP Workflows', 'Automation'],
   },
   {
-    id: 'experience-2',
+    id: 'exp-pekom',
+    role: 'Finance Lead & Treasurer',
+    organization: 'Persatuan Komputer Universiti Malaya (PEKOM)',
+    period: '2025 – Present',
+    type: 'Leadership',
+    description: [
+      'Overseeing fiscal governance, committee financial planning, and budget allocation for faculty-wide software engineering and tech initiatives.',
+      'Directed treasury operations for flagship faculty hackathons and symposiums, ensuring audit compliance and sponsorship transparency.',
+    ],
+    skills: ['Fiscal Governance', 'Budget Modeling', 'Stakeholder Management'],
+  },
+  {
+    id: 'exp-mytech',
+    role: 'Treasurer & Operations Lead',
+    organization: 'MYTECH Career Fair 2026',
+    period: 'Feb 2026',
+    type: 'Leadership',
+    description: [
+      'Governed a multi-tier financial framework and corporate sponsorship tracking system for one of Malaysia’s premier university tech career fairs.',
+      'Collaborated with corporate partners and tech recruiters to facilitate sponsorship contracts and event logistical infrastructure.',
+    ],
+    skills: ['Corporate Sponsorship', 'Operations', 'Resource Management'],
+  },
+  {
+    id: 'exp-codefest',
     role: 'Treasurer',
-    company: 'MYTECH Career Fair 2026',
-    description: 'Managed a RM50,200 budget, secured 30 corporate sponsors and RM46,200 in revenue, delivering a net surplus.',
-    start_date: '2026-02-01',
-    end_date: '2026-06-30',
-    is_current: false
+    organization: 'Code Fest & UM Alphathon 2025',
+    period: 'Oct 2025',
+    type: 'Leadership',
+    description: [
+      'Managed prize distribution pools, participant budgeting, and logistical procurement for over 200+ competitive programming participants.',
+    ],
+    skills: ['Event Operations', 'Financial Planning'],
   },
   {
-    id: 'experience-3',
-    role: 'Treasurer',
-    company: 'Code Fest X UM Alphathon 2025',
-    description: 'Managed event budget, sponsorship funds, and vendor payments for Code Fest X UM Alphathon.',
-    start_date: '2025-10-01',
-    end_date: '2025-12-31',
-    is_current: false
+    id: 'exp-kmns',
+    role: 'Assistant Head of Subject (Computer Science)',
+    organization: 'KMNS PAL Leader Club',
+    period: '2024',
+    type: 'Academic',
+    description: [
+      'Mentored matriculation students in structured programming, algorithmic problem solving, and object-oriented fundamentals, achieving top subject distinctions.',
+    ],
+    skills: ['Mentorship', 'Data Structures', 'Algorithmic Problem Solving'],
   },
-  {
-    id: 'experience-4',
-    role: 'Committee Member, Sponsorship & Public Relations',
-    company: 'Dean\'s Cup 2025',
-    description: 'Coordinated sponsor outreach, handled sponsorship agreements, and assisted with sponsorship reconciliation.',
-    start_date: '2025-10-01',
-    end_date: '2025-12-31',
-    is_current: false
-  },
-  {
-    id: 'experience-5',
-    role: 'Executive Assistant Finance',
-    company: 'Kraiburg TPE Technology (M) Sdn. Bhd.',
-    description: 'Managed high-volume financial data pipelines, executing complex financial reconciliations, and processed vendor payments.',
-    start_date: '2025-06-01',
-    end_date: '2025-09-30',
-    is_current: false
-  },
-  {
-    id: 'experience-6',
-    role: 'Assistant Head of Subject, Computer Science',
-    company: 'KMNS PAL Leader Club',
-    description: 'Led peer-assisted learning sessions, coordinated lesson plans, and mentored junior students in Computer Science topics.',
-    start_date: '2024-07-01',
-    end_date: '2024-12-31',
-    is_current: false
-  },
-  {
-    id: 'experience-7',
-    role: 'Chairperson',
-    company: 'Village Sports Club',
-    description: 'Organized sports events, managed club budgets, and led volunteer coordination.',
-    start_date: '2024-07-01',
-    end_date: '2024-12-31',
-    is_current: false
-  },
-  {
-    id: 'experience-8',
-    role: 'Finance Intern',
-    company: 'Kraiburg TPE',
-    description: 'Supported budget monitoring and expenditure tracking to improve financial planning accuracy. Gained early exposure to enterprise data systems.',
-    start_date: '2024-03-01',
-    end_date: '2024-06-30',
-    is_current: false
-  }
 ];
 
-export const fallbackProjects: ProjectItem[] = [
+export const projects: Project[] = [
   {
-    id: 'project-1',
-    title: 'ZeroLag: Enterprise AI Inbound Command Center',
-    context: '2nd Place — AutoPilot Asia Hackathon 2026',
-    description: 'Engineered a bi-modal architecture utilizing a 5-operator Supervity Master Orchestrator governed by a localized Next.js, FastAPI, and PostgreSQL control dashboard.',
-    tags: ['AI', 'Agentic Workflows', 'Next.js', 'FastAPI'],
-    project_url: null,
-    display_order: 1
+    id: 'proj-zerolag',
+    title: 'ZeroLag',
+    tagline: 'Autonomous Agentic Sales Intelligence & Multi-Model Orchestration',
+    description:
+      'Autonomous multi-agent workflow platform that ingests unstructured sales communications, scores intent, and orchestrates actions across CRM APIs with zero manual latency. Placed 2nd in the Sales Intelligence Track at Supervity AutoPilot Asia Hackathon 2026.',
+    category: 'AI & Agents',
+    technologies: ['TypeScript', 'Next.js', 'FastAPI', 'Agentic Workflows', 'Tailwind CSS'],
+    githubUrl: 'https://github.com/HowardWoon',
+    deckUrl: '/documents/supervity-pitchdeck.pdf',
+    featured: true,
+    highlight: '2nd Place @ Supervity Hackathon 2026',
   },
   {
-    id: 'project-2',
-    title: 'CATFISH.AI — Fraud Detection ML System',
-    context: 'Machine Learning Project',
-    description: 'Built a 6-model soft-voting ensemble on a 50,000-row dataset. Engineered a robust data pipeline using SMOTE-Tomek and PCA. Deployed predictive model via a Flask REST API hosted on Vercel.',
-    tags: ['Machine Learning', 'Python', 'Flask', 'AI'],
-    project_url: null,
-    display_order: 2
+    id: 'proj-slotify',
+    title: 'Slotify',
+    tagline: 'Smart Parking & Dynamic Traffic Routing Infrastructure',
+    description:
+      'Real-time traffic and parking management system leveraging Spring Boot and advanced data structures (Dijkstra algorithm, Min-Heaps, and AVL Trees) for optimal slot allocation and minimum-congestion vehicle routing.',
+    category: 'Distributed Systems',
+    technologies: ['Java', 'Spring Boot', 'Data Structures', 'Graph Algorithms', 'PostgreSQL'],
+    githubUrl: 'https://github.com/HowardWoon/Slotify',
+    featured: true,
+    highlight: 'Advanced DSA Architecture',
   },
   {
-    id: 'project-3',
-    title: 'Sensor X Sensei — Smart Lecture Hall',
-    context: 'UM Technothon 2026 Top 15 Finalist',
-    description: 'Developed an end-to-end IoT solution leveraging ESP32 microcontrollers and multi-sensor data fusion to power a real-time occupancy dashboard. Automated kWh/CO2 calculations.',
-    tags: ['IoT', 'ESP32', 'Sensors', 'Energy Management'],
-    project_url: null,
-    display_order: 3
+    id: 'proj-bilahujan',
+    title: 'BILAHUJAN',
+    tagline: 'AI-Powered Disaster Preparedness & Flood Response Network',
+    description:
+      'Real-time crisis management mobile and cloud system providing predictive flood level alerts, nearest evacuation telemetry, and offline emergency dispatch routes for vulnerable communities.',
+    category: 'Full-Stack',
+    technologies: ['Flutter', 'Python', 'FastAPI', 'GIS Mapping', 'Supabase'],
+    githubUrl: 'https://github.com/HowardWoon',
+    deckUrl: '/documents/dsaise-pitchdeck.pdf',
+    featured: true,
+    highlight: 'KitaHack 2026 Innovation',
   },
   {
-    id: 'project-4',
-    title: 'Slotify — Parking Management System',
-    context: 'Data Structures Project',
-    description: 'Engineered a Spring Boot backend implementing 7 hand-built data structures unified into a single pipeline. Implemented Dijkstra\'s shortest-path routing and a real-time interactive dashboard.',
-    tags: ['Java', 'Spring Boot', 'Data Structures', 'Algorithms'],
-    project_url: null,
-    display_order: 4
+    id: 'proj-sensor-sensei',
+    title: 'Sensor X Sensei',
+    tagline: 'Intelligent IoT Energy Monitoring & Automated Power Governance',
+    description:
+      'Embedded IoT telemetry and cloud telemetry dashboard for commercial energy monitoring, automated load shedding, and peak consumption forecasting.',
+    category: 'IoT',
+    technologies: ['Node.js', 'MQTT', 'React', 'Tailwind CSS', 'Embedded C++'],
+    githubUrl: 'https://github.com/HowardWoon',
+    featured: false,
+    highlight: 'UM Technothon 2026',
   },
-  {
-    id: 'project-5',
-    title: 'UI/UX Pitch Deck Design',
-    context: 'Visual Communication & Pitching',
-    description: 'Designed highly professional pitch decks and presentation slides using Canva for enterprise hackathons (Supervity) and academic pitches, showcasing a strong eye for visual hierarchy and storytelling.',
-    tags: ['Canva', 'UI/UX', 'Presentations', 'Design'],
-    project_url: '/documents/supervity-pitchdeck.pdf',
-    display_order: 5
-  }
 ];
 
-export const fallbackSkills: SkillItem[] = [
-  { id: 'skill-1', name: 'Java', category: 'Languages' },
-  { id: 'skill-2', name: 'Python', category: 'Languages' },
-  { id: 'skill-3', name: 'JavaScript', category: 'Languages' },
-  { id: 'skill-4', name: 'TypeScript', category: 'Languages' },
-  { id: 'skill-5', name: 'React', category: 'Frameworks' },
-  { id: 'skill-6', name: 'Next.js', category: 'Frameworks' },
-  { id: 'skill-7', name: 'Node.js', category: 'Frameworks' },
-  { id: 'skill-8', name: 'Spring Boot', category: 'Frameworks' },
-  { id: 'skill-9', name: 'FastAPI', category: 'Frameworks' },
-  { id: 'skill-10', name: 'Flask', category: 'Frameworks' },
-  { id: 'skill-11', name: 'PostgreSQL', category: 'Backend' },
-  { id: 'skill-12', name: 'RESTful APIs', category: 'Backend' },
-  { id: 'skill-13', name: 'Agentic Workflows', category: 'AI/ML' },
-  { id: 'skill-14', name: 'Ollama', category: 'AI/ML' },
-  { id: 'skill-15', name: 'Generative AI', category: 'AI/ML' },
-  { id: 'skill-16', name: 'Git/GitHub', category: 'Tools' },
-  { id: 'skill-17', name: 'Canva', category: 'Tools' },
-  { id: 'skill-18', name: 'UI/UX Design', category: 'Tools' }
+export const awards: AwardItem[] = [
+  {
+    id: 'award-supervity',
+    title: '2nd Place Winner (Sales Intelligence Track)',
+    issuer: 'Supervity AutoPilot Asia Hackathon 2026',
+    date: 'August 2026',
+    highlight: 'Regional Hackathon Prize',
+    description: 'Engineered ZeroLag, an agentic sales intelligence automation system, beating over 50 regional teams.',
+  },
+  {
+    id: 'award-deans-list',
+    title: "Dean's Honours List (4.00 CGPA)",
+    issuer: 'Faculty of Computer Science & Information Technology, Universiti Malaya',
+    date: '2025 – 2026',
+    highlight: 'Academic Distinction',
+    description: 'Maintained a flawless 4.00 CGPA across all software engineering and algorithmic coursework.',
+  },
+  {
+    id: 'award-kmns',
+    title: 'Academic Excellence Award (4.00 CGPA)',
+    issuer: 'Kolej Matrikulasi Negeri Sembilan',
+    date: '2024',
+    highlight: 'Matriculation Distinction',
+    description: 'Graduated top of cohort in Physical Sciences & Computer Science with straight-A distinctions.',
+  },
 ];
 
-export const stackGroups = [
+export const techStack = [
   {
-    title: 'Languages',
-    items: ['Java', 'Python', 'JavaScript', 'TypeScript']
+    category: 'Backend & Systems',
+    skills: ['Java', 'Spring Boot', 'Kotlin', 'Python', 'FastAPI', 'Node.js', 'REST APIs', 'Microservices'],
   },
   {
-    title: 'Frameworks',
-    items: ['React', 'Next.js', 'Spring Boot', 'FastAPI', 'Flask']
+    category: 'Core CS & Fundamentals',
+    skills: ['Data Structures & Algorithms', 'Object-Oriented Design (OOD)', 'Database Optimization', 'Operating Systems'],
   },
   {
-    title: 'Backend & Tools',
-    items: ['PostgreSQL', 'RESTful APIs', 'Git/GitHub', 'Canva', 'UI/UX Design']
+    category: 'Databases & Cloud',
+    skills: ['PostgreSQL', 'Supabase', 'MySQL', 'Redis', 'Docker', 'AWS', 'GCP', 'Azure', 'Git'],
   },
   {
-    title: 'AI & Machine Learning',
-    items: ['Agentic Workflows', 'Ollama', 'Generative AI']
-  }
+    category: 'Frontend & Mobile',
+    skills: ['TypeScript', 'Next.js 15', 'React', 'Tailwind CSS', 'Flutter'],
+  },
 ];

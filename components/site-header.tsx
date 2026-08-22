@@ -3,9 +3,10 @@ import Link from 'next/link';
 import { Download } from 'lucide-react';
 
 const links = [
-  { href: '#experience', label: 'Experience' },
   { href: '#projects', label: 'Projects' },
-  { href: '#stack', label: 'Stack' },
+  { href: '#experience', label: 'Experience' },
+  { href: '#awards', label: 'Awards' },
+  { href: '#skills', label: 'Stack' },
   { href: '#contact', label: 'Contact' }
 ];
 

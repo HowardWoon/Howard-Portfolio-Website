@@ -5,15 +5,6 @@ import { Stars } from '@react-three/drei';
 import { Suspense, useRef } from 'react';
 import * as THREE from 'three';
 import DigitalUniverse from './DigitalUniverse';
-import { fallbackExperiences, fallbackProfile, fallbackProjects, fallbackSkills } from '@/lib/site-data';
-
-// Add props type to match what we pass from page.tsx
-type SceneProps = {
-  profile: typeof fallbackProfile;
-  experiences: typeof fallbackExperiences;
-  projects: typeof fallbackProjects;
-  skills: typeof fallbackSkills;
-};
 
 function AnimatedStars() {
   const starsRef = useRef<THREE.Group>(null);
@@ -30,7 +21,7 @@ function AnimatedStars() {
   );
 }
 
-export default function Scene({ skills }: { skills: typeof fallbackSkills }) {
+export default function Scene() {
   return (
     <div className="w-full h-full pointer-events-none">
       <Canvas camera={{ position: [0, 0, 5], fov: 50 }} dpr={[1, 2]} gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}>
