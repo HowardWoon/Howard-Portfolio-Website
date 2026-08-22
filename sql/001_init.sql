@@ -282,6 +282,15 @@ values
     array['Java', 'Spring Boot', 'Data Structures', 'Algorithms'],
     null,
     4
+  ),
+  (
+    '33333333-3333-3333-3333-333333333335',
+    'UI/UX Pitch Deck Design',
+    'Visual Communication & Pitching',
+    'Designed highly professional pitch decks and presentation slides using Canva for enterprise hackathons (Supervity) and academic pitches, showcasing a strong eye for visual hierarchy and storytelling.',
+    array['Canva', 'UI/UX', 'Presentations', 'Design'],
+    '/documents/supervity-pitchdeck.pdf',
+    5
   )
 on conflict (id) do update set
   title = excluded.title,
@@ -308,7 +317,9 @@ values
   ('44444444-4444-4444-4444-444444444453', 'Agentic Workflows', 'AI/ML'),
   ('44444444-4444-4444-4444-444444444454', 'Ollama', 'AI/ML'),
   ('44444444-4444-4444-4444-444444444455', 'Generative AI', 'AI/ML'),
-  ('44444444-4444-4444-4444-444444444456', 'Git/GitHub', 'Tools')
+  ('44444444-4444-4444-4444-444444444456', 'Git/GitHub', 'Tools'),
+  ('44444444-4444-4444-4444-444444444457', 'Canva', 'Tools'),
+  ('44444444-4444-4444-4444-444444444458', 'UI/UX Design', 'Tools')
 on conflict (id) do update set
   name = excluded.name,
   category = excluded.category;

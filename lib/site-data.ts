@@ -143,6 +143,15 @@ export const fallbackProjects: ProjectItem[] = [
     tags: ['Java', 'Spring Boot', 'Data Structures', 'Algorithms'],
     project_url: null,
     display_order: 4
+  },
+  {
+    id: 'project-5',
+    title: 'UI/UX Pitch Deck Design',
+    context: 'Visual Communication & Pitching',
+    description: 'Designed highly professional pitch decks and presentation slides using Canva for enterprise hackathons (Supervity) and academic pitches, showcasing a strong eye for visual hierarchy and storytelling.',
+    tags: ['Canva', 'UI/UX', 'Presentations', 'Design'],
+    project_url: '/documents/supervity-pitchdeck.pdf',
+    display_order: 5
   }
 ];
 
@@ -162,7 +171,9 @@ export const fallbackSkills: SkillItem[] = [
   { id: 'skill-13', name: 'Agentic Workflows', category: 'AI/ML' },
   { id: 'skill-14', name: 'Ollama', category: 'AI/ML' },
   { id: 'skill-15', name: 'Generative AI', category: 'AI/ML' },
-  { id: 'skill-16', name: 'Git/GitHub', category: 'Tools' }
+  { id: 'skill-16', name: 'Git/GitHub', category: 'Tools' },
+  { id: 'skill-17', name: 'Canva', category: 'Tools' },
+  { id: 'skill-18', name: 'UI/UX Design', category: 'Tools' }
 ];
 
 export const stackGroups = [
@@ -176,7 +187,7 @@ export const stackGroups = [
   },
   {
     title: 'Backend & Tools',
-    items: ['PostgreSQL', 'RESTful APIs', 'Git/GitHub']
+    items: ['PostgreSQL', 'RESTful APIs', 'Git/GitHub', 'Canva', 'UI/UX Design']
   },
   {
     title: 'AI & Machine Learning',
