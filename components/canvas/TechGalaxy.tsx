@@ -71,7 +71,8 @@ function AsteroidBelt() {
   }, [asteroidCount]);
 
   useFrame((state) => {
-    if (!meshRef.current) return;
+    const mesh = meshRef.current;
+    if (!mesh) return;
     
     asteroids.forEach((asteroid, i) => {
       asteroid.angle += asteroid.speed * 0.05;
@@ -84,13 +85,14 @@ function AsteroidBelt() {
       dummy.rotation.y += 0.02;
       dummy.scale.set(asteroid.scale, asteroid.scale, asteroid.scale);
       dummy.updateMatrix();
-      meshRef.current.setMatrixAt(i, dummy.matrix);
+      mesh.setMatrixAt(i, dummy.matrix);
     });
-    meshRef.current.instanceMatrix.needsUpdate = true;
+    mesh.instanceMatrix.needsUpdate = true;
   });
 
   return (
-    <instancedMesh ref={meshRef} args={[undefined as any, undefined as any, asteroidCount]}>
+    // @ts-expect-error args tuple allows null for geometry and material
+    <instancedMesh ref={meshRef} args={[null, null, asteroidCount]}>
       <dodecahedronGeometry args={[1, 0]} />
       <meshStandardMaterial color="#4b5563" roughness={0.8} />
     </instancedMesh>

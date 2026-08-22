@@ -30,7 +30,7 @@ export function PortfolioPage({ profile, experiences, projects, skills }: Portfo
           <div className="mx-auto max-w-6xl pointer-events-auto">
             <Reveal>
               <p className="mb-4 text-sm font-bold uppercase tracking-widest text-primary font-jetbrains">
-                {profile.full_name}
+                {profile.name}
               </p>
             </Reveal>
             <Reveal delay={90}>

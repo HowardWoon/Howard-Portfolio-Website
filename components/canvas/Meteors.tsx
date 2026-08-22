@@ -28,7 +28,8 @@ export default function Meteors() {
   const dummy = useMemo(() => new THREE.Object3D(), []);
 
   useFrame(() => {
-    if (!meshRef.current) return;
+    const mesh = meshRef.current;
+    if (!mesh) return;
 
     meteors.forEach((meteor, i) => {
       // Delay countdown before shooting
@@ -57,14 +58,15 @@ export default function Meteors() {
       dummy.rotation.z = Math.PI / 4; 
       dummy.scale.set(0.02, meteor.length, 0.02); // Thin, long, elegant
       dummy.updateMatrix();
-      meshRef.current.setMatrixAt(i, dummy.matrix);
+      mesh.setMatrixAt(i, dummy.matrix);
     });
 
-    meshRef.current.instanceMatrix.needsUpdate = true;
+    mesh.instanceMatrix.needsUpdate = true;
   });
 
   return (
-    <instancedMesh ref={meshRef} args={[undefined as any, undefined as any, meteorCount]}>
+    // @ts-expect-error args tuple allows null for geometry and material
+    <instancedMesh ref={meshRef} args={[null, null, meteorCount]}>
       <cylinderGeometry args={[1, 0, 1, 8]} /> {/* Tapered end for a tail effect */}
       <meshBasicMaterial color="#ffffff" transparent opacity={0.8} blending={THREE.AdditiveBlending} />
     </instancedMesh>

@@ -33,7 +33,7 @@ function AnimatedStars() {
   );
 }
 
-export default function Scene({ profile, experiences, projects, skills }: SceneProps) {
+export default function Scene({ skills }: { skills: typeof fallbackSkills }) {
   return (
     <div className="w-full h-full">
       <Canvas camera={{ position: [0, 0, 5], fov: 50 }}>
