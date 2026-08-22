@@ -7,19 +7,23 @@ import { hasSupabaseCredentials } from '@/lib/supabase/fallback';
 
 type AdminResource = 'experiences' | 'projects' | 'skills';
 
-export async function POST(request: NextRequest, context: { params: Promise<{ resource: string }> }) {
+type RouteContext = {
+  params: Promise<{ resource: string }>;
+};
+
+export async function POST(request: NextRequest, context: RouteContext) {
   return mutateResource(request, context, 'POST');
 }
 
-export async function PATCH(request: NextRequest, context: { params: Promise<{ resource: string }> }) {
+export async function PATCH(request: NextRequest, context: RouteContext) {
   return mutateResource(request, context, 'PATCH');
 }
 
-export async function DELETE(request: NextRequest, context: { params: Promise<{ resource: string }> }) {
+export async function DELETE(request: NextRequest, context: RouteContext) {
   return mutateResource(request, context, 'DELETE');
 }
 
-async function mutateResource(request: NextRequest, context: { params: Promise<{ resource: string }> }, method: 'POST' | 'PATCH' | 'DELETE') {
+async function mutateResource(request: NextRequest, context: RouteContext, method: 'POST' | 'PATCH' | 'DELETE') {
   const { resource } = await context.params;
 
   if (!isResource(resource)) {

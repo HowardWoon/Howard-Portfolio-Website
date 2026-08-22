@@ -35,8 +35,8 @@ function AnimatedStars() {
 
 export default function Scene({ skills }: { skills: typeof fallbackSkills }) {
   return (
-    <div className="w-full h-full">
-      <Canvas camera={{ position: [0, 0, 5], fov: 50 }}>
+    <div className="w-full h-full pointer-events-none">
+      <Canvas camera={{ position: [0, 0, 5], fov: 50 }} dpr={[1, 2]} gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}>
         <color attach="background" args={['#0A0A0A']} />
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1} />
