@@ -5,9 +5,6 @@ import { Stars } from '@react-three/drei';
 import { Suspense, useRef } from 'react';
 import * as THREE from 'three';
 import DigitalUniverse from './DigitalUniverse';
-import TechGalaxy from './TechGalaxy';
-import Meteors from './Meteors';
-import FlyingUFO from './FlyingUFO';
 import { fallbackExperiences, fallbackProfile, fallbackProjects, fallbackSkills } from '@/lib/site-data';
 
 // Add props type to match what we pass from page.tsx
@@ -43,11 +40,7 @@ export default function Scene({ skills }: { skills: typeof fallbackSkills }) {
         
         <Suspense fallback={null}>
           <AnimatedStars />
-          <Meteors />
-          <FlyingUFO />
-          
           <DigitalUniverse />
-          <TechGalaxy skills={skills} />
         </Suspense>
       </Canvas>
     </div>
