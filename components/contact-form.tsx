@@ -35,26 +35,26 @@ export function ContactForm() {
   };
 
   return (
-    <form onSubmit={submitForm} className="glass-panel space-y-4 rounded-3xl p-6 sm:p-8">
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="floating-field">
+    <form onSubmit={submitForm} className="space-y-6">
+      <div className="grid gap-6 md:grid-cols-2">
+        <div className="relative">
           <input
             id="name"
-            className="floating-input"
+            className="w-full bg-white/5 border border-white/10 rounded-xl px-5 pb-4 pt-6 text-white outline-none transition focus-within:border-primary peer"
             placeholder=" "
             value={name}
             onChange={(event) => setName(event.target.value)}
             autoComplete="name"
             required
           />
-          <label htmlFor="name" className="floating-label">
+          <label htmlFor="name" className="absolute left-5 top-4 text-xs font-bold uppercase tracking-widest text-muted transition-all peer-focus:-translate-y-2 peer-focus:scale-90 peer-focus:text-primary peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:scale-90 peer-[:not(:placeholder-shown)]:text-muted">
             Name
           </label>
         </div>
-        <div className="floating-field">
+        <div className="relative">
           <input
             id="email"
-            className="floating-input"
+            className="w-full bg-white/5 border border-white/10 rounded-xl px-5 pb-4 pt-6 text-white outline-none transition focus-within:border-primary peer"
             placeholder=" "
             type="email"
             value={email}
@@ -62,35 +62,35 @@ export function ContactForm() {
             autoComplete="email"
             required
           />
-          <label htmlFor="email" className="floating-label">
+          <label htmlFor="email" className="absolute left-5 top-4 text-xs font-bold uppercase tracking-widest text-muted transition-all peer-focus:-translate-y-2 peer-focus:scale-90 peer-focus:text-primary peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:scale-90 peer-[:not(:placeholder-shown)]:text-muted">
             Email
           </label>
         </div>
       </div>
 
-      <div className="floating-field">
+      <div className="relative">
         <textarea
           id="message"
-          className="floating-input min-h-36 resize-none pt-1"
+          className="w-full bg-white/5 border border-white/10 rounded-xl px-5 pb-4 pt-6 text-white outline-none transition focus-within:border-primary min-h-[150px] resize-none peer"
           placeholder=" "
           value={message}
           onChange={(event) => setMessage(event.target.value)}
           required
         />
-        <label htmlFor="message" className="floating-label">
+        <label htmlFor="message" className="absolute left-5 top-4 text-xs font-bold uppercase tracking-widest text-muted transition-all peer-focus:-translate-y-2 peer-focus:scale-90 peer-focus:text-primary peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:scale-90 peer-[:not(:placeholder-shown)]:text-muted">
           Message
         </label>
       </div>
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-fog-500">Messages are saved securely and can be reviewed in Supabase.</p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pt-2">
+        <p className="text-xs font-bold uppercase tracking-widest text-muted font-jetbrains">Securely powered by Supabase.</p>
         <button type="submit" className="pill-button pill-button-primary">
           <Mail className="h-4 w-4" />
           <span>{status === 'sending' ? 'Sending...' : status === 'sent' ? 'Message Sent' : 'Send Message'}</span>
           <ArrowUpRight className="h-4 w-4" />
         </button>
       </div>
-      {error ? <p className="text-sm text-red-300">{error}</p> : null}
+      {error ? <p className="text-sm font-bold text-red-500 uppercase tracking-widest">{error}</p> : null}
     </form>
   );
 }

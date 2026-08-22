@@ -11,6 +11,7 @@ function createResolvedResult(data: unknown) {
 }
 
 function createQueryBuilder(table: string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const builder: any = {
     select: () => builder,
     order: () => builder,
@@ -48,6 +49,7 @@ export function createFallbackSupabaseClient() {
       signInWithPassword: async () => ({ data: null, error: { message: 'Supabase is not configured.' } })
     },
     from: (table: string) => createQueryBuilder(table)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any;
 }
 

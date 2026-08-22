@@ -17,6 +17,7 @@ export async function createSupabaseServerClient() {
         get(name: string) {
           return cookieStore.get(name)?.value;
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         set(name: string, value: string, options: any) {
           try {
             cookieStore.set({ name, value, ...options });
@@ -24,6 +25,7 @@ export async function createSupabaseServerClient() {
             // Server Component cookie writes are not always available.
           }
         },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         remove(name: string, options: any) {
           try {
             cookieStore.set({ name, value: '', ...options });

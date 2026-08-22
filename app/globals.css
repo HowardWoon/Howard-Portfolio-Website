@@ -3,93 +3,72 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  --background: #0A0A0A;
+  --foreground: #FFFFFF;
 }
 
-html {
-  scroll-behavior: smooth;
+html, body {
+  scroll-behavior: auto; /* Lenis handles smooth scrolling now */
+  cursor: auto; /* Reverting custom cursor for WebGL cursor later */
+  background-color: var(--background);
+  color: var(--foreground);
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
 }
 
-body {
-  @apply bg-ink-950 text-white antialiased;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Segoe UI', sans-serif;
-  background:
-    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.09), transparent 24%),
-    radial-gradient(circle at 80% 0%, rgba(255, 255, 255, 0.05), transparent 22%),
-    linear-gradient(180deg, #090909 0%, #000000 45%, #060606 100%);
+/* We want the body to be able to scroll if needed, but R3F ScrollControls usually takes over the main canvas.
+   If we use Lenis, we keep native scroll behavior but hijacked. */
+
+/* Base Typography */
+h1, h2, h3, h4, h5, h6 {
+  @apply font-inter tracking-tighter;
 }
 
-::selection {
-  background: rgba(255, 255, 255, 0.18);
-  color: white;
-}
-
+/* Premium UI Panels */
 .glass-panel {
-  @apply border border-white/10 bg-white/[0.035] backdrop-blur-2xl shadow-glass rounded-3xl p-6;
+  @apply border border-white/10 bg-black/40 backdrop-blur-xl shadow-glass rounded-2xl p-6;
 }
 
-.glass-nav {
-  @apply border border-white/10 bg-black/35 backdrop-blur-2xl shadow-glass;
+/* WebGL Canvas Container */
+.canvas-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: auto;
 }
 
-.section-shell {
-  @apply mx-auto w-full px-6 sm:px-8 lg:px-10;
-  max-width: 72rem;
+/* HTML Overlay Layer */
+.html-overlay {
+  position: relative;
+  z-index: 10;
+  pointer-events: none; /* Let clicks pass through to canvas unless on specific elements */
+}
+
+.html-overlay > * {
+  pointer-events: auto;
 }
 
 .section-heading {
-  @apply text-balance text-3xl font-semibold tracking-tight text-white sm:text-4xl lg:text-5xl;
-}
-
-.section-copy {
-  @apply text-base leading-7 text-fog-500 sm:text-lg;
-}
-
-.muted-label {
-  @apply text-xs uppercase tracking-[0.28em] text-fog-500;
+  @apply text-balance text-3xl sm:text-4xl lg:text-5xl font-inter font-bold tracking-tighter text-white mb-8;
 }
 
 .pill-button {
-  @apply inline-flex items-center justify-center gap-2 rounded-full text-sm font-medium transition duration-200 active:scale-[0.97] px-5 py-3;
+  @apply inline-flex items-center justify-center gap-2 text-sm font-medium uppercase tracking-widest font-inter transition-all duration-300 px-8 py-4 rounded-full;
 }
 
 .pill-button-primary {
-  @apply bg-white text-black shadow-md hover:bg-white/95 ring-1 ring-white/5;
+  @apply bg-primary text-white shadow-glow hover:bg-primary/90 hover:scale-105;
 }
 
 .pill-button-secondary {
-  @apply border border-white/15 bg-transparent text-white hover:border-white/30 hover:bg-white/[0.03];
+  @apply bg-surface border border-white/10 text-white hover:bg-white/10 hover:scale-105;
 }
 
-.floating-field {
-  @apply relative rounded-2xl border border-white/10 bg-white/[0.03] px-5 pb-4 pt-6 text-white outline-none transition focus-within:border-white/30 focus-within:bg-white/[0.05];
-}
-
-.floating-input {
-  @apply w-full bg-transparent text-sm text-white outline-none placeholder-transparent;
-}
-
-.floating-label {
-  @apply pointer-events-none absolute left-4 top-4 origin-left text-sm text-fog-500 transition-all;
-}
-
-.floating-input:not(:placeholder-shown) + .floating-label,
-.floating-input:focus + .floating-label {
-  @apply -translate-y-2 scale-90 text-white;
-}
-
-.reveal {
-  opacity: 0;
-  transform: translateY(18px);
-  transition: opacity 700ms ease, transform 700ms ease;
-}
-
-.reveal.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.grid-noise {
-  background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-  background-size: 72px 72px;
+::selection {
+  background: theme('colors.primary');
+  color: white;
 }

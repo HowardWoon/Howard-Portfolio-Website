@@ -23,82 +23,83 @@ export function PortfolioPage({ profile, experiences, projects, skills }: Portfo
   }));
 
   return (
-    <main>
-      <section className="relative overflow-hidden pb-20 pt-10 sm:pb-28 sm:pt-16">
-        <div className="absolute inset-0 grid-noise opacity-40" />
-        <div className="absolute left-1/2 top-[-10rem] h-80 w-80 -translate-x-1/2 rounded-full bg-white/10 blur-3xl animate-drift" />
-
-        <div className="section-shell relative z-10">
-          <div className="mx-auto max-w-5xl text-center">
+    <div className="text-white">
+      {/* We add significant padding to the top so the 3D Hero scene has space to breathe */}
+      <section className="relative overflow-hidden pt-[60vh] pb-24 sm:pb-32">
+        <div className="relative z-10 px-6 sm:px-8 lg:px-10 max-w-7xl mx-auto pointer-events-none">
+          <div className="mx-auto max-w-6xl pointer-events-auto">
             <Reveal>
-              <p className="mb-6 text-sm font-medium uppercase tracking-[0.34em] text-transparent bg-gradient-to-r from-zinc-300 via-white to-zinc-100 bg-clip-text">
+              <p className="mb-4 text-sm font-bold uppercase tracking-widest text-primary font-jetbrains">
                 {profile.full_name}
               </p>
             </Reveal>
             <Reveal delay={90}>
-              <h1 className="mx-auto max-w-4xl text-balance text-5xl font-semibold tracking-tight text-white sm:text-6xl lg:text-8xl">
-                Bridging software engineering and financial precision.
+              <h1 className="max-w-5xl text-balance text-6xl font-black tracking-tighter text-white sm:text-7xl lg:text-[7rem] leading-none mb-10 drop-shadow-2xl">
+                Creative<br /> Developer
               </h1>
             </Reveal>
             <Reveal delay={170}>
-              <p className="mx-auto mt-6 max-w-3xl text-balance text-lg leading-8 text-fog-500 sm:text-xl">
-                {profile.bio}
+              <p className="max-w-2xl text-balance text-xl leading-relaxed text-muted font-medium font-inter">
+                {profile.bio} Bridging software engineering and financial precision with impact, clarity, and speed.
               </p>
             </Reveal>
 
             <Reveal delay={250}>
-              <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <a href="#projects" className="pill-button pill-button-primary min-w-44">
-                  <Sparkles className="h-4 w-4" />
+              <div className="mt-12 flex flex-col items-start justify-start gap-4 sm:flex-row">
+                <a href="#projects" className="pill-button pill-button-primary">
+                  <Sparkles className="h-5 w-5" />
                   <span>View My Work</span>
                 </a>
-                <a href="https://github.com" target="_blank" rel="noreferrer" className="pill-button pill-button-secondary min-w-44">
-                  <Github className="h-4 w-4" />
+                <a href="https://github.com" target="_blank" rel="noreferrer" className="pill-button pill-button-secondary">
+                  <Github className="h-5 w-5" />
                   <span>Connect on GitHub</span>
-                  <ArrowUpRight className="h-4 w-4" />
+                  <ArrowUpRight className="h-5 w-5" />
                 </a>
-              </div>
-            </Reveal>
-
-            <Reveal delay={320}>
-              <div className="mt-14 grid gap-4 sm:grid-cols-3">
-                {heroMetrics.map((metric) => (
-                  <div key={metric.label} className="glass-panel rounded-3xl p-5 text-left">
-                    <p className="text-xs uppercase tracking-[0.24em] text-fog-500">{metric.label}</p>
-                    <p className="mt-2 text-lg font-medium text-white">{metric.value}</p>
-                  </div>
-                ))}
               </div>
             </Reveal>
           </div>
         </div>
       </section>
 
-      <section id="experience" className="pb-24 sm:pb-32">
-        <div className="section-shell">
+      <section className="py-16">
+        <div className="px-6 sm:px-8 lg:px-10 max-w-7xl mx-auto">
+           <Reveal delay={320}>
+             <div className="glass-panel grid gap-8 sm:grid-cols-3">
+               {heroMetrics.map((metric) => (
+                 <div key={metric.label} className="text-left">
+                   <p className="text-xs font-bold uppercase tracking-widest text-muted font-jetbrains">{metric.label}</p>
+                   <p className="mt-3 text-2xl font-bold text-white font-inter">{metric.value}</p>
+                 </div>
+               ))}
+             </div>
+           </Reveal>
+        </div>
+      </section>
+
+      <section id="experience" className="py-24 sm:py-32 relative z-10 pointer-events-auto">
+        <div className="px-6 sm:px-8 lg:px-10 max-w-7xl mx-auto">
           <Reveal>
-            <div className="mx-auto max-w-3xl text-center">
-              <p className="muted-label mb-4">Experience and leadership</p>
-              <h2 className="section-heading">A disciplined foundation in finance, leadership, and execution.</h2>
+            <div className="mx-auto max-w-4xl text-center">
+              <p className="text-sm font-bold uppercase tracking-widest text-primary font-jetbrains mb-4">Experience</p>
+              <h2 className="section-heading mx-auto">A disciplined foundation in finance, leadership, and execution.</h2>
             </div>
           </Reveal>
 
-          <div className="mx-auto mt-14 max-w-4xl">
-            <div className="relative border-l border-white/10 pl-6 sm:pl-10">
+          <div className="mx-auto mt-16 max-w-4xl">
+            <div className="flex flex-col gap-8">
               {experiences.map((item, index) => (
                 <Reveal key={item.id} delay={index * 80}>
-                  <article className="relative mb-8 rounded-3xl border border-white/10 bg-white/[0.03] p-6 shadow-glass backdrop-blur-2xl">
-                    <span className="absolute -left-[1.75rem] top-8 h-3.5 w-3.5 rounded-full border border-white/30 bg-white shadow-[0_0_0_8px_rgba(255,255,255,0.04)]" />
-                    <div className="flex flex-wrap items-center justify-between gap-3">
+                  <article className="glass-panel transition-transform hover:-translate-y-1 hover:shadow-glow">
+                    <div className="flex flex-wrap items-center justify-between gap-4">
                       <div>
-                        <p className="text-lg font-semibold text-white">{item.role}</p>
-                        <p className="text-sm text-fog-500">{item.company}</p>
+                        <p className="text-2xl font-bold text-white font-inter">{item.role}</p>
+                        <p className="text-lg font-medium text-muted font-inter mt-1">{item.company}</p>
                       </div>
-                      <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs uppercase tracking-[0.24em] text-fog-500">
+                      <span className="border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-widest text-white rounded-full">
                         {item.is_current ? 'Current' : 'Past'}
                       </span>
                     </div>
-                    <p className="mt-4 max-w-2xl text-sm leading-7 text-fog-500">{item.description}</p>
+                    <p className="mt-6 max-w-3xl text-base leading-relaxed text-muted font-medium">{item.description}</p>
                   </article>
                 </Reveal>
               ))}
@@ -107,16 +108,16 @@ export function PortfolioPage({ profile, experiences, projects, skills }: Portfo
         </div>
       </section>
 
-      <section id="projects" className="pb-24 sm:pb-32">
-        <div className="section-shell">
+      <section id="projects" className="py-24 sm:py-32 relative z-10 pointer-events-auto">
+        <div className="px-6 sm:px-8 lg:px-10 max-w-7xl mx-auto">
           <Reveal>
-            <div className="mx-auto max-w-3xl text-center">
-              <p className="muted-label mb-4">Featured projects</p>
-              <h2 className="section-heading">Bento-style work shaped around impact, clarity, and speed.</h2>
+            <div className="mx-auto max-w-4xl text-center">
+              <p className="text-sm font-bold uppercase tracking-widest text-accent font-jetbrains mb-4">Featured projects</p>
+              <h2 className="section-heading mx-auto">Bento-style work shaped around impact, clarity, and speed.</h2>
             </div>
           </Reveal>
 
-          <div className="mt-14 grid gap-5 md:grid-cols-12">
+          <div className="mt-16 grid gap-8 md:grid-cols-12">
             {projects.map((project, index) => {
               const spans = [
                 'md:col-span-7 md:row-span-2',
@@ -126,24 +127,23 @@ export function PortfolioPage({ profile, experiences, projects, skills }: Portfo
 
               return (
                 <Reveal key={project.id} delay={index * 90} className={spans[index % spans.length]}>
-                  <article className="glass-panel group relative flex h-full min-h-72 flex-col overflow-hidden rounded-[2rem] p-6 transition duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.05]">
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.08),transparent_40%)] opacity-0 transition-opacity group-hover:opacity-100" />
-                    <div className="relative flex h-full flex-col justify-between gap-8">
+                  <article className="glass-panel group relative flex h-full min-h-[24rem] flex-col overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:shadow-glow hover:bg-black/60">
+                    <div className="relative flex h-full flex-col justify-between gap-8 z-10">
                       <div className="flex items-start justify-between gap-4">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05] text-white">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-white group-hover:bg-primary transition-colors">
                           <SquareArrowOutUpRight className="h-5 w-5" />
                         </div>
-                        <span className="text-xs uppercase tracking-[0.25em] text-fog-500">{project.context}</span>
+                        <span className="text-xs font-bold uppercase tracking-widest text-muted">{project.context}</span>
                       </div>
 
                       <div>
-                        <h3 className="text-2xl font-semibold text-white">{project.title}</h3>
-                        <p className="mt-3 max-w-xl text-sm leading-7 text-fog-500">{project.description}</p>
+                        <h3 className="text-3xl font-bold font-inter text-white">{project.title}</h3>
+                        <p className="mt-4 max-w-xl text-base leading-relaxed text-muted font-medium">{project.description}</p>
                       </div>
 
                       <div className="flex flex-wrap gap-2">
                         {project.tags.map((tag) => (
-                          <span key={tag} className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs text-fog-500">
+                          <span key={tag} className="border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold text-muted rounded-full">
                             {tag}
                           </span>
                         ))}
@@ -157,26 +157,26 @@ export function PortfolioPage({ profile, experiences, projects, skills }: Portfo
         </div>
       </section>
 
-      <section id="stack" className="pb-24 sm:pb-32">
-        <div className="section-shell">
+      <section id="stack" className="py-24 sm:py-32 relative z-10 pointer-events-auto">
+        <div className="px-6 sm:px-8 lg:px-10 max-w-7xl mx-auto">
           <Reveal>
-            <div className="mx-auto max-w-3xl text-center">
-              <p className="muted-label mb-4">The stack</p>
-              <h2 className="section-heading">A minimalist system for building, shipping, and iterating.</h2>
+            <div className="mx-auto max-w-4xl text-center">
+              <p className="text-sm font-bold uppercase tracking-widest text-[#8B5CF6] font-jetbrains mb-4">The stack</p>
+              <h2 className="section-heading mx-auto">A minimalist system for building, shipping, and iterating.</h2>
             </div>
           </Reveal>
 
-          <div className="mt-14 grid gap-5 lg:grid-cols-2">
+          <div className="mt-16 grid gap-8 lg:grid-cols-2">
             {groupedSkills.map((group, index) => (
               <Reveal key={group.title} delay={index * 80}>
-                <div className="glass-panel rounded-[2rem] p-6">
-                  <div className="flex items-center justify-between gap-4">
-                    <h3 className="text-xl font-semibold text-white">{group.title}</h3>
-                    <span className="text-xs uppercase tracking-[0.24em] text-fog-500">{group.values.length || group.items.length} tools</span>
+                <div className="glass-panel">
+                  <div className="flex items-center justify-between gap-4 mb-8">
+                    <h3 className="text-xl font-bold font-inter text-white">{group.title}</h3>
+                    <span className="text-xs font-bold uppercase tracking-widest text-muted">{group.values.length || group.items.length} tools</span>
                   </div>
-                  <div className="mt-5 flex flex-wrap gap-3">
+                  <div className="flex flex-wrap gap-2">
                     {(group.values.length ? group.values : group.items).map((item) => (
-                      <span key={item} className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-fog-100">
+                      <span key={item} className="border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold text-white rounded-full">
                         {item}
                       </span>
                     ))}
@@ -188,22 +188,22 @@ export function PortfolioPage({ profile, experiences, projects, skills }: Portfo
         </div>
       </section>
 
-      <section id="leadership" className="pb-24 sm:pb-32">
-        <div className="section-shell">
+      <section id="leadership" className="py-24 sm:py-32 relative z-10 pointer-events-auto">
+        <div className="px-6 sm:px-8 lg:px-10 max-w-7xl mx-auto">
           <Reveal>
-            <div className="mx-auto max-w-3xl text-center">
-              <p className="muted-label mb-4">Leadership</p>
-              <h2 className="section-heading">Operational discipline across campus communities and competitive events.</h2>
+            <div className="mx-auto max-w-4xl text-center">
+              <p className="text-sm font-bold uppercase tracking-widest text-primary font-jetbrains mb-4">Leadership</p>
+              <h2 className="section-heading mx-auto">Operational discipline across campus communities.</h2>
             </div>
           </Reveal>
 
-          <div className="mx-auto mt-12 grid max-w-5xl gap-5 md:grid-cols-3">
-            {['UM Alphathon 2025', 'MYTECH Career Fair 2026', 'PEKOM CODEFEST / Mental Health Week'].map((item, index) => (
+          <div className="mx-auto mt-16 grid max-w-6xl gap-8 md:grid-cols-3">
+            {['UM Alphathon 2025', 'MYTECH Career Fair 2026', 'PEKOM CODEFEST'].map((item, index) => (
               <Reveal key={item} delay={index * 80}>
-                <div className="glass-panel rounded-3xl p-6">
-                  <p className="text-xs uppercase tracking-[0.24em] text-fog-500">Treasury</p>
-                  <h3 className="mt-3 text-xl font-semibold text-white">{item}</h3>
-                  <p className="mt-3 text-sm leading-7 text-fog-500">
+                <div className="glass-panel transition hover:-translate-y-1 hover:shadow-glow">
+                  <p className="text-xs font-bold uppercase tracking-widest text-muted">Treasury</p>
+                  <h3 className="mt-4 text-xl font-bold text-white font-inter leading-tight">{item}</h3>
+                  <p className="mt-4 text-sm leading-relaxed text-muted font-medium">
                     Led financial operations with precision, accountability, and calm execution under event pressure.
                   </p>
                 </div>
@@ -213,22 +213,24 @@ export function PortfolioPage({ profile, experiences, projects, skills }: Portfo
         </div>
       </section>
 
-      <section id="contact" className="pb-24 sm:pb-32">
-        <div className="section-shell">
+      <section id="contact" className="py-24 sm:py-32 relative z-10 pointer-events-auto">
+        <div className="px-6 sm:px-8 lg:px-10 max-w-7xl mx-auto">
           <Reveal>
-            <div className="mx-auto max-w-3xl text-center">
-              <p className="muted-label mb-4">Contact</p>
-              <h2 className="section-heading">Let&apos;s build something exceptional.</h2>
-              <p className="section-copy mt-4">Minimal, fast, and intentionally sharp. Reach out for collaborations, roles, or product ideas.</p>
+            <div className="mx-auto max-w-4xl text-center">
+              <p className="text-sm font-bold uppercase tracking-widest text-accent font-jetbrains mb-4">Contact</p>
+              <h2 className="section-heading mx-auto">Let&apos;s build something exceptional.</h2>
+              <p className="text-lg mt-6 text-muted font-medium">Minimal, fast, and intentionally sharp. Reach out for collaborations, roles, or product ideas.</p>
             </div>
           </Reveal>
 
-          <div className="mx-auto mt-12 max-w-4xl">
+          <div className="mx-auto mt-16 max-w-4xl">
             <Reveal>
-              <ContactForm />
+              <div className="glass-panel p-8">
+                <ContactForm />
+              </div>
             </Reveal>
-            <div className="mt-8 flex flex-wrap items-center justify-between gap-5 text-sm text-fog-500">
-              <div className="flex items-center gap-4">
+            <div className="mt-16 flex flex-wrap items-center justify-between gap-6 text-xs font-bold uppercase tracking-widest text-muted font-jetbrains">
+              <div className="flex items-center gap-8">
                 <a href="https://www.linkedin.com" target="_blank" rel="noreferrer" className="transition hover:text-white">
                   LinkedIn
                 </a>
@@ -244,6 +246,6 @@ export function PortfolioPage({ profile, experiences, projects, skills }: Portfo
           </div>
         </div>
       </section>
-    </main>
+    </div>
   );
 }
