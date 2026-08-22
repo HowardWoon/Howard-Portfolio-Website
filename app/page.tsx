@@ -1,5 +1,4 @@
 import { SiteHeader } from '@/components/site-header';
-import { EngineeringHUD } from '@/components/EngineeringHUD';
 import { DynamicScene } from '@/components/canvas/DynamicScene';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { fallbackExperiences, fallbackProfile, fallbackProjects, fallbackSkills } from '@/lib/site-data';
@@ -28,10 +27,9 @@ export default async function HomePage() {
     <SmoothScroller>
       <main className="relative min-h-screen w-full bg-background">
         <SiteHeader />
-        <EngineeringHUD />
         
-        {/* Fixed 3D Background */}
-        <div className="fixed inset-0 z-0 pointer-events-none">
+        {/* Fixed 3D Background - Calmed down for Vercel/Linear minimalism */}
+        <div className="fixed inset-0 z-0 pointer-events-none opacity-40 blur-[1px]">
           <DynamicScene skills={skills} />
         </div>
 

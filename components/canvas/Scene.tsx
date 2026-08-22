@@ -22,13 +22,13 @@ function AnimatedStars() {
   const starsRef = useRef<THREE.Group>(null);
   useFrame((state) => {
     if (starsRef.current) {
-      starsRef.current.rotation.y = state.clock.elapsedTime * 0.02;
-      starsRef.current.rotation.x = state.clock.elapsedTime * 0.01;
+      starsRef.current.rotation.y = state.clock.elapsedTime * 0.005;
+      starsRef.current.rotation.x = state.clock.elapsedTime * 0.005;
     }
   });
   return (
     <group ref={starsRef}>
-      <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1.5} />
+      <Stars radius={100} depth={50} count={1500} factor={4} saturation={0} fade speed={0.5} />
     </group>
   );
 }

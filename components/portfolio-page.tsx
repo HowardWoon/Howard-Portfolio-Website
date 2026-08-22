@@ -1,4 +1,4 @@
-import { ArrowUpRight, Github, Sparkles, SquareArrowOutUpRight } from 'lucide-react';
+import { ArrowRight, FileText, Github, Sparkles, SquareArrowOutUpRight } from 'lucide-react';
 import { fallbackProfile, stackGroups, type ExperienceItem, type ProjectItem, type SkillItem } from '@/lib/site-data';
 import { Reveal } from '@/components/reveal';
 import { ContactForm } from '@/components/contact-form';
@@ -10,12 +10,6 @@ type PortfolioPageProps = {
   skills: SkillItem[];
 };
 
-const heroMetrics = [
-  { label: 'University', value: 'University of Malaya' },
-  { label: 'Focus', value: 'Software Engineering' },
-  { label: 'Domain', value: 'Finance to AI systems' }
-];
-
 export function PortfolioPage({ profile, experiences, projects, skills }: PortfolioPageProps) {
   const groupedSkills = stackGroups.map((group) => ({
     ...group,
@@ -24,56 +18,82 @@ export function PortfolioPage({ profile, experiences, projects, skills }: Portfo
 
   return (
     <div className="text-white">
-      {/* We add significant padding to the top so the 3D Hero scene has space to breathe */}
-      <section className="relative overflow-hidden pt-[60vh] pb-24 sm:pb-32">
-        <div className="relative z-10 px-6 sm:px-8 lg:px-10 max-w-7xl mx-auto pointer-events-none">
-          <div className="mx-auto max-w-6xl pointer-events-auto">
-            <Reveal>
-              <p className="mb-4 text-sm font-bold uppercase tracking-widest text-primary font-jetbrains">
-                {profile.name}
-              </p>
-            </Reveal>
-            <Reveal delay={90}>
-              <h1 className="max-w-5xl text-balance text-6xl font-black tracking-tighter text-white sm:text-7xl lg:text-[7rem] leading-none mb-10 drop-shadow-2xl">
-                Creative<br /> Developer
-              </h1>
-            </Reveal>
-            <Reveal delay={170}>
-              <p className="max-w-2xl text-balance text-xl leading-relaxed text-muted font-medium font-inter">
-                {profile.bio} Bridging software engineering and financial precision with impact, clarity, and speed.
-              </p>
-            </Reveal>
+      <section className="relative min-h-[90vh] flex flex-col items-center justify-center text-center px-4 pt-32 pb-12 overflow-hidden pointer-events-auto z-10">
+        <Reveal>
+          {/* 1. Subtle Ambient Glow */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-indigo-600/15 blur-[120px] rounded-full pointer-events-none -z-10" />
 
-            <Reveal delay={250}>
-              <div className="mt-12 flex flex-col items-start justify-start gap-4 sm:flex-row">
-                <a href="#projects" className="pill-button pill-button-primary">
-                  <Sparkles className="h-5 w-5" />
-                  <span>View My Work</span>
-                </a>
-                <a href="https://github.com" target="_blank" rel="noreferrer" className="pill-button pill-button-secondary">
-                  <Github className="h-5 w-5" />
-                  <span>Connect on GitHub</span>
-                  <ArrowUpRight className="h-5 w-5" />
-                </a>
-              </div>
-            </Reveal>
+          {/* 2. Status Badge */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 text-xs font-mono mb-8 backdrop-blur-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span>Software Engineering @ Universiti Malaya</span>
           </div>
-        </div>
-      </section>
+        </Reveal>
 
-      <section className="py-16">
-        <div className="px-6 sm:px-8 lg:px-10 max-w-7xl mx-auto">
-           <Reveal delay={320}>
-             <div className="glass-panel grid gap-8 sm:grid-cols-3">
-               {heroMetrics.map((metric) => (
-                 <div key={metric.label} className="text-left">
-                   <p className="text-xs font-bold uppercase tracking-widest text-muted font-jetbrains">{metric.label}</p>
-                   <p className="mt-3 text-2xl font-bold text-white font-inter">{metric.value}</p>
-                 </div>
-               ))}
-             </div>
-           </Reveal>
-        </div>
+        <Reveal delay={90}>
+          {/* 3. Authoritative Headline */}
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white via-slate-100 to-slate-400 max-w-4xl leading-[1.1] mb-6 mx-auto">
+            Building Scalable Systems & Production Software
+          </h1>
+        </Reveal>
+
+        <Reveal delay={170}>
+          {/* 4. Concise Technical Value Proposition */}
+          <p className="text-base sm:text-lg text-slate-400 max-w-2xl leading-relaxed mb-10 font-normal mx-auto">
+            Hi, I'm <span className="text-white font-medium">{profile.name}</span>. I specialize in backend architectures, distributed systems, and AI integration using Java, Python, Next.js, and Spring Boot.
+          </p>
+        </Reveal>
+
+        <Reveal delay={250}>
+          {/* 5. Clear, Focused Action Buttons */}
+          <div className="flex flex-wrap items-center justify-center gap-4 mb-16">
+            <a
+              href="#projects"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white text-slate-950 font-medium text-sm hover:bg-slate-200 transition-all shadow-sm"
+            >
+              View Projects
+              <ArrowRight className="w-4 h-4" />
+            </a>
+            <a
+              href="https://github.com/HowardWoon"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-medium text-sm hover:bg-white/10 hover:border-white/20 transition-all backdrop-blur-sm"
+            >
+              <Github className="w-4 h-4" />
+              GitHub Profile
+            </a>
+            <a
+              href="/resume"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/5 border border-white/10 text-slate-300 font-medium text-sm hover:bg-white/10 hover:text-white transition-all backdrop-blur-sm"
+            >
+              <FileText className="w-4 h-4" />
+              Resume
+            </a>
+          </div>
+        </Reveal>
+
+        <Reveal delay={320}>
+          {/* 6. Clean Inline Metrics Bar */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-12 pt-8 border-t border-white/10 w-full max-w-3xl mx-auto">
+            <div>
+              <div className="text-2xl sm:text-3xl font-semibold text-white font-mono">4.00</div>
+              <div className="text-xs text-slate-400 uppercase tracking-wider mt-1">CGPA (SE)</div>
+            </div>
+            <div>
+              <div className="text-2xl sm:text-3xl font-semibold text-white font-mono">15+</div>
+              <div className="text-xs text-slate-400 uppercase tracking-wider mt-1">Projects Built</div>
+            </div>
+            <div>
+              <div className="text-2xl sm:text-3xl font-semibold text-white font-mono">2nd Place</div>
+              <div className="text-xs text-slate-400 uppercase tracking-wider mt-1">AutoPilot Hackathon</div>
+            </div>
+            <div>
+              <div className="text-2xl sm:text-3xl font-semibold text-white font-mono">4+</div>
+              <div className="text-xs text-slate-400 uppercase tracking-wider mt-1">Finance Roles</div>
+            </div>
+          </div>
+        </Reveal>
       </section>
 
       <section id="experience" className="py-24 sm:py-32 relative z-10 pointer-events-auto">
