@@ -154,7 +154,7 @@ insert into public.profiles (id, full_name, bio, current_role)
 values (
   '11111111-1111-1111-1111-111111111111',
   'Howard Woon',
-  'Driven Software Engineering student (CGPA 4.00) specializing in full-stack development, AI/ML integration, and IoT solutions. Leveraging a background in corporate finance to engineer high-impact, production-ready systems.',
+  'Bachelor of Computer Science student at the University of Malaya, specializing in Software Engineering. Combining a strong technical appetite with hands-on leadership experience to engineer systems that are as efficient as they are impactful.',
   'Software Engineer'
 )
 on conflict (id) do update set
@@ -167,7 +167,43 @@ insert into public.experiences (id, role, company, description, start_date, end_
 values
   (
     '22222222-2222-2222-2222-222222222221',
-    'Assistant Finance Executive',
+    'Finance Lead',
+    'Persatuan Komputer Universiti Malaya (PEKOM)',
+    'Architected the organization''s financial portfolio, securing B2B corporate partnerships and spearheading an automated digital claims pipeline to scale operational efficiency.',
+    '2026-06-01',
+    null,
+    true
+  ),
+  (
+    '22222222-2222-2222-2222-222222222222',
+    'Treasurer',
+    'MYTECH Career Fair 2026',
+    'Managed a RM50,200 budget, secured 30 corporate sponsors and RM46,200 in revenue, delivering a net surplus.',
+    '2026-02-01',
+    '2026-06-30',
+    false
+  ),
+  (
+    '22222222-2222-2222-2222-222222222223',
+    'Treasurer',
+    'Code Fest X UM Alphathon 2025',
+    'Managed event budget, sponsorship funds, and vendor payments for Code Fest X UM Alphathon.',
+    '2025-10-01',
+    '2025-12-31',
+    false
+  ),
+  (
+    '22222222-2222-2222-2222-222222222224',
+    'Committee Member, Sponsorship & Public Relations',
+    'Dean''s Cup 2025',
+    'Coordinated sponsor outreach, handled sponsorship agreements, and assisted with sponsorship reconciliation.',
+    '2025-10-01',
+    '2025-12-31',
+    false
+  ),
+  (
+    '22222222-2222-2222-2222-222222222225',
+    'Executive Assistant Finance',
     'Kraiburg TPE Technology (M) Sdn. Bhd.',
     'Managed high-volume financial data pipelines, executing complex financial reconciliations, and processed vendor payments.',
     '2025-06-01',
@@ -175,30 +211,30 @@ values
     false
   ),
   (
-    '22222222-2222-2222-2222-222222222222',
-    'Finance Intern',
-    'Kraiburg TPE Technology (M) Sdn. Bhd.',
-    'Supported budget monitoring and expenditure tracking to improve financial planning accuracy. Gained early exposure to enterprise data systems.',
-    '2024-03-01',
-    '2024-06-30',
+    '22222222-2222-2222-2222-222222222226',
+    'Assistant Head of Subject, Computer Science',
+    'KMNS PAL Leader Club',
+    'Led peer-assisted learning sessions, coordinated lesson plans, and mentored junior students in Computer Science topics.',
+    '2024-07-01',
+    '2024-12-31',
     false
   ),
   (
-    '22222222-2222-2222-2222-222222222223',
-    'Finance Lead',
-    'Persatuan Komputer Universiti Malaya (PEKOM)',
-    'Lead the financial architecture and resource management for Universiti Malaya''s flagship technology community.',
-    '2026-06-01',
-    null,
-    true
+    '22222222-2222-2222-2222-222222222227',
+    'Chairperson',
+    'Village Sports Club',
+    'Organized sports events, managed club budgets, and led volunteer coordination.',
+    '2024-07-01',
+    '2024-12-31',
+    false
   ),
   (
-    '22222222-2222-2222-2222-222222222224',
-    'Treasurer',
-    'MYTECH Career Fair 2026',
-    'Managed a RM50,200 budget, secured 30 corporate sponsors and RM46,200 in revenue, delivering a RM9,272.90 surplus.',
-    '2026-02-01',
-    '2026-06-30',
+    '22222222-2222-2222-2222-222222222228',
+    'Finance Intern',
+    'Kraiburg TPE',
+    'Supported budget monitoring and expenditure tracking to improve financial planning accuracy. Gained early exposure to enterprise data systems.',
+    '2024-03-01',
+    '2024-06-30',
     false
   )
 on conflict (id) do update set
@@ -213,30 +249,39 @@ insert into public.projects (id, title, context, description, tags, project_url,
 values
   (
     '33333333-3333-3333-3333-333333333331',
-    'CATFISH.AI — Fraud Detection ML System',
-    'Machine Learning Project',
-    'Built a 6-model soft-voting ensemble on a 50,000-row dataset. Engineered a robust data pipeline using SMOTE-Tomek and PCA. Deployed predictive model via a Flask REST API hosted on Vercel.',
-    array['Machine Learning', 'Python', 'Flask', 'AI'],
+    'ZeroLag: Enterprise AI Inbound Command Center',
+    '2nd Place — AutoPilot Asia Hackathon 2026',
+    'Engineered a bi-modal architecture utilizing a 5-operator Supervity Master Orchestrator governed by a localized Next.js, FastAPI, and PostgreSQL control dashboard.',
+    array['AI', 'Agentic Workflows', 'Next.js', 'FastAPI'],
     null,
     1
   ),
   (
     '33333333-3333-3333-3333-333333333332',
-    'Sensor X Sensei — Smart Lecture Hall',
-    'UM Technothon 2026 Top 15 Finalist',
-    'Developed an end-to-end IoT solution leveraging ESP32 microcontrollers and multi-sensor data fusion to power a real-time occupancy dashboard. Automated kWh/CO2 calculations.',
-    array['IoT', 'ESP32', 'Sensors', 'Energy Management'],
+    'CATFISH.AI — Fraud Detection ML System',
+    'Machine Learning Project',
+    'Built a 6-model soft-voting ensemble on a 50,000-row dataset. Engineered a robust data pipeline using SMOTE-Tomek and PCA. Deployed predictive model via a Flask REST API hosted on Vercel.',
+    array['Machine Learning', 'Python', 'Flask', 'AI'],
     null,
     2
   ),
   (
     '33333333-3333-3333-3333-333333333333',
+    'Sensor X Sensei — Smart Lecture Hall',
+    'UM Technothon 2026 Top 15 Finalist',
+    'Developed an end-to-end IoT solution leveraging ESP32 microcontrollers and multi-sensor data fusion to power a real-time occupancy dashboard. Automated kWh/CO2 calculations.',
+    array['IoT', 'ESP32', 'Sensors', 'Energy Management'],
+    null,
+    3
+  ),
+  (
+    '33333333-3333-3333-3333-333333333334',
     'Slotify — Parking Management System',
     'Data Structures Project',
     'Engineered a Spring Boot backend implementing 7 hand-built data structures unified into a single pipeline. Implemented Dijkstra''s shortest-path routing and a real-time interactive dashboard.',
     array['Java', 'Spring Boot', 'Data Structures', 'Algorithms'],
     null,
-    3
+    4
   )
 on conflict (id) do update set
   title = excluded.title,
@@ -253,15 +298,17 @@ values
   ('44444444-4444-4444-4444-444444444443', 'JavaScript', 'Languages'),
   ('44444444-4444-4444-4444-444444444444', 'TypeScript', 'Languages'),
   ('44444444-4444-4444-4444-444444444445', 'React', 'Frameworks'),
-  ('44444444-4444-4444-4444-444444444446', 'Node.js', 'Frameworks'),
-  ('44444444-4444-4444-4444-444444444447', 'Spring Boot', 'Frameworks'),
-  ('44444444-4444-4444-4444-444444444448', 'Flask', 'Frameworks'),
-  ('44444444-4444-4444-4444-444444444449', 'Firebase', 'Backend'),
-  ('44444444-4444-4444-4444-444444444450', 'RESTful APIs', 'Backend'),
-  ('44444444-4444-4444-4444-444444444451', 'Gemini API', 'AI/ML'),
-  ('44444444-4444-4444-4444-444444444452', 'Ollama', 'AI/ML'),
-  ('44444444-4444-4444-4444-444444444453', 'Generative AI', 'AI/ML'),
-  ('44444444-4444-4444-4444-444444444454', 'Git/GitHub', 'Tools')
+  ('44444444-4444-4444-4444-444444444446', 'Next.js', 'Frameworks'),
+  ('44444444-4444-4444-4444-444444444447', 'Node.js', 'Frameworks'),
+  ('44444444-4444-4444-4444-444444444448', 'Spring Boot', 'Frameworks'),
+  ('44444444-4444-4444-4444-444444444449', 'FastAPI', 'Frameworks'),
+  ('44444444-4444-4444-4444-444444444450', 'Flask', 'Frameworks'),
+  ('44444444-4444-4444-4444-444444444451', 'PostgreSQL', 'Backend'),
+  ('44444444-4444-4444-4444-444444444452', 'RESTful APIs', 'Backend'),
+  ('44444444-4444-4444-4444-444444444453', 'Agentic Workflows', 'AI/ML'),
+  ('44444444-4444-4444-4444-444444444454', 'Ollama', 'AI/ML'),
+  ('44444444-4444-4444-4444-444444444455', 'Generative AI', 'AI/ML'),
+  ('44444444-4444-4444-4444-444444444456', 'Git/GitHub', 'Tools')
 on conflict (id) do update set
   name = excluded.name,
   category = excluded.category;
