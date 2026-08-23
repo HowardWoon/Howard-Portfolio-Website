@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 
 const photos = [
   { src: '/images/projects/zerolag/dashboard.jpeg', alt: 'Dashboard Console', rotation: -1.5 },
+  { src: '/images/projects/zerolag/agent-flow.png', alt: 'Agent Architecture Flow', rotation: 3 },
   { src: '/images/projects/zerolag/ai insight.jpeg', alt: 'AI Insights Module', rotation: 2 },
   { src: '/images/projects/zerolag/ai policies.jpeg', alt: 'AI Agent Policies', rotation: -1 },
   { src: '/images/projects/zerolag/backend.jpeg', alt: 'Backend Telemetry', rotation: 1.5 },
@@ -44,7 +45,7 @@ export function InteractivePhotoStack() {
             className="absolute w-[98%] sm:w-[96%] aspect-video bg-white p-1.5 sm:p-2 rounded-lg shadow-2xl shadow-black/60 border border-neutral-200 origin-center max-h-full"
           >
             <div className="w-full h-full relative overflow-hidden rounded bg-neutral-100 border border-neutral-300">
-              <img src={photo.src} alt={photo.alt} className="absolute inset-0 w-full h-full object-cover pointer-events-none" />
+              <img src={photo.src} alt={photo.alt} className="absolute inset-0 w-full h-full object-contain pointer-events-none" />
             </div>
             {isTop && (
               <div className="absolute inset-0 bg-white/0 hover:bg-white/10 transition-colors pointer-events-none rounded-lg" />
