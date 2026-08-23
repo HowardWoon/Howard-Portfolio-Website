@@ -373,7 +373,7 @@ export default function ContactSection() {
         </div>
 
                 {/* Global Footer & Functional Sitemap */}
-        <footer className="border-t-2 border-white/10 pt-12 pb-8 mt-16 flex flex-col md:flex-row justify-between items-start md:items-end gap-10">
+        <footer className="relative z-10 border-t-2 border-white/10 pt-12 pb-8 mt-16 flex flex-col md:flex-row justify-between items-start md:items-end gap-10">
           
           {/* Left Block: Identity & Copyright */}
           <div className="space-y-4 text-left">
