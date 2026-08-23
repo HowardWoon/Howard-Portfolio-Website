@@ -1,55 +1,65 @@
-# Howard Woon Hao Zhe Portfolio
+<div align="center">
+  <img src="https://howard-woon-portfolio.vercel.app/images/howard-solid.jpeg" alt="Howard Woon" width="120" height="120" style="border-radius: 50%;" />
+  
+  <h1 align="center">Howard Woon · Software Engineer</h1>
+  
+  <p align="center">
+    <strong>A high-performance, system-architecture focused portfolio.</strong>
+  </p>
+  
+  <p align="center">
+    <a href="https://howard-woon-portfolio.vercel.app">Live Portfolio</a> · 
+    <a href="https://www.linkedin.com/in/howard-woon-hao-zhe-730b9337a/">LinkedIn</a>
+  </p>
+</div>
 
-Premium Next.js App Router portfolio with Tailwind CSS, Supabase-backed content, and a protected admin dashboard.
+<br />
 
-## Setup
+This repository houses the source code for my professional portfolio. Designed with an ultra-clean, restrained, premium aesthetic (inspired by Apple, Linear, and Vercel), it serves as both a resume and an active engineering showcase.
 
-1. Copy `.env.local.example` to `.env.local` and fill in the Supabase values.
-2. Run the SQL in `sql/001_init.sql` inside your Supabase project.
-3. Install dependencies and start the app:
+## ⚡ Key Features
+
+- **Interactive System Simulators:** Live React simulations of backend algorithms and agentic workflows (Dijkstra Pathfinding, Agentic Intent Triage, IoT Telemetry).
+- **In-App Document Modals:** Embedded, non-blocking PDF pitch-deck viewers.
+- **Strict Visual Restraint:** A meticulously maintained design system utilizing grayscale depth mapping, a single high-contrast `signal` color (`#C9974C`), and precision typography.
+- **High-Performance Architecture:** Zero unnecessary 3D WebGL bloat. Optimized static routing via Next.js 15 App Router, boasting a sub-4s build time and a lightweight ~100kB JS bundle.
+- **Fluid Interactions:** Staggered scroll reveals and physical hover lifts powered by Framer Motion.
+
+## 🛠️ Technical Stack
+
+- **Framework:** Next.js 15 (App Router, Strict Mode)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS (Custom Apple/Linear-inspired token system)
+- **Motion:** Framer Motion
+- **Icons:** Lucide React
+- **Backend / DB:** Supabase (for secure `/admin` dashboard and contact form routing)
+
+## 🚀 Running Locally
 
 ```bash
+# 1. Clone the repository
+git clone https://github.com/HowardWoon/Howard-Portfolio-Website.git
+
+# 2. Install dependencies
 npm install
+
+# 3. Setup environment variables (Requires Supabase instance for full admin features)
+cp .env.local.example .env.local
+
+# 4. Start the development server
 npm run dev
 ```
 
-## Admin
+Visit `http://localhost:3000` to view the application.
 
-- Public portfolio: `/`
-- Login: `/admin/login`
-- Dashboard: `/admin/dashboard`
-- Inbox: `/admin/messages`
+## 📁 Architecture Overview
 
-## Vercel Environment Variables
+- `app/`: Next.js 15 routing, global CSS, and layout configurations.
+- `components/`: Modular React components, including the interactive `project-simulators.tsx` and the main `portfolio-page.tsx` view.
+- `lib/site-data.ts`: The single source of truth for all content, rendering the portfolio highly maintainable without diving into component markup.
 
-Set these in the Vercel project settings for Production, Preview, and Development:
+<br />
 
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `ADMIN_USER_UUID`
-
-Use this exact admin UUID:
-
-- `54c734ee-1e79-4e92-bf9b-8504a1854a31`
-
-Optional but recommended:
-
-- `NEXT_PUBLIC_SITE_URL` if you later add absolute links or redirects.
-
-## Supabase Dashboard Checklist
-
-1. Create or open your Supabase project.
-2. Go to the SQL Editor and run `sql/001_init.sql`.
-3. Confirm the tables exist: `profiles`, `experiences`, `projects`, `skills`, and `contact_messages`.
-4. Confirm RLS is enabled on every table.
-5. Create or identify the admin user in Supabase Auth.
-6. Copy that user’s `auth.uid()` into `ADMIN_USER_UUID`.
-7. If you want the role-based path too, set the admin user’s JWT metadata to include `app_metadata.role = admin`.
-8. Insert or verify the seed content from the migration so the public site shows Howard’s latest profile, projects, skills, and experience.
-
-## Notes
-
-- Public users can only read the portfolio content.
-- Admin writes are routed through server endpoints and revalidate the public page immediately.
-- Contact form submissions are stored in Supabase and can be reviewed in `/admin/messages`.
+<div align="center">
+  <sub>Built by Howard Woon. Deployed on Vercel Edge Network.</sub>
+</div>
