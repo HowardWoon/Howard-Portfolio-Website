@@ -67,9 +67,14 @@ export function CustomCursor() {
 
   return (
     <>
-      {/* Tiny highly-responsive dot */}
+      {/* The Inverting Lens Dot */}
       <motion.div
-        className="fixed top-0 left-0 w-2 h-2 bg-amber-400 rounded-full pointer-events-none z-[9999] mix-blend-difference"
+        className="fixed top-0 left-0 rounded-full pointer-events-none z-[9999] mix-blend-difference bg-amber-500"
+        animate={{
+          width: isPointer ? 80 : 12,
+          height: isPointer ? 80 : 12,
+        }}
+        transition={{ type: 'spring', stiffness: 400, damping: 25 }}
         style={{
           x: cursorX,
           y: cursorY,
@@ -79,13 +84,14 @@ export function CustomCursor() {
         }}
       />
       
-      {/* Springy outer ring/reticle */}
+      {/* Thick Solid Yellow Outer Ring */}
       <motion.div
-        className="fixed top-0 left-0 w-8 h-8 border border-amber-500/50 rounded-full pointer-events-none z-[9998]"
+        className="fixed top-0 left-0 w-12 h-12 rounded-full pointer-events-none z-[9998]"
         animate={{
-          scale: isPointer ? 1.5 : 1,
-          backgroundColor: isPointer ? 'rgba(245, 158, 11, 0.1)' : 'transparent',
-          borderColor: isPointer ? 'rgba(245, 158, 11, 0.8)' : 'rgba(245, 158, 11, 0.5)'
+          scale: isPointer ? 1.8 : 1,
+          borderWidth: isPointer ? '2px' : '4px',
+          borderColor: isPointer ? 'rgba(245, 158, 11, 0.3)' : 'rgba(245, 158, 11, 1)',
+          backgroundColor: isPointer ? 'rgba(245, 158, 11, 0.05)' : 'transparent',
         }}
         transition={{ type: 'spring', stiffness: 300, damping: 20 }}
         style={{
