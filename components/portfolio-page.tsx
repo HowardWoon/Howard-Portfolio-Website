@@ -200,15 +200,26 @@ export function PortfolioPage() {
                     </div>
 
                     {/* Action Row */}
-                    <div className="flex items-center gap-4">
+                    <div className="flex flex-wrap items-center gap-3">
+                      {proj.liveUrl && (
+                        <a
+                          href={proj.liveUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-signal text-canvas font-bold text-sm hover:opacity-90 transition-opacity flex-1 shadow-md shadow-signal/10"
+                        >
+                          <ExternalLink className="w-4 h-4" /> Live App
+                        </a>
+                      )}
+                      
                       {proj.githubUrl && (
                         <a
                           href={proj.githubUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-ink text-canvas font-bold text-sm hover:opacity-90 transition-opacity flex-1"
+                          className={`inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full font-medium text-sm transition-all flex-1 ${proj.liveUrl ? 'border border-line text-ink hover:bg-surface-2' : 'bg-ink text-canvas hover:opacity-90'}`}
                         >
-                          Source Code
+                          <Github className="w-4 h-4" /> Code
                         </a>
                       )}
 
