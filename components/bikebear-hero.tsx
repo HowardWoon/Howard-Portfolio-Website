@@ -247,7 +247,7 @@ export default function BikebearHero() {
                         <span className="text-xs sm:text-sm font-sans font-black text-black uppercase tracking-widest px-4">
                           BREAKING NEWS: 9 AUGUST • 2ND PLACE WINNER AT SUPERVITY ASIA HACKATHON
                         </span>
-                        <span className="text-lg text-[#00E5FF] font-black mx-2">*</span>
+                        <span className="text-lg text-[#00E5FF] font-black mx-2 translate-y-[2px]">*</span>
                       </div>
                     ))}
                   </div>
