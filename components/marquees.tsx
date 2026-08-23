@@ -7,12 +7,17 @@ export function TechMarquee({ skills }: { skills: string[] }) {
   const repeatedSkills = [...skills, ...skills, ...skills, ...skills];
   
   return (
-    <div className="w-full overflow-hidden bg-amber-500/10 border-y border-amber-500/20 py-3 relative z-20 shadow-[0_0_30px_rgba(245,158,11,0.05)]">
+    <div className="w-full overflow-hidden bg-[#FFC700] border-y-2 border-black py-4 relative z-20">
       <div className="flex whitespace-nowrap animate-[marquee_25s_linear_infinite] hover:[animation-play-state:paused] w-max">
         {repeatedSkills.map((skill, idx) => (
           <div key={idx} className="flex items-center">
-            <span className="text-xs font-mono font-bold text-amber-500 uppercase tracking-widest px-8">{skill}</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500/50 mx-4"></span>
+            <span className="text-base sm:text-xl md:text-2xl font-sans font-black text-black uppercase tracking-wide px-6 sm:px-8">
+              {skill}
+            </span>
+            {/* The cyan asterisk separator */}
+            <span className="text-3xl sm:text-4xl text-[#00E5FF] font-black mx-2 sm:mx-4 mt-2">
+              *
+            </span>
           </div>
         ))}
       </div>
@@ -21,7 +26,7 @@ export function TechMarquee({ skills }: { skills: string[] }) {
 }
 
 export function SignatureMarquee() {
-  const text = "BUILDING SYSTEMS THAT SCALE • JAVA • PYTHON • SPRING BOOT • GRAPH ALGORITHMS • AGENTIC AI • ";
+  const text = "BUILDING SYSTEMS THAT SCALE   JAVA   PYTHON   SPRING BOOT   GRAPH ALGORITHMS   AGENTIC AI   ";
   const repeatedText = text.repeat(10);
   
   return (
