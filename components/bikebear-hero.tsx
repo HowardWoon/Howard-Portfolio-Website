@@ -41,15 +41,8 @@ export default function BikebearInspiredHero() {
         </div>
       </header>
 
-      {/* Sticky Left Vertical Edge Tab */}
-      <aside className="fixed left-0 top-1/2 -translate-y-1/2 z-40 hidden sm:flex">
-        <div className="flex items-center gap-2 rounded-r-xl bg-cyan-400 px-3 py-6 text-xs font-mono font-bold uppercase tracking-widest text-black shadow-lg [writing-mode:vertical-rl] rotate-180 cursor-pointer hover:pl-4 transition-all border border-black/10 border-l-0">
-          <span>Honors & Awards</span>
-        </div>
-      </aside>
-
       {/* Main 2-Column Hero Section with extra left padding for the rail */}
-      <main className="flex-1 flex items-center w-full max-w-7xl mx-auto px-6 sm:px-10 lg:pl-24 lg:pr-16 py-8 z-10">
+      <main className="flex-1 flex items-center w-full max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-8 z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center w-full">
           
           {/* Left Column: Vision & Headline (7 cols) */}
