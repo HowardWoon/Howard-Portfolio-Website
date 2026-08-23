@@ -359,8 +359,8 @@ export default function ContactSection() {
 
         
         {/* Footer Marquee */}
-        <div className="w-full overflow-hidden bg-amber-500/10 border-y border-amber-500/20 py-3 mt-16 -mx-6 sm:-mx-10 lg:-mx-16 px-6 sm:px-10 lg:px-16 w-[calc(100%+3rem)] sm:w-[calc(100%+5rem)] lg:w-[calc(100%+8rem)] relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen max-w-none">
-          <div className="flex whitespace-nowrap animate-marquee hover:[animation-play-state:paused] w-max">
+        <div className="w-full overflow-hidden bg-amber-500/10 border-y border-amber-500/20 py-3 mt-16 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]">
+          <div className="flex whitespace-nowrap animate-[marquee_20s_linear_infinite] hover:[animation-play-state:paused] w-max">
             {[...Array(8)].map((_, i) => (
               <div key={i} className="flex items-center">
                 <span className="text-xs font-mono font-medium text-amber-500 px-8">ENGINEERING SYSTEMS TO STAND OUT IN A NOISY WORLD</span>
