@@ -12,7 +12,8 @@ import {
   MapPin,
   Copy,
   Check,
-  Terminal as TerminalIcon
+  Terminal as TerminalIcon,
+  FileText
 } from 'lucide-react';
 import {
   personalDetails,
