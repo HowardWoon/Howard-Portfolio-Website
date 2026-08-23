@@ -35,7 +35,7 @@ export default function BikebearInspiredHero() {
 
   // Central Portal Zoom & Scale
   const portalScale = useTransform(smoothProgress, [0, 1], [1, 5]);
-  const portalRadius = useTransform(smoothProgress, [0, 0.5, 1], ["38%", "25%", "8%"]);
+  const portalRadius = useTransform(smoothProgress, [0, 0.5, 1], ["100px", "50px", "16px"]);
   const portalRotation = useTransform(smoothProgress, [0, 1], [0, 45]);
   const imageScale = useTransform(smoothProgress, [0, 1], [1, 0.5]);
 
@@ -54,10 +54,10 @@ export default function BikebearInspiredHero() {
       className="relative min-h-[220vh] w-full transition-colors duration-200"
     >
       {/* Sticky Fixed Viewport Frame */}
-      <div className="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-between p-6 sm:p-10 z-10">
+      <div className="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-between pt-6 pb-6 lg:pb-10 z-10 pl-14 sm:pl-16 lg:pl-20">
         
         {/* Floating Top Nav (Adaptive Glass) */}
-        <header className="flex items-center justify-between z-30">
+        <header className="flex items-center justify-between z-30 pr-6 lg:pr-12">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-black text-white font-mono font-bold text-base shadow-md">
               HW
@@ -93,63 +93,86 @@ export default function BikebearInspiredHero() {
           </div>
         </aside>
 
-        {/* Centerpiece Morphing Portal with Headshot */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-          <motion.div
-            style={{
-              scale: portalScale,
-              borderRadius: portalRadius,
-              rotate: portalRotation,
-            }}
-            className="relative h-[280px] w-[280px] sm:h-[380px] sm:w-[380px] overflow-hidden bg-neutral-900 shadow-2xl border-4 border-black/20"
-          >
-            {/* Animated Fluid Blob SVG Mask Container */}
-            <motion.div
-              style={{ rotate: useTransform(portalRotation, (r) => -r) }}
-              className="relative h-full w-full"
+        {/* Main Hero Body - 2-Column Grid */}
+        <main className="flex-1 flex items-center w-full max-w-7xl mx-auto pr-6 sm:pr-10 lg:pr-16 py-8 z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center w-full relative">
+            
+            {/* Left Column: Vision Badge & Headline (7 Cols) */}
+            <motion.div 
+              style={{ y: headlineY, opacity: headlineOpacity, color: textColor }}
+              className="lg:col-span-7 flex flex-col items-start space-y-6 relative z-10"
             >
-              <motion.div style={{ scale: imageScale }} className="relative h-full w-full">
-                <Image
-                  src="/images/howard-solid.jpeg"
-                  alt="Howard Woon"
-                  fill
-                  priority
-                  className="object-cover object-top filter grayscale contrast-125"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
-              </motion.div>
+              <div className="inline-flex items-center border border-black/80 rounded-full px-3.5 py-1 text-xs font-mono tracking-widest uppercase">
+                ABOUT // VISION
+              </div>
 
-              {/* Floating Verified Role Hologram */}
-              <div className="absolute bottom-4 left-4 right-4 rounded-xl border border-white/20 bg-black/60 p-3 backdrop-blur-md text-white">
-                <div className="flex items-center justify-between text-[11px] font-mono">
-                  <span className="text-neutral-300">CGPA 4.00 · UM</span>
-                  <span className="flex items-center gap-1 text-emerald-400">
-                    <Terminal className="h-3 w-3" /> VERIFIED
-                  </span>
+              <div className="relative">
+                <h1 className="text-5xl sm:text-6xl md:text-7xl xl:text-8xl font-extrabold uppercase tracking-tighter leading-[0.9] text-inherit">
+                  ENGINEERING <br />
+                  SYSTEMS TO <br />
+                  STAND OUT IN <br />
+                  A NOISY WORLD.
+                </h1>
+
+                {/* Decorative Accent Wave placed securely under text with z-0 */}
+                <div className="w-48 sm:w-64 mt-3 opacity-75 absolute -bottom-6 left-0 -z-10">
+                  <svg
+                    viewBox="0 0 200 16"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-full stroke-current"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                  >
+                    <path d="M2 8 Q 12 0, 22 8 T 42 8 T 62 8 T 82 8 T 102 8 T 122 8 T 142 8 T 162 8 T 182 8 T 198 8" />
+                  </svg>
                 </div>
               </div>
             </motion.div>
-          </motion.div>
-        </div>
 
-        {/* Large Kinetic Typography Reveal (Overlaid on Bottom) */}
-        <motion.div
-          style={{ y: headlineY, opacity: headlineOpacity, color: textColor }}
-          className="relative z-20 max-w-5xl space-y-4"
-        >
-          <div className="inline-block rounded-full border border-black/30 px-3 py-1 text-xs font-mono uppercase tracking-widest">
-            ABOUT // VISION
+            {/* Right Column: Portrait Portal (5 Cols) */}
+            <div className="lg:col-span-5 flex justify-center lg:justify-end z-20">
+              <motion.div
+                style={{
+                  scale: portalScale,
+                  borderRadius: portalRadius,
+                  rotate: portalRotation,
+                }}
+                className="relative w-[280px] sm:w-[320px] h-[380px] sm:h-[430px] border-2 border-black bg-black shadow-2xl overflow-hidden origin-center"
+              >
+                {/* Animated Fluid Blob SVG Mask Container */}
+                <motion.div
+                  style={{ rotate: useTransform(portalRotation, (r) => -r) }}
+                  className="relative h-full w-full flex flex-col justify-between"
+                >
+                  <motion.div style={{ scale: imageScale }} className="absolute inset-0 w-full h-full">
+                    <Image
+                      src="/images/howard-solid.jpeg"
+                      alt="Howard Woon"
+                      fill
+                      priority
+                      className="object-cover object-top filter grayscale contrast-125"
+                    />
+                  </motion.div>
+
+                  {/* Terminal / HUD Footer Overlay */}
+                  <div className="absolute bottom-0 inset-x-0 bg-black/90 text-white backdrop-blur-md px-4 py-2.5 flex items-center justify-between border-t border-neutral-800 z-10">
+                    <span className="text-[11px] font-mono tracking-wider text-neutral-300">
+                      CGPA 4.00 · UM
+                    </span>
+                    <span className="text-[11px] font-mono text-emerald-400 tracking-wider">
+                      &gt;_ VERIF
+                    </span>
+                  </div>
+                </motion.div>
+              </motion.div>
+            </div>
+
           </div>
-          
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight uppercase leading-[0.95]">
-            Engineering Systems <br />
-            <span className="underline decoration-black/30 decoration-wavy">To Stand Out</span> In A <br />
-            Noisy World.
-          </h1>
-        </motion.div>
+        </main>
 
         {/* Scroll Progress & Bottom Indicator */}
-        <div className="flex items-center justify-between z-20 text-xs font-mono uppercase tracking-widest text-black">
+        <div className="flex items-center justify-between z-20 text-xs font-mono uppercase tracking-widest text-black pr-6 lg:pr-12">
           <div className="flex items-center gap-2">
             <ArrowDown className="h-4 w-4 animate-bounce" />
             <span>Scroll To Initialize</span>
