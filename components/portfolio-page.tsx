@@ -1,524 +1,462 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import Image from 'next/image';
 import {
-  Github,
-  ExternalLink,
-  ArrowRight,
-  Send,
-  CheckCircle,
-  AlertCircle,
-  MapPin,
-  Copy,
-  Check,
-  Terminal as TerminalIcon,
-  FileText
+  Github, ExternalLink, FileText, ArrowUpRight, ArrowDown, Sparkles, Building2, Calendar, Award, Layers, Send, Check, Copy, MapPin, AlertCircle, CheckCircle,
 } from 'lucide-react';
-import {
-  personalDetails,
-  heroMetrics,
-  experiences,
-  projects,
-  awards,
-  techMatrix,
-} from '@/lib/site-data';
+import { personalDetails, heroStats, projects, experiences, awards } from '@/lib/site-data';
 import { PitchDeckModal } from '@/components/pitch-deck-modal';
-import {
-  SlotifySimulator,
-  ZeroLagSimulator,
-  BLAHujanSimulator,
-  SensorSenseiSimulator,
-} from '@/components/project-simulators';
-
-const FadeIn = ({ children, delay = 0, className = "" }: { children: React.ReactNode, delay?: number, className?: string }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, margin: "-100px" }}
-    transition={{ duration: 0.6, delay, ease: [0.21, 0.47, 0.32, 0.98] }}
-    className={className}
-  >
-    {children}
-  </motion.div>
-);
+import { SlotifySimulator, ZeroLagSimulator, BLAHujanSimulator, SensorSenseiSimulator } from '@/components/project-simulators';
 
 export function PortfolioPage() {
-  const [activeDocument, setActiveDocument] = useState<{ title: string; pdfUrl: string } | null>(null);
+  const [activeDeck, setActiveDeck] = useState<{ title: string; pdfUrl: string } | null>(null);
+  const [activeLabTab, setActiveLabTab] = useState<string>('slotify');
+  const [copied, setCopied] = useState(false);
+  const [revealedEmail, setRevealedEmail] = useState(false);
   const [formState, setFormState] = useState({ name: '', email: '', message: '' });
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [formStatus, setFormStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
-  const [copiedEmail, setCopiedEmail] = useState(false);
 
   const handleCopyEmail = () => {
     navigator.clipboard.writeText(personalDetails.email);
-    setCopiedEmail(true);
-    setTimeout(() => setCopiedEmail(false), 2000);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setStatus('loading');
+    setFormStatus('loading');
     setErrorMessage('');
-
     try {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formState),
       });
-
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.error || 'Failed to submit message.');
+        throw new Error(errorData.error || 'Failed to transmit message.');
       }
-
-      setStatus('success');
+      setFormStatus('success');
       setFormState({ name: '', email: '', message: '' });
     } catch (err: any) {
-      setStatus('error');
+      setFormStatus('error');
       setErrorMessage(err.message || 'An error occurred.');
     }
   };
 
   return (
-    <div className="relative min-h-screen bg-canvas text-ink overflow-x-hidden selection:bg-signal-dim selection:text-signal">
-      <div className="max-w-5xl mx-auto px-5 sm:px-8 lg:px-10 pt-40 pb-32 space-y-48">
-        
-        {/* ================= 1. HERO ================= */}
-        <section className="flex flex-col items-start text-left w-full relative">
-          {/* Subtle Dot Matrix Background behind hero */}
-          <div className="absolute inset-0 -z-10 bg-[radial-gradient(#C9974C_1px,transparent_1px)] [background-size:24px_24px] opacity-[0.03] mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_70%) pointer-events-none"></div>
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.21, 0.47, 0.32, 0.98] }}
-            className="w-full"
-          >
-            <div className="flex flex-col lg:flex-row gap-12 lg:gap-8 items-start justify-between w-full mb-16 relative">
-              <div className="space-y-8 max-w-3xl flex-1">
-                <h1 className="text-6xl sm:text-7xl md:text-[6rem] font-display font-extrabold tracking-tighter text-ink leading-[1.05]">
-                  Building Scalable Systems <br className="hidden md:block"/>& Production Software.
-                </h1>
-                <p className="text-lg sm:text-xl text-ink-2 max-w-2xl leading-loose font-normal">
-                  Hi, I'm {personalDetails.name}. I design backend architectures, distributed data pipelines, and agentic workflows using Java, Python, and Spring Boot.
-                </p>
-                
-                <div className="flex flex-wrap items-center gap-4 pt-4">
-                  <a
-                    href="#projects"
-                    className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-signal text-canvas font-bold text-sm hover:opacity-90 transition-opacity shadow-lg shadow-signal/20"
-                  >
-                    View Projects <ArrowRight className="w-4 h-4" />
-                  </a>
-                  <a
-                    href={personalDetails.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full border border-line bg-transparent text-ink font-medium text-sm hover:border-line-strong hover:bg-surface transition-all"
-                  >
-                    <Github className="w-4 h-4" /> GitHub
-                  </a>
-                </div>
-              </div>
-
-              {/* Signature Visual Moment: Terminal Anchor */}
-              <div className="hidden lg:flex w-72 shrink-0 p-5 rounded-2xl bg-surface border border-line shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] text-xs font-mono text-ink-3 flex-col gap-2 relative overflow-hidden group">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-signal to-transparent opacity-30"></div>
-                <div className="flex items-center gap-2 mb-2 text-ink-2">
-                  <TerminalIcon className="w-4 h-4" />
-                  <span>system_status.sh</span>
-                </div>
-                <p>Initializing telemetry...</p>
-                <p className="text-signal">Loading agent heuristics: OK</p>
-                <p>Connecting to message broker...</p>
-                <p className="text-success">System online. All tests passed.</p>
-                <p className="mt-2 text-ink">&gt; ready <span className="animate-pulse font-bold text-signal">_</span></p>
+    <div className="relative min-h-screen tech-grid-bg selection:bg-slate-900 selection:text-white">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 pb-32 space-y-36">
+        <section className="relative min-h-[70vh] sm:min-h-[78vh] flex flex-col justify-between pt-6">
+          <div className="flex items-center justify-between font-mono text-xs text-slate-500">
+            <div>01 // SOFTWARE ENGINEER</div>
+            <div className="hidden sm:block">UNIVERSITI MALAYA • 4.00 CGPA</div>
+          </div>
+          <div className="relative my-8 flex items-center justify-center">
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.06] select-none overflow-hidden">
+              <div className="animate-marquee-slow whitespace-nowrap text-7xl sm:text-9xl font-extrabold font-display tracking-tight text-black flex items-center gap-12">
+                <span>SPRING BOOT</span><span>•</span><span>AUTOPILOT 2026</span><span>•</span><span>AGENTIC AI</span><span>•</span><span>DIJKSTRA GRAPH</span><span>•</span><span>KRAIBURG TPE</span><span>•</span><span>PEKOM FINANCE</span><span>•</span>
               </div>
             </div>
-
-            {/* Linear-style plain text stat row with signal contrast */}
-            <div className="flex flex-wrap gap-10 sm:gap-20 pt-12 border-t border-line w-full">
-              {heroMetrics.map((m, idx) => (
-                <div key={idx} className="flex flex-col">
-                  <div className="text-4xl font-mono tracking-tighter text-signal mb-1.5 font-bold">{m.value}</div>
-                  <div className="text-xs text-ink-3 font-medium uppercase tracking-wider">{m.label}</div>
-                </div>
-              ))}
+            <div className="relative z-10 w-48 h-64 sm:w-60 sm:h-80 rounded-[48%] overflow-hidden border-2 border-white shadow-2xl ring-8 ring-black/[0.03] transition-transform duration-500 hover:scale-[1.02]">
+              <Image src={personalDetails.avatarUrl} alt={personalDetails.fullName} fill priority className="object-cover" />
             </div>
-          </motion.div>
-        </section>
-
-        {/* ================= 2. PROJECTS ================= */}
-        <section id="projects" className="space-y-16 scroll-mt-32">
-          <FadeIn className="border-b border-line pb-6">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink">
-              Interactive Systems & Projects
-            </h2>
-          </FadeIn>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {projects.map((proj, idx) => (
-              <FadeIn key={proj.id} delay={idx * 0.1} className="h-full">
-                <div className="h-full flex flex-col justify-between p-8 rounded-[24px] border border-line bg-surface shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] hover:-translate-y-1 hover:shadow-2xl hover:border-line-strong transition-all duration-300 group">
-                  <div>
-                    {/* Card Header Mono Tag */}
-                    <div className="mb-6 flex items-center justify-between">
-                      <span className="text-xs font-mono text-ink-3 uppercase tracking-wider group-hover:text-signal transition-colors">
-                        {proj.category}
-                      </span>
-                      {proj.metrics && (
-                        <span className="text-xs font-mono text-ink-3">
-                          {proj.metrics.label}: <span className="text-ink font-semibold">{proj.metrics.value}</span>
-                        </span>
-                      )}
-                    </div>
-
-                    <h3 className="text-2xl font-bold text-ink mb-3 group-hover:text-signal transition-colors">
-                      {proj.title}
-                    </h3>
-                    <p className="text-sm font-medium text-ink-2 mb-5">{proj.tagline}</p>
-                    <p className="text-sm text-ink-3 leading-relaxed mb-8">{proj.description}</p>
-
-                    {/* Mono Callout Box (Restrained) */}
-                    <div className="p-4 rounded-xl border border-line bg-canvas text-xs font-mono text-ink-2 mb-8 leading-relaxed shadow-inner">
-                      <span className="text-ink font-semibold">ARCH:</span> {proj.architectureHighlight}
-                    </div>
-
-                    {/* Embedded Interactive Simulators */}
-                    <div className="mb-8">
-                      {proj.id === 'proj-slotify' && <SlotifySimulator />}
-                      {proj.id === 'proj-zerolag' && <ZeroLagSimulator />}
-                      {proj.id === 'proj-bilahujan' && <BLAHujanSimulator />}
-                      {proj.id === 'proj-sensor-sensei' && <SensorSenseiSimulator />}
-                    </div>
-                  </div>
-
-                  <div className="pt-6 border-t border-line flex flex-col gap-6">
-                    {/* Quiet Tech Stack String */}
-                    <div className="text-xs font-mono text-ink-3 leading-relaxed">
-                      {proj.technologies.join(' · ')}
-                    </div>
-
-                    {/* Action Row */}
-                    <div className="flex flex-wrap items-center gap-3">
-                      {proj.liveUrl && (
-                        <a
-                          href={proj.liveUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-signal text-canvas font-bold text-sm hover:opacity-90 transition-opacity flex-1 shadow-md shadow-signal/10"
-                        >
-                          <ExternalLink className="w-4 h-4" /> Live App
-                        </a>
-                      )}
-                      
-                      {proj.githubUrl && (
-                        <a
-                          href={proj.githubUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={`inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full font-medium text-sm transition-all flex-1 ${proj.liveUrl ? 'border border-line text-ink hover:bg-surface-2' : 'bg-ink text-canvas hover:opacity-90'}`}
-                        >
-                          <Github className="w-4 h-4" /> Code
-                        </a>
-                      )}
-
-                      {proj.deckUrl && (
-                        <button
-                          onClick={() => setActiveDocument({ title: proj.title, pdfUrl: proj.deckUrl! })}
-                          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full border border-line text-ink font-medium text-sm hover:bg-surface-2 transition-colors flex-1"
-                        >
-                          <FileText className="w-4 h-4" /> Pitch Deck
-                        </button>
-                      )}
-
-                      {proj.certificateUrl && (
-                        <button
-                          onClick={() => setActiveDocument({ title: proj.title, pdfUrl: proj.certificateUrl! })}
-                          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full border border-line text-ink font-medium text-sm hover:bg-surface-2 transition-colors flex-1"
-                        >
-                          <FileText className="w-4 h-4" /> Certificate
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </FadeIn>
-            ))}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end border-t border-black/[0.08] pt-6">
+            <div className="md:col-span-6 space-y-2">
+              <div className="flex items-center gap-2 text-xs font-mono text-slate-500">
+                <ArrowDown className="w-3.5 h-3.5 text-slate-800" />
+                <span>HOWARD WOON / STATEMENT</span>
+              </div>
+              <p className="text-sm sm:text-base font-sans text-slate-800 leading-relaxed font-medium">
+                {personalDetails.statement}
+              </p>
+            </div>
+            <div className="md:col-span-6 grid grid-cols-3 gap-2 font-mono text-right">
+              <div className="p-3 rounded-xl border border-black/[0.06] bg-white/70 backdrop-blur-sm">
+                <div className="text-2xl font-bold text-slate-900">4.00</div>
+                <div className="text-[10px] text-slate-500 uppercase mt-0.5">Dean's List</div>
+              </div>
+              <div className="p-3 rounded-xl border border-black/[0.06] bg-white/70 backdrop-blur-sm">
+                <div className="text-2xl font-bold text-slate-900">2nd</div>
+                <div className="text-[10px] text-slate-500 uppercase mt-0.5">Supervity APAC</div>
+              </div>
+              <div className="p-3 rounded-xl border border-black/[0.06] bg-white/70 backdrop-blur-sm">
+                <div className="text-2xl font-bold text-slate-900">12+</div>
+                <div className="text-[10px] text-slate-500 uppercase mt-0.5">Shipped Systems</div>
+              </div>
+            </div>
           </div>
         </section>
 
-        {/* ================= 3. EXPERIENCE ================= */}
-        <section id="experience" className="space-y-16 scroll-mt-32">
-          <FadeIn className="border-b border-line pb-6">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink">
-              Experience & Leadership
+        <section id="about" className="space-y-10 scroll-mt-24">
+          <div className="space-y-4 max-w-4xl">
+            <div className="text-xs font-mono text-slate-500 uppercase tracking-widest">/about</div>
+            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-slate-900 leading-[1.1] font-display">
+              I architect resilient backend systems and engineer autonomous agentic pipelines from 0 to 1.
             </h2>
-          </FadeIn>
-
-          <div className="space-y-6">
-            {experiences.map((exp, idx) => (
-              <FadeIn key={exp.id} delay={idx * 0.1}>
-                <div className="p-8 rounded-[24px] border border-line bg-surface shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] hover:-translate-y-1 hover:shadow-xl hover:border-line-strong transition-all duration-300">
-                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
-                    <div>
-                      <h3 className="text-xl font-bold text-ink mb-1">{exp.role}</h3>
-                      <div className="flex items-center gap-2 text-sm text-ink-2">
-                        <span className="font-medium">{exp.organization}</span>
-                        <span className="text-line-strong">•</span>
-                        <span>{exp.location}</span>
-                      </div>
-                    </div>
-                    <div className="flex flex-col sm:items-end gap-1">
-                      <span className="text-xs font-mono text-ink-3 uppercase tracking-wider">{exp.category}</span>
-                      <span className="text-xs font-mono text-signal font-medium">{exp.period}</span>
-                    </div>
-                  </div>
-
-                  <ul className="space-y-4 mb-8 list-none text-sm text-ink-2 leading-relaxed">
-                    {exp.description.map((bullet, i) => (
-                      <li key={i} className="flex gap-3">
-                        <span className="text-line-strong mt-1">—</span>
-                        <span>{bullet}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <div className="text-xs font-mono text-ink-3 pt-6 border-t border-line">
-                    {exp.skills.join(' · ')}
-                  </div>
+            <p className="text-base text-slate-600 leading-relaxed max-w-2xl">
+              Studying Software Engineering at Universiti Malaya (4.00 CGPA). Combining low-latency algorithmic backend design (Spring Boot, Graph algorithms, Min-Heaps) with real-time AI automation and corporate financial governance.
+            </p>
+          </div>
+          <div className="rounded-3xl border border-black/[0.08] bg-[#EBEBED]/90 p-4 sm:p-6 shadow-sm space-y-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+              <div className="relative aspect-square rounded-2xl bg-white border border-black/[0.06] p-4 flex flex-col items-center justify-center text-center overflow-hidden group shadow-sm">
+                <div className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full border border-black/20" />
+                <div className="absolute inset-4 rounded-full border border-black/[0.05] flex items-center justify-center">
+                  <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-slate-400 to-transparent dial-spin-a" />
                 </div>
-              </FadeIn>
-            ))}
+                <div className="relative z-10 w-9 h-9 rounded-full bg-slate-100 border border-black/10 flex items-center justify-center font-mono font-bold text-xs text-slate-800 mb-2 shadow-inner">A</div>
+                <div className="relative z-10 text-xs font-bold text-slate-900 tracking-tight">Backend Systems</div>
+                <div className="relative z-10 text-[10px] font-mono text-slate-500 mt-0.5">Spring Boot & Java 21</div>
+              </div>
+              <div className="relative aspect-square rounded-2xl bg-white border border-black/[0.06] p-4 flex flex-col items-center justify-center text-center overflow-hidden group shadow-sm">
+                <div className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full border border-black/20" />
+                <div className="absolute inset-4 rounded-full border border-black/[0.05] flex items-center justify-center">
+                  <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-indigo-400 to-transparent dial-spin-b" />
+                </div>
+                <div className="relative z-10 w-9 h-9 rounded-full bg-slate-100 border border-black/10 flex items-center justify-center font-mono font-bold text-xs text-slate-800 mb-2 shadow-inner">B</div>
+                <div className="relative z-10 text-xs font-bold text-slate-900 tracking-tight">Agentic AI</div>
+                <div className="relative z-10 text-[10px] font-mono text-slate-500 mt-0.5">5-Operator Pipelines</div>
+              </div>
+              <div className="relative aspect-square rounded-2xl bg-[#E4E0DB] border border-black/[0.08] p-4 flex flex-col items-center justify-center text-center overflow-hidden group shadow-sm">
+                <div className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full border border-black/30" />
+                <div className="absolute inset-4 rounded-full border border-black/[0.08] flex items-center justify-center">
+                  <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-slate-600 to-transparent dial-spin-c" />
+                </div>
+                <div className="relative z-10 w-9 h-9 rounded-full bg-white border border-black/15 flex items-center justify-center font-mono font-bold text-xs text-slate-900 mb-2 shadow-inner">C</div>
+                <div className="relative z-10 text-xs font-bold text-slate-900 tracking-tight">Graph Algorithms</div>
+                <div className="relative z-10 text-[10px] font-mono text-slate-700 mt-0.5">Dijkstra & Min-Heaps</div>
+              </div>
+              <div className="relative aspect-square rounded-2xl bg-white border border-black/[0.06] p-4 flex flex-col items-center justify-center text-center overflow-hidden group shadow-sm">
+                <div className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full border border-black/20" />
+                <div className="absolute inset-4 rounded-full border border-black/[0.05] flex items-center justify-center">
+                  <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-slate-400 to-transparent dial-spin-d" />
+                </div>
+                <div className="relative z-10 w-9 h-9 rounded-full bg-slate-100 border border-black/10 flex items-center justify-center font-mono font-bold text-xs text-slate-800 mb-2 shadow-inner">D</div>
+                <div className="relative z-10 text-xs font-bold text-slate-900 tracking-tight">Fiscal Governance</div>
+                <div className="relative z-10 text-[10px] font-mono text-slate-500 mt-0.5">PEKOM Finance Lead</div>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center border-t border-black/[0.08] pt-4 font-mono text-xs">
+              <div className="md:col-span-6 flex items-center justify-between px-3 py-2 rounded-xl bg-white/70 border border-black/[0.05]">
+                <div className="flex items-center gap-1.5 text-slate-700">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  <span className="text-[11px]">Systems</span>
+                </div>
+                <span className="text-slate-300">~</span>
+                <div className="flex items-center gap-1.5 text-slate-700">
+                  <span className="w-2 h-2 rounded-full bg-indigo-500" />
+                  <span className="text-[11px]">AI Pipelines</span>
+                </div>
+                <span className="text-slate-300">~</span>
+                <div className="flex items-center gap-1.5 text-slate-700">
+                  <span className="w-2 h-2 rounded-full bg-amber-500" />
+                  <span className="text-[11px]">IoT Telemetry</span>
+                </div>
+              </div>
+              <div className="md:col-span-6 flex items-center justify-end gap-2 flex-wrap text-[11px] text-slate-600">
+                <span className="text-slate-400 mr-1">Stack:</span>
+                {['Java 21', 'Spring Boot', 'Python', 'FastAPI', 'PostgreSQL', 'Docker', 'Next.js 15'].map((w, i) => (
+                  <span key={i} className="px-2 py-0.5 rounded bg-white border border-black/[0.06] text-slate-800 shadow-2xs font-semibold hover:border-black/20 hover:bg-slate-200 transition-colors cursor-default">
+                    {w}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
         </section>
 
-        {/* ================= 4. AWARDS ================= */}
-        <section id="awards" className="space-y-16 scroll-mt-32">
-          <FadeIn className="border-b border-line pb-6">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink">
-              Honors & Awards
-            </h2>
-          </FadeIn>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {awards.map((award, idx) => (
-              <FadeIn key={award.id} delay={idx * 0.1} className="h-full">
-                <div className="h-full p-8 rounded-[24px] border border-line bg-surface shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] hover:-translate-y-1 hover:shadow-xl hover:border-line-strong transition-all duration-300 flex flex-col justify-between group">
-                  <div>
-                    <div className="mb-4 text-xs font-mono text-ink-3 uppercase tracking-wider group-hover:text-signal transition-colors flex items-center justify-between">
-                      <span>{award.highlight}</span>
-                    </div>
-                    <h3 className="text-lg font-bold text-ink mb-2">
-                      {award.title}
-                    </h3>
-                    <p className="text-sm font-medium text-ink-2 mb-4">{award.issuer}</p>
-                    <p className="text-sm text-ink-3 leading-relaxed mb-6">{award.description}</p>
-                  </div>
-
-                  <div>
-                    {/* Optional Action Buttons */}
-                    {(award.link || award.certificateUrl) && (
-                      <div className="flex items-center gap-3 mb-6">
-                        {award.link && (
-                          <a
-                            href={award.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full border border-line text-ink font-medium text-sm hover:bg-surface-2 transition-colors flex-1"
-                          >
-                            <ExternalLink className="w-4 h-4" /> View Project
-                          </a>
-                        )}
-                        {award.certificateUrl && (
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setActiveDocument({ title: award.title, pdfUrl: award.certificateUrl! });
-                            }}
-                            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full border border-line text-ink font-medium text-sm hover:bg-surface-2 transition-colors flex-1"
-                          >
-                            <FileText className="w-4 h-4" /> View Certificate
-                          </button>
-                        )}
-                      </div>
-                    )}
-
-                    <div className="flex items-center justify-between pt-6 border-t border-line">
-                      <span className="text-xs font-mono text-signal">{award.date}</span>
-                      {award.stats && (
-                        <span className="text-xs font-mono text-ink-3">{award.stats}</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </FadeIn>
-            ))}
+        <section id="selected-work" className="space-y-10 scroll-mt-24">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-black/[0.08] pb-4">
+            <div>
+              <div className="text-xs font-mono text-slate-500 uppercase tracking-widest">/selected_work</div>
+              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 font-display mt-1">Featured Systems & Production Engineering</h2>
+            </div>
+            <span className="font-mono text-xs text-slate-500">01 – 04 Projects</span>
           </div>
-        </section>
-
-        {/* ================= 5. TECHNICAL TOOLCHAIN ================= */}
-        <section id="skills" className="space-y-16 scroll-mt-32">
-          <FadeIn className="border-b border-line pb-6">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink">
-              Technical Toolchain
-            </h2>
-          </FadeIn>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {techMatrix.map((group, idx) => (
-              <FadeIn key={idx} delay={idx * 0.1}>
-                <div className="p-8 rounded-[24px] border border-line bg-surface shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] hover:-translate-y-1 hover:shadow-xl hover:border-line-strong transition-all duration-300">
-                  <h3 className="text-xs font-bold text-ink font-mono uppercase tracking-wider mb-6">
-                    {group.domain}
-                  </h3>
-                  <div className="text-sm font-mono text-ink-2 leading-loose">
-                    {group.skills.join(' · ')}
-                  </div>
-                </div>
-              </FadeIn>
-            ))}
-          </div>
-        </section>
-
-        {/* ================= 6. CONTACT ================= */}
-        <section id="contact" className="space-y-16 scroll-mt-32 pt-8">
-          <FadeIn className="border-b border-line pb-6">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink">
-              Contact
-            </h2>
-          </FadeIn>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-            <FadeIn delay={0.1}>
-              <div className="p-8 rounded-[24px] border border-line bg-surface shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {projects.map((proj) => (
+              <div key={proj.id} className="p-7 rounded-3xl border border-black/[0.08] bg-white hover:border-black/25 hover:shadow-xl transition-all flex flex-col justify-between group">
                 <div>
-                  <h3 className="text-2xl font-bold text-ink mb-2">Howard Woon Hao Zhe</h3>
-                  <p className="text-sm text-signal font-mono font-medium">Software Engineering Undergraduate</p>
-                  <p className="text-sm text-ink-2 mt-6 leading-relaxed">
-                    Open to software engineering internships, technical collaborations, and full-time opportunities.
-                  </p>
-                </div>
-
-                <div className="space-y-4 pt-8 border-t border-line text-sm font-mono text-ink-2">
-                  <div className="flex items-center gap-3">
-                    <MapPin className="w-4 h-4 text-ink-3 shrink-0" />
-                    <span>{personalDetails.location}</span>
+                  <div className="flex items-center justify-between mb-4 text-xs font-mono">
+                    <span className="text-slate-400">{proj.index} // {proj.year}</span>
+                    {proj.highlight && (
+                      <span className="px-2.5 py-0.5 rounded-full bg-slate-100 border border-black/[0.08] text-slate-800 font-semibold text-[11px]">
+                        {proj.highlight}
+                      </span>
+                    )}
                   </div>
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-canvas border border-line shadow-inner">
-                    <span className="truncate text-ink font-medium">{personalDetails.email}</span>
-                    <button
-                      onClick={handleCopyEmail}
-                      className="p-2 rounded-lg hover:bg-surface-2 text-ink-3 hover:text-ink transition-colors shrink-0"
-                      title="Copy Email"
-                    >
-                      {copiedEmail ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
+                  <h3 className="text-2xl font-bold text-slate-900 tracking-tight font-display group-hover:text-indigo-600 transition-colors">{proj.title}</h3>
+                  <p className="text-xs font-medium text-slate-600 mt-1 mb-3">{proj.tagline}</p>
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">{proj.description}</p>
+                  <div className="p-3 rounded-xl bg-slate-50 border border-black/[0.05] text-xs font-mono text-slate-700 mb-4 flex items-start gap-2">
+                    <span className="text-slate-900 font-bold shrink-0">ARCH:</span>
+                    <span>{proj.architectureHighlight}</span>
+                  </div>
+                </div>
+                <div className="pt-4 border-t border-black/[0.06] space-y-4">
+                  <div className="flex flex-wrap gap-1.5">
+                    {proj.technologies.map((tech, i) => (
+                      <span key={i} className="text-[11px] font-mono px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-black/[0.04] hover:border-black/20 hover:bg-slate-200 transition-colors cursor-default">
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between pt-1 font-mono text-xs">
+                    {proj.githubUrl && (
+                      <a href={proj.githubUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-slate-600 hover:text-black transition-colors">
+                        <Github className="w-3.5 h-3.5" /> Source Code <ArrowUpRight className="w-3 h-3 opacity-60" />
+                      </a>
+                    )}
+                    {proj.deckUrl && (
+                      <button onClick={() => setActiveDeck({ title: proj.title, pdfUrl: proj.deckUrl! })} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-medium transition-all ml-auto active:scale-95">
+                        <FileText className="w-3.5 h-3.5" /> View Pitch Deck
+                      </button>
+                    )}
+                    {proj.certificateUrl && (
+                      <button onClick={() => setActiveDeck({ title: proj.title, pdfUrl: proj.certificateUrl! })} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-medium transition-all ml-auto active:scale-95">
+                        <Award className="w-3.5 h-3.5" /> View Certificate
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id="experiments" className="space-y-8 scroll-mt-24">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-black/[0.08] pb-4">
+            <div>
+              <div className="text-xs font-mono text-slate-500 uppercase tracking-widest">/experiments & prototypes</div>
+              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 font-display mt-1">Interactive Engineering Lab</h2>
+            </div>
+            <p className="text-xs font-mono text-slate-500">Ideating & prototyping functional systems live.</p>
+          </div>
+          <div className="flex flex-wrap gap-2 p-1.5 rounded-2xl bg-white border border-black/[0.08] w-fit shadow-sm">
+            {[
+              { id: 'slotify', label: '01 / Slotify Dijkstra Router' },
+              { id: 'zerolag', label: '02 / ZeroLag AI Triage' },
+              { id: 'bilahujan', label: '03 / BILAHUJAN IoT Gauge' },
+              { id: 'sensor-sensei', label: '04 / Sensor X Sensei Load' },
+            ].map((tab) => (
+              <button key={tab.id} onClick={() => setActiveLabTab(tab.id)} className={`px-4 py-2 rounded-xl text-xs font-mono transition-all ${activeLabTab === tab.id ? 'bg-slate-900 text-white font-bold shadow-md' : 'text-slate-600 hover:text-black'}`}>
+                {tab.label}
+              </button>
+            ))}
+          </div>
+          <div className="p-6 sm:p-8 rounded-3xl border border-black/[0.08] bg-white shadow-xl">
+            {activeLabTab === 'slotify' && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between border-b border-black/[0.06] pb-3">
+                  <div>
+                    <h4 className="font-bold text-slate-900 text-base font-display">Slotify Graph Routing Engine</h4>
+                    <p className="text-xs font-mono text-slate-500">Dijkstra Shortest Path & Spot Allocation Simulation</p>
+                  </div>
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-700">Java 21 / Spring Boot</span>
+                </div>
+                <SlotifySimulator />
+              </div>
+            )}
+            {activeLabTab === 'zerolag' && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between border-b border-black/[0.06] pb-3">
+                  <div>
+                    <h4 className="font-bold text-slate-900 text-base font-display">ZeroLag 5-Operator Agentic Pipeline</h4>
+                    <p className="text-xs font-mono text-slate-500">Autonomous Sales Intent Extraction & Webhook Dispatch</p>
+                  </div>
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-medium">Supervity 2nd Place</span>
+                </div>
+                <ZeroLagSimulator />
+              </div>
+            )}
+            {activeLabTab === 'bilahujan' && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between border-b border-black/[0.06] pb-3">
+                  <div>
+                    <h4 className="font-bold text-slate-900 text-base font-display">BILAHUJAN Flood Telemetry Network</h4>
+                    <p className="text-xs font-mono text-slate-500">Predictive Water Sensor & SMS Evacuation Alert Engine</p>
+                  </div>
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-medium">KitaHack 2026</span>
+                </div>
+                <BLAHujanSimulator />
+              </div>
+            )}
+            {activeLabTab === 'sensor-sensei' && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between border-b border-black/[0.06] pb-3">
+                  <div>
+                    <h4 className="font-bold text-slate-900 text-base font-display">Sensor X Sensei HVAC Governance</h4>
+                    <p className="text-xs font-mono text-slate-500">Commercial Power Load Shedding & Telemetry Estimator</p>
+                  </div>
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-purple-50 text-purple-700 font-medium">UM Technothon Finalist</span>
+                </div>
+                <SensorSenseiSimulator />
+              </div>
+            )}
+          </div>
+        </section>
+
+        <section id="experience" className="space-y-8 scroll-mt-24">
+          <div className="border-b border-black/[0.08] pb-4">
+            <div className="text-xs font-mono text-slate-500 uppercase tracking-widest">/experience & leadership</div>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 font-display mt-1">Career & Institutional Governance</h2>
+          </div>
+          <div className="space-y-4">
+            {experiences.map((exp) => (
+              <div key={exp.id} className="p-6 sm:p-7 rounded-2xl border border-black/[0.08] bg-white hover:border-black/20 transition-all shadow-sm flex flex-col justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                  <div>
+                    <div className="flex items-center gap-3">
+                      <span className="font-mono text-xs text-slate-400">{exp.index}</span>
+                      <h3 className="text-base sm:text-lg font-bold text-slate-900">{exp.role}</h3>
+                      <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-700">{exp.category}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-slate-600 font-mono mt-1">
+                      <Building2 className="w-3.5 h-3.5 text-slate-400" />
+                      <span>{exp.organization}</span>
+                      <span className="text-slate-300">•</span>
+                      <span className="text-slate-500">{exp.location}</span>
+                    </div>
+                  </div>
+                  <div className="text-xs font-mono text-slate-500">{exp.period}</div>
+                </div>
+                <ul className="space-y-1.5 mb-4 list-disc list-inside text-xs sm:text-sm text-slate-600 leading-relaxed">
+                  {exp.description.map((b, i) => (
+                    <li key={i}>{b}</li>
+                  ))}
+                </ul>
+                <div className="flex flex-wrap gap-1.5 pt-2 border-t border-black/[0.05]">
+                  {exp.skills.map((skill, i) => (
+                    <span key={i} className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-600 hover:border-black/20 hover:bg-slate-200 transition-colors cursor-default border border-black/[0.04]">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id="honors" className="space-y-8 scroll-mt-24">
+          <div className="border-b border-black/[0.08] pb-4">
+            <div className="text-xs font-mono text-slate-500 uppercase tracking-widest">/honors & distinctions</div>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 font-display mt-1">Academic & Competition Honors</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {awards.map((award) => (
+              <div key={award.id} className="p-6 rounded-2xl border border-black/[0.08] bg-white hover:border-amber-600/40 transition-all flex flex-col justify-between group shadow-sm">
+                <div>
+                  <div className="flex items-center justify-between mb-4 font-mono text-xs">
+                    <span className="text-slate-400">{award.index}</span>
+                    <span className="px-2 py-0.5 rounded-full bg-amber-50 border border-amber-600/20 text-amber-800 font-semibold text-[11px]">{award.highlight}</span>
+                  </div>
+                  <h3 className="text-base font-bold text-slate-900 mb-1 group-hover:text-amber-800 transition-colors">{award.title}</h3>
+                  <p className="text-xs text-slate-600 font-mono mb-2">{award.issuer}</p>
+                  <p className="text-xs text-slate-600 leading-relaxed">{award.description}</p>
+                </div>
+                <div className="text-[11px] font-mono text-slate-400 pt-3 mt-4 border-t border-black/[0.05] flex items-center justify-between">
+                  <span>{award.date}</span>
+                  <div className="flex items-center gap-2">
+                    {award.stats && <span className="text-slate-700 font-semibold">{award.stats}</span>}
+                    {award.certificateUrl && (
+                      <button onClick={() => setActiveDeck({ title: award.title, pdfUrl: award.certificateUrl! })} className="p-1 rounded hover:bg-black/5 text-slate-900 transition-all ml-auto">
+                        <Award className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id="contact" className="space-y-10 scroll-mt-24">
+          <div className="border-b border-black/[0.08] pb-4">
+            <div className="text-xs font-mono text-slate-500 uppercase tracking-widest">/new_project</div>
+            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-slate-900 font-display mt-1">Let's build something special.</h2>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
+            <div className="lg:col-span-2 p-7 rounded-3xl border border-black/[0.08] bg-white space-y-6 shadow-md">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 tracking-tight">{personalDetails.fullName}</h3>
+                <p className="text-xs font-mono text-slate-500 mt-0.5">Software Engineering Undergraduate @ Universiti Malaya</p>
+                <p className="text-xs text-slate-600 mt-2.5 leading-relaxed">Open to software engineering roles, backend systems architecture, and high-impact hackathon collaborations.</p>
+              </div>
+              <div className="space-y-3 pt-2 border-t border-black/[0.06]">
+                <div className="flex items-center gap-2 text-xs font-mono text-slate-600">
+                  <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                  <span>{personalDetails.location}</span>
+                </div>
+                {!revealedEmail ? (
+                  <button onClick={() => setRevealedEmail(true)} className="w-full py-3 px-4 rounded-xl border border-black/10 bg-[#F4F4F6] hover:bg-slate-100 text-slate-900 font-mono text-xs font-semibold transition-all text-center">
+                    Reveal Email Address ↓
+                  </button>
+                ) : (
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-black/10 font-mono text-xs">
+                    <span className="truncate text-slate-900 font-semibold">{personalDetails.email}</span>
+                    <button onClick={handleCopyEmail} className="p-1 rounded hover:bg-black/5 text-slate-600 hover:text-black transition-colors" title="Copy Email">
+                      {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
                     </button>
                   </div>
-                </div>
-
-                <div className="flex items-center gap-4 pt-4">
-                  <a
-                    href={personalDetails.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 inline-flex items-center justify-center gap-2 py-3.5 rounded-xl border border-line text-sm font-medium text-ink hover:bg-surface-2 transition-colors"
-                  >
-                    <Github className="w-4 h-4" /> GitHub
-                  </a>
-                  <a
-                    href={personalDetails.linkedin}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 inline-flex items-center justify-center gap-2 py-3.5 rounded-xl border border-line text-sm font-medium text-ink hover:bg-surface-2 transition-colors"
-                  >
-                    LinkedIn
-                  </a>
-                </div>
+                )}
               </div>
-            </FadeIn>
-
-            <FadeIn delay={0.2}>
-              <div className="p-8 rounded-[24px] border border-line bg-surface shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-xs font-mono text-ink-3 mb-2 uppercase tracking-wider">Your Name</label>
-                      <input
-                        type="text"
-                        required
-                        value={formState.name}
-                        onChange={(e) => setFormState({ ...formState, name: e.target.value })}
-                        className="w-full px-4 py-3.5 rounded-xl border border-line bg-canvas text-ink text-sm focus:outline-none focus:border-signal focus:ring-1 focus:ring-signal transition-all shadow-inner"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-mono text-ink-3 mb-2 uppercase tracking-wider">Email Address</label>
-                      <input
-                        type="email"
-                        required
-                        value={formState.email}
-                        onChange={(e) => setFormState({ ...formState, email: e.target.value })}
-                        className="w-full px-4 py-3.5 rounded-xl border border-line bg-canvas text-ink text-sm focus:outline-none focus:border-signal focus:ring-1 focus:ring-signal transition-all shadow-inner"
-                      />
-                    </div>
-                  </div>
-
+              <div className="flex items-center gap-3 pt-1 font-mono text-xs">
+                <a href={personalDetails.github} target="_blank" rel="noopener noreferrer" className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-slate-100 border border-black/[0.06] text-slate-800 hover:bg-slate-200 transition-all font-semibold">
+                  <Github className="w-3.5 h-3.5" /> GitHub
+                </a>
+                <a href={personalDetails.linkedin} target="_blank" rel="noopener noreferrer" className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition-all font-semibold">
+                  LinkedIn
+                </a>
+              </div>
+            </div>
+            <div className="lg:col-span-3 p-7 rounded-3xl border border-black/[0.08] bg-white shadow-md">
+              <form onSubmit={handleFormSubmit} className="space-y-4 font-mono text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-mono text-ink-3 mb-2 uppercase tracking-wider">Message</label>
-                    <textarea
-                      required
-                      rows={5}
-                      value={formState.message}
-                      onChange={(e) => setFormState({ ...formState, message: e.target.value })}
-                      className="w-full px-4 py-3.5 rounded-xl border border-line bg-canvas text-ink text-sm focus:outline-none focus:border-signal focus:ring-1 focus:ring-signal transition-all resize-none shadow-inner"
-                    />
+                    <label className="block text-slate-500 mb-1.5 uppercase tracking-wider">Your Name</label>
+                    <input type="text" required value={formState.name} onChange={(e) => setFormState({ ...formState, name: e.target.value })} placeholder="Alex Mercer" className="w-full px-3.5 py-2.5 rounded-xl border border-black/10 bg-slate-50 text-slate-900 font-sans text-xs sm:text-sm focus:outline-none focus:border-slate-900 transition-colors" />
                   </div>
-
-                  {status === 'error' && (
-                    <div className="flex items-center gap-2 text-sm text-danger bg-danger/10 p-4 rounded-xl border border-danger/20">
-                      <AlertCircle className="w-4 h-4 shrink-0" />
-                      <span>{errorMessage}</span>
-                    </div>
-                  )}
-
-                  {status === 'success' && (
-                    <div className="flex items-center gap-2 text-sm text-success bg-success/10 p-4 rounded-xl border border-success/20">
-                      <CheckCircle className="w-4 h-4 shrink-0" />
-                      <span>Message received. I will get back to you promptly.</span>
-                    </div>
-                  )}
-
-                  <button
-                    type="submit"
-                    disabled={status === 'loading'}
-                    className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-signal text-canvas font-bold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 shadow-lg shadow-signal/20"
-                  >
-                    {status === 'loading' ? 'Sending Message...' : 'Send Message'}
-                    <Send className="w-4 h-4" />
-                  </button>
-                </form>
-              </div>
-            </FadeIn>
+                  <div>
+                    <label className="block text-slate-500 mb-1.5 uppercase tracking-wider">Email Address</label>
+                    <input type="email" required value={formState.email} onChange={(e) => setFormState({ ...formState, email: e.target.value })} placeholder="alex@company.com" className="w-full px-3.5 py-2.5 rounded-xl border border-black/10 bg-slate-50 text-slate-900 font-sans text-xs sm:text-sm focus:outline-none focus:border-slate-900 transition-colors" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-slate-500 mb-1.5 uppercase tracking-wider">Message</label>
+                  <textarea required rows={4} value={formState.message} onChange={(e) => setFormState({ ...formState, message: e.target.value })} placeholder="Hi Howard, let's connect regarding a software engineering role..." className="w-full px-3.5 py-2.5 rounded-xl border border-black/10 bg-slate-50 text-slate-900 font-sans text-xs sm:text-sm focus:outline-none focus:border-slate-900 transition-colors resize-none" />
+                </div>
+                {formStatus === 'error' && (
+                  <div className="flex items-center gap-2 text-rose-700 bg-rose-50 p-3 rounded-xl border border-rose-200">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{errorMessage}</span>
+                  </div>
+                )}
+                {formStatus === 'success' && (
+                  <div className="flex items-center gap-2 text-emerald-800 bg-emerald-50 p-3 rounded-xl border border-emerald-200">
+                    <CheckCircle className="w-4 h-4 shrink-0" />
+                    <span>Message received. Howard will respond promptly.</span>
+                  </div>
+                )}
+                <button type="submit" disabled={formStatus === 'loading'} className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-slate-950 text-white font-sans font-bold text-sm hover:bg-slate-800 transition-all disabled:opacity-50 shadow-md active:scale-95">
+                  {formStatus === 'loading' ? 'Transmitting...' : 'Send Message'} <Send className="w-4 h-4" />
+                </button>
+              </form>
+            </div>
           </div>
         </section>
 
-        {/* ================= FOOTER ================= */}
-        <footer className="pt-16 pb-8 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-ink-3 font-mono">
-          <p>© {new Date().getFullYear()} Howard Woon Hao Zhe.</p>
-          <p>Universiti Malaya</p>
+        <footer className="pt-10 border-t border-black/[0.08] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 font-mono">
+          <p>© {new Date().getFullYear()} Howard Woon Hao Zhe. All rights reserved.</p>
+          <p>Universiti Malaya • Software Engineering (4.00 CGPA)</p>
         </footer>
-      </div>
+      </main>
 
-      {/* Pitch Deck Modal */}
-      {activeDocument && (
-        <PitchDeckModal
-          isOpen={!!activeDocument}
-          onClose={() => setActiveDocument(null)}
-          title={activeDocument.title}
-          pdfUrl={activeDocument.pdfUrl}
-        />
+      {activeDeck && (
+        <PitchDeckModal isOpen={!!activeDeck} onClose={() => setActiveDeck(null)} title={activeDeck.title} pdfUrl={activeDeck.pdfUrl} />
       )}
     </div>
   );

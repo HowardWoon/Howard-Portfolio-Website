@@ -1,41 +1,90 @@
-@tailwind base;
+﻿@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --bg-canvas: #f3f3f5;
+    --bg-card: #ffffff;
+    --border-subtle: rgba(0, 0, 0, 0.08);
+    --border-hover: rgba(0, 0, 0, 0.22);
+    --text-primary: #12151b;
+    --text-secondary: #5e6676;
+    --text-muted: #8c95a6;
+  }
+
   html {
     scroll-behavior: smooth;
-    background-color: #0A0A0B;
+    background-color: var(--bg-canvas);
+    color: var(--text-primary);
   }
-  
+
   body {
-    background-color: #0A0A0B;
-    color: #F3F2EF;
+    background-color: var(--bg-canvas);
+    color: var(--text-primary);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     overflow-x: hidden;
   }
 }
 
-/* Custom Scrollbar - keeping restrained */
+/* Subtle Technical Grid Background */
+.tech-grid-bg {
+  background-image: 
+    linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Infinite Marquee Animation */
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee-slow {
+  display: flex;
+  width: 200%;
+  animation: marquee 35s linear infinite;
+}
+
+.animate-marquee-slow:hover {
+  animation-play-state: paused;
+}
+
+/* Rotating Gauge Dials */
+@keyframes dialRotateA {
+  0%, 100% { transform: rotate(15deg); }
+  50% { transform: rotate(75deg); }
+}
+@keyframes dialRotateB {
+  0%, 100% { transform: rotate(135deg); }
+  50% { transform: rotate(195deg); }
+}
+@keyframes dialRotateC {
+  0%, 100% { transform: rotate(220deg); }
+  50% { transform: rotate(310deg); }
+}
+@keyframes dialRotateD {
+  0%, 100% { transform: rotate(45deg); }
+  50% { transform: rotate(120deg); }
+}
+
+.dial-spin-a { animation: dialRotateA 10s ease-in-out infinite; }
+.dial-spin-b { animation: dialRotateB 12s ease-in-out infinite; }
+.dial-spin-c { animation: dialRotateC 11s ease-in-out infinite; }
+.dial-spin-d { animation: dialRotateD 14s ease-in-out infinite; }
+
+/* Custom Light Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 7px;
 }
-
 ::-webkit-scrollbar-track {
-  background: #0A0A0B;
+  background: #f3f3f5;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: #18181B;
-  border: 1px solid rgba(255,255,255,0.08);
+  background: #cbd5e1;
   border-radius: 4px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: #5C5B62;
-}
-
-/* Add focus visible utility if tailwind doesn't apply it automatically everywhere */
-*:focus-visible {
-  outline: 2px solid #C9974C;
-  outline-offset: 2px;
+  background: #94a3b8;
 }
