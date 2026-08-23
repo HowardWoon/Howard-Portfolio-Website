@@ -87,7 +87,7 @@ export function SlotifySimulator() {
 // 2. ZeroLag: Agentic Sales Intent Classifier
 export function ZeroLagSimulator() {
   const [prompt, setPrompt] = useState('Need 50 enterprise seats with custom API integration next quarter.');
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
   const [running, setRunning] = useState(false);
 
   const runAgent = () => {

@@ -40,7 +40,7 @@ export function PortfolioPage() {
       }
       setFormStatus('success');
       setFormState({ name: '', email: '', message: '' });
-    } catch (err: any) {
+    } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
       setFormStatus('error');
       setErrorMessage(err.message || 'An error occurred.');
     }
@@ -51,7 +51,7 @@ export function PortfolioPage() {
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 pb-32 space-y-36">
         <section className="relative min-h-[70vh] sm:min-h-[78vh] flex flex-col justify-between pt-6">
           <div className="flex items-center justify-between font-mono text-xs text-slate-500">
-            <div>01 // SOFTWARE ENGINEER</div>
+            <div>01 {"//"} SOFTWARE ENGINEER</div>
             <div className="hidden sm:block">UNIVERSITI MALAYA • 4.00 CGPA</div>
           </div>
           <div className="relative my-8 flex items-center justify-center">
@@ -77,7 +77,7 @@ export function PortfolioPage() {
             <div className="md:col-span-6 grid grid-cols-3 gap-2 font-mono text-right">
               <div className="p-3 rounded-xl border border-black/[0.06] bg-white/70 backdrop-blur-sm">
                 <div className="text-2xl font-bold text-slate-900">4.00</div>
-                <div className="text-[10px] text-slate-500 uppercase mt-0.5">Dean's List</div>
+                <div className="text-[10px] text-slate-500 uppercase mt-0.5">Dean&apos;s List</div>
               </div>
               <div className="p-3 rounded-xl border border-black/[0.06] bg-white/70 backdrop-blur-sm">
                 <div className="text-2xl font-bold text-slate-900">2nd</div>
@@ -182,7 +182,7 @@ export function PortfolioPage() {
               <div key={proj.id} className="p-7 rounded-3xl border border-black/[0.08] bg-white hover:border-black/25 hover:shadow-xl transition-all flex flex-col justify-between group">
                 <div>
                   <div className="flex items-center justify-between mb-4 text-xs font-mono">
-                    <span className="text-slate-400">{proj.index} // {proj.year}</span>
+                    <span className="text-slate-400">{proj.index} {"//"} {proj.year}</span>
                     {proj.highlight && (
                       <span className="px-2.5 py-0.5 rounded-full bg-slate-100 border border-black/[0.08] text-slate-800 font-semibold text-[11px]">
                         {proj.highlight}
@@ -377,7 +377,7 @@ export function PortfolioPage() {
         <section id="contact" className="space-y-10 scroll-mt-24">
           <div className="border-b border-black/[0.08] pb-4">
             <div className="text-xs font-mono text-slate-500 uppercase tracking-widest">/new_project</div>
-            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-slate-900 font-display mt-1">Let's build something special.</h2>
+            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-slate-900 font-display mt-1">Let&apos;s build something special.</h2>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
             <div className="lg:col-span-2 p-7 rounded-3xl border border-black/[0.08] bg-white space-y-6 shadow-md">

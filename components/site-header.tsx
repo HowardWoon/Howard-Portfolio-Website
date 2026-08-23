@@ -1,6 +1,7 @@
 ﻿'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import Image from 'next/image';
 import { Menu, X, FileText, ArrowUpRight } from 'lucide-react';
 import { personalDetails } from '@/lib/site-data';
@@ -32,14 +33,14 @@ export function SiteHeader() {
     <header className="fixed top-0 left-0 right-0 z-50 p-4 sm:p-6 pointer-events-none flex justify-center">
       <div className="w-full max-w-6xl px-5 py-3 rounded-2xl border border-black/[0.08] bg-[#F4F4F6]/85 backdrop-blur-xl shadow-lg shadow-black/[0.03] flex items-center justify-between pointer-events-auto transition-all">
         {/* Left: Identifier */}
-        <a href="/" className="flex flex-col text-left group">
+        <Link href="/" className="flex flex-col text-left group">
           <div className="text-sm font-bold tracking-tight text-slate-900 flex items-center gap-1.5">
             <span>{personalDetails.name}</span>
           </div>
           <div className="text-[10px] font-mono text-slate-500">
             Systems × AI × Distributed Architecture
           </div>
-        </a>
+        </Link>
 
         {/* Center/Right: Desktop Navigation & Available Pill */}
         <div className="hidden md:flex items-center gap-6 text-xs font-mono">
@@ -137,3 +138,4 @@ export function SiteHeader() {
     </header>
   );
 }
+
