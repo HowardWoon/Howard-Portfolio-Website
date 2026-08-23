@@ -3,18 +3,19 @@ import BikebearInspiredHero from '@/components/bikebear-hero';
 import AboutSection from '@/components/about-section';
 import StackedProjects from '@/components/stacked-projects';
 import ExperienceSection from '@/components/experience-section';
+import HonorsSection from '@/components/honors-section';
 
 import React, { useState } from 'react';
 import Image from 'next/image';
 import {
   Github, ExternalLink, FileText, ArrowUpRight, ArrowDown, Sparkles, Building2, Calendar, Award, Layers, Send, Check, Copy, MapPin, AlertCircle, CheckCircle,
 } from 'lucide-react';
-import { personalDetails, heroStats, projects, experiences, awards } from '@/lib/site-data';
-import { PitchDeckModal } from '@/components/pitch-deck-modal';
+import { personalDetails } from '@/lib/site-data';
+
 import ProjectSimulators from '@/components/project-simulators';
 
 export function PortfolioPage() {
-  const [activeDeck, setActiveDeck] = useState<{ title: string; pdfUrl: string } | null>(null);
+  
     const [copied, setCopied] = useState(false);
   const [revealedEmail, setRevealedEmail] = useState(false);
   const [formState, setFormState] = useState({ name: '', email: '', message: '' });
@@ -63,38 +64,7 @@ export function PortfolioPage() {
 
         <ExperienceSection />
 
-        <section id="honors" className="space-y-8 scroll-mt-24">
-          <div className="border-b border-black/[0.08] pb-4">
-            <div className="text-xs font-mono text-neutral-700 uppercase tracking-widest">/honors & distinctions</div>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-black font-display mt-1">Academic & Competition Honors</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {awards.map((award) => (
-              <div key={award.id} className="p-6 rounded-2xl border border-black/[0.08] bg-white hover:border-amber-600/40 transition-all flex flex-col justify-between group shadow-sm hover:scale-[1.02] hover:shadow-md transition-all cursor-default">
-                <div>
-                  <div className="flex items-center justify-between mb-4 font-mono text-xs">
-                    <span className="text-slate-400">{award.index}</span>
-                    <span className="px-2 py-0.5 rounded-full bg-amber-50 border border-amber-600/20 text-amber-800 font-semibold text-[11px]">{award.highlight}</span>
-                  </div>
-                  <h3 className="text-base font-bold text-black mb-1 group-hover:text-amber-800 transition-colors">{award.title}</h3>
-                  <p className="text-xs text-neutral-700 font-mono mb-2">{award.issuer}</p>
-                  <p className="text-xs text-neutral-700 leading-relaxed">{award.description}</p>
-                </div>
-                <div className="text-[11px] font-mono text-slate-400 pt-3 mt-4 border-t border-black/[0.05] flex items-center justify-between">
-                  <span>{award.date}</span>
-                  <div className="flex items-center gap-2">
-                    {award.stats && <span className="text-slate-700 font-semibold">{award.stats}</span>}
-                    {award.certificateUrl && (
-                      <button onClick={() => setActiveDeck({ title: award.title, pdfUrl: award.certificateUrl! })} className="p-1 rounded hover:bg-black/5 text-black transition-all ml-auto">
-                        <Award className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+        <HonorsSection />
 
         <section id="contact" className="space-y-10 scroll-mt-24">
           <div className="border-b border-black/[0.08] pb-4">
@@ -177,9 +147,7 @@ export function PortfolioPage() {
         </footer>
       </main>
 
-      {activeDeck && (
-        <PitchDeckModal isOpen={!!activeDeck} onClose={() => setActiveDeck(null)} title={activeDeck.title} pdfUrl={activeDeck.pdfUrl} />
-      )}
+      
     </div>
   );
 }
