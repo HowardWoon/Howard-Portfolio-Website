@@ -7,12 +7,12 @@ export function TechMarquee({ skills }: { skills: string[] }) {
   const repeatedSkills = [...skills, ...skills, ...skills, ...skills];
   
   return (
-    <div className="w-full overflow-hidden bg-surface-2 border-y border-line py-4">
-      <div className="flex whitespace-nowrap animate-marquee hover:[animation-play-state:paused] w-max">
+    <div className="w-full overflow-hidden bg-amber-500/10 border-y border-amber-500/20 py-3 relative z-20 shadow-[0_0_30px_rgba(245,158,11,0.05)]">
+      <div className="flex whitespace-nowrap animate-[marquee_25s_linear_infinite] hover:[animation-play-state:paused] w-max">
         {repeatedSkills.map((skill, idx) => (
           <div key={idx} className="flex items-center">
-            <span className="text-sm font-mono font-medium text-ink-2 px-6">{skill}</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-signal-dim mx-4"></span>
+            <span className="text-xs font-mono font-bold text-amber-500 uppercase tracking-widest px-8">{skill}</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500/50 mx-4"></span>
           </div>
         ))}
       </div>
@@ -26,7 +26,7 @@ export function SignatureMarquee() {
   
   return (
     <div className="w-full overflow-hidden py-10 border-t border-line">
-      <div className="flex whitespace-nowrap animate-marquee hover:[animation-play-state:paused] w-max">
+      <div className="flex whitespace-nowrap animate-[marquee_25s_linear_infinite] hover:[animation-play-state:paused] w-max">
         <span className="text-4xl sm:text-7xl font-display font-extrabold text-ink-3/30 tracking-tight select-none">
           {repeatedText}
         </span>
