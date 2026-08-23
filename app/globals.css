@@ -2,73 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #0A0A0A;
-  --foreground: #FFFFFF;
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    background-color: #05070B;
+  }
+  
+  body {
+    background-color: #05070B;
+    color: #f8fafc;
+    overflow-x: hidden;
+  }
 }
 
-html, body {
-  scroll-behavior: auto; /* Lenis handles smooth scrolling now */
-  cursor: auto; /* Reverting custom cursor for WebGL cursor later */
-  background-color: var(--background);
-  color: var(--foreground);
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-/* We want the body to be able to scroll if needed, but R3F ScrollControls usually takes over the main canvas.
-   If we use Lenis, we keep native scroll behavior but hijacked. */
-
-/* Base Typography */
-h1, h2, h3, h4, h5, h6 {
-  @apply font-inter tracking-tighter;
+::-webkit-scrollbar-track {
+  background: #05070b;
 }
 
-/* Premium UI Panels */
-.glass-panel {
-  @apply border border-white/10 bg-black/40 backdrop-blur-xl shadow-glass rounded-2xl p-6;
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 4px;
 }
 
-/* WebGL Canvas Container */
-.canvas-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 0;
-  pointer-events: auto;
-}
-
-/* HTML Overlay Layer */
-.html-overlay {
-  position: relative;
-  z-index: 10;
-  pointer-events: none; /* Let clicks pass through to canvas unless on specific elements */
-}
-
-.html-overlay > * {
-  pointer-events: auto;
-}
-
-.section-heading {
-  @apply text-balance text-3xl sm:text-4xl lg:text-5xl font-inter font-bold tracking-tighter text-white mb-8;
-}
-
-.pill-button {
-  @apply inline-flex items-center justify-center gap-2 text-sm font-medium uppercase tracking-widest font-inter transition-all duration-300 px-8 py-4 rounded-full;
-}
-
-.pill-button-primary {
-  @apply bg-primary text-white shadow-glow hover:bg-primary/90 hover:scale-105;
-}
-
-.pill-button-secondary {
-  @apply bg-surface border border-white/10 text-white hover:bg-white/10 hover:scale-105;
-}
-
-::selection {
-  background: theme('colors.primary');
-  color: white;
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
 }

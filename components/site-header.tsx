@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Menu, X, FileText } from 'lucide-react';
+import { Menu, X, FileText, Sparkles } from 'lucide-react';
 import { personalDetails } from '@/lib/site-data';
 
 export function SiteHeader() {
@@ -13,17 +13,17 @@ export function SiteHeader() {
   const navLinks = [
     { label: 'Projects', href: '#projects' },
     { label: 'Experience', href: '#experience' },
-    { label: 'Awards', href: '#awards' },
-    { label: 'Skills', href: '#skills' },
+    { label: 'Honors', href: '#awards' },
+    { label: 'Toolchain', href: '#skills' },
     { label: 'Contact', href: '#contact' },
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 flex justify-center p-4">
-      <div className="w-full max-w-5xl px-4 sm:px-6 py-3 rounded-2xl border border-white/10 bg-[#0B0F17]/85 backdrop-blur-md shadow-lg flex items-center justify-between">
-        {/* Brand / Logo */}
+    <header className="fixed top-0 left-0 right-0 z-50 flex justify-center p-3 sm:p-5 pointer-events-none">
+      <div className="w-full max-w-5xl px-4 sm:px-6 py-2.5 rounded-2xl border border-white/10 bg-[#080C14]/85 backdrop-blur-xl shadow-2xl shadow-black/60 flex items-center justify-between pointer-events-auto transition-all">
+        {/* Brand */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="relative w-8 h-8 rounded-full overflow-hidden border border-white/20">
+          <div className="relative w-8 h-8 rounded-full overflow-hidden border border-white/20 ring-2 ring-indigo-500/20 group-hover:ring-indigo-500/50 transition-all">
             <Image
               src={personalDetails.avatarUrl}
               alt={personalDetails.name}
@@ -32,14 +32,15 @@ export function SiteHeader() {
             />
           </div>
           <div className="text-left">
-            <div className="font-semibold text-sm text-white group-hover:text-indigo-300 transition-colors">
-              {personalDetails.name}
+            <div className="font-semibold text-sm text-white tracking-tight flex items-center gap-1.5 group-hover:text-indigo-300 transition-colors">
+              <span>{personalDetails.name}</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
             </div>
             <div className="text-[10px] font-mono text-slate-400">Software Engineer</div>
           </div>
         </Link>
 
-        {/* Desktop Navigation */}
+        {/* Desktop Links */}
         <nav className="hidden md:flex items-center gap-6 text-xs font-medium text-slate-300">
           {navLinks.map((link) => (
             <a
@@ -54,19 +55,19 @@ export function SiteHeader() {
             href={personalDetails.resumeUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs transition-colors shadow-sm"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white font-medium text-xs transition-all shadow-md shadow-indigo-600/20 active:scale-95"
           >
             <FileText className="w-3.5 h-3.5" /> Resume
           </a>
         </nav>
 
-        {/* Mobile Menu Trigger */}
+        {/* Mobile Actions */}
         <div className="md:hidden flex items-center gap-2">
           <a
             href={personalDetails.resumeUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-indigo-600 text-white text-xs"
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-600 text-white text-xs font-medium"
           >
             Resume
           </a>
@@ -82,7 +83,7 @@ export function SiteHeader() {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden absolute top-20 left-4 right-4 p-4 rounded-2xl border border-white/10 bg-[#0B0F17] shadow-2xl flex flex-col gap-3 text-center text-sm font-medium text-slate-300 animate-in fade-in slide-in-from-top-2 duration-150">
+        <div className="md:hidden absolute top-20 left-4 right-4 p-5 rounded-2xl border border-white/10 bg-[#080C14]/95 backdrop-blur-2xl shadow-2xl flex flex-col gap-3 text-center text-sm font-medium text-slate-300 pointer-events-auto animate-in fade-in slide-in-from-top-2 duration-150">
           {navLinks.map((link) => (
             <a
               key={link.href}
