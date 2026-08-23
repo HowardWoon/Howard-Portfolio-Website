@@ -1,7 +1,8 @@
 ﻿"use client";
 
 import React, { useRef, useState } from "react";
-import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
+import { motion, useScroll, useTransform, MotionValue, AnimatePresence } from "framer-motion";
+import { ZeroLagSimulator, BilahujanSimulator, SensorXSimulator } from "./project-simulators";
 import { 
   Award, 
   ExternalLink, 
@@ -181,8 +182,14 @@ function ProjectCard({
   progress: MotionValue<number>;
 }) {
   const [activeTab, setActiveTab] = useState<"architecture" | "telemetry">("architecture");
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Dynamic Badges
+  const cardStart = index / total;
+  const cardEnd = (index + 1) / total;
+  const panelOpacity = useTransform(progress, [cardStart, cardStart + 0.1, cardEnd - 0.1, cardEnd], [0, 1, 1, 0.5]);
+  const panelY = useTransform(progress, [cardStart, cardStart + 0.1], [30, 0]);
+
   const badgeStyles = {
     gold: "border-amber-500/40 bg-amber-500/10 text-amber-300",
     cyan: "border-amber-500/40 bg-amber-500/10 text-amber-300",
@@ -277,13 +284,7 @@ function ProjectCard({
 
             {/* Action Buttons */}
             <div className="flex flex-wrap items-center gap-3 pt-3">
-              <a
-                href={`#simulators`}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-amber-400 text-black font-mono font-bold text-xs uppercase tracking-wider hover:bg-amber-300 transition-all duration-200 shadow-lg shadow-amber-500/20"
-              >
-                <Terminal className="w-3.5 h-3.5" />
-                <span>TEST SIMULATOR</span>
-              </a>
+              <button onClick={() => setIsExpanded(true)} className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-amber-400 text-black font-mono font-bold text-xs uppercase tracking-wider hover:bg-amber-300 transition-all duration-200 shadow-lg shadow-amber-500/20"><Terminal className="w-3.5 h-3.5" /><span>LAUNCH LIVE SIMULATOR</span></button>
 
               {project.deckUrl && (
                 <a
@@ -302,7 +303,7 @@ function ProjectCard({
           </div>
 
           {/* Right Column: Live Visual Architecture Telemetry (5 Cols) */}
-          <div className="lg:col-span-5 w-full bg-black/60 rounded-3xl border border-white/10 p-6 space-y-4 shadow-inner">
+          <motion.div style={{ opacity: panelOpacity, y: panelY }} className="lg:col-span-5 w-full bg-black/60 rounded-3xl border border-white/10 p-6 space-y-4 shadow-inner">
             
             {/* Visualizer Header */}
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
@@ -412,9 +413,48 @@ function ProjectCard({
               </div>
             )}
 
-          </div>
+          </motion.div>
 
         </div>
+
+        {/* Full-Screen Simulator Expansion Modal */}
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-2xl p-4 sm:p-8 flex items-center justify-center overflow-y-auto"
+              onClick={() => setIsExpanded(false)}
+            >
+              <motion.div
+                layoutId={`project-${project.id}`}
+                className="relative w-full max-w-6xl bg-[#0E121B] border border-white/20 rounded-[32px] overflow-hidden shadow-2xl p-6 sm:p-10 my-8 flex flex-col"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between pb-6 border-b border-white/10 mb-6">
+                  <div>
+                    <h3 className="text-2xl font-black text-white uppercase tracking-tight">{project.title} SIMULATOR</h3>
+                    <p className="text-sm font-mono text-amber-400 mt-1">LIVE INTERACTIVE ENVIRONMENT</p>
+                  </div>
+                  <button
+                    onClick={() => setIsExpanded(false)}
+                    className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
+                  >
+                    X
+                  </button>
+                </div>
+                
+                <div className="flex-1 w-full min-h-[60vh] bg-black/50 rounded-2xl border border-white/10 overflow-hidden">
+                  {project.telemetryType === "agentic" && <ZeroLagSimulator />}
+                  {project.telemetryType === "flood" && <BilahujanSimulator />}
+                  {project.telemetryType === "energy" && <SensorXSimulator />}
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
       </motion.div>
     </div>
   );

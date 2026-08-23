@@ -1,4 +1,5 @@
-﻿export interface Project {
+﻿import { Building2, Landmark, Briefcase, GraduationCap, Server, Database, Code2, Globe, Cpu, Activity, Zap, Compass, CheckCircle2, FileText, Terminal } from 'lucide-react';
+export interface Project {
   id: string;
   index: string;
   title: string;

@@ -10,7 +10,6 @@ import { BootSequence } from '@/components/boot-sequence';
 import { TechMarquee } from '@/components/marquees';
 
 
-import ProjectSimulators from '@/components/project-simulators';
 
 export function PortfolioPage() {
   
@@ -27,9 +26,6 @@ export function PortfolioPage() {
         <AboutSection />
 
         <StackedProjects />
-
-        <ProjectSimulators />
-
         <ExperienceSection />
 
         <HonorsSection />

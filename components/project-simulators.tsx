@@ -263,7 +263,7 @@ function SlotifySimulator() {
 /* =========================================================================
    SIMULATOR 02: ZeroLag 5-Agent Sales Triage (Supervity 2nd Place)
 ========================================================================= */
-function ZeroLagSimulator() {
+export function ZeroLagSimulator() {
   const [currentStage, setCurrentStage] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
 
@@ -381,7 +381,7 @@ function ZeroLagSimulator() {
 /* =========================================================================
    SIMULATOR 03: BILAHUJAN Flood Mesh
 ========================================================================= */
-function BilahujanSimulator() {
+export function BilahujanSimulator() {
   const [waterLevel, setWaterLevel] = useState(2.8);
 
   const getStatus = (lvl: number) => {
@@ -458,7 +458,7 @@ function BilahujanSimulator() {
 /* =========================================================================
    SIMULATOR 04: Sensor X Sensei Smart Energy Grid
 ========================================================================= */
-function SensorXSimulator() {
+export function SensorXSimulator() {
   const [isOccupied, setIsOccupied] = useState(true);
 
   return (
