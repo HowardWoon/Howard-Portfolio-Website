@@ -83,7 +83,6 @@ const projects: ProjectData[] = [
       { label: "Graph Capacity", value: "10k+ Road Nodes" },
     ],
     tags: ["Flutter", "FastAPI", "Python", "Computer Vision", "Graph Algorithms", "IoT"],
-    deckUrl: "/documents/dsaise-pitchdeck.pdf",
     simulatorId: "bilahujan",
     githubUrl: "https://github.com",
     telemetryType: "flood",
