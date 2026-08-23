@@ -274,19 +274,6 @@ export default function BikebearHero() {
       </main>
 
       {/* Hero Footer Bar */}
-      <footer className="w-full flex items-center justify-between px-6 sm:px-10 lg:px-16 pb-6 text-xs font-mono z-20 border-t border-white/5 pt-4">
-        <div className="flex items-center gap-2.5 text-neutral-400 tracking-widest uppercase text-xs">
-          <ArrowDown className="w-3.5 h-3.5 text-amber-400 animate-bounce" />
-          <span>SCROLL TO INITIALIZE</span>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <span className="tracking-widest text-neutral-300 font-bold">01 / 04</span>
-          <div className="w-20 h-1 bg-white/10 rounded-full overflow-hidden">
-            <div className="w-1/4 h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full shadow-lg" />
-          </div>
-        </div>
-      </footer>
     </motion.section>
   );
 }
