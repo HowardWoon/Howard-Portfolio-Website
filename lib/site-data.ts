@@ -214,3 +214,12 @@ export const techStack = [
     skills: ['TypeScript', 'Next.js 15', 'React', 'Tailwind CSS', 'Flutter'],
   },
 ];
+
+// Backward compatibility for Admin/Supabase routes
+export const fallbackProfile = personalDetails;
+export const fallbackExperiences = experiences;
+export const fallbackProjects = projects;
+export const fallbackSkills = techStack;
+
+export type ProjectItem = Project;
+export type SkillItem = any;

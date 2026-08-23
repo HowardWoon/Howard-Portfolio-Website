@@ -27,11 +27,23 @@ import {
   awards,
   techStack,
 } from '@/lib/site-data';
+import { PitchDeckModal } from '@/components/pitch-deck-modal';
+import { SlotifySimulator, ZeroLagSimulator } from '@/components/project-simulators';
 
 export function PortfolioPage() {
   const [formState, setFormState] = useState({ name: '', email: '', message: '' });
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [activeDeck, setActiveDeck] = useState<{ title: string; pdfUrl: string } | null>(null);
+
+  const categories = ['All', 'AI & Agents', 'Distributed Systems', 'Full-Stack', 'IoT'];
+
+  const filteredProjects =
+    selectedCategory === 'All'
+      ? projects
+      : projects.filter((p) => p.category === selectedCategory);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,19 +94,22 @@ export function PortfolioPage() {
           >
             View Projects <ArrowRight className="w-4 h-4" />
           </Link>
-          <Link
+          <a
             href={personalDetails.github}
             target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-medium text-sm hover:bg-white/10 hover:border-white/20 transition-all backdrop-blur-sm"
           >
             <Github className="w-4 h-4" /> GitHub Profile
-          </Link>
-          <Link
+          </a>
+          <a
             href={personalDetails.resumeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/5 border border-white/10 text-slate-300 font-medium text-sm hover:bg-white/10 hover:text-white transition-all backdrop-blur-sm"
           >
             <FileText className="w-4 h-4" /> Resume
-          </Link>
+          </a>
         </div>
 
         {/* Inline Metrics Bar */}
@@ -108,73 +123,108 @@ export function PortfolioPage() {
         </div>
       </section>
 
-      {/* ================= FEATURED PROJECTS ================= */}
+      {/* ================= FEATURED PROJECTS & SIMULATORS ================= */}
       <section id="projects" className="space-y-8 scroll-mt-24">
-        <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 text-xs font-mono text-indigo-400 uppercase tracking-widest">
-            <Layers className="w-3.5 h-3.5" /> Shipped Architectures
+        {/* Section Header & Interactive Filter Tabs */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 text-xs font-mono text-indigo-400 uppercase tracking-widest">
+              <Layers className="w-3.5 h-3.5" /> Shipped Architectures
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">Interactive Systems</h2>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">Featured Projects</h2>
+
+          {/* Filter Pills */}
+          <div className="flex flex-wrap gap-1.5 p-1 rounded-lg bg-white/5 border border-white/10 backdrop-blur-sm">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
+                  selectedCategory === cat
+                    ? 'bg-white text-slate-950 shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
         </div>
 
+        {/* Projects Bento Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {projects.map((proj) => (
+          {filteredProjects.map((proj) => (
             <div
               key={proj.id}
-              className="group relative flex flex-col justify-between p-7 rounded-2xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/20 transition-all duration-300 backdrop-blur-sm"
+              className="flex flex-col justify-between p-7 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-white/20 transition-all duration-300 backdrop-blur-sm"
             >
               <div>
-                <div className="flex items-center justify-between gap-4 mb-4">
-                  <span className="text-xs font-mono px-2.5 py-1 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-indigo-300">
+                <div className="flex items-center justify-between gap-4 mb-3">
+                  <span className="text-xs font-mono px-2.5 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-indigo-300">
                     {proj.category}
                   </span>
                   {proj.highlight && (
                     <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
                       {proj.highlight}
                     </span>
-                  </div>
+                  )}
                 </div>
 
-                <h3 className="text-xl font-semibold text-white group-hover:text-indigo-300 transition-colors mb-2">
-                  {proj.title}
-                </h3>
-                <p className="text-xs font-medium text-slate-300 mb-3">{proj.tagline}</p>
-                <p className="text-sm text-slate-400 leading-relaxed mb-6">{proj.description}</p>
+                <h3 className="text-xl font-semibold text-white mb-1.5">{proj.title}</h3>
+                <p className="text-xs font-medium text-slate-300 mb-2">{proj.tagline}</p>
+                <p className="text-sm text-slate-400 leading-relaxed mb-4">{proj.description}</p>
+
+                {/* Dynamic Interactive Demo Injection */}
+                {proj.id === 'proj-slotify' && <SlotifySimulator />}
+                {proj.id === 'proj-zerolag' && <ZeroLagSimulator />}
               </div>
 
-              <div>
-                <div className="flex flex-wrap gap-1.5 mb-6">
+              <div className="pt-6">
+                <div className="flex flex-wrap gap-1.5 mb-5">
                   {proj.technologies.map((tech, i) => (
-                    <span key={i} className="text-xs font-mono px-2 py-1 rounded bg-white/5 border border-white/5 text-slate-300">
+                    <span key={i} className="text-xs font-mono px-2 py-0.5 rounded bg-white/5 border border-white/5 text-slate-300">
                       {tech}
                     </span>
                   ))}
                 </div>
 
-                <div className="flex items-center gap-3 pt-4 border-t border-white/5">
+                {/* Action Buttons */}
+                <div className="flex items-center gap-3 pt-3 border-t border-white/5">
                   {proj.githubUrl && (
-                    <Link
+                    <a
                       href={proj.githubUrl}
                       target="_blank"
+                      rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-300 hover:text-white transition-colors"
                     >
                       <Github className="w-3.5 h-3.5" /> Source Code <ExternalLink className="w-3 h-3 opacity-60" />
-                    </Link>
+                    </a>
                   )}
+
                   {proj.deckUrl && (
-                    <Link
-                      href={proj.deckUrl}
-                      target="_blank"
-                      className="inline-flex items-center gap-1.5 text-xs font-medium text-indigo-400 hover:text-indigo-300 transition-colors ml-auto"
+                    <button
+                      onClick={() => setActiveDeck({ title: proj.title, pdfUrl: proj.deckUrl! })}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 hover:bg-indigo-500/20 text-xs font-medium transition-colors ml-auto"
                     >
                       <FileText className="w-3.5 h-3.5" /> View Pitch Deck
-                    </Link>
+                    </button>
                   )}
                 </div>
               </div>
             </div>
           ))}
         </div>
+
+        {/* Global In-App Pitch Deck Modal */}
+        {activeDeck && (
+          <PitchDeckModal
+            isOpen={!!activeDeck}
+            onClose={() => setActiveDeck(null)}
+            title={activeDeck.title}
+            pdfUrl={activeDeck.pdfUrl}
+          />
+        )}
       </section>
 
       {/* ================= UNIFIED EXPERIENCE & LEADERSHIP ================= */}

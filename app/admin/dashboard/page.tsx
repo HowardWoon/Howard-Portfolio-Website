@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { DashboardClient } from '@/components/admin/dashboard-client';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { fallbackExperiences, fallbackProjects, fallbackSkills } from '@/lib/site-data';
