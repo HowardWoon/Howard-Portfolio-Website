@@ -1,5 +1,6 @@
 'use client';
-import { HeroSection } from '@/components/hero-section';
+import BikebearInspiredHero from '@/components/bikebear-hero';
+import StackedProjects from '@/components/stacked-projects';
 
 import React, { useState } from 'react';
 import Image from 'next/image';
@@ -49,7 +50,7 @@ export function PortfolioPage() {
 
   return (
     <div className="relative min-h-screen tech-grid-bg selection:bg-slate-900 selection:text-white">
-      <HeroSection />
+      <BikebearInspiredHero />
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-32 space-y-36">
         
 
@@ -131,66 +132,7 @@ export function PortfolioPage() {
           </div>
         </section>
 
-        <section id="selected-work" className="space-y-10 scroll-mt-24">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-black/[0.08] pb-4">
-            <div>
-              <div className="text-xs font-mono text-slate-600 uppercase tracking-widest">/selected_work</div>
-              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 font-display mt-1">Featured Systems & Production Engineering</h2>
-            </div>
-            <span className="font-mono text-xs text-slate-600">01 – 04 Projects</span>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {projects.map((proj) => (
-              <div key={proj.id} className="p-7 rounded-3xl border border-black/[0.08] bg-white hover:border-black/25 hover:shadow-xl transition-all flex flex-col justify-between group">
-                <div>
-                  <div className="flex items-center justify-between mb-4 text-xs font-mono">
-                    <span className="text-slate-400">{proj.index} {"//"} {proj.year}</span>
-                    {proj.highlight && (
-                      <span className="px-2.5 py-0.5 rounded-full bg-slate-100 border border-black/[0.08] text-slate-800 font-semibold text-[11px]">
-                        {proj.highlight}
-                      </span>
-                    )}
-                  </div>
-                  <h3 className="text-2xl font-bold text-slate-900 tracking-tight font-display group-hover:text-indigo-600 transition-colors">{proj.title}</h3>
-                  <p className="text-xs font-medium text-slate-600 mt-1 mb-3">{proj.tagline}</p>
-                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">{proj.description}</p>
-                  <div className="p-3 rounded-xl bg-slate-50 border border-black/[0.05] text-xs font-mono text-slate-700 mb-4 flex items-start gap-2">
-                    <span className="text-slate-900 font-bold shrink-0">ARCH:</span>
-                    <span>{proj.architectureHighlight}</span>
-                  </div>
-                </div>
-                <div className="pt-4 border-t border-black/[0.06] space-y-4">
-                  <div className="flex flex-wrap gap-1.5">
-                    {proj.technologies.map((tech, i) => (
-                      <span key={i} className="text-[11px] font-mono px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-black/[0.04] hover:border-black/20 hover:bg-slate-200 transition-colors cursor-default">
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="flex items-center justify-between pt-1 font-mono text-xs">
-                    {proj.githubUrl && (
-                      <a href={proj.githubUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-medium transition-all active:scale-95">
-                        <Github className="w-3.5 h-3.5" /> Source Code
-                      </a>
-                    )}
-                    <div className="flex items-center gap-2 ml-auto">
-                      {proj.deckUrl && (
-                        <button onClick={() => setActiveDeck({ title: proj.title, pdfUrl: proj.deckUrl! })} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-black/10 bg-white hover:bg-slate-50 text-slate-700 font-medium transition-all active:scale-95">
-                          <FileText className="w-3.5 h-3.5" /> Pitch Deck
-                        </button>
-                      )}
-                      {proj.certificateUrl && (
-                        <button onClick={() => setActiveDeck({ title: proj.title, pdfUrl: proj.certificateUrl! })} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-black/10 bg-white hover:bg-slate-50 text-slate-700 font-medium transition-all active:scale-95">
-                          <Award className="w-3.5 h-3.5" /> Certificate
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+        <StackedProjects />
 
         <section id="experiments" className="space-y-8 scroll-mt-24">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-black/[0.08] pb-4">

@@ -1,7 +1,7 @@
 ﻿import type { Metadata } from 'next';
 import { Plus_Jakarta_Sans, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
-import { SiteHeader } from '@/components/site-header';
+import SmoothScrollProvider from '@/components/smooth-scroll-provider';
 
 const sans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -34,9 +34,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${sans.variable} ${display.variable} ${mono.variable}`}>
-      <body className="font-sans antialiased bg-[#F3F3F5] text-[#12151B]">
-        <SiteHeader />
-        {children}
+      <body className="scroll-smooth font-sans antialiased bg-[#F3F3F5] text-[#12151B]">
+        
+        <SmoothScrollProvider>{children}</SmoothScrollProvider>
       </body>
     </html>
   );
