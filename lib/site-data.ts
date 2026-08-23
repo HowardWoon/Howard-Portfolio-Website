@@ -35,6 +35,7 @@ export interface AwardItem {
   highlight: string;
   description: string;
   stats?: string;
+  link?: string;
 }
 
 export const personalDetails = {
@@ -190,6 +191,16 @@ export const projects: Project[] = [
 ];
 
 export const awards: AwardItem[] = [
+  {
+    id: 'award-um-game-jam',
+    title: 'Public Choice Award',
+    issuer: 'UM Game Jam 2026 (PEKOM)',
+    date: '2026',
+    highlight: 'National Game Jam',
+    description: 'Developed "The Goofy Experience", an interactive medical horror/comedy game utilizing perceptual sabotage logic and UI hijacking. Won the Public Choice Award against 39 universities nationwide.',
+    stats: 'Public Choice / 39 Teams',
+    link: 'https://howard-woon.itch.io/the-goofy-experience',
+  },
   {
     id: 'award-supervity',
     title: '2nd Place Winner (Sales Intelligence Track)',

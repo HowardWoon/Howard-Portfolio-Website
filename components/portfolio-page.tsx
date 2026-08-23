@@ -293,14 +293,15 @@ export function PortfolioPage() {
           </FadeIn>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {awards.map((award, idx) => (
-              <FadeIn key={award.id} delay={idx * 0.1} className="h-full">
-                <div className="h-full p-8 rounded-[24px] border border-line bg-surface shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] hover:-translate-y-1 hover:shadow-xl hover:border-line-strong transition-all duration-300 flex flex-col justify-between group">
+            {awards.map((award, idx) => {
+              const CardContent = (
+                <div className={`h-full p-8 rounded-[24px] border border-line bg-surface shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] hover:-translate-y-1 hover:shadow-xl hover:border-line-strong transition-all duration-300 flex flex-col justify-between group ${award.link ? 'cursor-pointer' : ''}`}>
                   <div>
-                    <div className="mb-4 text-xs font-mono text-ink-3 uppercase tracking-wider group-hover:text-signal transition-colors">
-                      {award.highlight}
+                    <div className="mb-4 text-xs font-mono text-ink-3 uppercase tracking-wider group-hover:text-signal transition-colors flex items-center justify-between">
+                      <span>{award.highlight}</span>
+                      {award.link && <ExternalLink className="w-3 h-3 text-signal opacity-0 group-hover:opacity-100 transition-opacity" />}
                     </div>
-                    <h3 className="text-lg font-bold text-ink mb-2">
+                    <h3 className="text-lg font-bold text-ink mb-2 group-hover:text-signal transition-colors">
                       {award.title}
                     </h3>
                     <p className="text-sm font-medium text-ink-2 mb-4">{award.issuer}</p>
@@ -314,8 +315,20 @@ export function PortfolioPage() {
                     )}
                   </div>
                 </div>
-              </FadeIn>
-            ))}
+              );
+
+              return (
+                <FadeIn key={award.id} delay={idx * 0.1} className="h-full">
+                  {award.link ? (
+                    <a href={award.link} target="_blank" rel="noopener noreferrer" className="block h-full outline-none focus-visible:ring-2 focus-visible:ring-signal rounded-[24px]">
+                      {CardContent}
+                    </a>
+                  ) : (
+                    CardContent
+                  )}
+                </FadeIn>
+              );
+            })}
           </div>
         </section>
 
