@@ -11,7 +11,6 @@ import {
   Award,
   Briefcase,
   Layers,
-  GraduationCap,
   Mail,
   Send,
   CheckCircle,
@@ -28,15 +27,19 @@ import {
   techStack,
 } from '@/lib/site-data';
 import { PitchDeckModal } from '@/components/pitch-deck-modal';
-import { SlotifySimulator, ZeroLagSimulator } from '@/components/project-simulators';
+import {
+  SlotifySimulator,
+  ZeroLagSimulator,
+  BLAHujanSimulator,
+  SensorSenseiSimulator,
+} from '@/components/project-simulators';
 
 export function PortfolioPage() {
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [activeDeck, setActiveDeck] = useState<{ title: string; pdfUrl: string } | null>(null);
   const [formState, setFormState] = useState({ name: '', email: '', message: '' });
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
-  
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [activeDeck, setActiveDeck] = useState<{ title: string; pdfUrl: string } | null>(null);
 
   const categories = ['All', 'AI & Agents', 'Distributed Systems', 'Full-Stack', 'IoT'];
 
@@ -71,10 +74,10 @@ export function PortfolioPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-32">
-      {/* ================= HERO SECTION ================= */}
-      <section className="min-h-[80vh] flex flex-col items-center justify-center text-center pt-20">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 text-xs font-mono mb-8 backdrop-blur-sm">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-20 space-y-28">
+      {/* ================= 1. HERO SECTION ================= */}
+      <section className="flex flex-col items-center justify-center text-center pt-8 pb-4">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 text-xs font-mono mb-6 backdrop-blur-sm">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <span>Software Engineering @ Universiti Malaya (4.00 CGPA)</span>
         </div>
@@ -83,14 +86,14 @@ export function PortfolioPage() {
           Building Scalable Systems & Production Software
         </h1>
 
-        <p className="text-base sm:text-lg text-slate-400 max-w-2xl leading-relaxed mb-10">
-          Hi, I'm <span className="text-white font-medium">{personalDetails.name}</span>. I design and build reliable backend architectures, distributed systems, and automated workflows using Java, Python, and Spring Boot.
+        <p className="text-base sm:text-lg text-slate-400 max-w-2xl leading-relaxed mb-8">
+          Hi, I'm <span className="text-white font-medium">{personalDetails.name}</span>. I design and build backend architectures, distributed data pipelines, and agentic systems in Java, Python, and Spring Boot.
         </p>
 
-        <div className="flex flex-wrap items-center justify-center gap-4 mb-16">
+        <div className="flex flex-wrap items-center justify-center gap-3.5 mb-14">
           <Link
             href="#projects"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white text-slate-950 font-medium text-sm hover:bg-slate-200 transition-all shadow-sm"
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-white text-slate-950 font-medium text-sm hover:bg-slate-200 transition-all shadow-sm"
           >
             View Projects <ArrowRight className="w-4 h-4" />
           </Link>
@@ -98,7 +101,7 @@ export function PortfolioPage() {
             href={personalDetails.github}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/5 border border-white/10 text-white font-medium text-sm hover:bg-white/10 hover:border-white/20 transition-all backdrop-blur-sm"
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white font-medium text-sm hover:bg-white/10 hover:border-white/20 transition-all backdrop-blur-sm"
           >
             <Github className="w-4 h-4" /> GitHub Profile
           </a>
@@ -106,14 +109,14 @@ export function PortfolioPage() {
             href={personalDetails.resumeUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-white/5 border border-white/10 text-slate-300 font-medium text-sm hover:bg-white/10 hover:text-white transition-all backdrop-blur-sm"
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-white/5 border border-white/10 text-slate-300 font-medium text-sm hover:bg-white/10 hover:text-white transition-all backdrop-blur-sm"
           >
             <FileText className="w-4 h-4" /> Resume
           </a>
         </div>
 
-        {/* Inline Metrics Bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-12 pt-8 border-t border-white/10 w-full max-w-3xl">
+        {/* Inline Metrics */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-8 border-t border-white/10 w-full max-w-3xl">
           {metrics.map((m, idx) => (
             <div key={idx}>
               <div className="text-2xl sm:text-3xl font-semibold text-white font-mono">{m.value}</div>
@@ -123,15 +126,14 @@ export function PortfolioPage() {
         </div>
       </section>
 
-      {/* ================= FEATURED PROJECTS & SIMULATORS ================= */}
-      <section id="projects" className="space-y-8 scroll-mt-24">
-        {/* Section Header & Interactive Filter Tabs */}
+      {/* ================= 2. FEATURED & FUNCTIONAL PROJECTS ================= */}
+      <section id="projects" className="space-y-6 scroll-mt-24">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <div className="inline-flex items-center gap-2 text-xs font-mono text-indigo-400 uppercase tracking-widest">
-              <Layers className="w-3.5 h-3.5" /> Shipped Architectures
+              <Layers className="w-3.5 h-3.5" /> Shipped Systems
             </div>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">Interactive Systems</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">Interactive Projects</h2>
           </div>
 
           {/* Filter Pills */}
@@ -152,15 +154,15 @@ export function PortfolioPage() {
           </div>
         </div>
 
-        {/* Projects Bento Grid */}
+        {/* Project Cards (Clean 2-column Grid) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filteredProjects.map((proj) => (
             <div
               key={proj.id}
-              className="flex flex-col justify-between p-7 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-white/20 transition-all duration-300 backdrop-blur-sm"
+              className="flex flex-col justify-between p-6 sm:p-7 rounded-2xl border border-white/10 bg-[#0B0F17]/80 hover:border-white/20 transition-all duration-200 backdrop-blur-sm"
             >
               <div>
-                <div className="flex items-center justify-between gap-4 mb-3">
+                <div className="flex items-center justify-between gap-2 mb-3">
                   <span className="text-xs font-mono px-2.5 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-indigo-300">
                     {proj.category}
                   </span>
@@ -171,26 +173,27 @@ export function PortfolioPage() {
                   )}
                 </div>
 
-                <h3 className="text-xl font-semibold text-white mb-1.5">{proj.title}</h3>
+                <h3 className="text-lg sm:text-xl font-semibold text-white mb-1">{proj.title}</h3>
                 <p className="text-xs font-medium text-slate-300 mb-2">{proj.tagline}</p>
-                <p className="text-sm text-slate-400 leading-relaxed mb-4">{proj.description}</p>
+                <p className="text-xs sm:text-sm text-slate-400 leading-relaxed mb-2">{proj.description}</p>
 
-                {/* Dynamic Interactive Demo Injection */}
+                {/* Embedded Interactive Simulators */}
                 {proj.id === 'proj-slotify' && <SlotifySimulator />}
                 {proj.id === 'proj-zerolag' && <ZeroLagSimulator />}
+                {proj.id === 'proj-bilahujan' && <BLAHujanSimulator />}
+                {proj.id === 'proj-sensor-sensei' && <SensorSenseiSimulator />}
               </div>
 
-              <div className="pt-6">
-                <div className="flex flex-wrap gap-1.5 mb-5">
+              <div className="pt-4 border-t border-white/5 mt-4">
+                <div className="flex flex-wrap gap-1.5 mb-4">
                   {proj.technologies.map((tech, i) => (
-                    <span key={i} className="text-xs font-mono px-2 py-0.5 rounded bg-white/5 border border-white/5 text-slate-300">
+                    <span key={i} className="text-[11px] font-mono px-2 py-0.5 rounded bg-white/5 border border-white/5 text-slate-300">
                       {tech}
                     </span>
                   ))}
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex items-center gap-3 pt-3 border-t border-white/5">
+                <div className="flex items-center justify-between gap-3">
                   {proj.githubUrl && (
                     <a
                       href={proj.githubUrl}
@@ -215,23 +218,13 @@ export function PortfolioPage() {
             </div>
           ))}
         </div>
-
-        {/* Global In-App Pitch Deck Modal */}
-        {activeDeck && (
-          <PitchDeckModal
-            isOpen={!!activeDeck}
-            onClose={() => setActiveDeck(null)}
-            title={activeDeck.title}
-            pdfUrl={activeDeck.pdfUrl}
-          />
-        )}
       </section>
 
-      {/* ================= UNIFIED EXPERIENCE & LEADERSHIP ================= */}
-      <section id="experience" className="space-y-8 scroll-mt-24">
-        <div className="space-y-2">
+      {/* ================= 3. UNIFIED EXPERIENCE & LEADERSHIP ================= */}
+      <section id="experience" className="space-y-6 scroll-mt-24">
+        <div className="space-y-1.5">
           <div className="inline-flex items-center gap-2 text-xs font-mono text-indigo-400 uppercase tracking-widest">
-            <Briefcase className="w-3.5 h-3.5" /> Career & Governance
+            <Briefcase className="w-3.5 h-3.5" /> Work & Student Governance
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">Experience & Leadership</h2>
         </div>
@@ -240,18 +233,18 @@ export function PortfolioPage() {
           {experiences.map((exp) => (
             <div
               key={exp.id}
-              className="p-6 sm:p-7 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-white/20 transition-all backdrop-blur-sm"
+              className="p-6 rounded-2xl border border-white/10 bg-[#0B0F17]/80 hover:border-white/20 transition-all backdrop-blur-sm"
             >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
                 <div>
-                  <div className="flex items-center gap-2.5">
-                    <h3 className="text-lg font-semibold text-white">{exp.role}</h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base sm:text-lg font-semibold text-white">{exp.role}</h3>
                     <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-white/10 text-slate-300">
                       {exp.type}
                     </span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-sm text-indigo-300 mt-1">
-                    <Building2 className="w-4 h-4 text-slate-400" />
+                  <div className="flex items-center gap-1.5 text-xs sm:text-sm text-indigo-300 mt-0.5">
+                    <Building2 className="w-3.5 h-3.5 text-slate-400" />
                     <span>{exp.organization}</span>
                   </div>
                 </div>
@@ -261,15 +254,15 @@ export function PortfolioPage() {
                 </div>
               </div>
 
-              <ul className="space-y-2 mb-4 list-disc list-inside text-sm text-slate-300 leading-relaxed">
+              <ul className="space-y-1.5 mb-3.5 list-disc list-inside text-xs sm:text-sm text-slate-300 leading-relaxed">
                 {exp.description.map((bullet, i) => (
                   <li key={i}>{bullet}</li>
                 ))}
               </ul>
 
-              <div className="flex flex-wrap gap-1.5 pt-2">
+              <div className="flex flex-wrap gap-1.5">
                 {exp.skills.map((skill, i) => (
-                  <span key={i} className="text-xs font-mono px-2 py-0.5 rounded bg-white/5 text-slate-400">
+                  <span key={i} className="text-[11px] font-mono px-2 py-0.5 rounded bg-white/5 text-slate-400">
                     {skill}
                   </span>
                 ))}
@@ -279,9 +272,9 @@ export function PortfolioPage() {
         </div>
       </section>
 
-      {/* ================= AWARDS & CERTIFICATES ================= */}
-      <section id="awards" className="space-y-8 scroll-mt-24">
-        <div className="space-y-2">
+      {/* ================= 4. AWARDS & HONORS ================= */}
+      <section id="awards" className="space-y-6 scroll-mt-24">
+        <div className="space-y-1.5">
           <div className="inline-flex items-center gap-2 text-xs font-mono text-indigo-400 uppercase tracking-widest">
             <Award className="w-3.5 h-3.5" /> Recognition & Distinctions
           </div>
@@ -292,17 +285,17 @@ export function PortfolioPage() {
           {awards.map((award) => (
             <div
               key={award.id}
-              className="p-6 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-white/20 transition-all flex flex-col justify-between"
+              className="p-6 rounded-2xl border border-white/10 bg-[#0B0F17]/80 hover:border-white/20 transition-all flex flex-col justify-between"
             >
               <div>
-                <span className="text-[11px] font-mono px-2.5 py-1 rounded bg-amber-500/10 border border-amber-500/20 text-amber-400 inline-block mb-3">
+                <span className="text-[11px] font-mono px-2.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-400 inline-block mb-3">
                   {award.highlight}
                 </span>
-                <h3 className="text-base font-semibold text-white mb-1.5">{award.title}</h3>
-                <p className="text-xs text-indigo-300 mb-3">{award.issuer}</p>
+                <h3 className="text-base font-semibold text-white mb-1">{award.title}</h3>
+                <p className="text-xs text-indigo-300 mb-2">{award.issuer}</p>
                 <p className="text-xs text-slate-400 leading-relaxed">{award.description}</p>
               </div>
-              <div className="text-[11px] font-mono text-slate-400 pt-4 mt-4 border-t border-white/5">
+              <div className="text-[11px] font-mono text-slate-500 pt-3 mt-4 border-t border-white/5">
                 {award.date}
               </div>
             </div>
@@ -310,9 +303,9 @@ export function PortfolioPage() {
         </div>
       </section>
 
-      {/* ================= TECHNICAL STACK ================= */}
-      <section id="skills" className="space-y-8 scroll-mt-24">
-        <div className="space-y-2">
+      {/* ================= 5. TECHNICAL STACK ================= */}
+      <section id="skills" className="space-y-6 scroll-mt-24">
+        <div className="space-y-1.5">
           <div className="inline-flex items-center gap-2 text-xs font-mono text-indigo-400 uppercase tracking-widest">
             <Layers className="w-3.5 h-3.5" /> Engineering Toolchain
           </div>
@@ -321,15 +314,15 @@ export function PortfolioPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {techStack.map((group, idx) => (
-            <div key={idx} className="p-6 rounded-2xl border border-white/10 bg-white/[0.02]">
-              <h3 className="text-sm font-semibold text-indigo-300 font-mono uppercase tracking-wider mb-4">
+            <div key={idx} className="p-6 rounded-2xl border border-white/10 bg-[#0B0F17]/80">
+              <h3 className="text-xs font-semibold text-indigo-300 font-mono uppercase tracking-wider mb-3.5">
                 {group.category}
               </h3>
               <div className="flex flex-wrap gap-2">
                 {group.skills.map((skill, sIdx) => (
                   <span
                     key={sIdx}
-                    className="text-xs font-mono px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-slate-200"
+                    className="text-xs font-mono px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-slate-200"
                   >
                     {skill}
                   </span>
@@ -340,51 +333,51 @@ export function PortfolioPage() {
         </div>
       </section>
 
-      {/* ================= CONTACT SECTION ================= */}
-      <section id="contact" className="space-y-8 scroll-mt-24 pt-8">
-        <div className="text-center max-w-xl mx-auto space-y-2">
+      {/* ================= 6. CONTACT SECTION ================= */}
+      <section id="contact" className="space-y-6 scroll-mt-24 pt-4">
+        <div className="text-center max-w-xl mx-auto space-y-1.5">
           <div className="inline-flex items-center gap-2 text-xs font-mono text-indigo-400 uppercase tracking-widest">
-            <Mail className="w-3.5 h-3.5" /> Get in Touch
+            <Mail className="w-3.5 h-3.5" /> Connect
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">Let’s Build Together</h2>
-          <p className="text-sm text-slate-400">
+          <p className="text-xs sm:text-sm text-slate-400">
             Open to software engineering internships, technical collaborations, and full-time opportunities.
           </p>
         </div>
 
-        <div className="max-w-xl mx-auto p-8 rounded-2xl border border-white/10 bg-white/[0.02] backdrop-blur-md">
+        <div className="max-w-xl mx-auto p-6 sm:p-8 rounded-2xl border border-white/10 bg-[#0B0F17]/80 backdrop-blur-md">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-mono text-slate-400 mb-1.5 uppercase">Name</label>
+              <label className="block text-xs font-mono text-slate-400 mb-1 uppercase">Name</label>
               <input
                 type="text"
                 required
                 value={formState.name}
                 onChange={(e) => setFormState({ ...formState, name: e.target.value })}
-                placeholder="Linus Torvalds"
-                className="w-full px-4 py-2.5 rounded-lg border border-white/10 bg-white/5 text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+                placeholder="Alex Mercer"
+                className="w-full px-3.5 py-2 rounded-lg border border-white/10 bg-white/5 text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors"
               />
             </div>
             <div>
-              <label className="block text-xs font-mono text-slate-400 mb-1.5 uppercase">Email Address</label>
+              <label className="block text-xs font-mono text-slate-400 mb-1 uppercase">Email Address</label>
               <input
                 type="email"
                 required
                 value={formState.email}
                 onChange={(e) => setFormState({ ...formState, email: e.target.value })}
                 placeholder="name@company.com"
-                className="w-full px-4 py-2.5 rounded-lg border border-white/10 bg-white/5 text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+                className="w-full px-3.5 py-2 rounded-lg border border-white/10 bg-white/5 text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors"
               />
             </div>
             <div>
-              <label className="block text-xs font-mono text-slate-400 mb-1.5 uppercase">Message</label>
+              <label className="block text-xs font-mono text-slate-400 mb-1 uppercase">Message</label>
               <textarea
                 required
                 rows={4}
                 value={formState.message}
                 onChange={(e) => setFormState({ ...formState, message: e.target.value })}
                 placeholder="Hi Howard, let's discuss an engineering opportunity..."
-                className="w-full px-4 py-2.5 rounded-lg border border-white/10 bg-white/5 text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors resize-none"
+                className="w-full px-3.5 py-2 rounded-lg border border-white/10 bg-white/5 text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors resize-none"
               />
             </div>
 
@@ -405,7 +398,7 @@ export function PortfolioPage() {
             <button
               type="submit"
               disabled={status === 'loading'}
-              className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-white text-slate-950 font-medium text-sm hover:bg-slate-200 transition-all disabled:opacity-50 shadow-sm"
+              className="w-full inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg bg-white text-slate-950 font-medium text-sm hover:bg-slate-200 transition-all disabled:opacity-50 shadow-sm"
             >
               {status === 'loading' ? 'Sending...' : 'Send Message'}
               <Send className="w-4 h-4" />
@@ -415,9 +408,19 @@ export function PortfolioPage() {
       </section>
 
       {/* ================= FOOTER ================= */}
-      <footer className="pt-16 pb-8 border-t border-white/10 text-center text-xs text-slate-400 font-mono">
-        <p>© {new Date().getFullYear()} Howard Woon Hao Zhe. Built with Next.js, TypeScript & Tailwind CSS.</p>
+      <footer className="pt-12 pb-4 border-t border-white/10 text-center text-xs text-slate-500 font-mono">
+        <p>© {new Date().getFullYear()} Howard Woon Hao Zhe. Built with Next.js 15, TypeScript & Tailwind CSS.</p>
       </footer>
+
+      {/* Global In-App Pitch Deck Modal */}
+      {activeDeck && (
+        <PitchDeckModal
+          isOpen={!!activeDeck}
+          onClose={() => setActiveDeck(null)}
+          title={activeDeck.title}
+          pdfUrl={activeDeck.pdfUrl}
+        />
+      )}
     </div>
   );
 }
