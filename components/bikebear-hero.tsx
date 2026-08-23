@@ -240,7 +240,7 @@ export default function BikebearHero() {
               className="relative group cursor-pointer flex flex-col items-center lg:items-end"
             >
               {/* News Ticker (Above Photo) */}
-                <div className="w-[320px] sm:w-[420px] lg:w-[480px] lg:mr-8 mb-4 overflow-hidden bg-white rounded-xl border border-white/20 py-2.5 relative z-20 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+                <div className="w-[340px] sm:w-[460px] lg:w-[540px] xl:w-[600px] mb-4 overflow-hidden bg-white rounded-xl border border-white/20 py-2.5 relative z-20 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
                   <div className="flex whitespace-nowrap animate-[marquee_20s_linear_infinite] w-max">
                     {[...Array(4)].map((_, i) => (
                       <div key={i} className="flex items-center">
@@ -257,7 +257,7 @@ export default function BikebearHero() {
               <div className="absolute -inset-1 bg-gradient-to-b from-amber-500/40 via-amber-500/10 to-transparent rounded-[52px] blur-xl opacity-70 group-hover:opacity-100 transition-opacity duration-500" />
 
               {/* Main Portrait Frame - Natural Vibrant Color (No Grayscale) */}
-              <div className="relative w-[320px] sm:w-[420px] lg:w-[480px] h-[380px] sm:h-[480px] lg:h-[550px] rounded-[48px] border-2 border-amber-500/30 bg-[#121620] overflow-hidden shadow-2xl transition-all duration-500 group-hover:border-amber-400/60 lg:mr-8">
+              <div className="relative w-[340px] sm:w-[460px] lg:w-[540px] xl:w-[600px] h-[440px] sm:h-[580px] lg:h-[700px] xl:h-[780px] rounded-[48px] border-2 border-amber-500/30 bg-[#121620] overflow-hidden shadow-2xl transition-all duration-500 group-hover:border-amber-400/60">
                 <Image
                   src="/images/howard-solid.jpeg"
                   alt="Howard Woon - Systems & AI Architect"
