@@ -85,16 +85,18 @@ export function PortfolioPage() {
       <div className="max-w-5xl mx-auto px-5 sm:px-8 lg:px-10 pt-40 pb-32 space-y-48">
         
         {/* ================= 1. HERO ================= */}
-        <section className="flex flex-col items-start text-left w-full">
+        <section className="flex flex-col items-start text-left w-full relative">
+          {/* Subtle Dot Matrix Background behind hero */}
+          <div className="absolute inset-0 -z-10 bg-[radial-gradient(#C9974C_1px,transparent_1px)] [background-size:24px_24px] opacity-[0.03] mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_70%) pointer-events-none"></div>
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.21, 0.47, 0.32, 0.98] }}
             className="w-full"
           >
-            <div className="flex flex-col lg:flex-row gap-12 lg:gap-8 items-start justify-between w-full mb-16">
+            <div className="flex flex-col lg:flex-row gap-12 lg:gap-8 items-start justify-between w-full mb-16 relative">
               <div className="space-y-8 max-w-3xl flex-1">
-                <h1 className="text-6xl sm:text-7xl md:text-[5.5rem] font-bold tracking-tighter text-ink leading-[1.05]">
+                <h1 className="text-6xl sm:text-7xl md:text-[6rem] font-display font-extrabold tracking-tighter text-ink leading-[1.05]">
                   Building Scalable Systems <br className="hidden md:block"/>& Production Software.
                 </h1>
                 <p className="text-lg sm:text-xl text-ink-2 max-w-2xl leading-loose font-normal">
