@@ -138,7 +138,7 @@ export default function AboutSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white max-w-5xl leading-[1.08]"
+            className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-normal text-white max-w-5xl leading-tight"
           >
             I build resilient backend systems and autonomous AI agent pipelines that turn complex ideas into production-ready products.
           </motion.h2>

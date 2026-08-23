@@ -123,7 +123,7 @@ export default function BikebearHero() {
               transition={{ duration: 0.7, delay: 0.2 }}
               className="relative space-y-2"
             >
-              <h2 className="text-4xl sm:text-6xl md:text-7xl xl:text-8xl font-black uppercase tracking-tight leading-[0.92] text-white">
+              <h2 className="text-4xl sm:text-6xl md:text-7xl xl:text-8xl font-black uppercase tracking-normal leading-[1.05] text-white">
                 ENGINEERING <br />
                 <span className="bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 bg-clip-text text-transparent">
                   SYSTEMS TO
