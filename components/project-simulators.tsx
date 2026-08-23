@@ -41,9 +41,9 @@ export function SlotifySimulator() {
           <button
             onClick={runAllocation}
             disabled={computing || !!allocatedSlot}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-black/10 bg-white hover:bg-slate-100 disabled:opacity-50 text-xs font-mono text-slate-900 transition-colors"
+            className="relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-black/10 bg-white hover:bg-slate-100 disabled:opacity-50 text-xs font-mono text-slate-900 transition-colors shadow-sm" title="Click to simulate Dijkstra routing"
           >
-            <Play className="w-3 h-3" /> {computing ? 'Routing...' : 'Route Vehicle'}
+            <Play className="w-3 h-3" /> {computing ? 'Routing...' : 'Route Vehicle'} <span className="absolute -top-1 -right-1 flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-indigo-500"></span></span>
           </button>
           {allocatedSlot && (
             <button onClick={reset} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900">

@@ -50,13 +50,13 @@ export function PortfolioPage() {
     <div className="relative min-h-screen tech-grid-bg selection:bg-slate-900 selection:text-white">
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 pb-32 space-y-36">
         <section className="relative min-h-[70vh] sm:min-h-[78vh] flex flex-col justify-between pt-6">
-          <div className="flex items-center justify-between font-mono text-xs text-slate-500">
+          <div className="flex items-center justify-between font-mono text-xs text-slate-600">
             <div>01 {"//"} SOFTWARE ENGINEER</div>
             <div className="hidden sm:block">UNIVERSITI MALAYA • 4.00 CGPA</div>
           </div>
           <div className="relative my-8 flex items-center justify-center">
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.06] select-none overflow-hidden">
-              <div className="animate-marquee-slow whitespace-nowrap text-7xl sm:text-9xl font-extrabold font-display tracking-tight text-black flex items-center gap-12">
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] select-none overflow-hidden">
+              <div className="animate-marquee-slow whitespace-nowrap text-5xl sm:text-7xl font-extrabold font-display tracking-tight text-black flex items-center gap-12">
                 <span>SPRING BOOT</span><span>•</span><span>AUTOPILOT 2026</span><span>•</span><span>AGENTIC AI</span><span>•</span><span>DIJKSTRA GRAPH</span><span>•</span><span>KRAIBURG TPE</span><span>•</span><span>PEKOM FINANCE</span><span>•</span>
               </div>
             </div>
@@ -93,7 +93,7 @@ export function PortfolioPage() {
 
         <section id="about" className="space-y-10 scroll-mt-24">
           <div className="space-y-4 max-w-4xl">
-            <div className="text-xs font-mono text-slate-500 uppercase tracking-widest">/about</div>
+            <div className="text-xs font-mono text-slate-600 uppercase tracking-widest">/about</div>
             <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-slate-900 leading-[1.1] font-display">
               I architect resilient backend systems and engineer autonomous agentic pipelines from 0 to 1.
             </h2>
@@ -102,8 +102,8 @@ export function PortfolioPage() {
             </p>
           </div>
           <div className="rounded-3xl border border-black/[0.08] bg-[#EBEBED]/90 p-4 sm:p-6 shadow-sm space-y-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-              <div className="relative aspect-square rounded-2xl bg-white border border-black/[0.06] p-4 flex flex-col items-center justify-center text-center overflow-hidden group shadow-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="relative aspect-square rounded-2xl bg-white border border-black/[0.06] p-4 flex flex-col items-center justify-center text-center overflow-hidden group shadow-sm hover:scale-[1.02] hover:shadow-md transition-all cursor-default">
                 <div className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full border border-black/20" />
                 <div className="absolute inset-4 rounded-full border border-black/[0.05] flex items-center justify-center">
                   <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-slate-400 to-transparent dial-spin-a" />
@@ -112,7 +112,7 @@ export function PortfolioPage() {
                 <div className="relative z-10 text-xs font-bold text-slate-900 tracking-tight">Backend Systems</div>
                 <div className="relative z-10 text-[10px] font-mono text-slate-500 mt-0.5">Spring Boot & Java 21</div>
               </div>
-              <div className="relative aspect-square rounded-2xl bg-white border border-black/[0.06] p-4 flex flex-col items-center justify-center text-center overflow-hidden group shadow-sm">
+              <div className="relative aspect-square rounded-2xl bg-white border border-black/[0.06] p-4 flex flex-col items-center justify-center text-center overflow-hidden group shadow-sm hover:scale-[1.02] hover:shadow-md transition-all cursor-default">
                 <div className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full border border-black/20" />
                 <div className="absolute inset-4 rounded-full border border-black/[0.05] flex items-center justify-center">
                   <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-indigo-400 to-transparent dial-spin-b" />
@@ -121,7 +121,7 @@ export function PortfolioPage() {
                 <div className="relative z-10 text-xs font-bold text-slate-900 tracking-tight">Agentic AI</div>
                 <div className="relative z-10 text-[10px] font-mono text-slate-500 mt-0.5">5-Operator Pipelines</div>
               </div>
-              <div className="relative aspect-square rounded-2xl bg-[#E4E0DB] border border-black/[0.08] p-4 flex flex-col items-center justify-center text-center overflow-hidden group shadow-sm">
+              <div className="relative aspect-square rounded-2xl bg-[#E4E0DB] border border-black/[0.08] p-4 flex flex-col items-center justify-center text-center overflow-hidden group shadow-sm hover:scale-[1.02] hover:shadow-md transition-all cursor-default">
                 <div className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full border border-black/30" />
                 <div className="absolute inset-4 rounded-full border border-black/[0.08] flex items-center justify-center">
                   <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-slate-600 to-transparent dial-spin-c" />
@@ -130,7 +130,7 @@ export function PortfolioPage() {
                 <div className="relative z-10 text-xs font-bold text-slate-900 tracking-tight">Graph Algorithms</div>
                 <div className="relative z-10 text-[10px] font-mono text-slate-700 mt-0.5">Dijkstra & Min-Heaps</div>
               </div>
-              <div className="relative aspect-square rounded-2xl bg-white border border-black/[0.06] p-4 flex flex-col items-center justify-center text-center overflow-hidden group shadow-sm">
+              <div className="relative aspect-square rounded-2xl bg-white border border-black/[0.06] p-4 flex flex-col items-center justify-center text-center overflow-hidden group shadow-sm hover:scale-[1.02] hover:shadow-md transition-all cursor-default">
                 <div className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full border border-black/20" />
                 <div className="absolute inset-4 rounded-full border border-black/[0.05] flex items-center justify-center">
                   <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-slate-400 to-transparent dial-spin-d" />
@@ -172,10 +172,10 @@ export function PortfolioPage() {
         <section id="selected-work" className="space-y-10 scroll-mt-24">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-black/[0.08] pb-4">
             <div>
-              <div className="text-xs font-mono text-slate-500 uppercase tracking-widest">/selected_work</div>
+              <div className="text-xs font-mono text-slate-600 uppercase tracking-widest">/selected_work</div>
               <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 font-display mt-1">Featured Systems & Production Engineering</h2>
             </div>
-            <span className="font-mono text-xs text-slate-500">01 – 04 Projects</span>
+            <span className="font-mono text-xs text-slate-600">01 – 04 Projects</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {projects.map((proj) => (
@@ -207,20 +207,22 @@ export function PortfolioPage() {
                   </div>
                   <div className="flex items-center justify-between pt-1 font-mono text-xs">
                     {proj.githubUrl && (
-                      <a href={proj.githubUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-slate-600 hover:text-black transition-colors">
-                        <Github className="w-3.5 h-3.5" /> Source Code <ArrowUpRight className="w-3 h-3 opacity-60" />
+                      <a href={proj.githubUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-medium transition-all active:scale-95">
+                        <Github className="w-3.5 h-3.5" /> Source Code
                       </a>
                     )}
-                    {proj.deckUrl && (
-                      <button onClick={() => setActiveDeck({ title: proj.title, pdfUrl: proj.deckUrl! })} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-medium transition-all ml-auto active:scale-95">
-                        <FileText className="w-3.5 h-3.5" /> View Pitch Deck
-                      </button>
-                    )}
-                    {proj.certificateUrl && (
-                      <button onClick={() => setActiveDeck({ title: proj.title, pdfUrl: proj.certificateUrl! })} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-medium transition-all ml-auto active:scale-95">
-                        <Award className="w-3.5 h-3.5" /> View Certificate
-                      </button>
-                    )}
+                    <div className="flex items-center gap-2 ml-auto">
+                      {proj.deckUrl && (
+                        <button onClick={() => setActiveDeck({ title: proj.title, pdfUrl: proj.deckUrl! })} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-black/10 bg-white hover:bg-slate-50 text-slate-700 font-medium transition-all active:scale-95">
+                          <FileText className="w-3.5 h-3.5" /> Pitch Deck
+                        </button>
+                      )}
+                      {proj.certificateUrl && (
+                        <button onClick={() => setActiveDeck({ title: proj.title, pdfUrl: proj.certificateUrl! })} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-black/10 bg-white hover:bg-slate-50 text-slate-700 font-medium transition-all active:scale-95">
+                          <Award className="w-3.5 h-3.5" /> Certificate
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -231,7 +233,7 @@ export function PortfolioPage() {
         <section id="experiments" className="space-y-8 scroll-mt-24">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-black/[0.08] pb-4">
             <div>
-              <div className="text-xs font-mono text-slate-500 uppercase tracking-widest">/experiments & prototypes</div>
+              <div className="text-xs font-mono text-slate-600 uppercase tracking-widest">/experiments & prototypes</div>
               <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 font-display mt-1">Interactive Engineering Lab</h2>
             </div>
             <p className="text-xs font-mono text-slate-500">Ideating & prototyping functional systems live.</p>
@@ -302,7 +304,7 @@ export function PortfolioPage() {
 
         <section id="experience" className="space-y-8 scroll-mt-24">
           <div className="border-b border-black/[0.08] pb-4">
-            <div className="text-xs font-mono text-slate-500 uppercase tracking-widest">/experience & leadership</div>
+            <div className="text-xs font-mono text-slate-600 uppercase tracking-widest">/experience & leadership</div>
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 font-display mt-1">Career & Institutional Governance</h2>
           </div>
           <div className="space-y-4">
@@ -343,12 +345,12 @@ export function PortfolioPage() {
 
         <section id="honors" className="space-y-8 scroll-mt-24">
           <div className="border-b border-black/[0.08] pb-4">
-            <div className="text-xs font-mono text-slate-500 uppercase tracking-widest">/honors & distinctions</div>
+            <div className="text-xs font-mono text-slate-600 uppercase tracking-widest">/honors & distinctions</div>
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 font-display mt-1">Academic & Competition Honors</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {awards.map((award) => (
-              <div key={award.id} className="p-6 rounded-2xl border border-black/[0.08] bg-white hover:border-amber-600/40 transition-all flex flex-col justify-between group shadow-sm">
+              <div key={award.id} className="p-6 rounded-2xl border border-black/[0.08] bg-white hover:border-amber-600/40 transition-all flex flex-col justify-between group shadow-sm hover:scale-[1.02] hover:shadow-md transition-all cursor-default">
                 <div>
                   <div className="flex items-center justify-between mb-4 font-mono text-xs">
                     <span className="text-slate-400">{award.index}</span>
@@ -376,7 +378,7 @@ export function PortfolioPage() {
 
         <section id="contact" className="space-y-10 scroll-mt-24">
           <div className="border-b border-black/[0.08] pb-4">
-            <div className="text-xs font-mono text-slate-500 uppercase tracking-widest">/new_project</div>
+            <div className="text-xs font-mono text-slate-600 uppercase tracking-widest">/new_project</div>
             <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-slate-900 font-display mt-1">Let&apos;s build something special.</h2>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
@@ -449,7 +451,7 @@ export function PortfolioPage() {
           </div>
         </section>
 
-        <footer className="pt-10 border-t border-black/[0.08] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 font-mono">
+        <footer className="pt-10 border-t border-black/[0.08] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600 font-mono">
           <p>© {new Date().getFullYear()} Howard Woon Hao Zhe. All rights reserved.</p>
           <p>Universiti Malaya • Software Engineering (4.00 CGPA)</p>
         </footer>
