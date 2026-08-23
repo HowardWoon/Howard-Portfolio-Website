@@ -6,24 +6,23 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        primary: '#6366F1',
-        secondary: '#8B5CF6',
-        accent: '#06B6D4',
-        background: '#0A0A0A',
-        surface: '#111111',
-        muted: '#A1A1AA'
+        canvas: '#0A0A0B',
+        surface: '#131315',
+        'surface-2': '#18181B',
+        line: 'rgba(255,255,255,0.08)',
+        'line-strong': 'rgba(255,255,255,0.16)',
+        ink: '#F3F2EF',
+        'ink-2': '#9A99A0',
+        'ink-3': '#5C5B62',
+        signal: '#C9974C',
+        'signal-dim': 'rgba(201,151,76,0.12)',
+        success: '#34D399',
+        danger: '#F87171',
       },
       fontFamily: {
-        inter: ['var(--font-inter)', 'sans-serif'],
-        jetbrains: ['var(--font-jetbrains)', 'monospace']
+        sans: ['var(--font-sans)', 'sans-serif'],
+        mono: ['var(--font-mono)', 'monospace']
       },
-      boxShadow: {
-        glass: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
-        glow: '0 0 20px rgba(99, 102, 241, 0.5)'
-      },
-      backgroundImage: {
-        'hero-gradient': 'radial-gradient(circle at center, rgba(99,102,241,0.15) 0%, rgba(10,10,10,1) 100%)',
-      }
     }
   },
   plugins: []

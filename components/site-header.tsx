@@ -1,10 +1,8 @@
-// components/site-header.tsx
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
-import { Menu, X, FileText, Sparkles } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { personalDetails } from '@/lib/site-data';
 
 export function SiteHeader() {
@@ -20,33 +18,31 @@ export function SiteHeader() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex justify-center p-3 sm:p-5 pointer-events-none">
-      <div className="w-full max-w-5xl px-4 sm:px-6 py-2.5 rounded-2xl border border-white/10 bg-[#080C14]/85 backdrop-blur-xl shadow-2xl shadow-black/60 flex items-center justify-between pointer-events-auto transition-all">
+      <div className="w-full max-w-5xl px-4 sm:px-6 py-3 rounded-2xl bg-surface/80 backdrop-blur-md border border-line flex items-center justify-between pointer-events-auto transition-all">
         {/* Brand */}
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="relative w-8 h-8 rounded-full overflow-hidden border border-white/20 ring-2 ring-indigo-500/20 group-hover:ring-indigo-500/50 transition-all">
+        <a href="/" className="flex items-center gap-3 group outline-none">
+          <div className="relative w-8 h-8 rounded-full overflow-hidden border border-line group-hover:border-line-strong transition-colors">
             <Image
               src={personalDetails.avatarUrl}
               alt={personalDetails.name}
               fill
-              className="object-cover"
+              className="object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
             />
           </div>
-          <div className="text-left">
-            <div className="font-semibold text-sm text-white tracking-tight flex items-center gap-1.5 group-hover:text-indigo-300 transition-colors">
+          <div className="text-left flex flex-col justify-center">
+            <div className="font-semibold text-sm text-ink tracking-tight flex items-center gap-1.5 transition-colors">
               <span>{personalDetails.name}</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
             </div>
-            <div className="text-[10px] font-mono text-slate-400">Software Engineer</div>
           </div>
-        </Link>
+        </a>
 
         {/* Desktop Links */}
-        <nav className="hidden md:flex items-center gap-6 text-xs font-medium text-slate-300">
+        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-ink-2">
           {navLinks.map((link) => (
             <a
               key={link.href}
               href={link.href}
-              className="hover:text-white transition-colors"
+              className="hover:text-ink transition-colors outline-none focus-visible:text-signal"
             >
               {link.label}
             </a>
@@ -55,25 +51,25 @@ export function SiteHeader() {
             href={personalDetails.resumeUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white font-medium text-xs transition-all shadow-md shadow-indigo-600/20 active:scale-95"
+            className="inline-flex items-center justify-center px-4 py-2 rounded-full bg-ink text-canvas hover:opacity-90 font-semibold text-sm transition-opacity outline-none focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
           >
-            <FileText className="w-3.5 h-3.5" /> Resume
+            Resume
           </a>
         </nav>
 
         {/* Mobile Actions */}
-        <div className="md:hidden flex items-center gap-2">
+        <div className="md:hidden flex items-center gap-3">
           <a
             href={personalDetails.resumeUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-600 text-white text-xs font-medium"
+            className="inline-flex items-center justify-center px-3 py-1.5 rounded-full bg-ink text-canvas font-semibold text-xs transition-opacity outline-none"
           >
             Resume
           </a>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10"
+            className="p-1.5 rounded-lg text-ink-2 hover:text-ink hover:bg-surface-2 outline-none"
             aria-label="Toggle Menu"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -83,13 +79,13 @@ export function SiteHeader() {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden absolute top-20 left-4 right-4 p-5 rounded-2xl border border-white/10 bg-[#080C14]/95 backdrop-blur-2xl shadow-2xl flex flex-col gap-3 text-center text-sm font-medium text-slate-300 pointer-events-auto animate-in fade-in slide-in-from-top-2 duration-150">
+        <div className="md:hidden absolute top-20 left-4 right-4 p-5 rounded-2xl border border-line bg-surface/95 backdrop-blur-xl shadow-2xl flex flex-col gap-2 text-center text-sm font-medium text-ink-2 pointer-events-auto animate-in fade-in slide-in-from-top-2 duration-150">
           {navLinks.map((link) => (
             <a
               key={link.href}
               href={link.href}
               onClick={() => setMobileMenuOpen(false)}
-              className="py-2 hover:text-white rounded-lg hover:bg-white/5 transition-colors"
+              className="py-3 hover:text-ink rounded-lg hover:bg-surface-2 transition-colors outline-none"
             >
               {link.label}
             </a>

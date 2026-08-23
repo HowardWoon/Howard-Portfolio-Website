@@ -19,7 +19,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${mono.variable} dark scroll-smooth`}>
-      <body className="min-h-screen bg-[#07090E] text-slate-100 antialiased selection:bg-indigo-500 selection:text-white">
+      <body className="min-h-screen bg-canvas text-ink antialiased selection:bg-signal-dim selection:text-signal">
         <SiteHeader />
         <main>{children}</main>
       </body>

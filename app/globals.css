@@ -5,30 +5,37 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    background-color: #05070B;
+    background-color: #0A0A0B;
   }
   
   body {
-    background-color: #05070B;
-    color: #f8fafc;
+    background-color: #0A0A0B;
+    color: #F3F2EF;
     overflow-x: hidden;
   }
 }
 
-/* Custom Scrollbar */
+/* Custom Scrollbar - keeping restrained */
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #05070b;
+  background: #0A0A0B;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #18181B;
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #5C5B62;
+}
+
+/* Add focus visible utility if tailwind doesn't apply it automatically everywhere */
+*:focus-visible {
+  outline: 2px solid #C9974C;
+  outline-offset: 2px;
 }
