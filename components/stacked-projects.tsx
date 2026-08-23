@@ -197,7 +197,8 @@ function ProjectCard({
   };
 
   return (
-    <div className="sticky top-24 w-full group" style={{ zIndex: index + 10 }}>`n
+    <div className="sticky top-24 w-full group" style={{ zIndex: index + 10 }}>
+
         <TiltCard>
       <motion.div
         initial={{ opacity: 0, y: 40 }}
@@ -454,6 +455,7 @@ function ProjectCard({
         </AnimatePresence>
 
       </motion.div>
-    </TiltCard>`n      </div>
+    </TiltCard>
+      </div>
   );
 }
