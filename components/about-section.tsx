@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { DecodeText } from "./decode-text";
 import { 
   Server, 
   Cpu, 
@@ -140,7 +141,7 @@ export default function AboutSection() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white max-w-5xl leading-[1.08]"
           >
-            I build resilient backend systems and autonomous AI agent pipelines that turn complex ideas into production-ready products.
+            <DecodeText text="I build resilient backend systems and autonomous AI agent pipelines that turn complex ideas into production-ready products." />
           </motion.h2>
 
           <motion.p

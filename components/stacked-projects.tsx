@@ -2,6 +2,7 @@
 
 import React, { useRef, useState } from "react";
 import { motion, useScroll, useTransform, MotionValue, AnimatePresence } from "framer-motion";
+import { TiltCard } from './tilt-card';
 import { ZeroLagSimulator, BilahujanSimulator, SensorXSimulator } from "./project-simulators";
 import { 
   Award, 
@@ -196,10 +197,8 @@ function ProjectCard({
   };
 
   return (
-    <div 
-      className="sticky top-24 w-full"
-      style={{ zIndex: index + 10 }}
-    >
+    <div className="sticky top-24 w-full group" style={{ zIndex: index + 10 }}>`n
+        <TiltCard>
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -455,6 +454,6 @@ function ProjectCard({
         </AnimatePresence>
 
       </motion.div>
-    </div>
+    </TiltCard>`n      </div>
   );
 }

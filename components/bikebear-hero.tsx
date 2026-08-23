@@ -3,6 +3,8 @@
 import React, { useRef, useState } from "react";
 import Image from "next/image";
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion";
+import { ParticleMesh } from './particle-mesh';
+import { DecodeText } from './decode-text';
 import { ArrowDown, ExternalLink, Sparkles, Terminal, Award, GraduationCap, Cpu, ShieldCheck } from "lucide-react";
 
 export default function BikebearHero() {
