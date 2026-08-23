@@ -49,7 +49,7 @@ export const personalDetails = {
   bio: 'Software Engineering undergraduate at Universiti Malaya (4.00 CGPA) with deep expertise in backend systems, distributed architectures, graph algorithms, and multi-agent AI workflows. Experienced in shipping production solutions across Java, Kotlin, Python, and Spring Boot.',
   email: 'howardwoonhz06@gmail.com',
   github: 'https://github.com/HowardWoon',
-  linkedin: 'https://linkedin.com/in/howardwoon',
+  linkedin: 'https://www.linkedin.com/in/howard-woon-hao-zhe-730b9337a/',
   resumeUrl: '/resume.pdf',
   avatarUrl: '/images/howard-solid.jpeg',
 };
