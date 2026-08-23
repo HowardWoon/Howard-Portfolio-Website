@@ -168,7 +168,7 @@ export default function BikebearHero() {
       </header>
 
       {/* Main Hero Body */}
-      <main className="flex-1 flex items-center w-full max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-10 z-10">
+      <main className="flex-1 flex items-center w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 py-10 z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center w-full">
           
           {/* Left Column: Vision & Narrative (7 cols) */}
@@ -240,7 +240,7 @@ export default function BikebearHero() {
               className="relative group cursor-pointer flex flex-col items-center lg:items-end"
             >
               {/* News Ticker (Above Photo) */}
-                <div className="w-[340px] sm:w-[460px] lg:w-[540px] xl:w-[600px] mb-4 overflow-hidden bg-white rounded-xl border border-white/20 py-2.5 relative z-20 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+                <div className="w-[340px] sm:w-[460px] lg:w-[480px] xl:w-[540px] mb-4 overflow-hidden bg-white rounded-xl border border-white/20 py-2.5 relative z-20 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
                   <div className="flex whitespace-nowrap animate-[marquee_20s_linear_infinite] w-max">
                     {[...Array(4)].map((_, i) => (
                       <div key={i} className="flex items-center">
@@ -257,7 +257,7 @@ export default function BikebearHero() {
               <div className="absolute -inset-1 bg-gradient-to-b from-amber-500/40 via-amber-500/10 to-transparent rounded-[52px] blur-xl opacity-70 group-hover:opacity-100 transition-opacity duration-500" />
 
               {/* Main Portrait Frame - Natural Vibrant Color (No Grayscale) */}
-              <div className="relative w-[340px] sm:w-[460px] lg:w-[540px] xl:w-[600px] h-[440px] sm:h-[580px] lg:h-[700px] xl:h-[780px] rounded-[48px] border-2 border-amber-500/30 bg-[#121620] overflow-hidden shadow-2xl transition-all duration-500 group-hover:border-amber-400/60">
+              <div className="relative w-[340px] sm:w-[460px] lg:w-[480px] xl:w-[540px] h-[440px] sm:h-[580px] lg:h-[620px] xl:h-[700px] rounded-[48px] border-2 border-amber-500/30 bg-[#121620] overflow-hidden shadow-2xl transition-all duration-500 group-hover:border-amber-400/60">
                 <Image
                   src="/images/howard-solid.jpeg"
                   alt="Howard Woon - Systems & AI Architect"
