@@ -243,12 +243,12 @@ export default function BikebearHero() {
               <div className="absolute -inset-1 bg-gradient-to-b from-amber-500/40 via-amber-500/10 to-transparent rounded-[52px] blur-xl opacity-70 group-hover:opacity-100 transition-opacity duration-500" />
 
               {/* Main Portrait Frame - Natural Vibrant Color (No Grayscale) */}
-              <div className="relative w-[290px] sm:w-[340px] h-[390px] sm:h-[450px] rounded-[48px] border-2 border-amber-500/30 bg-[#121620] overflow-hidden shadow-2xl transition-all duration-500 group-hover:border-amber-400/60">
+              <div className="relative w-[320px] sm:w-[420px] lg:w-[480px] h-[450px] sm:h-[550px] lg:h-[620px] rounded-[48px] border-2 border-amber-500/30 bg-[#121620] overflow-hidden shadow-2xl transition-all duration-500 group-hover:border-amber-400/60 lg:mr-8">
                 <Image
                   src="/images/howard-solid.jpeg"
                   alt="Howard Woon - Systems & AI Architect"
                   fill
-                  className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                  className="object-cover object-top transition-transform duration-700 group-hover:scale-105 saturate-[1.3] contrast-[1.15]"
                   priority
                   quality={95}
                 />
