@@ -62,7 +62,7 @@ export function SlotifySimulator() {
                 ? 'border-success text-emerald-600 bg-success/5 font-bold scale-[1.02]'
                 : s.free
                 ? 'border-black/10 text-slate-500'
-                : 'border-black/5 text-slate-400/50 opacity-60'
+                : 'border-black/5 text-neutral-400/50 opacity-60'
             }`}
           >
             <div className="text-sm mb-1">{s.id}</div>

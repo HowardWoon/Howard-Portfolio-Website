@@ -62,8 +62,8 @@ export function PortfolioPage() {
         <section id="experiments" className="space-y-8 scroll-mt-24">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-black/[0.08] pb-4">
             <div>
-              <div className="text-xs font-mono text-slate-600 uppercase tracking-widest">/experiments & prototypes</div>
-              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 font-display mt-1">Interactive Engineering Lab</h2>
+              <div className="text-xs font-mono text-neutral-700 uppercase tracking-widest">/experiments & prototypes</div>
+              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-black font-display mt-1">Interactive Engineering Lab</h2>
             </div>
             <p className="text-xs font-mono text-slate-500">Ideating & prototyping functional systems live.</p>
           </div>
@@ -74,17 +74,17 @@ export function PortfolioPage() {
               { id: 'bilahujan', label: '03 / BILAHUJAN IoT Gauge' },
               { id: 'sensor-sensei', label: '04 / Sensor X Sensei Load' },
             ].map((tab) => (
-              <button key={tab.id} onClick={() => setActiveLabTab(tab.id)} className={`px-4 py-2 rounded-xl text-xs font-mono transition-all ${activeLabTab === tab.id ? 'bg-slate-900 text-white font-bold shadow-md' : 'text-slate-600 hover:text-black'}`}>
+              <button key={tab.id} onClick={() => setActiveLabTab(tab.id)} className={`px-4 py-2 rounded-xl text-xs font-mono transition-all ${activeLabTab === tab.id ? 'bg-slate-900 text-white font-bold shadow-md' : 'text-neutral-700 hover:text-black'}`}>
                 {tab.label}
               </button>
             ))}
           </div>
-          <div className="p-6 sm:p-8 rounded-3xl border border-black/[0.08] bg-white shadow-xl">
+          <div className="p-6 sm:p-8 rounded-3xl border-2 border-black bg-white shadow-xl">
             {activeLabTab === 'slotify' && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between border-b border-black/[0.06] pb-3">
                   <div>
-                    <h4 className="font-bold text-slate-900 text-base font-display">Slotify Graph Routing Engine</h4>
+                    <h4 className="font-bold text-black text-base font-display">Slotify Graph Routing Engine</h4>
                     <p className="text-xs font-mono text-slate-500">Dijkstra Shortest Path & Spot Allocation Simulation</p>
                   </div>
                   <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-700">Java 21 / Spring Boot</span>
@@ -96,7 +96,7 @@ export function PortfolioPage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between border-b border-black/[0.06] pb-3">
                   <div>
-                    <h4 className="font-bold text-slate-900 text-base font-display">ZeroLag 5-Operator Agentic Pipeline</h4>
+                    <h4 className="font-bold text-black text-base font-display">ZeroLag 5-Operator Agentic Pipeline</h4>
                     <p className="text-xs font-mono text-slate-500">Autonomous Sales Intent Extraction & Webhook Dispatch</p>
                   </div>
                   <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-medium">Supervity 2nd Place</span>
@@ -108,7 +108,7 @@ export function PortfolioPage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between border-b border-black/[0.06] pb-3">
                   <div>
-                    <h4 className="font-bold text-slate-900 text-base font-display">BILAHUJAN Flood Telemetry Network</h4>
+                    <h4 className="font-bold text-black text-base font-display">BILAHUJAN Flood Telemetry Network</h4>
                     <p className="text-xs font-mono text-slate-500">Predictive Water Sensor & SMS Evacuation Alert Engine</p>
                   </div>
                   <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-medium">KitaHack 2026</span>
@@ -120,7 +120,7 @@ export function PortfolioPage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between border-b border-black/[0.06] pb-3">
                   <div>
-                    <h4 className="font-bold text-slate-900 text-base font-display">Sensor X Sensei HVAC Governance</h4>
+                    <h4 className="font-bold text-black text-base font-display">Sensor X Sensei HVAC Governance</h4>
                     <p className="text-xs font-mono text-slate-500">Commercial Power Load Shedding & Telemetry Estimator</p>
                   </div>
                   <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-purple-50 text-purple-700 font-medium">UM Technothon Finalist</span>
@@ -133,8 +133,8 @@ export function PortfolioPage() {
 
         <section id="experience" className="space-y-8 scroll-mt-24">
           <div className="border-b border-black/[0.08] pb-4">
-            <div className="text-xs font-mono text-slate-600 uppercase tracking-widest">/experience & leadership</div>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 font-display mt-1">Career & Institutional Governance</h2>
+            <div className="text-xs font-mono text-neutral-700 uppercase tracking-widest">/experience & leadership</div>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-black font-display mt-1">Career & Institutional Governance</h2>
           </div>
           <div className="space-y-4">
             {experiences.map((exp) => (
@@ -143,10 +143,10 @@ export function PortfolioPage() {
                   <div>
                     <div className="flex items-center gap-3">
                       <span className="font-mono text-xs text-slate-400">{exp.index}</span>
-                      <h3 className="text-base sm:text-lg font-bold text-slate-900">{exp.role}</h3>
+                      <h3 className="text-base sm:text-lg font-bold text-black">{exp.role}</h3>
                       <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-700">{exp.category}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-slate-600 font-mono mt-1">
+                    <div className="flex items-center gap-2 text-xs text-neutral-700 font-mono mt-1">
                       <Building2 className="w-3.5 h-3.5 text-slate-400" />
                       <span>{exp.organization}</span>
                       <span className="text-slate-300">•</span>
@@ -155,14 +155,14 @@ export function PortfolioPage() {
                   </div>
                   <div className="text-xs font-mono text-slate-500">{exp.period}</div>
                 </div>
-                <ul className="space-y-1.5 mb-4 list-disc list-inside text-xs sm:text-sm text-slate-600 leading-relaxed">
+                <ul className="space-y-1.5 mb-4 list-disc list-inside text-xs sm:text-sm text-neutral-700 leading-relaxed">
                   {exp.description.map((b, i) => (
                     <li key={i}>{b}</li>
                   ))}
                 </ul>
                 <div className="flex flex-wrap gap-1.5 pt-2 border-t border-black/[0.05]">
                   {exp.skills.map((skill, i) => (
-                    <span key={i} className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-600 hover:border-black/20 hover:bg-slate-200 transition-colors cursor-default border border-black/[0.04]">
+                    <span key={i} className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 text-neutral-700 hover:border-black/20 hover:bg-slate-200 transition-colors cursor-default border border-black/[0.04]">
                       {skill}
                     </span>
                   ))}
@@ -174,8 +174,8 @@ export function PortfolioPage() {
 
         <section id="honors" className="space-y-8 scroll-mt-24">
           <div className="border-b border-black/[0.08] pb-4">
-            <div className="text-xs font-mono text-slate-600 uppercase tracking-widest">/honors & distinctions</div>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 font-display mt-1">Academic & Competition Honors</h2>
+            <div className="text-xs font-mono text-neutral-700 uppercase tracking-widest">/honors & distinctions</div>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-black font-display mt-1">Academic & Competition Honors</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {awards.map((award) => (
@@ -185,16 +185,16 @@ export function PortfolioPage() {
                     <span className="text-slate-400">{award.index}</span>
                     <span className="px-2 py-0.5 rounded-full bg-amber-50 border border-amber-600/20 text-amber-800 font-semibold text-[11px]">{award.highlight}</span>
                   </div>
-                  <h3 className="text-base font-bold text-slate-900 mb-1 group-hover:text-amber-800 transition-colors">{award.title}</h3>
-                  <p className="text-xs text-slate-600 font-mono mb-2">{award.issuer}</p>
-                  <p className="text-xs text-slate-600 leading-relaxed">{award.description}</p>
+                  <h3 className="text-base font-bold text-black mb-1 group-hover:text-amber-800 transition-colors">{award.title}</h3>
+                  <p className="text-xs text-neutral-700 font-mono mb-2">{award.issuer}</p>
+                  <p className="text-xs text-neutral-700 leading-relaxed">{award.description}</p>
                 </div>
                 <div className="text-[11px] font-mono text-slate-400 pt-3 mt-4 border-t border-black/[0.05] flex items-center justify-between">
                   <span>{award.date}</span>
                   <div className="flex items-center gap-2">
                     {award.stats && <span className="text-slate-700 font-semibold">{award.stats}</span>}
                     {award.certificateUrl && (
-                      <button onClick={() => setActiveDeck({ title: award.title, pdfUrl: award.certificateUrl! })} className="p-1 rounded hover:bg-black/5 text-slate-900 transition-all ml-auto">
+                      <button onClick={() => setActiveDeck({ title: award.title, pdfUrl: award.certificateUrl! })} className="p-1 rounded hover:bg-black/5 text-black transition-all ml-auto">
                         <Award className="w-3.5 h-3.5" />
                       </button>
                     )}
@@ -207,29 +207,29 @@ export function PortfolioPage() {
 
         <section id="contact" className="space-y-10 scroll-mt-24">
           <div className="border-b border-black/[0.08] pb-4">
-            <div className="text-xs font-mono text-slate-600 uppercase tracking-widest">/new_project</div>
-            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-slate-900 font-display mt-1">Let&apos;s build something special.</h2>
+            <div className="inline-flex items-center border border-black/80 rounded-full px-3.5 py-1 text-xs font-mono tracking-widest uppercase bg-white mb-2">CONTACT // CONNECT</div>
+<h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold uppercase tracking-tight text-black font-display">Let&apos;s build something special.</h2>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
-            <div className="lg:col-span-2 p-7 rounded-3xl border border-black/[0.08] bg-white space-y-6 shadow-md">
+            <div className="lg:col-span-2 p-7 rounded-3xl border-2 border-black bg-white space-y-6 shadow-md">
               <div>
-                <h3 className="text-lg font-bold text-slate-900 tracking-tight">{personalDetails.fullName}</h3>
+                <h3 className="text-lg font-bold text-black tracking-tight">{personalDetails.fullName}</h3>
                 <p className="text-xs font-mono text-slate-500 mt-0.5">Software Engineering Undergraduate @ Universiti Malaya</p>
-                <p className="text-xs text-slate-600 mt-2.5 leading-relaxed">Open to software engineering roles, backend systems architecture, and high-impact hackathon collaborations.</p>
+                <p className="text-xs text-neutral-700 mt-2.5 leading-relaxed">Open to software engineering roles, backend systems architecture, and high-impact hackathon collaborations.</p>
               </div>
               <div className="space-y-3 pt-2 border-t border-black/[0.06]">
-                <div className="flex items-center gap-2 text-xs font-mono text-slate-600">
+                <div className="flex items-center gap-2 text-xs font-mono text-neutral-700">
                   <MapPin className="w-3.5 h-3.5 text-slate-400" />
                   <span>{personalDetails.location}</span>
                 </div>
                 {!revealedEmail ? (
-                  <button onClick={() => setRevealedEmail(true)} className="w-full py-3 px-4 rounded-xl border border-black/10 bg-[#F4F4F6] hover:bg-slate-100 text-slate-900 font-mono text-xs font-semibold transition-all text-center">
+                  <button onClick={() => setRevealedEmail(true)} className="w-full py-3 px-4 rounded-xl border border-black/10 bg-[#F4F4F6] hover:bg-slate-100 text-black font-mono text-xs font-semibold transition-all text-center">
                     Reveal Email Address ↓
                   </button>
                 ) : (
                   <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-black/10 font-mono text-xs">
-                    <span className="truncate text-slate-900 font-semibold">{personalDetails.email}</span>
-                    <button onClick={handleCopyEmail} className="p-1 rounded hover:bg-black/5 text-slate-600 hover:text-black transition-colors" title="Copy Email">
+                    <span className="truncate text-black font-semibold">{personalDetails.email}</span>
+                    <button onClick={handleCopyEmail} className="p-1 rounded hover:bg-black/5 text-neutral-700 hover:text-black transition-colors" title="Copy Email">
                       {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
                     </button>
                   </div>
@@ -244,21 +244,21 @@ export function PortfolioPage() {
                 </a>
               </div>
             </div>
-            <div className="lg:col-span-3 p-7 rounded-3xl border border-black/[0.08] bg-white shadow-md">
+            <div className="lg:col-span-3 p-7 rounded-3xl border-2 border-black bg-white shadow-md">
               <form onSubmit={handleFormSubmit} className="space-y-4 font-mono text-xs">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-slate-500 mb-1.5 uppercase tracking-wider">Your Name</label>
-                    <input type="text" required value={formState.name} onChange={(e) => setFormState({ ...formState, name: e.target.value })} placeholder="Alex Mercer" className="w-full px-3.5 py-2.5 rounded-xl border border-black/10 bg-slate-50 text-slate-900 font-sans text-xs sm:text-sm focus:outline-none focus:border-slate-900 transition-colors" />
+                    <input type="text" required value={formState.name} onChange={(e) => setFormState({ ...formState, name: e.target.value })} placeholder="Alex Mercer" className="w-full px-3.5 py-2.5 rounded-xl border border-black/10 bg-slate-50 text-black font-sans text-xs sm:text-sm focus:outline-none focus:border-slate-900 transition-colors" />
                   </div>
                   <div>
                     <label className="block text-slate-500 mb-1.5 uppercase tracking-wider">Email Address</label>
-                    <input type="email" required value={formState.email} onChange={(e) => setFormState({ ...formState, email: e.target.value })} placeholder="alex@company.com" className="w-full px-3.5 py-2.5 rounded-xl border border-black/10 bg-slate-50 text-slate-900 font-sans text-xs sm:text-sm focus:outline-none focus:border-slate-900 transition-colors" />
+                    <input type="email" required value={formState.email} onChange={(e) => setFormState({ ...formState, email: e.target.value })} placeholder="alex@company.com" className="w-full px-3.5 py-2.5 rounded-xl border border-black/10 bg-slate-50 text-black font-sans text-xs sm:text-sm focus:outline-none focus:border-slate-900 transition-colors" />
                   </div>
                 </div>
                 <div>
                   <label className="block text-slate-500 mb-1.5 uppercase tracking-wider">Message</label>
-                  <textarea required rows={4} value={formState.message} onChange={(e) => setFormState({ ...formState, message: e.target.value })} placeholder="Hi Howard, let's connect regarding a software engineering role..." className="w-full px-3.5 py-2.5 rounded-xl border border-black/10 bg-slate-50 text-slate-900 font-sans text-xs sm:text-sm focus:outline-none focus:border-slate-900 transition-colors resize-none" />
+                  <textarea required rows={4} value={formState.message} onChange={(e) => setFormState({ ...formState, message: e.target.value })} placeholder="Hi Howard, let's connect regarding a software engineering role..." className="w-full px-3.5 py-2.5 rounded-xl border border-black/10 bg-slate-50 text-black font-sans text-xs sm:text-sm focus:outline-none focus:border-slate-900 transition-colors resize-none" />
                 </div>
                 {formStatus === 'error' && (
                   <div className="flex items-center gap-2 text-rose-700 bg-rose-50 p-3 rounded-xl border border-rose-200">
@@ -280,7 +280,7 @@ export function PortfolioPage() {
           </div>
         </section>
 
-        <footer className="pt-10 border-t border-black/[0.08] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600 font-mono">
+        <footer className="pt-10 border-t border-black/[0.08] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-neutral-700 font-mono">
           <p>© {new Date().getFullYear()} Howard Woon Hao Zhe. All rights reserved.</p>
           <p>Universiti Malaya • Software Engineering (4.00 CGPA)</p>
         </footer>
