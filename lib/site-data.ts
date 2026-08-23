@@ -11,6 +11,7 @@ export interface Project {
   githubUrl?: string;
   liveUrl?: string;
   deckUrl?: string;
+  certificateUrl?: string;
   featured: boolean;
   highlight?: string;
   metrics?: { label: string; value: string };
@@ -36,6 +37,7 @@ export interface AwardItem {
   description: string;
   stats?: string;
   link?: string;
+  certificateUrl?: string;
 }
 
 export const personalDetails = {
@@ -170,6 +172,7 @@ export const projects: Project[] = [
     githubUrl: 'https://github.com/HowardWoon/BILAHUJAN-VHack2026',
     liveUrl: 'https://bilahujan-vhack.web.app/',
     deckUrl: '/documents/dsaise-pitchdeck.pdf',
+    certificateUrl: '/certificates/V HACK 2026 QUALIFIER_HOWARD WOON HAO ZHE.pdf',
     featured: true,
     highlight: 'KitaHack 2026 National Innovation',
     metrics: { label: 'Early Warning Window', value: '3.5 Hours' },
@@ -178,12 +181,12 @@ export const projects: Project[] = [
     id: 'proj-sensor-sensei',
     title: 'Sensor X Sensei',
     tagline: 'IoT Energy Monitoring & Automated Power Governance',
-    description:
-      'Embedded IoT telemetry and cloud monitoring dashboard for commercial lecture hall energy monitoring, automated load shedding, and peak consumption forecasting.',
+    description: 'Embedded IoT telemetry and cloud monitoring dashboard for commercial lecture hall energy monitoring, automated load shedding, and peak consumption forecasting.',
     architectureHighlight: 'ESP32 microcontroller telemetry via MQTT with automated HVAC load-shedding algorithms.',
     category: 'Mobile & Cloud IoT',
     technologies: ['ESP32', 'Node.js', 'MQTT', 'React', 'Tailwind CSS'],
     githubUrl: 'https://github.com/HowardWoon',
+    certificateUrl: '/certificates/UM TECHNOTHON 2026.pdf',
     featured: false,
     highlight: 'UM Technothon 2026 Finalist',
     metrics: { label: 'Energy Reduction', value: '28.4%' },
@@ -200,6 +203,7 @@ export const awards: AwardItem[] = [
     description: 'Developed "The Goofy Experience" with Team Charlton—a medical horror/comedy game themed around "Losing Control". Implemented complex Perceptual Sabotage mechanics (UI hijacking, cursor manipulation) and a Chaos Buddy system to actively disorient players. Features 100% custom a cappella audio. Won against 39 universities nationwide.',
     stats: 'Public Choice / 39 Teams',
     link: 'https://howard-woon.itch.io/the-goofy-experience',
+    certificateUrl: '/certificates/UM GAME JAM 2026 HOWARD WOON HAO ZHE.png',
   },
   {
     id: 'award-supervity',
@@ -209,6 +213,7 @@ export const awards: AwardItem[] = [
     highlight: 'Regional Hackathon Prize',
     description: 'Engineered ZeroLag, an agentic sales intelligence automation system, outperforming over 50 regional teams across Asia-Pacific.',
     stats: '2nd / 50+ Regional Teams',
+    certificateUrl: '/certificates/Sales Intelligence Winner - 2nd Place.png',
   },
   {
     id: 'award-deans-list',

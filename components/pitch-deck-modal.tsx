@@ -70,7 +70,7 @@ export function PitchDeckModal({ isOpen, onClose, title, pdfUrl }: PitchDeckModa
           <iframe
             src={`${pdfUrl}#toolbar=0&navpanes=0&view=FitH`}
             className="w-full h-full border-none"
-            title={`${title} Pitch Deck`}
+            title={`${title} Document`}
           />
         </div>
       </div>

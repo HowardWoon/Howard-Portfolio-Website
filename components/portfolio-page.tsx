@@ -43,7 +43,7 @@ const FadeIn = ({ children, delay = 0, className = "" }: { children: React.React
 );
 
 export function PortfolioPage() {
-  const [activeDeck, setActiveDeck] = useState<{ title: string; pdfUrl: string } | null>(null);
+  const [activeDocument, setActiveDocument] = useState<{ title: string; pdfUrl: string } | null>(null);
   const [formState, setFormState] = useState({ name: '', email: '', message: '' });
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
@@ -225,10 +225,19 @@ export function PortfolioPage() {
 
                       {proj.deckUrl && (
                         <button
-                          onClick={() => setActiveDeck({ title: proj.title, pdfUrl: proj.deckUrl! })}
+                          onClick={() => setActiveDocument({ title: proj.title, pdfUrl: proj.deckUrl! })}
                           className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full border border-line text-ink font-medium text-sm hover:bg-surface-2 transition-colors flex-1"
                         >
-                          Pitch Deck
+                          <FileText className="w-4 h-4" /> Pitch Deck
+                        </button>
+                      )}
+
+                      {proj.certificateUrl && (
+                        <button
+                          onClick={() => setActiveDocument({ title: proj.title, pdfUrl: proj.certificateUrl! })}
+                          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full border border-line text-ink font-medium text-sm hover:bg-surface-2 transition-colors flex-1"
+                        >
+                          <FileText className="w-4 h-4" /> Certificate
                         </button>
                       )}
                     </div>
@@ -293,42 +302,58 @@ export function PortfolioPage() {
           </FadeIn>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {awards.map((award, idx) => {
-              const CardContent = (
-                <div className={`h-full p-8 rounded-[24px] border border-line bg-surface shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] hover:-translate-y-1 hover:shadow-xl hover:border-line-strong transition-all duration-300 flex flex-col justify-between group ${award.link ? 'cursor-pointer' : ''}`}>
+            {awards.map((award, idx) => (
+              <FadeIn key={award.id} delay={idx * 0.1} className="h-full">
+                <div className="h-full p-8 rounded-[24px] border border-line bg-surface shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] hover:-translate-y-1 hover:shadow-xl hover:border-line-strong transition-all duration-300 flex flex-col justify-between group">
                   <div>
                     <div className="mb-4 text-xs font-mono text-ink-3 uppercase tracking-wider group-hover:text-signal transition-colors flex items-center justify-between">
                       <span>{award.highlight}</span>
-                      {award.link && <ExternalLink className="w-3 h-3 text-signal opacity-0 group-hover:opacity-100 transition-opacity" />}
                     </div>
-                    <h3 className="text-lg font-bold text-ink mb-2 group-hover:text-signal transition-colors">
+                    <h3 className="text-lg font-bold text-ink mb-2">
                       {award.title}
                     </h3>
                     <p className="text-sm font-medium text-ink-2 mb-4">{award.issuer}</p>
-                    <p className="text-sm text-ink-3 leading-relaxed">{award.description}</p>
+                    <p className="text-sm text-ink-3 leading-relaxed mb-6">{award.description}</p>
                   </div>
 
-                  <div className="flex items-center justify-between pt-6 mt-6 border-t border-line">
-                    <span className="text-xs font-mono text-signal">{award.date}</span>
-                    {award.stats && (
-                       <span className="text-xs font-mono text-ink-3">{award.stats}</span>
+                  <div>
+                    {/* Optional Action Buttons */}
+                    {(award.link || award.certificateUrl) && (
+                      <div className="flex items-center gap-3 mb-6">
+                        {award.link && (
+                          <a
+                            href={award.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full border border-line text-ink font-medium text-sm hover:bg-surface-2 transition-colors flex-1"
+                          >
+                            <ExternalLink className="w-4 h-4" /> View Project
+                          </a>
+                        )}
+                        {award.certificateUrl && (
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setActiveDocument({ title: award.title, pdfUrl: award.certificateUrl! });
+                            }}
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full border border-line text-ink font-medium text-sm hover:bg-surface-2 transition-colors flex-1"
+                          >
+                            <FileText className="w-4 h-4" /> View Certificate
+                          </button>
+                        )}
+                      </div>
                     )}
+
+                    <div className="flex items-center justify-between pt-6 border-t border-line">
+                      <span className="text-xs font-mono text-signal">{award.date}</span>
+                      {award.stats && (
+                        <span className="text-xs font-mono text-ink-3">{award.stats}</span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              );
-
-              return (
-                <FadeIn key={award.id} delay={idx * 0.1} className="h-full">
-                  {award.link ? (
-                    <a href={award.link} target="_blank" rel="noopener noreferrer" className="block h-full outline-none focus-visible:ring-2 focus-visible:ring-signal rounded-[24px]">
-                      {CardContent}
-                    </a>
-                  ) : (
-                    CardContent
-                  )}
-                </FadeIn>
-              );
-            })}
+              </FadeIn>
+            ))}
           </div>
         </section>
 
@@ -486,12 +511,12 @@ export function PortfolioPage() {
       </div>
 
       {/* Pitch Deck Modal */}
-      {activeDeck && (
+      {activeDocument && (
         <PitchDeckModal
-          isOpen={!!activeDeck}
-          onClose={() => setActiveDeck(null)}
-          title={activeDeck.title}
-          pdfUrl={activeDeck.pdfUrl}
+          isOpen={!!activeDocument}
+          onClose={() => setActiveDocument(null)}
+          title={activeDocument.title}
+          pdfUrl={activeDocument.pdfUrl}
         />
       )}
     </div>
