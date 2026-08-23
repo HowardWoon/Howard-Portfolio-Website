@@ -271,62 +271,7 @@ export default function BikebearHero() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
               </div>
 
-              {/* Floating Glassmorphic Badge #1 (Top Left): Hackathon Winner */}
-              <motion.div
-                initial={{ opacity: 0, x: -30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.7, delay: 0.5 }}
-                className="absolute -top-4 -left-6 bg-[#0E121B]/90 backdrop-blur-xl border border-amber-500/40 rounded-2xl p-3.5 shadow-2xl flex items-center gap-3 group-hover:-translate-y-1 transition-transform"
-                style={{ transform: "translateZ(40px)" }}
-              >
-                <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
-                  <Award className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="text-xs font-mono font-bold text-white leading-tight">
-                    2nd Place Winner
-                  </div>
-                  <div className="text-xs font-mono text-amber-400">
-                    Supervity Asia Hackathon
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Floating Glassmorphic Badge #2 (Bottom Right): 4.00 CGPA UM */}
-              <motion.div
-                initial={{ opacity: 0, x: 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.7, delay: 0.6 }}
-                className="absolute -bottom-5 -right-6 bg-[#0E121B]/90 backdrop-blur-xl border border-emerald-500/40 rounded-2xl p-3.5 shadow-2xl flex items-center gap-3 group-hover:translate-y-1 transition-transform"
-                style={{ transform: "translateZ(40px)" }}
-              >
-                <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
-                  <GraduationCap className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="text-xs font-mono font-bold text-white flex items-center gap-1.5 leading-tight">
-                    CGPA 4.00 · UM
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  </div>
-                  <div className="text-xs font-mono text-neutral-400">
-                    Software Engineering
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Floating Micro-Badge #3 (Bottom Left): Multi-Agent Pipelines */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.7 }}
-                className="hidden sm:flex absolute bottom-8 -left-8 bg-[#0E121B]/90 backdrop-blur-xl border border-cyan-500/30 rounded-xl px-3 py-2 shadow-xl items-center gap-2"
-                style={{ transform: "translateZ(30px)" }}
-              >
-                <Cpu className="w-3.5 h-3.5 text-cyan-400" />
-                <span className="text-xs font-mono text-neutral-200">
-                  5-Operator Agentic AI
-                </span>
-              </motion.div>
+              
 
             </motion.div>
           </div>
