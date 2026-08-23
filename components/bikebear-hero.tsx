@@ -172,7 +172,7 @@ export default function BikebearHero() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center w-full">
           
           {/* Left Column: Vision & Narrative (7 cols) */}
-          <div className="lg:col-span-7 flex flex-col items-start space-y-6">
+          <div className="lg:col-span-7 flex flex-col items-start space-y-6 relative z-30 pointer-events-auto">
             
             {/* Brand Pill Badge */}
             <motion.div
