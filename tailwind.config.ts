@@ -7,8 +7,8 @@ const config: Config = {
     extend: {
       colors: {
         canvas: '#0A0A0B',
-        surface: '#131315',
-        'surface-2': '#18181B',
+        surface: '#151518',
+        'surface-2': '#1C1C20',
         line: 'rgba(255,255,255,0.08)',
         'line-strong': 'rgba(255,255,255,0.16)',
         ink: '#F3F2EF',
