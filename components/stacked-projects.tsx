@@ -324,7 +324,7 @@ function ProjectCard({
 
             {/* Conditional Graphic Visualizers */}
             {project.telemetryType === "agentic" && (
-              <div className="flex-1 w-full flex items-center justify-center min-h-[350px] py-4">
+              <div className="flex-1 w-full flex items-center justify-center min-h-[400px] lg:min-h-[450px] py-2 overflow-hidden rounded-xl">
                 <InteractivePhotoStack />
               </div>
             )}
