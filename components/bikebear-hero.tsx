@@ -60,9 +60,7 @@ export default function BikebearHero() {
           transition={{ duration: 0.6 }}
           className="flex items-center gap-3.5"
         >
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-black font-black flex items-center justify-center text-sm tracking-wider shadow-lg shadow-amber-500/20">
-            HW
-          </div>
+          <img src="/images/profile-icon.jpg" alt="Howard Woon" className="w-10 h-10 rounded-xl object-cover shadow-lg shadow-amber-500/20 border border-white/10" />
           <div>
             <h1 className="font-bold text-sm tracking-wide uppercase leading-none text-white flex items-center gap-2">
               HOWARD WOON
