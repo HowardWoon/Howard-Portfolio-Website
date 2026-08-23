@@ -116,7 +116,7 @@ export default function AboutSection() {
     >
       {/* Ambient Lighting Gradients */}
       <div className="absolute top-1/3 left-0 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-10 right-0 w-[500px] h-[500px] bg-cyan-500/5 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-10 right-0 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-[140px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto space-y-16">
         
@@ -206,10 +206,10 @@ export default function AboutSection() {
                 <div className="grid grid-cols-3 gap-2.5 pt-3 border-t border-white/10">
                   {pillar.metrics.map((metric, mIdx) => (
                     <div key={mIdx} className="bg-black/30 rounded-xl p-2.5 border border-white/5">
-                      <div className="text-[10px] font-mono text-neutral-400 uppercase leading-none">
+                      <div className="text-xs font-mono text-neutral-400 uppercase leading-none">
                         {metric.label}
                       </div>
-                      <div className="text-xs font-mono font-bold text-neutral-100 mt-1.5 truncate">
+                      <div className="text-xs font-mono font-bold text-neutral-100 mt-1.5 ">
                         {metric.value}
                       </div>
                     </div>
@@ -217,12 +217,12 @@ export default function AboutSection() {
                 </div>
 
                 {/* Live Telemetry Ticker */}
-                <div className="bg-black/60 rounded-xl px-3.5 py-2 border border-white/10 flex items-center justify-between text-[11px] font-mono text-neutral-400">
-                  <div className="flex items-center gap-2 truncate">
+                <div className="bg-black/60 rounded-xl px-3.5 py-2 border border-white/10 flex items-center justify-between text-xs font-mono text-neutral-400">
+                  <div className="flex items-center gap-2 ">
                     <Activity className="w-3.5 h-3.5 text-emerald-400 animate-pulse shrink-0" />
-                    <span className="truncate">{pillar.telemetrySnippet}</span>
+                    <span className="">{pillar.telemetrySnippet}</span>
                   </div>
-                  <span className="text-[10px] text-amber-400/80 font-bold shrink-0 ml-2">ACTIVE</span>
+                  <span className="text-xs text-amber-400/80 font-bold shrink-0 ml-2">ACTIVE</span>
                 </div>
               </motion.div>
             );

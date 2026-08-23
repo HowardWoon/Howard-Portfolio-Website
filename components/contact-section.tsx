@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Mail, 
@@ -32,8 +32,20 @@ const quickIntents = [
 export default function ContactSection() {
   const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
   const [copiedEmail, setCopiedEmail] = useState(false);
+  const [emailRevealed, setEmailRevealed] = useState(false);
   const [formStatus, setFormStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
   const [activeIntent, setActiveIntent] = useState<string | null>(null);
+
+  
+  const cycleWords = ["BUILD", "SHIP", "ARCHITECT", "SCALE", "DEPLOY"];
+  const [cycleIndex, setCycleIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCycleIndex((prev) => (prev + 1) % cycleWords.length);
+    }, 2000);
+    return () => clearInterval(timer);
+  }, []);
 
   const emailAddress = "howardwoonhz@gmail.com";
   const linkedInUrl = "https://www.linkedin.com/in/howard-woon-hao-zhe-730b9337a/";
@@ -86,7 +98,7 @@ export default function ContactSection() {
     >
       {/* Ambient Glows */}
       <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[160px] pointer-events-none" />
-      <div className="absolute bottom-10 right-1/4 w-[600px] h-[600px] bg-cyan-500/5 rounded-full blur-[160px] pointer-events-none" />
+      <div className="absolute bottom-10 right-1/4 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[160px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto space-y-16">
         
@@ -151,7 +163,7 @@ export default function ContactSection() {
                   <span>Kajang, Selangor · Kuala Lumpur, Malaysia</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Clock className="w-3.5 h-3.5 text-cyan-400" />
+                  <Clock className="w-3.5 h-3.5 text-amber-400" />
                   <span>Timezone: GMT+8 (Open to Remote / Relocation)</span>
                 </div>
               </div>
@@ -159,12 +171,12 @@ export default function ContactSection() {
               {/* 1-Click Email Clipboard Button with Toast */}
               <div className="pt-2">
                 <button
-                  onClick={handleCopyEmail}
+                  onClick={emailRevealed ? handleCopyEmail : () => setEmailRevealed(true)}
                   className="w-full flex items-center justify-between px-5 py-3.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/15 text-xs font-mono text-neutral-200 transition-all group"
                 >
-                  <div className="flex items-center gap-2.5 truncate">
+                  <div className="flex items-center gap-2.5">
                     <Mail className="w-4 h-4 text-amber-400 shrink-0" />
-                    <span className="truncate">{emailAddress}</span>
+                    <span>{emailRevealed ? emailAddress : "REVEAL EMAIL ADDRESS"}</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-amber-400 font-bold shrink-0 ml-2">
                     {copiedEmail ? (
@@ -175,7 +187,7 @@ export default function ContactSection() {
                     ) : (
                       <>
                         <Copy className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
-                        <span>COPY</span>
+                        <span>{emailRevealed ? "COPY" : "VIEW"}</span>
                       </>
                     )}
                   </div>
@@ -217,12 +229,12 @@ export default function ContactSection() {
 
               {/* Target Engineering Specializations */}
               <div className="space-y-2 border-t border-white/10 pt-4">
-                <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest block">
+                <span className="text-xs font-mono text-neutral-400 uppercase tracking-widest block">
                   TARGET ROLES & SPECIALIZATIONS:
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {["Distributed Backends", "Java 21 / Spring Boot", "Agentic AI Pipelines", "High-Throughput APIs", "Fiscal Governance"].map((role) => (
-                    <span key={role} className="px-2.5 py-1 bg-black/40 border border-white/5 rounded-lg text-[11px] font-mono text-neutral-300">
+                    <span key={role} className="px-2.5 py-1 bg-black/40 border border-white/5 rounded-lg text-xs font-mono text-neutral-300">
                       {role}
                     </span>
                   ))}
@@ -251,7 +263,7 @@ export default function ContactSection() {
 
             {/* Quick Intent Pre-Fill Chips */}
             <div className="space-y-2">
-              <span className="text-[11px] font-mono text-amber-400/90">
+              <span className="text-xs font-mono text-amber-400/90">
                 // Select a conversation intent:
               </span>
               <div className="flex flex-wrap gap-2">
@@ -276,7 +288,7 @@ export default function ContactSection() {
             <form onSubmit={handleSubmit} className="space-y-4 pt-2">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-mono text-neutral-400 uppercase tracking-wider">
+                  <label className="text-xs font-mono text-neutral-400 uppercase tracking-wider">
                     YOUR NAME *
                   </label>
                   <input
@@ -290,7 +302,7 @@ export default function ContactSection() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-mono text-neutral-400 uppercase tracking-wider">
+                  <label className="text-xs font-mono text-neutral-400 uppercase tracking-wider">
                     EMAIL ADDRESS *
                   </label>
                   <input
@@ -305,7 +317,7 @@ export default function ContactSection() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[11px] font-mono text-neutral-400 uppercase tracking-wider">
+                <label className="text-xs font-mono text-neutral-400 uppercase tracking-wider">
                   MESSAGE / PROPOSAL *
                 </label>
                 <textarea
@@ -345,6 +357,19 @@ export default function ContactSection() {
 
         </div>
 
+        
+        {/* Footer Marquee */}
+        <div className="w-full overflow-hidden bg-amber-500/10 border-y border-amber-500/20 py-3 mt-16 -mx-6 sm:-mx-10 lg:-mx-16 px-6 sm:px-10 lg:px-16 w-[calc(100%+3rem)] sm:w-[calc(100%+5rem)] lg:w-[calc(100%+8rem)] relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen max-w-none">
+          <div className="flex whitespace-nowrap animate-marquee hover:[animation-play-state:paused] w-max">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="flex items-center">
+                <span className="text-xs font-mono font-medium text-amber-500 px-8">ENGINEERING SYSTEMS TO STAND OUT IN A NOISY WORLD</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500/50 mx-4"></span>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Global Footer & Functional Sitemap */}
         <footer className="border-t border-white/10 pt-10 pb-6 space-y-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
@@ -354,7 +379,7 @@ export default function ContactSection() {
               <div className="text-xs font-mono text-white font-bold">
                 © 2026 Howard Woon Hao Zhe. All rights reserved.
               </div>
-              <div className="text-[11px] font-mono text-neutral-500">
+              <div className="text-xs font-mono text-neutral-500">
                 Universiti Malaya · Bachelor of Computer Science (Software Engineering, 4.00 CGPA)
               </div>
             </div>
@@ -366,10 +391,7 @@ export default function ContactSection() {
               <a href="#simulators" className="hover:text-amber-400 transition-colors">03 // LAB</a>
               <a href="#experience" className="hover:text-amber-400 transition-colors">04 // GOVERNANCE</a>
               <a href="#honors" className="hover:text-amber-400 transition-colors">05 // HONORS</a>
-              <a href="/admin/login" className="flex items-center gap-1 text-neutral-500 hover:text-white transition-colors">
-                <Lock className="w-3 h-3" />
-                <span>ADMIN</span>
-              </a>
+              
             </div>
 
           </div>

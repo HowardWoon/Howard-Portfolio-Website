@@ -6,11 +6,8 @@ import ExperienceSection from '@/components/experience-section';
 import HonorsSection from '@/components/honors-section';
 import ContactSection from '@/components/contact-section';
 
-import React, { useState } from 'react';
-import Image from 'next/image';
-import {
-  Github, ExternalLink, FileText, ArrowUpRight, ArrowDown, Sparkles, Building2, Calendar, Award, Layers, Send, Check, Copy, MapPin, AlertCircle, CheckCircle,
-} from 'lucide-react';
+import { BootSequence } from '@/components/boot-sequence';
+import { TechMarquee } from '@/components/marquees';
 
 
 import ProjectSimulators from '@/components/project-simulators';
@@ -21,9 +18,10 @@ export function PortfolioPage() {
   
 
   return (
-    <div className="relative min-h-screen tech-grid-bg selection:bg-slate-900 selection:text-white">
+    <BootSequence><div className="relative min-h-screen bg-[#090B10] selection:bg-amber-500 selection:text-black">
       <BikebearInspiredHero />
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-32 space-y-36">
+      <TechMarquee skills={['REGIONAL APAC HACKATHON 2ND PLACE', 'STRAIGHT 4.00 CGPA UM SOFTWARE ENGINEERING', 'UM GAME JAM CHAMPION', 'PKUM FINANCE LEAD', 'V HACK QUALIFIER']} />
+      <main className="w-full">
         
 
         <AboutSection />
@@ -40,6 +38,6 @@ export function PortfolioPage() {
       </main>
 
       
-    </div>
+    </div></BootSequence>
   );
 }

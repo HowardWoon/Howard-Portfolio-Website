@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Award, 
@@ -124,11 +124,22 @@ const honorsList: HonorItem[] = [
 export default function HonorsSection() {
   const [selectedCert, setSelectedCert] = useState<string | null>(null);
 
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    if (selectedCert) {
+      dialogRef.current?.showModal();
+    } else {
+      dialogRef.current?.close();
+    }
+  }, [selectedCert]);
+
+
   const badgeColorMap = {
     gold: "border-amber-500/40 bg-amber-500/10 text-amber-300",
-    cyan: "border-cyan-500/40 bg-cyan-500/10 text-cyan-300",
+    cyan: "border-amber-500/40 bg-amber-500/10 text-amber-300",
     emerald: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
-    purple: "border-purple-500/40 bg-purple-500/10 text-purple-300",
+    purple: "border-amber-500/40 bg-amber-500/10 text-amber-300",
   };
 
   return (
@@ -136,9 +147,8 @@ export default function HonorsSection() {
       id="honors" 
       className="relative w-full bg-[#090B10] text-white py-32 px-6 sm:px-10 lg:px-16 overflow-hidden border-t border-white/10 selection:bg-amber-500 selection:text-black"
     >
-      {/* Ambient Radial Background Glow */}
-      <div className="absolute top-1/3 left-1/4 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[160px] pointer-events-none" />
-      <div className="absolute bottom-10 right-1/4 w-[600px] h-[600px] bg-cyan-500/5 rounded-full blur-[160px] pointer-events-none" />
+      
+      
 
       <div className="max-w-7xl mx-auto space-y-16">
         
@@ -249,51 +259,46 @@ export default function HonorsSection() {
 
       </div>
 
-      {/* Interactive Certificate Preview Modal */}
-      <AnimatePresence>
+      {/* Native Dialog Modal */}
+      <dialog
+        ref={dialogRef}
+        onClose={() => setSelectedCert(null)}
+        onClick={(e) => {
+          if (e.target === dialogRef.current) setSelectedCert(null);
+        }}
+        className="fixed inset-0 z-50 bg-transparent p-4 sm:p-8 m-auto w-full max-w-4xl backdrop:bg-black/90 backdrop:backdrop-blur-xl open:animate-in open:fade-in open:zoom-in-95 duration-300"
+      >
         {selectedCert && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setSelectedCert(null)}
-            className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 sm:p-8"
+          <div
+            className="relative w-full bg-[#0E121B] border border-white/20 rounded-3xl overflow-hidden shadow-2xl p-4 sm:p-6"
           >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative max-w-4xl w-full bg-[#0E121B] border border-white/20 rounded-3xl overflow-hidden shadow-2xl p-4 sm:p-6"
-            >
-              <div className="flex items-center justify-between pb-4 border-b border-white/10">
-                <span className="text-xs font-mono text-neutral-300 uppercase tracking-widest">
-                  OFFICIAL CREDENTIAL VERIFICATION
-                </span>
-                <button
-                  onClick={() => setSelectedCert(null)}
-                  className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
+            <div className="flex items-center justify-between pb-4 border-b border-white/10">
+              <span className="text-xs font-mono text-neutral-300 uppercase tracking-widest">
+                OFFICIAL CREDENTIAL VERIFICATION
+              </span>
+              <button
+                onClick={() => setSelectedCert(null)}
+                className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
-              <div className="relative w-full h-[65vh] mt-4 rounded-2xl overflow-hidden bg-black/50 flex items-center justify-center">
-                {selectedCert.endsWith(".pdf") ? (
-                  <iframe src={selectedCert} className="w-full h-full rounded-2xl" />
-                ) : (
-                  <Image
-                    src={selectedCert}
-                    alt="Verified Certificate"
-                    fill
-                    className="object-contain"
-                  />
-                )}
-              </div>
-            </motion.div>
-          </motion.div>
+            <div className="relative w-full h-[65vh] mt-4 rounded-2xl overflow-hidden bg-black/50 flex items-center justify-center">
+              {selectedCert.endsWith(".pdf") ? (
+                <iframe src={selectedCert} className="w-full h-full rounded-2xl" />
+              ) : (
+                <Image
+                  src={selectedCert}
+                  alt="Verified Certificate"
+                  fill
+                  className="object-contain"
+                />
+              )}
+            </div>
+          </div>
         )}
-      </AnimatePresence>
+      </dialog>
     </section>
   );
 }

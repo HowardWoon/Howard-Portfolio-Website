@@ -32,7 +32,7 @@ export default function ProjectSimulators() {
     >
       {/* Background Gradients */}
       <div className="absolute top-1/3 left-10 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-[500px] h-[500px] bg-cyan-500/5 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-10 right-10 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-[140px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto space-y-12">
         
@@ -66,7 +66,7 @@ export default function ProjectSimulators() {
         {/* High-Tech Tab Bar */}
         <div className="flex flex-wrap items-center gap-3 p-2 bg-white/[0.03] border border-white/10 rounded-2xl backdrop-blur-xl">
           {[
-            { id: "slotify", num: "01", label: "Slotify Dijkstra Router" },
+            
             { id: "zerolag", num: "02", label: "ZeroLag 5-Agent Pipeline" },
             { id: "bilahujan", num: "03", label: "BILAHUJAN Flood Mesh" },
             { id: "sensorx", num: "04", label: "Sensor X Smart Grid" },
@@ -201,12 +201,12 @@ function SlotifySimulator() {
                   }`}
                 >
                   <div className="text-xl font-mono font-black text-white">{spot.id}</div>
-                  <div className={`text-[10px] font-mono mt-1 font-bold ${
+                  <div className={`text-xs font-mono mt-1 font-bold ${
                     isSelected ? "text-amber-400" : spot.status === "OCCUPIED" ? "text-red-400" : "text-neutral-400"
                   }`}>
                     {spot.status}
                   </div>
-                  <div className="text-[11px] font-mono text-neutral-400 mt-1">{spot.dist}</div>
+                  <div className="text-xs font-mono text-neutral-400 mt-1">{spot.dist}</div>
                 </div>
               );
             })}
@@ -215,16 +215,16 @@ function SlotifySimulator() {
           {/* Quick Architecture Specs */}
           <div className="grid grid-cols-3 gap-3 pt-2 text-center text-xs font-mono">
             <div className="bg-white/5 p-3 rounded-xl border border-white/5">
-              <span className="text-[10px] text-neutral-400 block">EXECUTION TIME</span>
+              <span className="text-xs text-neutral-400 block">EXECUTION TIME</span>
               <span className="font-bold text-amber-300">1.42 ms</span>
             </div>
             <div className="bg-white/5 p-3 rounded-xl border border-white/5">
-              <span className="text-[10px] text-neutral-400 block">PRIORITY QUEUE</span>
+              <span className="text-xs text-neutral-400 block">PRIORITY QUEUE</span>
               <span className="font-bold text-emerald-400">Min-Heap</span>
             </div>
             <div className="bg-white/5 p-3 rounded-xl border border-white/5">
-              <span className="text-[10px] text-neutral-400 block">ACTIVE THREADS</span>
-              <span className="font-bold text-cyan-400">Virtual Threads</span>
+              <span className="text-xs text-neutral-400 block">ACTIVE THREADS</span>
+              <span className="font-bold text-amber-400">Virtual Threads</span>
             </div>
           </div>
         </div>
@@ -236,12 +236,12 @@ function SlotifySimulator() {
               <Terminal className="w-3.5 h-3.5 text-amber-400" />
               <span>ROUTING_STREAM.LOG</span>
             </div>
-            <span className="text-[10px] text-emerald-400 flex items-center gap-1">
+            <span className="text-xs text-emerald-400 flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> LIVE
             </span>
           </div>
 
-          <div className="space-y-1.5 text-neutral-300 text-[11px] overflow-y-auto max-h-48 py-1">
+          <div className="space-y-1.5 text-neutral-300 text-xs overflow-y-auto max-h-48 py-1">
             {logs.map((log, lIdx) => (
               <div key={lIdx} className={log.includes("Selected") ? "text-amber-300 font-bold" : ""}>
                 &gt; {log}
@@ -249,7 +249,7 @@ function SlotifySimulator() {
             ))}
           </div>
 
-          <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[10px] text-neutral-500">
+          <div className="pt-2 border-t border-white/10 flex items-center justify-between text-xs text-neutral-500">
             <span>BACKEND: Spring Boot 3 / Java 21</span>
             <span className="text-amber-400">STATUS: READY</span>
           </div>
@@ -300,7 +300,7 @@ function ZeroLagSimulator() {
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
         <div>
-          <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 tracking-wider uppercase">
+          <div className="flex items-center gap-2 text-xs font-mono text-amber-400 tracking-wider uppercase">
             <Cpu className="w-4 h-4" />
             <span>AGENTIC WORKFLOW · 2ND PLACE SUPERVITY APAC HACKATHON</span>
           </div>
@@ -312,7 +312,7 @@ function ZeroLagSimulator() {
         <button
           onClick={triggerPipeline}
           disabled={isRunning}
-          className="flex items-center gap-2 px-6 py-3 rounded-full bg-cyan-400 hover:bg-cyan-300 text-black font-mono font-bold text-xs uppercase tracking-wider shadow-lg shadow-cyan-500/20 transition-all active:scale-95 disabled:opacity-50"
+          className="flex items-center gap-2 px-6 py-3 rounded-full bg-amber-400 hover:bg-amber-300 text-black font-mono font-bold text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 transition-all active:scale-95 disabled:opacity-50"
         >
           <Play className={`w-3.5 h-3.5 ${isRunning ? "animate-spin" : ""}`} />
           <span>{isRunning ? "AGENTS EXECUTING..." : "DISPATCH AGENT PIPELINE"}</span>
@@ -331,7 +331,7 @@ function ZeroLagSimulator() {
               key={idx}
               className={`p-4 rounded-2xl border transition-all duration-300 flex flex-col justify-between space-y-3 ${
                 isCurrent
-                  ? "border-cyan-400 bg-cyan-400/10 shadow-lg shadow-cyan-500/10"
+                  ? "border-amber-400 bg-amber-400/10 shadow-lg shadow-amber-500/10"
                   : isDone
                   ? "border-emerald-500/40 bg-emerald-500/5 text-neutral-300"
                   : "border-white/10 bg-white/[0.02] text-neutral-500"
@@ -342,16 +342,16 @@ function ZeroLagSimulator() {
                 {isDone ? (
                   <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                 ) : isCurrent ? (
-                  <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
                 ) : (
                   <span className="w-2 h-2 rounded-full bg-neutral-700" />
                 )}
               </div>
               <div>
-                <div className={`font-mono text-xs font-bold ${isCurrent ? "text-cyan-300" : "text-white"}`}>
+                <div className={`font-mono text-xs font-bold ${isCurrent ? "text-amber-300" : "text-white"}`}>
                   {stage.name}
                 </div>
-                <div className="text-[10px] font-sans text-neutral-400 mt-1 leading-tight">
+                <div className="text-xs font-sans text-neutral-400 mt-1 leading-tight">
                   {stage.desc}
                 </div>
               </div>
@@ -363,7 +363,7 @@ function ZeroLagSimulator() {
       {/* Output Log Banner */}
       <div className="bg-black rounded-2xl border border-white/10 p-4 font-mono text-xs flex items-center justify-between">
         <div className="flex items-center gap-2 text-neutral-300">
-          <Terminal className="w-4 h-4 text-cyan-400" />
+          <Terminal className="w-4 h-4 text-amber-400" />
           <span>
             {currentStage === 5 
               ? "Lead Qualified: Score 0.96 [High Priority] · Auto-Dispatched to Enterprise CRM." 
@@ -372,7 +372,7 @@ function ZeroLagSimulator() {
               : "System Idle. Click 'Dispatch Agent Pipeline' to execute state machine."}
           </span>
         </div>
-        <span className="text-[10px] text-cyan-400 uppercase font-bold">LangGraph Orchestrator</span>
+        <span className="text-xs text-amber-400 uppercase font-bold">LangGraph Orchestrator</span>
       </div>
     </motion.div>
   );
@@ -402,7 +402,7 @@ function BilahujanSimulator() {
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
         <div>
-          <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 tracking-wider uppercase">
+          <div className="flex items-center gap-2 text-xs font-mono text-amber-400 tracking-wider uppercase">
             <Droplets className="w-4 h-4" />
             <span>IOT SENSORS + COMPUTER VISION · KITAHACK 2026 TOP PROJECT</span>
           </div>
@@ -431,10 +431,10 @@ function BilahujanSimulator() {
             step="0.1"
             value={waterLevel}
             onChange={(e) => setWaterLevel(parseFloat(e.target.value))}
-            className="w-full h-2 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+            className="w-full h-2 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-amber-400"
           />
 
-          <div className="flex justify-between text-[10px] font-mono text-neutral-500">
+          <div className="flex justify-between text-xs font-mono text-neutral-500">
             <span>0.5m (Dry)</span>
             <span>2.5m (Alert)</span>
             <span>4.5m (Severe Flood)</span>
@@ -446,7 +446,7 @@ function BilahujanSimulator() {
           <div className="text-neutral-400">// Dynamic Safe Route Calculation</div>
           <div className="p-3 bg-white/5 border border-white/10 rounded-xl space-y-1.5 text-neutral-200">
             <div>&gt; Road Node #214: {waterLevel > 3.0 ? "INUNDATED (Avoided)" : "Passable"}</div>
-            <div>&gt; Selected Safe Corridor: <span className="text-cyan-300 font-bold">Route 8 ➔ Rescue Zone Beta</span></div>
+            <div>&gt; Selected Safe Corridor: <span className="text-amber-300 font-bold">Route 8 ➔ Rescue Zone Beta</span></div>
             <div>&gt; Dijkstra Re-route Latency: <span className="text-emerald-400 font-bold">34.2 ms</span></div>
           </div>
         </div>
@@ -498,7 +498,7 @@ function SensorXSimulator() {
           <div className="text-3xl font-mono font-bold text-white">
             {isOccupied ? "1.84 kW" : "0.72 kW"}
           </div>
-          <span className="text-[10px] font-mono text-neutral-500">HVAC + Smart Relays</span>
+          <span className="text-xs font-mono text-neutral-500">HVAC + Smart Relays</span>
         </div>
 
         <div className="p-5 bg-black/60 border border-white/10 rounded-2xl space-y-1">
@@ -506,15 +506,15 @@ function SensorXSimulator() {
           <div className="text-3xl font-mono font-bold text-emerald-400">
             {isOccupied ? "0.0%" : "-60.8%"}
           </div>
-          <span className="text-[10px] font-mono text-neutral-500">Auto Load-Shed Activated</span>
+          <span className="text-xs font-mono text-neutral-500">Auto Load-Shed Activated</span>
         </div>
 
         <div className="p-5 bg-black/60 border border-white/10 rounded-2xl space-y-1">
           <span className="text-xs font-mono text-neutral-400">SENSOR FUSION STATUS</span>
-          <div className="text-lg font-mono font-bold text-cyan-300 mt-2">
+          <div className="text-lg font-mono font-bold text-amber-300 mt-2">
             {isOccupied ? "PIR Active · NFC In" : "PIR Idle · Auto Cutoff"}
           </div>
-          <span className="text-[10px] font-mono text-neutral-500">MQTT Broker: Connected</span>
+          <span className="text-xs font-mono text-neutral-500">MQTT Broker: Connected</span>
         </div>
       </div>
     </motion.div>

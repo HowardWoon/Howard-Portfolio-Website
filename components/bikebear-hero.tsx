@@ -68,7 +68,7 @@ export default function BikebearHero() {
               HOWARD WOON
               <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
             </h1>
-            <p className="text-[11px] font-mono text-neutral-400 tracking-wider mt-1">
+            <p className="text-xs font-mono text-neutral-400 tracking-wider mt-1">
               SYSTEMS & AI ARCHITECT
             </p>
           </div>
@@ -222,10 +222,10 @@ export default function BikebearHero() {
                   <Award className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="text-[11px] font-mono font-bold text-white leading-tight">
+                  <div className="text-xs font-mono font-bold text-white leading-tight">
                     2nd Place Winner
                   </div>
-                  <div className="text-[10px] font-mono text-amber-400">
+                  <div className="text-xs font-mono text-amber-400">
                     Supervity Asia Hackathon
                   </div>
                 </div>
@@ -243,11 +243,11 @@ export default function BikebearHero() {
                   <GraduationCap className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="text-[11px] font-mono font-bold text-white flex items-center gap-1.5 leading-tight">
+                  <div className="text-xs font-mono font-bold text-white flex items-center gap-1.5 leading-tight">
                     CGPA 4.00 · UM
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   </div>
-                  <div className="text-[10px] font-mono text-neutral-400">
+                  <div className="text-xs font-mono text-neutral-400">
                     Software Engineering
                   </div>
                 </div>
@@ -262,7 +262,7 @@ export default function BikebearHero() {
                 style={{ transform: "translateZ(30px)" }}
               >
                 <Cpu className="w-3.5 h-3.5 text-cyan-400" />
-                <span className="text-[10px] font-mono text-neutral-200">
+                <span className="text-xs font-mono text-neutral-200">
                   5-Operator Agentic AI
                 </span>
               </motion.div>
@@ -275,7 +275,7 @@ export default function BikebearHero() {
 
       {/* Hero Footer Bar */}
       <footer className="w-full flex items-center justify-between px-6 sm:px-10 lg:px-16 pb-6 text-xs font-mono z-20 border-t border-white/5 pt-4">
-        <div className="flex items-center gap-2.5 text-neutral-400 tracking-widest uppercase text-[11px]">
+        <div className="flex items-center gap-2.5 text-neutral-400 tracking-widest uppercase text-xs">
           <ArrowDown className="w-3.5 h-3.5 text-amber-400 animate-bounce" />
           <span>SCROLL TO INITIALIZE</span>
         </div>

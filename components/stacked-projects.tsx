@@ -128,7 +128,7 @@ export default function StackedProjects() {
     >
       {/* Ambient Lighting */}
       <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-1/4 left-0 w-[600px] h-[600px] bg-cyan-500/5 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-1/4 left-0 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[150px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto space-y-20">
         
@@ -185,7 +185,7 @@ function ProjectCard({
   // Dynamic Badges
   const badgeStyles = {
     gold: "border-amber-500/40 bg-amber-500/10 text-amber-300",
-    cyan: "border-cyan-500/40 bg-cyan-500/10 text-cyan-300",
+    cyan: "border-amber-500/40 bg-amber-500/10 text-amber-300",
     emerald: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
   };
 
@@ -238,7 +238,7 @@ function ProjectCard({
 
             {/* Key Architectural Highlights */}
             <div className="space-y-2.5 bg-black/30 p-4 rounded-2xl border border-white/5">
-              <span className="text-[11px] font-mono text-neutral-400 uppercase tracking-widest block mb-1">
+              <span className="text-xs font-mono text-neutral-400 uppercase tracking-widest block mb-1">
                 KEY ARCHITECTURAL HIGHLIGHTS:
               </span>
               {project.architecturePoints.map((point, pIdx) => (
@@ -253,10 +253,10 @@ function ProjectCard({
             <div className="grid grid-cols-3 gap-3">
               {project.metrics.map((m, mIdx) => (
                 <div key={mIdx} className="bg-white/[0.03] border border-white/10 rounded-2xl p-3">
-                  <div className="text-[10px] font-mono text-neutral-400 uppercase truncate">
+                  <div className="text-xs font-mono text-neutral-400 uppercase ">
                     {m.label}
                   </div>
-                  <div className="text-sm font-mono font-bold text-amber-300 mt-1 truncate">
+                  <div className="text-sm font-mono font-bold text-amber-300 mt-1 ">
                     {m.value}
                   </div>
                 </div>
@@ -310,7 +310,7 @@ function ProjectCard({
                 <Activity className="w-4 h-4 text-emerald-400 animate-pulse" />
                 <span className="uppercase font-bold tracking-wider">LIVE TELEMETRY WINDOW</span>
               </div>
-              <span className="text-[10px] font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+              <span className="text-xs font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
                 ACTIVE PIPELINE
               </span>
             </div>
@@ -318,7 +318,7 @@ function ProjectCard({
             {/* Conditional Graphic Visualizers */}
             {project.telemetryType === "agentic" && (
               <div className="space-y-4 py-2">
-                <div className="text-[11px] font-mono text-neutral-400">
+                <div className="text-xs font-mono text-neutral-400">
                   // Multi-Agent State Machine Flow
                 </div>
                 
@@ -329,15 +329,15 @@ function ProjectCard({
                       <div className="w-2 h-2 rounded-full bg-blue-400 animate-ping" />
                       <span className="text-xs font-mono text-white">1. Prospect Telemetry Ingestion</span>
                     </div>
-                    <span className="text-[10px] font-mono text-neutral-400">20ms</span>
+                    <span className="text-xs font-mono text-neutral-400">20ms</span>
                   </div>
 
                   <div className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-purple-400" />
+                      <div className="w-2 h-2 rounded-full bg-amber-400" />
                       <span className="text-xs font-mono text-white">2. Multi-Agent Lead Scoring</span>
                     </div>
-                    <span className="text-[10px] font-mono text-neutral-400">LangGraph</span>
+                    <span className="text-xs font-mono text-neutral-400">LangGraph</span>
                   </div>
 
                   <div className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between">
@@ -345,11 +345,11 @@ function ProjectCard({
                       <div className="w-2 h-2 rounded-full bg-emerald-400" />
                       <span className="text-xs font-mono text-white">3. Automated CRM Dispatch</span>
                     </div>
-                    <span className="text-[10px] font-mono text-emerald-400">Completed</span>
+                    <span className="text-xs font-mono text-emerald-400">Completed</span>
                   </div>
                 </div>
 
-                <div className="bg-black p-3 rounded-xl border border-white/5 font-mono text-[11px] text-neutral-400 space-y-1">
+                <div className="bg-black p-3 rounded-xl border border-white/5 font-mono text-xs text-neutral-400 space-y-1">
                   <div className="text-emerald-400">&gt;_ state.status: &quot;EXECUTION_VERIFIED&quot;</div>
                   <div>&gt;_ sentiment_score: 0.94 [HIGH_CONVERT]</div>
                   <div>&gt;_ sync_target: &quot;Supabase_VectorStore&quot;</div>
@@ -359,7 +359,7 @@ function ProjectCard({
 
             {project.telemetryType === "flood" && (
               <div className="space-y-4 py-2">
-                <div className="text-[11px] font-mono text-neutral-400">
+                <div className="text-xs font-mono text-neutral-400">
                   // Dijkstra Evacuation Path Engine
                 </div>
 
@@ -374,12 +374,12 @@ function ProjectCard({
                     <span className="text-emerald-400 font-bold">Path Node #104 ➔ #289</span>
                   </div>
                   <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
-                    <div className="bg-cyan-400 h-full w-4/5 animate-pulse" />
+                    <div className="bg-amber-400 h-full w-4/5 animate-pulse" />
                   </div>
                 </div>
 
-                <div className="bg-black p-3 rounded-xl border border-white/5 font-mono text-[11px] text-neutral-400 space-y-1">
-                  <div className="text-cyan-400">&gt;_ graph.nodes_evaluated: 1,024</div>
+                <div className="bg-black p-3 rounded-xl border border-white/5 font-mono text-xs text-neutral-400 space-y-1">
+                  <div className="text-amber-400">&gt;_ graph.nodes_evaluated: 1,024</div>
                   <div>&gt;_ priority_queue: &quot;MinHeap_Balanced&quot;</div>
                   <div>&gt;_ route_dispatch_time: 42.8ms</div>
                 </div>
@@ -388,23 +388,23 @@ function ProjectCard({
 
             {project.telemetryType === "energy" && (
               <div className="space-y-4 py-2">
-                <div className="text-[11px] font-mono text-neutral-400">
+                <div className="text-xs font-mono text-neutral-400">
                   // Micro-Grid Power & Occupancy Matrix
                 </div>
 
                 {/* IoT Grid Dashboard */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
-                    <div className="text-[10px] font-mono text-neutral-400">Current Load</div>
+                    <div className="text-xs font-mono text-neutral-400">Current Load</div>
                     <div className="text-base font-mono font-bold text-white mt-1">1.42 kW</div>
                   </div>
                   <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
-                    <div className="text-[10px] font-mono text-neutral-400">Idle Savings</div>
+                    <div className="text-xs font-mono text-neutral-400">Idle Savings</div>
                     <div className="text-base font-mono font-bold text-emerald-400 mt-1">-38.2%</div>
                   </div>
                 </div>
 
-                <div className="bg-black p-3 rounded-xl border border-white/5 font-mono text-[11px] text-neutral-400 space-y-1">
+                <div className="bg-black p-3 rounded-xl border border-white/5 font-mono text-xs text-neutral-400 space-y-1">
                   <div className="text-emerald-400">&gt;_ sensor_fusion: &quot;PIR_ACTIVE + NFC_PASS&quot;</div>
                   <div>&gt;_ protocol_broker: &quot;MQTT_TLS_v1.3&quot;</div>
                   <div>&gt;_ relay_state: &quot;OPTIMIZED_AUTO_SHED&quot;</div>
