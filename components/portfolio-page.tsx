@@ -23,12 +23,12 @@ export function PortfolioPage() {
       <main className="w-full">
         
 
-        <AboutSection />
+        <div id="about"><AboutSection /></div>
 
-        <StackedProjects />
-        <ExperienceSection />
+        <div id="projects"><StackedProjects /></div>
+        <div id="experience"><ExperienceSection /></div>
 
-        <HonorsSection />
+        <div id="honors"><HonorsSection /></div>
 
         <ContactSection />
       </main>
