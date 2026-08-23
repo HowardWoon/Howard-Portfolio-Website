@@ -1,5 +1,6 @@
 'use client';
 import BikebearInspiredHero from '@/components/bikebear-hero';
+import AboutSection from '@/components/about-section';
 import StackedProjects from '@/components/stacked-projects';
 
 import React, { useState } from 'react';
@@ -54,83 +55,7 @@ export function PortfolioPage() {
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-32 space-y-36">
         
 
-        <section id="about" className="space-y-10 scroll-mt-24">
-          <div className="space-y-4 max-w-4xl">
-            <div className="text-xs font-mono text-slate-600 uppercase tracking-widest">/about</div>
-            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-slate-900 leading-[1.1] font-display">
-              I architect resilient backend systems and engineer autonomous agentic pipelines from 0 to 1.
-            </h2>
-            <p className="text-base text-slate-600 leading-relaxed max-w-2xl">
-              Studying Software Engineering at Universiti Malaya (4.00 CGPA). Combining low-latency algorithmic backend design (Spring Boot, Graph algorithms, Min-Heaps) with real-time AI automation and corporate financial governance.
-            </p>
-          </div>
-          <div className="rounded-3xl border border-black/[0.08] bg-[#EBEBED]/90 p-4 sm:p-6 shadow-sm space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-              <div className="relative aspect-square rounded-2xl bg-white border border-black/[0.06] p-4 flex flex-col items-center justify-center text-center overflow-hidden group shadow-sm hover:scale-[1.02] hover:shadow-md transition-all cursor-default">
-                <div className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full border border-black/20" />
-                <div className="absolute inset-4 rounded-full border border-black/[0.05] flex items-center justify-center">
-                  <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-slate-400 to-transparent dial-spin-a" />
-                </div>
-                <div className="relative z-10 w-9 h-9 rounded-full bg-slate-100 border border-black/10 flex items-center justify-center font-mono font-bold text-xs text-slate-800 mb-2 shadow-inner">A</div>
-                <div className="relative z-10 text-xs font-bold text-slate-900 tracking-tight">Backend Systems</div>
-                <div className="relative z-10 text-[10px] font-mono text-slate-500 mt-0.5">Spring Boot & Java 21</div>
-              </div>
-              <div className="relative aspect-square rounded-2xl bg-white border border-black/[0.06] p-4 flex flex-col items-center justify-center text-center overflow-hidden group shadow-sm hover:scale-[1.02] hover:shadow-md transition-all cursor-default">
-                <div className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full border border-black/20" />
-                <div className="absolute inset-4 rounded-full border border-black/[0.05] flex items-center justify-center">
-                  <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-indigo-400 to-transparent dial-spin-b" />
-                </div>
-                <div className="relative z-10 w-9 h-9 rounded-full bg-slate-100 border border-black/10 flex items-center justify-center font-mono font-bold text-xs text-slate-800 mb-2 shadow-inner">B</div>
-                <div className="relative z-10 text-xs font-bold text-slate-900 tracking-tight">Agentic AI</div>
-                <div className="relative z-10 text-[10px] font-mono text-slate-500 mt-0.5">5-Operator Pipelines</div>
-              </div>
-              <div className="relative aspect-square rounded-2xl bg-[#E4E0DB] border border-black/[0.08] p-4 flex flex-col items-center justify-center text-center overflow-hidden group shadow-sm hover:scale-[1.02] hover:shadow-md transition-all cursor-default">
-                <div className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full border border-black/30" />
-                <div className="absolute inset-4 rounded-full border border-black/[0.08] flex items-center justify-center">
-                  <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-slate-600 to-transparent dial-spin-c" />
-                </div>
-                <div className="relative z-10 w-9 h-9 rounded-full bg-white border border-black/15 flex items-center justify-center font-mono font-bold text-xs text-slate-900 mb-2 shadow-inner">C</div>
-                <div className="relative z-10 text-xs font-bold text-slate-900 tracking-tight">Graph Algorithms</div>
-                <div className="relative z-10 text-[10px] font-mono text-slate-700 mt-0.5">Dijkstra & Min-Heaps</div>
-              </div>
-              <div className="relative aspect-square rounded-2xl bg-white border border-black/[0.06] p-4 flex flex-col items-center justify-center text-center overflow-hidden group shadow-sm hover:scale-[1.02] hover:shadow-md transition-all cursor-default">
-                <div className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full border border-black/20" />
-                <div className="absolute inset-4 rounded-full border border-black/[0.05] flex items-center justify-center">
-                  <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-slate-400 to-transparent dial-spin-d" />
-                </div>
-                <div className="relative z-10 w-9 h-9 rounded-full bg-slate-100 border border-black/10 flex items-center justify-center font-mono font-bold text-xs text-slate-800 mb-2 shadow-inner">D</div>
-                <div className="relative z-10 text-xs font-bold text-slate-900 tracking-tight">Fiscal Governance</div>
-                <div className="relative z-10 text-[10px] font-mono text-slate-500 mt-0.5">PEKOM Finance Lead</div>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center border-t border-black/[0.08] pt-4 font-mono text-xs">
-              <div className="md:col-span-6 flex items-center justify-between px-3 py-2 rounded-xl bg-white/70 border border-black/[0.05]">
-                <div className="flex items-center gap-1.5 text-slate-700">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  <span className="text-[11px]">Systems</span>
-                </div>
-                <span className="text-slate-300">~</span>
-                <div className="flex items-center gap-1.5 text-slate-700">
-                  <span className="w-2 h-2 rounded-full bg-indigo-500" />
-                  <span className="text-[11px]">AI Pipelines</span>
-                </div>
-                <span className="text-slate-300">~</span>
-                <div className="flex items-center gap-1.5 text-slate-700">
-                  <span className="w-2 h-2 rounded-full bg-amber-500" />
-                  <span className="text-[11px]">IoT Telemetry</span>
-                </div>
-              </div>
-              <div className="md:col-span-6 flex items-center justify-end gap-2 flex-wrap text-[11px] text-slate-600">
-                <span className="text-slate-400 mr-1">Stack:</span>
-                {['Java 21', 'Spring Boot', 'Python', 'FastAPI', 'PostgreSQL', 'Docker', 'Next.js 15'].map((w, i) => (
-                  <span key={i} className="px-2 py-0.5 rounded bg-white border border-black/[0.06] text-slate-800 shadow-2xs font-semibold hover:border-black/20 hover:bg-slate-200 transition-colors cursor-default">
-                    {w}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
+        <AboutSection />
 
         <StackedProjects />
 

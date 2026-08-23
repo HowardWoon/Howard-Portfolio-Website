@@ -1,21 +1,26 @@
-﻿import type { Config } from 'tailwindcss';
+﻿import type { Config } from "tailwindcss";
 
 const config: Config = {
-  darkMode: 'class',
   content: [
-    './pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './components/**/*.{js,ts,jsx,tsx,mdx}',
-    './app/**/*.{js,ts,jsx,tsx,mdx}',
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
-      fontFamily: {
-        sans: ['var(--font-sans)', 'Plus Jakarta Sans', 'Inter', 'sans-serif'],
-        display: ['var(--font-display)', 'Space Grotesk', 'sans-serif'],
-        mono: ['var(--font-mono)', 'JetBrains Mono', 'monospace'],
+      colors: {
+        brand: {
+          yellow: "#F5C400", // Signature Hero Yellow
+          black: "#0A0A0A",  // High-contrast deep black
+          cream: "#F6F6F2",  // Warm studio content background
+          dark: "#121212",   // Card surface for dark mode & simulators
+          cyan: "#00E5FF",   // Side rail & award highlight
+          emerald: "#10B981" // Active / verified badge
+        }
       },
-      boxShadow: {
-        '2xs': '0 1px 2px rgba(0, 0, 0, 0.04)',
+      fontFamily: {
+        sans: ["var(--font-sans)", "sans-serif"],
+        mono: ["var(--font-mono)", "monospace"],
       },
     },
   },
