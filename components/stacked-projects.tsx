@@ -303,7 +303,7 @@ function ProjectCard({
           </div>
 
           {/* Right Column: Live Visual Architecture Telemetry (5 Cols) */}
-          <motion.div style={{ opacity: panelOpacity, y: panelY }} className="lg:col-span-5 w-full bg-black/60 rounded-3xl border border-white/10 p-6 space-y-4 shadow-inner flex flex-col">
+          <motion.div className="lg:col-span-5 w-full bg-black/60 rounded-3xl border border-white/10 p-6 space-y-4 shadow-inner flex flex-col">
             
             {/* Visualizer Header */}
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
