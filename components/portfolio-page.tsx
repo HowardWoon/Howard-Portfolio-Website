@@ -2,6 +2,7 @@
 import BikebearInspiredHero from '@/components/bikebear-hero';
 import AboutSection from '@/components/about-section';
 import StackedProjects from '@/components/stacked-projects';
+import ExperienceSection from '@/components/experience-section';
 
 import React, { useState } from 'react';
 import Image from 'next/image';
@@ -60,46 +61,7 @@ export function PortfolioPage() {
 
         <ProjectSimulators />
 
-        <section id="experience" className="space-y-8 scroll-mt-24">
-          <div className="border-b border-black/[0.08] pb-4">
-            <div className="text-xs font-mono text-neutral-700 uppercase tracking-widest">/experience & leadership</div>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-black font-display mt-1">Career & Institutional Governance</h2>
-          </div>
-          <div className="space-y-4">
-            {experiences.map((exp) => (
-              <div key={exp.id} className="p-6 sm:p-7 rounded-2xl border border-black/[0.08] bg-white hover:border-black/20 transition-all shadow-sm flex flex-col justify-between">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-                  <div>
-                    <div className="flex items-center gap-3">
-                      <span className="font-mono text-xs text-slate-400">{exp.index}</span>
-                      <h3 className="text-base sm:text-lg font-bold text-black">{exp.role}</h3>
-                      <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-700">{exp.category}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-neutral-700 font-mono mt-1">
-                      <Building2 className="w-3.5 h-3.5 text-slate-400" />
-                      <span>{exp.organization}</span>
-                      <span className="text-slate-300">â€¢</span>
-                      <span className="text-slate-500">{exp.location}</span>
-                    </div>
-                  </div>
-                  <div className="text-xs font-mono text-slate-500">{exp.period}</div>
-                </div>
-                <ul className="space-y-1.5 mb-4 list-disc list-inside text-xs sm:text-sm text-neutral-700 leading-relaxed">
-                  {exp.description.map((b, i) => (
-                    <li key={i}>{b}</li>
-                  ))}
-                </ul>
-                <div className="flex flex-wrap gap-1.5 pt-2 border-t border-black/[0.05]">
-                  {exp.skills.map((skill, i) => (
-                    <span key={i} className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 text-neutral-700 hover:border-black/20 hover:bg-slate-200 transition-colors cursor-default border border-black/[0.04]">
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+        <ExperienceSection />
 
         <section id="honors" className="space-y-8 scroll-mt-24">
           <div className="border-b border-black/[0.08] pb-4">
