@@ -74,9 +74,9 @@ export function PortfolioPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-20 space-y-28">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-20 space-y-28">
       {/* ================= 1. HERO SECTION ================= */}
-      <section className="flex flex-col items-center justify-center text-center pt-8 pb-4">
+      <section className="flex flex-col items-center justify-center text-center pt-6 pb-2">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 text-xs font-mono mb-6 backdrop-blur-sm">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <span>Software Engineering @ Universiti Malaya (4.00 CGPA)</span>
@@ -87,16 +87,16 @@ export function PortfolioPage() {
         </h1>
 
         <p className="text-base sm:text-lg text-slate-400 max-w-2xl leading-relaxed mb-8">
-          Hi, I'm <span className="text-white font-medium">{personalDetails.name}</span>. I design and build backend architectures, distributed data pipelines, and agentic systems in Java, Python, and Spring Boot.
+          Hi, I'm <span className="text-white font-medium">{personalDetails.name}</span>. I design and build backend architectures, distributed data pipelines, and agentic workflows in Java, Python, and Spring Boot.
         </p>
 
-        <div className="flex flex-wrap items-center justify-center gap-3.5 mb-14">
-          <Link
+        <div className="flex flex-wrap items-center justify-center gap-3 mb-12">
+          <a
             href="#projects"
             className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-white text-slate-950 font-medium text-sm hover:bg-slate-200 transition-all shadow-sm"
           >
             View Projects <ArrowRight className="w-4 h-4" />
-          </Link>
+          </a>
           <a
             href={personalDetails.github}
             target="_blank"
@@ -126,17 +126,17 @@ export function PortfolioPage() {
         </div>
       </section>
 
-      {/* ================= 2. FEATURED & FUNCTIONAL PROJECTS ================= */}
+      {/* ================= 2. INTERACTIVE PROJECTS ================= */}
       <section id="projects" className="space-y-6 scroll-mt-24">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <div className="inline-flex items-center gap-2 text-xs font-mono text-indigo-400 uppercase tracking-widest">
-              <Layers className="w-3.5 h-3.5" /> Shipped Systems
+              <Layers className="w-3.5 h-3.5" /> Shipped Architectures
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">Interactive Projects</h2>
           </div>
 
-          {/* Filter Pills */}
+          {/* Category Filter Tabs */}
           <div className="flex flex-wrap gap-1.5 p-1 rounded-lg bg-white/5 border border-white/10 backdrop-blur-sm">
             {categories.map((cat) => (
               <button
@@ -154,12 +154,12 @@ export function PortfolioPage() {
           </div>
         </div>
 
-        {/* Project Cards (Clean 2-column Grid) */}
+        {/* Clean 2-Column Responsive Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filteredProjects.map((proj) => (
             <div
               key={proj.id}
-              className="flex flex-col justify-between p-6 sm:p-7 rounded-2xl border border-white/10 bg-[#0B0F17]/80 hover:border-white/20 transition-all duration-200 backdrop-blur-sm"
+              className="flex flex-col justify-between p-6 sm:p-7 rounded-2xl border border-white/10 bg-[#0B0F17]/85 hover:border-white/20 transition-all duration-200 backdrop-blur-sm"
             >
               <div>
                 <div className="flex items-center justify-between gap-2 mb-3">
@@ -222,9 +222,9 @@ export function PortfolioPage() {
 
       {/* ================= 3. UNIFIED EXPERIENCE & LEADERSHIP ================= */}
       <section id="experience" className="space-y-6 scroll-mt-24">
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           <div className="inline-flex items-center gap-2 text-xs font-mono text-indigo-400 uppercase tracking-widest">
-            <Briefcase className="w-3.5 h-3.5" /> Work & Student Governance
+            <Briefcase className="w-3.5 h-3.5" /> Career & Student Governance
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">Experience & Leadership</h2>
         </div>
@@ -233,7 +233,7 @@ export function PortfolioPage() {
           {experiences.map((exp) => (
             <div
               key={exp.id}
-              className="p-6 rounded-2xl border border-white/10 bg-[#0B0F17]/80 hover:border-white/20 transition-all backdrop-blur-sm"
+              className="p-6 rounded-2xl border border-white/10 bg-[#0B0F17]/85 hover:border-white/20 transition-all backdrop-blur-sm"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
                 <div>
@@ -274,9 +274,9 @@ export function PortfolioPage() {
 
       {/* ================= 4. AWARDS & HONORS ================= */}
       <section id="awards" className="space-y-6 scroll-mt-24">
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           <div className="inline-flex items-center gap-2 text-xs font-mono text-indigo-400 uppercase tracking-widest">
-            <Award className="w-3.5 h-3.5" /> Recognition & Distinctions
+            <Award className="w-3.5 h-3.5" /> Distinctions
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">Honors & Certifications</h2>
         </div>
@@ -285,7 +285,7 @@ export function PortfolioPage() {
           {awards.map((award) => (
             <div
               key={award.id}
-              className="p-6 rounded-2xl border border-white/10 bg-[#0B0F17]/80 hover:border-white/20 transition-all flex flex-col justify-between"
+              className="p-6 rounded-2xl border border-white/10 bg-[#0B0F17]/85 hover:border-white/20 transition-all flex flex-col justify-between"
             >
               <div>
                 <span className="text-[11px] font-mono px-2.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-400 inline-block mb-3">
@@ -305,7 +305,7 @@ export function PortfolioPage() {
 
       {/* ================= 5. TECHNICAL STACK ================= */}
       <section id="skills" className="space-y-6 scroll-mt-24">
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           <div className="inline-flex items-center gap-2 text-xs font-mono text-indigo-400 uppercase tracking-widest">
             <Layers className="w-3.5 h-3.5" /> Engineering Toolchain
           </div>
@@ -314,7 +314,7 @@ export function PortfolioPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {techStack.map((group, idx) => (
-            <div key={idx} className="p-6 rounded-2xl border border-white/10 bg-[#0B0F17]/80">
+            <div key={idx} className="p-6 rounded-2xl border border-white/10 bg-[#0B0F17]/85">
               <h3 className="text-xs font-semibold text-indigo-300 font-mono uppercase tracking-wider mb-3.5">
                 {group.category}
               </h3>
@@ -335,17 +335,17 @@ export function PortfolioPage() {
 
       {/* ================= 6. CONTACT SECTION ================= */}
       <section id="contact" className="space-y-6 scroll-mt-24 pt-4">
-        <div className="text-center max-w-xl mx-auto space-y-1.5">
+        <div className="text-center max-w-xl mx-auto space-y-1">
           <div className="inline-flex items-center gap-2 text-xs font-mono text-indigo-400 uppercase tracking-widest">
             <Mail className="w-3.5 h-3.5" /> Connect
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">Let’s Build Together</h2>
           <p className="text-xs sm:text-sm text-slate-400">
-            Open to software engineering internships, technical collaborations, and full-time opportunities.
+            Open to software engineering internships, technical collaborations, and opportunities.
           </p>
         </div>
 
-        <div className="max-w-xl mx-auto p-6 sm:p-8 rounded-2xl border border-white/10 bg-[#0B0F17]/80 backdrop-blur-md">
+        <div className="max-w-xl mx-auto p-6 sm:p-8 rounded-2xl border border-white/10 bg-[#0B0F17]/85 backdrop-blur-md">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-mono text-slate-400 mb-1 uppercase">Name</label>

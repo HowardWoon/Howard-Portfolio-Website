@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import { Play, RotateCcw, Cpu, Check, Terminal, Activity, Zap } from 'lucide-react';
 
-// 1. Slotify: Dijkstra Pathfinding & Min-Heap Slot Allocation
+// 1. Slotify: Dijkstra Pathfinding & Min-Heap Slot Allocator
 export function SlotifySimulator() {
   const [allocatedSlot, setAllocatedSlot] = useState<string | null>(null);
   const [computing, setComputing] = useState(false);
@@ -19,10 +19,10 @@ export function SlotifySimulator() {
 
   const runAllocation = () => {
     setComputing(true);
-    setLogs(['[GATE_01] Vehicle detected. Building adjacency graph...', 'Parsing Min-Heap for lowest distance unreserved node...']);
+    setLogs(['[GATE_01] Ingesting vehicle arrival...', 'Evaluating Adjacency Graph...', 'Polling Min-Heap for minimum-weight available node...']);
     setTimeout(() => {
       setAllocatedSlot('A2');
-      setLogs((prev) => [...prev, '✓ Assigned Slot: A2 (Weight: 18m | Congestion: 0.04)']);
+      setLogs((prev) => [...prev, '✓ Assigned Slot: A2 (Weight: 18m | Route Cost: 0.04s)']);
       setComputing(false);
     }, 700);
   };
@@ -36,7 +36,7 @@ export function SlotifySimulator() {
     <div className="my-3 p-3.5 rounded-xl border border-indigo-500/20 bg-indigo-950/20 text-left">
       <div className="flex items-center justify-between mb-2.5">
         <span className="flex items-center gap-1.5 text-xs font-mono text-indigo-300">
-          <Cpu className="w-3.5 h-3.5" /> Dijkstra & Min-Heap Allocator
+          <Cpu className="w-3.5 h-3.5" /> Dijkstra & Min-Heap Router
         </span>
         <div className="flex items-center gap-1.5">
           <button
@@ -44,7 +44,7 @@ export function SlotifySimulator() {
             disabled={computing || !!allocatedSlot}
             className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-[11px] font-medium text-white transition-colors"
           >
-            <Play className="w-3 h-3" /> {computing ? 'Computing...' : 'Run Router'}
+            <Play className="w-3 h-3" /> {computing ? 'Routing...' : 'Route Vehicle'}
           </button>
           {allocatedSlot && (
             <button onClick={reset} className="p-1 rounded hover:bg-white/10 text-slate-400 hover:text-white">
@@ -67,7 +67,7 @@ export function SlotifySimulator() {
             }`}
           >
             <div>{s.id}</div>
-            <div className="text-[10px] opacity-75">{s.free ? s.dist : 'BUSY'}</div>
+            <div className="text-[10px] opacity-75">{s.free ? s.dist : 'OCCUPIED'}</div>
           </div>
         ))}
       </div>
@@ -87,7 +87,7 @@ export function SlotifySimulator() {
 
 // 2. ZeroLag: Agentic Sales Intent Classifier
 export function ZeroLagSimulator() {
-  const [prompt, setPrompt] = useState('We need 50 enterprise seats with custom API webhook integration.');
+  const [prompt, setPrompt] = useState('Need 50 enterprise seats with custom API integration next quarter.');
   const [result, setResult] = useState<any>(null);
   const [running, setRunning] = useState(false);
 
@@ -138,7 +138,7 @@ export function ZeroLagSimulator() {
 
 // 3. BILAHUJAN: Flood Level Telemetry Simulation
 export function BLAHujanSimulator() {
-  const [level, setLevel] = useState(2.1);
+  const [level, setLevel] = useState(2.2);
   const status = level > 3.5 ? 'DANGER' : level > 2.8 ? 'WARNING' : 'NORMAL';
 
   return (
