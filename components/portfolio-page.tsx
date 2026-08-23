@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import BikebearInspiredHero from '@/components/bikebear-hero';
 import AboutSection from '@/components/about-section';
 import StackedProjects from '@/components/stacked-projects';
@@ -10,12 +10,11 @@ import {
 } from 'lucide-react';
 import { personalDetails, heroStats, projects, experiences, awards } from '@/lib/site-data';
 import { PitchDeckModal } from '@/components/pitch-deck-modal';
-import { SlotifySimulator, ZeroLagSimulator, BLAHujanSimulator, SensorSenseiSimulator } from '@/components/project-simulators';
+import ProjectSimulators from '@/components/project-simulators';
 
 export function PortfolioPage() {
   const [activeDeck, setActiveDeck] = useState<{ title: string; pdfUrl: string } | null>(null);
-  const [activeLabTab, setActiveLabTab] = useState<string>('slotify');
-  const [copied, setCopied] = useState(false);
+    const [copied, setCopied] = useState(false);
   const [revealedEmail, setRevealedEmail] = useState(false);
   const [formState, setFormState] = useState({ name: '', email: '', message: '' });
   const [formStatus, setFormStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -59,77 +58,7 @@ export function PortfolioPage() {
 
         <StackedProjects />
 
-        <section id="experiments" className="space-y-8 scroll-mt-24">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-black/[0.08] pb-4">
-            <div>
-              <div className="text-xs font-mono text-neutral-700 uppercase tracking-widest">/experiments & prototypes</div>
-              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-black font-display mt-1">Interactive Engineering Lab</h2>
-            </div>
-            <p className="text-xs font-mono text-slate-500">Ideating & prototyping functional systems live.</p>
-          </div>
-          <div className="flex flex-wrap gap-2 p-1.5 rounded-2xl bg-white border border-black/[0.08] w-fit shadow-sm">
-            {[
-              { id: 'slotify', label: '01 / Slotify Dijkstra Router' },
-              { id: 'zerolag', label: '02 / ZeroLag AI Triage' },
-              { id: 'bilahujan', label: '03 / BILAHUJAN IoT Gauge' },
-              { id: 'sensor-sensei', label: '04 / Sensor X Sensei Load' },
-            ].map((tab) => (
-              <button key={tab.id} onClick={() => setActiveLabTab(tab.id)} className={`px-4 py-2 rounded-xl text-xs font-mono transition-all ${activeLabTab === tab.id ? 'bg-slate-900 text-white font-bold shadow-md' : 'text-neutral-700 hover:text-black'}`}>
-                {tab.label}
-              </button>
-            ))}
-          </div>
-          <div className="p-6 sm:p-8 rounded-3xl border-2 border-black bg-white shadow-xl">
-            {activeLabTab === 'slotify' && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-black/[0.06] pb-3">
-                  <div>
-                    <h4 className="font-bold text-black text-base font-display">Slotify Graph Routing Engine</h4>
-                    <p className="text-xs font-mono text-slate-500">Dijkstra Shortest Path & Spot Allocation Simulation</p>
-                  </div>
-                  <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-700">Java 21 / Spring Boot</span>
-                </div>
-                <SlotifySimulator />
-              </div>
-            )}
-            {activeLabTab === 'zerolag' && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-black/[0.06] pb-3">
-                  <div>
-                    <h4 className="font-bold text-black text-base font-display">ZeroLag 5-Operator Agentic Pipeline</h4>
-                    <p className="text-xs font-mono text-slate-500">Autonomous Sales Intent Extraction & Webhook Dispatch</p>
-                  </div>
-                  <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-medium">Supervity 2nd Place</span>
-                </div>
-                <ZeroLagSimulator />
-              </div>
-            )}
-            {activeLabTab === 'bilahujan' && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-black/[0.06] pb-3">
-                  <div>
-                    <h4 className="font-bold text-black text-base font-display">BILAHUJAN Flood Telemetry Network</h4>
-                    <p className="text-xs font-mono text-slate-500">Predictive Water Sensor & SMS Evacuation Alert Engine</p>
-                  </div>
-                  <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-medium">KitaHack 2026</span>
-                </div>
-                <BLAHujanSimulator />
-              </div>
-            )}
-            {activeLabTab === 'sensor-sensei' && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-black/[0.06] pb-3">
-                  <div>
-                    <h4 className="font-bold text-black text-base font-display">Sensor X Sensei HVAC Governance</h4>
-                    <p className="text-xs font-mono text-slate-500">Commercial Power Load Shedding & Telemetry Estimator</p>
-                  </div>
-                  <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-purple-50 text-purple-700 font-medium">UM Technothon Finalist</span>
-                </div>
-                <SensorSenseiSimulator />
-              </div>
-            )}
-          </div>
-        </section>
+        <ProjectSimulators />
 
         <section id="experience" className="space-y-8 scroll-mt-24">
           <div className="border-b border-black/[0.08] pb-4">
@@ -149,7 +78,7 @@ export function PortfolioPage() {
                     <div className="flex items-center gap-2 text-xs text-neutral-700 font-mono mt-1">
                       <Building2 className="w-3.5 h-3.5 text-slate-400" />
                       <span>{exp.organization}</span>
-                      <span className="text-slate-300">•</span>
+                      <span className="text-slate-300">â€¢</span>
                       <span className="text-slate-500">{exp.location}</span>
                     </div>
                   </div>
@@ -224,7 +153,7 @@ export function PortfolioPage() {
                 </div>
                 {!revealedEmail ? (
                   <button onClick={() => setRevealedEmail(true)} className="w-full py-3 px-4 rounded-xl border border-black/10 bg-[#F4F4F6] hover:bg-slate-100 text-black font-mono text-xs font-semibold transition-all text-center">
-                    Reveal Email Address ↓
+                    Reveal Email Address â†“
                   </button>
                 ) : (
                   <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-black/10 font-mono text-xs">
@@ -281,8 +210,8 @@ export function PortfolioPage() {
         </section>
 
         <footer className="pt-10 border-t border-black/[0.08] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-neutral-700 font-mono">
-          <p>© {new Date().getFullYear()} Howard Woon Hao Zhe. All rights reserved.</p>
-          <p>Universiti Malaya • Software Engineering (4.00 CGPA)</p>
+          <p>Â© {new Date().getFullYear()} Howard Woon Hao Zhe. All rights reserved.</p>
+          <p>Universiti Malaya â€¢ Software Engineering (4.00 CGPA)</p>
         </footer>
       </main>
 
