@@ -6,6 +6,7 @@ import { motion, useMotionValue, useSpring } from 'framer-motion';
 export function CustomCursor() {
   const [isMounted, setIsMounted] = useState(false);
   const [isPointer, setIsPointer] = useState(false);
+  const [isSpiderman, setIsSpiderman] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -45,6 +46,12 @@ export function CustomCursor() {
       } else {
         setIsPointer(false);
       }
+      
+      if (target.closest('[data-spiderman]')) {
+        setIsSpiderman(true);
+      } else {
+        setIsSpiderman(false);
+      }
     };
 
     const handleMouseLeave = () => setIsHidden(true);
@@ -69,7 +76,7 @@ export function CustomCursor() {
     <>
       {/* The Inverting Lens Dot */}
       <motion.div
-        className="fixed top-0 left-0 rounded-full pointer-events-none z-[9999] mix-blend-difference bg-amber-500"
+        className={`fixed top-0 left-0 rounded-full pointer-events-none z-[9999] ${isSpiderman ? 'bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.8)]' : 'mix-blend-difference bg-amber-500'}`}
         animate={{
           width: isPointer ? 80 : 12,
           height: isPointer ? 80 : 12,
@@ -88,10 +95,10 @@ export function CustomCursor() {
       <motion.div
         className="fixed top-0 left-0 w-12 h-12 rounded-full pointer-events-none z-[9998]"
         animate={{
-          scale: isPointer ? 1.8 : 1,
+          scale: isPointer ? 1.8 : (isSpiderman ? 1.5 : 1),
           borderWidth: isPointer ? '2px' : '4px',
-          borderColor: isPointer ? 'rgba(245, 158, 11, 0.3)' : 'rgba(245, 158, 11, 1)',
-          backgroundColor: isPointer ? 'rgba(245, 158, 11, 0.05)' : 'transparent',
+          borderColor: isSpiderman ? 'rgba(59, 130, 246, 1)' : (isPointer ? 'rgba(245, 158, 11, 0.3)' : 'rgba(245, 158, 11, 1)'),
+          backgroundColor: isSpiderman ? 'rgba(59, 130, 246, 0.2)' : (isPointer ? 'rgba(245, 158, 11, 0.05)' : 'transparent'),
         }}
         transition={{ type: 'spring', stiffness: 300, damping: 20 }}
         style={{

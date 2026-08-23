@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useRef, useState } from "react";
 import Image from "next/image";
@@ -257,18 +257,28 @@ export default function BikebearHero() {
               <div className="absolute -inset-1 bg-gradient-to-b from-amber-500/40 via-amber-500/10 to-transparent rounded-[52px] blur-xl opacity-70 group-hover:opacity-100 transition-opacity duration-500" />
 
               {/* Main Portrait Frame - Natural Vibrant Color (No Grayscale) */}
-              <div className="relative w-[340px] sm:w-[460px] lg:w-[480px] xl:w-[540px] h-[440px] sm:h-[580px] lg:h-[620px] xl:h-[700px] rounded-[48px] border-2 border-amber-500/30 bg-[#121620] overflow-hidden shadow-2xl transition-all duration-500 group-hover:border-amber-400/60">
+              <div data-spiderman="true" className="relative w-[340px] sm:w-[460px] lg:w-[480px] xl:w-[540px] h-[440px] sm:h-[580px] lg:h-[620px] xl:h-[700px] rounded-[48px] border-2 border-amber-500/30 bg-[#121620] overflow-hidden shadow-2xl transition-all duration-500 group-hover:border-red-500/60">
                 <Image
                   src="/images/howard-solid.jpeg"
                   alt="Howard Woon - Systems & AI Architect"
                   fill
-                  className="object-cover object-top transition-transform duration-700 group-hover:scale-105 saturate-[1.3] contrast-[1.15]"
+                  className="object-cover object-top transition-all duration-700 group-hover:scale-105 group-hover:opacity-0 saturate-[1.3] contrast-[1.15]"
                   priority
-                  quality={95}
+                  quality={100}
+                />
+
+                {/* Spiderman Overlay */}
+                <Image
+                  src="/images/spiderman.jpg"
+                  alt="Howard Woon - Spiderman"
+                  fill
+                  className="object-cover object-top transition-all duration-700 scale-100 opacity-0 group-hover:scale-105 group-hover:opacity-100 saturate-[1.3] contrast-[1.15]"
+                  priority
+                  quality={100}
                 />
                 
                 {/* Subtle Gradient Shade at the Bottom for Depth */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none transition-colors duration-500 group-hover:from-blue-900/60" />
               </div>
 
               
