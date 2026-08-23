@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { ArrowUpRight, Copy, Check, Terminal, Award, BookOpen, Layers } from "lucide-react";
 
