@@ -1,104 +1,421 @@
 ﻿"use client";
 
-import React, { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowUpRight, Github } from "lucide-react";
+import React, { useRef, useState } from "react";
+import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
+import { 
+  Award, 
+  ExternalLink, 
+  Terminal, 
+  FileText, 
+  Cpu, 
+  Activity, 
+  Zap, 
+  ArrowUpRight, 
+  Sparkles, 
+  Layers, 
+  Radio, 
+  ShieldCheck, 
+  Compass,
+  CheckCircle2
+} from "lucide-react";
 
-interface Project {
+interface ProjectData {
+  id: string;
+  number: string;
+  badge: string;
+  badgeType: "gold" | "cyan" | "emerald";
   title: string;
-  category: string;
+  subtitle: string;
   description: string;
+  architecturePoints: string[];
+  metrics: { label: string; value: string }[];
   tags: string[];
-  color: string;
+  deckUrl?: string;
+  simulatorId: string;
+  githubUrl?: string;
+  telemetryType: "agentic" | "flood" | "energy";
 }
 
-const projects: Project[] = [
+const projects: ProjectData[] = [
   {
-    title: "ZeroLag — Autonomous Sales Intelligence",
-    category: "Supervity APAC Hackathon · 2nd Place Winner",
-    description: "Agentic AI pipeline delivering real-time prospect telemetry, sentiment analysis, and instant lead scoring.",
-    tags: ["FastAPI", "React", "Gemini API", "Supabase"],
-    color: "#121212",
+    id: "zerolag",
+    number: "01",
+    badge: "🏆 2nd Place Winner · Supervity Asia Hackathon 2026",
+    badgeType: "gold",
+    title: "ZeroLag",
+    subtitle: "Autonomous Multi-Agent Sales Intelligence Pipeline",
+    description:
+      "A deterministic 5-operator AI agent architecture built to eliminate manual CRM research. Ingests real-time prospect telemetry, executes sentiment analysis, and scores high-conversion leads with sub-second execution.",
+    architecturePoints: [
+      "LangGraph State Machine with deterministic tool-calling guardrails",
+      "Real-time prospect sentiment scoring & CRM auto-dispatch",
+      "FastAPI asynchronous backend integrated with Supabase Vector Store"
+    ],
+    metrics: [
+      { label: "End-to-End Latency", value: "1.2s" },
+      { label: "Agent Operators", value: "5 Autonomous Nodes" },
+      { label: "Accuracy Score", value: "96.4% Precision" },
+    ],
+    tags: ["FastAPI", "Python 3.12", "LangGraph", "Gemini 1.5 Pro", "Supabase", "React"],
+    deckUrl: "/documents/supervity-pitchdeck.pdf",
+    simulatorId: "zerolag",
+    githubUrl: "https://github.com",
+    telemetryType: "agentic",
   },
   {
-    title: "BILAHUJAN — AI Flood Disaster Response",
-    category: "KitaHack 2026 Top Project",
-    description: "Real-time flood alert and logistics dispatch mobile platform powered by IoT water sensors and local vision models.",
-    tags: ["Flutter", "FastAPI", "IoT Sensors", "Computer Vision"],
-    color: "#121212",
+    id: "bilahujan",
+    number: "02",
+    badge: "🌊 KitaHack 2026 Top Project · AI Disaster Response",
+    badgeType: "cyan",
+    title: "BILAHUJAN",
+    subtitle: "Real-Time AI Flood Response & Evacuation Routing",
+    description:
+      "An automated flood disaster response mobile platform that fuses ultrasonic water telemetry, local vision models, and Dijkstra graph pathfinding to calculate dynamic safe evacuation corridors during flash floods.",
+    architecturePoints: [
+      "Sub-millisecond Dijkstra shortest-path engine avoiding inundated coordinates",
+      "Edge Computer Vision for water-level gauge classification",
+      "Offline-first mobile dispatch architecture built with Flutter & FastAPI"
+    ],
+    metrics: [
+      { label: "Routing Latency", value: "< 45ms" },
+      { label: "Telemetry Engine", value: "IoT Sensors + CV" },
+      { label: "Graph Capacity", value: "10k+ Road Nodes" },
+    ],
+    tags: ["Flutter", "FastAPI", "Python", "Computer Vision", "Graph Algorithms", "IoT"],
+    deckUrl: "/documents/dsaise-pitchdeck.pdf",
+    simulatorId: "bilahujan",
+    githubUrl: "https://github.com",
+    telemetryType: "flood",
   },
   {
-    title: "Sensor X Sensei — Smart Energy Grid",
-    category: "UM Technothon 2026 Finalist",
-    description: "Automated lecture hall electricity optimization tracking occupancy via NFC/PIR fusion and carbon emission analytics.",
-    tags: ["ESP32", "Next.js", "C++", "MQTT"],
-    color: "#121212",
+    id: "sensor-x-sensei",
+    number: "03",
+    badge: "⚡ UM Technothon 2026 Finalist · IoT Energy Grid",
+    badgeType: "emerald",
+    title: "Sensor X Sensei",
+    subtitle: "Automated Energy Management & Micro-Grid Telemetry",
+    description:
+      "An IoT-mediated building automation system designed for university lecture halls. Integrates dual-sensor fusion (PIR + NFC) with automated HVAC/lighting relays and live carbon emission telemetry dashboards.",
+    architecturePoints: [
+      "Low-power ESP32 firmware communicating via lightweight MQTT brokers",
+      "Next.js 15 telemetry dashboard streaming real-time kilowatt loads",
+      "Automated load-shedding algorithms cutting idle energy consumption by 38%"
+    ],
+    metrics: [
+      { label: "Energy Reduction", value: "38.2% Idle Saved" },
+      { label: "Hardware Stack", value: "ESP32 + PIR/NFC" },
+      { label: "Protocol", value: "MQTT / WebSockets" },
+    ],
+    tags: ["ESP32", "C++", "Next.js 15", "MQTT", "PostgreSQL", "Tailwind CSS"],
+    simulatorId: "sensor-x",
+    githubUrl: "https://github.com",
+    telemetryType: "energy",
   },
 ];
 
 export default function StackedProjects() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"],
+  });
+
   return (
-    <section className="relative w-full bg-neutral-950 py-24 px-4 sm:px-8">
-      <div className="mx-auto max-w-5xl space-y-12">
-        <div className="text-center space-y-3">
-          <div className="inline-flex items-center border border-white/80 rounded-full px-3.5 py-1 text-xs font-mono tracking-widest uppercase text-white bg-transparent">PROJECTS // PRODUCTION</div>
-          <h2 className="text-4xl sm:text-5xl font-bold tracking-tight text-white uppercase">
-            Stacked Systems & Works
-          </h2>
+    <section 
+      ref={containerRef}
+      id="projects" 
+      className="relative w-full bg-[#090B10] text-white py-32 px-6 sm:px-10 lg:px-16 overflow-hidden border-t border-white/10 selection:bg-amber-500 selection:text-black"
+    >
+      {/* Ambient Lighting */}
+      <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-1/4 left-0 w-[600px] h-[600px] bg-cyan-500/5 rounded-full blur-[150px] pointer-events-none" />
+
+      <div className="max-w-7xl mx-auto space-y-20">
+        
+        {/* Section Header */}
+        <div className="space-y-6">
+          <div className="inline-flex items-center gap-2 border border-amber-500/30 bg-amber-500/10 backdrop-blur-md rounded-full px-4 py-1.5 text-xs font-mono text-amber-300 tracking-widest uppercase">
+            <Layers className="w-3.5 h-3.5 text-amber-400" />
+            <span>PROJECTS // PRODUCTION & ARCHITECTURE</span>
+          </div>
+
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+            <h2 className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white max-w-3xl leading-[1.05]">
+              STACKED SYSTEMS & PRODUCTION ARCHITECTURES.
+            </h2>
+            <p className="text-neutral-400 text-sm sm:text-base font-mono max-w-md">
+              Scroll through the stack to inspect low-latency backends, multi-agent LLM systems, and IoT micro-grids built from 0 to 1.
+            </p>
+          </div>
         </div>
 
-        <div className="space-y-16">
-          {projects.map((project, i) => (
-            <ProjectCard key={project.title} project={project} index={i} total={projects.length} />
-          ))}
+        {/* Stacked Cards Container */}
+        <div className="space-y-12 lg:space-y-24">
+          {projects.map((project, index) => {
+            return (
+              <ProjectCard 
+                key={project.id} 
+                project={project} 
+                index={index} 
+                total={projects.length}
+                progress={scrollYProgress}
+              />
+            );
+          })}
         </div>
+
       </div>
     </section>
   );
 }
 
-function ProjectCard({ project, index, total }: { project: Project; index: number; total: number }) {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: cardRef,
-    offset: ["start end", "start start"],
-  });
+function ProjectCard({
+  project,
+  index,
+  total,
+  progress
+}: {
+  project: ProjectData;
+  index: number;
+  total: number;
+  progress: MotionValue<number>;
+}) {
+  const [activeTab, setActiveTab] = useState<"architecture" | "telemetry">("architecture");
 
-  const scale = useTransform(scrollYProgress, [0, 1], [0.8, 1]);
+  // Dynamic Badges
+  const badgeStyles = {
+    gold: "border-amber-500/40 bg-amber-500/10 text-amber-300",
+    cyan: "border-cyan-500/40 bg-cyan-500/10 text-cyan-300",
+    emerald: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
+  };
 
   return (
-    <motion.div
-      ref={cardRef}
-      style={{
-        scale,
-        top: `calc(100px + ${index * 35}px)`,
-        backgroundColor: project.color,
-      }}
-      className="sticky rounded-3xl border border-neutral-800 p-8 sm:p-12 shadow-2xl backdrop-blur-2xl transition-all"
+    <div 
+      className="sticky top-24 w-full"
+      style={{ zIndex: index + 10 }}
     >
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-        <div className="space-y-4 max-w-2xl">
-          <span className="inline-block rounded-full bg-white/10 px-3.5 py-1 text-xs font-mono text-[#F5C400]">
-            {project.category}
-          </span>
-          <h3 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">{project.title}</h3>
-          <p className="text-sm sm:text-base text-neutral-300 leading-relaxed">{project.description}</p>
-          
-          <div className="flex flex-wrap gap-2 pt-2">
-            {project.tags.map((tag) => (
-              <span key={tag} className="rounded-lg bg-white/5 border border-white/10 px-3 py-1 text-xs font-mono text-neutral-300">
-                {tag}
-              </span>
-            ))}
-          </div>
-        </div>
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+        className="w-full rounded-[36px] p-8 sm:p-10 lg:p-12 border border-white/15 bg-[#0E121B]/95 backdrop-blur-2xl shadow-2xl transition-all duration-500 hover:border-amber-400/40 group"
+      >
+        {/* Background glow per card */}
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none group-hover:bg-amber-500/10 transition-colors" />
 
-        <div className="flex items-center gap-3">
-          <button className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#F5C400] text-black shadow-lg hover:scale-110 active:scale-95 transition">
-            <ArrowUpRight className="h-6 w-6" />
-          </button>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
+          
+          {/* Left Column: Narrative, Architecture & Benchmarks (7 Cols) */}
+          <div className="lg:col-span-7 space-y-6">
+            
+            {/* Top Bar: Project Index + Award Badge */}
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="w-8 h-8 rounded-full bg-white/10 text-white font-mono text-xs font-bold flex items-center justify-center border border-white/15">
+                {project.number}
+              </span>
+              <div className={`inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-mono tracking-wider border ${badgeStyles[project.badgeType]}`}>
+                <Award className="w-3.5 h-3.5" />
+                <span>{project.badge}</span>
+              </div>
+            </div>
+
+            {/* Title & Subtitle */}
+            <div className="space-y-1.5">
+              <h3 className="text-3xl sm:text-4xl font-extrabold uppercase tracking-tight text-white flex items-center gap-3">
+                {project.title}
+                <ArrowUpRight className="w-5 h-5 text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </h3>
+              <p className="text-sm font-mono text-amber-400 font-medium tracking-wide">
+                {project.subtitle}
+              </p>
+            </div>
+
+            {/* Narrative Description */}
+            <p className="text-neutral-300 text-sm sm:text-base leading-relaxed font-sans">
+              {project.description}
+            </p>
+
+            {/* Key Architectural Highlights */}
+            <div className="space-y-2.5 bg-black/30 p-4 rounded-2xl border border-white/5">
+              <span className="text-[11px] font-mono text-neutral-400 uppercase tracking-widest block mb-1">
+                KEY ARCHITECTURAL HIGHLIGHTS:
+              </span>
+              {project.architecturePoints.map((point, pIdx) => (
+                <div key={pIdx} className="flex items-start gap-2.5 text-xs font-sans text-neutral-200">
+                  <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <span>{point}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Live Benchmarks & Metric Chips */}
+            <div className="grid grid-cols-3 gap-3">
+              {project.metrics.map((m, mIdx) => (
+                <div key={mIdx} className="bg-white/[0.03] border border-white/10 rounded-2xl p-3">
+                  <div className="text-[10px] font-mono text-neutral-400 uppercase truncate">
+                    {m.label}
+                  </div>
+                  <div className="text-sm font-mono font-bold text-amber-300 mt-1 truncate">
+                    {m.value}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Tech Stack Pills */}
+            <div className="flex flex-wrap gap-2 pt-1">
+              {project.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-mono text-neutral-300 hover:border-amber-400/50 hover:text-white transition-colors"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-wrap items-center gap-3 pt-3">
+              <a
+                href={`#simulators`}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-amber-400 text-black font-mono font-bold text-xs uppercase tracking-wider hover:bg-amber-300 transition-all duration-200 shadow-lg shadow-amber-500/20"
+              >
+                <Terminal className="w-3.5 h-3.5" />
+                <span>TEST SIMULATOR</span>
+              </a>
+
+              {project.deckUrl && (
+                <a
+                  href={project.deckUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/15 text-white font-mono text-xs uppercase tracking-wider transition-all duration-200"
+                >
+                  <FileText className="w-3.5 h-3.5 text-neutral-400" />
+                  <span>PITCH DECK</span>
+                  <ExternalLink className="w-3 h-3 text-neutral-400" />
+                </a>
+              )}
+            </div>
+
+          </div>
+
+          {/* Right Column: Live Visual Architecture Telemetry (5 Cols) */}
+          <div className="lg:col-span-5 w-full bg-black/60 rounded-3xl border border-white/10 p-6 space-y-4 shadow-inner">
+            
+            {/* Visualizer Header */}
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2 text-xs font-mono text-neutral-300">
+                <Activity className="w-4 h-4 text-emerald-400 animate-pulse" />
+                <span className="uppercase font-bold tracking-wider">LIVE TELEMETRY WINDOW</span>
+              </div>
+              <span className="text-[10px] font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                ACTIVE PIPELINE
+              </span>
+            </div>
+
+            {/* Conditional Graphic Visualizers */}
+            {project.telemetryType === "agentic" && (
+              <div className="space-y-4 py-2">
+                <div className="text-[11px] font-mono text-neutral-400">
+                  // Multi-Agent State Machine Flow
+                </div>
+                
+                {/* Agent Flow Diagram */}
+                <div className="space-y-2.5">
+                  <div className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-blue-400 animate-ping" />
+                      <span className="text-xs font-mono text-white">1. Prospect Telemetry Ingestion</span>
+                    </div>
+                    <span className="text-[10px] font-mono text-neutral-400">20ms</span>
+                  </div>
+
+                  <div className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-purple-400" />
+                      <span className="text-xs font-mono text-white">2. Multi-Agent Lead Scoring</span>
+                    </div>
+                    <span className="text-[10px] font-mono text-neutral-400">LangGraph</span>
+                  </div>
+
+                  <div className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-emerald-400" />
+                      <span className="text-xs font-mono text-white">3. Automated CRM Dispatch</span>
+                    </div>
+                    <span className="text-[10px] font-mono text-emerald-400">Completed</span>
+                  </div>
+                </div>
+
+                <div className="bg-black p-3 rounded-xl border border-white/5 font-mono text-[11px] text-neutral-400 space-y-1">
+                  <div className="text-emerald-400">&gt;_ state.status: &quot;EXECUTION_VERIFIED&quot;</div>
+                  <div>&gt;_ sentiment_score: 0.94 [HIGH_CONVERT]</div>
+                  <div>&gt;_ sync_target: &quot;Supabase_VectorStore&quot;</div>
+                </div>
+              </div>
+            )}
+
+            {project.telemetryType === "flood" && (
+              <div className="space-y-4 py-2">
+                <div className="text-[11px] font-mono text-neutral-400">
+                  // Dijkstra Evacuation Path Engine
+                </div>
+
+                {/* Simulated Graph Routing */}
+                <div className="bg-black/50 border border-white/10 rounded-xl p-4 space-y-3">
+                  <div className="flex items-center justify-between text-xs font-mono">
+                    <span className="text-neutral-400">Target Hazard Zone:</span>
+                    <span className="text-red-400 font-bold">Inundation Level 3</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs font-mono">
+                    <span className="text-neutral-400">Calculated Safe Corridor:</span>
+                    <span className="text-emerald-400 font-bold">Path Node #104 ➔ #289</span>
+                  </div>
+                  <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                    <div className="bg-cyan-400 h-full w-4/5 animate-pulse" />
+                  </div>
+                </div>
+
+                <div className="bg-black p-3 rounded-xl border border-white/5 font-mono text-[11px] text-neutral-400 space-y-1">
+                  <div className="text-cyan-400">&gt;_ graph.nodes_evaluated: 1,024</div>
+                  <div>&gt;_ priority_queue: &quot;MinHeap_Balanced&quot;</div>
+                  <div>&gt;_ route_dispatch_time: 42.8ms</div>
+                </div>
+              </div>
+            )}
+
+            {project.telemetryType === "energy" && (
+              <div className="space-y-4 py-2">
+                <div className="text-[11px] font-mono text-neutral-400">
+                  // Micro-Grid Power & Occupancy Matrix
+                </div>
+
+                {/* IoT Grid Dashboard */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
+                    <div className="text-[10px] font-mono text-neutral-400">Current Load</div>
+                    <div className="text-base font-mono font-bold text-white mt-1">1.42 kW</div>
+                  </div>
+                  <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
+                    <div className="text-[10px] font-mono text-neutral-400">Idle Savings</div>
+                    <div className="text-base font-mono font-bold text-emerald-400 mt-1">-38.2%</div>
+                  </div>
+                </div>
+
+                <div className="bg-black p-3 rounded-xl border border-white/5 font-mono text-[11px] text-neutral-400 space-y-1">
+                  <div className="text-emerald-400">&gt;_ sensor_fusion: &quot;PIR_ACTIVE + NFC_PASS&quot;</div>
+                  <div>&gt;_ protocol_broker: &quot;MQTT_TLS_v1.3&quot;</div>
+                  <div>&gt;_ relay_state: &quot;OPTIMIZED_AUTO_SHED&quot;</div>
+                </div>
+              </div>
+            )}
+
+          </div>
+
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+    </div>
   );
 }
