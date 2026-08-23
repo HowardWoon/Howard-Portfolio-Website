@@ -3,6 +3,7 @@
 import React, { useRef, useState } from "react";
 import { motion, useScroll, useTransform, MotionValue, AnimatePresence } from "framer-motion";
 import { TiltCard } from './tilt-card';
+import { InteractivePhotoStack } from "./interactive-photo-stack";
 import { ZeroLagSimulator, BilahujanSimulator, SensorXSimulator } from "./project-simulators";
 import { 
   Award, 
@@ -302,61 +303,32 @@ function ProjectCard({
           </div>
 
           {/* Right Column: Live Visual Architecture Telemetry (5 Cols) */}
-          <motion.div style={{ opacity: panelOpacity, y: panelY }} className="lg:col-span-5 w-full bg-black/60 rounded-3xl border border-white/10 p-6 space-y-4 shadow-inner">
+          <motion.div style={{ opacity: panelOpacity, y: panelY }} className="lg:col-span-5 w-full bg-black/60 rounded-3xl border border-white/10 p-6 space-y-4 shadow-inner flex flex-col">
             
             {/* Visualizer Header */}
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <div className="flex items-center gap-2 text-xs font-mono text-neutral-300">
-                <Activity className="w-4 h-4 text-emerald-400 animate-pulse" />
-                <span className="uppercase font-bold tracking-wider">LIVE TELEMETRY WINDOW</span>
+                {project.telemetryType === "agentic" ? (
+                  <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
+                ) : (
+                  <Activity className="w-4 h-4 text-emerald-400 animate-pulse" />
+                )}
+                <span className="uppercase font-bold tracking-wider">
+                  {project.telemetryType === "agentic" ? "PROJECT GALLERY" : "LIVE TELEMETRY WINDOW"}
+                </span>
               </div>
               <span className="text-xs font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-                ACTIVE PIPELINE
+                {project.telemetryType === "agentic" ? "INTERACTIVE" : "ACTIVE PIPELINE"}
               </span>
             </div>
 
             {/* Conditional Graphic Visualizers */}
             {project.telemetryType === "agentic" && (
-              <div className="space-y-4 py-2">
-                <div className="text-xs font-mono text-neutral-400">
-                  // Multi-Agent State Machine Flow
-                </div>
-                
-                {/* Agent Flow Diagram */}
-                <div className="space-y-2.5">
-                  <div className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-blue-400 animate-ping" />
-                      <span className="text-xs font-mono text-white">1. Prospect Telemetry Ingestion</span>
-                    </div>
-                    <span className="text-xs font-mono text-neutral-400">20ms</span>
-                  </div>
-
-                  <div className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-amber-400" />
-                      <span className="text-xs font-mono text-white">2. Multi-Agent Lead Scoring</span>
-                    </div>
-                    <span className="text-xs font-mono text-neutral-400">LangGraph</span>
-                  </div>
-
-                  <div className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-emerald-400" />
-                      <span className="text-xs font-mono text-white">3. Automated CRM Dispatch</span>
-                    </div>
-                    <span className="text-xs font-mono text-emerald-400">Completed</span>
-                  </div>
-                </div>
-
-                <div className="bg-black p-3 rounded-xl border border-white/5 font-mono text-xs text-neutral-400 space-y-1">
-                  <div className="text-emerald-400">&gt;_ state.status: &quot;EXECUTION_VERIFIED&quot;</div>
-                  <div>&gt;_ sentiment_score: 0.94 [HIGH_CONVERT]</div>
-                  <div>&gt;_ sync_target: &quot;Supabase_VectorStore&quot;</div>
-                </div>
+              <div className="flex-1 w-full flex items-center justify-center min-h-[350px] py-4">
+                <InteractivePhotoStack />
               </div>
             )}
-
+            
             {project.telemetryType === "flood" && (
               <div className="space-y-4 py-2">
                 <div className="text-xs font-mono text-neutral-400">
