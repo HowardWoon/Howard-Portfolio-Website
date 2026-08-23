@@ -1,4 +1,5 @@
 'use client';
+import { HeroSection } from '@/components/hero-section';
 
 import React, { useState } from 'react';
 import Image from 'next/image';
@@ -48,48 +49,9 @@ export function PortfolioPage() {
 
   return (
     <div className="relative min-h-screen tech-grid-bg selection:bg-slate-900 selection:text-white">
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-32 pb-32 space-y-36">
-        <section className="relative min-h-[70vh] sm:min-h-[78vh] flex flex-col justify-between pt-6">
-          <div className="flex items-center justify-between font-mono text-xs text-slate-600">
-            <div>01 {"//"} SOFTWARE ENGINEER</div>
-            <div className="hidden sm:block">UNIVERSITI MALAYA • 4.00 CGPA</div>
-          </div>
-          <div className="relative my-8 flex items-center justify-center">
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] select-none overflow-hidden">
-              <div className="animate-marquee-slow whitespace-nowrap text-5xl sm:text-7xl font-extrabold font-display tracking-tight text-black flex items-center gap-12">
-                <span>SPRING BOOT</span><span>•</span><span>AUTOPILOT 2026</span><span>•</span><span>AGENTIC AI</span><span>•</span><span>DIJKSTRA GRAPH</span><span>•</span><span>KRAIBURG TPE</span><span>•</span><span>PEKOM FINANCE</span><span>•</span>
-              </div>
-            </div>
-            <div className="relative z-10 w-48 h-64 sm:w-60 sm:h-80 rounded-[48%] overflow-hidden border-2 border-white shadow-2xl ring-8 ring-black/[0.03] transition-transform duration-500 hover:scale-[1.02]">
-              <Image src={personalDetails.avatarUrl} alt={personalDetails.fullName} fill priority className="object-cover" />
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end border-t border-black/[0.08] pt-6">
-            <div className="md:col-span-6 space-y-2">
-              <div className="flex items-center gap-2 text-xs font-mono text-slate-500">
-                <ArrowDown className="w-3.5 h-3.5 text-slate-800" />
-                <span>HOWARD WOON / STATEMENT</span>
-              </div>
-              <p className="text-sm sm:text-base font-sans text-slate-800 leading-relaxed font-medium">
-                {personalDetails.statement}
-              </p>
-            </div>
-            <div className="md:col-span-6 grid grid-cols-3 gap-2 font-mono text-right">
-              <div className="p-3 rounded-xl border border-black/[0.06] bg-white/70 backdrop-blur-sm">
-                <div className="text-2xl font-bold text-slate-900">4.00</div>
-                <div className="text-[10px] text-slate-500 uppercase mt-0.5">Dean&apos;s List</div>
-              </div>
-              <div className="p-3 rounded-xl border border-black/[0.06] bg-white/70 backdrop-blur-sm">
-                <div className="text-2xl font-bold text-slate-900">2nd</div>
-                <div className="text-[10px] text-slate-500 uppercase mt-0.5">Supervity APAC</div>
-              </div>
-              <div className="p-3 rounded-xl border border-black/[0.06] bg-white/70 backdrop-blur-sm">
-                <div className="text-2xl font-bold text-slate-900">12+</div>
-                <div className="text-[10px] text-slate-500 uppercase mt-0.5">Shipped Systems</div>
-              </div>
-            </div>
-          </div>
-        </section>
+      <HeroSection />
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-32 space-y-36">
+        
 
         <section id="about" className="space-y-10 scroll-mt-24">
           <div className="space-y-4 max-w-4xl">
