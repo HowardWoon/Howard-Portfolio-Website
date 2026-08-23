@@ -237,7 +237,7 @@ export default function BikebearHero() {
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
               style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-              className="relative group cursor-pointer flex flex-col items-center lg:items-end"
+              className="relative group cursor-pointer flex flex-col items-center lg:items-end z-40"
             >
               {/* News Ticker (Above Photo) */}
                 <div className="w-[340px] sm:w-[460px] lg:w-[480px] xl:w-[540px] mb-4 overflow-hidden bg-white rounded-xl border border-white/20 py-2.5 relative z-20 shadow-[0_0_20px_rgba(255,255,255,0.1)]">

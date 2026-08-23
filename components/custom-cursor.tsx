@@ -30,6 +30,14 @@ export function CustomCursor() {
     const moveCursor = (e: MouseEvent) => {
       cursorX.set(e.clientX);
       cursorY.set(e.clientY);
+      
+      if (e.target && (e.target as HTMLElement).closest) {
+        if ((e.target as HTMLElement).closest('[data-spiderman]')) {
+          setIsSpiderman(true);
+        } else {
+          setIsSpiderman(false);
+        }
+      }
     };
 
     const handleMouseOver = (e: MouseEvent) => {
