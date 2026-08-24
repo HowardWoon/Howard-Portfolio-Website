@@ -63,10 +63,10 @@ const architecturePillars = [
       "Leveraging Dijkstra's shortest path, priority queues, and dynamic programming for real-time routing engines (e.g. BILAHUJAN flood response app at KitaHack 2026).",
     metrics: [
       { label: "Complexity Focus", value: "O(E + V log V) Routing" },
-      { label: "Academic Standing", value: "4.00 CGPA (2 Semesters)" },
+      { label: "PRACTICAL APPLICATION", value: "Real-Time Pathfinding" },
       { label: "Optimization", value: "Spatial Graph Heuristics" },
     ],
-    telemetrySnippet: "MinHeap[Priority Queue: 1,024 Nodes Balanced]",
+    telemetrySnippet: "[Pathfinding] Dijkstra executed: Sub-1.2ms latency ACTIVE",
   },
   {
     id: "governance",
@@ -77,34 +77,77 @@ const architecturePillars = [
     accentHex: "#10B981",
     headline: "Corporate Financial Leadership & System Auditing",
     description:
-      "Combining technical engineering with executive financial stewardship as PEKOM Finance Lead 2026/2027 and corporate finance intern at Kraiburg TPE.",
+      "Bridging software engineering with corporate financial stewardship, managing budgets, and executing system audits as PEKOM Finance Lead and Kraiburg TPE Finance Intern.",
     metrics: [
       { label: "Leadership", value: "Finance Lead 26/27 @ PEKOM" },
       { label: "Oversight", value: "100% Audit Compliance" },
       { label: "Corporate Exp.", value: "Kraiburg TPE Finance" },
     ],
-    telemetrySnippet: "Audit Log: 100% Balanced · Ledger Verified",
+    telemetrySnippet: "Audit Process: Zero Discrepancies | Ledger Verified ACTIVE",
   },
 ];
 
-const techStackGroups = [
-  {
-    category: "CORE LANGUAGES",
-    skills: ["Java 21", "Python 3.12", "TypeScript", "SQL (PostgreSQL)", "C++"],
-  },
-  {
-    category: "BACKEND & FRAMEWORKS",
-    skills: ["Spring Boot 3", "FastAPI", "Next.js 15 (App Router)", "Node.js", "Docker"],
-  },
-  {
-    category: "AI & AGENTIC SYSTEMS",
-    skills: ["LangChain", "LangGraph", "CrewAI", "Ollama (Local LLMs)", "Prompt Engineering"],
-  },
-  {
-    category: "DATA & INFRASTRUCTURE",
-    skills: ["PostgreSQL", "Supabase", "Git / GitHub Actions", "Vercel", "REST / gRPC APIs"],
-  },
-];
+type SkillStatus = 'production' | 'hackathon' | 'rnd';
+
+  const techStackGroups: { category: string, skills: {name: string, status: SkillStatus}[] }[] = [
+    {
+      category: "CORE LANGUAGES",
+      skills: [
+        {name: "Java 21", status: "production"}, 
+        {name: "Python 3.12", status: "production"}, 
+        {name: "TypeScript", status: "production"}, 
+        {name: "SQL (PostgreSQL)", status: "production"}, 
+        {name: "C++", status: "hackathon"}
+      ],
+    },
+    {
+      category: "BACKEND & APIs",
+      skills: [
+        {name: "Spring Boot 3", status: "production"}, 
+        {name: "FastAPI", status: "hackathon"}, 
+        {name: "Next.js 15", status: "production"}, 
+        {name: "Node.js", status: "production"}, 
+        {name: "Docker", status: "production"}
+      ],
+    },
+    {
+      category: "DATA & INFRASTRUCTURE",
+      skills: [
+        {name: "PostgreSQL", status: "production"}, 
+        {name: "Supabase", status: "hackathon"}, 
+        {name: "Git / Actions", status: "production"}, 
+        {name: "Vercel", status: "production"}, 
+        {name: "REST / gRPC APIs", status: "production"}
+      ],
+    },
+    {
+      category: "AI & AGENTIC SYSTEMS",
+      skills: [
+        {name: "LangChain", status: "rnd"}, 
+        {name: "LangGraph", status: "rnd"}, 
+        {name: "CrewAI", status: "hackathon"}, 
+        {name: "Ollama (Local LLMs)", status: "hackathon"}, 
+        {name: "Prompt Engineering", status: "production"}
+      ],
+    },
+    {
+      category: "UI & GRAPHICS",
+      skills: [
+        {name: "React", status: "production"}, 
+        {name: "Tailwind CSS", status: "production"}, 
+        {name: "WebGL", status: "rnd"}, 
+        {name: "Framer Motion", status: "production"}
+      ],
+    },
+    {
+      category: "IOT & HARDWARE",
+      skills: [
+        {name: "ESP32", status: "hackathon"}, 
+        {name: "Firmware (C/C++)", status: "hackathon"}, 
+        {name: "Sensor Networks", status: "hackathon"}
+      ],
+    },
+  ];
 
 export default function AboutSection() {
   const [activeCard, setActiveCard] = useState<string>("backend");
@@ -250,14 +293,17 @@ export default function AboutSection() {
             <div className="flex items-center gap-4 text-xs font-mono text-neutral-400">
               <span className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-400" /> Production Tested
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-amber-400" /> Hackathon Proven
-              </span>
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-amber-400" /> Hackathon Proven
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-blue-400" /> Active R&D
+                </span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-y-10 gap-x-6">
             {techStackGroups.map((group, gIdx) => (
               <div key={gIdx} className="space-y-3.5">
                 <h5 className="text-xs font-mono font-bold text-neutral-400 tracking-wider uppercase flex items-center gap-1.5">
@@ -265,14 +311,18 @@ export default function AboutSection() {
                   {group.category}
                 </h5>
                 <div className="flex flex-wrap gap-2">
-                  {group.skills.map((skill) => (
-                    <span
-                      key={skill}
-                      className="px-3 py-1.5 bg-white/[0.04] hover:bg-amber-400/20 hover:border-amber-400/50 hover:text-amber-300 border border-white/10 rounded-xl text-xs font-mono text-neutral-200 transition-all duration-200"
-                    >
-                      {skill}
-                    </span>
-                  ))}
+                  {group.skills.map((skill) => {
+                      const dotColor = skill.status === 'production' ? 'bg-emerald-400' : skill.status === 'hackathon' ? 'bg-amber-400' : 'bg-blue-400';
+                      return (
+                        <span
+                          key={skill.name}
+                          className="px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 rounded-xl text-xs font-mono text-neutral-200 transition-all duration-200 flex items-center gap-2"
+                        >
+                          <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
+                          {skill.name}
+                        </span>
+                      );
+                    })}
                 </div>
               </div>
             ))}
