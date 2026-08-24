@@ -62,7 +62,15 @@ export function CustomCursor() {
       }
     };
 
-    const handleMouseLeave = () => setIsHidden(true);
+    const handleMouseLeave = (e: MouseEvent) => {
+      if (
+        e.clientY <= 0 ||
+        e.clientX <= 0 ||
+        (e.clientX >= window.innerWidth || e.clientY >= window.innerHeight)
+      ) {
+        setIsHidden(true);
+      }
+    };
     const handleMouseEnter = () => setIsHidden(false);
 
     window.addEventListener('mousemove', moveCursor);
