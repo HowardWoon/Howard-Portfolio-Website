@@ -398,6 +398,9 @@ export default function ExperienceSection() {
                       </span>
                     ))}
                   </div>
+                  
+                  {/* Specialized Dashboards */}
+                  {item.id === "pekom" && <PekomTreasurerDashboard />}
                 </motion.div>
               );
             })}
