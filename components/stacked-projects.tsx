@@ -121,7 +121,7 @@ export default function StackedProjects() {
     <section 
       ref={containerRef}
       id="projects" 
-      className="relative w-full bg-[#090B10] text-white pt-32 pb-[50vh] px-6 sm:px-10 lg:px-16 overflow-x-clip overflow-y-visible border-t border-white/10 selection:bg-amber-500 selection:text-black"
+      className="relative w-full bg-[#090B10] text-white py-32 px-6 sm:px-10 lg:px-16 overflow-x-clip overflow-y-visible border-t border-white/10 selection:bg-amber-500 selection:text-black"
     >
       {/* Ambient Lighting */}
       <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[150px] pointer-events-none" />
@@ -193,7 +193,7 @@ function ProjectCard({
   };
 
   return (
-    <div className="sticky top-24 w-full group" style={{ zIndex: index + 10 }}>
+    <div className="w-full group">
 
         <TiltCard>
       <motion.div
