@@ -45,7 +45,7 @@ const architecturePillars = [
     description:
       "Engineering state-machine AI workflows (LangGraph, CrewAI, local Ollama) that autonomously research, synthesize, and execute end-to-end tasks with verified guardrails.",
     metrics: [
-      { label: "Track Record", value: "2nd Place @ Supervity Hackathon" },
+      { label: "Track Record", value: "2nd Place @ Autopilot Asia Hackathon" },
       { label: "Orchestration", value: "LangGraph + CrewAI" },
       { label: "Guardrails", value: "Deterministic Tool Routing" },
     ],
@@ -63,7 +63,7 @@ const architecturePillars = [
       "Leveraging Dijkstra's shortest path, priority queues, and dynamic programming for real-time routing engines (e.g. BILAHUJAN flood response app at KitaHack 2026).",
     metrics: [
       { label: "Complexity Focus", value: "O(E + V log V) Routing" },
-      { label: "Academic Standing", value: "4.00 CGPA @ Univ Malaya" },
+      { label: "Academic Standing", value: "4.00 CGPA (2 Semesters)" },
       { label: "Optimization", value: "Spatial Graph Heuristics" },
     ],
     telemetrySnippet: "MinHeap[Priority Queue: 1,024 Nodes Balanced]",
@@ -77,9 +77,9 @@ const architecturePillars = [
     accentHex: "#10B981",
     headline: "Corporate Financial Leadership & System Auditing",
     description:
-      "Combining technical engineering with executive financial stewardship as PEKOM Finance Lead and corporate finance intern at Kraiburg TPE.",
+      "Combining technical engineering with executive financial stewardship as PEKOM Finance Lead 2026/2027 and corporate finance intern at Kraiburg TPE.",
     metrics: [
-      { label: "Leadership", value: "Finance Lead @ PEKOM UM" },
+      { label: "Leadership", value: "Finance Lead 26/27 @ PEKOM" },
       { label: "Oversight", value: "100% Audit Compliance" },
       { label: "Corporate Exp.", value: "Kraiburg TPE Finance" },
     ],
