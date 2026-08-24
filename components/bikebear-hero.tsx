@@ -239,10 +239,10 @@ export default function BikebearHero() {
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
               style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-              className="relative group cursor-pointer flex flex-col items-center lg:items-end z-40"
+              className="relative group cursor-pointer flex flex-col items-center lg:items-end z-40 pointer-events-none"
             >
               {/* News Ticker (Above Photo) */}
-                <div className="w-[340px] sm:w-[460px] lg:w-[480px] xl:w-[540px] mb-4 overflow-hidden bg-white rounded-xl border border-white/20 py-2.5 relative z-20 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+                <div className="w-[340px] sm:w-[460px] lg:w-[480px] xl:w-[540px] mb-4 overflow-hidden bg-white rounded-xl border border-white/20 py-2.5 relative z-20 shadow-[0_0_20px_rgba(255,255,255,0.1)] pointer-events-auto">
                   <div className="flex whitespace-nowrap animate-[marquee_20s_linear_infinite] w-max">
                     {[...Array(4)].map((_, i) => (
                       <div key={i} className="flex items-center">
@@ -270,7 +270,7 @@ export default function BikebearHero() {
                   }}
                   onMouseEnter={() => setIsMaskVisible(true)}
                   onMouseLeave={() => setIsMaskVisible(false)}
-                  className="relative w-[340px] sm:w-[460px] lg:w-[480px] xl:w-[540px] h-[440px] sm:h-[580px] lg:h-[620px] xl:h-[700px] rounded-[48px] border-2 border-amber-500/30 bg-[#121620] overflow-hidden shadow-2xl transition-all duration-500 group-hover:border-red-500/60"
+                  className="relative w-[340px] sm:w-[460px] lg:w-[480px] xl:w-[540px] h-[440px] sm:h-[580px] lg:h-[620px] xl:h-[700px] rounded-[48px] border-2 border-amber-500/30 bg-[#121620] overflow-hidden shadow-2xl transition-all duration-500 group-hover:border-red-500/60 pointer-events-auto cursor-pointer"
                 >
                   <Image
                     src="/images/howard-solid.jpeg"
