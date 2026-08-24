@@ -38,10 +38,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${sans.variable} ${display.variable} ${mono.variable}`}>
       <body className="scroll-smooth font-sans antialiased bg-[#F3F3F5] text-[#12151B]">
-        <CustomCursor />
         <SmoothScrollProvider>{children}</SmoothScrollProvider>
         <Analytics />
         <SpeedInsights />
+        <CustomCursor />
       </body>
     </html>
   );

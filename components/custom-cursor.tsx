@@ -84,7 +84,7 @@ export function CustomCursor() {
     <>
       {/* The Inverting Lens Dot */}
       <motion.div
-        className={`fixed top-0 left-0 rounded-full pointer-events-none z-[9999] ${isSpiderman ? 'bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.8)]' : 'mix-blend-difference bg-amber-500'}`}
+        className={`fixed top-0 left-0 rounded-full pointer-events-none z-[100000] ${isSpiderman ? 'bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.8)]' : 'mix-blend-difference bg-amber-500'}`}
         animate={{
           width: isPointer ? 80 : 12,
           height: isPointer ? 80 : 12,
@@ -101,7 +101,7 @@ export function CustomCursor() {
       
       {/* Thick Solid Yellow Outer Ring */}
       <motion.div
-        className="fixed top-0 left-0 w-12 h-12 rounded-full pointer-events-none z-[9998]"
+        className="fixed top-0 left-0 w-12 h-12 rounded-full pointer-events-none z-[99999]"
         animate={{
           scale: isPointer ? 1.8 : (isSpiderman ? 1.5 : 1),
           borderWidth: isPointer ? '2px' : '4px',
