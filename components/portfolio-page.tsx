@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import BikebearInspiredHero from '@/components/bikebear-hero';
 import AboutSection from '@/components/about-section';
 import StackedProjects from '@/components/stacked-projects';
@@ -11,9 +11,9 @@ import { TechMarquee } from '@/components/marquees';
 
 
 
+import { ScrollToTop } from '@/components/scroll-to-top';
+
 export function PortfolioPage() {
-  
-    
   
 
   return (
@@ -33,7 +33,7 @@ export function PortfolioPage() {
         <ContactSection />
       </main>
 
-      
+      <ScrollToTop />
     </div></BootSequence>
   );
 }
