@@ -280,9 +280,7 @@ function ProjectCard({
 
             {/* Action Buttons */}
             <div className="flex flex-wrap items-center gap-3 pt-3">
-              {project.id !== "sensor-x-sensei" && (
-                  <Link href={`/simulators/${project.telemetryType}`} target="_blank" className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-amber-400 text-black font-mono font-bold text-xs uppercase tracking-wider hover:bg-amber-300 transition-all duration-200 shadow-lg shadow-amber-500/20"><Terminal className="w-3.5 h-3.5" /><span>LAUNCH LIVE SIMULATOR</span></Link>
-                )}
+              
 
               {project.deckUrl && (
                 <a
