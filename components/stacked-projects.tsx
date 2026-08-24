@@ -66,29 +66,29 @@ const projects: ProjectData[] = [
       telemetryType: "agentic",
     },
   {
-    id: "bilahujan",
-    number: "02",
-    badge: "🌊 KitaHack 2026 Top Project · AI Disaster Response",
-    badgeType: "cyan",
-    title: "BILAHUJAN",
-    subtitle: "Real-Time AI Flood Response & Evacuation Routing",
-    description:
-      "An automated flood disaster response mobile platform that fuses ultrasonic water telemetry, local vision models, and Dijkstra graph pathfinding to calculate dynamic safe evacuation corridors during flash floods.",
-    architecturePoints: [
-      "Sub-millisecond Dijkstra shortest-path engine avoiding inundated coordinates",
-      "Edge Computer Vision for water-level gauge classification",
-      "Offline-first mobile dispatch architecture built with Flutter & FastAPI"
-    ],
-    metrics: [
-      { label: "Routing Latency", value: "< 45ms" },
-      { label: "Telemetry Engine", value: "IoT Sensors + CV" },
-      { label: "Graph Capacity", value: "10k+ Road Nodes" },
-    ],
-    tags: ["Flutter", "FastAPI", "Python", "Computer Vision", "Graph Algorithms", "IoT"],
-    simulatorId: "bilahujan",
-    githubUrl: "https://github.com",
-    telemetryType: "flood",
-  },
+      id: "bilahujan",
+      number: "02",
+      badge: "🏅 V Hack 2026 Case Study 3 — First Responder of the Future",
+      badgeType: "cyan",
+      title: "BILAHUJAN",
+      subtitle: "Decentralised Swarm Intelligence for Flood First Response",
+      description:
+        "An autonomous, edge-ready civic intelligence platform where every civilian acts as a sensor node. Fuses Gemini 2.5 Flash 12-pass image triage with a Gemini 2.0 Flash Command Agent orchestrated via 7 standardised MCP tools to instantly verify floods and dispatch authorities with zero human intervention.",
+      architecturePoints: [
+        "Autonomous Command Agent (Gemini 2.0 Flash) running a 3-phase Chain-of-Thought loop",
+        "12-pass vision pipeline enforcing unbypassable physical anchor guardrails (e.g., Rooftop = Severity 9)",
+        "Decentralised MCP Swarm architecture with real-time Firebase syncing and hardcoded offline-first fallbacks"
+      ],
+      metrics: [
+        { label: "Agent Tool Calls", value: "7 MCP Tools" },
+        { label: "Vision Pipeline", value: "12-Pass (Sub-35s)" },
+        { label: "Swarm Scale", value: "150+ Pre-seeded Towns" },
+      ],
+      tags: ["React", "TypeScript", "Firebase RTDB", "Gemini 2.5 Flash", "MCP Architecture", "Google Maps"],
+      simulatorId: "bilahujan",
+      githubUrl: "https://github.com/HowardWoon/BILAHUJAN-VHack2026",
+      telemetryType: "flood",
+    },
   {
     id: "sensor-x-sensei",
     number: "03",

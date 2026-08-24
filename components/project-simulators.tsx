@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,7 +17,8 @@ import {
   ShieldCheck, 
   Layers, 
   ArrowRight,
-  Sparkles
+  Sparkles,
+  Radio
 } from "lucide-react";
 
 type TabType = "slotify" | "zerolag" | "bilahujan" | "sensorx";
@@ -382,15 +383,38 @@ export function ZeroLagSimulator() {
    SIMULATOR 03: BILAHUJAN Flood Mesh
 ========================================================================= */
 export function BilahujanSimulator() {
-  const [waterLevel, setWaterLevel] = useState(2.8);
+  const [logs, setLogs] = useState<string[]>([
+    "[System] Firebase RTDB connected.",
+    "[Agent] Gemini 2.0 Flash Command Agent IDLE.",
+    "Awaiting citizen flood reports..."
+  ]);
+  const [isSimulating, setIsSimulating] = useState(false);
+  const [severity, setSeverity] = useState<number | null>(null);
 
-  const getStatus = (lvl: number) => {
-    if (lvl < 1.5) return { text: "NORMAL", color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/30" };
-    if (lvl < 3.0) return { text: "WARNING (ELEVATED)", color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/30" };
-    return { text: "CRITICAL FLASH FLOOD", color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/30" };
+  const triggerReport = () => {
+    if (isSimulating) return;
+    setIsSimulating(true);
+    setLogs(["[Node] Citizen uploaded flood image at KL-007 (Ampang)"]);
+    setSeverity(null);
+    
+    setTimeout(() => {
+      setLogs(p => [...p, "[Vision] gemini-2.5-flash 12-pass analysis started..."]);
+    }, 600);
+
+    setTimeout(() => {
+      setLogs(p => [...p, "[Vision] Pass 5 (Rooftop Cue): DETECTED", "[Vision] Severity Override applied -> 9 (CRITICAL)"]);
+      setSeverity(9);
+    }, 1800);
+
+    setTimeout(() => {
+      setLogs(p => [...p, "[Agent] New node detected via get_active_nodes MCP tool", "[Agent] Chain-of-Thought: 'Zone KL-007 has severity 9. I will dispatch an alert to NADMA.'"]);
+    }, 3200);
+
+    setTimeout(() => {
+      setLogs(p => [...p, "[MCP] Executing: dispatch_alert(zone: 'KL-007', severity: 9)", "[System] Authority notification sent to JPS & NADMA via Firebase."]);
+      setIsSimulating(false);
+    }, 4800);
   };
-
-  const status = getStatus(waterLevel);
 
   return (
     <motion.div
@@ -402,52 +426,90 @@ export function BilahujanSimulator() {
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
         <div>
-          <div className="flex items-center gap-2 text-xs font-mono text-amber-400 tracking-wider uppercase">
-            <Droplets className="w-4 h-4" />
-            <span>IOT SENSORS + COMPUTER VISION · KITAHACK 2026 TOP PROJECT</span>
+          <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 tracking-wider uppercase">
+            <Radio className="w-4 h-4" />
+            <span>SWARM INTELLIGENCE + MCP TOOLS — V HACK 2026</span>
           </div>
           <h3 className="text-2xl sm:text-3xl font-extrabold uppercase text-white mt-1">
-            BILAHUJAN Flood Evacuation Corridor Engine
+            Autonomous Command Agent Terminal
           </h3>
         </div>
 
-        <div className={`px-4 py-2 rounded-full border text-xs font-mono font-bold uppercase tracking-wider ${status.bg} ${status.border} ${status.color}`}>
-          STATUS: {status.text}
-        </div>
+        <button
+          onClick={triggerReport}
+          disabled={isSimulating}
+          className={`px-5 py-2.5 rounded-full border text-xs font-mono font-bold uppercase tracking-wider transition-colors ${
+            isSimulating
+              ? "bg-neutral-800 border-neutral-700 text-neutral-500 cursor-not-allowed"
+              : "bg-cyan-500/10 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20"
+          }`}
+        >
+          {isSimulating ? "Agent Active..." : "Simulate Citizen Report"}
+        </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-        {/* Left: Interactive Sensor Gauge */}
-        <div className="lg:col-span-6 bg-black/60 border border-white/10 rounded-2xl p-6 space-y-5">
-          <div className="flex items-center justify-between text-xs font-mono text-neutral-300">
-            <span>ULTRASONIC WATER LEVEL GAUGE:</span>
-            <span className="text-lg font-bold text-white">{waterLevel.toFixed(1)} Meters</span>
-          </div>
-
-          <input
-            type="range"
-            min="0.5"
-            max="4.5"
-            step="0.1"
-            value={waterLevel}
-            onChange={(e) => setWaterLevel(parseFloat(e.target.value))}
-            className="w-full h-2 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-amber-400"
-          />
-
-          <div className="flex justify-between text-xs font-mono text-neutral-500">
-            <span>0.5m (Dry)</span>
-            <span>2.5m (Alert)</span>
-            <span>4.5m (Severe Flood)</span>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+        {/* Left: Swarm Map / Status */}
+        <div className="lg:col-span-4 bg-black/60 border border-white/10 rounded-2xl p-6 flex flex-col justify-between">
+          <div className="space-y-2 text-xs font-mono">
+            <div className="text-neutral-500">// Firebase Node Status</div>
+            <div className="flex justify-between items-center text-neutral-300">
+              <span>Active Citizen Nodes</span>
+              <span className="text-cyan-400 font-bold">144 Nodes</span>
+            </div>
+            <div className="flex justify-between items-center text-neutral-300">
+              <span>Network Health</span>
+              <span className="text-emerald-400 font-bold">100% ONLINE</span>
+            </div>
+            <div className="flex justify-between items-center text-neutral-300 pt-4 border-t border-white/5">
+              <span>Current Incident Severity</span>
+              {severity ? (
+                <span className="text-red-400 font-bold animate-pulse">Level {severity} CRITICAL</span>
+              ) : (
+                <span className="text-neutral-500">Waiting for data</span>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Right: Evacuation Route Solver */}
-        <div className="lg:col-span-6 bg-black rounded-2xl border border-white/10 p-6 space-y-3 font-mono text-xs">
-          <div className="text-neutral-400">// Dynamic Safe Route Calculation</div>
-          <div className="p-3 bg-white/5 border border-white/10 rounded-xl space-y-1.5 text-neutral-200">
-            <div>&gt; Road Node #214: {waterLevel > 3.0 ? "INUNDATED (Avoided)" : "Passable"}</div>
-            <div>&gt; Selected Safe Corridor: <span className="text-amber-300 font-bold">Route 8 ➔ Rescue Zone Beta</span></div>
-            <div>&gt; Dijkstra Re-route Latency: <span className="text-emerald-400 font-bold">34.2 ms</span></div>
+        {/* Right: Live Terminal */}
+        <div className="lg:col-span-8 bg-[#0C0E14] rounded-2xl border border-white/10 p-5 font-mono text-[11px] sm:text-xs">
+          <div className="text-neutral-500 mb-4 flex items-center gap-2">
+            <Terminal className="w-4 h-4" />
+            <span>Command_Agent_Mission_Log.sh</span>
+          </div>
+          <div className="space-y-2 h-[150px] overflow-y-auto pr-2 custom-scrollbar">
+            {logs.map((log, i) => {
+              const isHighlight = log.includes("Severity Override") || log.includes("Authority notification sent");
+              const isAgent = log.includes("[Agent]");
+              const isVision = log.includes("[Vision]");
+              const isMCP = log.includes("[MCP]");
+              
+              let textColor = "text-neutral-300";
+              if (isHighlight) textColor = "text-red-400 font-bold";
+              else if (isAgent) textColor = "text-amber-300";
+              else if (isVision) textColor = "text-cyan-300";
+              else if (isMCP) textColor = "text-purple-400";
+              else if (log.includes("[System]")) textColor = "text-emerald-400";
+
+              return (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className={textColor}
+                >
+                  <span className="opacity-50 mr-2">{new Date().toISOString().split("T")[1].slice(0, 8)}</span>
+                  {log}
+                </motion.div>
+              );
+            })}
+            {isSimulating && (
+              <div className="flex items-center gap-2 text-neutral-500 pt-2">
+                <span className="animate-pulse">_</span>
+                <span>Agent processing...</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
