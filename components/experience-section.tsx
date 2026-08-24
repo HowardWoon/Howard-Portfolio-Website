@@ -14,7 +14,12 @@ import {
   ShieldCheck, 
   Sparkles,
   ArrowUpRight,
-  Filter
+  Filter,
+  Wallet,
+  BarChart3,
+  Receipt,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
 
 type FilterCategory = "all" | "corporate" | "leadership" | "academic";
@@ -133,6 +138,103 @@ const experiences: ExperienceItem[] = [
     tags: ["DSA Coaching", "OOP Paradigms", "Python / Java", "Academic Mentorship"],
   },
 ];
+
+
+function PekomTreasurerDashboard() {
+  const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
+
+  const stats = [
+    { label: "Total Funds", value: "RM 72,880+", icon: Wallet },
+    { label: "Sponsorships", value: "RM 62,550", icon: BarChart3 },
+    { label: "Net Surplus", value: "RM 9,619+", icon: TrendingUp },
+    { label: "Leverage Ratio", value: "16.46x", icon: Receipt },
+  ];
+
+  const events = [
+    {
+      id: "mytech",
+      name: "Treasurer | MYTECH Career Fair 2026",
+      desc: "Managed an unprecedented RM50,200 budget, securing 30 corporate sponsors and RM46,200 in revenue. Enforced an 81.5% spending cap to generate a record-breaking RM9,272.90 pure surplus for PEKOM."
+    },
+    {
+      id: "alphathon",
+      name: "Treasurer | UM Alphathon 2025",
+      desc: "Orchestrated a RM14,150 (USD 3,369) budget funded entirely by international partner WorldQuant. Achieved 99.87% budget accuracy, distributing 89.2% of all funds directly into the student prize pool."
+    },
+    {
+      id: "codefest",
+      name: "Treasurer | PEKOM CodeFest 2025",
+      desc: "Balanced a RM2,700 operational fund, achieving 100% financial reconciliation with zero deficit. Optimized operational overhead to ensure exactly 66.7% of the budget was paid out as direct cash rewards."
+    },
+    {
+      id: "mhw",
+      name: "Treasurer | Mental Health Week 2025",
+      desc: "Directed a RM5,830 multi-event fund, outperforming merchandise sales targets to secure a RM346 surplus. Executed charity outreach at RM11.68/pax, maintaining a 100%-reconciled budget."
+    }
+  ];
+
+  return (
+    <div className="mt-6 p-1 bg-amber-500/10 rounded-3xl border border-amber-500/20 shadow-inner overflow-hidden">
+      <div className="bg-[#090B10] rounded-[22px] p-5 sm:p-6">
+        <div className="flex items-center gap-2 mb-6">
+          <div className="w-2 h-2 bg-amber-500 rounded-full animate-ping" />
+          <h4 className="text-sm font-mono font-bold text-amber-400 uppercase tracking-widest">Treasurer Event Portfolio [4]</h4>
+        </div>
+        
+        {/* KPI Dashboard */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+          {stats.map((stat, i) => (
+            <div key={i} className="flex flex-col items-start p-3 bg-white/[0.02] rounded-xl border border-white/5">
+              <stat.icon className="w-4 h-4 text-amber-500/70 mb-2" />
+              <div className="text-[10px] font-mono text-neutral-400 uppercase">{stat.label}</div>
+              <div className="text-xs sm:text-sm font-bold text-white tracking-wide mt-1">{stat.value}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Interactive Event Accordion */}
+        <div className="space-y-3">
+          {events.map((event) => {
+            const isExpanded = expandedEvent === event.id;
+            return (
+              <div 
+                key={event.id}
+                onClick={() => setExpandedEvent(isExpanded ? null : event.id)}
+                className={`relative overflow-hidden cursor-pointer rounded-xl border transition-all duration-300 ${isExpanded ? 'bg-amber-500/10 border-amber-500/30' : 'bg-white/[0.02] border-white/10 hover:border-amber-500/50 hover:bg-white/[0.04]'}`}
+              >
+                <div className="p-4 flex items-center justify-between">
+                  <span className={`font-mono text-xs sm:text-sm font-bold tracking-wide ${isExpanded ? 'text-amber-400' : 'text-neutral-300'}`}>
+                    {event.name}
+                  </span>
+                  {isExpanded ? (
+                    <ChevronUp className="w-4 h-4 text-amber-400" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-neutral-500" />
+                  )}
+                </div>
+                
+                <AnimatePresence>
+                  {isExpanded && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="px-4 pb-4"
+                    >
+                      <div className="pt-2 border-t border-amber-500/20 text-xs sm:text-sm font-sans text-neutral-300 leading-relaxed">
+                        {event.desc}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function ExperienceSection() {
   const [selectedFilter, setSelectedFilter] = useState<FilterCategory>("all");
