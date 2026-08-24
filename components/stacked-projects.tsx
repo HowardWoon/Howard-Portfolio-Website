@@ -396,7 +396,7 @@ function ProjectCard({
               onClick={() => setIsExpanded(false)}
             >
               <motion.div
-                layoutId={`project-${project.id}`}
+                
                 className="relative w-full max-w-6xl bg-[#0E121B] border border-white/20 rounded-[32px] overflow-hidden shadow-2xl p-6 sm:p-10 my-8 flex flex-col"
                 onClick={(e) => e.stopPropagation()}
               >
