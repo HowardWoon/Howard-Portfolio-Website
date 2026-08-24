@@ -1,22 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Terminal, 
   Play, 
-  RefreshCw, 
-  Activity, 
   Cpu, 
   GitBranch, 
   Zap, 
-  Droplets, 
-  Sliders, 
-  CheckCircle2, 
-  AlertTriangle, 
-  ShieldCheck, 
-  Layers, 
-  ArrowRight,
+  CheckCircle2,
   Sparkles,
   Radio
 } from "lucide-react";

@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import Image from "next/image";
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion";
 import { ParticleMesh } from './particle-mesh';
-import { ArrowDown, ExternalLink, Sparkles, Terminal, Award, GraduationCap, Cpu, ShieldCheck } from "lucide-react";
+import {   Sparkles, Terminal } from "lucide-react";
 
 
 function MagnifiedHeadline() {

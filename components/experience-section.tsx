@@ -11,10 +11,8 @@ import {
   MapPin, 
   CheckCircle2, 
   TrendingUp, 
-  ShieldCheck, 
   Sparkles,
   ArrowUpRight,
-  Filter,
   Wallet,
   BarChart3,
   Receipt,
@@ -305,7 +303,7 @@ export default function ExperienceSection() {
           
           <AnimatePresence mode="wait">
             {filteredExperiences.map((item, idx) => {
-              const Icon = item.icon;
+              
               return (
                 <motion.div
                   key={item.id}
@@ -378,6 +376,8 @@ export default function ExperienceSection() {
                       </div>
                     ))}
                   </div>
+
+                  {item.id === 'pekom' && <PekomTreasurerDashboard />}
 
                   {/* Tag Badges */}
                   <div className="flex flex-wrap gap-2 pt-5">

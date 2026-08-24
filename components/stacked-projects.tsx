@@ -10,15 +10,10 @@ import {
   ExternalLink, 
   Terminal, 
   FileText, 
-  Cpu, 
   Activity, 
-  Zap, 
   ArrowUpRight, 
   Sparkles, 
-  Layers, 
-  Radio, 
-  ShieldCheck, 
-  Compass,
+  Layers,
   CheckCircle2
 } from "lucide-react";
 
@@ -182,14 +177,14 @@ function ProjectCard({
   total: number;
   progress: MotionValue<number>;
 }) {
-  const [activeTab, setActiveTab] = useState<"architecture" | "telemetry">("architecture");
+  
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Dynamic Badges
   const cardStart = index / total;
   const cardEnd = (index + 1) / total;
-  const panelOpacity = useTransform(progress, [cardStart, cardStart + 0.1, cardEnd - 0.1, cardEnd], [0, 1, 1, 0.5]);
-  const panelY = useTransform(progress, [cardStart, cardStart + 0.1], [30, 0]);
+  
+  
 
   const badgeStyles = {
     gold: "border-amber-500/40 bg-amber-500/10 text-amber-300",

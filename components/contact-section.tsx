@@ -1,26 +1,20 @@
 ﻿"use client";
 
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { ParticleMesh } from "./particle-mesh";
 import { 
   Mail, 
   Copy, 
   Check, 
   Send, 
-  ExternalLink, 
   Linkedin, 
   Github, 
   FileText, 
   MapPin, 
   Clock, 
-  Sparkles, 
-  Building, 
-  Briefcase, 
-  Terminal,
-  ShieldCheck,
-  CheckCircle2,
-  Lock
+  Sparkles,
+  CheckCircle2
 } from "lucide-react";
 
 const quickIntents = [
@@ -39,14 +33,9 @@ export default function ContactSection() {
 
   
   const cycleWords = ["BUILD", "SHIP", "ARCHITECT", "SCALE", "DEPLOY"];
-  const [cycleIndex, setCycleIndex] = useState(0);
+  
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCycleIndex((prev) => (prev + 1) % cycleWords.length);
-    }, 2000);
-    return () => clearInterval(timer);
-  }, []);
+  
 
   const emailAddress = "howardwoonhz@gmail.com";
   const linkedInUrl = "https://www.linkedin.com/in/howard-woon-hao-zhe-730b9337a/";

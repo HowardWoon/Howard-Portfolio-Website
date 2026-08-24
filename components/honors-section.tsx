@@ -1,9 +1,9 @@
 ﻿"use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { 
-  Award, 
+   
   Trophy, 
   GraduationCap, 
   Gamepad2, 
@@ -13,8 +13,7 @@ import {
   X, 
   CheckCircle2, 
   Medal,
-  Calendar,
-  Layers
+  Calendar
 } from "lucide-react";
 import Image from "next/image";
 
