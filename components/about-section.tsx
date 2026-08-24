@@ -26,10 +26,10 @@ const architecturePillars = [
     accentHex: "#F59E0B",
     headline: "Low-Latency Java 21 & Spring Boot Architecture",
     description:
-      "Architecting concurrent, fault-tolerant backend services with thread pooling, connection pooling, and optimized REST/gRPC endpoints designed for scale.",
+      "Architecting concurrent, fault-tolerant backend services utilizing thread pooling and optimized REST/gRPC endpoints to handle high-throughput workloads at scale.",
     metrics: [
-      { label: "Core Runtime", value: "Java 21 LTS" },
-      { label: "Architecture", value: "Spring Boot / Microservices" },
+      { label: "Core Runtime", value: "Java 21 LTS / Node.js" },
+      { label: "Architecture", value: "Spring Boot / Microservices / Supabase" },
       { label: "Throughput", value: "Sub-50ms API Latency" },
     ],
     telemetrySnippet: "ThreadPool[Active: 64, Idle: 16] · EventLoop: OK",
@@ -45,11 +45,11 @@ const architecturePillars = [
     description:
       "Engineering state-machine AI workflows (LangGraph, CrewAI, local Ollama) that autonomously research, synthesize, and execute end-to-end tasks with verified guardrails.",
     metrics: [
-      { label: "Track Record", value: "2nd Place @ Autopilot Asia Hackathon" },
+      { label: "Track Record", value: "2nd Place @ Autopilot Asia Hackathon (ZeroLag)" },
       { label: "Orchestration", value: "LangGraph + CrewAI" },
       { label: "Guardrails", value: "Deterministic Tool Routing" },
     ],
-    telemetrySnippet: "Agent Pipeline: [Planner ➔ Coder ➔ Reviewer ➔ Deployer]",
+    telemetrySnippet: "Agent Pipeline: [Triage -> Planner -> Execution -> QA Review] ACTIVE",
   },
   {
     id: "algorithms",
@@ -140,7 +140,7 @@ export default function AboutSection() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white max-w-5xl leading-[1.08]"
           >
-            I build resilient backend systems and autonomous AI agent pipelines that turn complex ideas into production-ready products.
+            I ARCHITECT RESILIENT BACKENDS AND AUTONOMOUS AI PIPELINES, TURNING COMPLEX IDEAS INTO PRODUCTION-READY SYSTEMS.
           </motion.h2>
 
           <motion.p
@@ -150,7 +150,7 @@ export default function AboutSection() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-neutral-300 text-lg sm:text-xl max-w-3xl leading-relaxed font-sans"
           >
-            Software Engineering undergraduate at <strong className="text-white">Universiti Malaya</strong> (<span className="text-amber-400 font-mono font-bold">4.00 CGPA</span>). Bridging low-latency algorithmic backend performance with production-grade AI agent orchestration and corporate fiscal governance.
+            Software Engineering undergraduate at <strong className="text-white">Universiti Malaya</strong> (<span className="text-amber-400 font-mono font-bold">4.00 CGPA</span>). Bridging low-latency algorithmic backend performance and AI orchestration with strong technical leadership and fiscal governance to deliver scalable, cost-effective solutions.
           </motion.p>
         </div>
 
