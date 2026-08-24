@@ -123,16 +123,17 @@ const honorsList: HonorItem[] = [
   },
   {
     id: "vhack",
-    badge: "CYBERSECURITY QUALIFIER",
+    badge: "V HACK 2026 QUALIFIER",
     badgeColor: "cyan",
-    title: "PRELIMINARY ROUND QUALIFIER",
+    title: "CASE STUDY 3: FIRST RESPONDER OF THE FUTURE",
     issuingBody: "Varsity Hackathon (V Hack) 2026",
     period: "2026",
-    statCallout: { value: "Qual", label: "National Cybersecurity" },
+    statCallout: { value: "Qual", label: "AI First Responder" },
     description:
-      "Competed in the V Hack 2026 Preliminary Round, demonstrating proficiency in cybersecurity challenges and secure systems engineering.",
+      "Architected BILAHUJAN, a decentralised swarm intelligence platform for flood response. Fused Gemini 2.5 Flash image triage with an MCP-orchestrated command agent.",
     highlights: [
-      "Participated in national-level cybersecurity technical challenges"
+      "Engineered decentralised swarm architecture with real-time Firebase syncing",
+      "Qualified in the Preliminary Round via the Case Study 3 track"
     ],
     certificateUrl: "/certificates/V HACK 2026 QUALIFIER_HOWARD WOON HAO ZHE.pdf",
     icon: Shield,
