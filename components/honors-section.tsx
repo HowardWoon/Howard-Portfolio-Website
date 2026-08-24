@@ -38,7 +38,7 @@ const honorsList: HonorItem[] = [
     isFeatured: true,
     badge: "REGIONAL APAC HACKATHON WINNER",
     badgeColor: "gold",
-    title: "2nd Place Winner (Sales Intelligence Track)",
+    title: "2ND PLACE WINNER — SALES INTELLIGENCE",
     issuingBody: "Supervity AutoPilot Asia Hackathon 2026",
     period: "August 2026",
     rankMetric: "2nd / 50+ Regional APAC Teams",
@@ -53,26 +53,10 @@ const honorsList: HonorItem[] = [
     icon: Trophy,
   },
   {
-    id: "deans-list",
-    badge: "ACADEMIC DISTINCTION",
-    badgeColor: "emerald",
-    title: "Dean's Honours List (4.00 CGPA)",
-    issuingBody: "Faculty of Computer Science & IT, Universiti Malaya",
-    period: "2025 – 2026",
-    rankMetric: "Top 1% Academic Distinction",
-    description:
-      "Maintained a 4.00 CGPA across software engineering, concurrent systems, data structures, algorithms, and distributed computing coursework.",
-    highlights: [
-      "Straight-A academic standing across all computer science semesters",
-      "Recognized on the Faculty of Computer Science & IT Dean's List"
-    ],
-    icon: GraduationCap,
-  },
-  {
     id: "game-jam",
     badge: "NATIONAL GAME JAM CHAMPION",
     badgeColor: "cyan",
-    title: "Public Choice Award (1st Place)",
+    title: "1ST PLACE (PUBLIC CHOICE AWARD)",
     issuingBody: "UM Game Jam 2026 (PEKOM)",
     period: "April 2026",
     rankMetric: "Public Choice / 39 Universities Nationwide",
@@ -89,18 +73,50 @@ const honorsList: HonorItem[] = [
     id: "technothon",
     badge: "INNOVATION FINALIST",
     badgeColor: "purple",
-    title: "Finalist & Cybersecurity Qualifier",
-    issuingBody: "UM Technothon 2026 & V Hack 2026",
+    title: "TOP 15 FINALIST (INNOVATION TRACK)",
+    issuingBody: "UM Technothon 2026",
     period: "May 2026",
-    rankMetric: "Technothon Finalist · V Hack Qualifier",
+    rankMetric: "Status: Top 15 Finalist Nationwide",
     description:
-      "Created Sensor X Sensei automated micro-grid power optimization system for university halls, and qualified in national cybersecurity technical challenges.",
+      "Engineered 'Sensor X Sensei', a smart lecture hall energy management IoT system. Utilized ESP32 microcontrollers and dynamic web dashboards to optimize university power grids.",
     highlights: [
       "Engineered low-power ESP32 + MQTT sensor fusion firmware",
-      "Qualified in V Hack 2026 National Cybersecurity Competition"
+      "Ranked Top 15 among national university teams"
     ],
     certificateUrl: "/certificates/UM TECHNOTHON 2026.pdf",
     icon: Zap,
+  },
+  {
+    id: "deans-list",
+    badge: "ACADEMIC DISTINCTION",
+    badgeColor: "emerald",
+    title: "Dean's Honours List (4.00 CGPA)",
+    issuingBody: "Faculty of Computer Science & IT, Universiti Malaya",
+    period: "2025 - 2026",
+    rankMetric: "Top 1% Academic Distinction",
+    description:
+      "Maintained a 4.00 CGPA across software engineering, concurrent systems, data structures, algorithms, and distributed computing coursework.",
+    highlights: [
+      "Straight-A academic standing across all computer science semesters",
+      "Recognized on the Faculty of Computer Science & IT Dean's List"
+    ],
+    icon: GraduationCap,
+  },
+  {
+    id: "vhack",
+    badge: "CYBERSECURITY QUALIFIER",
+    badgeColor: "cyan",
+    title: "PRELIMINARY ROUND QUALIFIER",
+    issuingBody: "Varsity Hackathon (V Hack) 2026",
+    period: "2026",
+    rankMetric: "National Cybersecurity Qualifier",
+    description:
+      "Competed in the V Hack 2026 Preliminary Round, demonstrating proficiency in cybersecurity challenges and secure systems engineering.",
+    highlights: [
+      "Participated in national-level cybersecurity technical challenges"
+    ],
+    certificateUrl: "/certificates/V HACK 2026 QUALIFIER_HOWARD WOON HAO ZHE.pdf",
+    icon: Sparkles,
   },
   {
     id: "kmns-distinction",
@@ -109,13 +125,29 @@ const honorsList: HonorItem[] = [
     title: "Academic Excellence Award (4.00 CGPA)",
     issuingBody: "Kolej Matrikulasi Negeri Sembilan",
     period: "2024",
-    rankMetric: "Top of Cohort · Physical Sciences",
+    rankMetric: "Top of Cohort - Physical Sciences",
     description:
       "Graduated top of cohort in Physical Sciences & Computer Science with straight-A distinctions and perfect 4.00 GPA.",
     highlights: [
       "Highest academic honor awarded to top matriculation scholars",
       "Appointed Assistant Head of Subject for Computer Science"
     ],
+    icon: Medal,
+  },
+  {
+    id: "umsic",
+    badge: "COMPETITION PARTICIPANT",
+    badgeColor: "emerald",
+    title: "UMSIC 2025 PARTICIPANT",
+    issuingBody: "Persatuan Komputer Universiti Malaya (PEKOM)",
+    period: "December 2025",
+    rankMetric: "Active Participant",
+    description:
+      "Participated in the Universiti Malaya Student Initiation Competition (UMSIC) 2025, engaging in technical challenges organized by PEKOM.",
+    highlights: [
+      "Engaged in faculty-level technical challenges"
+    ],
+    certificateUrl: "/certificates/UMSIC HOWARD_WOON_HAO_ZHE.pdf",
     icon: Medal,
   },
 ];
@@ -170,11 +202,11 @@ export default function HonorsSection() {
               viewport={{ once: true }}
               className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white max-w-3xl leading-[1.05]"
             >
-              VERIFIED AWARDS & COMPETITION MERITS.
+              HONORS & COMPETITIVE ACHIEVEMENTS.
             </motion.h2>
 
             <p className="text-neutral-400 text-sm font-mono max-w-md">
-              Regional hackathons, academic 4.00 CGPA distinctions, and national engineering championships.
+              A curated log of regional hackathon podiums, 4.00 CGPA academic distinctions, and engineering competition finals.
             </p>
           </div>
         </div>
