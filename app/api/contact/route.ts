@@ -1,6 +1,7 @@
 ﻿import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { headers } from 'next/headers';
+import nodemailer from 'nodemailer';
 
 // Simple in-memory rate limiting map for basic protection
 const ipRequestMap = new Map<string, { count: number; lastReset: number }>();
@@ -74,32 +75,42 @@ export async function POST(request: NextRequest) {
     const cleanSubject = sanitize(subject || 'General Inquiry');
     const cleanMessage = sanitize(message);
 
-    // 5. Supabase Insertion
+    // 5. Supabase Insertion (Keep this so they still have a database backup)
     const supabase = await createSupabaseServerClient();
-
-    if (!supabase) {
-      // Fallback mode
-      console.warn('[Contact Route Fallback] Supabase not configured. Message received:', { cleanName, cleanEmail, cleanSubject });
-      return NextResponse.json(
-        { success: true, message: 'Message received (Fallback mode).' },
-        { status: 200 }
-      );
+    if (supabase) {
+      await supabase.from('contact_messages').insert([
+        {
+          name: cleanName,
+          email: cleanEmail,
+          subject: cleanSubject,
+          message: cleanMessage,
+          created_at: new Date().toISOString(),
+          is_read: false
+        },
+      ]);
     }
 
-    const { error } = await supabase.from('contact_messages').insert([
-      {
-        name: cleanName,
-        email: cleanEmail,
-        subject: cleanSubject,
-        message: cleanMessage,
-        created_at: new Date().toISOString(),
-        is_read: false
-      },
-    ]);
+    // 6. Send Email via Nodemailer
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
 
-    if (error) {
-      console.error('[Supabase Error]:', error.message);
-      return NextResponse.json({ error: 'Failed to send message.' }, { status: 500 });
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: process.env.EMAIL_USER, // Send to themselves
+        replyTo: cleanEmail, // If they click "Reply" in Gmail, it goes to the sender
+        subject: `[Portfolio] New Message from ${cleanName}: ${cleanSubject}`,
+        text: `You have received a new message from your portfolio contact form.\n\nName: ${cleanName}\nEmail: ${cleanEmail}\nSubject: ${cleanSubject}\n\nMessage:\n${cleanMessage}\n\n---\nTo reply, simply hit "Reply" in your email client.`,
+      };
+
+      await transporter.sendMail(mailOptions);
+    } else {
+      console.warn('EMAIL_USER or EMAIL_PASS not set in environment variables. Email notification was skipped.');
     }
 
     return NextResponse.json(
@@ -108,6 +119,6 @@ export async function POST(request: NextRequest) {
     );
   } catch (err) {
     console.error('[Contact Handler Error]:', err);
-    return NextResponse.json({ error: 'Invalid request format.' }, { status: 400 });
+    return NextResponse.json({ error: 'Failed to process request.' }, { status: 500 });
   }
 }
