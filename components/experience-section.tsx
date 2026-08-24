@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -61,30 +61,31 @@ const experiences: ExperienceItem[] = [
     ],
     tags: ["Process Automation", "ERP Integration", "Financial Data Pipelines", "Statutory Compliance"],
   },
-  {
-    id: "pekom",
-    number: "02",
-    category: "leadership",
-    categoryLabel: "INSTITUTIONAL LEADERSHIP",
-    role: "Finance Lead & Executive Treasurer",
-    organization: "Persatuan Komputer Universiti Malaya (PEKOM)",
-    location: "Universiti Malaya",
-    period: "2025 – Present",
-    icon: Landmark,
-    accentColor: "cyan",
-    headline: "Faculty-Wide Fiscal Governance & Capital Allocation",
-    bullets: [
-      "Directing fiscal governance and multi-tier budget modeling across faculty-wide software engineering hackathons and summits (Code Fest, Alphathon).",
-      "Overseeing corporate sponsorship funds and financial accountability for 500+ participants with transparent auditing.",
-      "Spearheaded digital financial requisition workflows to streamline executive reimbursements.",
-    ],
-    metrics: [
-      { label: "Budget Oversight", value: "RM 50,000+" },
-      { label: "Participant Reach", value: "500+ Engineers" },
-      { label: "Governance", value: "100% Audit Cleared" },
-    ],
-    tags: ["Fiscal Governance", "Budget Modeling", "Capital Allocation", "Leadership"],
-  },
+    {
+      id: "pekom",
+      number: "02",
+      category: "leadership",
+      categoryLabel: "INSTITUTIONAL LEADERSHIP",
+      role: "Finance Lead & Executive Treasurer",
+      organization: "Persatuan Komputer Universiti Malaya (PEKOM)",
+      location: "Universiti Malaya",
+      period: "2025 - Present",
+      icon: Landmark,
+      accentColor: "cyan",
+      headline: "Led the financial architecture and resource management for Universiti Malaya's flagship technology community, driving the annual fiscal strategy to sustain student-led tech initiatives, hackathons, and professional development programs throughout the academic year.",
+      bullets: [
+        "Portfolio Management: Architected and oversaw the organization's comprehensive financial portfolio, utilizing strict data verification protocols to ensure 100% ledger accuracy and zero transaction discrepancies across all club operations.",
+        "B2B Corporate Partnerships: Partnered cross-functionally with the Sponsorship and PR departments to secure critical funding from enterprise tech sponsors, utilizing data-driven budget models to maximize student value and operational scale.",
+        "Process Automation: Spearheaded the transition from manual accounting to an automated digital claims pipeline, eliminating paperwork bottlenecks and scaling the committee's operational efficiency.",
+        "Financial Governance: Enforced strict budget allocation frameworks to minimize administrative overhead, successfully delivering consistent net surpluses to fund future software engineering workshops and tech community initiatives."
+      ],
+      metrics: [
+        { label: "Budget Oversight", value: "RM 50,000+" },
+        { label: "Participant Reach", value: "500+ Engineers" },
+        { label: "Governance", value: "100% Audit Cleared" },
+      ],
+      tags: ["Fiscal Governance", "Budget Modeling", "Capital Allocation", "Leadership"],
+    },
   {
     id: "mytech",
     number: "03",
