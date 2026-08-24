@@ -1,8 +1,10 @@
-﻿import type { Metadata } from 'next';
+import type { Metadata } from 'next';
 import { Plus_Jakarta_Sans, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import SmoothScrollProvider from '@/components/smooth-scroll-provider';
 import { CustomCursor } from '@/components/custom-cursor';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 const sans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -36,9 +38,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${sans.variable} ${display.variable} ${mono.variable}`}>
       <body className="scroll-smooth font-sans antialiased bg-[#F3F3F5] text-[#12151B]">
-        
         <CustomCursor />
         <SmoothScrollProvider>{children}</SmoothScrollProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
