@@ -221,7 +221,7 @@ export default function BikebearHero() {
                 EXPLORE PROJECTS ↓
               </a>
               <a
-                href="#simulators"
+                href="#projects"
                 className="flex items-center gap-2 px-6 py-3.5 rounded-full bg-white/[0.05] border border-white/15 text-white font-mono text-xs uppercase tracking-wider hover:bg-white/[0.1] hover:border-amber-400/50 transition-all duration-300 backdrop-blur-md"
               >
                 <Terminal className="w-3.5 h-3.5 text-amber-400" />
