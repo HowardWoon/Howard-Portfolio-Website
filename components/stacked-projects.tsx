@@ -30,6 +30,7 @@ interface ProjectData {
   metrics: { label: string; value: string }[];
   tags: string[];
   deckUrl?: string;
+  prototypeUrl?: string;
   simulatorId: string;
   githubUrl?: string;
   telemetryType: "agentic" | "flood" | "energy";
@@ -82,6 +83,7 @@ const projects: ProjectData[] = [
       ],
       tags: ["React", "TypeScript", "Firebase RTDB", "Gemini 2.5 Flash", "MCP Architecture", "Google Maps"],
       simulatorId: "bilahujan",
+    prototypeUrl: "https://bilahujan-vhack.web.app/",
       githubUrl: "https://github.com/HowardWoon/BILAHUJAN-VHack2026",
       telemetryType: "flood",
     },
@@ -278,11 +280,23 @@ function ProjectCard({
               ))}
             </div>
 
-            {/* Action Buttons */}
+                        {/* Action Buttons */}
             <div className="flex flex-wrap items-center gap-3 pt-3">
-              
-
-              {project.deckUrl && (
+              {project.prototypeUrl && (
+                <a
+                  href={project.prototypeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-amber-400 text-black font-mono font-bold text-xs uppercase tracking-wider hover:bg-amber-300 transition-all duration-200 shadow-lg shadow-amber-500/20 group relative overflow-hidden"
+                >
+                  <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+                  <span className="relative z-10 flex items-center gap-2">
+                    <Terminal className="w-3.5 h-3.5" />
+                    LAUNCH LIVE PROTOTYPE
+                  </span>
+                </a>
+              )}
+{project.deckUrl && (
                 <a
                   href={project.deckUrl}
                   target="_blank"
