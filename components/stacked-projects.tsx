@@ -138,10 +138,10 @@ export default function StackedProjects() {
 
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
             <h2 className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white max-w-3xl leading-[1.05]">
-              STACKED SYSTEMS & PRODUCTION ARCHITECTURES.
+              SCALABLE SYSTEMS & AUTONOMOUS ARCHITECTURES.
             </h2>
             <p className="text-neutral-400 text-sm sm:text-base font-mono max-w-md">
-              Scroll through the stack to inspect low-latency backends, multi-agent LLM systems, and IoT micro-grids built from 0 to 1.
+              Scroll through the stack to deconstruct high-throughput backends, deterministic multi-agent LLM pipelines, and hardware-integrated IoT networks built from 0 to 1.
             </p>
           </div>
         </div>
