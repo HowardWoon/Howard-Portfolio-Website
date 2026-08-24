@@ -121,7 +121,7 @@ export default function StackedProjects() {
     <section 
       ref={containerRef}
       id="projects" 
-      className="relative w-full bg-[#090B10] text-white py-32 px-6 sm:px-10 lg:px-16 overflow-x-clip overflow-y-visible border-t border-white/10 selection:bg-amber-500 selection:text-black"
+      className="relative w-full bg-[#090B10] text-white pt-32 pb-[50vh] px-6 sm:px-10 lg:px-16 overflow-x-clip overflow-y-visible border-t border-white/10 selection:bg-amber-500 selection:text-black"
     >
       {/* Ambient Lighting */}
       <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[150px] pointer-events-none" />
@@ -201,7 +201,7 @@ function ProjectCard({
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
-        className="w-full min-h-[650px] lg:min-h-[750px] rounded-[36px] p-8 sm:p-10 lg:p-12 border border-white/15 bg-[#0E121B]/95 backdrop-blur-2xl shadow-2xl transition-all duration-500 hover:border-amber-400/40 group"
+        className="w-full rounded-[36px] p-8 sm:p-10 lg:p-12 border border-white/15 bg-[#0E121B]/95 backdrop-blur-2xl shadow-2xl transition-all duration-500 hover:border-amber-400/40 group"
       >
         {/* Background glow per card */}
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none group-hover:bg-amber-500/10 transition-colors" />
