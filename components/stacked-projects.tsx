@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useRef, useState } from "react";
 import { motion, useScroll, useTransform, MotionValue, AnimatePresence } from "framer-motion";
@@ -413,7 +413,7 @@ function ProjectCard({
                   </button>
                 </div>
                 
-                <div className="flex-1 w-full min-h-[60vh] bg-black/50 rounded-2xl border border-white/10 overflow-hidden">
+                <div className="w-full bg-black/50 rounded-2xl border border-white/10 overflow-hidden p-4 sm:p-6">
                   {project.telemetryType === "agentic" && <ZeroLagSimulator />}
                   {project.telemetryType === "flood" && <BilahujanSimulator />}
                   {project.telemetryType === "energy" && <SensorXSimulator />}
