@@ -207,124 +207,135 @@ export default function HonorsSection() {
           </div>
         </div>
 
-        {/* High-Prestige Bento Grid (Masonry Layout) */}
-        <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
-          {honorsList.map((item, idx) => {
-            const Icon = item.icon;
-            const isFeatured = item.isFeatured;
+        {/* High-Prestige Bento Grid (Categorized Columns) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[
+            { key: "gold", items: honorsList.filter(i => i.badgeColor === "gold") },
+            { key: "emerald", items: honorsList.filter(i => i.badgeColor === "emerald") },
+            { key: "cyan", items: honorsList.filter(i => i.badgeColor === "cyan") }
+          ].map((column, colIdx) => (
+            <div key={column.key} className="flex flex-col gap-6">
+              {column.items.map((item, itemIdx) => {
+                const Icon = item.icon;
+                const isFeatured = item.isFeatured;
 
-            const badgeStyles = {
-              gold: "bg-amber-500/10 border-amber-500/30 text-amber-300",
-              cyan: "bg-cyan-500/10 border-cyan-500/30 text-cyan-300",
-              emerald: "bg-emerald-500/10 border-emerald-500/30 text-emerald-300",
-              purple: "bg-purple-500/10 border-purple-500/30 text-purple-300",
-            };
+                const badgeStyles = {
+                  gold: "bg-amber-500/10 border-amber-500/30 text-amber-300",
+                  cyan: "bg-cyan-500/10 border-cyan-500/30 text-cyan-300",
+                  emerald: "bg-emerald-500/10 border-emerald-500/30 text-emerald-300",
+                  purple: "bg-purple-500/10 border-purple-500/30 text-purple-300",
+                };
 
-            const glowStyles = {
-              gold: "bg-amber-500/5 group-hover:bg-amber-500/10",
-              cyan: "bg-cyan-500/5 group-hover:bg-cyan-500/10",
-              emerald: "bg-emerald-500/5 group-hover:bg-emerald-500/10",
-              purple: "bg-purple-500/5 group-hover:bg-purple-500/10",
-            };
+                const glowStyles = {
+                  gold: "bg-amber-500/5 group-hover:bg-amber-500/10",
+                  cyan: "bg-cyan-500/5 group-hover:bg-cyan-500/10",
+                  emerald: "bg-emerald-500/5 group-hover:bg-emerald-500/10",
+                  purple: "bg-purple-500/5 group-hover:bg-purple-500/10",
+                };
 
-            return (
-              <motion.div
-                key={item.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.5, delay: idx * 0.1 }}
-                className={`break-inside-avoid relative group rounded-[32px] p-6 sm:p-8 border border-white/10 bg-[#0E121B]/95 backdrop-blur-2xl shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden flex flex-col h-full ${
-                  isFeatured ? "hover:border-amber-400/40" : "hover:border-white/20"
-                }`}
-              >
-                {/* Background Ambient Glow */}
-                <div className={`absolute top-0 right-0 w-64 h-64 rounded-full blur-[80px] pointer-events-none transition-colors ${glowStyles[item.badgeColor]}`} />
+                // Calculate global index for staggered animation
+                const globalIdx = (colIdx * 3) + itemIdx;
 
-                {/* Featured Watermark */}
-                {isFeatured && (
-                  <div className="absolute -right-8 -top-8 opacity-[0.03] pointer-events-none rotate-12 group-hover:rotate-6 transition-transform duration-700 group-hover:opacity-[0.05]">
-                    <Trophy className="w-64 h-64" />
-                  </div>
-                )}
+                return (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-50px" }}
+                    transition={{ duration: 0.5, delay: globalIdx * 0.1 }}
+                    className={`relative group rounded-[32px] p-6 sm:p-8 border border-white/10 bg-[#0E121B]/95 backdrop-blur-2xl shadow-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden flex flex-col h-full ${
+                      isFeatured ? "hover:border-amber-400/40" : "hover:border-white/20"
+                    }`}
+                  >
+                    {/* Background Ambient Glow */}
+                    <div className={`absolute top-0 right-0 w-64 h-64 rounded-full blur-[80px] pointer-events-none transition-colors ${glowStyles[item.badgeColor]}`} />
 
-                <div className="relative z-10 flex flex-col flex-1">
-                  {/* Top Bar */}
-                  <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-                    <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[10px] sm:text-xs font-mono tracking-widest uppercase ${badgeStyles[item.badgeColor]}`}>
-                      <Icon className="w-3.5 h-3.5" />
-                      <span>{item.badge}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-xs font-mono text-neutral-400">
-                      <Calendar className="w-3.5 h-3.5 text-neutral-500" />
-                      <span>{item.period}</span>
-                    </div>
-                  </div>
-
-                  {/* Title & Body */}
-                  <div className="space-y-2 mb-4">
-                    <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white group-hover:text-white/90 transition-colors">
-                      {item.title}
-                    </h3>
-                    <p className="text-sm font-mono text-neutral-400">
-                      {item.issuingBody}
-                    </p>
-                  </div>
-
-                  <p className="text-sm text-neutral-300 leading-relaxed font-sans mb-6">
-                    {item.description}
-                  </p>
-
-                  <div className="space-y-2.5 mb-8">
-                    {item.highlights.map((hl, hlIdx) => (
-                      <div key={hlIdx} className="flex items-start gap-2.5 text-xs text-neutral-400 font-sans">
-                        <div className="w-4 h-4 rounded-full bg-white/5 flex items-center justify-center shrink-0 mt-0.5 border border-white/10">
-                          <CheckCircle2 className="w-2.5 h-2.5 text-neutral-500" />
-                        </div>
-                        <p>{hl}</p>
+                    {/* Featured Watermark */}
+                    {isFeatured && (
+                      <div className="absolute -right-8 -top-8 opacity-[0.03] pointer-events-none rotate-12 group-hover:rotate-6 transition-transform duration-700 group-hover:opacity-[0.05]">
+                        <Trophy className="w-64 h-64" />
                       </div>
-                    ))}
-                  </div>
-
-                  {/* Spacer to push metrics to bottom */}
-                  <div className="flex-1" />
-
-                  {/* Footer: Stat Callout & Certificate Link */}
-                  <div className="mt-auto pt-6 border-t border-white/10 flex flex-col sm:flex-row sm:items-end justify-between gap-6">
-                    
-                    {/* Big Stat Callout */}
-                    <div className="flex flex-col">
-                      <span className="text-3xl font-black text-white tracking-tighter">
-                        {item.statCallout.value}
-                      </span>
-                      <span className="text-xs font-mono text-neutral-500 uppercase tracking-widest mt-1">
-                        {item.statCallout.label}
-                      </span>
-                    </div>
-
-                    {/* Certificate Action Link */}
-                    {item.certificateUrl && (
-                      <button
-                        onClick={() => setSelectedCert(item.certificateUrl!)}
-                        className={`group/btn flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest transition-colors ${
-                          item.badgeColor === 'gold' ? 'text-amber-400 hover:text-amber-300' :
-                          item.badgeColor === 'cyan' ? 'text-cyan-400 hover:text-cyan-300' :
-                          'text-emerald-400 hover:text-emerald-300'
-                        }`}
-                      >
-                        <span className="relative">
-                          VIEW CERTIFICATE
-                          <span className="absolute left-0 right-0 -bottom-1 h-px bg-current scale-x-0 group-hover/btn:scale-x-100 transition-transform origin-left duration-300" />
-                        </span>
-                        <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
-                      </button>
                     )}
-                  </div>
 
-                </div>
-              </motion.div>
-            );
-          })}
+                    <div className="relative z-10 flex flex-col flex-1">
+                      {/* Top Bar */}
+                      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                        <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[10px] sm:text-xs font-mono tracking-widest uppercase ${badgeStyles[item.badgeColor]}`}>
+                          <Icon className="w-3.5 h-3.5" />
+                          <span>{item.badge}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs font-mono text-neutral-400">
+                          <Calendar className="w-3.5 h-3.5 text-neutral-500" />
+                          <span>{item.period}</span>
+                        </div>
+                      </div>
+
+                      {/* Title & Body */}
+                      <div className="space-y-2 mb-4">
+                        <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white group-hover:text-white/90 transition-colors">
+                          {item.title}
+                        </h3>
+                        <p className="text-sm font-mono text-neutral-400">
+                          {item.issuingBody}
+                        </p>
+                      </div>
+
+                      <p className="text-sm text-neutral-300 leading-relaxed font-sans mb-6">
+                        {item.description}
+                      </p>
+
+                      <div className="space-y-2.5 mb-8">
+                        {item.highlights.map((hl, hlIdx) => (
+                          <div key={hlIdx} className="flex items-start gap-2.5 text-xs text-neutral-400 font-sans">
+                            <div className="w-4 h-4 rounded-full bg-white/5 flex items-center justify-center shrink-0 mt-0.5 border border-white/10">
+                              <CheckCircle2 className="w-2.5 h-2.5 text-neutral-500" />
+                            </div>
+                            <p>{hl}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Spacer to push metrics to bottom */}
+                      <div className="flex-1" />
+
+                      {/* Footer: Stat Callout & Certificate Link */}
+                      <div className="mt-auto pt-6 border-t border-white/10 flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+                        
+                        {/* Big Stat Callout */}
+                        <div className="flex flex-col">
+                          <span className="text-3xl font-black text-white tracking-tighter">
+                            {item.statCallout.value}
+                          </span>
+                          <span className="text-xs font-mono text-neutral-500 uppercase tracking-widest mt-1">
+                            {item.statCallout.label}
+                          </span>
+                        </div>
+
+                        {/* Certificate Action Link */}
+                        {item.certificateUrl && (
+                          <button
+                            onClick={() => setSelectedCert(item.certificateUrl!)}
+                            className={`group/btn flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest transition-colors ${
+                              item.badgeColor === 'gold' ? 'text-amber-400 hover:text-amber-300' :
+                              item.badgeColor === 'cyan' ? 'text-cyan-400 hover:text-cyan-300' :
+                              'text-emerald-400 hover:text-emerald-300'
+                            }`}
+                          >
+                            <span className="relative">
+                              VIEW CERTIFICATE
+                              <span className="absolute left-0 right-0 -bottom-1 h-px bg-current scale-x-0 group-hover/btn:scale-x-100 transition-transform origin-left duration-300" />
+                            </span>
+                            <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
+                          </button>
+                        )}
+                      </div>
+
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          ))}
         </div>
       </div>
 
