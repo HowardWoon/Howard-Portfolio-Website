@@ -218,6 +218,13 @@ export default function ExperienceSection() {
     (exp) => selectedFilter === "all" || exp.category === selectedFilter
   );
 
+  const filters: { id: FilterCategory; label: string; colorClass: string; dotClass: string }[] = [
+    { id: "all", label: "ALL", colorClass: "text-white", dotClass: "bg-white" },
+    { id: "corporate", label: "CORPORATE", colorClass: "text-amber-400", dotClass: "bg-amber-400" },
+    { id: "leadership", label: "LEADERSHIP", colorClass: "text-cyan-400", dotClass: "bg-cyan-400" },
+    { id: "academic", label: "MENTORSHIP", colorClass: "text-emerald-400", dotClass: "bg-emerald-400" },
+  ];
+
   return (
     <section 
       id="experience" 
@@ -227,7 +234,7 @@ export default function ExperienceSection() {
       <div className="absolute top-1/4 left-0 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-[140px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-0 w-[500px] h-[500px] bg-cyan-500/5 rounded-full blur-[140px] pointer-events-none" />
 
-      <div className="max-w-6xl mx-auto space-y-16">
+      <div className="max-w-6xl mx-auto space-y-12">
         
         {/* Section Header */}
         <div className="space-y-6">
@@ -241,69 +248,97 @@ export default function ExperienceSection() {
             <span>EXPERIENCE // CAREER & INSTITUTIONAL GOVERNANCE</span>
           </motion.div>
 
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-            <motion.h2 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white max-w-3xl leading-[1.05]"
-            >
-              EXECUTIVE LEADERSHIP & GOVERNANCE.
-            </motion.h2>
-
-            {/* Filter Pills */}
-            <div className="flex flex-wrap items-center gap-2 p-1.5 bg-white/[0.04] border border-white/10 rounded-2xl backdrop-blur-md">
-              {[
-                { id: "all", label: "ALL" },
-                { id: "corporate", label: "CORPORATE" },
-                { id: "leadership", label: "LEADERSHIP" },
-                { id: "academic", label: "MENTORSHIP" },
-              ].map((f) => (
-                <button
-                  key={f.id}
-                  onClick={() => setSelectedFilter(f.id as FilterCategory)}
-                  className={`px-4 py-2 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all duration-200 ${
-                    selectedFilter === f.id
-                      ? "bg-amber-400 text-black shadow-lg shadow-amber-500/20"
-                      : "text-neutral-400 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white max-w-3xl leading-[1.05]"
+          >
+            EXECUTIVE LEADERSHIP & GOVERNANCE.
+          </motion.h2>
         </div>
 
+        {/* iOS-Style Segmented Filter Control */}
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="flex flex-wrap items-center gap-1.5 p-1.5 bg-white/[0.02] border border-white/10 rounded-2xl backdrop-blur-md w-fit"
+        >
+          {filters.map((f) => {
+            const count = f.id === "all" ? experiences.length : experiences.filter(e => e.category === f.id).length;
+            const isActive = selectedFilter === f.id;
+            
+            return (
+              <button
+                key={f.id}
+                onClick={() => setSelectedFilter(f.id)}
+                className={`relative px-4 py-2.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all duration-300 ${
+                  isActive ? "text-white" : "text-neutral-500 hover:text-neutral-300"
+                }`}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="active-filter-pill"
+                    className="absolute inset-0 bg-white/10 border border-white/10 rounded-xl"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-2.5">
+                  <span className={`w-2 h-2 rounded-full shadow-lg ${f.dotClass} ${isActive ? 'shadow-' + f.dotClass.replace('bg-', '') + '/40 opacity-100' : 'opacity-40'}`} />
+                  {f.label}
+                  <span className={`text-[10px] ${isActive ? "text-neutral-400" : "text-neutral-600"}`}>({count})</span>
+                </span>
+              </button>
+            );
+          })}
+        </motion.div>
+
         {/* Interactive Timeline Spine & Bento Experience Cards */}
-        <div className="relative space-y-8">
-          
-          <AnimatePresence mode="wait">
+        <div className="relative space-y-8 min-h-[500px]">
+          <AnimatePresence mode="popLayout">
             {filteredExperiences.map((item, idx) => {
-              
+              // Map the accent color string to actual Tailwind classes
+              let badgeColor = "bg-amber-500/10 border-amber-500/30 text-amber-300";
+              let dotColor = "bg-amber-400";
+              if (item.accentColor === "cyan") {
+                badgeColor = "bg-cyan-500/10 border-cyan-500/30 text-cyan-300";
+                dotColor = "bg-cyan-400";
+              } else if (item.accentColor === "emerald") {
+                badgeColor = "bg-emerald-500/10 border-emerald-500/30 text-emerald-300";
+                dotColor = "bg-emerald-400";
+              } else if (item.accentColor === "purple") {
+                badgeColor = "bg-purple-500/10 border-purple-500/30 text-purple-300";
+                dotColor = "bg-purple-400";
+              }
+
               return (
                 <motion.div
+                  layout
                   key={item.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.5, delay: idx * 0.1 }}
-                  className="relative group rounded-[32px] p-8 sm:p-10 border border-white/10 bg-[#0E121B]/95 backdrop-blur-2xl shadow-2xl transition-all duration-300 hover:border-amber-400/40 hover:-translate-y-1"
+                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: -20 }}
+                  transition={{ duration: 0.4, type: "spring", bounce: 0.2 }}
+                  className="relative group rounded-[32px] p-8 sm:p-10 border border-white/10 bg-[#0E121B]/95 backdrop-blur-2xl shadow-2xl transition-all duration-300 hover:border-white/20 hover:-translate-y-1 overflow-hidden"
                 >
+                  {/* Color Coding Left Border/Dot */}
+                  <div className={`absolute left-0 top-0 bottom-0 w-1 ${dotColor} opacity-50 group-hover:opacity-100 transition-opacity duration-300`} />
+
                   {/* Top Bar: Number + Category Tag + Period */}
                   <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5">
                     <div className="flex items-center gap-3">
                       <span className="w-8 h-8 rounded-full bg-white/10 text-white font-mono text-xs font-bold flex items-center justify-center border border-white/15">
                         {item.number}
                       </span>
-                      <span className="px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono tracking-widest uppercase">
+                      <span className={`px-3 py-1 rounded-full border text-xs font-mono tracking-widest uppercase ${badgeColor}`}>
                         {item.categoryLabel}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-4 text-xs font-mono text-neutral-400">
                       <div className="flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-amber-400" />
+                        <Calendar className="w-3.5 h-3.5 text-neutral-500" />
                         <span>{item.period}</span>
                       </div>
                       <div className="hidden sm:flex items-center gap-1.5 text-neutral-500">
@@ -313,56 +348,52 @@ export default function ExperienceSection() {
                     </div>
                   </div>
 
-                  {/* Main Role & Organization Title */}
-                  <div className="pt-6 space-y-3">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <h3 className="text-2xl sm:text-3xl font-extrabold uppercase tracking-tight text-white flex items-center gap-2.5">
-                        {item.role}
-                        <ArrowUpRight className="w-4 h-4 text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </h3>
-                      <div className="text-sm font-mono text-neutral-300 font-bold">
-                        {item.organization}
+                  {/* Main Role & Org */}
+                  <div className="pt-6 pb-6">
+                    <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+                      <div className="space-y-2">
+                        <h3 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-white group-hover:text-amber-400 transition-colors duration-300">
+                          {item.role}
+                        </h3>
+                        <p className="text-sm font-mono text-amber-500/80 uppercase tracking-widest">
+                          // {item.headline}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2.5 bg-white/5 border border-white/10 px-4 py-2 rounded-xl">
+                        <item.icon className="w-4 h-4 text-neutral-400" />
+                        <span className="text-sm font-bold font-sans text-neutral-200">
+                          {item.organization}
+                        </span>
                       </div>
                     </div>
-
-                    <p className="text-xs font-mono text-amber-400 font-medium tracking-wide">
-                      // {item.headline}
-                    </p>
                   </div>
 
-                  {/* Narrative Bullets */}
-                  <div className="py-4 space-y-2.5">
-                    {item.bullets.map((b, bIdx) => (
-                      <div key={bIdx} className="flex items-start gap-3 text-xs sm:text-sm font-sans text-neutral-300 leading-relaxed">
-                        <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                        <span>{b}</span>
+                  {/* Description Bullets */}
+                  <div className="space-y-3 mb-8">
+                    {item.bullets.map((bullet, bIdx) => (
+                      <div key={bIdx} className="flex items-start gap-3 text-sm text-neutral-300 leading-relaxed font-sans max-w-4xl">
+                        <div className="w-5 h-5 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0 mt-0.5 border border-amber-500/20">
+                          <CheckCircle2 className="w-3 h-3 text-amber-400" />
+                        </div>
+                        <p>{bullet}</p>
                       </div>
                     ))}
                   </div>
 
-                  {/* Quantified Metrics Ribbon */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-white/10">
-                    {item.metrics.map((m, mIdx) => (
-                      <div key={mIdx} className="bg-black/40 border border-white/5 rounded-2xl p-3.5">
-                        <div className="text-[10px] font-mono text-neutral-400 uppercase">
-                          {m.label}
-                        </div>
-                        <div className="text-sm font-mono font-bold text-white mt-1">
-                          {m.value}
-                        </div>
+                  {/* Metrics & Impact Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
+                    {item.metrics.map((metric, mIdx) => (
+                      <div key={mIdx} className="bg-black/40 border border-white/5 rounded-2xl p-4 flex flex-col justify-center">
+                        <span className="text-[10px] font-mono text-neutral-500 uppercase tracking-widest mb-1">{metric.label}</span>
+                        <span className="text-lg font-bold text-white tracking-tight">{metric.value}</span>
                       </div>
                     ))}
                   </div>
 
-                  {item.id === 'pekom' && <PekomTreasurerDashboard />}
-
-                  {/* Tag Badges */}
-                  <div className="flex flex-wrap gap-2 pt-5">
-                    {item.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-mono text-neutral-300 hover:text-white transition-colors"
-                      >
+                  {/* Skills/Tags */}
+                  <div className="flex flex-wrap gap-2">
+                    {item.tags.map((tag, tIdx) => (
+                      <span key={tIdx} className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[11px] font-mono text-neutral-400 uppercase tracking-wider">
                         {tag}
                       </span>
                     ))}
@@ -371,9 +402,7 @@ export default function ExperienceSection() {
               );
             })}
           </AnimatePresence>
-
         </div>
-
       </div>
     </section>
   );
