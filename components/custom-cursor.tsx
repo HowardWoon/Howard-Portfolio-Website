@@ -84,7 +84,7 @@ export function CustomCursor() {
     <>
       {/* The Inverting Lens Dot */}
       <motion.div
-        className={`fixed top-0 left-0 rounded-full pointer-events-none z-[100000] ${isSpiderman ? 'bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.8)]' : 'mix-blend-difference bg-amber-500'}`}
+        className={`fixed top-0 left-0 rounded-full pointer-events-none z-[100000] ${isSpiderman ? 'bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.8)]' : 'bg-amber-500 shadow-md shadow-amber-500/20'}`}
         animate={{
           width: isPointer ? 80 : 12,
           height: isPointer ? 80 : 12,
