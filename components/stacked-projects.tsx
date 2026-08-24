@@ -2,6 +2,7 @@
 
 import React, { useRef, useState } from "react";
 import { motion, useScroll, useTransform, MotionValue, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import { TiltCard } from './tilt-card';
 import { InteractivePhotoStack } from "./interactive-photo-stack";
 import { ZeroLagSimulator, BilahujanSimulator, SensorXSimulator } from "./project-simulators";
@@ -280,7 +281,7 @@ function ProjectCard({
             {/* Action Buttons */}
             <div className="flex flex-wrap items-center gap-3 pt-3">
               {project.id !== "sensor-x-sensei" && (
-                  <button onClick={() => setIsExpanded(true)} className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-amber-400 text-black font-mono font-bold text-xs uppercase tracking-wider hover:bg-amber-300 transition-all duration-200 shadow-lg shadow-amber-500/20"><Terminal className="w-3.5 h-3.5" /><span>LAUNCH LIVE SIMULATOR</span></button>
+                  <Link href={`/simulators/${project.telemetryType}`} target="_blank" className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-amber-400 text-black font-mono font-bold text-xs uppercase tracking-wider hover:bg-amber-300 transition-all duration-200 shadow-lg shadow-amber-500/20"><Terminal className="w-3.5 h-3.5" /><span>LAUNCH LIVE SIMULATOR</span></Link>
                 )}
 
               {project.deckUrl && (
@@ -386,42 +387,7 @@ function ProjectCard({
         </div>
 
         {/* Full-Screen Simulator Expansion Modal */}
-        <AnimatePresence>
-          {isExpanded && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-2xl p-4 sm:p-8 flex items-center justify-center overflow-y-auto"
-              onClick={() => setIsExpanded(false)}
-            >
-              <motion.div
-                
-                className="relative w-full max-w-6xl bg-[#0E121B] border border-white/20 rounded-[32px] overflow-hidden shadow-2xl p-6 sm:p-10 my-8 flex flex-col"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="flex items-center justify-between pb-6 border-b border-white/10 mb-6">
-                  <div>
-                    <h3 className="text-2xl font-black text-white uppercase tracking-tight">{project.title} SIMULATOR</h3>
-                    <p className="text-sm font-mono text-amber-400 mt-1">LIVE INTERACTIVE ENVIRONMENT</p>
-                  </div>
-                  <button
-                    onClick={() => setIsExpanded(false)}
-                    className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
-                  >
-                    X
-                  </button>
-                </div>
-                
-                <div className="w-full bg-black/50 rounded-2xl border border-white/10 overflow-hidden p-4 sm:p-6">
-                  {project.telemetryType === "agentic" && <ZeroLagSimulator />}
-                  {project.telemetryType === "flood" && <BilahujanSimulator />}
-                  {project.telemetryType === "energy" && <SensorXSimulator />}
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        
 
       </motion.div>
     </TiltCard>
