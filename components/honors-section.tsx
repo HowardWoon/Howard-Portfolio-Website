@@ -1,7 +1,7 @@
 ﻿"use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
    
   Trophy, 
@@ -155,15 +155,7 @@ const honorsList: HonorItem[] = [
 export default function HonorsSection() {
   const [selectedCert, setSelectedCert] = useState<string | null>(null);
 
-  const dialogRef = useRef<HTMLDialogElement>(null);
-
-  useEffect(() => {
-    if (selectedCert) {
-      dialogRef.current?.showModal();
-    } else {
-      dialogRef.current?.close();
-    }
-  }, [selectedCert]);
+  
 
 
   const badgeColorMap = {
@@ -290,46 +282,52 @@ export default function HonorsSection() {
 
       </div>
 
-      {/* Native Dialog Modal */}
-      <dialog
-        ref={dialogRef}
-        onClose={() => setSelectedCert(null)}
-        onClick={(e) => {
-          if (e.target === dialogRef.current) setSelectedCert(null);
-        }}
-        className="fixed inset-0 z-50 bg-transparent p-4 sm:p-8 m-auto w-full max-w-4xl backdrop:bg-black/90 backdrop:backdrop-blur-xl open:animate-in open:fade-in open:zoom-in-95 duration-300"
-      >
+      {/* Framer Motion Fixed Modal */}
+      <AnimatePresence>
         {selectedCert && (
-          <div
-            className="relative w-full bg-[#0E121B] border border-white/20 rounded-3xl overflow-hidden shadow-2xl p-4 sm:p-6"
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-xl p-4 sm:p-8 flex items-center justify-center overflow-y-auto"
+            onClick={() => setSelectedCert(null)}
           >
-            <div className="flex items-center justify-between pb-4 border-b border-white/10">
-              <span className="text-xs font-mono text-neutral-300 uppercase tracking-widest">
-                OFFICIAL CREDENTIAL VERIFICATION
-              </span>
-              <button
-                onClick={() => setSelectedCert(null)}
-                className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="relative w-full h-[65vh] mt-4 rounded-2xl overflow-hidden bg-black/50 flex items-center justify-center">
-              {selectedCert.endsWith(".pdf") ? (
-                <iframe src={selectedCert} className="w-full h-full rounded-2xl" />
-              ) : (
-                <Image
-                  src={selectedCert}
-                  alt="Verified Certificate"
-                  fill
-                  className="object-contain"
-                />
-              )}
-            </div>
-          </div>
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ type: "spring", duration: 0.5, bounce: 0 }}
+              className="relative w-full max-w-4xl bg-[#0E121B] border border-white/20 rounded-3xl overflow-hidden shadow-2xl p-4 sm:p-6 my-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                <span className="text-xs font-mono text-neutral-300 uppercase tracking-widest">
+                  OFFICIAL CREDENTIAL VERIFICATION
+                </span>
+                <button
+                  onClick={() => setSelectedCert(null)}
+                  className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+  
+              <div className="relative w-full h-[65vh] mt-4 rounded-2xl overflow-hidden bg-black/50 flex items-center justify-center">
+                {selectedCert.endsWith(".pdf") ? (
+                  <iframe src={selectedCert} className="w-full h-full rounded-2xl" />
+                ) : (
+                  <Image
+                    src={selectedCert}
+                    alt="Verified Certificate"
+                    fill
+                    className="object-contain"
+                  />
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
         )}
-      </dialog>
+      </AnimatePresence>
     </section>
   );
 }
