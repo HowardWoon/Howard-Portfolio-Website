@@ -30,7 +30,7 @@ interface HonorItem {
   issuingBody: string;
   period: string;
   statCallout: { value: string; label: string };
-  description: string;
+  description: React.ReactNode;
   highlights: string[];
   certificateUrl?: string;
   icon: any;
@@ -99,12 +99,44 @@ const honorsList: HonorItem[] = [
     issuingBody: "Faculty of Computer Science & IT, Universiti Malaya",
     period: "2025 - 2026",
     statCallout: { value: "Top 1%", label: "Academic Distinction" },
-    description:
-      "Maintained a 4.00 CGPA across software engineering, concurrent systems, data structures, algorithms, and distributed computing coursework.",
-    highlights: [
-      "Straight-A academic standing across all computer science semesters",
-      "Recognized on the Faculty of Computer Science & IT Dean's List"
-    ],
+          description: (
+        <div className="space-y-4 pt-1">
+          <p className="text-sm text-neutral-300 pb-2">
+            Engineered a flawless 4.00 CGPA algorithmic academic record, securing straight-A distinctions across all advanced computer science and systems architecture modules.
+          </p>
+          
+          <div className="bg-black/40 border border-white/5 rounded-xl overflow-hidden">
+            <div className="bg-white/5 px-3 py-2 border-b border-white/10 flex justify-between items-center">
+              <span className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-widest text-emerald-400">Semester 2 Core</span>
+              <span className="text-[10px] sm:text-xs font-mono text-neutral-400">GPA: 4.00</span>
+            </div>
+            <div className="p-3 grid grid-cols-1 gap-2 text-[10px] sm:text-xs font-mono">
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-amber-400 transition-colors">WIA1006 · Machine Learning</span><span className="text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded">A+</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-amber-400 transition-colors">WIA1002 · Data Structure</span><span className="text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded">A+</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-400 group-hover:text-neutral-200 transition-colors">WIA1003 · Computer System Architecture</span><span className="text-emerald-500">A</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-400 group-hover:text-neutral-200 transition-colors">WIA1005 · Network Technology Foundation</span><span className="text-emerald-500">A</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-500 group-hover:text-neutral-300 transition-colors">GIG1012 · Philosophy and Current Issues</span><span className="text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded">A+</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-500 group-hover:text-neutral-300 transition-colors">GLT1025 · Effective Oral Communication</span><span className="text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded">A+</span></div>
+            </div>
+          </div>
+
+          <div className="bg-black/40 border border-white/5 rounded-xl overflow-hidden">
+            <div className="bg-white/5 px-3 py-2 border-b border-white/10 flex justify-between items-center">
+              <span className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-widest text-emerald-400">Semester 1 Core</span>
+              <span className="text-[10px] sm:text-xs font-mono text-neutral-400">GPA: 4.00</span>
+            </div>
+            <div className="p-3 grid grid-cols-1 gap-2 text-[10px] sm:text-xs font-mono">
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-amber-400 transition-colors">WIX1002 · Fundamentals of Programming</span><span className="text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded">A+</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-400 group-hover:text-neutral-200 transition-colors">WIA2010 · Human Computer Interaction</span><span className="text-emerald-500">A</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-400 group-hover:text-neutral-200 transition-colors">WIX1001 · Computing Mathematics I</span><span className="text-emerald-500">A</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-400 group-hover:text-neutral-200 transition-colors">WIX1003 · Computer Systems and Organization</span><span className="text-emerald-500">A</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-500 group-hover:text-neutral-300 transition-colors">GIG1003 · Basic Entrepreneurship Enculturation</span><span className="text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded">A+</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-500 group-hover:text-neutral-300 transition-colors">GLT1024 · Proficiency in English III</span><span className="text-emerald-500">A</span></div>
+            </div>
+          </div>
+        </div>
+      ),
+      highlights: [],
     icon: GraduationCap,
   },
   {
@@ -371,9 +403,9 @@ export default function HonorsSection() {
                           </p>
                         </div>
 
-                        <p className="text-sm text-neutral-300 leading-relaxed font-sans mb-6">
+                        <div className="text-sm text-neutral-300 leading-relaxed font-sans mb-6">
                           {item.description}
-                        </p>
+                        </div>
 
                         <div className="space-y-2.5 mb-8">
                           {item.highlights.map((hl, hlIdx) => (
