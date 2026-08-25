@@ -454,34 +454,11 @@ function ProjectCard({
             )}
 
             {project.telemetryType === "catfish" && (
-              <div className="space-y-4 py-2">
-                <div className="text-xs font-mono text-neutral-400">
-                  // 6-Model Ensemble Inference Engine
-                </div>
-
-                <div className="bg-black/50 border border-white/10 rounded-xl p-4 space-y-3">
-                  <div className="flex items-center justify-between text-xs font-mono">
-                    <span className="text-neutral-400">Profile Behavioral Vectors:</span>
-                    <span className="text-amber-400 font-bold">51 Extracted</span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs font-mono">
-                    <span className="text-neutral-400">Heuristic Z-Score:</span>
-                    <span className="text-red-400 font-bold animate-pulse">+4.2σ (Anomaly)</span>
-                  </div>
-                  <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
-                    <div className="bg-red-500 h-full w-[94%]" />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5 font-mono text-[10px] sm:text-xs text-neutral-500 bg-black/30 p-4 rounded-xl border border-white/5">
-                  <div>{">_"} ensemble_vote: [SVM, GMM, DT, RF, LR, NN]</div>
-                  <div>{">_"} smote_tomek_balancing: TRUE</div>
-                  <div>{">_"} model_confidence: 94.7%</div>
-                  <div className="text-red-400 font-bold pt-2">{">_"} VERDICT: DECEPTION DETECTED</div>
-                </div>
+              <div className="flex-1 w-full flex items-center justify-center min-h-[400px] lg:min-h-[450px] py-2 overflow-hidden rounded-xl">
+                <InteractivePhotoStack customPhotos={project.galleryPhotos} />
               </div>
             )}
-
+            
             {project.telemetryType === "flood" && (
               <div className="space-y-4 py-2">
                 <div className="text-xs font-mono text-neutral-400">
