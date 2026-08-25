@@ -103,8 +103,9 @@ const experiences: ExperienceItem[] = [
     accentColor: "purple",
     headline: "Algorithmic Problem Solving & Object-Oriented Tutoring",
     bullets: [
-      "Conducted structured tutorials in Data Structures, Algorithms, and Object-Oriented Programming (Java/Python) for matriculation cohorts.",
-      "Mentored 100+ students, resulting in top cohort distinctions in physical sciences and computer science.",
+      "Peer-Assisted Learning (PAL) Facilitation: Conducted interactive, student-led tutorials in Data Structures, Algorithms, and Object-Oriented Programming (Java/Python) to reinforce key concepts for matriculation cohorts.",
+        "Academic Mentorship & Concept Reinforcement: Mentored 100+ students by breaking down complex theoretical course materials and building effective study strategies, resulting in top cohort distinctions.",
+        "Faculty Collaboration & Community Building: Worked closely with academic coordinators and subject lecturers to foster a welcoming, anxiety-reducing learning environment that built academic confidence for incoming students.",
     ],
     metrics: [
       { label: "Distinction Rate", value: "90%+ Top Grades" },
