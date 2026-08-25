@@ -165,11 +165,42 @@ function PekomTreasurerDashboard() {
           </div>
         )
       },
-    {
-      id: "alphathon",
-      name: "Treasurer | UM Alphathon 2025",
-      desc: "Orchestrated a RM14,150 (USD 3,369) budget funded entirely by international partner WorldQuant. Achieved 99.87% budget accuracy, distributing 89.2% of all funds directly into the student prize pool."
-    },
+          {
+        id: "alphathon",
+        name: "Treasurer | UM Alphathon 2025",
+        desc: (
+          <div className="space-y-6 pt-2">
+            <div className="flex flex-col gap-1">
+              <div className="text-amber-400 font-mono text-xs font-bold uppercase tracking-widest">Duration</div>
+              <div className="text-neutral-400 font-mono text-xs">2025</div>
+            </div>
+            
+            <div className="space-y-2">
+              <h5 className="text-white font-bold text-sm uppercase tracking-wide border-b border-amber-500/20 pb-1.5">Executive Summary</h5>
+              <p className="text-neutral-300">
+                Directed the financial operations and budget allocations for UM Alphathon 2025, a competitive event featuring a Quantitative Finance Workshop and a major prize pool funded entirely by international partner WorldQuant. Oversaw comprehensive expenditure tracking of a RM14,150 (USD 3,369) budget, committee reimbursements, and ledger maintenance to ensure strict financial compliance and seamless event execution.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <h5 className="text-white font-bold text-sm uppercase tracking-wide border-b border-amber-500/20 pb-1.5">Key Achievements & Metrics</h5>
+              <ul className="space-y-2 text-neutral-300 list-disc list-outside ml-4">
+                <li><strong className="text-amber-400 font-medium">Prize Pool Administration:</strong> Facilitated the financial oversight and planning surrounding a substantial USD 3,000 total prize pool for event participants, successfully distributing 89.2% of all funds directly into the student prize pool.</li>
+                <li><strong className="text-amber-400 font-medium">Budget Oversight:</strong> Managed shared operational costs in conjunction with PEKOM CodeFest, tracking a combined expenditure of RM1,531.77 across both events and achieving an exceptional 99.87% budget accuracy rating.</li>
+              </ul>
+            </div>
+
+            <div className="space-y-2">
+              <h5 className="text-white font-bold text-sm uppercase tracking-wide border-b border-amber-500/20 pb-1.5">Financial Governance & Operations</h5>
+              <ul className="space-y-2 text-neutral-300 list-disc list-outside ml-4">
+                <li><strong className="text-amber-400 font-medium">Expense Management:</strong> Processed and documented committee expenditures, including large-scale logistics and hospitality allocations (such as RM443.55 for committee meals), as well as printing and refreshments.</li>
+                <li><strong className="text-amber-400 font-medium">Ledger Maintenance:</strong> Maintained a highly detailed master ledger to record all transaction histories, ensuring complete transparency for audit and review purposes.</li>
+                <li><strong className="text-amber-400 font-medium">Financial Reporting:</strong> Reviewed and finalized the "UM Alphathon 2025 Financial Implication" document to establish clear budgetary baselines and reporting standards for the organizing committee.</li>
+              </ul>
+            </div>
+          </div>
+        )
+      },
           {
         id: "codefest",
         name: "Treasurer | PEKOM CodeFest 2025",
