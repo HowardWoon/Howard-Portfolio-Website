@@ -158,16 +158,16 @@ const honorsList: HonorItem[] = [
               <span className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-widest text-emerald-400">Kebangsaan & Negeri Excellence</span>
               <span className="text-[10px] sm:text-xs font-mono text-neutral-400">KMNS 2024/2025</span>
             </div>
-            <div className="p-3 grid grid-cols-1 gap-2 text-[10px] sm:text-xs font-mono max-h-[220px] overflow-y-auto">
-              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">SUKED Ping Pong Coach (Negeri)</span><span className="w-16 text-right text-amber-400 font-bold shrink-0">EMAS</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Matrix eXtra Quiz Challenge (Kebangsaan)</span><span className="w-16 text-right text-orange-400 font-bold shrink-0">GANGSA</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">SUKED Tenis Lelaki (Negeri)</span><span className="w-16 text-right text-orange-400 font-bold shrink-0">GANGSA</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-400 group-hover:text-white transition-colors">IMONST 1 Math Olympiad (Kebangsaan)</span><span className="w-16 text-right text-neutral-500 shrink-0">FINALIST</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-400 group-hover:text-white transition-colors">Kursus Kepimpinan Generasi Madani (Kebangsaan)</span><span className="w-16 text-right text-neutral-500 shrink-0">KPM</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-500 group-hover:text-white transition-colors">Bicara Eksekutif Kenegaraan Madani (Kebangsaan)</span><span className="w-16 text-right text-neutral-500 shrink-0">KPM</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-500 group-hover:text-white transition-colors">Pertandingan Komik STEM 2024 (Negeri)</span><span className="w-16 text-right text-neutral-500 shrink-0">PENYERTAAN</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-500 group-hover:text-white transition-colors">Pertandingan Poster AI (Negeri)</span><span className="w-16 text-right text-neutral-500 shrink-0">PENYERTAAN</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-500 group-hover:text-white transition-colors">Konvensyen Profesional KMNS 2024 (Negeri)</span><span className="w-16 text-right text-neutral-500 shrink-0">PENYERTAAN</span></div>
+            <div className="p-3 grid grid-cols-1 gap-2 text-[10px] sm:text-xs font-mono ">
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">SUKED Ping Pong Coach (Negeri)</span><span className="w-24 text-right text-amber-400 font-bold shrink-0">EMAS</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Matrix eXtra Quiz Challenge (Kebangsaan)</span><span className="w-24 text-right text-orange-400 font-bold shrink-0">GANGSA</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">SUKED Tenis Lelaki (Negeri)</span><span className="w-24 text-right text-orange-400 font-bold shrink-0">GANGSA</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">IMONST 1 Math Olympiad (Kebangsaan)</span><span className="w-24 text-right text-neutral-500 shrink-0">FINALIST</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Kursus Kepimpinan Generasi Madani (Kebangsaan)</span><span className="w-24 text-right text-neutral-500 shrink-0">KPM</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Bicara Eksekutif Kenegaraan Madani (Kebangsaan)</span><span className="w-24 text-right text-neutral-500 shrink-0">KPM</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Pertandingan Komik STEM 2024 (Negeri)</span><span className="w-24 text-right text-neutral-500 shrink-0">PENYERTAAN</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Pertandingan Poster AI (Negeri)</span><span className="w-24 text-right text-neutral-500 shrink-0">PENYERTAAN</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Konvensyen Profesional KMNS 2024 (Negeri)</span><span className="w-24 text-right text-neutral-500 shrink-0">PENYERTAAN</span></div>
             </div>
           </div>
 
@@ -179,9 +179,9 @@ const honorsList: HonorItem[] = [
             <div className="p-3 grid grid-cols-1 gap-2 text-[10px] sm:text-xs font-mono">
               <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Sukan Kampung</span><span className="text-emerald-400 font-bold shrink-0">PENGERUSI</span></div>
               <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Peer Assisted Learning (PAL)</span><span className="text-emerald-400 font-bold shrink-0">PENOLONG KETUA</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-400 group-hover:text-white transition-colors">Maths Support System (MSS)</span><span className="text-emerald-500 font-medium shrink-0">MENTOR</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-400 group-hover:text-white transition-colors">Program Chemcare Sem 2</span><span className="text-emerald-500 font-medium shrink-0">FASILITATOR</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-500 group-hover:text-white transition-colors">Gemersik Cakna x Pesta Tanglung</span><span className="text-emerald-500 font-medium shrink-0">FASILITATOR</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Maths Support System (MSS)</span><span className="text-emerald-500 font-medium shrink-0">MENTOR</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Program Chemcare Sem 2</span><span className="text-emerald-500 font-medium shrink-0">FASILITATOR</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Gemersik Cakna x Pesta Tanglung</span><span className="text-emerald-500 font-medium shrink-0">FASILITATOR</span></div>
             </div>
           </div>
         </div>
@@ -341,7 +341,7 @@ export default function HonorsSection() {
 
                 <div className="relative z-10 w-full flex items-start justify-between mb-4">
                   <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border transition-colors ${
-                    isActive ? `${cat.bg} ${cat.border} ${cat.text}` : 'bg-white/5 border-white/10 text-neutral-400 group-hover:text-white'
+                    isActive ? `${cat.bg} ${cat.border} ${cat.text}` : 'bg-white/5 border-white/10 text-neutral-300 group-hover:text-white'
                   }`}>
                     <Icon className="w-6 h-6" />
                   </div>
