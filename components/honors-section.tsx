@@ -576,8 +576,8 @@ export default function HonorsSection() {
             >
               {selectedCert.endsWith(".pdf") ? (
                 <iframe
-                  src={`${selectedCert}#toolbar=0&navpanes=0&scrollbar=0`}
-                  className="w-full h-full border-0"
+                  src={`${selectedCert}#navpanes=0`}
+                  className="w-[98%] h-[98%] border-0 rounded-xl"
                   title="Certificate Preview"
                 />
               ) : (
