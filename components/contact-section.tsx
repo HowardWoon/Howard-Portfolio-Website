@@ -362,51 +362,72 @@ export default function ContactSection() {
         </div>
 
                 {/* Global Footer & Functional Sitemap */}
-        <footer className="relative z-10 border-t-2 border-white/10 pt-12 pb-8 mt-16 flex flex-col md:flex-row justify-between items-start md:items-end gap-10">
-          
-          {/* Left Block: Identity & Copyright */}
-          <div className="space-y-4 text-left">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full border-2 border-amber-500 flex items-center justify-center bg-[#090B10]">
-                <span className="w-4 h-4 bg-amber-400 rounded-full animate-pulse" />
+                {/* ENGINEERING TITLE BLOCK FOOTER */}
+        <footer className="relative z-10 pt-24 pb-12 mt-20">
+          <div className="flex flex-col lg:flex-row justify-between items-start gap-16 lg:gap-10">
+            
+            {/* Left: System of Record / Title Block */}
+            <div className="flex-1 w-full border border-white/10 rounded-xl bg-[#090B10] overflow-hidden flex flex-col relative group hover:border-white/20 transition-colors shadow-2xl">
+              {/* Header Bar */}
+              <div className="flex flex-wrap items-center justify-between border-b border-white/10 bg-white/[0.02] px-6 py-4 gap-4">
+                <span className="text-xs font-mono font-bold text-neutral-400 tracking-[0.2em] uppercase">System Handover</span>
+                <span className="text-[10px] font-mono text-amber-400 tracking-[0.2em] bg-amber-500/10 px-2 py-1 rounded border border-amber-500/20 uppercase flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                  OPERATIONAL
+                </span>
               </div>
-              <div>
-                <h3 className="text-xl sm:text-2xl font-black uppercase text-white tracking-wide">
-                  Howard Woon <span className="text-amber-500">Hao Zhe</span>
-                </h3>
-                <div className="text-sm font-mono text-neutral-400 uppercase tracking-widest mt-1">
-                  Systems & AI Architect
+              
+              {/* Body */}
+              <div className="p-6 md:p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+                {/* Identity */}
+                <div className="space-y-1">
+                  <div className="text-[10px] font-mono text-neutral-500 tracking-[0.2em] mb-4 uppercase">System Of Record</div>
+                  <h3 className="text-xl md:text-2xl font-black text-white uppercase tracking-wider leading-none">Howard Woon Hao Zhe</h3>
+                  <p className="text-xs font-mono text-amber-400 uppercase tracking-widest pt-2">Systems & AI Architect</p>
+                </div>
+
+                {/* Education */}
+                <div className="space-y-1">
+                  <div className="text-[10px] font-mono text-neutral-500 tracking-[0.2em] mb-4 uppercase">Academic Foundation</div>
+                  <h3 className="text-sm font-bold text-white uppercase tracking-wider">Universiti Malaya</h3>
+                  <p className="text-xs font-mono text-neutral-400">B.Comp.Sc. / Software Engineering</p>
+                </div>
+
+                {/* Metadata */}
+                <div className="space-y-2">
+                  <div className="text-[10px] font-mono text-neutral-500 tracking-[0.2em] mb-4 uppercase">Document Metadata</div>
+                  <div className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-xs font-mono">
+                    <span className="text-neutral-500">DOCUMENT</span>
+                    <span className="text-neutral-300">HWZ-2026</span>
+                    <span className="text-neutral-500">REVISION</span>
+                    <span className="text-neutral-300">01.04</span>
+                    <span className="text-neutral-500">NODE</span>
+                    <span className="text-neutral-300">KUL-MY-01</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer Bar */}
+              <div className="border-t border-white/10 bg-white/[0.01] px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-6">
+                <span className="text-[10px] font-mono text-neutral-500 uppercase tracking-[0.2em] text-center md:text-left">Engineered Systems. Autonomous Pipelines.</span>
+                
+                <div className="flex flex-wrap justify-center items-center gap-6">
+                  <a href="https://linkedin.com/in/howardwoon" target="_blank" rel="noreferrer" className="text-xs font-mono font-bold text-neutral-400 hover:text-amber-400 transition-colors uppercase tracking-widest flex items-center gap-2">
+                    <Linkedin className="w-3.5 h-3.5" /> LINKEDIN
+                  </a>
+                  <a href="https://github.com/HowardWoon" target="_blank" rel="noreferrer" className="text-xs font-mono font-bold text-neutral-400 hover:text-amber-400 transition-colors uppercase tracking-widest flex items-center gap-2">
+                    <Github className="w-3.5 h-3.5" /> GITHUB
+                  </a>
+                  <a href="/resume" className="text-xs font-mono font-bold text-neutral-400 hover:text-amber-400 transition-colors uppercase tracking-widest flex items-center gap-2">
+                    <FileText className="w-3.5 h-3.5" /> RESUME
+                  </a>
                 </div>
               </div>
             </div>
-            
-            <div className="space-y-1 pt-2">
-              <div className="text-sm font-bold text-neutral-300">
-                © 2026 Howard Woon Hao Zhe. All rights reserved.
-              </div>
-              <div className="text-sm font-mono text-neutral-500">
-                Universiti Malaya · Bachelor of Computer Science (Software Engineering, 4.00 CGPA)
-              </div>
-            </div>
-          </div>
 
-          {/* Right Block: System Status & Sitemap */}
-          <div className="flex flex-col items-start md:items-end space-y-6">
-            
-            {/* System Status Display */}
-            <div className="flex flex-col md:items-end space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-mono text-emerald-500 uppercase tracking-widest">System Status</span>
-                <span className="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold">ALL SYSTEMS OPERATIONAL</span>
-              </div>
-              <div className="text-xs font-mono text-neutral-500 tracking-wider">
-                NODE: KUL-MY-01 | LATENCY: 24ms | LOAD: 12%
-              </div>
-            </div>
-
-            {/* Structured Navigation Directory */}
-            <div className="flex flex-col items-start md:items-end space-y-2.5 mt-4 pt-4 border-t border-white/5 w-full min-w-[200px]">
-              <span className="text-[10px] font-mono text-neutral-600 uppercase tracking-[0.2em] mb-1">Index Directory</span>
+            {/* Right Block: Sitemap */}
+            <div className="w-full lg:w-48 flex flex-col space-y-2.5">
+              <span className="text-[10px] font-mono text-neutral-500 uppercase tracking-[0.2em] mb-2">Index Directory</span>
               <a href="#about" className="group flex items-center gap-3 text-xs sm:text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-all">
                 <span className="w-4 h-px bg-white/10 group-hover:bg-amber-400 transition-colors" />
                 01 // VISION
@@ -425,14 +446,14 @@ export default function ContactSection() {
               </a>
               <button 
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} 
-                className="group flex items-center gap-3 text-xs sm:text-sm font-mono font-bold text-white hover:text-amber-400 transition-all mt-2"
+                className="group flex items-center gap-3 text-xs sm:text-sm font-mono font-bold text-white mt-4 pt-4 border-t border-white/10 hover:text-amber-400 transition-all text-left"
               >
-                <span className="w-4 h-px bg-white/30 group-hover:bg-amber-400 transition-colors" />
-                BACK TO TOP 
+                <span className="w-4 h-px bg-white/20 group-hover:bg-amber-400 transition-colors" />
+                BACK TO TOP
               </button>
             </div>
-          </div>
 
+          </div>
         </footer>
 
       </div>
