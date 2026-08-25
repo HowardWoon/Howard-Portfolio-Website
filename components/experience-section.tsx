@@ -449,14 +449,14 @@ export default function ExperienceSection() {
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-4 text-xs font-mono text-neutral-400">
-                      <div className="flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-neutral-500" />
+                    <div className="flex items-center gap-5 text-sm font-mono font-bold text-neutral-300 tracking-wide">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-neutral-400" />
                         <span>{item.period}</span>
                       </div>
-                      <div className="hidden sm:flex items-center gap-1.5 text-neutral-500">
-                        <MapPin className="w-3.5 h-3.5" />
-                        <span>{item.location}</span>
+                      <div className="hidden sm:flex items-center gap-2 text-neutral-400">
+                        <MapPin className="w-4 h-4" />
+                        <span className="text-neutral-300">{item.location}</span>
                       </div>
                     </div>
                   </div>
