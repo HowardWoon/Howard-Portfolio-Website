@@ -35,10 +35,11 @@ interface ProjectData {
   orchestratorUrl?: string;
   simulatorId: string;
   githubUrl?: string;
-  telemetryType: "agentic" | "flood" | "energy";
+  telemetryType: "agentic" | "flood" | "energy" | "catfish";
 }
 
 const projects: ProjectData[] = [
+    
       {
       id: "zerolag",
       number: "01",
@@ -90,9 +91,32 @@ const projects: ProjectData[] = [
       githubUrl: "https://github.com/HowardWoon/BILAHUJAN-VHack2026",
       telemetryType: "flood",
     },
+{
+      id: "catfish",
+      number: "03",
+      badge: "WIA1006 Machine Learning • Ultimate Pipeline",
+      badgeType: "cyan",
+      title: "CATFISH DETECTOR AI",
+      subtitle: "Detecting Deception Through Mathematical Behavioral Intelligence",
+      description: "An advanced machine learning pipeline that exposes romance scammers not by scanning static images or text, but by analyzing the mathematical fingerprint of 51 behavioral heuristics. Engineered to process 50,000 raw dating profiles through a custom SMOTE-Tomek balanced, 6-model ensemble engine.",
+      architecturePoints: [
+        "Layer 1 Heuristic Engine: Dynamic Z-Score mathematical baseline evaluating engagement density and match conversion anomalies.",
+        "Layer 2 ML Vote: 6 independently-tuned models (GMM, SVM, NN, etc.) fused via a dynamic probability threshold.",
+        "Explainable AI (SHAP): Fully auditable decision trees breaking down the exact marginal contribution of each behavioral signal."
+      ],
+      metrics: [
+        { label: "Features", value: "51 Signals" },
+        { label: "Class Balance", value: "SMOTE-Tomek" },
+        { label: "Model Bundle", value: "6-Model (58MB)" }
+      ],
+      tags: ["Python", "Scikit-Learn", "SHAP", "SMOTE", "Flask"],
+      githubUrl: "https://github.com/HowardWoon/Catfish-Detector-ML-Models",
+      simulatorId: "catfish",
+      telemetryType: "catfish",
+    },
   {
     id: "sensor-x-sensei",
-    number: "03",
+    number: "04",
     badge: "⚡ UM Technothon 2026 Finalist · IoT Energy Grid",
     badgeType: "emerald",
     title: "Sensor X Sensei",
@@ -354,6 +378,35 @@ function ProjectCard({
               </div>
             )}
             
+            {project.telemetryType === "catfish" && (
+              <div className="space-y-4 py-2">
+                <div className="text-xs font-mono text-neutral-400">
+                  // 6-Model Ensemble Inference Engine
+                </div>
+
+                <div className="bg-black/50 border border-white/10 rounded-xl p-4 space-y-3">
+                  <div className="flex items-center justify-between text-xs font-mono">
+                    <span className="text-neutral-400">Profile Behavioral Vectors:</span>
+                    <span className="text-amber-400 font-bold">51 Extracted</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs font-mono">
+                    <span className="text-neutral-400">Heuristic Z-Score:</span>
+                    <span className="text-red-400 font-bold animate-pulse">+4.2σ (Anomaly)</span>
+                  </div>
+                  <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                    <div className="bg-red-500 h-full w-[94%]" />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 font-mono text-[10px] sm:text-xs text-neutral-500 bg-black/30 p-4 rounded-xl border border-white/5">
+                  <div>{">_"} ensemble_vote: [SVM, GMM, DT, RF, LR, NN]</div>
+                  <div>{">_"} smote_tomek_balancing: TRUE</div>
+                  <div>{">_"} model_confidence: 94.7%</div>
+                  <div className="text-red-400 font-bold pt-2">{">_"} VERDICT: DECEPTION DETECTED</div>
+                </div>
+              </div>
+            )}
+
             {project.telemetryType === "flood" && (
               <div className="space-y-4 py-2">
                 <div className="text-xs font-mono text-neutral-400">
