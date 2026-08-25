@@ -96,7 +96,7 @@ const experiences: ExperienceItem[] = [
     categoryLabel: "ACADEMIC MENTORSHIP",
     role: "Assistant Head of Subject (Computer Science)",
     organization: "KMNS PAL Leader Club",
-    location: "Kolej Matrikulasi Negeri Sembilan",
+    location: "Kolej Matrikulasi Negeri Sembilan (Negeri Sembilan Matriculation College)",
     period: "2024",
     icon: GraduationCap,
     accentColor: "purple",
