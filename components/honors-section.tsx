@@ -558,10 +558,10 @@ export default function HonorsSection() {
             className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-10 bg-black/90 backdrop-blur-xl"
             onClick={() => setSelectedCert(null)}
           >
-            <div className="absolute top-6 right-6">
+            <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-[110]">
               <button
                 onClick={() => setSelectedCert(null)}
-                className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white backdrop-blur-md transition-colors"
+                className="w-12 h-12 rounded-full bg-neutral-800/80 hover:bg-neutral-700 border border-white/20 flex items-center justify-center text-white backdrop-blur-xl transition-all shadow-[0_0_30px_rgba(0,0,0,0.5)]"
               >
                 <X className="w-5 h-5" />
               </button>
