@@ -35,7 +35,7 @@ interface ProjectData {
   orchestratorUrl?: string;
   simulatorId: string;
   githubUrl?: string;
-  telemetryType: "agentic" | "flood" | "energy" | "catfish";
+  telemetryType: "agentic" | "flood" | "energy" | "catfish" | "slotify";
 }
 
 const projects: ProjectData[] = [
@@ -114,9 +114,32 @@ const projects: ProjectData[] = [
       simulatorId: "catfish",
       telemetryType: "catfish",
     },
-  {
+      {
+      id: "slotify",
+      number: "04",
+      badge: "Java Spring Boot • Data Structures",
+      badgeType: "gold",
+      title: "SLOTIFY",
+      subtitle: "Multi-Data Structure Architecture & Algorithmic Router",
+      description: "A Spring Boot backend architecture demonstrating seven manually implemented data structures working synchronously. Each API lifecycle threads operations through Custom Min-Heaps, AVL BSTs, HashMaps, and Dijkstra's Shortest Path routing to execute with optimal Big O time complexities.",
+      architecturePoints: [
+        "Memory Linkages: Doubly Linked Lists & LIFO Stacks track temporal allocation history for instant O(1) state rollbacks.",
+        "Priority Engine: A zero-dependency Min-Heap orchestrates O(log n) physical parking slot assignments.",
+        "Algorithmic Pathing: Graph adjacency lists compute optimal node-to-node pathways via Dijkstra's Algorithm."
+      ],
+      metrics: [
+        { label: "Algorithms", value: "7 Custom Structures" },
+        { label: "Routing", value: "Dijkstra (O((V+E)logV))" },
+        { label: "Data Cache", value: "AVL BST & HashMap" }
+      ],
+      tags: ["Java 17", "Spring Boot", "Data Structures", "Dijkstra", "Min-Heap", "AVL BST"],
+      githubUrl: "https://github.com/HowardWoon/Slotify",
+      simulatorId: "slotify",
+      telemetryType: "slotify",
+    },
+{
     id: "sensor-x-sensei",
-    number: "04",
+    number: "05",
     badge: "⚡ UM Technothon 2026 Finalist · IoT Energy Grid",
     badgeType: "emerald",
     title: "Sensor X Sensei",
@@ -378,6 +401,35 @@ function ProjectCard({
               </div>
             )}
             
+            {project.telemetryType === "slotify" && (
+              <div className="space-y-4 py-2">
+                <div className="text-xs font-mono text-neutral-400">
+                  // Core Algorithm: Dijkstra Shortest Path Engine
+                </div>
+
+                <div className="bg-black/50 border border-white/10 rounded-xl p-4 space-y-3">
+                  <div className="flex items-center justify-between text-xs font-mono">
+                    <span className="text-neutral-400">Graph Assignment:</span>
+                    <span className="text-amber-400 font-bold">Node 0 → Node 101</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs font-mono">
+                    <span className="text-neutral-400">Min-Heap Allocation:</span>
+                    <span className="text-emerald-400 font-bold">O(log n) Extract</span>
+                  </div>
+                  <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                    <div className="bg-amber-400 h-full w-[100%] animate-[pulse_2s_ease-in-out_infinite]" />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 font-mono text-[10px] sm:text-xs text-neutral-500 bg-black/30 p-4 rounded-xl border border-white/5">
+                  <div>{">_ [PROCESS] ABC-123 (Alice)"}</div>
+                  <div>{">_ AVL_BST_INSERT: SUCCESS"}</div>
+                  <div>{">_ HASHMAP_LOOKUP: O(1)"}</div>
+                  <div className="text-emerald-400 font-bold pt-2">{">_ DIJKSTRA ROUTE: 0 → 3 → 7 → 101"}</div>
+                </div>
+              </div>
+            )}
+
             {project.telemetryType === "catfish" && (
               <div className="space-y-4 py-2">
                 <div className="text-xs font-mono text-neutral-400">
