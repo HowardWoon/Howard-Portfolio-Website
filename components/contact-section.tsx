@@ -413,7 +413,7 @@ export default function ContactSection() {
                 <span className="text-xs font-mono font-bold text-neutral-500 uppercase tracking-[0.2em] text-center md:text-left">Engineered Systems. Autonomous Pipelines.</span>
                 
                 <div className="flex flex-wrap justify-center items-center gap-8">
-                  <a href="https://linkedin.com/in/howardwoon" target="_blank" rel="noreferrer" className="text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-colors uppercase tracking-widest flex items-center gap-2.5">
+                  <a href={linkedInUrl} target="_blank" rel="noreferrer" className="text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-colors uppercase tracking-widest flex items-center gap-2.5">
                     <Linkedin className="w-5 h-5" /> LINKEDIN
                   </a>
                   <a href="https://github.com/HowardWoon" target="_blank" rel="noreferrer" className="text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-colors uppercase tracking-widest flex items-center gap-2.5">
