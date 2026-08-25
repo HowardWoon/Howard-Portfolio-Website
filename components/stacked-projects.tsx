@@ -145,6 +145,13 @@ const projects: ProjectData[] = [
       ],
       tags: ["Java 17", "Spring Boot", "Data Structures", "Dijkstra", "Min-Heap", "AVL BST"],
       githubUrl: "https://github.com/HowardWoon/Slotify",
+      galleryPhotos: [
+        { src: "/images/projects/slotify/01.png", alt: "Slotify Interface", rotation: -4 },
+        { src: "/images/projects/slotify/02.png", alt: "Slotify Algorithm", rotation: 2 },
+        { src: "/images/projects/slotify/03.png", alt: "Slotify Diagram", rotation: -2 },
+        { src: "/images/projects/slotify/04.png", alt: "Slotify Flow", rotation: 4 },
+        { src: "/images/projects/slotify/05.png", alt: "Slotify Architecture", rotation: -1 }
+      ],
       simulatorId: "slotify",
       telemetryType: "slotify",
     },
@@ -409,11 +416,11 @@ function ProjectCard({
                   <Activity className="w-4 h-4 text-emerald-400 animate-pulse" />
                 )}
                 <span className="uppercase font-bold tracking-wider">
-                  {project.telemetryType === "agentic" || project.telemetryType === "catfish" ? "PROJECT GALLERY" : "LIVE TELEMETRY WINDOW"}
+                  {project.telemetryType === "agentic" || project.telemetryType === "catfish" || project.telemetryType === "slotify" ? "PROJECT GALLERY" : "LIVE TELEMETRY WINDOW"}
                 </span>
               </div>
               <span className="text-xs font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-                {project.telemetryType === "agentic" || project.telemetryType === "catfish" ? "INTERACTIVE" : "ACTIVE PIPELINE"}
+                {project.telemetryType === "agentic" || project.telemetryType === "catfish" || project.telemetryType === "slotify" ? "INTERACTIVE" : "ACTIVE PIPELINE"}
               </span>
             </div>
 
@@ -424,36 +431,9 @@ function ProjectCard({
               </div>
             )}
             
-            {project.telemetryType === "slotify" && (
-              <div className="space-y-4 py-2">
-                <div className="text-xs font-mono text-neutral-400">
-                  // Core Algorithm: Dijkstra Shortest Path Engine
-                </div>
+            
 
-                <div className="bg-black/50 border border-white/10 rounded-xl p-4 space-y-3">
-                  <div className="flex items-center justify-between text-xs font-mono">
-                    <span className="text-neutral-400">Graph Assignment:</span>
-                    <span className="text-amber-400 font-bold">Node 0 → Node 101</span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs font-mono">
-                    <span className="text-neutral-400">Min-Heap Allocation:</span>
-                    <span className="text-emerald-400 font-bold">O(log n) Extract</span>
-                  </div>
-                  <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
-                    <div className="bg-amber-400 h-full w-[100%] animate-[pulse_2s_ease-in-out_infinite]" />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5 font-mono text-[10px] sm:text-xs text-neutral-500 bg-black/30 p-4 rounded-xl border border-white/5">
-                  <div>{">_ [PROCESS] ABC-123 (Alice)"}</div>
-                  <div>{">_ AVL_BST_INSERT: SUCCESS"}</div>
-                  <div>{">_ HASHMAP_LOOKUP: O(1)"}</div>
-                  <div className="text-emerald-400 font-bold pt-2">{">_ DIJKSTRA ROUTE: 0 → 3 → 7 → 101"}</div>
-                </div>
-              </div>
-            )}
-
-            {project.telemetryType === "catfish" && (
+            {(project.telemetryType === "catfish" || project.telemetryType === "slotify") && (
               <div className="flex-1 w-full flex items-center justify-center min-h-[400px] lg:min-h-[450px] py-2 overflow-hidden rounded-xl">
                 <InteractivePhotoStack customPhotos={project.galleryPhotos} />
               </div>
