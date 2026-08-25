@@ -555,7 +555,7 @@ export default function HonorsSection() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-10 bg-black/90 backdrop-blur-xl"
+            className="fixed inset-0 z-[100] flex flex-col items-center justify-center p-12 sm:p-16 bg-black/90 backdrop-blur-xl"
             onClick={() => setSelectedCert(null)}
           >
             <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-[110]">
@@ -572,7 +572,7 @@ export default function HonorsSection() {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 20 }}
               onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-5xl h-[85vh] sm:h-[80vh] bg-[#0E121B] rounded-2xl border border-white/20 shadow-2xl overflow-hidden flex items-center justify-center"
+              className="relative w-full max-w-5xl h-[calc(100vh-6rem)] sm:h-[calc(100vh-8rem)] bg-[#0E121B] rounded-2xl border-2 border-white/30 shadow-2xl overflow-hidden flex items-center justify-center"
             >
               {selectedCert.endsWith(".pdf") ? (
                 <iframe
