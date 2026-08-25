@@ -4,13 +4,13 @@
 
 @layer base {
   :root {
-    --bg-canvas: #f3f3f5;
-    --bg-card: #ffffff;
-    --border-subtle: rgba(0, 0, 0, 0.08);
-    --border-hover: rgba(0, 0, 0, 0.22);
-    --text-primary: #12151b;
-    --text-secondary: #5e6676;
-    --text-muted: #8c95a6;
+    --bg-canvas: #090B10;
+    --bg-card: #0E121B;
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-hover: rgba(255, 255, 255, 0.22);
+    --text-primary: #ffffff;
+    --text-secondary: #9ca3af;
+    --text-muted: #6b7280;
   }
 
   html {
@@ -130,5 +130,34 @@
   }
   a, button, input, textarea, select {
     cursor: none !important;
+  }
+}
+@layer components {
+  .glass-panel {
+    @apply bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl;
+  }
+  .pill-button {
+    @apply px-4 py-2 rounded-full font-medium transition-colors cursor-pointer inline-flex items-center justify-center;
+  }
+  .pill-button-primary {
+    @apply bg-amber-500 text-black hover:bg-amber-400;
+  }
+  .pill-button-secondary {
+    @apply bg-white/10 text-white hover:bg-white/20;
+  }
+  .floating-field {
+    @apply relative;
+  }
+  .floating-input {
+    @apply w-full bg-black/50 border border-white/10 rounded-xl px-4 pt-6 pb-2 text-white outline-none focus:border-amber-500/50 transition-colors;
+  }
+  .floating-label {
+    @apply absolute left-4 top-4 text-neutral-500 text-sm transition-all cursor-text pointer-events-none;
+  }
+  .section-shell {
+    @apply max-w-7xl mx-auto px-6 py-12;
+  }
+  .muted-label {
+    @apply text-neutral-400 text-sm font-medium;
   }
 }
