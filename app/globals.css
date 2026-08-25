@@ -19,13 +19,13 @@
     color: var(--text-primary);
     
     /* SCALE UP ENTIRE UI & TYPOGRAPHY BY 12.5% (16px -> 18px) */
-    font-size: 18px;
+    font-size: 22px;
   }
   
   /* Drop back slightly on very small screens to avoid overflow */
   @media (max-width: 640px) {
     html {
-      font-size: 16px;
+      font-size: 18px;
     }
   }
 
