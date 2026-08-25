@@ -170,11 +170,34 @@ function PekomTreasurerDashboard() {
       name: "Treasurer | UM Alphathon 2025",
       desc: "Orchestrated a RM14,150 (USD 3,369) budget funded entirely by international partner WorldQuant. Achieved 99.87% budget accuracy, distributing 89.2% of all funds directly into the student prize pool."
     },
-    {
-      id: "codefest",
-      name: "Treasurer | PEKOM CodeFest 2025",
-      desc: "Balanced a RM2,700 operational fund, achieving 100% financial reconciliation with zero deficit. Optimized operational overhead to ensure exactly 66.7% of the budget was paid out as direct cash rewards."
-    },
+          {
+        id: "codefest",
+        name: "Treasurer | PEKOM CodeFest 2025",
+        desc: (
+          <div className="space-y-6 pt-2">
+            <div className="flex flex-col gap-1">
+              <div className="text-amber-400 font-mono text-xs font-bold uppercase tracking-widest">Duration</div>
+              <div className="text-neutral-400 font-mono text-xs">2025</div>
+            </div>
+            
+            <div className="space-y-2">
+              <h5 className="text-white font-bold text-sm uppercase tracking-wide border-b border-amber-500/20 pb-1.5">Executive Summary</h5>
+              <p className="text-neutral-300">
+                Directed the financial operations and budget management for PEKOM CodeFest (in conjunction with UM Alphathon 2025). Balanced a RM2,700 operational fund and oversaw all event-related expenses, achieving 100% financial reconciliation with zero deficit while ensuring streamlined reimbursement processes for the organizing committee.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <h5 className="text-white font-bold text-sm uppercase tracking-wide border-b border-amber-500/20 pb-1.5">Key Responsibilities & Achievements</h5>
+              <ul className="space-y-2 text-neutral-300 list-disc list-outside ml-4">
+                <li><strong className="text-amber-400 font-medium">Budget Management & Optimization:</strong> Managed total event expenditures amounting to RM1,531.77, optimizing operational overhead to ensure exactly 66.7% of the budget was paid out as direct cash rewards to participants.</li>
+                <li><strong className="text-amber-400 font-medium">Expense Tracking:</strong> Monitored operational costs across multiple categories, including roll-up bunting, certificate printing, meals, and transportation.</li>
+                <li><strong className="text-amber-400 font-medium">Financial Documentation:</strong> Developed and maintained a master reimbursement spreadsheet to compile all costs, ensuring absolute transparency and efficient financial settlement.</li>
+              </ul>
+            </div>
+          </div>
+        )
+      },
                 {
         id: "mhw",
         name: "Treasurer | Mental Health Week & Share Your Love",
