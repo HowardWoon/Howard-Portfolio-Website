@@ -175,10 +175,35 @@ function PekomTreasurerDashboard() {
       name: "Treasurer | PEKOM CodeFest 2025",
       desc: "Balanced a RM2,700 operational fund, achieving 100% financial reconciliation with zero deficit. Optimized operational overhead to ensure exactly 66.7% of the budget was paid out as direct cash rewards."
     },
-          {
+                {
         id: "mhw",
         name: "Treasurer | Mental Health Week & Share Your Love",
-        desc: "Directed a RM5,830 multi-event fund, outperforming merchandise sales targets to secure a RM346 surplus. Executed the charity outreach at RM11.68/pax, maintaining a 100%-reconciled budget by responsibly adjusting donations to match actual available funds."
+        desc: (
+          <div className="space-y-6 pt-2">
+            <div className="flex flex-col gap-1">
+              <div className="text-amber-400 font-mono text-xs font-bold uppercase tracking-widest">Duration</div>
+              <div className="text-neutral-400 font-mono text-xs">September 2025 – June 2026</div>
+            </div>
+            
+            <div className="space-y-2">
+              <h5 className="text-white font-bold text-sm uppercase tracking-wide border-b border-amber-500/20 pb-1.5">Executive Summary</h5>
+              <p className="text-neutral-300">
+                Directed the financial operations and budget allocations for Mental Health Week 2025 and its associated "Share Your Love" outreach initiative. Established rigorous treasury protocols to maintain accurate transaction histories, directing a RM5,830 multi-event fund to ensure complete transparency and accountability across all organizing committees.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <h5 className="text-white font-bold text-sm uppercase tracking-wide border-b border-amber-500/20 pb-1.5">Key Responsibilities & Governance</h5>
+              <ul className="space-y-2 text-neutral-300 list-disc list-outside ml-4">
+                <li><strong className="text-amber-400 font-medium">Budget Allocation:</strong> Managed and distributed event funding across various outreach activities, outperforming merchandise sales targets to secure a RM346 surplus.</li>
+                <li><strong className="text-amber-400 font-medium">Charity Execution:</strong> Executed the charity outreach effectively at RM11.68/pax, responsibly adjusting donations to match actual available funds.</li>
+                <li><strong className="text-amber-400 font-medium">Audit Compliance:</strong> Enforced strict documentation policies, verifying that every receipt was properly accounted for to maintain a 100%-reconciled budget.</li>
+                <li><strong className="text-amber-400 font-medium">Reporting Standards:</strong> Standardized the financial report formats used by the committee to maintain transparency and streamline the final administrative review process.</li>
+                <li><strong className="text-amber-400 font-medium">Reimbursement Policy Management:</strong> Administered transport reimbursement guidelines for event planning, deliberately excluding the 20% penalty deduction clause to ensure fair and complete compensation for committee members' travel expenses.</li>
+              </ul>
+            </div>
+          </div>
+        )
       }
   ];
 
