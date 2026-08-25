@@ -111,12 +111,12 @@ const honorsList: HonorItem[] = [
               <span className="text-[10px] sm:text-xs font-mono text-neutral-400">GPA: 4.00</span>
             </div>
             <div className="p-3 grid grid-cols-1 gap-2 text-[10px] sm:text-xs font-mono">
-              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-amber-400 transition-colors">WIA1006 · Machine Learning</span><span className="text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded">A+</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-amber-400 transition-colors">WIA1002 · Data Structure</span><span className="text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded">A+</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-400 group-hover:text-neutral-200 transition-colors">WIA1003 · Computer System Architecture</span><span className="text-emerald-500">A</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-400 group-hover:text-neutral-200 transition-colors">WIA1005 · Network Technology Foundation</span><span className="text-emerald-500">A</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-500 group-hover:text-neutral-300 transition-colors">GIG1012 · Philosophy and Current Issues</span><span className="text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded">A+</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-500 group-hover:text-neutral-300 transition-colors">GLT1025 · Effective Oral Communication</span><span className="text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded">A+</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">WIA1006 · Machine Learning</span><span className="w-6 text-right text-emerald-400 font-bold shrink-0">A+</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">WIA1002 · Data Structure</span><span className="w-6 text-right text-emerald-400 font-bold shrink-0">A+</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">WIA1003 · Computer System Architecture</span><span className="w-6 text-right text-emerald-500 font-medium shrink-0">A</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">WIA1005 · Network Technology Foundation</span><span className="w-6 text-right text-emerald-500 font-medium shrink-0">A</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">GIG1012 · Philosophy and Current Issues</span><span className="w-6 text-right text-emerald-400 font-bold shrink-0">A+</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">GLT1025 · Effective Oral Communication</span><span className="w-6 text-right text-emerald-400 font-bold shrink-0">A+</span></div>
             </div>
           </div>
 
@@ -126,12 +126,12 @@ const honorsList: HonorItem[] = [
               <span className="text-[10px] sm:text-xs font-mono text-neutral-400">GPA: 4.00</span>
             </div>
             <div className="p-3 grid grid-cols-1 gap-2 text-[10px] sm:text-xs font-mono">
-              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-amber-400 transition-colors">WIX1002 · Fundamentals of Programming</span><span className="text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded">A+</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-400 group-hover:text-neutral-200 transition-colors">WIA2010 · Human Computer Interaction</span><span className="text-emerald-500">A</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-400 group-hover:text-neutral-200 transition-colors">WIX1001 · Computing Mathematics I</span><span className="text-emerald-500">A</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-400 group-hover:text-neutral-200 transition-colors">WIX1003 · Computer Systems and Organization</span><span className="text-emerald-500">A</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-500 group-hover:text-neutral-300 transition-colors">GIG1003 · Basic Entrepreneurship Enculturation</span><span className="text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded">A+</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-500 group-hover:text-neutral-300 transition-colors">GLT1024 · Proficiency in English III</span><span className="text-emerald-500">A</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">WIX1002 · Fundamentals of Programming</span><span className="w-6 text-right text-emerald-400 font-bold shrink-0">A+</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">WIA2010 · Human Computer Interaction</span><span className="w-6 text-right text-emerald-500 font-medium shrink-0">A</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">WIX1001 · Computing Mathematics I</span><span className="w-6 text-right text-emerald-500 font-medium shrink-0">A</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">WIX1003 · Computer Systems and Organization</span><span className="w-6 text-right text-emerald-500 font-medium shrink-0">A</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">GIG1003 · Basic Entrepreneurship Enculturation</span><span className="w-6 text-right text-emerald-400 font-bold shrink-0">A+</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">GLT1024 · Proficiency in English III</span><span className="w-6 text-right text-emerald-500 font-medium shrink-0">A</span></div>
             </div>
           </div>
         </div>
