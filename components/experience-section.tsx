@@ -161,11 +161,12 @@ function PekomTreasurerDashboard() {
                 <li><strong className="text-amber-400 font-medium">Ledger Management:</strong> Established and maintained a comprehensive master ledger to track all expenditures, internal budgets, and receipts.</li>
                 <li><strong className="text-amber-400 font-medium">Sponsor Relations:</strong> Coordinated settlement details with corporate sponsors, managed vendor data requests, and established specific payment guidelines and verification requirements to ensure smooth transactions.</li>
                 <li><strong className="text-amber-400 font-medium">Committee Coordination:</strong> Directed financial planning and executed budget strategies across committee meetings to ensure all departments operated within their allocated funds.</li>
-              </ul>
+                </ul>
+              </div>
+              <FieldArchive archiveId="mytech" />
             </div>
-          </div>
-        )
-      },
+          )
+        },
           {
         id: "alphathon",
         name: "Treasurer | UM Alphathon 2025",
