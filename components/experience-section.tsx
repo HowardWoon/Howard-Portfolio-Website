@@ -126,11 +126,45 @@ function PekomTreasurerDashboard() {
   ];
 
   const events = [
-    {
-      id: "mytech",
-      name: "Treasurer | MYTECH Career Fair 2026",
-      desc: "Managed an unprecedented RM50,200 budget, securing 30 corporate sponsors and RM46,200 in revenue. Enforced an 81.5% spending cap to generate a record-breaking RM9,272.90 pure surplus for PEKOM."
-    },
+          {
+        id: "mytech",
+        name: "Treasurer | MYTECH Career Fair 2026",
+        desc: (
+          <div className="space-y-6 pt-2">
+            <div className="flex flex-col gap-1">
+              <div className="text-amber-400 font-mono text-xs font-bold uppercase tracking-widest">Duration</div>
+              <div className="text-neutral-400 font-mono text-xs">February – June 2026</div>
+            </div>
+            
+            <div className="space-y-2">
+              <h5 className="text-white font-bold text-sm uppercase tracking-wide border-b border-amber-500/20 pb-1.5">Executive Summary</h5>
+              <p className="text-neutral-300">
+                Directed financial planning, budget execution, and reporting for the MYTECH Career Fair 2026. Managed an unprecedented RM50,200 budget and implemented strict financial governance, successfully securing 30 corporate sponsors and RM46,200 in revenue. By enforcing an 81.5% spending cap, the event generated a record-breaking RM9,272.90 pure surplus for Persatuan Komputer Universiti Malaya (PEKOM).
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <h5 className="text-white font-bold text-sm uppercase tracking-wide border-b border-amber-500/20 pb-1.5">Key Achievements & Metrics</h5>
+              <ul className="space-y-2 text-neutral-300 list-disc list-outside ml-4">
+                <li><strong className="text-amber-400 font-medium">Budget Oversight:</strong> Managed an unprecedented total budget of RM50,200.</li>
+                <li><strong className="text-amber-400 font-medium">Revenue Generation:</strong> Secured RM46,200 in revenue through 30 corporate sponsorships (including partners like Garmin).</li>
+                <li><strong className="text-amber-400 font-medium">Cost Control:</strong> Successfully enforced an 81.5% spending cap across all event operations.</li>
+                <li><strong className="text-amber-400 font-medium">Profitability:</strong> Generated a record-breaking RM9,272.90 pure surplus for PEKOM.</li>
+              </ul>
+            </div>
+
+            <div className="space-y-2">
+              <h5 className="text-white font-bold text-sm uppercase tracking-wide border-b border-amber-500/20 pb-1.5">Financial Governance & Operations</h5>
+              <ul className="space-y-2 text-neutral-300 list-disc list-outside ml-4">
+                <li><strong className="text-amber-400 font-medium">Financial Compliance:</strong> Managed tax compliance for a student-led initiative, handling declarations of exemption for e-invoice issuance.</li>
+                <li><strong className="text-amber-400 font-medium">Ledger Management:</strong> Established and maintained a comprehensive master ledger to track all expenditures, internal budgets, and receipts.</li>
+                <li><strong className="text-amber-400 font-medium">Sponsor Relations:</strong> Coordinated settlement details with corporate sponsors, managed vendor data requests, and established specific payment guidelines and verification requirements to ensure smooth transactions.</li>
+                <li><strong className="text-amber-400 font-medium">Committee Coordination:</strong> Directed financial planning and executed budget strategies across committee meetings to ensure all departments operated within their allocated funds.</li>
+              </ul>
+            </div>
+          </div>
+        )
+      },
     {
       id: "alphathon",
       name: "Treasurer | UM Alphathon 2025",
