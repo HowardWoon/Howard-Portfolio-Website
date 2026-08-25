@@ -105,6 +105,7 @@ const honorsList: HonorItem[] = [
         "Awarded National Gold Medal for technical excellence",
         "Recognized for outstanding presentation and innovative methodologies"
       ],
+      certificateUrl: "/certificates/HARI INOVASI PPAL PENCAPAIAN CERT.pdf",
       icon: Trophy,
     },
     {
