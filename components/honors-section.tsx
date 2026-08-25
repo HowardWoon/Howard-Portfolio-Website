@@ -91,6 +91,54 @@ const honorsList: HonorItem[] = [
     certificateUrl: "/certificates/UM TECHNOTHON 2026.pdf",
     icon: Trophy,
   },
+    {
+      id: "hari-inovasi",
+      badge: "NATIONAL INNOVATION GOLD",
+      badgeColor: "gold",
+      title: "GOLD MEDALIST (EMAS)",
+      issuingBody: "Hari Inovasi PPAL 4.0 (Kebangsaan)",
+      period: "2024",
+      statCallout: { value: "Gold", label: "National Champion" },
+      description:
+        "Achieved the Gold Medal (Emas) at the national-level Hari Inovasi PPAL 4.0, demonstrating exceptional problem-solving and technical innovation among top matriculation cohorts nationwide.",
+      highlights: [
+        "Awarded National Gold Medal for technical excellence",
+        "Recognized for outstanding presentation and innovative methodologies"
+      ],
+      icon: Trophy,
+    },
+    {
+      id: "chemcreative",
+      badge: "STATE DIGITAL INNOVATION",
+      badgeColor: "gold",
+      title: "GOLD MEDALIST (EMAS)",
+      issuingBody: "Chemcreative-Innovation (Digital Learning)",
+      period: "2024",
+      statCallout: { value: "Gold", label: "State Champion" },
+      description:
+        "Secured the Gold Medal at the state-level Chemcreative-Innovation competition, engineering advanced digital learning methodologies and interactive frameworks for scientific education.",
+      highlights: [
+        "Awarded State Gold Medal for Digital Learning Innovation",
+        "Pioneered interactive and highly effective digital education frameworks"
+      ],
+      icon: Trophy,
+    },
+    {
+      id: "simposium-pal",
+      badge: "NATIONAL ACADEMIC SYMPOSIUM",
+      badgeColor: "gold",
+      title: "SILVER MEDALIST (PERAK)",
+      issuingBody: "Simposium Peer Assisted Learning (PAL) KPM",
+      period: "2024",
+      statCallout: { value: "Silver", label: "National Podium" },
+      description:
+        "Awarded the Silver Medal (Perak) at the prestigious national Simposium Peer Assisted Learning (PAL) organized by the Ministry of Education (KPM), showcasing exemplary peer-mentorship strategies.",
+      highlights: [
+        "Awarded National Silver Medal by the Ministry of Education (KPM)",
+        "Presented highly effective academic mentorship and leadership frameworks"
+      ],
+      icon: Trophy,
+    },
   {
     id: "deans-list",
     badge: "ACADEMIC DISTINCTION",
