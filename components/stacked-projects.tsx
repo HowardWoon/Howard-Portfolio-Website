@@ -15,7 +15,8 @@ import {
   ArrowUpRight, 
   Sparkles, 
   Layers,
-  CheckCircle2
+  CheckCircle2,
+  Network
 } from "lucide-react";
 
 interface ProjectData {
@@ -31,6 +32,7 @@ interface ProjectData {
   tags: string[];
   deckUrl?: string;
   prototypeUrl?: string;
+  orchestratorUrl?: string;
   simulatorId: string;
   githubUrl?: string;
   telemetryType: "agentic" | "flood" | "energy";
@@ -59,6 +61,7 @@ const projects: ProjectData[] = [
       tags: ["FastAPI", "LangGraph", "PostgreSQL", "HubSpot API", "React", "Python"],
       deckUrl: "/documents/supervity-pitchdeck.pdf",
       simulatorId: "zerolag",
+      orchestratorUrl: "https://auto.supervity.ai/u/alpha/agent/workflow/019fd755-073c-7000-b437-02bfad99b025?tab=Workflow",
       githubUrl: "https://github.com",
       telemetryType: "agentic",
     },
@@ -287,13 +290,25 @@ function ProjectCard({
                   href={project.prototypeUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-amber-400 text-black font-mono font-bold text-xs uppercase tracking-wider hover:bg-amber-300 transition-all duration-200 shadow-lg shadow-amber-500/20 group relative overflow-hidden"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-amber-400 text-black font-mono font-bold text-xs uppercase tracking-wider hover:bg-amber-300 transition-all duration-200 shadow-lg shadow-amber-500/20 group relative overflow-hidden shrink-0"
                 >
                   <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
                   <span className="relative z-10 flex items-center gap-2">
                     <Terminal className="w-3.5 h-3.5" />
                     LAUNCH LIVE PROTOTYPE
                   </span>
+                </a>
+              )}
+
+              {project.orchestratorUrl && (
+                <a
+                  href={project.orchestratorUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 font-mono font-bold text-xs uppercase tracking-wider hover:bg-purple-500/20 transition-all duration-200 shadow-lg shadow-purple-500/10 group shrink-0"
+                >
+                  <Network className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+                  VIEW MASTER ORCHESTRATOR
                 </a>
               )}
 {project.deckUrl && (
