@@ -137,6 +137,7 @@ const honorsList: HonorItem[] = [
         "Awarded National Silver Medal by the Ministry of Education (KPM)",
         "Presented highly effective academic mentorship and leadership frameworks"
       ],
+        certificateUrl: "/certificates/HowardWoonHaoZhe-PERAK-SIMPOSIUM PEER ASSISTED LEARNING PROGRAM MATRIKULASI KPM.pdf",
       icon: Trophy,
     },
   {
