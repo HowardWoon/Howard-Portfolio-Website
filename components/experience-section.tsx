@@ -40,30 +40,30 @@ interface ExperienceItem {
 }
 
 const experiences: ExperienceItem[] = [
-  {
-    id: "kraiburg",
-    number: "01",
-    category: "corporate",
-    categoryLabel: "CORPORATE AUTOMATION",
-    role: "Assistant Finance Executive & Intern",
-    organization: "KRAIBURG TPE Technology (M) Sdn. Bhd.",
-    location: "Kuala Lumpur, Malaysia",
-    period: "Nov 2025 – Present",
-    icon: Building2,
-    accentColor: "amber",
-    headline: "Automated Enterprise Ledger Reconciliation & ERP Workflows",
-    bullets: [
-      "Engineered automated Python reconciliation pipelines for high-volume corporate financial ledgers, eliminating manual data entry bottlenecks.",
-      "Managed vendor disbursements, statutory compliance, and corporate SAP/ERP ledger workflows with strict fault tolerance.",
-      "Conducted financial variance analysis to optimize cross-departmental operational expenditure.",
-    ],
-    metrics: [
-      { label: "Audit Accuracy", value: "100% Balanced" },
-      { label: "Pipeline Stack", value: "Python + ERP" },
-      { label: "Efficiency Gain", value: "Zero Data Bottlenecks" },
-    ],
-    tags: ["Process Automation", "ERP Integration", "Financial Data Pipelines", "Statutory Compliance"],
-  },
+      {
+      id: "kraiburg",
+      number: "01",
+      category: "corporate",
+      categoryLabel: "CORPORATE FINANCE",
+      role: "Assistant Finance Executive & Intern",
+      organization: "KRAIBURG TPE Technology (M) Sdn. Bhd.",
+      location: "Kuala Lumpur, Malaysia",
+      period: "Nov 2025 - Present",
+      icon: Building2,
+      accentColor: "amber",
+      headline: "Enterprise SAP Financial Operations & Statutory Compliance",
+      bullets: [
+        "Executed full-cycle Accounts Payable (AP) and Accounts Receivable (AR) operations within the SAP ERP environment, managing high-volume invoice clearing and ledger reconciliations.",
+        "Spearheaded vendor and customer master data migrations in SAP to ensure strict compliance with federal E-Invoice regulatory standards and data accuracy protocols.",
+        "Compiled and audited statutory financial records, including LMW (Licensed Manufacturing Warehouse) listings and customer tax exemptions to support rigorous SST submissions.",
+      ],
+      metrics: [
+        { label: "Enterprise Stack", value: "SAP ERP" },
+        { label: "Regulatory Compliance", value: "100% SST Cleared" },
+        { label: "Ledger Accuracy", value: "Zero Discrepancies" },
+      ],
+      tags: ["SAP ERP Operations", "E-Invoice Compliance", "Ledger Reconciliation", "Statutory Auditing"],
+    },
     {
       id: "pekom",
       number: "02",
