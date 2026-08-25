@@ -33,6 +33,7 @@ interface ProjectData {
   deckUrl?: string;
   prototypeUrl?: string;
   orchestratorUrl?: string;
+  colabUrl?: string;
   simulatorId: string;
   githubUrl?: string;
   telemetryType: "agentic" | "flood" | "energy" | "catfish" | "slotify";
@@ -111,6 +112,7 @@ const projects: ProjectData[] = [
       ],
       tags: ["Python", "Scikit-Learn", "SHAP", "SMOTE", "Flask"],
       githubUrl: "https://github.com/HowardWoon/Catfish-Detector-ML-Models",
+      colabUrl: "https://colab.research.google.com/drive/1AR7Mv0Eg1iGw2IWA1pB_Xt9RZHPHeLCx",
       simulatorId: "catfish",
       telemetryType: "catfish",
     },
@@ -347,7 +349,19 @@ function ProjectCard({
                 </a>
               )}
 
-              {project.orchestratorUrl && (
+              {project.colabUrl && (
+                  <a
+                    href={project.colabUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 font-mono font-bold text-xs uppercase tracking-wider hover:bg-orange-500/20 transition-all duration-200 shadow-lg shadow-orange-500/10 group shrink-0"
+                  >
+                    <Activity className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                    OPEN IN GOOGLE COLAB
+                  </a>
+                )}
+
+                {project.orchestratorUrl && (
                 <a
                   href={project.orchestratorUrl}
                   target="_blank"
