@@ -572,19 +572,19 @@ export default function HonorsSection() {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 20 }}
               onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-5xl aspect-auto max-h-[85vh] bg-[#0E121B] rounded-2xl border border-white/20 shadow-2xl overflow-hidden flex items-center justify-center"
+              className="relative w-full max-w-5xl h-[85vh] sm:h-[80vh] bg-[#0E121B] rounded-2xl border border-white/20 shadow-2xl overflow-hidden flex items-center justify-center"
             >
               {selectedCert.endsWith(".pdf") ? (
                 <iframe
                   src={`${selectedCert}#toolbar=0&navpanes=0&scrollbar=0`}
-                  className="w-full h-[85vh] border-0"
+                  className="w-full h-full border-0"
                   title="Certificate Preview"
                 />
               ) : (
                 <img
                   src={selectedCert}
                   alt="Certificate"
-                  className="w-full h-[85vh] object-contain py-4"
+                  className="w-full h-full object-contain p-2 sm:p-4"
                 />
               )}
             </motion.div>
