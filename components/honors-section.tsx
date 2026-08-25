@@ -122,6 +122,7 @@ const honorsList: HonorItem[] = [
         "Awarded State Gold Medal for Digital Learning Innovation",
         "Pioneered interactive and highly effective digital education frameworks"
       ],
+        certificateUrl: "/certificates/chem creative.png",
       icon: Trophy,
     },
     {
