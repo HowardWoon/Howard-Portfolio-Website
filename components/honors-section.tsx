@@ -584,7 +584,7 @@ export default function HonorsSection() {
                 <img
                   src={selectedCert}
                   alt="Certificate"
-                  className="w-full h-full object-contain"
+                  className="w-full h-[85vh] object-contain py-4"
                 />
               )}
             </motion.div>
