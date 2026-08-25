@@ -17,6 +17,16 @@
     scroll-behavior: smooth;
     background-color: var(--bg-canvas);
     color: var(--text-primary);
+    
+    /* SCALE UP ENTIRE UI & TYPOGRAPHY BY 12.5% (16px -> 18px) */
+    font-size: 18px;
+  }
+  
+  /* Drop back slightly on very small screens to avoid overflow */
+  @media (max-width: 640px) {
+    html {
+      font-size: 16px;
+    }
   }
 
   body {
