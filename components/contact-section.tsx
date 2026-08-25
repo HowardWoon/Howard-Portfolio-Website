@@ -363,40 +363,41 @@ export default function ContactSection() {
 
                 {/* Global Footer & Functional Sitemap */}
                 {/* ENGINEERING TITLE BLOCK FOOTER */}
+                {/* ENGINEERING TITLE BLOCK FOOTER */}
         <footer className="relative z-10 pt-24 pb-12 mt-20">
           <div className="flex flex-col lg:flex-row justify-between items-start gap-16 lg:gap-10">
             
             {/* Left: System of Record / Title Block */}
             <div className="flex-1 w-full border border-white/10 rounded-xl bg-[#090B10] overflow-hidden flex flex-col relative group hover:border-white/20 transition-colors shadow-2xl">
               {/* Header Bar */}
-              <div className="flex flex-wrap items-center justify-between border-b border-white/10 bg-white/[0.02] px-6 py-4 gap-4">
-                <span className="text-xs font-mono font-bold text-neutral-400 tracking-[0.2em] uppercase">System Handover</span>
-                <span className="text-[10px] font-mono text-amber-400 tracking-[0.2em] bg-amber-500/10 px-2 py-1 rounded border border-amber-500/20 uppercase flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+              <div className="flex flex-wrap items-center justify-between border-b border-white/10 bg-white/[0.02] px-6 py-5 gap-4">
+                <span className="text-sm font-mono font-bold text-neutral-400 tracking-[0.2em] uppercase">System Handover</span>
+                <span className="text-xs font-mono font-bold text-amber-400 tracking-[0.2em] bg-amber-500/10 px-3 py-1.5 rounded border border-amber-500/20 uppercase flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
                   OPERATIONAL
                 </span>
               </div>
               
               {/* Body */}
-              <div className="p-6 md:p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+              <div className="p-6 md:p-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
                 {/* Identity */}
                 <div className="space-y-1">
-                  <div className="text-[10px] font-mono text-neutral-500 tracking-[0.2em] mb-4 uppercase">System Of Record</div>
-                  <h3 className="text-xl md:text-2xl font-black text-white uppercase tracking-wider leading-none">Howard Woon Hao Zhe</h3>
-                  <p className="text-xs font-mono text-amber-400 uppercase tracking-widest pt-2">Systems & AI Architect</p>
+                  <div className="text-xs font-mono font-bold text-neutral-500 tracking-[0.2em] mb-4 uppercase">System Of Record</div>
+                  <h3 className="text-2xl md:text-3xl font-black text-white uppercase tracking-wider leading-none">Howard Woon Hao Zhe</h3>
+                  <p className="text-sm font-mono text-amber-400 uppercase tracking-widest pt-3">Systems & AI Architect</p>
                 </div>
 
                 {/* Education */}
                 <div className="space-y-1">
-                  <div className="text-[10px] font-mono text-neutral-500 tracking-[0.2em] mb-4 uppercase">Academic Foundation</div>
-                  <h3 className="text-sm font-bold text-white uppercase tracking-wider">Universiti Malaya</h3>
-                  <p className="text-xs font-mono text-neutral-400">B.Comp.Sc. / Software Engineering</p>
+                  <div className="text-xs font-mono font-bold text-neutral-500 tracking-[0.2em] mb-4 uppercase">Academic Foundation</div>
+                  <h3 className="text-base md:text-lg font-bold text-white uppercase tracking-wider">Universiti Malaya</h3>
+                  <p className="text-sm font-mono text-neutral-400">B.Comp.Sc. / Software Engineering</p>
                 </div>
 
                 {/* Metadata */}
                 <div className="space-y-2">
-                  <div className="text-[10px] font-mono text-neutral-500 tracking-[0.2em] mb-4 uppercase">Document Metadata</div>
-                  <div className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-xs font-mono">
+                  <div className="text-xs font-mono font-bold text-neutral-500 tracking-[0.2em] mb-4 uppercase">Document Metadata</div>
+                  <div className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 text-sm font-mono">
                     <span className="text-neutral-500">DOCUMENT</span>
                     <span className="text-neutral-300">HWZ-2026</span>
                     <span className="text-neutral-500">REVISION</span>
@@ -408,47 +409,47 @@ export default function ContactSection() {
               </div>
 
               {/* Footer Bar */}
-              <div className="border-t border-white/10 bg-white/[0.01] px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-6">
-                <span className="text-[10px] font-mono text-neutral-500 uppercase tracking-[0.2em] text-center md:text-left">Engineered Systems. Autonomous Pipelines.</span>
+              <div className="border-t border-white/10 bg-white/[0.01] px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-6">
+                <span className="text-xs font-mono font-bold text-neutral-500 uppercase tracking-[0.2em] text-center md:text-left">Engineered Systems. Autonomous Pipelines.</span>
                 
-                <div className="flex flex-wrap justify-center items-center gap-6">
-                  <a href="https://linkedin.com/in/howardwoon" target="_blank" rel="noreferrer" className="text-xs font-mono font-bold text-neutral-400 hover:text-amber-400 transition-colors uppercase tracking-widest flex items-center gap-2">
-                    <Linkedin className="w-3.5 h-3.5" /> LINKEDIN
+                <div className="flex flex-wrap justify-center items-center gap-8">
+                  <a href="https://linkedin.com/in/howardwoon" target="_blank" rel="noreferrer" className="text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-colors uppercase tracking-widest flex items-center gap-2.5">
+                    <Linkedin className="w-5 h-5" /> LINKEDIN
                   </a>
-                  <a href="https://github.com/HowardWoon" target="_blank" rel="noreferrer" className="text-xs font-mono font-bold text-neutral-400 hover:text-amber-400 transition-colors uppercase tracking-widest flex items-center gap-2">
-                    <Github className="w-3.5 h-3.5" /> GITHUB
+                  <a href="https://github.com/HowardWoon" target="_blank" rel="noreferrer" className="text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-colors uppercase tracking-widest flex items-center gap-2.5">
+                    <Github className="w-5 h-5" /> GITHUB
                   </a>
-                  <a href="/resume" className="text-xs font-mono font-bold text-neutral-400 hover:text-amber-400 transition-colors uppercase tracking-widest flex items-center gap-2">
-                    <FileText className="w-3.5 h-3.5" /> RESUME
+                  <a href="/resume" className="text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-colors uppercase tracking-widest flex items-center gap-2.5">
+                    <FileText className="w-5 h-5" /> RESUME
                   </a>
                 </div>
               </div>
             </div>
 
             {/* Right Block: Sitemap */}
-            <div className="w-full lg:w-48 flex flex-col space-y-2.5">
-              <span className="text-[10px] font-mono text-neutral-500 uppercase tracking-[0.2em] mb-2">Index Directory</span>
-              <a href="#about" className="group flex items-center gap-3 text-xs sm:text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-all">
-                <span className="w-4 h-px bg-white/10 group-hover:bg-amber-400 transition-colors" />
+            <div className="w-full lg:w-56 flex flex-col space-y-4">
+              <span className="text-xs font-mono font-bold text-neutral-500 uppercase tracking-[0.2em] mb-2">Index Directory</span>
+              <a href="#about" className="group flex items-center gap-3 text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-all">
+                <span className="w-6 h-px bg-white/10 group-hover:bg-amber-400 transition-colors" />
                 01 // VISION
               </a>
-              <a href="#projects" className="group flex items-center gap-3 text-xs sm:text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-all">
-                <span className="w-4 h-px bg-white/10 group-hover:bg-amber-400 transition-colors" />
+              <a href="#projects" className="group flex items-center gap-3 text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-all">
+                <span className="w-6 h-px bg-white/10 group-hover:bg-amber-400 transition-colors" />
                 02 // ARCHITECTURE
               </a>
-              <a href="#experience" className="group flex items-center gap-3 text-xs sm:text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-all">
-                <span className="w-4 h-px bg-white/10 group-hover:bg-amber-400 transition-colors" />
+              <a href="#experience" className="group flex items-center gap-3 text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-all">
+                <span className="w-6 h-px bg-white/10 group-hover:bg-amber-400 transition-colors" />
                 03 // GOVERNANCE
               </a>
-              <a href="#honors" className="group flex items-center gap-3 text-xs sm:text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-all">
-                <span className="w-4 h-px bg-white/10 group-hover:bg-amber-400 transition-colors" />
+              <a href="#honors" className="group flex items-center gap-3 text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-all">
+                <span className="w-6 h-px bg-white/10 group-hover:bg-amber-400 transition-colors" />
                 04 // HONORS
               </a>
               <button 
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} 
-                className="group flex items-center gap-3 text-xs sm:text-sm font-mono font-bold text-white mt-4 pt-4 border-t border-white/10 hover:text-amber-400 transition-all text-left"
+                className="group flex items-center gap-3 text-sm font-mono font-bold text-white mt-6 pt-6 border-t border-white/10 hover:text-amber-400 transition-all text-left"
               >
-                <span className="w-4 h-px bg-white/20 group-hover:bg-amber-400 transition-colors" />
+                <span className="w-6 h-px bg-white/20 group-hover:bg-amber-400 transition-colors" />
                 BACK TO TOP
               </button>
             </div>
