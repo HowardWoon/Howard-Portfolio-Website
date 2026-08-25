@@ -141,11 +141,11 @@ function PekomTreasurerDashboard() {
       name: "Treasurer | PEKOM CodeFest 2025",
       desc: "Balanced a RM2,700 operational fund, achieving 100% financial reconciliation with zero deficit. Optimized operational overhead to ensure exactly 66.7% of the budget was paid out as direct cash rewards."
     },
-    {
-      id: "mhw",
-      name: "Treasurer | Mental Health Week 2025",
-      desc: "Directed a RM5,830 multi-event fund, outperforming merchandise sales targets to secure a RM346 surplus. Executed charity outreach at RM11.68/pax, maintaining a 100%-reconciled budget."
-    }
+          {
+        id: "mhw",
+        name: "Treasurer | Mental Health Week & Share Your Love",
+        desc: "Directed a RM5,830 multi-event fund, outperforming merchandise sales targets to secure a RM346 surplus. Executed the charity outreach at RM11.68/pax, maintaining a 100%-reconciled budget by responsibly adjusting donations to match actual available funds."
+      }
   ];
 
   return (
