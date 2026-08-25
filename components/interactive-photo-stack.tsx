@@ -11,8 +11,8 @@ const photos = [
   { src: '/images/projects/zerolag/backend.jpeg', alt: 'Backend Telemetry', rotation: 1.5 },
 ];
 
-export function InteractivePhotoStack() {
-  const [cards, setCards] = useState(photos);
+export function InteractivePhotoStack({ customPhotos }: { customPhotos?: { src: string, alt: string, rotation: number }[] }) {
+  const [cards, setCards] = useState(customPhotos || photos);
 
   const handleNextPhoto = (e: React.MouseEvent) => {
     e.stopPropagation();

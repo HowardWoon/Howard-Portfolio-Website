@@ -37,6 +37,7 @@ interface ProjectData {
   simulatorId: string;
   githubUrl?: string;
   telemetryType: "agentic" | "flood" | "energy" | "catfish" | "slotify";
+  galleryPhotos?: { src: string, alt: string, rotation: number }[];
 }
 
 const projects: ProjectData[] = [
@@ -113,7 +114,15 @@ const projects: ProjectData[] = [
       tags: ["Python", "Scikit-Learn", "SHAP", "SMOTE", "Flask"],
       githubUrl: "https://github.com/HowardWoon/Catfish-Detector-ML-Models",
       colabUrl: "https://colab.research.google.com/drive/1AR7Mv0Eg1iGw2IWA1pB_Xt9RZHPHeLCx",
-      simulatorId: "catfish",
+      galleryPhotos: [
+          { src: "/images/projects/catfish/dashboard.png", alt: "Catfish Dashboard", rotation: -1.5 },
+          { src: "/images/projects/catfish/scanner.png", alt: "Profile Scanner", rotation: 3 },
+          { src: "/images/projects/catfish/Screenshot 2026-08-25 225954.png", alt: "Detection Report 1", rotation: 2 },
+          { src: "/images/projects/catfish/Screenshot 2026-08-25 230009.png", alt: "Detection Report 2", rotation: -1 },
+          { src: "/images/projects/catfish/Screenshot 2026-08-25 230023.png", alt: "Detection Report 3", rotation: 1.5 },
+          { src: "/images/projects/catfish/system.png", alt: "System Architecture", rotation: -2 }
+        ],
+        simulatorId: "catfish",
       telemetryType: "catfish",
     },
       {
@@ -400,11 +409,11 @@ function ProjectCard({
                   <Activity className="w-4 h-4 text-emerald-400 animate-pulse" />
                 )}
                 <span className="uppercase font-bold tracking-wider">
-                  {project.telemetryType === "agentic" ? "PROJECT GALLERY" : "LIVE TELEMETRY WINDOW"}
+                  {project.telemetryType === "agentic" || project.telemetryType === "catfish" ? "PROJECT GALLERY" : "LIVE TELEMETRY WINDOW"}
                 </span>
               </div>
               <span className="text-xs font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-                {project.telemetryType === "agentic" ? "INTERACTIVE" : "ACTIVE PIPELINE"}
+                {project.telemetryType === "agentic" || project.telemetryType === "catfish" ? "INTERACTIVE" : "ACTIVE PIPELINE"}
               </span>
             </div>
 
