@@ -1,12 +1,15 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
+﻿/* eslint-disable @typescript-eslint/ban-ts-comment */
 // // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
+// 
 'use client';
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Check, PencilLine, Plus, Trash2 } from 'lucide-react';
-import type { ExperienceItem, ProjectItem, SkillItem } from '@/lib/site-data';
+import type { ExperienceItem, Project } from '@/lib/site-data';
+
+type SkillItem = { id: string; name: string; category: string; };
+type ProjectItem = Project;
 
 type DashboardClientProps = {
   initialExperiences: ExperienceItem[];
@@ -193,7 +196,7 @@ export function DashboardClient({ initialExperiences, initialProjects, initialSk
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="font-medium text-white">{item.role}</p>
-                    <p className="text-sm text-fog-500">{item.company}</p>
+                    <p className="text-sm text-fog-500">{item.organization}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -203,11 +206,11 @@ export function DashboardClient({ initialExperiences, initialProjects, initialSk
                         setEditingExperienceId(item.id);
                         setExperienceForm({
                           role: item.role,
-                          company: item.company,
-                          description: item.description,
-                          start_date: item.start_date ?? '',
-                          end_date: item.end_date ?? '',
-                          is_current: item.is_current
+                          company: item.organization,
+                          description: Array.isArray(item.description) ? item.description.join(' ') : item.description,
+                          start_date: item.period ? item.period.split(' - ')[0] : '',
+                          end_date: item.period ? item.period.split(' - ')[1] : '',
+                          is_current: item.period ? item.period.toLowerCase().includes('present') : false
                         });
                       }}
                     >
@@ -250,18 +253,18 @@ export function DashboardClient({ initialExperiences, initialProjects, initialSk
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="font-medium text-white">{item.title}</p>
-                    <p className="text-sm text-fog-500">{item.context}</p>
+                    <p className="text-sm text-fog-500">{item.description}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <button type="button" className="rounded-full border border-white/10 p-2 text-fog-500 transition hover:text-white" onClick={() => {
                       setEditingProjectId(item.id);
                       setProjectForm({
                         title: item.title,
-                        context: item.context,
-                        description: item.description,
-                        tags: item.tags.join(', '),
-                        project_url: item.project_url ?? '',
-                        display_order: String(item.display_order)
+                        context: item.description,
+                        description: Array.isArray(item.description) ? item.description.join(' ') : item.description,
+                        tags: item.technologies ? item.technologies.join(", ") : "",
+                        project_url: item.githubUrl ?? "",
+                        display_order: "0"
                       });
                     }}>
                       <PencilLine className="h-4 w-4" />
@@ -327,3 +330,10 @@ export function DashboardClient({ initialExperiences, initialProjects, initialSk
     </div>
   );
 }
+
+
+
+
+
+
+

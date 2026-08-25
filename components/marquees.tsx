@@ -24,18 +24,3 @@ export function TechMarquee({ skills }: { skills: string[] }) {
     </div>
   );
 }
-
-export function SignatureMarquee() {
-  const text = "BUILDING SYSTEMS THAT SCALE   JAVA   PYTHON   SPRING BOOT   GRAPH ALGORITHMS   AGENTIC AI   ";
-  const repeatedText = text.repeat(10);
-  
-  return (
-    <div className="w-full overflow-hidden py-10 border-t border-line">
-      <div className="flex whitespace-nowrap animate-[marquee_25s_linear_infinite] hover:[animation-play-state:paused] w-max">
-        <span className="text-4xl sm:text-7xl font-display font-extrabold text-ink-3/30 tracking-tight select-none">
-          {repeatedText}
-        </span>
-      </div>
-    </div>
-  );
-}

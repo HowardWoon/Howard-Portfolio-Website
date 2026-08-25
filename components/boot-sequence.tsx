@@ -32,7 +32,7 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const handleStartBoot = () => {
+  function handleStartBoot() {
     setBootState('booting');
     
     let currentLogIndex = 0;

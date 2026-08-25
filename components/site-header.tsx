@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import React from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { ExternalLink } from "lucide-react";
 
@@ -13,7 +14,7 @@ export function SiteHeader() {
         transition={{ duration: 0.6 }}
         className="flex items-center gap-4"
       >
-        <img src="/images/profile-icon.jpg" alt="Howard Woon" className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl object-cover shadow-lg shadow-amber-500/20 border border-white/10" />
+        <Image src="/images/profile-icon.jpg" alt="Howard Woon" width={64} height={64} className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl object-cover shadow-lg shadow-amber-500/20 border border-white/10" priority />
         <div>
           <h1 className="font-black text-lg sm:text-2xl tracking-wide uppercase leading-none text-white flex items-center gap-2">
             HOWARD WOON
