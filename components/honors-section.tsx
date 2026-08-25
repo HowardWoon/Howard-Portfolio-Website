@@ -555,10 +555,10 @@ export default function HonorsSection() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex flex-col items-center justify-center p-12 sm:p-16 bg-black/90 backdrop-blur-xl"
+            className="fixed inset-0 z-[10000] flex flex-col items-center justify-center p-12 sm:p-16 bg-black/90 backdrop-blur-xl"
             onClick={() => setSelectedCert(null)}
           >
-            <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-[110]">
+            <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-[10010]">
               <button
                 onClick={() => setSelectedCert(null)}
                 className="w-12 h-12 rounded-full bg-neutral-800/80 hover:bg-neutral-700 border border-white/20 flex items-center justify-center text-white backdrop-blur-xl transition-all shadow-[0_0_30px_rgba(0,0,0,0.5)]"
