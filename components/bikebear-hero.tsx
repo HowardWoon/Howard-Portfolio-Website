@@ -155,13 +155,13 @@ export default function BikebearHero() {
             </motion.div>
 
             {/* Sub-narrative Bio Copy */}
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
+            <motion.p 
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
               className="text-neutral-300 text-base sm:text-lg max-w-xl leading-relaxed font-sans"
             >
-              Combining low-latency distributed backends (<span className="text-amber-300 font-mono text-sm">Spring Boot</span>, <span className="text-amber-300 font-mono text-sm">Java 21</span>, <span className="text-amber-300 font-mono text-sm">Graph Optimization</span>) with autonomous agentic pipelines and corporate fiscal governance.
+              Architecting robust, <span className="text-amber-400 font-medium">low-latency distributed backends</span> and <span className="text-amber-400 font-medium">autonomous AI systems</span>—engineered with algorithmic precision, enterprise scalability, and strategic fiscal discipline.
             </motion.p>
 
             {/* Call to Action Buttons */}
