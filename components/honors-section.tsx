@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { AnimatedCounter } from "./animated-counter";
 import { 
    
   Trophy,
@@ -518,9 +519,7 @@ export default function HonorsSection() {
                           
                           {/* Big Stat Callout */}
                           <div className="flex flex-col">
-                            <span className="text-3xl font-black text-white tracking-tighter">
-                              {item.statCallout.value}
-                            </span>
+                            <span className="text-3xl font-black text-white tracking-tighter"><AnimatedCounter value={item.statCallout.value} /></span>
                             <span className="text-xs font-mono text-neutral-500 uppercase tracking-widest mt-1">
                               {item.statCallout.label}
                             </span>

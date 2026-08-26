@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { FieldArchive } from "./field-archive";
 import { motion, AnimatePresence } from "framer-motion";
+import { AnimatedCounter } from "./animated-counter";
 import { 
   Building2, 
   Landmark, 

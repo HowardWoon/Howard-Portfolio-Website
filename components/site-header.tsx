@@ -4,7 +4,7 @@ import React from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Magnetic } from "./magnetic-button";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Search } from "lucide-react";
 
 export function SiteHeader() {
   return (
@@ -51,6 +51,13 @@ export function SiteHeader() {
           <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
         </a>
           </Magnetic>
+          <button 
+            onClick={() => window.dispatchEvent(new Event('open-command-palette'))}
+            className="flex items-center justify-center w-10 h-10 md:w-11 md:h-11 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-colors pointer-events-auto backdrop-blur-md text-neutral-400 hover:text-white"
+            aria-label="Open Command Palette"
+          >
+            <Search className="w-4 h-4 md:w-5 md:h-5" />
+          </button>
       </motion.div>
     </header>
   );
