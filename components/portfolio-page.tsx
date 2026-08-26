@@ -19,7 +19,7 @@ export function PortfolioPage() {
   useEffect(() => {
     const handleResize = () => {
       const target = Math.max(window.innerWidth / 496, window.innerHeight / 272);
-      setScale(1 / target);
+        setScale(1 / target);
     };
     handleResize();
     window.addEventListener('resize', handleResize);

@@ -62,12 +62,12 @@ export const MacbookScroll = ({
   const scaleX = useTransform(
     scrollYProgress,
     [0, 0.3],
-    [1.2, isMobile ? 1 : 1.5],
+    [1.2, 1],
   );
   const scaleY = useTransform(
     scrollYProgress,
     [0, 0.3],
-    [0.6, isMobile ? 1 : 1.5],
+    [0.6, 1],
   );
   
   // We use max of width/height ratios to ensure the laptop screen completely covers the viewport, even on weird aspect ratios.
