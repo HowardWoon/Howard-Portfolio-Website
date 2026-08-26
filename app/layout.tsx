@@ -21,7 +21,7 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Howard Woon â€” Software Engineer & Systems Architect',
+  title: 'Howard Woon // Systems & AI Architect',
   description:
     'Howard Woon (Universiti Malaya, 4.00 CGPA) is a software engineer building distributed backend architectures, graph algorithms, and autonomous agentic workflows.',
 };
