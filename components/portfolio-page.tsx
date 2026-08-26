@@ -29,7 +29,7 @@ export function PortfolioPage() {
   return (
     <BootSequence>
       <div className="relative min-h-screen overflow-x-clip bg-[#090B10] selection:bg-amber-500 selection:text-black">
-        <div className="relative w-full h-[200vh]">
+        <div className="relative w-full h-[300vh]">
             {/* Real website stays sticky at top while we scroll 200vh */}
             <div className="sticky top-0 h-screen w-full z-0 overflow-hidden">
               <SiteHeader />

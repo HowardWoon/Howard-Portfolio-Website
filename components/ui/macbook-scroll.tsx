@@ -41,7 +41,7 @@ export const MacbookScroll = ({
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start start", "end start"],
+    offset: ["start start", "end end"],
   });
 
   const [isMobile, setIsMobile] = useState(false);
@@ -89,7 +89,7 @@ export const MacbookScroll = ({
   const textOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
 
   return (
-    <div ref={ref} className="h-[200vh] w-full">
+    <div ref={ref} className="h-[300vh] w-full">
       <motion.div style={{ opacity: macbookOpacity }} className="sticky top-0 flex h-screen w-full items-center justify-center overflow-hidden bg-[#090B10]">
           <motion.div style={{ scale: macbookScale }} className="flex shrink-0 transform flex-col items-center justify-center py-0 [perspective:800px]">
       <motion.h2
