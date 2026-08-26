@@ -1,4 +1,5 @@
 'use client';
+import { useState, useEffect } from 'react';
 import BikebearInspiredHero from '@/components/bikebear-hero';
 import AboutSection from '@/components/about-section';
 import StackedProjects from '@/components/stacked-projects';
@@ -14,7 +15,15 @@ import { MacbookScroll } from '@/components/ui/macbook-scroll';
 
 
 export function PortfolioPage() {
-  
+  const [scale, setScale] = useState(0.3555);
+  useEffect(() => {
+    const handleResize = () => {
+      setScale(512 / window.innerWidth);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
     <BootSequence>
@@ -40,9 +49,23 @@ export function PortfolioPage() {
                     </h1>
                   </div>
                 }
-                src="/hero-screenshot.png"
                 showGradient={false}
-              />
+              >
+                {/* 
+                  Render the actual hero component inside the Macbook screen.
+                  We force it to a desktop width (1440px) and scale it down to fit the 512px (32rem) laptop screen.
+                  512 / 1440 = 0.3555
+                */}
+                <div 
+                  className="origin-top-left pointer-events-none" 
+                  style={{ width: '100vw', height: '100vh', transform: `scale(${scale})` }}
+                >
+                   <div className="w-full h-full bg-[#090B10]">
+                     <SiteHeader />
+                     <BikebearInspiredHero />
+                   </div>
+                </div>
+              </MacbookScroll>
             </div>
           </div>
         </div>

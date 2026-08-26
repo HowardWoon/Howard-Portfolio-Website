@@ -45,6 +45,13 @@ export const MacbookScroll = ({
   });
 
   const [isMobile, setIsMobile] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(1920);
+  useEffect(() => {
+    setWindowWidth(window.innerWidth);
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (window && window.innerWidth < 768) {
@@ -63,7 +70,18 @@ export const MacbookScroll = ({
     [0.6, isMobile ? 1 : 1.5],
   );
   
-  const macbookScale = useTransform(scrollYProgress, [0.4, 1], [isMobile ? 0.35 : 1, 6]);
+  // We use max of width/height ratios to ensure the laptop screen completely covers the viewport, even on weird aspect ratios.
+  // 512 is laptop width (32rem), 288 is laptop height (18rem)
+  const [windowHeight, setWindowHeight] = useState(1080);
+  useEffect(() => {
+    setWindowHeight(window.innerHeight);
+    const handleResize = () => setWindowHeight(window.innerHeight);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
+  const targetScale = Math.max(windowWidth / 512, windowHeight / 288);
+  const macbookScale = useTransform(scrollYProgress, [0.4, 1], [isMobile ? 0.35 : 1, targetScale]);
   const macbookOpacity = useTransform(scrollYProgress, [0.8, 1], [1, 0]);
   const translate = useTransform(scrollYProgress, [0, 1], [0, 0]);
   const rotate = useTransform(scrollYProgress, [0.1, 0.12, 0.3], [-28, -28, 0]);
@@ -171,7 +189,7 @@ export const Lid = ({
           transformStyle: "preserve-3d",
           transformOrigin: "top",
         }}
-        className="absolute inset-0 h-96 w-[32rem] rounded-2xl bg-[#010101] p-2"
+        className="absolute inset-0 h-[18rem] w-[32rem] rounded-2xl bg-[#010101] p-2"
       >
         <div className="absolute inset-0 rounded-lg bg-[#272729]" />
         {children ? children : <img
