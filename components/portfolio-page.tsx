@@ -20,18 +20,32 @@ export function PortfolioPage() {
     <BootSequence>
       <div className="relative min-h-screen bg-[#090B10] selection:bg-amber-500 selection:text-black">
         <SiteHeader />
-        <div className="w-full overflow-hidden bg-[#090B10]">
-          <MacbookScroll
-            title={
-              <span className="text-white font-sans">
-                Welcome to my universe. <br /> Scroll down to enter.
-              </span>
-            }
-            src="/hero-screenshot.png"
-            showGradient={false}
-          />
+        <div className="relative w-full h-[200vh]">
+          {/* Real website stays sticky at top while we scroll 200vh */}
+          <div className="sticky top-0 h-screen w-full z-0 overflow-hidden">
+            <BikebearInspiredHero />
+          </div>
+          
+          {/* Macbook overlay dictates the 200vh scroll and fades out at end */}
+          <div className="absolute top-0 left-0 w-full h-full z-10 pointer-events-none">
+            <div className="w-full h-full overflow-hidden">
+              <MacbookScroll
+                title={
+                  <div className="flex flex-col items-center justify-center mb-10">
+                    <h1 className="text-4xl font-semibold text-white pointer-events-auto">
+                      Welcome to my universe. <br />
+                      <span className="text-4xl md:text-[6rem] font-bold mt-1 leading-none">
+                        Scroll down to enter.
+                      </span>
+                    </h1>
+                  </div>
+                }
+                src="/hero-screenshot.png"
+                showGradient={false}
+              />
+            </div>
+          </div>
         </div>
-        <BikebearInspiredHero />
       <TechMarquee skills={['AUTOPILOT ASIA HACKATHON 2ND PLACE (SALES INTELLIGENCE)', 'STRAIGHT 4.00 CGPA COMPUTER SCIENCE (SOFTWARE ENGINEERING) FOR TWO SEMESTER', 'UM GAME JAM 2026 PUBLIC CHOICE AWARD', 'PERSATUAN KOMPUTER UNIVERSITI MALAYA (PEKOM) FINANCE LEAD 2026/2027', 'USM V HACK PRELIMINARY ROUND QUALIFIER']} />
       <main className="w-full">
         
