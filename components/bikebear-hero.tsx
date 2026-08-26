@@ -147,29 +147,13 @@ export default function BikebearHero() {
 
             {/* Kinetic Typography Headline */}
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                className="flex flex-wrap items-center gap-4 pt-2"
-              >
-                <Magnetic strength={0.3}>
-                  <a
-                    href="#projects"
-                    className="px-7 py-3.5 rounded-full bg-white text-black font-bold font-mono text-xs uppercase tracking-wider hover:bg-amber-400 transition-all duration-300 shadow-xl shadow-white/5 hover:shadow-amber-400/20 hover:-translate-y-0.5"
-                  >
-                    EXPLORE PROJECTS ↗
-                  </a>
-                </Magnetic>
-                <Magnetic strength={0.3}>
-                  <a
-                    href="#projects"
-                    className="flex items-center gap-2 px-6 py-3.5 rounded-full bg-white/[0.05] border border-white/15 text-white font-mono text-xs uppercase tracking-wider hover:bg-white/[0.1] hover:border-amber-400/50 transition-all duration-300 backdrop-blur-md"
-                  >
-                    <Terminal className="w-3.5 h-3.5 text-amber-400" />
-                    <span>LIVE SIMULATORS</span>
-                  </a>
-                </Magnetic>
-              </motion.div>
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.2 }}
+              className="relative space-y-2"
+            >
+              <MagnifiedHeadline />
+            </motion.div>
 
             {/* Sub-narrative Bio Copy */}
             <motion.p 
@@ -178,7 +162,7 @@ export default function BikebearHero() {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="text-neutral-300 text-base sm:text-lg max-w-xl leading-relaxed font-sans"
             >
-              Architecting robust, <span className="text-amber-400 font-medium">low-latency distributed backends</span> and <span className="text-amber-400 font-medium">autonomous AI systems</span>â€”engineered with algorithmic precision, enterprise scalability, and strategic fiscal discipline.
+              Architecting robust, <span className="text-amber-400 font-medium">low-latency distributed backends</span> and <span className="text-amber-400 font-medium">autonomous AI systems</span> — engineered with algorithmic precision, enterprise scalability, and strategic fiscal discipline.
             </motion.p>
 
             {/* Call to Action Buttons */}
