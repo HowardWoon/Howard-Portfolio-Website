@@ -59,7 +59,7 @@ export function PortfolioPage() {
                 */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div 
-                    className="origin-center pointer-events-none" 
+                    className="origin-center pointer-events-none shrink-0" 
                     style={{ width: '100vw', height: '100vh', transform: `scale(${scale})` }}
                   >
                    <div className="w-full h-full bg-[#090B10]">
