@@ -150,6 +150,13 @@ type SkillStatus = 'production' | 'hackathon' | 'rnd';
 export default function AboutSection() {
   const [activeCard, setActiveCard] = useState<string>("backend");
 
+  const colorMap = {
+    amber: { border: "border-amber-500/60", shadow: "shadow-amber-500/10", iconBg: "bg-amber-400/20", iconBorder: "border-amber-400/50", iconText: "text-amber-400", text: "text-amber-400", headline: "text-amber-400/90" },
+    cyan: { border: "border-cyan-500/60", shadow: "shadow-cyan-500/10", iconBg: "bg-cyan-400/20", iconBorder: "border-cyan-400/50", iconText: "text-cyan-400", text: "text-cyan-400", headline: "text-cyan-400/90" },
+    purple: { border: "border-purple-500/60", shadow: "shadow-purple-500/10", iconBg: "bg-purple-400/20", iconBorder: "border-purple-400/50", iconText: "text-purple-400", text: "text-purple-400", headline: "text-purple-400/90" },
+    emerald: { border: "border-emerald-500/60", shadow: "shadow-emerald-500/10", iconBg: "bg-emerald-400/20", iconBorder: "border-emerald-400/50", iconText: "text-emerald-400", text: "text-emerald-400", headline: "text-emerald-400/90" }
+  };
+
   return (
     <section 
       id="about" 
@@ -211,7 +218,7 @@ export default function AboutSection() {
                 onClick={() => setActiveCard(pillar.id)}
                 className={`relative group cursor-pointer rounded-3xl p-8 border transition-all duration-500 flex flex-col justify-between space-y-6 ${
                   isActive
-                    ? "bg-[#121622] border-amber-500/60 shadow-2xl shadow-amber-500/10"
+                    ? `bg-[#121622] shadow-2xl ${colorMap[pillar.color as keyof typeof colorMap].border} ${colorMap[pillar.color as keyof typeof colorMap].shadow}`
                     : "bg-[#0E121B]/90 hover:bg-[#121622] border-white/10 hover:border-white/25"
                 }`}
               >
@@ -222,7 +229,7 @@ export default function AboutSection() {
                   </span>
                   <div className={`w-10 h-10 rounded-2xl flex items-center justify-center border transition-all duration-300 ${
                     isActive 
-                      ? "bg-amber-400/20 border-amber-400/50 text-amber-400" 
+                      ? `${colorMap[pillar.color as keyof typeof colorMap].iconBg} ${colorMap[pillar.color as keyof typeof colorMap].iconBorder} ${colorMap[pillar.color as keyof typeof colorMap].iconText}` 
                       : "bg-white/5 border-white/10 text-neutral-300 group-hover:text-white"
                   }`}>
                     <Icon className="w-5 h-5" />
@@ -233,9 +240,9 @@ export default function AboutSection() {
                 <div className="space-y-2.5">
                   <h3 className="text-2xl font-bold uppercase tracking-tight text-white flex items-center gap-2">
                     {pillar.title}
-                    <ArrowUpRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-amber-400" />
+                    <ArrowUpRight className={`w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity ${colorMap[pillar.color as keyof typeof colorMap].text}`} />
                   </h3>
-                  <p className="text-xs font-mono text-amber-400/90 font-medium">
+                  <p className={`text-xs font-mono font-medium ${isActive ? colorMap[pillar.color as keyof typeof colorMap].headline : 'text-neutral-400'}`}>
                     {pillar.headline}
                   </p>
                   <p className="text-sm text-neutral-300 leading-relaxed font-sans pt-1">
@@ -263,7 +270,7 @@ export default function AboutSection() {
                     <Activity className="w-3.5 h-3.5 text-emerald-400 animate-pulse shrink-0" />
                     <span className="">{pillar.telemetrySnippet}</span>
                   </div>
-                  <span className="text-xs text-amber-400/80 font-bold shrink-0 ml-2">ACTIVE</span>
+                  <span className={`text-xs font-bold shrink-0 ml-2 ${colorMap[pillar.color as keyof typeof colorMap].headline}`}>ACTIVE</span>
                 </div>
               </motion.div>
             );

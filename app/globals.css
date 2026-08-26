@@ -84,19 +84,20 @@
 .dial-spin-c { animation: dialRotateC 11s ease-in-out infinite; }
 .dial-spin-d { animation: dialRotateD 14s ease-in-out infinite; }
 
-/* Custom Light Scrollbar */
+/* Premium Dark Scrollbar */
 ::-webkit-scrollbar {
-  width: 7px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f3f3f5;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
+  background: rgba(245, 196, 0, 0.3); /* Muted amber */
+  border-radius: 6px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: rgba(245, 196, 0, 0.6); /* Brighter amber */
 }
 
 @keyframes scrollRevealUp {

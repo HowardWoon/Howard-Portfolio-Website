@@ -4,6 +4,7 @@ import React, { useRef } from "react";
 import Image from "next/image";
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion";
 import { ParticleMesh } from './particle-mesh';
+import { Magnetic } from "./magnetic-button";
 import {   Sparkles, Terminal } from "lucide-react";
 
 
@@ -146,13 +147,29 @@ export default function BikebearHero() {
 
             {/* Kinetic Typography Headline */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.2 }}
-              className="relative space-y-2"
-            >
-              <MagnifiedHeadline />
-            </motion.div>
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                className="flex flex-wrap items-center gap-4 pt-2"
+              >
+                <Magnetic strength={0.3}>
+                  <a
+                    href="#projects"
+                    className="px-7 py-3.5 rounded-full bg-white text-black font-bold font-mono text-xs uppercase tracking-wider hover:bg-amber-400 transition-all duration-300 shadow-xl shadow-white/5 hover:shadow-amber-400/20 hover:-translate-y-0.5"
+                  >
+                    EXPLORE PROJECTS ↗
+                  </a>
+                </Magnetic>
+                <Magnetic strength={0.3}>
+                  <a
+                    href="#projects"
+                    className="flex items-center gap-2 px-6 py-3.5 rounded-full bg-white/[0.05] border border-white/15 text-white font-mono text-xs uppercase tracking-wider hover:bg-white/[0.1] hover:border-amber-400/50 transition-all duration-300 backdrop-blur-md"
+                  >
+                    <Terminal className="w-3.5 h-3.5 text-amber-400" />
+                    <span>LIVE SIMULATORS</span>
+                  </a>
+                </Magnetic>
+              </motion.div>
 
             {/* Sub-narrative Bio Copy */}
             <motion.p 
@@ -166,25 +183,29 @@ export default function BikebearHero() {
 
             {/* Call to Action Buttons */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="flex flex-wrap items-center gap-4 pt-2"
-            >
-              <a
-                href="#projects"
-                className="px-7 py-3.5 rounded-full bg-white text-black font-bold font-mono text-xs uppercase tracking-wider hover:bg-amber-400 transition-all duration-300 shadow-xl shadow-white/5 hover:shadow-amber-400/20 hover:-translate-y-0.5"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                className="flex flex-wrap items-center gap-4 pt-2"
               >
-                EXPLORE PROJECTS â†“
-              </a>
-              <a
-                href="#projects"
-                className="flex items-center gap-2 px-6 py-3.5 rounded-full bg-white/[0.05] border border-white/15 text-white font-mono text-xs uppercase tracking-wider hover:bg-white/[0.1] hover:border-amber-400/50 transition-all duration-300 backdrop-blur-md"
-              >
-                <Terminal className="w-3.5 h-3.5 text-amber-400" />
-                <span>LIVE SIMULATORS</span>
-              </a>
-            </motion.div>
+                <Magnetic strength={0.3}>
+                  <a
+                    href="#projects"
+                    className="px-7 py-3.5 rounded-full bg-white text-black font-bold font-mono text-xs uppercase tracking-wider hover:bg-amber-400 transition-all duration-300 shadow-xl shadow-white/5 hover:shadow-amber-400/20 hover:-translate-y-0.5"
+                  >
+                    EXPLORE PROJECTS ↗
+                  </a>
+                </Magnetic>
+                <Magnetic strength={0.3}>
+                  <a
+                    href="#projects"
+                    className="flex items-center gap-2 px-6 py-3.5 rounded-full bg-white/[0.05] border border-white/15 text-white font-mono text-xs uppercase tracking-wider hover:bg-white/[0.1] hover:border-amber-400/50 transition-all duration-300 backdrop-blur-md"
+                  >
+                    <Terminal className="w-3.5 h-3.5 text-amber-400" />
+                    <span>LIVE SIMULATORS</span>
+                  </a>
+                </Magnetic>
+              </motion.div>
           </div>
 
           {/* Right Column: Full-Color Portrait Card with Interactive Tilt (5 cols) */}
