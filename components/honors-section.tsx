@@ -188,7 +188,8 @@ const honorsList: HonorItem[] = [
         </div>
       ),
       highlights: [],
-    icon: GraduationCap,
+      certificateUrl: "/certificates/HowardWoon-Transcript-Sem2.pdf",
+      icon: GraduationCap,
   },
   {
     id: "kmns-distinction",
