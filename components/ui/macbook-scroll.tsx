@@ -72,8 +72,8 @@ export const MacbookScroll = ({
 
   return (
     <div ref={ref} className="h-[200vh] w-full">
-      <div className="sticky top-0 flex h-screen w-full items-center justify-center overflow-hidden">
-        <motion.div style={{ scale: macbookScale, opacity: macbookOpacity }} className="flex shrink-0 transform flex-col items-center justify-center py-0 [perspective:800px]">
+      <motion.div style={{ opacity: macbookOpacity }} className="sticky top-0 flex h-screen w-full items-center justify-center overflow-hidden bg-[#090B10]">
+          <motion.div style={{ scale: macbookScale }} className="flex shrink-0 transform flex-col items-center justify-center py-0 [perspective:800px]">
       <motion.h2
         style={{
           translateY: textTransform,
@@ -121,7 +121,7 @@ export const MacbookScroll = ({
         {badge && <div className="absolute bottom-4 left-4">{badge}</div>}
         </div>
         </motion.div>
-      </div>
+      </motion.div>
     </div>
   );
 };
