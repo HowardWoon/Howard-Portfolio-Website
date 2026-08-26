@@ -10,6 +10,14 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
+    if (showBoot) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+  }, [showBoot]);
+
+  useEffect(() => {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const hasBooted = sessionStorage.getItem('has_booted_v6');
     
@@ -35,6 +43,7 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
       setBootState('complete');
       
       setTimeout(() => {
+        window.scrollTo(0, 0);
         setShowBoot(false);
         sessionStorage.setItem('has_booted_v6', 'true');
       }, 800);
@@ -48,7 +57,7 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
       <AnimatePresence>
         {showBoot && (
           <motion.div 
-            className="fixed inset-0 z-[100] bg-[#050608] flex items-center justify-center"
+            className="fixed inset-0 z-[99999] bg-[#050608] flex items-center justify-center"
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.8, ease: "easeInOut" }}
