@@ -330,6 +330,13 @@ function PekomTreasurerDashboard() {
 export default function ExperienceSection() {
   const [selectedFilter, setSelectedFilter] = useState<FilterCategory>("all");
 
+  const shadowMap: Record<string, string> = {
+    'bg-white': 'shadow-white/40',
+    'bg-amber-400': 'shadow-amber-400/40',
+    'bg-cyan-400': 'shadow-cyan-400/40',
+    'bg-emerald-400': 'shadow-emerald-400/40'
+  };
+
   const filteredExperiences = experiences.filter(
     (exp) => selectedFilter === "all" || exp.category === selectedFilter
   );
@@ -401,7 +408,7 @@ export default function ExperienceSection() {
                   />
                 )}
                 <span className="relative z-10 flex items-center gap-2.5">
-                  <span className={`w-2 h-2 rounded-full shadow-lg ${f.dotClass} ${isActive ? 'shadow-' + f.dotClass.replace('bg-', '') + '/40 opacity-100' : 'opacity-40'}`} />
+                  <span className={`w-2 h-2 rounded-full shadow-lg ${f.dotClass} ${isActive ? shadowMap[f.dotClass] + ' opacity-100' : 'opacity-40'}`} />
                   {f.label}
                   <span className={`text-[10px] ${isActive ? "text-neutral-400" : "text-neutral-600"}`}>({count})</span>
                 </span>

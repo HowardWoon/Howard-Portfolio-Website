@@ -33,7 +33,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${sans.variable} ${mono.variable}`}>
-      <body className="scroll-smooth font-sans antialiased bg-ink-950 text-white text-[#12151B]">
+      <body className="scroll-smooth font-sans antialiased bg-[#090B10] text-white">
         <SmoothScrollProvider>{children}</SmoothScrollProvider>
         <Analytics />
         <SpeedInsights />

@@ -271,7 +271,7 @@ const honorsList: HonorItem[] = [
     highlights: [
       "Collaborated in foundational software engineering problem-solving"
     ],
-    certificateUrl: "/certificates/UMSIC.png",
+    certificateUrl: "/certificates/UMSIC HOWARD_WOON_HAO_ZHE.pdf",
     icon: Shield,
   }
 ];
@@ -318,6 +318,12 @@ export default function HonorsSection() {
       hover: "hover:border-cyan-500/50 hover:bg-cyan-500/20"
     },
   ];
+
+  const gradientMap: Record<string, string> = {
+    'text-amber-400': 'to-amber-400',
+    'text-emerald-400': 'to-emerald-400',
+    'text-cyan-400': 'to-cyan-400'
+  };
 
   const activeItems = honorsList.filter(i => i.badgeColor === activeCategory);
 
@@ -388,7 +394,7 @@ export default function HonorsSection() {
               >
                 {/* Background Glow on Active */}
                 {isActive && (
-                  <div className={`absolute inset-0 opacity-20 bg-gradient-to-br from-transparent to-${cat.text.replace('text-', '')}`} />
+                  <div className={`absolute inset-0 opacity-20 bg-gradient-to-br from-transparent ${gradientMap[cat.text]}`} />
                 )}
 
                 <div className="relative z-10 w-full flex items-start justify-between mb-4">
