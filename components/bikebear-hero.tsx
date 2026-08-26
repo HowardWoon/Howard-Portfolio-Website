@@ -209,7 +209,7 @@ export default function BikebearHero() {
                     {[...Array(4)].map((_, i) => (
                       <div key={i} className="flex items-center">
                         <span className="text-xs sm:text-sm font-sans font-black text-black uppercase tracking-widest px-4">
-                          BREAKING NEWS: 9 AUGUST â€¢ 2ND PLACE WINNER AT SUPERVITY ASIA HACKATHON
+                          LATEST: 2ND PLACE @ SUPERVITY ASIA HACKATHON ✨
                         </span>
                         <span className="text-lg text-[#00E5FF] font-black mx-2 translate-y-[2px]">*</span>
                       </div>
