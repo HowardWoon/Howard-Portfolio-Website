@@ -80,9 +80,9 @@ export const MacbookScroll = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
   
-  const targetScale = Math.max(windowWidth / 512, windowHeight / 288);
+  const targetScale = Math.max(windowWidth / 496, windowHeight / 272);
   const macbookScale = useTransform(scrollYProgress, [0.4, 1], [isMobile ? 0.35 : 1, targetScale]);
-  const macbookOpacity = useTransform(scrollYProgress, [0.8, 1], [1, 0]);
+  const macbookOpacity = useTransform(scrollYProgress, [0.99, 1], [1, 0]);
   const translate = useTransform(scrollYProgress, [0, 1], [0, 0]);
   const rotate = useTransform(scrollYProgress, [0.1, 0.12, 0.3], [-28, -28, 0]);
   const textTransform = useTransform(scrollYProgress, [0, 0.3], [0, 100]);

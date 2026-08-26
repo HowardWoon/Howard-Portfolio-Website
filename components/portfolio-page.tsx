@@ -18,7 +18,7 @@ export function PortfolioPage() {
   const [scale, setScale] = useState(0.3555);
   useEffect(() => {
     const handleResize = () => {
-      const target = Math.max(window.innerWidth / 512, window.innerHeight / 288);
+      const target = Math.max(window.innerWidth / 496, window.innerHeight / 272);
       setScale(1 / target);
     };
     handleResize();
