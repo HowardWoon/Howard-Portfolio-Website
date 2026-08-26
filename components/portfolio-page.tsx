@@ -10,6 +10,7 @@ import { BootSequence } from '@/components/boot-sequence';
 import { TechMarquee } from '@/components/marquees';
 import { ScrollToTop } from '@/components/scroll-to-top';
 import { SiteHeader } from '@/components/site-header';
+import { MacbookScroll } from '@/components/ui/macbook-scroll';
 
 
 export function PortfolioPage() {
@@ -19,6 +20,17 @@ export function PortfolioPage() {
     <BootSequence>
       <div className="relative min-h-screen bg-[#090B10] selection:bg-amber-500 selection:text-black">
         <SiteHeader />
+        <div className="w-full overflow-hidden bg-[#090B10]">
+          <MacbookScroll
+            title={
+              <span className="text-white font-sans">
+                Welcome to my universe. <br /> Scroll down to enter.
+              </span>
+            }
+            src="/hero-screenshot.png"
+            showGradient={false}
+          />
+        </div>
         <BikebearInspiredHero />
       <TechMarquee skills={['AUTOPILOT ASIA HACKATHON 2ND PLACE (SALES INTELLIGENCE)', 'STRAIGHT 4.00 CGPA COMPUTER SCIENCE (SOFTWARE ENGINEERING) FOR TWO SEMESTER', 'UM GAME JAM 2026 PUBLIC CHOICE AWARD', 'PERSATUAN KOMPUTER UNIVERSITI MALAYA (PEKOM) FINANCE LEAD 2026/2027', 'USM V HACK PRELIMINARY ROUND QUALIFIER']} />
       <main className="w-full">
