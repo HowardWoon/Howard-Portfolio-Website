@@ -28,7 +28,7 @@ export function PortfolioPage() {
 
   return (
     <BootSequence>
-      <div className="relative min-h-screen bg-[#090B10] selection:bg-amber-500 selection:text-black">
+      <div className="relative min-h-screen overflow-x-clip bg-[#090B10] selection:bg-amber-500 selection:text-black">
         <div className="relative w-full h-[200vh]">
             {/* Real website stays sticky at top while we scroll 200vh */}
             <div className="sticky top-0 h-screen w-full z-0 overflow-hidden">
@@ -38,8 +38,8 @@ export function PortfolioPage() {
           
           {/* Macbook overlay dictates the 200vh scroll and fades out at end */}
           <div className="absolute top-0 left-0 w-full h-full z-10 pointer-events-none">
-            <div className="w-full h-full overflow-hidden">
-              <MacbookScroll
+            <div className="w-full h-full">
+                <MacbookScroll
                 title={
                   <div className="flex flex-col items-center justify-center mb-10">
                     <h1 className="text-4xl font-semibold text-white pointer-events-auto">
