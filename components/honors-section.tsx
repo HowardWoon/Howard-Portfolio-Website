@@ -208,33 +208,33 @@ const honorsList: HonorItem[] = [
 
           <div className="bg-black/40 border border-white/5 rounded-xl overflow-hidden">
             <div className="bg-white/5 px-3 py-2 border-b border-white/10 flex justify-between items-center">
-              <span className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-widest text-emerald-400">Kebangsaan & Negeri Excellence</span>
+              <span className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-widest text-emerald-400">National & State Excellence</span>
               <span className="text-[10px] sm:text-xs font-mono text-neutral-400">KMNS 2024/2025</span>
             </div>
             <div className="p-3 grid grid-cols-1 gap-2 text-[10px] sm:text-xs font-mono ">
-              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">SUKED Ping Pong Coach (Negeri)</span><span className="w-24 text-right text-amber-400 font-bold shrink-0">EMAS</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Matrix eXtra Quiz Challenge (Kebangsaan)</span><span className="w-24 text-right text-orange-400 font-bold shrink-0">GANGSA</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">SUKED Tenis Lelaki (Negeri)</span><span className="w-24 text-right text-orange-400 font-bold shrink-0">GANGSA</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">SUKED Ping Pong Coach (Negeri)</span><span className="w-24 text-right text-amber-400 font-bold shrink-0">GOLD</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Matrix eXtra Quiz Challenge (Kebangsaan)</span><span className="w-24 text-right text-orange-400 font-bold shrink-0">BRONZE</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">SUKED Tenis Lelaki (Negeri)</span><span className="w-24 text-right text-orange-400 font-bold shrink-0">BRONZE</span></div>
               <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">IMONST 1 Math Olympiad (Kebangsaan)</span><span className="w-24 text-right text-neutral-500 shrink-0">FINALIST</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Kursus Kepimpinan Generasi Madani (Kebangsaan)</span><span className="w-24 text-right text-neutral-500 shrink-0">KPM</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Bicara Eksekutif Kenegaraan Madani (Kebangsaan)</span><span className="w-24 text-right text-neutral-500 shrink-0">KPM</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Pertandingan Komik STEM 2024 (Negeri)</span><span className="w-24 text-right text-neutral-500 shrink-0">PENYERTAAN</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Pertandingan Poster AI (Negeri)</span><span className="w-24 text-right text-neutral-500 shrink-0">PENYERTAAN</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Konvensyen Profesional KMNS 2024 (Negeri)</span><span className="w-24 text-right text-neutral-500 shrink-0">PENYERTAAN</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Kursus Kepimpinan Generasi Madani (Kebangsaan)</span><span className="w-24 text-right text-neutral-500 shrink-0">MOE</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Bicara Eksekutif Kenegaraan Madani (Kebangsaan)</span><span className="w-24 text-right text-neutral-500 shrink-0">MOE</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Pertandingan Komik STEM 2024 (Negeri)</span><span className="w-24 text-right text-neutral-500 shrink-0">PARTICIPANT</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Pertandingan Poster AI (Negeri)</span><span className="w-24 text-right text-neutral-500 shrink-0">PARTICIPANT</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Konvensyen Profesional KMNS 2024 (Negeri)</span><span className="w-24 text-right text-neutral-500 shrink-0">PARTICIPANT</span></div>
             </div>
           </div>
 
           <div className="bg-black/40 border border-white/5 rounded-xl overflow-hidden">
             <div className="bg-white/5 px-3 py-2 border-b border-white/10 flex justify-between items-center">
               <span className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-widest text-emerald-400">Leadership & Mentorship Roles</span>
-              <span className="text-[10px] sm:text-xs font-mono text-neutral-400">JAWATAN UTAMA</span>
+              <span className="text-[10px] sm:text-xs font-mono text-neutral-400">KEY POSITIONS</span>
             </div>
             <div className="p-3 grid grid-cols-1 gap-2 text-[10px] sm:text-xs font-mono">
-              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Sukan Kampung</span><span className="text-emerald-400 font-bold shrink-0">PENGERUSI</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Peer Assisted Learning (PAL)</span><span className="text-emerald-400 font-bold shrink-0">PENOLONG KETUA</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Sukan Kampung</span><span className="text-emerald-400 font-bold shrink-0">CHAIRMAN</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Peer Assisted Learning (PAL)</span><span className="text-emerald-400 font-bold shrink-0">VICE PRESIDENT</span></div>
               <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Maths Support System (MSS)</span><span className="text-emerald-500 font-medium shrink-0">MENTOR</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Program Chemcare Sem 2</span><span className="text-emerald-500 font-medium shrink-0">FASILITATOR</span></div>
-              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Gemersik Cakna x Pesta Tanglung</span><span className="text-emerald-500 font-medium shrink-0">FASILITATOR</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Program Chemcare Sem 2</span><span className="text-emerald-500 font-medium shrink-0">FACILITATOR</span></div>
+              <div className="flex justify-between items-center group"><span className="text-neutral-300 group-hover:text-white transition-colors">Gemersik Cakna x Pesta Tanglung</span><span className="text-emerald-500 font-medium shrink-0">FACILITATOR</span></div>
             </div>
           </div>
         </div>
