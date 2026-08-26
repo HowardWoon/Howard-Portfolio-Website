@@ -18,7 +18,8 @@ export function PortfolioPage() {
   const [scale, setScale] = useState(0.3555);
   useEffect(() => {
     const handleResize = () => {
-      setScale(512 / window.innerWidth);
+      const target = Math.max(window.innerWidth / 512, window.innerHeight / 288);
+      setScale(1 / target);
     };
     handleResize();
     window.addEventListener('resize', handleResize);
@@ -28,10 +29,10 @@ export function PortfolioPage() {
   return (
     <BootSequence>
       <div className="relative min-h-screen bg-[#090B10] selection:bg-amber-500 selection:text-black">
-        <SiteHeader />
         <div className="relative w-full h-[200vh]">
-          {/* Real website stays sticky at top while we scroll 200vh */}
-          <div className="sticky top-0 h-screen w-full z-0 overflow-hidden">
+            {/* Real website stays sticky at top while we scroll 200vh */}
+            <div className="sticky top-0 h-screen w-full z-0 overflow-hidden">
+              <SiteHeader />
             <BikebearInspiredHero />
           </div>
           
@@ -56,14 +57,16 @@ export function PortfolioPage() {
                   We force it to a desktop width (1440px) and scale it down to fit the 512px (32rem) laptop screen.
                   512 / 1440 = 0.3555
                 */}
-                <div 
-                  className="origin-top-left pointer-events-none" 
-                  style={{ width: '100vw', height: '100vh', transform: `scale(${scale})` }}
-                >
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div 
+                    className="origin-center pointer-events-none" 
+                    style={{ width: '100vw', height: '100vh', transform: `scale(${scale})` }}
+                  >
                    <div className="w-full h-full bg-[#090B10]">
                      <SiteHeader />
-                     <BikebearInspiredHero />
-                   </div>
+                       <BikebearInspiredHero />
+                     </div>
+                  </div>
                 </div>
               </MacbookScroll>
             </div>

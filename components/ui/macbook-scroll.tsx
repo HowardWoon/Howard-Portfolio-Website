@@ -192,7 +192,11 @@ export const Lid = ({
         className="absolute inset-0 h-[18rem] w-[32rem] rounded-2xl bg-[#010101] p-2"
       >
         <div className="absolute inset-0 rounded-lg bg-[#272729]" />
-        {children ? children : <img
+        {children ? (
+            <div className="absolute inset-0 h-full w-full rounded-lg overflow-hidden">
+              {children}
+            </div>
+          ) : <img
           src={src as string}
           alt="aceternity logo"
           className="absolute inset-0 h-full w-full rounded-lg object-cover object-left-top"
