@@ -69,9 +69,8 @@ export const MacbookScroll = ({
 
   return (
     <div ref={ref} className="h-[200vh] w-full">
-      <div
-        className="sticky top-0 flex h-screen w-full shrink-0 scale-[0.35] transform flex-col items-center justify-center py-0 [perspective:800px] sm:scale-50 md:scale-100 overflow-hidden"
-      >
+      <div className="sticky top-0 flex h-screen w-full items-center justify-center overflow-hidden">
+        <div className="flex shrink-0 scale-[0.35] transform flex-col items-center justify-center py-0 [perspective:800px] sm:scale-50 md:scale-100">
       <motion.h2
         style={{
           translateY: textTransform,
@@ -117,6 +116,7 @@ export const MacbookScroll = ({
           <div className="absolute inset-x-0 bottom-0 z-50 h-40 w-full bg-gradient-to-t from-white via-white to-transparent dark:from-black dark:via-black"></div>
         )}
         {badge && <div className="absolute bottom-4 left-4">{badge}</div>}
+        </div>
       </div>
       </div>
     </div>

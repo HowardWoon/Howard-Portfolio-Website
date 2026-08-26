@@ -19,7 +19,7 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const hasBooted = sessionStorage.getItem('has_booted_v6');
+    const hasBooted = sessionStorage.getItem('has_booted_v7');
     
     if (prefersReduced || hasBooted === 'true') {
       setShowBoot(false);
@@ -45,7 +45,7 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
       setTimeout(() => {
         window.scrollTo(0, 0);
         setShowBoot(false);
-        sessionStorage.setItem('has_booted_v6', 'true');
+        sessionStorage.setItem('has_booted_v7', 'true');
       }, 800);
     }, 2000);
   }
