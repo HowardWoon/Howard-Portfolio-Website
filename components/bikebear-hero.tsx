@@ -242,17 +242,17 @@ export default function BikebearHero() {
                   />
                   
                   {/* Spiderman Overlay X-Ray Mask */}
-                  <Image
-                    src="/images/spiderman.jpg"
-                    alt="Howard Woon - Spiderman"
-                    fill
-                    className="object-cover object-top saturate-[1.3] contrast-[1.15] pointer-events-none transition-all duration-75"
-                    style={{
-                      clipPath: `circle(120px at ${maskPosition.x}px ${maskPosition.y}px)`
-                    }}
-                    priority
-                    quality={85}
-                  />
+                    <Image
+                      src="/images/spiderman.jpg"
+                      alt="Howard Woon - Spiderman"
+                      fill
+                      className="object-cover object-top saturate-[1.3] contrast-[1.15] pointer-events-none transition-all duration-75"
+                      style={{
+                        clipPath: `circle(36px at ${maskPosition.x}px ${maskPosition.y}px)`
+                      }}
+                      priority
+                      quality={85}
+                    />
                 
                 {/* Subtle Gradient Shade at the Bottom for Depth */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none transition-colors duration-500 group-hover:from-blue-900/60" />
