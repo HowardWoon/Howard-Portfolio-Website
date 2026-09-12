@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useRef } from "react";
 import Image from "next/image";
@@ -161,7 +161,7 @@ export default function BikebearHero() {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="text-neutral-300 text-base sm:text-lg max-w-xl leading-relaxed font-sans"
             >
-              Architecting robust, <span className="text-amber-400 font-medium">low-latency distributed backends</span> and <span className="text-amber-400 font-medium">autonomous AI systems</span> â€” engineered with algorithmic precision, enterprise scalability, and strategic fiscal discipline.
+              Architecting robust, <span className="text-amber-400 font-medium">low-latency distributed backends</span> and <span className="text-amber-400 font-medium">autonomous AI systems</span> — engineered with algorithmic precision, enterprise scalability, and strategic fiscal discipline.
             </motion.p>
 
             {/* Call to Action Buttons */}
@@ -176,7 +176,7 @@ export default function BikebearHero() {
                     href="#projects"
                     className="px-7 py-3.5 rounded-full bg-white text-black font-bold font-mono text-xs uppercase tracking-wider hover:bg-amber-400 transition-all duration-300 shadow-xl shadow-white/5 hover:shadow-amber-400/20 hover:-translate-y-0.5"
                   >
-                    EXPLORE PROJECTS â†—
+                    EXPLORE PROJECTS ↗
                   </a>
                 </Magnetic>
                 <Magnetic strength={0.3}>
@@ -208,7 +208,7 @@ export default function BikebearHero() {
                       {[...Array(4)].map((_, i) => (
                         <div key={i} className="flex items-center">
                           <span className="text-[10px] sm:text-sm font-sans font-black text-black uppercase tracking-[0.2em] px-4">
-                            LATEST: 2ND PLACE @ SUPERVITY ASIA HACKATHON âœˆ
+                            LATEST: 2ND PLACE @ SUPERVITY ASIA HACKATHON ✈
                           </span>
                           <span className="text-lg text-[#00E5FF] font-black mx-2 translate-y-[2px]">*</span>
                         </div>

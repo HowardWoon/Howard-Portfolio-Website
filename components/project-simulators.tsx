@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -120,7 +120,7 @@ function SlotifySimulator() {
     setLogs(["[0.0ms] Vehicle detected at Entry Gate A.", "[0.4ms] Initializing Min-Heap Priority Queue..."]);
     
     setTimeout(() => {
-      setLogs((prev) => [...prev, "[0.9ms] Relaxing edges for Vertex A1 (Occupied, weight: âˆž)"]);
+      setLogs((prev) => [...prev, "[0.9ms] Relaxing edges for Vertex A1 (Occupied, weight: ∞)"]);
     }, 400);
 
     setTimeout(() => {
@@ -147,7 +147,7 @@ function SlotifySimulator() {
         <div>
           <div className="flex items-center gap-2 text-xs font-mono text-amber-400 tracking-wider uppercase">
             <GitBranch className="w-4 h-4" />
-            <span>ALGORITHMIC GRAPH SIMULATION Â· JAVA 21 & SPRING BOOT</span>
+            <span>ALGORITHMIC GRAPH SIMULATION · JAVA 21 & SPRING BOOT</span>
           </div>
           <h3 className="text-2xl sm:text-3xl font-extrabold uppercase text-white mt-1">
             Slotify Dijkstra Shortest Path Router
@@ -295,7 +295,7 @@ export function ZeroLagSimulator() {
         <div>
           <div className="flex items-center gap-2 text-xs font-mono text-amber-400 tracking-wider uppercase">
             <Cpu className="w-4 h-4" />
-            <span>AGENTIC WORKFLOW Â· 2ND PLACE SUPERVITY APAC HACKATHON</span>
+            <span>AGENTIC WORKFLOW · 2ND PLACE SUPERVITY APAC HACKATHON</span>
           </div>
           <h3 className="text-2xl sm:text-3xl font-extrabold uppercase text-white mt-1">
             ZeroLag 5-Agent Autonomous Intelligence Engine
@@ -359,7 +359,7 @@ export function ZeroLagSimulator() {
           <Terminal className="w-4 h-4 text-amber-400" />
           <span>
             {currentStage === 5 
-              ? "Lead Qualified: Score 0.96 [High Priority] Â· Auto-Dispatched to Enterprise CRM." 
+              ? "Lead Qualified: Score 0.96 [High Priority] · Auto-Dispatched to Enterprise CRM." 
               : isRunning 
               ? `Executing Node #${currentStage}: ${stages[currentStage - 1]?.name}...` 
               : "System Idle. Click 'Dispatch Agent Pipeline' to execute state machine."}
@@ -420,7 +420,7 @@ export function BilahujanSimulator() {
         <div>
           <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 tracking-wider uppercase">
             <Radio className="w-4 h-4" />
-            <span>SWARM INTELLIGENCE + MCP TOOLS â€” V HACK 2026</span>
+            <span>SWARM INTELLIGENCE + MCP TOOLS — V HACK 2026</span>
           </div>
           <h3 className="text-2xl sm:text-3xl font-extrabold uppercase text-white mt-1">
             Autonomous Command Agent Terminal
@@ -527,7 +527,7 @@ export function SensorXSimulator() {
         <div>
           <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 tracking-wider uppercase">
             <Zap className="w-4 h-4" />
-            <span>ESP32 FIRMWARE + MQTT PROTOCOL Â· UM TECHNOTHON 2026</span>
+            <span>ESP32 FIRMWARE + MQTT PROTOCOL · UM TECHNOTHON 2026</span>
           </div>
           <h3 className="text-2xl sm:text-3xl font-extrabold uppercase text-white mt-1">
             Sensor X Sensei Smart Grid & Load-Shedding Lab
@@ -566,7 +566,7 @@ export function SensorXSimulator() {
         <div className="p-5 bg-black/60 border border-white/10 rounded-2xl space-y-1">
           <span className="text-xs font-mono text-neutral-400">SENSOR FUSION STATUS</span>
           <div className="text-lg font-mono font-bold text-amber-300 mt-2">
-            {isOccupied ? "PIR Active Â· NFC In" : "PIR Idle Â· Auto Cutoff"}
+            {isOccupied ? "PIR Active · NFC In" : "PIR Idle · Auto Cutoff"}
           </div>
           <span className="text-xs font-mono text-neutral-500">MQTT Broker: Connected</span>
         </div>

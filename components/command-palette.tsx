@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { Command } from "cmdk";
@@ -100,7 +100,7 @@ export function CommandPalette() {
               className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer aria-selected:bg-white/10 text-neutral-200 aria-selected:text-white transition-colors text-sm"
             >
               <Download className="w-4 h-4 text-neutral-400" />
-              <span>Download RÃ©sumÃ©</span>
+              <span>Download Résumé</span>
             </Command.Item>
           </Command.Group>
         </Command.List>

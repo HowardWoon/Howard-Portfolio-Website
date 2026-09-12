@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import BikebearInspiredHero from '@/components/bikebear-hero';
 import AboutSection from '@/components/about-section';
 import StackedProjects from '@/components/stacked-projects';

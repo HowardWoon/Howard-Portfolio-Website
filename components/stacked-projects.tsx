@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useRef, useState } from "react";
 import { motion, useScroll, useTransform, MotionValue, AnimatePresence } from "framer-motion";
@@ -45,7 +45,7 @@ const projects: ProjectData[] = [
       {
       id: "zerolag",
       number: "01",
-      badge: "ðŸ† 2nd Place Winner Â· Supervity Asia Hackathon 2026",
+      badge: "🏆 2nd Place Winner · Supervity Asia Hackathon 2026",
       badgeType: "gold",
       title: "ZeroLag",
       subtitle: "Governed AI Workforce & Autonomous Sales Pipeline",
@@ -71,7 +71,7 @@ const projects: ProjectData[] = [
     {
       id: "proofpay",
       number: "02",
-      badge: "ðŸ… 2nd Runner Up (Sui) & Top 6 (Gonka AI) Â· MUBA 2026",
+      badge: "🏅 2nd Runner Up (Sui) & Top 6 (Gonka AI) · MUBA 2026",
       badgeType: "gold",
       title: "PROOFPAY",
       subtitle: "Delivery-linked B2B Escrow & Settlement Platform",
@@ -94,7 +94,7 @@ const projects: ProjectData[] = [
   {
       id: "bilahujan",
       number: "03",
-      badge: "ðŸ… V Hack 2026 Case Study 3 â€” First Responder of the Future",
+      badge: "🏅 V Hack 2026 Case Study 3 — First Responder of the Future",
       badgeType: "cyan",
       title: "BILAHUJAN",
       subtitle: "Decentralised Swarm Intelligence for Flood First Response",
@@ -119,7 +119,7 @@ const projects: ProjectData[] = [
 {
       id: "catfish",
       number: "04",
-      badge: "WIA1006 Machine Learning â€¢ Ultimate Pipeline",
+      badge: "WIA1006 Machine Learning • Ultimate Pipeline",
       badgeType: "cyan",
       title: "CATFISH DETECTOR AI",
       subtitle: "Detecting Deception Through Mathematical Behavioral Intelligence",
@@ -151,7 +151,7 @@ const projects: ProjectData[] = [
       {
       id: "slotify",
       number: "05",
-      badge: "Java Spring Boot â€¢ Data Structures",
+      badge: "Java Spring Boot • Data Structures",
       badgeType: "gold",
       title: "SLOTIFY",
       subtitle: "Multi-Data Structure Architecture & Algorithmic Router",
@@ -181,7 +181,7 @@ const projects: ProjectData[] = [
 {
     id: "sensor-x-sensei",
     number: "05",
-    badge: "âš¡ UM Technothon 2026 Finalist Â· IoT Energy Grid",
+    badge: "⚡ UM Technothon 2026 Finalist · IoT Energy Grid",
     badgeType: "emerald",
     title: "Sensor X Sensei",
     subtitle: "Automated Energy Management & Micro-Grid Telemetry",
@@ -502,7 +502,7 @@ function ProjectCard({
                   </div>
                   <div className="flex items-center justify-between text-xs font-mono">
                     <span className="text-neutral-400">Calculated Safe Corridor:</span>
-                    <span className="text-emerald-400 font-bold">Path Node #104 âž” #289</span>
+                    <span className="text-emerald-400 font-bold">Path Node #104 ➔ #289</span>
                   </div>
                   <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
                     <div className="bg-amber-400 h-full w-4/5 animate-pulse" />

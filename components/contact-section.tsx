@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -19,10 +19,10 @@ import {
 import { personalDetails } from "@/lib/site-data";
 
 const quickIntents = [
-  { label: "ðŸ’¼ 2026 SWE Role", text: "Hi Howard, I would like to discuss a Software Engineering opportunity at our company..." },
-  { label: "ðŸ¤– AI Pipeline Collab", text: "Hi Howard, I saw your ZeroLag multi-agent architecture and wanted to talk about an AI system..." },
-  { label: "ðŸ† Hackathon Team", text: "Hi Howard, are you open to teaming up for an upcoming technical hackathon?" },
-  { label: "â˜• Quick Tech Chat", text: "Hi Howard, loved your portfolio. Let's connect for a quick virtual coffee chat!" }
+  { label: "💼 2026 SWE Role", text: "Hi Howard, I would like to discuss a Software Engineering opportunity at our company..." },
+  { label: "🤖 AI Pipeline Collab", text: "Hi Howard, I saw your ZeroLag multi-agent architecture and wanted to talk about an AI system..." },
+  { label: "🏆 Hackathon Team", text: "Hi Howard, are you open to teaming up for an upcoming technical hackathon?" },
+  { label: "☕ Quick Tech Chat", text: "Hi Howard, loved your portfolio. Let's connect for a quick virtual coffee chat!" }
 ];
 
 export default function ContactSection() {
@@ -152,7 +152,7 @@ export default function ContactSection() {
               <div className="space-y-2 text-xs font-mono text-neutral-400 border-t border-white/10 pt-4">
                 <div className="flex items-center gap-2">
                   <MapPin className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Kajang, Selangor Â· Kuala Lumpur, Malaysia</span>
+                  <span>Kajang, Selangor · Kuala Lumpur, Malaysia</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="w-3.5 h-3.5 text-amber-400" />
@@ -335,7 +335,7 @@ export default function ContactSection() {
                 ) : formStatus === "success" ? (
                   <>
                     <CheckCircle2 className="w-4 h-4 text-black" />
-                    <span>TRANSMISSION RECEIVED â€” I WILL REPLY SHORTLY!</span>
+                    <span>TRANSMISSION RECEIVED — I WILL REPLY SHORTLY!</span>
                   </>
                 ) : formStatus === "error" ? (
                   <>

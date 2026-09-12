@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
 import { FieldArchive } from "./field-archive";
@@ -136,7 +136,7 @@ function PekomTreasurerDashboard() {
           <div className="space-y-6 pt-2">
             <div className="flex flex-col gap-1">
               <div className="text-amber-400 font-mono text-xs font-bold uppercase tracking-[0.2em]">Duration</div>
-              <div className="text-neutral-400 font-mono text-xs">February â€“ June 2026</div>
+              <div className="text-neutral-400 font-mono text-xs">February – June 2026</div>
             </div>
             
             <div className="space-y-2">
@@ -240,7 +240,7 @@ function PekomTreasurerDashboard() {
           <div className="space-y-6 pt-2">
             <div className="flex flex-col gap-1">
               <div className="text-amber-400 font-mono text-xs font-bold uppercase tracking-[0.2em]">Duration</div>
-              <div className="text-neutral-400 font-mono text-xs">September 2025 â€“ June 2026</div>
+              <div className="text-neutral-400 font-mono text-xs">September 2025 – June 2026</div>
             </div>
             
             <div className="space-y-2">
