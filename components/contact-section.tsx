@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -19,10 +19,10 @@ import {
 import { personalDetails } from "@/lib/site-data";
 
 const quickIntents = [
-  { label: "💼 2026 SWE Role", text: "Hi Howard, I would like to discuss a Software Engineering opportunity at our company..." },
-  { label: "🤖 AI Pipeline Collab", text: "Hi Howard, I saw your ZeroLag multi-agent architecture and wanted to talk about an AI system..." },
-  { label: "🏆 Hackathon Team", text: "Hi Howard, are you open to teaming up for an upcoming technical hackathon?" },
-  { label: "☕ Quick Tech Chat", text: "Hi Howard, loved your portfolio. Let's connect for a quick virtual coffee chat!" }
+  { label: "ðŸ’¼ 2026 SWE Role", text: "Hi Howard, I would like to discuss a Software Engineering opportunity at our company..." },
+  { label: "ðŸ¤– AI Pipeline Collab", text: "Hi Howard, I saw your ZeroLag multi-agent architecture and wanted to talk about an AI system..." },
+  { label: "ðŸ† Hackathon Team", text: "Hi Howard, are you open to teaming up for an upcoming technical hackathon?" },
+  { label: "â˜• Quick Tech Chat", text: "Hi Howard, loved your portfolio. Let's connect for a quick virtual coffee chat!" }
 ];
 
 export default function ContactSection() {
@@ -100,7 +100,7 @@ export default function ContactSection() {
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="inline-flex items-center gap-2 border border-amber-500/30 bg-amber-500/10 backdrop-blur-md rounded-full px-4 py-1.5 text-xs font-mono text-amber-300 tracking-widest uppercase"
+            className="inline-flex items-center gap-2 border border-amber-500/30 bg-amber-500/10 backdrop-blur-md rounded-full px-4 py-1.5 text-xs font-mono text-amber-300 tracking-[0.2em] uppercase"
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
             <span>CONTACT // RECRUITER & PARTNERSHIP HUB</span>
@@ -110,7 +110,7 @@ export default function ContactSection() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white max-w-4xl leading-[1.05]"
+            className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tighter text-white max-w-4xl leading-[1.05]"
           >
             LET'S ARCHITECT SOMETHING SPECIAL.
           </motion.h2>
@@ -137,7 +137,7 @@ export default function ContactSection() {
 
               {/* Profile Bio */}
               <div className="space-y-2">
-                <h3 className="text-2xl font-bold uppercase text-white tracking-tight">
+                <h3 className="text-2xl font-bold uppercase text-white tracking-tighter">
                   Howard Woon Hao Zhe
                 </h3>
                 <p className="text-xs font-mono text-amber-400 font-medium">
@@ -152,7 +152,7 @@ export default function ContactSection() {
               <div className="space-y-2 text-xs font-mono text-neutral-400 border-t border-white/10 pt-4">
                 <div className="flex items-center gap-2">
                   <MapPin className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Kajang, Selangor · Kuala Lumpur, Malaysia</span>
+                  <span>Kajang, Selangor Â· Kuala Lumpur, Malaysia</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="w-3.5 h-3.5 text-amber-400" />
@@ -221,7 +221,7 @@ export default function ContactSection() {
 
               {/* Target Engineering Specializations */}
               <div className="space-y-2 border-t border-white/10 pt-4">
-                <span className="text-xs font-mono text-neutral-400 uppercase tracking-widest block">
+                <span className="text-xs font-mono text-neutral-400 uppercase tracking-[0.2em] block">
                   TARGET ROLES & SPECIALIZATIONS:
                 </span>
                 <div className="flex flex-wrap gap-1.5">
@@ -245,10 +245,10 @@ export default function ContactSection() {
             className="lg:col-span-7 rounded-[32px] p-8 sm:p-10 border border-white/10 bg-[#0E121B]/95 backdrop-blur-2xl shadow-2xl space-y-6"
           >
             <div className="space-y-2">
-              <span className="text-xs font-mono text-neutral-400 uppercase tracking-widest block">
+              <span className="text-xs font-mono text-neutral-400 uppercase tracking-[0.2em] block">
                 DIRECT TRANSMISSION CONSOLE
               </span>
-              <h3 className="text-2xl font-bold uppercase text-white tracking-tight">
+              <h3 className="text-2xl font-bold uppercase text-white tracking-tighter">
                 Send a Direct Message
               </h3>
             </div>
@@ -335,7 +335,7 @@ export default function ContactSection() {
                 ) : formStatus === "success" ? (
                   <>
                     <CheckCircle2 className="w-4 h-4 text-black" />
-                    <span>TRANSMISSION RECEIVED — I WILL REPLY SHORTLY!</span>
+                    <span>TRANSMISSION RECEIVED â€” I WILL REPLY SHORTLY!</span>
                   </>
                 ) : formStatus === "error" ? (
                   <>
@@ -389,7 +389,7 @@ export default function ContactSection() {
                 <div className="space-y-1">
                   <div className="text-xs font-mono font-bold text-neutral-500 tracking-[0.2em] mb-4 uppercase">System Of Record</div>
                   <h3 className="text-2xl md:text-3xl font-black text-white uppercase tracking-wider leading-none">Howard Woon Hao Zhe</h3>
-                  <p className="text-sm font-mono text-amber-400 uppercase tracking-widest pt-3">Systems & AI Architect</p>
+                  <p className="text-sm font-mono text-amber-400 uppercase tracking-[0.2em] pt-3">Systems & AI Architect</p>
                 </div>
 
                 {/* Education */}
@@ -418,13 +418,13 @@ export default function ContactSection() {
                 <span className="text-xs font-mono font-bold text-neutral-500 uppercase tracking-[0.2em] text-center md:text-left">Engineered Systems. Autonomous Pipelines.</span>
                 
                 <div className="flex flex-wrap justify-center items-center gap-8">
-                  <a href={linkedInUrl} target="_blank" rel="noreferrer" className="text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-colors uppercase tracking-widest flex items-center gap-2.5">
+                  <a href={linkedInUrl} target="_blank" rel="noreferrer" className="text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-colors uppercase tracking-[0.2em] flex items-center gap-2.5">
                     <Linkedin className="w-5 h-5" /> LINKEDIN
                   </a>
-                  <a href="https://github.com/HowardWoon" target="_blank" rel="noreferrer" className="text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-colors uppercase tracking-widest flex items-center gap-2.5">
+                  <a href="https://github.com/HowardWoon" target="_blank" rel="noreferrer" className="text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-colors uppercase tracking-[0.2em] flex items-center gap-2.5">
                     <Github className="w-5 h-5" /> GITHUB
                   </a>
-                  <a href="/resume.pdf" target="_blank" className="text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-colors uppercase tracking-widest flex items-center gap-2.5">
+                  <a href="/resume.pdf" target="_blank" className="text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-colors uppercase tracking-[0.2em] flex items-center gap-2.5">
                     <FileText className="w-5 h-5" /> RESUME
                   </a>
                 </div>

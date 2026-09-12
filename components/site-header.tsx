@@ -45,7 +45,7 @@ export function SiteHeader() {
           href="/resume.pdf"
           target="_blank"
           rel="noopener noreferrer"
-          className="group flex items-center gap-2 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-black text-sm font-mono font-black uppercase tracking-widest px-7 py-3.5 rounded-full shadow-lg shadow-amber-500/25 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer pointer-events-auto"
+          className="group flex items-center gap-2 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-black text-sm font-mono font-black uppercase tracking-[0.2em] px-7 py-3.5 rounded-full shadow-lg shadow-amber-500/25 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer pointer-events-auto"
         >
           <span>RESUME</span>
           <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />

@@ -175,7 +175,7 @@ export default function AboutSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 border border-amber-500/30 bg-amber-500/10 backdrop-blur-md rounded-full px-4 py-1.5 text-xs font-mono text-amber-300 tracking-widest uppercase"
+            className="inline-flex items-center gap-2 border border-amber-500/30 bg-amber-500/10 backdrop-blur-md rounded-full px-4 py-1.5 text-xs font-mono text-amber-300 tracking-[0.2em] uppercase"
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
             <span>ABOUT // SYSTEMS ARCHITECTURE & VISION</span>
@@ -186,7 +186,7 @@ export default function AboutSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white max-w-5xl leading-[1.08]"
+            className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tighter text-white max-w-5xl leading-[1.08]"
           >
             I ARCHITECT RESILIENT BACKENDS AND AUTONOMOUS AI PIPELINES, TURNING COMPLEX IDEAS INTO PRODUCTION-READY SYSTEMS.
           </motion.h2>
@@ -224,7 +224,7 @@ export default function AboutSection() {
               >
                 {/* Top Card Bar: Category Tag + Icon */}
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono tracking-widest text-neutral-400 uppercase">
+                  <span className="text-xs font-mono tracking-[0.2em] text-neutral-400 uppercase">
                     {pillar.category}
                   </span>
                   <div className={`w-10 h-10 rounded-2xl flex items-center justify-center border transition-all duration-300 ${
@@ -238,7 +238,7 @@ export default function AboutSection() {
 
                 {/* Card Title & Description */}
                 <div className="space-y-2.5">
-                  <h3 className="text-2xl font-bold uppercase tracking-tight text-white flex items-center gap-2">
+                  <h3 className="text-2xl font-bold uppercase tracking-tighter text-white flex items-center gap-2">
                     {pillar.title}
                     <ArrowUpRight className={`w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity ${colorMap[pillar.color as keyof typeof colorMap].text}`} />
                   </h3>
@@ -287,11 +287,11 @@ export default function AboutSection() {
         >
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
             <div className="space-y-1">
-              <div className="flex items-center gap-2 text-xs font-mono text-amber-400 tracking-widest uppercase">
+              <div className="flex items-center gap-2 text-xs font-mono text-amber-400 tracking-[0.2em] uppercase">
                 <Code2 className="w-4 h-4" />
                 <span>TECHNICAL TOOLING MATRIX</span>
               </div>
-              <h4 className="text-xl font-bold text-white uppercase tracking-tight">
+              <h4 className="text-xl font-bold text-white uppercase tracking-tighter">
                 Verified Production & Research Stack
               </h4>
             </div>

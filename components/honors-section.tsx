@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -176,31 +176,31 @@ const honorsList: HonorItem[] = [
           
           <div className="bg-black/40 border border-white/5 rounded-xl overflow-hidden">
             <div className="bg-white/5 px-3 py-2 border-b border-white/10 flex justify-between items-center">
-              <span className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-widest text-emerald-400">Semester 2 Core</span>
+              <span className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-[0.2em] text-emerald-400">Semester 2 Core</span>
               <span className="text-[10px] sm:text-xs font-mono text-neutral-400">GPA: 4.00</span>
             </div>
             <div className="p-3 grid grid-cols-1 gap-2 text-[10px] sm:text-xs font-mono">
-              <div className="flex justify-between items-start group"><div className="flex gap-1.5 text-neutral-300 group-hover:text-white transition-colors flex-1 pr-2"><span className="shrink-0 w-[52px]">WIA1006</span><span className="shrink-0 text-neutral-500">·</span><span>Machine Learning</span></div><span className="w-6 text-right text-emerald-400 font-bold shrink-0">A+</span></div>
-              <div className="flex justify-between items-start group"><div className="flex gap-1.5 text-neutral-300 group-hover:text-white transition-colors flex-1 pr-2"><span className="shrink-0 w-[52px]">WIA1002</span><span className="shrink-0 text-neutral-500">·</span><span>Data Structure</span></div><span className="w-6 text-right text-emerald-400 font-bold shrink-0">A+</span></div>
-              <div className="flex justify-between items-start group"><div className="flex gap-1.5 text-neutral-300 group-hover:text-white transition-colors flex-1 pr-2"><span className="shrink-0 w-[52px]">WIA1003</span><span className="shrink-0 text-neutral-500">·</span><span>Computer System Architecture</span></div><span className="w-6 text-right text-emerald-500 font-medium shrink-0">A</span></div>
-              <div className="flex justify-between items-start group"><div className="flex gap-1.5 text-neutral-300 group-hover:text-white transition-colors flex-1 pr-2"><span className="shrink-0 w-[52px]">WIA1005</span><span className="shrink-0 text-neutral-500">·</span><span>Network Technology Foundation</span></div><span className="w-6 text-right text-emerald-500 font-medium shrink-0">A</span></div>
-              <div className="flex justify-between items-start group"><div className="flex gap-1.5 text-neutral-300 group-hover:text-white transition-colors flex-1 pr-2"><span className="shrink-0 w-[52px]">GIG1012</span><span className="shrink-0 text-neutral-500">·</span><span>Philosophy and Current Issues</span></div><span className="w-6 text-right text-emerald-400 font-bold shrink-0">A+</span></div>
-              <div className="flex justify-between items-start group"><div className="flex gap-1.5 text-neutral-300 group-hover:text-white transition-colors flex-1 pr-2"><span className="shrink-0 w-[52px]">GLT1025</span><span className="shrink-0 text-neutral-500">·</span><span>Effective Oral Communication</span></div><span className="w-6 text-right text-emerald-400 font-bold shrink-0">A+</span></div>
+              <div className="flex justify-between items-start group"><div className="flex gap-1.5 text-neutral-300 group-hover:text-white transition-colors flex-1 pr-2"><span className="shrink-0 w-[52px]">WIA1006</span><span className="shrink-0 text-neutral-500">Â·</span><span>Machine Learning</span></div><span className="w-6 text-right text-emerald-400 font-bold shrink-0">A+</span></div>
+              <div className="flex justify-between items-start group"><div className="flex gap-1.5 text-neutral-300 group-hover:text-white transition-colors flex-1 pr-2"><span className="shrink-0 w-[52px]">WIA1002</span><span className="shrink-0 text-neutral-500">Â·</span><span>Data Structure</span></div><span className="w-6 text-right text-emerald-400 font-bold shrink-0">A+</span></div>
+              <div className="flex justify-between items-start group"><div className="flex gap-1.5 text-neutral-300 group-hover:text-white transition-colors flex-1 pr-2"><span className="shrink-0 w-[52px]">WIA1003</span><span className="shrink-0 text-neutral-500">Â·</span><span>Computer System Architecture</span></div><span className="w-6 text-right text-emerald-500 font-medium shrink-0">A</span></div>
+              <div className="flex justify-between items-start group"><div className="flex gap-1.5 text-neutral-300 group-hover:text-white transition-colors flex-1 pr-2"><span className="shrink-0 w-[52px]">WIA1005</span><span className="shrink-0 text-neutral-500">Â·</span><span>Network Technology Foundation</span></div><span className="w-6 text-right text-emerald-500 font-medium shrink-0">A</span></div>
+              <div className="flex justify-between items-start group"><div className="flex gap-1.5 text-neutral-300 group-hover:text-white transition-colors flex-1 pr-2"><span className="shrink-0 w-[52px]">GIG1012</span><span className="shrink-0 text-neutral-500">Â·</span><span>Philosophy and Current Issues</span></div><span className="w-6 text-right text-emerald-400 font-bold shrink-0">A+</span></div>
+              <div className="flex justify-between items-start group"><div className="flex gap-1.5 text-neutral-300 group-hover:text-white transition-colors flex-1 pr-2"><span className="shrink-0 w-[52px]">GLT1025</span><span className="shrink-0 text-neutral-500">Â·</span><span>Effective Oral Communication</span></div><span className="w-6 text-right text-emerald-400 font-bold shrink-0">A+</span></div>
             </div>
           </div>
 
           <div className="bg-black/40 border border-white/5 rounded-xl overflow-hidden">
             <div className="bg-white/5 px-3 py-2 border-b border-white/10 flex justify-between items-center">
-              <span className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-widest text-emerald-400">Semester 1 Core</span>
+              <span className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-[0.2em] text-emerald-400">Semester 1 Core</span>
               <span className="text-[10px] sm:text-xs font-mono text-neutral-400">GPA: 4.00</span>
             </div>
             <div className="p-3 grid grid-cols-1 gap-2 text-[10px] sm:text-xs font-mono">
-              <div className="flex justify-between items-start group"><div className="flex gap-1.5 text-neutral-300 group-hover:text-white transition-colors flex-1 pr-2"><span className="shrink-0 w-[52px]">WIX1002</span><span className="shrink-0 text-neutral-500">·</span><span>Fundamentals of Programming</span></div><span className="w-6 text-right text-emerald-400 font-bold shrink-0">A+</span></div>
-              <div className="flex justify-between items-start group"><div className="flex gap-1.5 text-neutral-300 group-hover:text-white transition-colors flex-1 pr-2"><span className="shrink-0 w-[52px]">WIA2010</span><span className="shrink-0 text-neutral-500">·</span><span>Human Computer Interaction</span></div><span className="w-6 text-right text-emerald-500 font-medium shrink-0">A</span></div>
-              <div className="flex justify-between items-start group"><div className="flex gap-1.5 text-neutral-300 group-hover:text-white transition-colors flex-1 pr-2"><span className="shrink-0 w-[52px]">WIX1001</span><span className="shrink-0 text-neutral-500">·</span><span>Computing Mathematics I</span></div><span className="w-6 text-right text-emerald-500 font-medium shrink-0">A</span></div>
-              <div className="flex justify-between items-start group"><div className="flex gap-1.5 text-neutral-300 group-hover:text-white transition-colors flex-1 pr-2"><span className="shrink-0 w-[52px]">WIX1003</span><span className="shrink-0 text-neutral-500">·</span><span>Computer Systems and Organization</span></div><span className="w-6 text-right text-emerald-500 font-medium shrink-0">A</span></div>
-              <div className="flex justify-between items-start group"><div className="flex gap-1.5 text-neutral-300 group-hover:text-white transition-colors flex-1 pr-2"><span className="shrink-0 w-[52px]">GIG1003</span><span className="shrink-0 text-neutral-500">·</span><span>Basic Entrepreneurship Enculturation</span></div><span className="w-6 text-right text-emerald-400 font-bold shrink-0">A+</span></div>
-              <div className="flex justify-between items-start group"><div className="flex gap-1.5 text-neutral-300 group-hover:text-white transition-colors flex-1 pr-2"><span className="shrink-0 w-[52px]">GLT1024</span><span className="shrink-0 text-neutral-500">·</span><span>Proficiency in English III</span></div><span className="w-6 text-right text-emerald-500 font-medium shrink-0">A</span></div>
+              <div className="flex justify-between items-start group"><div className="flex gap-1.5 text-neutral-300 group-hover:text-white transition-colors flex-1 pr-2"><span className="shrink-0 w-[52px]">WIX1002</span><span className="shrink-0 text-neutral-500">Â·</span><span>Fundamentals of Programming</span></div><span className="w-6 text-right text-emerald-400 font-bold shrink-0">A+</span></div>
+              <div className="flex justify-between items-start group"><div className="flex gap-1.5 text-neutral-300 group-hover:text-white transition-colors flex-1 pr-2"><span className="shrink-0 w-[52px]">WIA2010</span><span className="shrink-0 text-neutral-500">Â·</span><span>Human Computer Interaction</span></div><span className="w-6 text-right text-emerald-500 font-medium shrink-0">A</span></div>
+              <div className="flex justify-between items-start group"><div className="flex gap-1.5 text-neutral-300 group-hover:text-white transition-colors flex-1 pr-2"><span className="shrink-0 w-[52px]">WIX1001</span><span className="shrink-0 text-neutral-500">Â·</span><span>Computing Mathematics I</span></div><span className="w-6 text-right text-emerald-500 font-medium shrink-0">A</span></div>
+              <div className="flex justify-between items-start group"><div className="flex gap-1.5 text-neutral-300 group-hover:text-white transition-colors flex-1 pr-2"><span className="shrink-0 w-[52px]">WIX1003</span><span className="shrink-0 text-neutral-500">Â·</span><span>Computer Systems and Organization</span></div><span className="w-6 text-right text-emerald-500 font-medium shrink-0">A</span></div>
+              <div className="flex justify-between items-start group"><div className="flex gap-1.5 text-neutral-300 group-hover:text-white transition-colors flex-1 pr-2"><span className="shrink-0 w-[52px]">GIG1003</span><span className="shrink-0 text-neutral-500">Â·</span><span>Basic Entrepreneurship Enculturation</span></div><span className="w-6 text-right text-emerald-400 font-bold shrink-0">A+</span></div>
+              <div className="flex justify-between items-start group"><div className="flex gap-1.5 text-neutral-300 group-hover:text-white transition-colors flex-1 pr-2"><span className="shrink-0 w-[52px]">GLT1024</span><span className="shrink-0 text-neutral-500">Â·</span><span>Proficiency in English III</span></div><span className="w-6 text-right text-emerald-500 font-medium shrink-0">A</span></div>
             </div>
           </div>
         </div>
@@ -225,7 +225,7 @@ const honorsList: HonorItem[] = [
 
           <div className="bg-black/40 border border-white/5 rounded-xl overflow-hidden">
             <div className="bg-white/5 px-3 py-2 border-b border-white/10 flex justify-between items-center">
-              <span className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-widest text-emerald-400">National & State Excellence</span>
+              <span className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-[0.2em] text-emerald-400">National & State Excellence</span>
               <span className="text-[10px] sm:text-xs font-mono text-neutral-400">KMNS 2024/2025</span>
             </div>
             <div className="p-3 grid grid-cols-1 gap-2 text-[10px] sm:text-xs font-mono ">
@@ -243,7 +243,7 @@ const honorsList: HonorItem[] = [
 
           <div className="bg-black/40 border border-white/5 rounded-xl overflow-hidden">
             <div className="bg-white/5 px-3 py-2 border-b border-white/10 flex justify-between items-center">
-              <span className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-widest text-emerald-400">Leadership & Mentorship Roles</span>
+              <span className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-[0.2em] text-emerald-400">Leadership & Mentorship Roles</span>
               <span className="text-[10px] sm:text-xs font-mono text-neutral-400">KEY POSITIONS</span>
             </div>
             <div className="p-3 grid grid-cols-1 gap-2 text-[10px] sm:text-xs font-mono">
@@ -362,7 +362,7 @@ export default function HonorsSection() {
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="inline-flex items-center gap-2 border border-amber-500/30 bg-amber-500/10 backdrop-blur-md rounded-full px-4 py-1.5 text-xs font-mono text-amber-300 tracking-widest uppercase"
+            className="inline-flex items-center gap-2 border border-amber-500/30 bg-amber-500/10 backdrop-blur-md rounded-full px-4 py-1.5 text-xs font-mono text-amber-300 tracking-[0.2em] uppercase"
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
             <span>HONORS // ACADEMIC & COMPETITION DISTINCTIONS</span>
@@ -373,7 +373,7 @@ export default function HonorsSection() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white max-w-3xl leading-[1.05]"
+              className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tighter text-white max-w-3xl leading-[1.05]"
             >
               HONORS & COMPETITIVE ACHIEVEMENTS.
             </motion.h2>
@@ -428,7 +428,7 @@ export default function HonorsSection() {
                 </div>
 
                 <div className="relative z-10 space-y-1">
-                  <h3 className={`font-black uppercase tracking-tight text-lg transition-colors ${isActive ? 'text-white' : 'text-neutral-300 group-hover:text-white'}`}>
+                  <h3 className={`font-black uppercase tracking-tighter text-lg transition-colors ${isActive ? 'text-white' : 'text-neutral-300 group-hover:text-white'}`}>
                     {cat.label}
                   </h3>
                   <p className={`text-xs font-mono transition-colors ${isActive ? cat.text : 'text-neutral-500'}`}>
@@ -493,7 +493,7 @@ export default function HonorsSection() {
                       <div className="relative z-10 flex flex-col flex-1">
                         {/* Top Bar */}
                         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-                          <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[10px] sm:text-xs font-mono tracking-widest uppercase ${badgeStyles[item.badgeColor]}`}>
+                          <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[10px] sm:text-xs font-mono tracking-[0.2em] uppercase ${badgeStyles[item.badgeColor]}`}>
                             <Icon className="w-3.5 h-3.5" />
                             <span>{item.badge}</span>
                           </div>
@@ -505,7 +505,7 @@ export default function HonorsSection() {
 
                         {/* Title & Body */}
                         <div className="space-y-2 mb-4">
-                          <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white group-hover:text-white/90 transition-colors">
+                          <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tighter text-white group-hover:text-white/90 transition-colors">
                             {item.title}
                           </h3>
                           <p className="text-sm font-mono text-neutral-400">
@@ -537,7 +537,7 @@ export default function HonorsSection() {
                           {/* Big Stat Callout */}
                           <div className="flex flex-col">
                             <span className="text-3xl font-black text-white tracking-tighter"><AnimatedCounter value={item.statCallout.value} /></span>
-                            <span className="text-xs font-mono text-neutral-500 uppercase tracking-widest mt-1">
+                            <span className="text-xs font-mono text-neutral-500 uppercase tracking-[0.2em] mt-1">
                               {item.statCallout.label}
                             </span>
                           </div>
@@ -546,7 +546,7 @@ export default function HonorsSection() {
                           {item.certificateUrl && (
                             <button
                               onClick={() => setSelectedCert(item.certificateUrl!)}
-                              className={`group/btn flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest transition-colors ${
+                              className={`group/btn flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-[0.2em] transition-colors ${
                                 item.badgeColor === 'gold' ? 'text-amber-400 hover:text-amber-300' :
                                 item.badgeColor === 'cyan' ? 'text-cyan-400 hover:text-cyan-300' :
                                 'text-emerald-400 hover:text-emerald-300'

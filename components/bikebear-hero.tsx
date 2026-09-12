@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useRef } from "react";
 import Image from "next/image";
@@ -31,7 +31,7 @@ function MagnifiedHeadline() {
       className="relative space-y-2 cursor-none"
     >
       {/* Base Normal Text */}
-      <h2 className="text-4xl sm:text-6xl md:text-7xl xl:text-8xl font-black uppercase tracking-tight leading-[0.92] text-white transition-opacity duration-300" style={{ opacity: isHovered ? 0.2 : 1 }}>
+      <h2 className="text-4xl sm:text-6xl md:text-7xl xl:text-8xl font-black uppercase tracking-tighter leading-[0.92] text-white transition-opacity duration-300" style={{ opacity: isHovered ? 0.2 : 1 }}>
         ENGINEERING <br />
         <span className="bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 bg-clip-text text-transparent">
           SYSTEMS TO
@@ -42,7 +42,7 @@ function MagnifiedHeadline() {
 
       {/* Scaled X-Ray Magnification Text */}
       <h2 
-        className="text-4xl sm:text-6xl md:text-7xl xl:text-8xl font-black uppercase tracking-tight leading-[0.92] text-amber-400 absolute inset-0 pointer-events-none transition-opacity duration-150"
+        className="text-4xl sm:text-6xl md:text-7xl xl:text-8xl font-black uppercase tracking-tighter leading-[0.92] text-amber-400 absolute inset-0 pointer-events-none transition-opacity duration-150"
         style={{
           transform: 'scale(1.15)',
           transformOrigin: `${position.x}px ${position.y}px`,
@@ -138,7 +138,7 @@ export default function BikebearHero() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="inline-flex items-center gap-2 border border-amber-500/30 bg-amber-500/10 backdrop-blur-md rounded-full px-4 py-1.5 text-xs font-mono text-amber-300 tracking-widest uppercase shadow-sm"
+              className="inline-flex items-center gap-2 border border-amber-500/30 bg-amber-500/10 backdrop-blur-md rounded-full px-4 py-1.5 text-xs font-mono text-amber-300 tracking-[0.2em] uppercase shadow-sm"
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
               <span>ABOUT // VISION & SYSTEMS ARCHITECTURE</span>
@@ -161,7 +161,7 @@ export default function BikebearHero() {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="text-neutral-300 text-base sm:text-lg max-w-xl leading-relaxed font-sans"
             >
-              Architecting robust, <span className="text-amber-400 font-medium">low-latency distributed backends</span> and <span className="text-amber-400 font-medium">autonomous AI systems</span> — engineered with algorithmic precision, enterprise scalability, and strategic fiscal discipline.
+              Architecting robust, <span className="text-amber-400 font-medium">low-latency distributed backends</span> and <span className="text-amber-400 font-medium">autonomous AI systems</span> â€” engineered with algorithmic precision, enterprise scalability, and strategic fiscal discipline.
             </motion.p>
 
             {/* Call to Action Buttons */}
@@ -176,7 +176,7 @@ export default function BikebearHero() {
                     href="#projects"
                     className="px-7 py-3.5 rounded-full bg-white text-black font-bold font-mono text-xs uppercase tracking-wider hover:bg-amber-400 transition-all duration-300 shadow-xl shadow-white/5 hover:shadow-amber-400/20 hover:-translate-y-0.5"
                   >
-                    EXPLORE PROJECTS ↗
+                    EXPLORE PROJECTS â†—
                   </a>
                 </Magnetic>
                 <Magnetic strength={0.3}>
@@ -207,8 +207,8 @@ export default function BikebearHero() {
                     <div className="flex whitespace-nowrap animate-[marquee_20s_linear_infinite] w-max">
                       {[...Array(4)].map((_, i) => (
                         <div key={i} className="flex items-center">
-                          <span className="text-[10px] sm:text-sm font-sans font-black text-black uppercase tracking-widest px-4">
-                            LATEST: 2ND PLACE @ SUPERVITY ASIA HACKATHON ✈
+                          <span className="text-[10px] sm:text-sm font-sans font-black text-black uppercase tracking-[0.2em] px-4">
+                            LATEST: 2ND PLACE @ SUPERVITY ASIA HACKATHON âœˆ
                           </span>
                           <span className="text-lg text-[#00E5FF] font-black mx-2 translate-y-[2px]">*</span>
                         </div>

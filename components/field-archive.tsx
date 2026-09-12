@@ -18,7 +18,7 @@ export function FieldArchive({ archiveId }: FieldArchiveProps) {
   return (
     <div className="mt-8 pt-8 border-t border-white/5">
       <div className="flex items-center gap-4 mb-6">
-        <span className="text-xs font-mono font-bold uppercase tracking-widest text-emerald-400">
+        <span className="text-xs font-mono font-bold uppercase tracking-[0.2em] text-emerald-400">
           FIELD ARCHIVE // {String(records.length).padStart(2, '0')} RECORDS
         </span>
         <div className="flex-1 h-[1px] bg-white/5"></div>

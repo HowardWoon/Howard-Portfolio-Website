@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import { FieldArchive } from "./field-archive";
@@ -135,8 +135,8 @@ function PekomTreasurerDashboard() {
         desc: (
           <div className="space-y-6 pt-2">
             <div className="flex flex-col gap-1">
-              <div className="text-amber-400 font-mono text-xs font-bold uppercase tracking-widest">Duration</div>
-              <div className="text-neutral-400 font-mono text-xs">February – June 2026</div>
+              <div className="text-amber-400 font-mono text-xs font-bold uppercase tracking-[0.2em]">Duration</div>
+              <div className="text-neutral-400 font-mono text-xs">February â€“ June 2026</div>
             </div>
             
             <div className="space-y-2">
@@ -175,7 +175,7 @@ function PekomTreasurerDashboard() {
         desc: (
           <div className="space-y-6 pt-2">
             <div className="flex flex-col gap-1">
-              <div className="text-amber-400 font-mono text-xs font-bold uppercase tracking-widest">Duration</div>
+              <div className="text-amber-400 font-mono text-xs font-bold uppercase tracking-[0.2em]">Duration</div>
               <div className="text-neutral-400 font-mono text-xs">2025</div>
             </div>
             
@@ -211,7 +211,7 @@ function PekomTreasurerDashboard() {
         desc: (
           <div className="space-y-6 pt-2">
             <div className="flex flex-col gap-1">
-              <div className="text-amber-400 font-mono text-xs font-bold uppercase tracking-widest">Duration</div>
+              <div className="text-amber-400 font-mono text-xs font-bold uppercase tracking-[0.2em]">Duration</div>
               <div className="text-neutral-400 font-mono text-xs">2025</div>
             </div>
             
@@ -239,8 +239,8 @@ function PekomTreasurerDashboard() {
         desc: (
           <div className="space-y-6 pt-2">
             <div className="flex flex-col gap-1">
-              <div className="text-amber-400 font-mono text-xs font-bold uppercase tracking-widest">Duration</div>
-              <div className="text-neutral-400 font-mono text-xs">September 2025 – June 2026</div>
+              <div className="text-amber-400 font-mono text-xs font-bold uppercase tracking-[0.2em]">Duration</div>
+              <div className="text-neutral-400 font-mono text-xs">September 2025 â€“ June 2026</div>
             </div>
             
             <div className="space-y-2">
@@ -270,7 +270,7 @@ function PekomTreasurerDashboard() {
       <div className="bg-[#090B10] rounded-[22px] p-5 sm:p-6">
         <div className="flex items-center gap-2 mb-6">
           <div className="w-2 h-2 bg-amber-500 rounded-full animate-ping" />
-          <h4 className="text-sm font-mono font-bold text-amber-400 uppercase tracking-widest">Treasurer Event Portfolio [4]</h4>
+          <h4 className="text-sm font-mono font-bold text-amber-400 uppercase tracking-[0.2em]">Treasurer Event Portfolio [4]</h4>
         </div>
         
         {/* KPI Dashboard */}
@@ -366,7 +366,7 @@ export default function ExperienceSection() {
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="inline-flex items-center gap-2 border border-amber-500/30 bg-amber-500/10 backdrop-blur-md rounded-full px-4 py-1.5 text-xs font-mono text-amber-300 tracking-widest uppercase"
+            className="inline-flex items-center gap-2 border border-amber-500/30 bg-amber-500/10 backdrop-blur-md rounded-full px-4 py-1.5 text-xs font-mono text-amber-300 tracking-[0.2em] uppercase"
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
             <span>EXPERIENCE // CAREER & INSTITUTIONAL GOVERNANCE</span>
@@ -376,7 +376,7 @@ export default function ExperienceSection() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white max-w-3xl leading-[1.05]"
+            className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tighter text-white max-w-3xl leading-[1.05]"
           >
             EXECUTIVE LEADERSHIP & GOVERNANCE.
           </motion.h2>
@@ -455,7 +455,7 @@ export default function ExperienceSection() {
                       <span className="w-8 h-8 rounded-full bg-white/10 text-white font-mono text-xs font-bold flex items-center justify-center border border-white/15">
                         {item.number}
                       </span>
-                      <span className={`px-3 py-1 rounded-full border text-xs font-mono tracking-widest uppercase ${badgeColor}`}>
+                      <span className={`px-3 py-1 rounded-full border text-xs font-mono tracking-[0.2em] uppercase ${badgeColor}`}>
                         {item.categoryLabel}
                       </span>
                     </div>
@@ -476,10 +476,10 @@ export default function ExperienceSection() {
                   <div className="pt-6 pb-6">
                     <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
                       <div className="space-y-2">
-                        <h3 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-white group-hover:text-amber-400 transition-colors duration-300">
+                        <h3 className="text-2xl sm:text-3xl font-black uppercase tracking-tighter text-white group-hover:text-amber-400 transition-colors duration-300">
                           {item.role}
                         </h3>
-                        <p className="text-sm font-mono text-amber-500/80 uppercase tracking-widest">
+                        <p className="text-sm font-mono text-amber-500/80 uppercase tracking-[0.2em]">
                           // {item.headline}
                         </p>
                       </div>
@@ -508,8 +508,8 @@ export default function ExperienceSection() {
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
                     {item.metrics.map((metric, mIdx) => (
                       <div key={mIdx} className="bg-black/40 border border-white/5 rounded-2xl p-4 flex flex-col justify-center">
-                        <span className="text-[10px] font-mono text-neutral-500 uppercase tracking-widest mb-1">{metric.label}</span>
-                        <span className="text-lg font-bold text-white tracking-tight">{metric.value}</span>
+                        <span className="text-[10px] font-mono text-neutral-500 uppercase tracking-[0.2em] mb-1">{metric.label}</span>
+                        <span className="text-lg font-bold text-white tracking-tighter">{metric.value}</span>
                       </div>
                     ))}
                   </div>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useRef, useState } from "react";
 import { motion, useScroll, useTransform, MotionValue, AnimatePresence } from "framer-motion";
@@ -45,7 +45,7 @@ const projects: ProjectData[] = [
       {
       id: "zerolag",
       number: "01",
-      badge: "🏆 2nd Place Winner · Supervity Asia Hackathon 2026",
+      badge: "ðŸ† 2nd Place Winner Â· Supervity Asia Hackathon 2026",
       badgeType: "gold",
       title: "ZeroLag",
       subtitle: "Governed AI Workforce & Autonomous Sales Pipeline",
@@ -71,7 +71,7 @@ const projects: ProjectData[] = [
     {
       id: "proofpay",
       number: "02",
-      badge: "🏅 2nd Runner Up (Sui) & Top 6 (Gonka AI) · MUBA 2026",
+      badge: "ðŸ… 2nd Runner Up (Sui) & Top 6 (Gonka AI) Â· MUBA 2026",
       badgeType: "gold",
       title: "PROOFPAY",
       subtitle: "Delivery-linked B2B Escrow & Settlement Platform",
@@ -94,7 +94,7 @@ const projects: ProjectData[] = [
   {
       id: "bilahujan",
       number: "03",
-      badge: "🏅 V Hack 2026 Case Study 3 — First Responder of the Future",
+      badge: "ðŸ… V Hack 2026 Case Study 3 â€” First Responder of the Future",
       badgeType: "cyan",
       title: "BILAHUJAN",
       subtitle: "Decentralised Swarm Intelligence for Flood First Response",
@@ -119,7 +119,7 @@ const projects: ProjectData[] = [
 {
       id: "catfish",
       number: "04",
-      badge: "WIA1006 Machine Learning • Ultimate Pipeline",
+      badge: "WIA1006 Machine Learning â€¢ Ultimate Pipeline",
       badgeType: "cyan",
       title: "CATFISH DETECTOR AI",
       subtitle: "Detecting Deception Through Mathematical Behavioral Intelligence",
@@ -151,7 +151,7 @@ const projects: ProjectData[] = [
       {
       id: "slotify",
       number: "05",
-      badge: "Java Spring Boot • Data Structures",
+      badge: "Java Spring Boot â€¢ Data Structures",
       badgeType: "gold",
       title: "SLOTIFY",
       subtitle: "Multi-Data Structure Architecture & Algorithmic Router",
@@ -181,7 +181,7 @@ const projects: ProjectData[] = [
 {
     id: "sensor-x-sensei",
     number: "05",
-    badge: "⚡ UM Technothon 2026 Finalist · IoT Energy Grid",
+    badge: "âš¡ UM Technothon 2026 Finalist Â· IoT Energy Grid",
     badgeType: "emerald",
     title: "Sensor X Sensei",
     subtitle: "Automated Energy Management & Micro-Grid Telemetry",
@@ -225,13 +225,13 @@ export default function StackedProjects() {
         
         {/* Section Header */}
         <div className="space-y-6">
-          <div className="inline-flex items-center gap-2 border border-amber-500/30 bg-amber-500/10 backdrop-blur-md rounded-full px-4 py-1.5 text-xs font-mono text-amber-300 tracking-widest uppercase">
+          <div className="inline-flex items-center gap-2 border border-amber-500/30 bg-amber-500/10 backdrop-blur-md rounded-full px-4 py-1.5 text-xs font-mono text-amber-300 tracking-[0.2em] uppercase">
             <Layers className="w-3.5 h-3.5 text-amber-400" />
             <span>PROJECTS // PRODUCTION & ARCHITECTURE</span>
           </div>
 
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-            <h2 className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white max-w-3xl leading-[1.05]">
+            <h2 className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tighter text-white max-w-3xl leading-[1.05]">
               SCALABLE SYSTEMS & AUTONOMOUS ARCHITECTURES.
             </h2>
             <p className="text-neutral-400 text-sm sm:text-base font-mono max-w-md">
@@ -318,7 +318,7 @@ function ProjectCard({
 
             {/* Title & Subtitle */}
             <div className="space-y-1.5">
-              <h3 className="text-3xl sm:text-4xl font-extrabold uppercase tracking-tight text-white flex items-center gap-3">
+              <h3 className="text-3xl sm:text-4xl font-extrabold uppercase tracking-tighter text-white flex items-center gap-3">
                 {project.title}
                 <ArrowUpRight className="w-5 h-5 text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity" />
               </h3>
@@ -334,7 +334,7 @@ function ProjectCard({
 
             {/* Key Architectural Highlights */}
             <div className="space-y-2.5 bg-black/30 p-4 rounded-2xl border border-white/5">
-              <span className="text-xs font-mono text-neutral-400 uppercase tracking-widest block mb-1">
+              <span className="text-xs font-mono text-neutral-400 uppercase tracking-[0.2em] block mb-1">
                 KEY ARCHITECTURAL HIGHLIGHTS:
               </span>
               {project.architecturePoints.map((point, pIdx) => (
@@ -502,7 +502,7 @@ function ProjectCard({
                   </div>
                   <div className="flex items-center justify-between text-xs font-mono">
                     <span className="text-neutral-400">Calculated Safe Corridor:</span>
-                    <span className="text-emerald-400 font-bold">Path Node #104 ➔ #289</span>
+                    <span className="text-emerald-400 font-bold">Path Node #104 âž” #289</span>
                   </div>
                   <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
                     <div className="bg-amber-400 h-full w-4/5 animate-pulse" />

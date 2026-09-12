@@ -80,7 +80,7 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
                     >
                       <button 
                         onClick={handleStartBoot}
-                        className="h-full w-full cursor-pointer rounded-full bg-gradient-to-r from-neutral-100 via-neutral-100 to-white px-6 py-3 text-black font-semibold tracking-tight shadow-md transition-all duration-100 active:scale-95 dark:from-black dark:via-black dark:to-neutral-900 dark:text-white dark:shadow-md hover:scale-105"
+                        className="h-full w-full cursor-pointer rounded-full bg-gradient-to-r from-neutral-100 via-neutral-100 to-white px-6 py-3 text-black font-semibold tracking-tighter shadow-md transition-all duration-100 active:scale-95 dark:from-black dark:via-black dark:to-neutral-900 dark:text-white dark:shadow-md hover:scale-105"
                       >
                         Initialize System &rarr;
                       </button>

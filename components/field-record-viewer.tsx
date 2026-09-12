@@ -51,10 +51,10 @@ export function FieldRecordViewer({ records, currentIndex, onClose, onNavigate }
       >
         {/* Header / ID */}
         <div className="absolute top-6 left-6 sm:top-8 sm:left-8 flex flex-col gap-1 z-[10010]" onClick={e => e.stopPropagation()}>
-          <div className="text-xs font-mono font-bold text-amber-400 uppercase tracking-widest">
+          <div className="text-xs font-mono font-bold text-amber-400 uppercase tracking-[0.2em]">
             FIELD RECORD // {String(currentIndex + 1).padStart(2, '0')} OF {String(records.length).padStart(2, '0')}
           </div>
-          <div className="text-[10px] font-mono text-neutral-500 uppercase tracking-widest">
+          <div className="text-[10px] font-mono text-neutral-500 uppercase tracking-[0.2em]">
             STATUS: SECURE // {currentRecord.category}
           </div>
         </div>
@@ -108,17 +108,17 @@ export function FieldRecordViewer({ records, currentIndex, onClose, onNavigate }
 
             <div className="space-y-6">
               <div>
-                <div className="text-[10px] font-mono text-neutral-500 uppercase tracking-widest mb-1">CATEGORY</div>
+                <div className="text-[10px] font-mono text-neutral-500 uppercase tracking-[0.2em] mb-1">CATEGORY</div>
                 <div className="text-xs font-mono font-bold text-white uppercase tracking-wider">{currentRecord.category}</div>
               </div>
               
               <div>
-                <div className="text-[10px] font-mono text-neutral-500 uppercase tracking-widest mb-1">ROLE</div>
+                <div className="text-[10px] font-mono text-neutral-500 uppercase tracking-[0.2em] mb-1">ROLE</div>
                 <div className="text-xs font-mono font-bold text-emerald-400 uppercase tracking-wider">{currentRecord.role}</div>
               </div>
 
               <div>
-                <div className="text-[10px] font-mono text-neutral-500 uppercase tracking-widest mb-1">EVENT</div>
+                <div className="text-[10px] font-mono text-neutral-500 uppercase tracking-[0.2em] mb-1">EVENT</div>
                 <div className="text-xs font-mono font-bold text-neutral-300 uppercase tracking-wider">{currentRecord.event}</div>
               </div>
             </div>
