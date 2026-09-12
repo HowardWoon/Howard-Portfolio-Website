@@ -192,46 +192,46 @@ export default function BikebearHero() {
           </div>
 
           {/* Right Column: Full-Color Portrait Card with Interactive Tilt (5 cols) */}
-          <div className="lg:col-span-5 flex justify-center lg:justify-end">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              onMouseMove={handleMouseMove}
-              onMouseLeave={handleMouseLeave}
-              style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-              className="relative group cursor-pointer flex flex-col items-center lg:items-end z-40 pointer-events-auto"
-            >
-              {/* News Ticker (Above Photo) */}
-                <div className="w-[340px] sm:w-[460px] lg:w-[480px] xl:w-[540px] mb-4 overflow-hidden bg-white rounded-xl border border-white/20 py-2.5 relative z-20 shadow-[0_0_20px_rgba(255,255,255,0.1)] pointer-events-auto">
-                  <div className="flex whitespace-nowrap animate-[marquee_20s_linear_infinite] w-max">
-                    {[...Array(4)].map((_, i) => (
-                      <div key={i} className="flex items-center">
-                        <span className="text-xs sm:text-sm font-sans font-black text-black uppercase tracking-widest px-4">
-                          LATEST: 2ND PLACE @ SUPERVITY ASIA HACKATHON ✨
-                        </span>
-                        <span className="text-lg text-[#00E5FF] font-black mx-2 translate-y-[2px]">*</span>
-                      </div>
-                    ))}
+            <div className="lg:col-span-5 flex justify-center lg:justify-end w-full">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                onMouseMove={handleMouseMove}
+                onMouseLeave={handleMouseLeave}
+                style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+                className="relative group cursor-pointer flex flex-col items-center lg:items-end z-40 pointer-events-auto w-full sm:w-auto px-2 sm:px-0"
+              >
+                {/* News Ticker (Above Photo) */}
+                  <div className="w-full max-w-[340px] sm:max-w-none sm:w-[460px] lg:w-[480px] xl:w-[540px] mb-4 overflow-hidden bg-white rounded-xl border border-white/20 py-2.5 relative z-20 shadow-[0_0_20px_rgba(255,255,255,0.1)] pointer-events-auto">
+                    <div className="flex whitespace-nowrap animate-[marquee_20s_linear_infinite] w-max">
+                      {[...Array(4)].map((_, i) => (
+                        <div key={i} className="flex items-center">
+                          <span className="text-[10px] sm:text-sm font-sans font-black text-black uppercase tracking-widest px-4">
+                            LATEST: 2ND PLACE @ SUPERVITY ASIA HACKATHON ✈
+                          </span>
+                          <span className="text-lg text-[#00E5FF] font-black mx-2 translate-y-[2px]">*</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
 
-                {/* Outer Glow Halo */}
-              <div className="absolute -inset-1 bg-gradient-to-b from-amber-500/40 via-amber-500/10 to-transparent rounded-[52px] blur-xl opacity-70 group-hover:opacity-100 transition-opacity duration-500" />
+                  {/* Outer Glow Halo */}
+                <div className="absolute -inset-1 bg-gradient-to-b from-amber-500/40 via-amber-500/10 to-transparent rounded-[52px] blur-xl opacity-70 group-hover:opacity-100 transition-opacity duration-500" />
 
-              {/* Main Portrait Frame - Natural Vibrant Color (No Grayscale) */}
-                <div 
-                  data-spiderman="true" 
-                  onMouseMove={(e) => {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    setMaskPosition({
-                      x: e.clientX - rect.left,
-                      y: e.clientY - rect.top
-                    });
-                  }}
-                  onMouseLeave={() => setMaskPosition({ x: -1000, y: -1000 })}
-                  className="relative w-[340px] sm:w-[460px] lg:w-[480px] xl:w-[540px] h-[440px] sm:h-[580px] lg:h-[620px] xl:h-[700px] rounded-[48px] border-2 border-amber-500/30 bg-[#121620] overflow-hidden shadow-2xl transition-all duration-500 group-hover:border-red-500/60 pointer-events-auto cursor-pointer"
-                >
+                {/* Main Portrait Frame - Natural Vibrant Color (No Grayscale) */}
+                  <div 
+                    data-spiderman="true" 
+                    onMouseMove={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      setMaskPosition({
+                        x: e.clientX - rect.left,
+                        y: e.clientY - rect.top
+                      });
+                    }}
+                    onMouseLeave={() => setMaskPosition({ x: -1000, y: -1000 })}
+                    className="relative w-full max-w-[340px] sm:max-w-none sm:w-[460px] lg:w-[480px] xl:w-[540px] h-[400px] sm:h-[580px] lg:h-[620px] xl:h-[700px] rounded-[40px] sm:rounded-[48px] border-2 border-amber-500/30 bg-[#121620] overflow-hidden shadow-2xl transition-all duration-500 group-hover:border-red-500/60 pointer-events-auto cursor-pointer"
+                  >
                   <Image
                     src="/images/howard-solid.jpeg"
                     alt="Howard Woon - Systems & AI Architect"

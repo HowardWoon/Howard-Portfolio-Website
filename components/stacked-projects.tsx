@@ -346,13 +346,13 @@ function ProjectCard({
             </div>
 
             {/* Live Benchmarks & Metric Chips */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {project.metrics.map((m, mIdx) => (
                 <div key={mIdx} className="bg-white/[0.03] border border-white/10 rounded-2xl p-3">
-                  <div className="text-xs font-mono text-neutral-400 uppercase ">
+                  <div className="text-xs font-mono text-neutral-400 uppercase truncate">
                     {m.label}
                   </div>
-                  <div className="text-sm font-mono font-bold text-amber-300 mt-1 ">
+                  <div className="text-sm font-bold text-amber-400 mt-1 truncate">
                     {m.value}
                   </div>
                 </div>
