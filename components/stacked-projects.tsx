@@ -88,6 +88,12 @@ const projects: ProjectData[] = [
       ],
       tags: ["Sui Move", "Next.js", "USDC Stablecoin", "TypeScript", "Gonka Router"],
       prototypeUrl: "https://proofpay-choong-zhuo-lins-projects.vercel.app/",
+      galleryPhotos: [
+        { src: "/images/muba/zilian_muba.jpg", alt: "MUBA Zilian", rotation: -2 },
+        { src: "/images/muba/4ppl_muba.jpg", alt: "MUBA 4 People", rotation: 3 },
+        { src: "/images/muba/gonka_4ppl_muba.jpg", alt: "MUBA Gonka", rotation: -1 },
+        { src: "/images/muba/solo_muba.jpg", alt: "MUBA Solo", rotation: 2 }
+      ],
       simulatorId: "proofpay",
       telemetryType: "proofpay",
     },
@@ -439,40 +445,15 @@ function ProjectCard({
                   <Activity className="w-4 h-4 text-emerald-400 animate-pulse" />
                 )}
                 <span className="uppercase font-bold tracking-wider">
-                  {project.telemetryType === "agentic" || project.telemetryType === "catfish" || project.telemetryType === "slotify" ? "PROJECT GALLERY" : "LIVE TELEMETRY WINDOW"}
+                  {project.telemetryType === "agentic" || project.telemetryType === "catfish" || project.telemetryType === "slotify" || project.telemetryType === "proofpay" ? "PROJECT GALLERY" : "LIVE TELEMETRY WINDOW"}
                 </span>
               </div>
               <span className="text-xs font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-                {project.telemetryType === "agentic" || project.telemetryType === "catfish" || project.telemetryType === "slotify" ? "INTERACTIVE" : "ACTIVE PIPELINE"}
+                {project.telemetryType === "agentic" || project.telemetryType === "catfish" || project.telemetryType === "slotify" || project.telemetryType === "proofpay" ? "INTERACTIVE" : "ACTIVE PIPELINE"}
               </span>
             </div>
 
           {/* Conditional Graphic Visualizers */}
-          {project.telemetryType === "proofpay" && (
-            <div className="space-y-4 py-2">
-              <div className="text-xs font-mono text-neutral-400">
-                // Sui Move Escrow Settlement & AI Truth Engine
-              </div>
-              <div className="bg-black/50 border border-white/10 rounded-xl p-4 space-y-3">
-                <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="text-neutral-400">Transaction Status:</span>
-                  <span className="text-amber-400 font-bold">Milestone #2 Locked</span>
-                </div>
-                <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="text-neutral-400">Evidence Truth Score:</span>
-                  <span className="text-emerald-400 font-bold">96/100 (High Confidence)</span>
-                </div>
-                <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
-                  <div className="bg-emerald-400 h-full w-[96%]" />
-                </div>
-              </div>
-              <div className="bg-black p-3 rounded-xl border border-white/5 font-mono text-xs text-neutral-400 space-y-1">
-                <div className="text-cyan-400">&gt;_ PTB: split_coins, transfer_objects</div>
-                <div>&gt;_ gonka_router: validating evidence_hash</div>
-                <div>&gt;_ mediation_proposal: cited_rules_loaded</div>
-              </div>
-            </div>
-          )}
 
           {project.telemetryType === "agentic" && (
               <div className="flex-1 w-full flex items-center justify-center min-h-[400px] lg:min-h-[450px] py-2 overflow-hidden rounded-xl">
@@ -482,7 +463,7 @@ function ProjectCard({
             
             
 
-            {(project.telemetryType === "catfish" || project.telemetryType === "slotify") && (
+            {(project.telemetryType === "catfish" || project.telemetryType === "slotify" || project.telemetryType === "proofpay") && (
               <div className="flex-1 w-full flex items-center justify-center min-h-[400px] lg:min-h-[450px] py-2 overflow-hidden rounded-xl">
                 <InteractivePhotoStack customPhotos={project.galleryPhotos} />
               </div>
