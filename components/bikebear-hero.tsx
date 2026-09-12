@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useRef } from "react";
 import Image from "next/image";
@@ -82,7 +82,6 @@ export default function BikebearHero() {
   // Mouse Parallax for Portrait Card
   const mouseX = useMotionValue(0);
   const [maskPosition, setMaskPosition] = React.useState({ x: -1000, y: -1000 });
-  const [isMaskVisible, setIsMaskVisible] = React.useState(false);
   const mouseY = useMotionValue(0);
   const springConfig = { damping: 25, stiffness: 150 };
   const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [15, -15]), springConfig);
@@ -201,7 +200,7 @@ export default function BikebearHero() {
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
               style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-              className="relative group cursor-pointer flex flex-col items-center lg:items-end z-40 pointer-events-none"
+              className="relative group cursor-pointer flex flex-col items-center lg:items-end z-40 pointer-events-auto"
             >
               {/* News Ticker (Above Photo) */}
                 <div className="w-[340px] sm:w-[460px] lg:w-[480px] xl:w-[540px] mb-4 overflow-hidden bg-white rounded-xl border border-white/20 py-2.5 relative z-20 shadow-[0_0_20px_rgba(255,255,255,0.1)] pointer-events-auto">
@@ -230,8 +229,7 @@ export default function BikebearHero() {
                       y: e.clientY - rect.top
                     });
                   }}
-                  onMouseEnter={() => setIsMaskVisible(true)}
-                  onMouseLeave={() => setIsMaskVisible(false)}
+                  onMouseLeave={() => setMaskPosition({ x: -1000, y: -1000 })}
                   className="relative w-[340px] sm:w-[460px] lg:w-[480px] xl:w-[540px] h-[440px] sm:h-[580px] lg:h-[620px] xl:h-[700px] rounded-[48px] border-2 border-amber-500/30 bg-[#121620] overflow-hidden shadow-2xl transition-all duration-500 group-hover:border-red-500/60 pointer-events-auto cursor-pointer"
                 >
                   <Image
@@ -248,9 +246,8 @@ export default function BikebearHero() {
                     src="/images/spiderman.jpg"
                     alt="Howard Woon - Spiderman"
                     fill
-                    className="object-cover object-top saturate-[1.3] contrast-[1.15] pointer-events-none transition-opacity duration-300"
+                    className="object-cover object-top saturate-[1.3] contrast-[1.15] pointer-events-none transition-all duration-75"
                     style={{
-                      opacity: isMaskVisible ? 1 : 0,
                       clipPath: `circle(120px at ${maskPosition.x}px ${maskPosition.y}px)`
                     }}
                     priority
