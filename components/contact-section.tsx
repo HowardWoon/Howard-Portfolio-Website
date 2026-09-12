@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -16,6 +16,7 @@ import {
   Sparkles,
   CheckCircle2
 } from "lucide-react";
+import { personalDetails } from "@/lib/site-data";
 
 const quickIntents = [
   { label: "💼 2026 SWE Role", text: "Hi Howard, I would like to discuss a Software Engineering opportunity at our company..." },
@@ -37,7 +38,7 @@ export default function ContactSection() {
 
   
 
-  const emailAddress = "howardwoonhz@gmail.com";
+  const emailAddress = personalDetails.email;
   const linkedInUrl = "https://www.linkedin.com/in/howard-woon-hao-zhe-730b9337a/";
   const githubUrl = "https://github.com/HowardWoon";
 
@@ -336,6 +337,10 @@ export default function ContactSection() {
                     <CheckCircle2 className="w-4 h-4 text-black" />
                     <span>TRANSMISSION RECEIVED — I WILL REPLY SHORTLY!</span>
                   </>
+                ) : formStatus === "error" ? (
+                  <>
+                    <span>TRANSMISSION FAILED - TRY AGAIN</span>
+                  </>
                 ) : (
                   <>
                     <Send className="w-4 h-4" />
@@ -419,7 +424,7 @@ export default function ContactSection() {
                   <a href="https://github.com/HowardWoon" target="_blank" rel="noreferrer" className="text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-colors uppercase tracking-widest flex items-center gap-2.5">
                     <Github className="w-5 h-5" /> GITHUB
                   </a>
-                  <a href="/resume" className="text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-colors uppercase tracking-widest flex items-center gap-2.5">
+                  <a href="/resume.pdf" target="_blank" className="text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-colors uppercase tracking-widest flex items-center gap-2.5">
                     <FileText className="w-5 h-5" /> RESUME
                   </a>
                 </div>

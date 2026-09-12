@@ -1,9 +1,10 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { Command } from "cmdk";
 import { Search, Home, Code, GraduationCap, Briefcase, Download, Mail } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { personalDetails } from "@/lib/site-data";
 
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
@@ -14,6 +15,9 @@ export function CommandPalette() {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setOpen((open) => !open);
+      }
+      if (e.key === "Escape") {
+        setOpen(false);
       }
     };
     document.addEventListener("keydown", down);
@@ -83,7 +87,7 @@ export function CommandPalette() {
           <Command.Group heading="Actions" className="text-xs font-mono text-neutral-500 px-2 py-2 border-t border-white/5 mt-1">
             <Command.Item 
               onSelect={() => runCommand(() => {
-                navigator.clipboard.writeText("contact@howardwoon.com");
+                navigator.clipboard.writeText(personalDetails.email);
                 alert("Email copied to clipboard!");
               })}
               className="flex items-center gap-3 px-3 py-2.5 mt-1 rounded-lg cursor-pointer aria-selected:bg-white/10 text-neutral-200 aria-selected:text-white transition-colors text-sm"

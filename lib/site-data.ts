@@ -1,4 +1,4 @@
-﻿import {               Terminal } from 'lucide-react';
+import {               Terminal } from 'lucide-react';
 export interface Project {
   id: string;
   index: string;
@@ -125,7 +125,7 @@ export const projects: Project[] = [
     technologies: ['Flutter', 'Python', 'FastAPI', 'GIS Mapping', 'Supabase'],
     githubUrl: 'https://github.com/HowardWoon/BILAHUJAN-VHack2026',
     liveUrl: 'https://bilahujan-vhack.web.app/',
-    certificateUrl: '/certificates/VHack 2026.pdf',
+    certificateUrl: '/certificates/V HACK 2026 QUALIFIER_HOWARD WOON HAO ZHE.pdf',
     featured: true,
     highlight: 'KitaHack 2026 National Innovation',
     year: '2026',
