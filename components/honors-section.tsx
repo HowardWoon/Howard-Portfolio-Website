@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -55,6 +55,23 @@ const honorsList: HonorItem[] = [
       "Integrated real-time sentiment scoring with vectorized CRM dispatch"
     ],
     certificateUrl: "/certificates/Sales Intelligence Winner - 2nd Place.png",
+    icon: Trophy,
+  },
+  {
+    id: "proofpay",
+    isFeatured: true,
+    badge: "GLOBAL BLOCKCHAIN HACKATHON WINNER",
+    badgeColor: "gold",
+    title: "2ND RUNNER UP (PAYMENTS & STABLECOINS)",
+    issuingBody: "MUBA Blockchain Hackathon 2026",
+    period: "2026",
+    statCallout: { value: "3rd", label: "Payments & Stablecoins Track" },
+    description:
+      "Developed ProofPay, a delivery-linked B2B escrow and settlement platform built on Sui. Addressed B2B trust deadlocks using smart contract milestone releases and AI-driven evidence verification via Gonka Router.",
+    highlights: [
+      "Awarded 2nd Runner Up out of global participants in the Sui Foundation track",
+      "Ranked Top 6 in the AI For Society track (Gonka Router AI)"
+    ],
     icon: Trophy,
   },
   {

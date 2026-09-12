@@ -36,7 +36,7 @@ interface ProjectData {
   colabUrl?: string;
   simulatorId: string;
   githubUrl?: string;
-  telemetryType: "agentic" | "flood" | "energy" | "catfish" | "slotify";
+  telemetryType: "agentic" | "flood" | "energy" | "catfish" | "slotify" | "proofpay";
   galleryPhotos?: { src: string, alt: string, rotation: number }[];
 }
 
@@ -68,9 +68,32 @@ const projects: ProjectData[] = [
       githubUrl: "https://github.com",
       telemetryType: "agentic",
     },
+    {
+      id: "proofpay",
+      number: "02",
+      badge: "🏅 2nd Runner Up (Sui) & Top 6 (Gonka AI) · MUBA 2026",
+      badgeType: "gold",
+      title: "PROOFPAY",
+      subtitle: "Delivery-linked B2B Escrow & Settlement Platform",
+      description: "A decentralized B2B Transaction Truth Engine built on Sui that replaces blind trust with transparent, programmable trade conditions. Buyers fund a non-custodial smart contract, suppliers ship against visible funds, and Gonka-powered AI validates evidence.",
+      architecturePoints: [
+        "Sui Move Smart Contract: Non-custodial programmable escrow with atomic PTB funding and milestone-based releases.",
+        "Gonka Router AI Verification: Multi-model AI validation (consistency, credibility, completeness) of delivery evidence.",
+        "Dispute Resolution: AI generates cited, non-binding mediation proposals grounded in legal and commercial sources."
+      ],
+      metrics: [
+        { label: "Sui Track", value: "3rd Place" },
+        { label: "Gonka AI", value: "Top 6" },
+        { label: "Escrow Logic", value: "Partial Settlement" }
+      ],
+      tags: ["Sui Move", "Next.js", "USDC Stablecoin", "TypeScript", "Gonka Router"],
+      prototypeUrl: "https://proofpay-choong-zhuo-lins-projects.vercel.app/",
+      simulatorId: "proofpay",
+      telemetryType: "proofpay",
+    },
   {
       id: "bilahujan",
-      number: "02",
+      number: "03",
       badge: "🏅 V Hack 2026 Case Study 3 — First Responder of the Future",
       badgeType: "cyan",
       title: "BILAHUJAN",
@@ -95,7 +118,7 @@ const projects: ProjectData[] = [
     },
 {
       id: "catfish",
-      number: "03",
+      number: "04",
       badge: "WIA1006 Machine Learning • Ultimate Pipeline",
       badgeType: "cyan",
       title: "CATFISH DETECTOR AI",
@@ -127,7 +150,7 @@ const projects: ProjectData[] = [
     },
       {
       id: "slotify",
-      number: "04",
+      number: "05",
       badge: "Java Spring Boot • Data Structures",
       badgeType: "gold",
       title: "SLOTIFY",
@@ -424,8 +447,34 @@ function ProjectCard({
               </span>
             </div>
 
-            {/* Conditional Graphic Visualizers */}
-            {project.telemetryType === "agentic" && (
+          {/* Conditional Graphic Visualizers */}
+          {project.telemetryType === "proofpay" && (
+            <div className="space-y-4 py-2">
+              <div className="text-xs font-mono text-neutral-400">
+                // Sui Move Escrow Settlement & AI Truth Engine
+              </div>
+              <div className="bg-black/50 border border-white/10 rounded-xl p-4 space-y-3">
+                <div className="flex items-center justify-between text-xs font-mono">
+                  <span className="text-neutral-400">Transaction Status:</span>
+                  <span className="text-amber-400 font-bold">Milestone #2 Locked</span>
+                </div>
+                <div className="flex items-center justify-between text-xs font-mono">
+                  <span className="text-neutral-400">Evidence Truth Score:</span>
+                  <span className="text-emerald-400 font-bold">96/100 (High Confidence)</span>
+                </div>
+                <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                  <div className="bg-emerald-400 h-full w-[96%]" />
+                </div>
+              </div>
+              <div className="bg-black p-3 rounded-xl border border-white/5 font-mono text-xs text-neutral-400 space-y-1">
+                <div className="text-cyan-400">&gt;_ PTB: split_coins, transfer_objects</div>
+                <div>&gt;_ gonka_router: validating evidence_hash</div>
+                <div>&gt;_ mediation_proposal: cited_rules_loaded</div>
+              </div>
+            </div>
+          )}
+
+          {project.telemetryType === "agentic" && (
               <div className="flex-1 w-full flex items-center justify-center min-h-[400px] lg:min-h-[450px] py-2 overflow-hidden rounded-xl">
                 <InteractivePhotoStack />
               </div>
