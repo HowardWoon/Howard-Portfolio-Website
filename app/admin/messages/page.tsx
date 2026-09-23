@@ -1,4 +1,4 @@
-﻿import Link from 'next/link';
+import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 import { Mail, MailOpen, CalendarDays, ArrowUpRight, Check, Trash2, X } from 'lucide-react';
 import { requireAdminUser } from '@/lib/admin-auth';

@@ -2,17 +2,29 @@
 
 import { useEffect, useState } from "react";
 import { Command } from "cmdk";
-import { Search, Home, Code, GraduationCap, Briefcase, Download, Mail } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Search, Code, GraduationCap, Briefcase, Download, Mail } from "lucide-react";
 import { personalDetails } from "@/lib/site-data";
+
+/** Scroll to a section through Lenis (smooth + header offset) with a native fallback. */
+function goTo(hash: string) {
+  const el = document.querySelector(hash);
+  if (!el) return;
+  if (window.__lenis) {
+    // Lenis applies the section's CSS scroll-margin-top (header offset) itself
+    window.__lenis.scrollTo(el as HTMLElement);
+  } else {
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  history.replaceState(null, "", hash);
+}
 
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
-  const router = useRouter();
+  const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+      if (e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setOpen((open) => !open);
       }
@@ -31,80 +43,94 @@ export function CommandPalette() {
     return () => window.removeEventListener("open-command-palette", handleOpen);
   }, []);
 
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 2200);
+    return () => clearTimeout(t);
+  }, [toast]);
+
   const runCommand = (command: () => void) => {
     setOpen(false);
     command();
   };
 
-  if (!open) return null;
+  const itemClass =
+    "flex items-center gap-3 px-3 py-3 mt-1 rounded-xl cursor-pointer border-2 border-transparent text-ink font-sans font-semibold text-[0.95rem] transition-colors aria-selected:bg-pop-yellow aria-selected:border-ink";
+  const groupClass =
+    "px-2 py-2 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:pb-1 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-mono [&_[cmdk-group-heading]]:font-extrabold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.1em] [&_[cmdk-group-heading]]:text-ink-muted";
 
   return (
-    <div className="fixed inset-0 z-[10000] flex items-start justify-center pt-[15vh] sm:pt-[20vh] px-4 backdrop-blur-sm bg-black/40">
-      <div className="fixed inset-0" onClick={() => setOpen(false)} />
-      
-      <Command 
-        className="relative w-full max-w-[560px] bg-[#0E121B] rounded-2xl border border-white/10 shadow-2xl shadow-black overflow-hidden flex flex-col font-sans"
-        shouldFilter={true}
-      >
-        <div className="flex items-center border-b border-white/10 px-4 py-3">
-          <Search className="w-4 h-4 text-neutral-400 mr-3" />
-          <Command.Input 
-            autoFocus
-            placeholder="Type a command or search..."
-            className="flex-1 bg-transparent text-white placeholder-neutral-500 outline-none border-none text-sm font-medium"
-          />
+    <>
+      {/* Non-blocking toast (replaces window.alert) */}
+      {toast && (
+        <div role="status" className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[10001] nb-tag bg-pop-mint shadow-brutal-sm px-4 py-2">
+          {toast}
         </div>
+      )}
 
-        <Command.List className="max-h-[300px] overflow-y-auto p-2 scrollbar-none">
-          <Command.Empty className="py-6 text-center text-sm text-neutral-400">
-            No results found.
-          </Command.Empty>
+      {open && (
+        <div className="fixed inset-0 z-[10000] flex items-start justify-center pt-[max(4.5rem,12dvh)] sm:pt-[18vh] px-3 xs:px-4 bg-ink/40 backdrop-blur-[2px]" data-lenis-prevent>
+          <div className="fixed inset-0" onClick={() => setOpen(false)} />
 
-          <Command.Group heading="Navigation" className="text-xs font-mono text-neutral-500 px-2 py-2">
-            <Command.Item 
-              onSelect={() => runCommand(() => window.location.hash = "#experience")}
-              className="flex items-center gap-3 px-3 py-2.5 mt-1 rounded-lg cursor-pointer aria-selected:bg-white/10 text-neutral-200 aria-selected:text-white transition-colors text-sm"
-            >
-              <Briefcase className="w-4 h-4 text-neutral-400" />
-              <span>Experience</span>
-            </Command.Item>
-            <Command.Item 
-              onSelect={() => runCommand(() => window.location.hash = "#projects")}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer aria-selected:bg-white/10 text-neutral-200 aria-selected:text-white transition-colors text-sm"
-            >
-              <Code className="w-4 h-4 text-neutral-400" />
-              <span>Projects</span>
-            </Command.Item>
-            <Command.Item 
-              onSelect={() => runCommand(() => window.location.hash = "#honors")}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer aria-selected:bg-white/10 text-neutral-200 aria-selected:text-white transition-colors text-sm"
-            >
-              <GraduationCap className="w-4 h-4 text-neutral-400" />
-              <span>Honors & Awards</span>
-            </Command.Item>
-          </Command.Group>
+          <Command
+            label="Command Palette"
+            className="relative w-full max-w-[560px] bg-white rounded-[22px] border-3 border-ink shadow-brutal-xl overflow-hidden flex flex-col font-sans"
+            shouldFilter={true}
+          >
+            <div className="flex items-center border-b-3 border-ink px-4 py-3.5 bg-paper-cream">
+              <Search className="w-5 h-5 text-ink mr-3" strokeWidth={2.75} />
+              <Command.Input
+                autoFocus
+                placeholder="Type a command or search..."
+                className="flex-1 bg-transparent text-ink placeholder:text-ink-muted outline-none border-none text-base font-semibold"
+              />
+              <kbd className="hidden sm:inline-block nb-tag bg-white text-[0.65rem] py-0.5">ESC</kbd>
+            </div>
 
-          <Command.Group heading="Actions" className="text-xs font-mono text-neutral-500 px-2 py-2 border-t border-white/5 mt-1">
-            <Command.Item 
-              onSelect={() => runCommand(() => {
-                navigator.clipboard.writeText(personalDetails.email);
-                alert("Email copied to clipboard!");
-              })}
-              className="flex items-center gap-3 px-3 py-2.5 mt-1 rounded-lg cursor-pointer aria-selected:bg-white/10 text-neutral-200 aria-selected:text-white transition-colors text-sm"
-            >
-              <Mail className="w-4 h-4 text-neutral-400" />
-              <span>Copy Email Address</span>
-            </Command.Item>
-            <Command.Item 
-              onSelect={() => runCommand(() => window.open('/resume.pdf', '_blank'))}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer aria-selected:bg-white/10 text-neutral-200 aria-selected:text-white transition-colors text-sm"
-            >
-              <Download className="w-4 h-4 text-neutral-400" />
-              <span>Download Résumé</span>
-            </Command.Item>
-          </Command.Group>
-        </Command.List>
-      </Command>
-    </div>
+            <Command.List className="max-h-[min(320px,50dvh)] overflow-y-auto overscroll-contain p-2">
+              <Command.Empty className="py-6 text-center text-sm font-semibold text-ink-muted">
+                No results found.
+              </Command.Empty>
+
+              <Command.Group heading="Navigation" className={groupClass}>
+                <Command.Item onSelect={() => runCommand(() => goTo("#experience"))} className={itemClass}>
+                  <Briefcase className="w-5 h-5" strokeWidth={2.5} />
+                  <span>Experience</span>
+                </Command.Item>
+                <Command.Item onSelect={() => runCommand(() => goTo("#projects"))} className={itemClass}>
+                  <Code className="w-5 h-5" strokeWidth={2.5} />
+                  <span>Projects</span>
+                </Command.Item>
+                <Command.Item onSelect={() => runCommand(() => goTo("#honors"))} className={itemClass}>
+                  <GraduationCap className="w-5 h-5" strokeWidth={2.5} />
+                  <span>Honors & Awards</span>
+                </Command.Item>
+              </Command.Group>
+
+              <Command.Group heading="Actions" className={`${groupClass} border-t-2 border-dashed border-ink mt-1`}>
+                <Command.Item
+                  onSelect={() => runCommand(async () => {
+                    try {
+                      await navigator.clipboard.writeText(personalDetails.email);
+                      setToast("Email copied to clipboard!");
+                    } catch {
+                      window.location.href = `mailto:${personalDetails.email}`;
+                    }
+                  })}
+                  className={itemClass}
+                >
+                  <Mail className="w-5 h-5" strokeWidth={2.5} />
+                  <span>Copy Email Address</span>
+                </Command.Item>
+                <Command.Item onSelect={() => runCommand(() => window.open('/resume.pdf', '_blank'))} className={itemClass}>
+                  <Download className="w-5 h-5" strokeWidth={2.5} />
+                  <span>Download Résumé</span>
+                </Command.Item>
+              </Command.Group>
+            </Command.List>
+          </Command>
+        </div>
+      )}
+    </>
   );
 }

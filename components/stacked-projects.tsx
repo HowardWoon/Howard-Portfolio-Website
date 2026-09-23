@@ -1,22 +1,21 @@
 "use client";
 
-import React, { useRef, useState } from "react";
-import { motion, useScroll, useTransform, MotionValue, AnimatePresence } from "framer-motion";
-import Link from "next/link";
+import React from "react";
+import { motion } from "framer-motion";
 import { TiltCard } from './tilt-card';
 import { InteractivePhotoStack } from "./interactive-photo-stack";
-import { ZeroLagSimulator, BilahujanSimulator, SensorXSimulator } from "./project-simulators";
-import { 
-  Award, 
-  ExternalLink, 
-  Terminal, 
-  FileText, 
-  Activity, 
-  ArrowUpRight, 
-  Sparkles, 
+import {
+  Award,
+  ExternalLink,
+  Terminal,
+  FileText,
+  Activity,
+  ArrowUpRight,
+  Sparkles,
   Layers,
   CheckCircle2,
-  Network
+  Network,
+  Github
 } from "lucide-react";
 
 interface ProjectData {
@@ -186,7 +185,7 @@ const projects: ProjectData[] = [
     },
 {
     id: "sensor-x-sensei",
-    number: "05",
+    number: "06",
     badge: "⚡ UM Technothon 2026 Finalist · IoT Energy Grid",
     badgeType: "emerald",
     title: "Sensor X Sensei",
@@ -211,54 +210,38 @@ const projects: ProjectData[] = [
 ];
 
 export default function StackedProjects() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"],
-  });
-
   return (
-    <section 
-      ref={containerRef}
-      id="projects" 
-      className="relative w-full bg-[#090B10] text-white py-32 px-6 sm:px-10 lg:px-16 overflow-x-clip overflow-y-visible border-t border-white/10 selection:bg-amber-500 selection:text-black"
+    <section
+      id="projects"
+      className="relative w-full bg-paper text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-x-clip border-t-3 border-ink"
     >
-      {/* Ambient Lighting */}
-      <div className="absolute top-1/4 right-0 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-1/4 left-0 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[150px] pointer-events-none" />
+      {/* Structural grid texture */}
+      <div aria-hidden className="absolute inset-0 bg-grid pointer-events-none [mask-image:linear-gradient(to_bottom,#000,transparent_40%)]" />
 
-      <div className="max-w-7xl mx-auto space-y-20">
-        
+      <div className="relative max-w-7xl mx-auto space-y-16 sm:space-y-20">
+
         {/* Section Header */}
-        <div className="space-y-6">
-          <div className="inline-flex items-center gap-2 border border-amber-500/30 bg-amber-500/10 backdrop-blur-md rounded-full px-4 py-1.5 text-xs font-mono text-amber-300 tracking-[0.2em] uppercase">
-            <Layers className="w-3.5 h-3.5 text-amber-400" />
+        <div className="space-y-7">
+          <div className="nb-kicker">
+            <Layers className="w-4 h-4" strokeWidth={2.5} />
             <span>PROJECTS // PRODUCTION & ARCHITECTURE</span>
           </div>
 
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-            <h2 className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tighter text-white max-w-3xl leading-[1.05]">
+            <h2 className="nb-title text-[clamp(1.55rem,8.2vw,2.1rem)] sm:text-5xl lg:text-6xl max-w-3xl leading-[1.02]">
               SCALABLE SYSTEMS & AUTONOMOUS ARCHITECTURES.
             </h2>
-            <p className="text-neutral-400 text-sm sm:text-base font-mono max-w-md">
+            <p className="text-ink-soft text-sm sm:text-base font-mono font-semibold max-w-md bg-white border-3 border-ink rounded-2xl p-4 shadow-brutal-sm rotate-1">
               Scroll through the stack to deconstruct high-throughput backends, deterministic multi-agent LLM pipelines, and hardware-integrated IoT networks built from 0 to 1.
             </p>
           </div>
         </div>
 
-        {/* Stacked Cards Container */}
-        <div className="space-y-12 lg:space-y-24">
-          {projects.map((project, index) => {
-            return (
-              <ProjectCard 
-                key={project.id} 
-                project={project} 
-                index={index} 
-                total={projects.length}
-                progress={scrollYProgress}
-              />
-            );
-          })}
+        {/* Project Cards */}
+        <div className="space-y-12 lg:space-y-20">
+          {projects.map((project) => (
+            <ProjectCard key={project.id} project={project} />
+          ))}
         </div>
 
       </div>
@@ -266,273 +249,253 @@ export default function StackedProjects() {
   );
 }
 
-function ProjectCard({
-  project,
-  index,
-  total,
-  progress
-}: {
-  project: ProjectData;
-  index: number;
-  total: number;
-  progress: MotionValue<number>;
-}) {
-  
-  const [isExpanded, setIsExpanded] = useState(false);
+const accent = {
+  gold: { fill: "bg-pop-yellow", soft: "bg-[#FFF3C4]" },
+  cyan: { fill: "bg-pop-cyan", soft: "bg-[#D9FBFF]" },
+  emerald: { fill: "bg-pop-mint", soft: "bg-[#DCFAEC]" },
+} as const;
 
-  // Dynamic Badges
-  const cardStart = index / total;
-  const cardEnd = (index + 1) / total;
-  
-  
+// GitHub links that are still placeholders ("https://github.com") are hidden instead of shipped as dead links
+const isRealRepo = (url?: string) => !!url && /github\.com\/[^/]+\/[^/]+/.test(url);
 
-  const badgeStyles = {
-    gold: "border-amber-500/40 bg-amber-500/10 text-amber-300",
-    cyan: "border-amber-500/40 bg-amber-500/10 text-amber-300",
-    emerald: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
-  };
+function ProjectCard({ project }: { project: ProjectData }) {
+  const a = accent[project.badgeType];
+  const isGallery =
+    project.telemetryType === "agentic" ||
+    project.telemetryType === "catfish" ||
+    project.telemetryType === "slotify" ||
+    project.telemetryType === "proofpay";
 
   return (
     <div className="w-full group">
-
-        <TiltCard>
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-        className="w-full rounded-[36px] p-8 sm:p-10 lg:p-12 border border-white/15 bg-[#0E121B]/95 backdrop-blur-2xl shadow-2xl transition-all duration-500 hover:border-amber-400/40 group"
-      >
-        {/* Background glow per card */}
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none group-hover:bg-amber-500/10 transition-colors" />
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
-          
-          {/* Left Column: Narrative, Architecture & Benchmarks (7 Cols) */}
-          <div className="lg:col-span-7 space-y-6">
-            
-            {/* Top Bar: Project Index + Award Badge */}
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="w-8 h-8 rounded-full bg-white/10 text-white font-mono text-xs font-bold flex items-center justify-center border border-white/15">
-                {project.number}
-              </span>
-              <div className={`inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-mono tracking-wider border ${badgeStyles[project.badgeType]}`}>
-                <Award className="w-3.5 h-3.5" />
-                <span>{project.badge}</span>
-              </div>
+      <TiltCard maxTilt={2.5}>
+        <motion.article
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="relative w-full rounded-[32px] border-3 border-ink bg-white shadow-brutal-lg transition-shadow duration-300 group-hover:shadow-brutal-xl overflow-hidden"
+        >
+          {/* Colour-block header strip (Bauhaus band) */}
+          <div className={`flex items-center justify-between gap-3 px-4 xs:px-6 sm:px-10 py-3 border-b-3 border-ink ${a.fill}`}>
+            <div className="flex items-center gap-2" aria-hidden>
+              <span className="w-3.5 h-3.5 rounded-full bg-pop-red border-2 border-ink" />
+              <span className="w-3.5 h-3.5 bg-pop-blue border-2 border-ink" />
+              <span className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[14px] border-l-transparent border-r-transparent border-b-ink" />
             </div>
+            <span className="font-mono text-xs font-extrabold tracking-[0.12em] text-ink">
+              {project.number} / {String(projects.length).padStart(2, "0")}
+            </span>
+          </div>
 
-            {/* Title & Subtitle */}
-            <div className="space-y-1.5">
-              <h3 className="text-3xl sm:text-4xl font-extrabold uppercase tracking-tighter text-white flex items-center gap-3">
-                {project.title}
-                <ArrowUpRight className="w-5 h-5 text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </h3>
-              <p className="text-sm font-mono text-amber-400 font-medium tracking-wide">
-                {project.subtitle}
-              </p>
-            </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start p-4 xs:p-6 sm:p-10 lg:p-12">
 
-            {/* Narrative Description */}
-            <p className="text-neutral-300 text-sm sm:text-base leading-relaxed font-sans">
-              {project.description}
-            </p>
+            {/* Left Column: Narrative, Architecture & Benchmarks (7 Cols) */}
+            <div className="lg:col-span-7 space-y-6">
 
-            {/* Key Architectural Highlights */}
-            <div className="space-y-2.5 bg-black/30 p-4 rounded-2xl border border-white/5">
-              <span className="text-xs font-mono text-neutral-400 uppercase tracking-[0.2em] block mb-1">
-                KEY ARCHITECTURAL HIGHLIGHTS:
-              </span>
-              {project.architecturePoints.map((point, pIdx) => (
-                <div key={pIdx} className="flex items-start gap-2.5 text-xs font-sans text-neutral-200">
-                  <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                  <span>{point}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Live Benchmarks & Metric Chips */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {project.metrics.map((m, mIdx) => (
-                <div key={mIdx} className="bg-white/[0.03] border border-white/10 rounded-2xl p-3">
-                  <div className="text-xs font-mono text-neutral-400 uppercase truncate">
-                    {m.label}
-                  </div>
-                  <div className="text-sm font-bold text-amber-400 mt-1 truncate">
-                    {m.value}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Tech Stack Pills */}
-            <div className="flex flex-wrap gap-2 pt-1">
-              {project.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-mono text-neutral-300 hover:border-amber-400/50 hover:text-white transition-colors"
-                >
-                  {tag}
+              {/* Top Bar: Project Index + Award Badge */}
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="nb-num">
+                  {project.number}
                 </span>
-              ))}
-            </div>
+                <div className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-mono font-bold tracking-[0.04em] border-2 border-ink text-ink shadow-brutal-xs ${a.soft}`}>
+                  <Award className="w-4 h-4 shrink-0" strokeWidth={2.5} />
+                  <span>{project.badge}</span>
+                </div>
+              </div>
 
-                        {/* Action Buttons */}
-            <div className="flex flex-wrap items-center gap-3 pt-3">
-              {project.prototypeUrl && (
-                <a
-                  href={project.prototypeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-amber-400 text-black font-mono font-bold text-xs uppercase tracking-wider hover:bg-amber-300 transition-all duration-200 shadow-lg shadow-amber-500/20 group relative overflow-hidden shrink-0"
-                >
-                  <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
-                  <span className="relative z-10 flex items-center gap-2">
-                    <Terminal className="w-3.5 h-3.5" />
-                    LAUNCH LIVE PROTOTYPE
-                  </span>
-                </a>
-              )}
+              {/* Title & Subtitle */}
+              <div className="space-y-2">
+                <h3 className="font-display text-[clamp(1.6rem,8.5vw,2.25rem)] sm:text-5xl font-extrabold uppercase tracking-[-0.03em] leading-[0.95] text-ink flex items-center gap-3">
+                  {project.title}
+                  <ArrowUpRight className="w-7 h-7 text-pop-blue opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" strokeWidth={3} />
+                </h3>
+                <p className="text-sm sm:text-base font-mono text-pop-blue font-bold tracking-[0.01em]">
+                  {project.subtitle}
+                </p>
+              </div>
 
-              {project.colabUrl && (
-                  <a
-                    href={project.colabUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 font-mono font-bold text-xs uppercase tracking-wider hover:bg-orange-500/20 transition-all duration-200 shadow-lg shadow-orange-500/10 group shrink-0"
+              {/* Narrative Description */}
+              <p className="text-ink-soft text-base leading-relaxed font-sans font-medium">
+                {project.description}
+              </p>
+
+              {/* Key Architectural Highlights */}
+              <div className="space-y-3 nb-inset p-4 sm:p-5">
+                <span className="text-xs font-mono font-extrabold text-ink uppercase tracking-[0.12em] block mb-1">
+                  KEY ARCHITECTURAL HIGHLIGHTS:
+                </span>
+                {project.architecturePoints.map((point, pIdx) => (
+                  <div key={pIdx} className="flex items-start gap-2.5 text-sm font-sans font-medium text-ink-soft leading-snug">
+                    <CheckCircle2 className="w-5 h-5 text-ink fill-pop-mint shrink-0" strokeWidth={2.25} />
+                    <span>{point}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Live Benchmarks & Metric Chips (bento) */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {project.metrics.map((m, mIdx) => (
+                  <div
+                    key={mIdx}
+                    className={`rounded-2xl p-3.5 border-3 border-ink ${mIdx === 0 ? a.fill : "bg-white"} shadow-brutal-sm`}
                   >
-                    <Activity className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                    <div className="text-[0.7rem] font-mono font-bold text-ink/70 uppercase tracking-[0.06em]">
+                      {m.label}
+                    </div>
+                    <div className="font-display text-lg font-extrabold text-ink mt-1 leading-tight break-words">
+                      {m.value}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Tech Stack Pills */}
+              <div className="flex flex-wrap gap-2 pt-1">
+                {project.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="nb-chip hover:bg-pop-yellow transition-colors"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-wrap items-center gap-3 pt-3">
+                {project.prototypeUrl && (
+                  <a href={project.prototypeUrl} target="_blank" rel="noopener noreferrer" className="nb-btn nb-btn-yellow px-5 py-3">
+                    <Terminal className="w-4 h-4" strokeWidth={2.75} />
+                    LAUNCH LIVE PROTOTYPE
+                  </a>
+                )}
+
+                {project.colabUrl && (
+                  <a href={project.colabUrl} target="_blank" rel="noopener noreferrer" className="nb-btn bg-pop-orange px-5 py-3">
+                    <Activity className="w-4 h-4" strokeWidth={2.75} />
                     OPEN IN GOOGLE COLAB
                   </a>
                 )}
 
                 {project.orchestratorUrl && (
-                <a
-                  href={project.orchestratorUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 font-mono font-bold text-xs uppercase tracking-wider hover:bg-purple-500/20 transition-all duration-200 shadow-lg shadow-purple-500/10 group shrink-0"
-                >
-                  <Network className="w-4 h-4 group-hover:rotate-12 transition-transform" />
-                  VIEW MASTER ORCHESTRATOR
-                </a>
+                  <a href={project.orchestratorUrl} target="_blank" rel="noopener noreferrer" className="nb-btn nb-btn-lilac px-5 py-3">
+                    <Network className="w-4 h-4" strokeWidth={2.75} />
+                    VIEW MASTER ORCHESTRATOR
+                  </a>
+                )}
+
+                {project.deckUrl && (
+                  <a href={project.deckUrl} target="_blank" rel="noopener noreferrer" className="nb-btn nb-btn-white px-5 py-3">
+                    <FileText className="w-4 h-4" strokeWidth={2.75} />
+                    <span>PITCH DECK</span>
+                    <ExternalLink className="w-3.5 h-3.5" strokeWidth={2.75} />
+                  </a>
+                )}
+
+                {isRealRepo(project.githubUrl) && (
+                  <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" className="nb-btn nb-btn-ink px-5 py-3">
+                    <Github className="w-4 h-4" strokeWidth={2.5} />
+                    <span>GITHUB</span>
+                  </a>
+                )}
+              </div>
+
+            </div>
+
+            {/* Right Column: Visual Architecture / Gallery (5 Cols) — a physical "desk" for the polaroids */}
+            <div className="lg:col-span-5 w-full rounded-[26px] border-3 border-ink bg-paper-deep bg-dots p-5 sm:p-6 space-y-4 flex flex-col shadow-[inset_0_3px_0_rgba(0,0,0,0.06)]">
+
+              {/* Visualizer Header */}
+              <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 border-b-2 border-dashed border-ink pb-3">
+                <div className="flex items-center gap-2 text-xs font-mono font-extrabold text-ink">
+                  {project.telemetryType === "agentic" ? (
+                    <Sparkles className="w-4 h-4 animate-pulse" strokeWidth={2.5} />
+                  ) : (
+                    <Activity className="w-4 h-4 text-ink animate-pulse" strokeWidth={2.5} />
+                  )}
+                  <span className="uppercase tracking-[0.1em]">
+                    {isGallery ? "PROJECT GALLERY" : "LIVE TELEMETRY WINDOW"}
+                  </span>
+                </div>
+                <span className={`nb-tag ${a.fill}`}>
+                  {isGallery ? "INTERACTIVE" : "ACTIVE PIPELINE"}
+                </span>
+              </div>
+
+              {/* Conditional Graphic Visualizers */}
+              {project.telemetryType === "agentic" && (
+                <div className="flex-1 w-full flex items-center justify-center min-h-[300px] sm:min-h-[400px] lg:min-h-[440px] py-4">
+                  <InteractivePhotoStack />
+                </div>
               )}
-{project.deckUrl && (
-                <a
-                  href={project.deckUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/15 text-white font-mono text-xs uppercase tracking-wider transition-all duration-200"
-                >
-                  <FileText className="w-3.5 h-3.5 text-neutral-400" />
-                  <span>PITCH DECK</span>
-                  <ExternalLink className="w-3 h-3 text-neutral-400" />
-                </a>
+
+              {(project.telemetryType === "catfish" || project.telemetryType === "slotify" || project.telemetryType === "proofpay") && (
+                <div className="flex-1 w-full flex items-center justify-center min-h-[300px] sm:min-h-[400px] lg:min-h-[440px] py-4">
+                  <InteractivePhotoStack customPhotos={project.galleryPhotos} />
+                </div>
               )}
+
+              {project.telemetryType === "flood" && (
+                <div className="space-y-4 py-2">
+                  <div className="text-xs font-mono font-bold text-ink-muted">
+                    {"// Dijkstra Evacuation Path Engine"}
+                  </div>
+
+                  {/* Simulated Graph Routing */}
+                  <div className="bg-white border-3 border-ink rounded-2xl p-4 space-y-3 shadow-brutal-sm">
+                    <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs font-mono font-semibold">
+                      <span className="text-ink-muted">Target Hazard Zone:</span>
+                      <span className="text-pop-redInk font-extrabold">Inundation Level 3</span>
+                    </div>
+                    <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs font-mono font-semibold">
+                      <span className="text-ink-muted">Calculated Safe Corridor:</span>
+                      <span className="text-[#0F7A4A] font-extrabold">Path Node #104 ➔ #289</span>
+                    </div>
+                    <div className="w-full bg-paper-deep h-3 rounded-full overflow-hidden border-2 border-ink">
+                      <div className="bg-pop-yellow h-full w-4/5 border-r-2 border-ink animate-pulse" />
+                    </div>
+                  </div>
+
+                  <div className="terminal space-y-1">
+                    <div className="text-pop-yellow">&gt;_ graph.nodes_evaluated: 1,024</div>
+                    <div>&gt;_ priority_queue: &quot;MinHeap_Balanced&quot;</div>
+                    <div>&gt;_ route_dispatch_time: 42.8ms</div>
+                  </div>
+                </div>
+              )}
+
+              {project.telemetryType === "energy" && (
+                <div className="space-y-4 py-2">
+                  <div className="text-xs font-mono font-bold text-ink-muted">
+                    {"// Micro-Grid Power & Occupancy Matrix"}
+                  </div>
+
+                  {/* IoT Grid Dashboard */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="p-3.5 bg-white border-3 border-ink rounded-2xl shadow-brutal-sm">
+                      <div className="text-xs font-mono font-bold text-ink-muted">Current Load</div>
+                      <div className="font-display text-2xl font-extrabold text-ink mt-1">1.42 kW</div>
+                    </div>
+                    <div className="p-3.5 bg-pop-mint border-3 border-ink rounded-2xl shadow-brutal-sm">
+                      <div className="text-xs font-mono font-bold text-ink/70">Idle Savings</div>
+                      <div className="font-display text-2xl font-extrabold text-ink mt-1">-38.2%</div>
+                    </div>
+                  </div>
+
+                  <div className="terminal space-y-1">
+                    <div className="text-pop-mint">&gt;_ sensor_fusion: &quot;PIR_ACTIVE + NFC_PASS&quot;</div>
+                    <div>&gt;_ protocol_broker: &quot;MQTT_TLS_v1.3&quot;</div>
+                    <div>&gt;_ relay_state: &quot;OPTIMIZED_AUTO_SHED&quot;</div>
+                  </div>
+                </div>
+              )}
+
             </div>
 
           </div>
-
-          {/* Right Column: Live Visual Architecture Telemetry (5 Cols) */}
-          <motion.div className="lg:col-span-5 w-full bg-black/60 rounded-3xl border border-white/10 p-6 space-y-4 shadow-inner flex flex-col">
-            
-            {/* Visualizer Header */}
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <div className="flex items-center gap-2 text-xs font-mono text-neutral-300">
-                {project.telemetryType === "agentic" ? (
-                  <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
-                ) : (
-                  <Activity className="w-4 h-4 text-emerald-400 animate-pulse" />
-                )}
-                <span className="uppercase font-bold tracking-wider">
-                  {project.telemetryType === "agentic" || project.telemetryType === "catfish" || project.telemetryType === "slotify" || project.telemetryType === "proofpay" ? "PROJECT GALLERY" : "LIVE TELEMETRY WINDOW"}
-                </span>
-              </div>
-              <span className="text-xs font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-                {project.telemetryType === "agentic" || project.telemetryType === "catfish" || project.telemetryType === "slotify" || project.telemetryType === "proofpay" ? "INTERACTIVE" : "ACTIVE PIPELINE"}
-              </span>
-            </div>
-
-          {/* Conditional Graphic Visualizers */}
-
-          {project.telemetryType === "agentic" && (
-              <div className="flex-1 w-full flex items-center justify-center min-h-[400px] lg:min-h-[450px] py-2 overflow-hidden rounded-xl">
-                <InteractivePhotoStack />
-              </div>
-            )}
-            
-            
-
-            {(project.telemetryType === "catfish" || project.telemetryType === "slotify" || project.telemetryType === "proofpay") && (
-              <div className="flex-1 w-full flex items-center justify-center min-h-[400px] lg:min-h-[450px] py-2 overflow-hidden rounded-xl">
-                <InteractivePhotoStack customPhotos={project.galleryPhotos} />
-              </div>
-            )}
-            
-            {project.telemetryType === "flood" && (
-              <div className="space-y-4 py-2">
-                <div className="text-xs font-mono text-neutral-400">
-                  // Dijkstra Evacuation Path Engine
-                </div>
-
-                {/* Simulated Graph Routing */}
-                <div className="bg-black/50 border border-white/10 rounded-xl p-4 space-y-3">
-                  <div className="flex items-center justify-between text-xs font-mono">
-                    <span className="text-neutral-400">Target Hazard Zone:</span>
-                    <span className="text-red-400 font-bold">Inundation Level 3</span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs font-mono">
-                    <span className="text-neutral-400">Calculated Safe Corridor:</span>
-                    <span className="text-emerald-400 font-bold">Path Node #104 ➔ #289</span>
-                  </div>
-                  <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
-                    <div className="bg-amber-400 h-full w-4/5 animate-pulse" />
-                  </div>
-                </div>
-
-                <div className="bg-black p-3 rounded-xl border border-white/5 font-mono text-xs text-neutral-400 space-y-1">
-                  <div className="text-amber-400">&gt;_ graph.nodes_evaluated: 1,024</div>
-                  <div>&gt;_ priority_queue: &quot;MinHeap_Balanced&quot;</div>
-                  <div>&gt;_ route_dispatch_time: 42.8ms</div>
-                </div>
-              </div>
-            )}
-
-            {project.telemetryType === "energy" && (
-              <div className="space-y-4 py-2">
-                <div className="text-xs font-mono text-neutral-400">
-                  // Micro-Grid Power & Occupancy Matrix
-                </div>
-
-                {/* IoT Grid Dashboard */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
-                    <div className="text-xs font-mono text-neutral-400">Current Load</div>
-                    <div className="text-base font-mono font-bold text-white mt-1">1.42 kW</div>
-                  </div>
-                  <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
-                    <div className="text-xs font-mono text-neutral-400">Idle Savings</div>
-                    <div className="text-base font-mono font-bold text-emerald-400 mt-1">-38.2%</div>
-                  </div>
-                </div>
-
-                <div className="bg-black p-3 rounded-xl border border-white/5 font-mono text-xs text-neutral-400 space-y-1">
-                  <div className="text-emerald-400">&gt;_ sensor_fusion: &quot;PIR_ACTIVE + NFC_PASS&quot;</div>
-                  <div>&gt;_ protocol_broker: &quot;MQTT_TLS_v1.3&quot;</div>
-                  <div>&gt;_ relay_state: &quot;OPTIMIZED_AUTO_SHED&quot;</div>
-                </div>
-              </div>
-            )}
-
-          </motion.div>
-
-        </div>
-
-        {/* Full-Screen Simulator Expansion Modal */}
-        
-
-      </motion.div>
-    </TiltCard>
-      </div>
+        </motion.article>
+      </TiltCard>
+    </div>
   );
 }

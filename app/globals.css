@@ -1,164 +1,296 @@
-﻿@tailwind base;
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* =====================================================================
+   HOWARD WOON — "BOLD PLAYGROUND" DESIGN SYSTEM
+   Neo-Brutalism (structure) · Bento Grid (layout) · Bauhaus (geometry)
+   Claymorphism (tactile controls) · Skeuomorphism (real-world artifacts)
+   ===================================================================== */
+
 @layer base {
   :root {
-    --bg-canvas: #090B10;
-    --bg-card: #0E121B;
-    --border-subtle: rgba(255, 255, 255, 0.08);
-    --border-hover: rgba(255, 255, 255, 0.22);
-    --text-primary: #ffffff;
-    --text-secondary: #9ca3af;
-    --text-muted: #6b7280;
+    --ink: #0a0a0a;
+    --paper: #ffffff;
+    --paper-cream: #fff7e0;
+    --paper-deep: #f4eedc;
+    --pop-yellow: #ffc700;
+    --pop-blue: #2b4bff;
+    --pop-red: #ff4b2b;
+    --pop-mint: #3ddc97;
+    /* Fallback only — <SiteHeader/> measures itself and overwrites this on every resize */
+    --header-h: 88px;
+    color-scheme: only light;
+    /* notch / home-indicator safe areas (needs viewport-fit=cover, set in layout.tsx) */
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+  }
+  @media (max-width: 640px) {
+    /* must target :root (not html) — :root has higher specificity and would win otherwise */
+    :root { --header-h: 72px; }
   }
 
   html {
-    scroll-behavior: smooth;
-    background-color: var(--bg-canvas);
-    color: var(--text-primary);
-    
-    /* SCALE UP ENTIRE UI & TYPOGRAPHY BY 12.5% (16px -> 18px) */
-    font-size: 17px;
+    background-color: var(--paper);
+    color: var(--ink);
+    /* 106.25% = 17px at the default setting, but still honours the visitor's own browser font-size
+       preference (a fixed "17px" ignored low-vision users' settings). */
+    font-size: 106.25%;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
-  
-  /* Drop back slightly on very small screens to avoid overflow */
+
   @media (max-width: 640px) {
-    html {
-      font-size: 16px;
-    }
+    html { font-size: 100%; }
   }
 
   body {
-    background-color: var(--bg-canvas);
-    color: var(--text-primary);
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    background-color: var(--paper);
+    color: var(--ink);
     overflow-x: hidden;
+    /* Safety net: any single word / URL / email that is wider than its box wraps instead of
+       pushing the page sideways on small phones. */
+    overflow-wrap: break-word;
+    min-width: 0;
+    text-rendering: optimizeLegibility;
+    -webkit-tap-highlight-color: transparent;
+    /* Inter: disambiguated 1/l/I + open digits = better numbers in metrics */
+    font-feature-settings: "cv05", "cv08", "cv11", "ss03", "tnum" 0;
+  }
+
+  @supports (overflow: clip) {
+    /* `clip` (unlike `hidden`) does not create a scroll container, so iOS can't be "rubber-banded" sideways */
+    html, body { overflow-x: clip; }
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+    font-optical-sizing: auto;
+    overflow-wrap: break-word;
+    text-wrap: balance;
+  }
+
+  p { text-wrap: pretty; }
+
+  img, video, iframe, object, svg { max-width: 100%; }
+
+  /* When the phone keyboard scrolls a focused field into view, keep it clear of the fixed header */
+  input, textarea, select { scroll-margin-top: calc(var(--header-h) + 24px); scroll-margin-bottom: 24px; }
+
+  /* Faster taps (no double-tap-zoom wait) on controls */
+  a, button, [role="button"], input, textarea, select, label { touch-action: manipulation; }
+
+  /* Anchor jumps (#projects, #honors…) no longer hide under the fixed header.
+     Lenis reads this too — don't also set scroll-padding-top on <html> or the offset doubles. */
+  section[id] {
+    scroll-margin-top: calc(var(--header-h) + 16px);
+  }
+
+  ::selection {
+    background: var(--pop-yellow);
+    color: var(--ink);
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--pop-blue);
+    outline-offset: 3px;
+    border-radius: 6px;
   }
 }
 
-/* Subtle Technical Grid Background */
-.tech-grid-bg {
-  background-image: 
-    linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
-  background-size: 32px 32px;
-}
+/* ---------- Lenis (smooth scroll) required styles ---------- */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
 
-/* Infinite Marquee Animation */
+/* ---------- Background textures ---------- */
+.bg-dots {
+  background-image: radial-gradient(rgba(10, 10, 10, 0.14) 1.2px, transparent 1.2px);
+  background-size: 22px 22px;
+}
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgba(10, 10, 10, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(10, 10, 10, 0.06) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+/* kept for backwards-compat with old class name */
+.tech-grid-bg { @apply bg-grid; }
+
+/* ---------- Marquee ---------- */
 @keyframes marquee {
   0% { transform: translateX(0%); }
   100% { transform: translateX(-50%); }
 }
-
 .animate-marquee-slow {
   display: flex;
   width: 200%;
   animation: marquee 35s linear infinite;
 }
+.animate-marquee-slow:hover { animation-play-state: paused; }
 
-.animate-marquee-slow:hover {
-  animation-play-state: paused;
-}
-
-/* Rotating Gauge Dials */
-@keyframes dialRotateA {
-  0%, 100% { transform: rotate(15deg); }
-  50% { transform: rotate(75deg); }
-}
-@keyframes dialRotateB {
-  0%, 100% { transform: rotate(135deg); }
-  50% { transform: rotate(195deg); }
-}
-@keyframes dialRotateC {
-  0%, 100% { transform: rotate(220deg); }
-  50% { transform: rotate(310deg); }
-}
-@keyframes dialRotateD {
-  0%, 100% { transform: rotate(45deg); }
-  50% { transform: rotate(120deg); }
-}
-
+/* ---------- Rotating gauge dials (used by simulators) ---------- */
+@keyframes dialRotateA { 0%, 100% { transform: rotate(15deg); } 50% { transform: rotate(75deg); } }
+@keyframes dialRotateB { 0%, 100% { transform: rotate(135deg); } 50% { transform: rotate(195deg); } }
+@keyframes dialRotateC { 0%, 100% { transform: rotate(220deg); } 50% { transform: rotate(310deg); } }
+@keyframes dialRotateD { 0%, 100% { transform: rotate(45deg); } 50% { transform: rotate(120deg); } }
 .dial-spin-a { animation: dialRotateA 10s ease-in-out infinite; }
 .dial-spin-b { animation: dialRotateB 12s ease-in-out infinite; }
 .dial-spin-c { animation: dialRotateC 11s ease-in-out infinite; }
 .dial-spin-d { animation: dialRotateD 14s ease-in-out infinite; }
 
-/* Premium Dark Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
+/* ---------- Brutalist scrollbar ---------- */
+::-webkit-scrollbar { width: 14px; height: 14px; }
+::-webkit-scrollbar-track { background: var(--paper-cream); border-left: 2px solid var(--ink); }
 ::-webkit-scrollbar-thumb {
-  background: rgba(245, 196, 0, 0.3); /* Muted amber */
-  border-radius: 6px;
+  background: var(--pop-yellow);
+  border: 2px solid var(--ink);
+  border-radius: 999px;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(245, 196, 0, 0.6); /* Brighter amber */
-}
+::-webkit-scrollbar-thumb:hover { background: #ffb800; }
 
 @keyframes scrollRevealUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-
 .scroll-reveal-up {
   animation: scrollRevealUp linear both;
   animation-timeline: view();
   animation-range: entry 10% cover 30%;
 }
 
+@keyframes shimmer { 100% { transform: translateX(100%); } }
 
-@keyframes shimmer {
-  100% {
-    transform: translateX(100%);
+/* Custom cursor: only hide the native cursor once the JS cursor is actually mounted
+   (class is added by <CustomCursor/>). Text fields always keep the I-beam. */
+html.has-custom-cursor body,
+html.has-custom-cursor a,
+html.has-custom-cursor button,
+html.has-custom-cursor [role="button"] {
+  cursor: none !important;
+}
+html.has-custom-cursor input,
+html.has-custom-cursor textarea,
+html.has-custom-cursor select,
+html.has-custom-cursor [cmdk-input] {
+  cursor: text !important;
+}
+
+/* Full-height sections that respect mobile browser toolbars (100vh is taller than the visible
+   area on iOS Safari / Chrome Android, which pushed hero content below the fold) */
+.min-h-screen-safe { min-height: 100vh; min-height: 100svh; }
+.h-screen-safe { height: 100vh; height: 100dvh; }
+
+/* Short landscape phones (e.g. 844×390): compact header so it doesn't eat 20% of the screen */
+@media (orientation: landscape) and (max-height: 500px) {
+  .site-header { padding-top: 0.35rem !important; padding-bottom: 0.35rem !important; }
+}
+
+/* Respect reduced motion everywhere (marquees, pulses, spins) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
   }
 }
 
-
-@media (pointer: fine) {
-  body {
-    cursor: none;
-  }
-  a, button, input, textarea, select {
-    cursor: none !important;
-  }
-}
 @layer components {
-  .glass-panel {
-    @apply bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl;
+  /* ===== NEO-BRUTALIST SURFACES ===== */
+  .nb-card {
+    @apply relative bg-white border-3 border-ink rounded-[22px] shadow-brutal;
   }
-  .pill-button {
-    @apply px-4 py-2 rounded-full font-medium transition-colors cursor-pointer inline-flex items-center justify-center;
+  .nb-card-lg {
+    @apply relative bg-white border-3 border-ink rounded-[28px] shadow-brutal-lg;
   }
-  .pill-button-primary {
-    @apply bg-amber-500 text-black hover:bg-amber-400;
+  .nb-lift {
+    @apply transition-[transform,box-shadow] duration-200 ease-out hover:-translate-x-1 hover:-translate-y-1 hover:shadow-brutal-xl;
   }
-  .pill-button-secondary {
-    @apply bg-white/10 text-white hover:bg-white/20;
+  .nb-inset {
+    @apply bg-paper-deep border-2 border-ink rounded-2xl;
   }
-  .floating-field {
-    @apply relative;
+  .nb-divider {
+    @apply border-ink border-t-2 border-dashed;
   }
-  .floating-input {
-    @apply w-full bg-black/50 border border-white/10 rounded-xl px-4 pt-6 pb-2 text-white outline-none focus:border-amber-500/50 transition-colors;
+
+  /* ===== SECTION HEADINGS ===== */
+  .nb-kicker {
+    @apply inline-flex items-center gap-2 border-3 border-ink bg-pop-yellow px-4 py-1.5 font-mono text-xs font-bold uppercase tracking-[0.12em] text-ink shadow-brutal-sm -rotate-1 max-w-full [overflow-wrap:anywhere];
   }
-  .floating-label {
-    @apply absolute left-4 top-4 text-neutral-500 text-sm transition-all cursor-text pointer-events-none;
+  .nb-title {
+    @apply font-display font-extrabold uppercase tracking-[-0.03em] text-ink;
   }
-  .section-shell {
-    @apply max-w-7xl mx-auto px-6 py-12;
+  .nb-marker {
+    /* highlighter-pen stripe behind a word */
+    background: linear-gradient(transparent 55%, var(--pop-yellow) 55%, var(--pop-yellow) 92%, transparent 92%);
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    @apply px-1;
   }
-  .muted-label {
-    @apply text-neutral-400 text-sm font-medium;
+
+  /* ===== CLAY / TACTILE CONTROLS ===== */
+  .nb-btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border-3 border-ink px-6 py-3 font-mono text-xs font-extrabold uppercase tracking-[0.1em] text-ink text-center max-w-full shadow-clay transition-[transform,box-shadow,background-color] duration-150 ease-out hover:-translate-y-0.5 hover:shadow-[inset_3px_3px_6px_rgba(255,255,255,0.65),inset_-4px_-4px_8px_rgba(0,0,0,0.18),5px_5px_0_0_#0A0A0A] active:translate-x-[3px] active:translate-y-[3px] active:shadow-clay-pressed disabled:opacity-60 disabled:pointer-events-none;
   }
+  .nb-btn-yellow { @apply bg-pop-yellow; }
+  .nb-btn-white { @apply bg-white; }
+  .nb-btn-blue { @apply bg-pop-blue text-white; }
+  .nb-btn-mint { @apply bg-pop-mint; }
+  .nb-btn-lilac { @apply bg-pop-lilac; }
+  .nb-btn-pink { @apply bg-pop-pink; }
+  .nb-btn-ink { @apply bg-ink text-white; }
+
+  .nb-chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border-2 border-ink bg-white px-3 py-1 font-mono text-xs font-semibold text-ink max-w-full [overflow-wrap:anywhere];
+  }
+  .nb-tag {
+    @apply inline-flex items-center gap-1.5 rounded-md border-2 border-ink px-2.5 py-1 font-mono text-xs font-bold uppercase tracking-[0.08em] text-ink max-w-full [overflow-wrap:anywhere];
+  }
+  .nb-num {
+    /* Bauhaus index disc: 01, 02 … */
+    @apply grid h-10 w-10 shrink-0 place-items-center rounded-full border-3 border-ink bg-ink font-mono text-sm font-extrabold text-pop-yellow;
+  }
+  .nb-dot {
+    @apply inline-block h-2.5 w-2.5 shrink-0 rounded-full border-2 border-ink;
+  }
+  .nb-led {
+    /* skeuomorphic status LED */
+    @apply inline-block h-3 w-3 shrink-0 rounded-full border-2 border-ink bg-pop-mint;
+    box-shadow: inset -1px -1px 2px rgba(0, 0, 0, 0.35), inset 1px 1px 2px rgba(255, 255, 255, 0.8), 0 0 8px rgba(61, 220, 151, 0.9);
+  }
+
+  /* ===== FORM FIELDS ===== */
+  .nb-field {
+    @apply w-full rounded-2xl border-3 border-ink bg-white px-4 py-3 font-sans text-base font-medium text-ink outline-none transition-shadow placeholder:text-ink-muted/70 focus:shadow-brutal focus:-translate-y-px;
+  }
+  .nb-label {
+    @apply font-mono text-xs font-bold uppercase tracking-[0.1em] text-ink;
+  }
+
+  /* ===== SKEUOMORPHIC ARTIFACTS ===== */
+  .tape {
+    /* masking tape strip for polaroids/certificates */
+    @apply pointer-events-none absolute left-1/2 top-0 z-20 h-6 w-24 -translate-x-1/2 -translate-y-1/2 rotate-[-3deg];
+    background: repeating-linear-gradient(90deg, rgba(255, 236, 170, 0.92) 0 6px, rgba(255, 228, 140, 0.92) 6px 12px);
+    border: 1px solid rgba(10, 10, 10, 0.18);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+  }
+  .terminal {
+    @apply rounded-xl border-2 border-ink bg-ink p-3 font-mono text-xs text-[#E7E7E7];
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.6);
+  }
+
+  /* ===== LEGACY HELPERS (kept, restyled) ===== */
+  .glass-panel { @apply nb-card; }
+  .pill-button { @apply nb-btn; }
+  .pill-button-primary { @apply nb-btn-yellow; }
+  .pill-button-secondary { @apply nb-btn-white; }
+  .floating-field { @apply relative; }
+  .floating-input { @apply nb-field pt-6 pb-2; }
+  .floating-label { @apply absolute left-4 top-4 text-ink-muted text-sm transition-all cursor-text pointer-events-none; }
+  .section-shell { @apply max-w-7xl mx-auto px-6 py-12; }
+  .muted-label { @apply text-ink-muted text-sm font-medium; }
 }

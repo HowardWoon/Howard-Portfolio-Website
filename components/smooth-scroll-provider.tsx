@@ -1,11 +1,15 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import Lenis from "lenis";
 
-export default function SmoothScrollProvider({ children }: { children: React.ReactNode }) {
-  const lenisRef = useRef<Lenis | null>(null);
+declare global {
+  interface Window {
+    __lenis?: Lenis;
+  }
+}
 
+export default function SmoothScrollProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Respect user's motion preferences
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -20,19 +24,19 @@ export default function SmoothScrollProvider({ children }: { children: React.Rea
       smoothWheel: true,
       wheelMultiplier: 1.0,
       touchMultiplier: 2.0,
+      autoRaf: true, // replaces the manual rAF loop that was never cancelled on unmount
+      // Smoothly handle <a href="#section"> links. Lenis already honours the CSS `scroll-margin-top`
+      // set on section[id] in globals.css, so no extra JS offset is needed (adding one doubled it).
+      anchors: true,
+      // Let scrollable modals / lists scroll natively
+      prevent: (node) => node.closest("[data-lenis-prevent]") !== null,
     });
 
-    lenisRef.current = lenis;
-
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-
-    requestAnimationFrame(raf);
+    window.__lenis = lenis;
 
     return () => {
       lenis.destroy();
+      delete window.__lenis;
     };
   }, []);
 

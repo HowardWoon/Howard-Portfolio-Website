@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useMotionValue, useSpring, useReducedMotion } from "framer-motion";
-import { useRef, ReactNode, MouseEvent } from "react";
+import { useRef, ReactNode, PointerEvent } from "react";
 
 interface MagneticProps {
   children: ReactNode;
@@ -20,11 +20,12 @@ export function Magnetic({ children, className = "", strength = 0.5 }: MagneticP
   const springX = useSpring(x, springConfig);
   const springY = useSpring(y, springConfig);
 
-  const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
-    if (prefersReducedMotion) return;
+  const handleMouseMove = (e: PointerEvent<HTMLDivElement>) => {
+    // Touch taps emit a synthetic move with no leave → the button used to stay shifted off-centre on phones
+    if (prefersReducedMotion || e.pointerType === "touch" || !ref.current) return;
     
     const { clientX, clientY } = e;
-    const { height, width, left, top } = ref.current!.getBoundingClientRect();
+    const { height, width, left, top } = ref.current.getBoundingClientRect();
     const centerX = left + width / 2;
     const centerY = top + height / 2;
     
@@ -41,8 +42,8 @@ export function Magnetic({ children, className = "", strength = 0.5 }: MagneticP
   return (
     <motion.div
       ref={ref}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
+      onPointerMove={handleMouseMove}
+      onPointerLeave={handleMouseLeave}
       style={{ x: prefersReducedMotion ? 0 : springX, y: prefersReducedMotion ? 0 : springY }}
       className={`inline-block ${className}`}
       data-magnetic

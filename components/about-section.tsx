@@ -150,34 +150,35 @@ type SkillStatus = 'production' | 'hackathon' | 'rnd';
 export default function AboutSection() {
   const [activeCard, setActiveCard] = useState<string>("backend");
 
+  // Accent → Neo-brutalist colour-block mapping (fills always carry black ink text → AAA contrast)
   const colorMap = {
-    amber: { border: "border-amber-500/60", shadow: "shadow-amber-500/10", iconBg: "bg-amber-400/20", iconBorder: "border-amber-400/50", iconText: "text-amber-400", text: "text-amber-400", headline: "text-amber-400/90" },
-    cyan: { border: "border-cyan-500/60", shadow: "shadow-cyan-500/10", iconBg: "bg-cyan-400/20", iconBorder: "border-cyan-400/50", iconText: "text-cyan-400", text: "text-cyan-400", headline: "text-cyan-400/90" },
-    purple: { border: "border-purple-500/60", shadow: "shadow-purple-500/10", iconBg: "bg-purple-400/20", iconBorder: "border-purple-400/50", iconText: "text-purple-400", text: "text-purple-400", headline: "text-purple-400/90" },
-    emerald: { border: "border-emerald-500/60", shadow: "shadow-emerald-500/10", iconBg: "bg-emerald-400/20", iconBorder: "border-emerald-400/50", iconText: "text-emerald-400", text: "text-emerald-400", headline: "text-emerald-400/90" }
+    amber: { fill: "bg-pop-yellow", soft: "bg-[#FFF3C4]", dot: "bg-pop-yellow" },
+    cyan: { fill: "bg-pop-cyan", soft: "bg-[#D9FBFF]", dot: "bg-pop-cyan" },
+    purple: { fill: "bg-pop-lilac", soft: "bg-[#EEE9FF]", dot: "bg-pop-lilac" },
+    emerald: { fill: "bg-pop-mint", soft: "bg-[#DCFAEC]", dot: "bg-pop-mint" },
   };
 
   return (
-    <section 
-      id="about" 
-      className="relative w-full bg-[#0A0D14] text-white py-28 px-6 sm:px-10 lg:px-16 overflow-hidden border-t border-white/10 selection:bg-amber-500 selection:text-black"
+    <section
+      id="about"
+      className="relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-28 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-hidden border-t-3 border-ink"
     >
-      {/* Ambient Lighting Gradients */}
-      <div className="absolute top-1/3 left-0 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-10 right-0 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-[140px] pointer-events-none" />
+      {/* Bauhaus accents */}
+      <div aria-hidden className="pointer-events-none absolute -right-20 top-24 w-64 h-64 rounded-full border-3 border-ink bg-pop-blue hidden lg:block" />
+      <div aria-hidden className="pointer-events-none absolute right-40 top-72 w-16 h-16 border-3 border-ink bg-pop-red rotate-45 hidden lg:block" />
 
-      <div className="max-w-7xl mx-auto space-y-16">
-        
+      <div className="relative max-w-7xl mx-auto space-y-16">
+
         {/* Section Header */}
-        <div className="space-y-6">
+        <div className="space-y-7">
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 border border-amber-500/30 bg-amber-500/10 backdrop-blur-md rounded-full px-4 py-1.5 text-xs font-mono text-amber-300 tracking-[0.2em] uppercase"
+            className="nb-kicker"
           >
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <Sparkles className="w-4 h-4" strokeWidth={2.5} />
             <span>ABOUT // SYSTEMS ARCHITECTURE & VISION</span>
           </motion.div>
 
@@ -186,7 +187,7 @@ export default function AboutSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tighter text-white max-w-5xl leading-[1.08]"
+            className="nb-title text-[clamp(1.55rem,8.2vw,2.1rem)] sm:text-5xl lg:text-6xl max-w-5xl leading-[1.02]"
           >
             I ARCHITECT RESILIENT BACKENDS AND AUTONOMOUS AI PIPELINES, TURNING COMPLEX IDEAS INTO PRODUCTION-READY SYSTEMS.
           </motion.h2>
@@ -196,17 +197,18 @@ export default function AboutSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-neutral-300 text-lg sm:text-xl max-w-3xl leading-relaxed font-sans"
+            className="text-ink-soft text-lg sm:text-xl max-w-3xl leading-relaxed font-sans font-medium"
           >
-            Software Engineering undergraduate at <strong className="text-white">Universiti Malaya</strong> (<span className="text-amber-400 font-mono font-bold">4.00 CGPA</span>). Bridging low-latency algorithmic backend performance and AI orchestration with strong technical leadership and fiscal governance to deliver scalable, cost-effective solutions.
+            Software Engineering undergraduate at <strong className="text-ink font-extrabold">Universiti Malaya</strong> (<span className="inline-block bg-pop-yellow border-2 border-ink rounded-md px-1.5 text-ink font-mono font-extrabold text-[0.95em] leading-snug">4.00 CGPA</span>). Bridging low-latency algorithmic backend performance and AI orchestration with strong technical leadership and fiscal governance to deliver scalable, cost-effective solutions.
           </motion.p>
         </div>
 
-        {/* Core Architecture Bento Grid (4 Pillars) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Core Architecture Bento Grid (4 Pillars) — staggered columns for a deliberately asymmetric rhythm */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-7 lg:gap-8 items-start">
           {architecturePillars.map((pillar, idx) => {
             const Icon = pillar.icon;
             const isActive = activeCard === pillar.id;
+            const c = colorMap[pillar.color as keyof typeof colorMap];
 
             return (
               <motion.div
@@ -215,62 +217,69 @@ export default function AboutSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: idx * 0.1 }}
+                role="button"
+                tabIndex={0}
+                aria-pressed={isActive}
                 onClick={() => setActiveCard(pillar.id)}
-                className={`relative group cursor-pointer rounded-3xl p-8 border transition-all duration-500 flex flex-col justify-between space-y-6 ${
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setActiveCard(pillar.id);
+                  }
+                }}
+                className={`relative group cursor-pointer rounded-[26px] p-4 xs:p-6 sm:p-8 border-3 border-ink flex flex-col justify-between gap-6 transition-[transform,box-shadow,background-color] duration-200 ${
+                  idx % 2 === 1 ? "lg:mt-10" : ""
+                } ${
                   isActive
-                    ? `bg-[#121622] shadow-2xl ${colorMap[pillar.color as keyof typeof colorMap].border} ${colorMap[pillar.color as keyof typeof colorMap].shadow}`
-                    : "bg-[#0E121B]/90 hover:bg-[#121622] border-white/10 hover:border-white/25"
+                    ? `${c.soft} shadow-brutal-lg -translate-x-1 -translate-y-1`
+                    : "bg-white shadow-brutal hover:-translate-y-1 hover:shadow-brutal-lg"
                 }`}
               >
                 {/* Top Card Bar: Category Tag + Icon */}
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono tracking-[0.2em] text-neutral-400 uppercase">
+                <div className="flex items-center justify-between gap-4">
+                  <span className={`nb-tag ${isActive ? c.fill : "bg-white"}`}>
                     {pillar.category}
                   </span>
-                  <div className={`w-10 h-10 rounded-2xl flex items-center justify-center border transition-all duration-300 ${
-                    isActive 
-                      ? `${colorMap[pillar.color as keyof typeof colorMap].iconBg} ${colorMap[pillar.color as keyof typeof colorMap].iconBorder} ${colorMap[pillar.color as keyof typeof colorMap].iconText}` 
-                      : "bg-white/5 border-white/10 text-neutral-300 group-hover:text-white"
-                  }`}>
-                    <Icon className="w-5 h-5" />
+                  <div className={`w-12 h-12 rounded-2xl grid place-items-center border-3 border-ink shadow-clay transition-transform duration-300 group-hover:rotate-6 ${c.fill}`}>
+                    <Icon className="w-6 h-6 text-ink" strokeWidth={2.5} />
                   </div>
                 </div>
 
                 {/* Card Title & Description */}
-                <div className="space-y-2.5">
-                  <h3 className="text-2xl font-bold uppercase tracking-tighter text-white flex items-center gap-2">
+                <div className="space-y-3">
+                  <h3 className="font-display text-[clamp(1.25rem,6.4vw,1.5rem)] sm:text-[1.7rem] font-extrabold uppercase tracking-[-0.02em] leading-tight text-ink flex items-center gap-2">
                     {pillar.title}
-                    <ArrowUpRight className={`w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity ${colorMap[pillar.color as keyof typeof colorMap].text}`} />
+                    <ArrowUpRight className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity text-pop-blue" strokeWidth={3} />
                   </h3>
-                  <p className={`text-xs font-mono font-medium ${isActive ? colorMap[pillar.color as keyof typeof colorMap].headline : 'text-neutral-400'}`}>
+                  <p className="text-sm font-mono font-bold text-pop-blue">
                     {pillar.headline}
                   </p>
-                  <p className="text-sm text-neutral-300 leading-relaxed font-sans pt-1">
+                  <p className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium pt-1">
                     {pillar.description}
                   </p>
                 </div>
 
                 {/* Metrics Breakdown Grid */}
-                <div className="grid grid-cols-3 gap-2.5 pt-3 border-t border-white/10">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-5 border-t-2 border-dashed border-ink">
                   {pillar.metrics.map((metric, mIdx) => (
-                    <div key={mIdx} className="bg-black/30 rounded-xl p-2.5 border border-white/5">
-                      <div className="text-xs font-mono text-neutral-400 uppercase leading-none">
+                    <div key={mIdx} className="bg-white rounded-xl p-3 border-2 border-ink">
+                      <div className="text-[0.7rem] font-mono font-bold text-ink-muted uppercase tracking-[0.06em] leading-tight">
                         {metric.label}
                       </div>
-                      <div className="text-xs font-mono font-bold text-neutral-100 mt-1.5 ">
+                      <div className="text-sm font-sans font-extrabold text-ink mt-1.5 leading-snug break-words">
                         {metric.value}
                       </div>
                     </div>
                   ))}
                 </div>
 
-                {/* Live Telemetry Ticker */}
-                <div className="bg-black/60 rounded-xl px-3.5 py-2 border border-white/10 flex items-center justify-between text-xs font-mono text-neutral-400">
-                  <div className="flex items-center gap-2 ">
-                    <Activity className="w-3.5 h-3.5 text-emerald-400 animate-pulse shrink-0" />
-                    <span className="">{pillar.telemetrySnippet}</span>
+                {/* Live Telemetry Ticker — skeuomorphic LCD strip */}
+                <div className="terminal flex items-start xs:items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Activity className="w-4 h-4 text-pop-mint animate-pulse shrink-0" strokeWidth={2.5} />
+                    <span className="break-words [overflow-wrap:anywhere]">{pillar.telemetrySnippet}</span>
                   </div>
-                  <span className={`text-xs font-bold shrink-0 ml-2 ${colorMap[pillar.color as keyof typeof colorMap].headline}`}>ACTIVE</span>
+                  <span className={`text-[0.7rem] font-extrabold shrink-0 px-2 py-0.5 rounded border-2 border-ink text-ink ${c.fill}`}>ACTIVE</span>
                 </div>
               </motion.div>
             );
@@ -283,47 +292,49 @@ export default function AboutSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="bg-[#0E121B]/90 border border-white/10 rounded-3xl p-8 lg:p-10 space-y-8"
+          className="nb-card-lg p-4 xs:p-6 sm:p-8 lg:p-10 space-y-8 lg:mt-10"
         >
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-xs font-mono text-amber-400 tracking-[0.2em] uppercase">
-                <Code2 className="w-4 h-4" />
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-b-3 border-ink pb-6">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-xs font-mono font-extrabold text-pop-blue tracking-[0.12em] uppercase">
+                <Code2 className="w-4 h-4" strokeWidth={2.75} />
                 <span>TECHNICAL TOOLING MATRIX</span>
               </div>
-              <h4 className="text-xl font-bold text-white uppercase tracking-tighter">
+              <h4 className="font-display text-2xl sm:text-3xl font-extrabold text-ink uppercase tracking-[-0.02em]">
                 Verified Production & Research Stack
               </h4>
             </div>
-            <div className="flex items-center gap-4 text-xs font-mono text-neutral-400">
-              <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400" /> Production Tested
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-amber-400" /> Hackathon Proven
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-blue-400" /> Active R&D
-                </span>
+            <div className="flex flex-wrap items-center gap-2 text-xs font-mono font-bold text-ink">
+              <span className="nb-chip">
+                <span className="nb-dot bg-pop-mint" /> Production Tested
+              </span>
+              <span className="nb-chip">
+                <span className="nb-dot bg-pop-yellow" /> Hackathon Proven
+              </span>
+              <span className="nb-chip">
+                <span className="nb-dot bg-pop-blue" /> Active R&D
+              </span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-y-10 gap-x-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-9 gap-x-6">
             {techStackGroups.map((group, gIdx) => (
               <div key={gIdx} className="space-y-3.5">
-                <h5 className="text-xs font-mono font-bold text-neutral-400 tracking-wider uppercase flex items-center gap-1.5">
-                  <Layers className="w-3.5 h-3.5 text-amber-400" />
+                <h5 className="text-xs font-mono font-extrabold text-ink tracking-[0.1em] uppercase flex items-center gap-2">
+                  <span className="grid place-items-center w-6 h-6 rounded-md bg-pop-yellow border-2 border-ink">
+                    <Layers className="w-3.5 h-3.5" strokeWidth={2.75} />
+                  </span>
                   {group.category}
                 </h5>
                 <div className="flex flex-wrap gap-2">
                   {group.skills.map((skill) => {
-                      const dotColor = skill.status === 'production' ? 'bg-emerald-400' : skill.status === 'hackathon' ? 'bg-amber-400' : 'bg-blue-400';
+                      const dotColor = skill.status === 'production' ? 'bg-pop-mint' : skill.status === 'hackathon' ? 'bg-pop-yellow' : 'bg-pop-blue';
                       return (
                         <span
                           key={skill.name}
-                          className="px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 rounded-xl text-xs font-mono text-neutral-200 transition-all duration-200 flex items-center gap-2"
+                          className="nb-chip transition-transform duration-150 hover:-translate-y-0.5 hover:shadow-brutal-xs"
                         >
-                          <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
+                          <span className={`nb-dot ${dotColor}`} />
                           {skill.name}
                         </span>
                       );

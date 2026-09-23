@@ -1,22 +1,22 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { ParticleMesh } from "./particle-mesh";
-import { 
-  Mail, 
-  Copy, 
-  Check, 
-  Send, 
-  Linkedin, 
-  Github, 
-  FileText, 
-  MapPin, 
-  Clock, 
+import {
+  Mail,
+  Copy,
+  Check,
+  Send,
+  Linkedin,
+  Github,
+  FileText,
+  MapPin,
+  Clock,
   Sparkles,
   CheckCircle2
 } from "lucide-react";
 import { personalDetails } from "@/lib/site-data";
+
 
 const quickIntents = [
   { label: "💼 2026 SWE Role", text: "Hi Howard, I would like to discuss a Software Engineering opportunity at our company..." },
@@ -25,6 +25,7 @@ const quickIntents = [
   { label: "☕ Quick Tech Chat", text: "Hi Howard, loved your portfolio. Let's connect for a quick virtual coffee chat!" }
 ];
 
+
 export default function ContactSection() {
   const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
   const [copiedEmail, setCopiedEmail] = useState(false);
@@ -32,20 +33,19 @@ export default function ContactSection() {
   const [formStatus, setFormStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
   const [activeIntent, setActiveIntent] = useState<string | null>(null);
 
-  
-  const cycleWords = ["BUILD", "SHIP", "ARCHITECT", "SCALE", "DEPLOY"];
-  
-
-  
-
   const emailAddress = personalDetails.email;
   const linkedInUrl = "https://www.linkedin.com/in/howard-woon-hao-zhe-730b9337a/";
   const githubUrl = "https://github.com/HowardWoon";
 
-  const handleCopyEmail = () => {
-    navigator.clipboard.writeText(emailAddress);
-    setCopiedEmail(true);
-    setTimeout(() => setCopiedEmail(false), 2500);
+  const handleCopyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText(emailAddress);
+      setCopiedEmail(true);
+      setTimeout(() => setCopiedEmail(false), 2500);
+    } catch {
+      // Clipboard can be blocked (insecure context / permissions) → fall back to the mail client
+      window.location.href = `mailto:${emailAddress}`;
+    }
   };
 
   const handleSelectIntent = (intent: typeof quickIntents[0]) => {
@@ -76,49 +76,57 @@ export default function ContactSection() {
         setTimeout(() => setFormStatus("idle"), 5000);
       } else {
         setFormStatus("error");
+        setTimeout(() => setFormStatus("idle"), 5000);
       }
     } catch {
       setFormStatus("error");
+      setTimeout(() => setFormStatus("idle"), 5000);
     }
   };
 
-  return (
-    <section 
-      id="contact" 
-      className="relative w-full bg-[#090B10] text-white py-32 px-6 sm:px-10 lg:px-16 overflow-hidden border-t border-white/10 selection:bg-amber-500 selection:text-black"
-    >
-      {/* Ambient Glows */}
-      <ParticleMesh />
-      <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[160px] pointer-events-none" />
-      <div className="absolute bottom-10 right-1/4 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[160px] pointer-events-none" />
+  const submitColor =
+    formStatus === "success" ? "bg-pop-mint" : formStatus === "error" ? "bg-pop-red text-white" : "bg-pop-yellow";
 
-      <div className="max-w-7xl mx-auto space-y-16">
-        
+  return (
+    <section
+      id="contact"
+      className="relative w-full bg-paper-cream bg-dots text-ink pt-24 sm:pt-32 pb-0 overflow-hidden border-t-3 border-ink"
+    >
+      {/* Bauhaus composition (replaces the particle canvas, which was invisible on a light canvas
+          and was also being stretched: its bitmap was viewport-sized but CSS-sized to the whole section) */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -left-36 top-[38%] w-56 h-56 rounded-full bg-pop-yellow border-3 border-ink hidden xl:block" />
+        <div className="absolute right-12 top-20 w-24 h-24 rounded-full bg-pop-blue border-3 border-ink hidden lg:block" />
+        <div className="absolute right-44 top-40 w-14 h-14 bg-pop-red border-3 border-ink rotate-12 hidden lg:block" />
+      </div>
+
+      <div className="relative max-w-7xl mx-auto space-y-14 px-4 xs:px-5 sm:px-10 lg:px-16">
+
         {/* Section Header */}
-        <div className="space-y-4">
+        <div className="space-y-7">
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="inline-flex items-center gap-2 border border-amber-500/30 bg-amber-500/10 backdrop-blur-md rounded-full px-4 py-1.5 text-xs font-mono text-amber-300 tracking-[0.2em] uppercase"
+            className="nb-kicker"
           >
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <Sparkles className="w-4 h-4" strokeWidth={2.5} />
             <span>CONTACT // RECRUITER & PARTNERSHIP HUB</span>
           </motion.div>
 
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tighter text-white max-w-4xl leading-[1.05]"
+            className="nb-title text-[clamp(1.7rem,9.5vw,2.4rem)] sm:text-6xl lg:text-7xl max-w-4xl leading-[0.98]"
           >
-            LET'S ARCHITECT SOMETHING SPECIAL.
+            LET&apos;S ARCHITECT SOMETHING SPECIAL.
           </motion.h2>
         </div>
 
-        {/* Main 2-Column Recruiter Hub */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
-          
+        {/* Main 2-Column Recruiter Hub (bento) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+
           {/* Left Column: Identity, Availability & 1-Click Recruiter Pack (5 Cols) */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
@@ -127,58 +135,59 @@ export default function ContactSection() {
             transition={{ duration: 0.6 }}
             className="lg:col-span-5 space-y-6"
           >
-            <div className="rounded-[32px] p-8 border border-white/10 bg-[#0E121B]/95 backdrop-blur-2xl shadow-2xl space-y-6">
-              
+            <div className="nb-card-lg p-4 xs:p-6 sm:p-8 space-y-6">
+
               {/* Recruiter Live Status Pill */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono tracking-wider">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#DCFAEC] border-2 border-ink text-ink text-xs font-mono font-extrabold tracking-[0.06em]">
+                <span className="nb-led" aria-hidden />
                 <span>AVAILABLE FOR 2026 ROLES</span>
               </div>
 
               {/* Profile Bio */}
               <div className="space-y-2">
-                <h3 className="text-2xl font-bold uppercase text-white tracking-tighter">
+                <h3 className="font-display text-[clamp(1.5rem,7.5vw,1.875rem)] font-extrabold uppercase text-ink tracking-[-0.02em] leading-none">
                   Howard Woon Hao Zhe
                 </h3>
-                <p className="text-xs font-mono text-amber-400 font-medium">
+                <p className="text-sm font-mono text-pop-blue font-bold">
                   Software Engineering @ Universiti Malaya (4.00 CGPA)
                 </p>
-                <p className="text-sm text-neutral-300 leading-relaxed font-sans pt-1">
+                <p className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium pt-1">
                   Open to full-time roles, high-impact backend engineering, distributed systems architecture, and AI agent research collaborations.
                 </p>
               </div>
 
               {/* Location & Timezone Details */}
-              <div className="space-y-2 text-xs font-mono text-neutral-400 border-t border-white/10 pt-4">
+              <div className="space-y-2 text-xs font-mono font-semibold text-ink-soft border-t-2 border-dashed border-ink pt-4">
                 <div className="flex items-center gap-2">
-                  <MapPin className="w-3.5 h-3.5 text-amber-400" />
+                  <MapPin className="w-4 h-4 text-ink shrink-0" strokeWidth={2.5} />
                   <span>Kajang, Selangor · Kuala Lumpur, Malaysia</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Clock className="w-3.5 h-3.5 text-amber-400" />
+                  <Clock className="w-4 h-4 text-ink shrink-0" strokeWidth={2.5} />
                   <span>Timezone: GMT+8 (Open to Remote / Relocation)</span>
                 </div>
               </div>
 
-              {/* 1-Click Email Clipboard Button with Toast */}
-              <div className="pt-2">
+              {/* 1-Click Email Clipboard Button */}
+              <div className="pt-1">
                 <button
                   onClick={emailRevealed ? handleCopyEmail : () => setEmailRevealed(true)}
-                  className="w-full flex items-center justify-between px-5 py-3.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/15 text-xs font-mono text-neutral-200 transition-all group"
+                  aria-live="polite"
+                  className="w-full flex flex-wrap items-center justify-between gap-2 px-4 xs:px-5 py-3.5 rounded-2xl bg-white border-3 border-ink shadow-brutal-sm hover:-translate-y-0.5 hover:shadow-brutal active:translate-x-[2px] active:translate-y-[2px] active:shadow-none text-xs font-mono font-bold text-ink transition-all group"
                 >
-                  <div className="flex items-center gap-2.5">
-                    <Mail className="w-4 h-4 text-amber-400 shrink-0" />
-                    <span>{emailRevealed ? emailAddress : "REVEAL EMAIL ADDRESS"}</span>
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <Mail className="w-4 h-4 shrink-0" strokeWidth={2.5} />
+                    <span className="text-left [overflow-wrap:anywhere]">{emailRevealed ? emailAddress : "REVEAL EMAIL ADDRESS"}</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-amber-400 font-bold shrink-0 ml-2">
+                  <div className="flex items-center gap-1.5 font-extrabold shrink-0 ml-auto px-2 py-1 rounded-lg border-2 border-ink bg-pop-yellow">
                     {copiedEmail ? (
                       <>
-                        <Check className="w-3.5 h-3.5 text-emerald-400" />
-                        <span className="text-emerald-400">COPIED!</span>
+                        <Check className="w-3.5 h-3.5" strokeWidth={3} />
+                        <span>COPIED!</span>
                       </>
                     ) : (
                       <>
-                        <Copy className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+                        <Copy className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" strokeWidth={2.5} />
                         <span>{emailRevealed ? "COPY" : "VIEW"}</span>
                       </>
                     )}
@@ -186,47 +195,30 @@ export default function ContactSection() {
                 </button>
               </div>
 
-              {/* Verified Recruiter Links (Correct LinkedIn & GitHub) */}
-              <div className="grid grid-cols-3 gap-2.5 pt-2">
-                <a
-                  href={linkedInUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-1.5 py-3 rounded-xl bg-[#0077B5]/20 hover:bg-[#0077B5]/30 border border-[#0077B5]/40 text-xs font-mono text-[#00E5FF] font-bold transition-colors"
-                >
-                  <Linkedin className="w-3.5 h-3.5" />
+              {/* Verified Recruiter Links */}
+              <div className="grid grid-cols-1 min-[420px]:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3 gap-2.5 pt-1">
+                <a href={linkedInUrl} target="_blank" rel="noopener noreferrer" className="nb-btn nb-btn-blue px-3 py-3 text-xs">
+                  <Linkedin className="w-4 h-4" strokeWidth={2.5} />
                   <span>LINKEDIN</span>
                 </a>
-
-                <a
-                  href={githubUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-1.5 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-xs font-mono text-white font-bold transition-colors"
-                >
-                  <Github className="w-3.5 h-3.5" />
+                <a href={githubUrl} target="_blank" rel="noopener noreferrer" className="nb-btn nb-btn-ink px-3 py-3 text-xs">
+                  <Github className="w-4 h-4" strokeWidth={2.5} />
                   <span>GITHUB</span>
                 </a>
-
-                <a
-                  href="/resume.pdf"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-1.5 py-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-xs font-mono text-amber-300 font-bold transition-colors"
-                >
-                  <FileText className="w-3.5 h-3.5" />
+                <a href="/resume.pdf" target="_blank" rel="noopener noreferrer" className="nb-btn nb-btn-yellow px-3 py-3 text-xs">
+                  <FileText className="w-4 h-4" strokeWidth={2.5} />
                   <span>RESUME</span>
                 </a>
               </div>
 
               {/* Target Engineering Specializations */}
-              <div className="space-y-2 border-t border-white/10 pt-4">
-                <span className="text-xs font-mono text-neutral-400 uppercase tracking-[0.2em] block">
+              <div className="space-y-2.5 border-t-2 border-dashed border-ink pt-4">
+                <span className="text-xs font-mono font-extrabold text-ink uppercase tracking-[0.1em] block">
                   TARGET ROLES & SPECIALIZATIONS:
                 </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {["Distributed Backends", "Java 21 / Spring Boot", "Agentic AI Pipelines", "High-Throughput APIs", "Fiscal Governance"].map((role) => (
-                    <span key={role} className="px-2.5 py-1 bg-black/40 border border-white/5 rounded-lg text-xs font-mono text-neutral-300">
+                <div className="flex flex-wrap gap-2">
+                  {["Distributed Backends", "Java 21 / Spring Boot", "Agentic AI Pipelines", "High-Throughput APIs", "Fiscal Governance"].map((role, i) => (
+                    <span key={role} className={`nb-chip ${["bg-[#FFF3C4]", "bg-[#D9FBFF]", "bg-[#EEE9FF]", "bg-[#DCFAEC]", "bg-[#FFE1EF]"][i % 5]}`}>
                       {role}
                     </span>
                   ))}
@@ -242,32 +234,33 @@ export default function ContactSection() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="lg:col-span-7 rounded-[32px] p-8 sm:p-10 border border-white/10 bg-[#0E121B]/95 backdrop-blur-2xl shadow-2xl space-y-6"
+            className="lg:col-span-7 nb-card-lg p-4 xs:p-6 sm:p-10 space-y-6"
           >
             <div className="space-y-2">
-              <span className="text-xs font-mono text-neutral-400 uppercase tracking-[0.2em] block">
+              <span className="nb-tag bg-pop-lilac">
                 DIRECT TRANSMISSION CONSOLE
               </span>
-              <h3 className="text-2xl font-bold uppercase text-white tracking-tighter">
+              <h3 className="font-display text-[clamp(1.4rem,7vw,1.875rem)] font-extrabold uppercase text-ink tracking-[-0.02em] pt-2">
                 Send a Direct Message
               </h3>
             </div>
 
             {/* Quick Intent Pre-Fill Chips */}
-            <div className="space-y-2">
-              <span className="text-xs font-mono text-amber-400/90">
-                // Select a conversation intent:
+            <div className="space-y-2.5">
+              <span className="text-xs font-mono font-bold text-pop-blue">
+                {"// Select a conversation intent:"}
               </span>
               <div className="flex flex-wrap gap-2">
                 {quickIntents.map((intent) => (
                   <button
                     key={intent.label}
                     type="button"
+                    aria-pressed={activeIntent === intent.label}
                     onClick={() => handleSelectIntent(intent)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-mono transition-all ${
+                    className={`px-3.5 py-2 rounded-xl text-xs font-mono font-bold border-2 border-ink transition-all ${
                       activeIntent === intent.label
-                        ? "bg-amber-400 text-black font-bold shadow-md shadow-amber-500/20"
-                        : "bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-300"
+                        ? "bg-pop-yellow text-ink shadow-clay-pressed translate-x-[2px] translate-y-[2px]"
+                        : "bg-white text-ink shadow-brutal-xs hover:-translate-y-0.5 hover:shadow-brutal-sm"
                     }`}
                   >
                     {intent.label}
@@ -277,64 +270,72 @@ export default function ContactSection() {
             </div>
 
             {/* Dispatch Form */}
-            <form onSubmit={handleSubmit} className="space-y-4 pt-2">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-mono text-neutral-400 uppercase tracking-wider">
+            <form onSubmit={handleSubmit} className="space-y-5 pt-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="space-y-2">
+                  <label htmlFor="contact-name" className="nb-label">
                     YOUR NAME *
                   </label>
                   <input
+                    id="contact-name"
                     type="text"
                     required
+                    autoComplete="name"
+                    maxLength={120}
                     placeholder="Alex Mercer"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-3 rounded-2xl bg-black/50 border border-white/10 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 text-sm font-sans text-white placeholder-neutral-600 outline-none transition-all"
+                    className="nb-field"
                   />
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-mono text-neutral-400 uppercase tracking-wider">
+                <div className="space-y-2">
+                  <label htmlFor="contact-email" className="nb-label">
                     EMAIL ADDRESS *
                   </label>
                   <input
+                    id="contact-email"
                     type="email"
                     required
+                    autoComplete="email"
+                    maxLength={200}
                     placeholder="alex@company.com"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-4 py-3 rounded-2xl bg-black/50 border border-white/10 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 text-sm font-sans text-white placeholder-neutral-600 outline-none transition-all"
+                    className="nb-field"
                   />
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-mono text-neutral-400 uppercase tracking-wider">
+              <div className="space-y-2">
+                <label htmlFor="contact-message" className="nb-label">
                   MESSAGE / PROPOSAL *
                 </label>
                 <textarea
+                  id="contact-message"
                   required
-                  rows={4}
+                  rows={5}
+                  maxLength={5000}
                   placeholder="Hi Howard, let's connect regarding a software engineering role..."
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  className="w-full px-4 py-3 rounded-2xl bg-black/50 border border-white/10 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 text-sm font-sans text-white placeholder-neutral-600 outline-none transition-all resize-none"
+                  className="nb-field resize-y min-h-[140px]"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={formStatus === "sending"}
-                className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-black font-mono font-bold text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 transition-all active:scale-[0.99] flex items-center justify-center gap-2 disabled:opacity-50"
+                className={`nb-btn w-full py-4 text-sm ${submitColor}`}
               >
                 {formStatus === "sending" ? (
                   <>
-                    <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                    <span className="w-4 h-4 border-[3px] border-ink border-t-transparent rounded-full animate-spin" />
                     <span>DISPATCHING MESSAGE...</span>
                   </>
                 ) : formStatus === "success" ? (
                   <>
-                    <CheckCircle2 className="w-4 h-4 text-black" />
+                    <CheckCircle2 className="w-4 h-4" strokeWidth={3} />
                     <span>TRANSMISSION RECEIVED — I WILL REPLY SHORTLY!</span>
                   </>
                 ) : formStatus === "error" ? (
@@ -343,7 +344,7 @@ export default function ContactSection() {
                   </>
                 ) : (
                   <>
-                    <Send className="w-4 h-4" />
+                    <Send className="w-4 h-4" strokeWidth={2.75} />
                     <span>DISPATCH MESSAGE</span>
                   </>
                 )}
@@ -352,117 +353,108 @@ export default function ContactSection() {
           </motion.div>
 
         </div>
-
-        
-        {/* Footer Marquee */}
-        <div className="w-full overflow-hidden bg-[#FFC700] border-y-2 border-black py-4 mt-16 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] z-20">
-          <div className="flex whitespace-nowrap animate-[marquee_20s_linear_infinite] hover:[animation-play-state:paused] w-max">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="flex items-center">
-                <span className="text-base sm:text-xl md:text-2xl font-sans font-black text-black uppercase tracking-wide px-6 sm:px-8">ENGINEERING SYSTEMS TO STAND OUT IN A NOISY WORLD</span>
-                <span className="text-3xl sm:text-4xl text-[#00E5FF] font-black mx-2 sm:mx-4 mt-2">*</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-                {/* Global Footer & Functional Sitemap */}
-                {/* ENGINEERING TITLE BLOCK FOOTER */}
-                {/* ENGINEERING TITLE BLOCK FOOTER */}
-        <footer className="relative z-10 pt-24 pb-12 mt-20">
-          <div className="flex flex-col lg:flex-row justify-between items-start gap-16 lg:gap-10">
-            
-            {/* Left: System of Record / Title Block */}
-            <div className="flex-1 w-full border border-white/10 rounded-xl bg-[#090B10] overflow-hidden flex flex-col relative group hover:border-white/20 transition-colors shadow-2xl">
-              {/* Header Bar */}
-              <div className="flex flex-wrap items-center justify-between border-b border-white/10 bg-white/[0.02] px-6 py-5 gap-4">
-                <span className="text-sm font-mono font-bold text-neutral-400 tracking-[0.2em] uppercase">System Handover</span>
-                <span className="text-xs font-mono font-bold text-amber-400 tracking-[0.2em] bg-amber-500/10 px-3 py-1.5 rounded border border-amber-500/20 uppercase flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                  OPERATIONAL
-                </span>
-              </div>
-              
-              {/* Body */}
-              <div className="p-6 md:p-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-                {/* Identity */}
-                <div className="space-y-1">
-                  <div className="text-xs font-mono font-bold text-neutral-500 tracking-[0.2em] mb-4 uppercase">System Of Record</div>
-                  <h3 className="text-2xl md:text-3xl font-black text-white uppercase tracking-wider leading-none">Howard Woon Hao Zhe</h3>
-                  <p className="text-sm font-mono text-amber-400 uppercase tracking-[0.2em] pt-3">Systems & AI Architect</p>
-                </div>
-
-                {/* Education */}
-                <div className="space-y-1">
-                  <div className="text-xs font-mono font-bold text-neutral-500 tracking-[0.2em] mb-4 uppercase">Academic Foundation</div>
-                  <h3 className="text-base md:text-lg font-bold text-white uppercase tracking-wider">Universiti Malaya</h3>
-                  <p className="text-sm font-mono text-neutral-400">B.Comp.Sc. / Software Engineering</p>
-                </div>
-
-                {/* Metadata */}
-                <div className="space-y-2">
-                  <div className="text-xs font-mono font-bold text-neutral-500 tracking-[0.2em] mb-4 uppercase">Document Metadata</div>
-                  <div className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 text-sm font-mono">
-                    <span className="text-neutral-500">DOCUMENT</span>
-                    <span className="text-neutral-300">HWZ-2026</span>
-                    <span className="text-neutral-500">REVISION</span>
-                    <span className="text-neutral-300">01.04</span>
-                    <span className="text-neutral-500">NODE</span>
-                    <span className="text-neutral-300">KUL-MY-01</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Footer Bar */}
-              <div className="border-t border-white/10 bg-white/[0.01] px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-6">
-                <span className="text-xs font-mono font-bold text-neutral-500 uppercase tracking-[0.2em] text-center md:text-left">Engineered Systems. Autonomous Pipelines.</span>
-                
-                <div className="flex flex-wrap justify-center items-center gap-8">
-                  <a href={linkedInUrl} target="_blank" rel="noreferrer" className="text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-colors uppercase tracking-[0.2em] flex items-center gap-2.5">
-                    <Linkedin className="w-5 h-5" /> LINKEDIN
-                  </a>
-                  <a href="https://github.com/HowardWoon" target="_blank" rel="noreferrer" className="text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-colors uppercase tracking-[0.2em] flex items-center gap-2.5">
-                    <Github className="w-5 h-5" /> GITHUB
-                  </a>
-                  <a href="/resume.pdf" target="_blank" className="text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-colors uppercase tracking-[0.2em] flex items-center gap-2.5">
-                    <FileText className="w-5 h-5" /> RESUME
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Block: Sitemap */}
-            <div className="w-full lg:w-56 flex flex-col space-y-4">
-              <span className="text-xs font-mono font-bold text-neutral-500 uppercase tracking-[0.2em] mb-2">Index Directory</span>
-              <a href="#about" className="group flex items-center gap-3 text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-all">
-                <span className="w-6 h-px bg-white/10 group-hover:bg-amber-400 transition-colors" />
-                01 // VISION
-              </a>
-              <a href="#projects" className="group flex items-center gap-3 text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-all">
-                <span className="w-6 h-px bg-white/10 group-hover:bg-amber-400 transition-colors" />
-                02 // ARCHITECTURE
-              </a>
-              <a href="#experience" className="group flex items-center gap-3 text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-all">
-                <span className="w-6 h-px bg-white/10 group-hover:bg-amber-400 transition-colors" />
-                03 // GOVERNANCE
-              </a>
-              <a href="#honors" className="group flex items-center gap-3 text-sm font-mono font-bold text-neutral-400 hover:text-amber-400 transition-all">
-                <span className="w-6 h-px bg-white/10 group-hover:bg-amber-400 transition-colors" />
-                04 // HONORS
-              </a>
-              <button 
-                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} 
-                className="group flex items-center gap-3 text-sm font-mono font-bold text-white mt-6 pt-6 border-t border-white/10 hover:text-amber-400 transition-all text-left"
-              >
-                <span className="w-6 h-px bg-white/20 group-hover:bg-amber-400 transition-colors" />
-                BACK TO TOP
-              </button>
-            </div>
-
-          </div>
-        </footer>
-
       </div>
+
+      {/* Footer Marquee (full-bleed without the 100vw hack, which overflowed by the scrollbar width on Windows) */}
+      <div className="w-full overflow-hidden bg-pop-yellow border-y-3 border-ink py-4 sm:py-5 mt-24 relative z-20 rotate-[0.6deg] scale-[1.02]">
+        <div className="flex whitespace-nowrap animate-[marquee_30s_linear_infinite] hover:[animation-play-state:paused] w-max">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="flex items-center" aria-hidden={i > 0}>
+              <span className="font-display text-lg sm:text-2xl md:text-3xl font-extrabold text-ink uppercase tracking-[-0.01em] px-6 sm:px-8">ENGINEERING SYSTEMS TO STAND OUT IN A NOISY WORLD</span>
+              <span aria-hidden className="inline-block w-5 h-5 sm:w-6 sm:h-6 bg-pop-red border-3 border-ink rotate-45 mx-2 sm:mx-4" />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ENGINEERING TITLE BLOCK FOOTER */}
+      <footer className="relative z-10 bg-ink text-white mt-0 pt-16 sm:pt-20 pb-[max(3.5rem,calc(var(--safe-bottom)+2rem))] px-4 xs:px-5 sm:px-10 lg:px-16">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-start gap-14 lg:gap-10">
+
+          {/* Left: System of Record / Title Block (blueprint-style drawing frame) */}
+          <div className="flex-1 w-full border-3 border-white rounded-[22px] overflow-hidden flex flex-col relative shadow-[5px_5px_0_0_#FFC700] sm:shadow-[8px_8px_0_0_#FFC700]">
+            {/* Header Bar */}
+            <div className="flex flex-wrap items-center justify-between border-b-3 border-white bg-white/[0.04] px-6 py-5 gap-4">
+              <span className="text-sm font-mono font-extrabold text-white tracking-[0.12em] uppercase">System Handover</span>
+              <span className="text-xs font-mono font-extrabold text-ink tracking-[0.1em] bg-pop-mint px-3 py-1.5 rounded-lg border-2 border-white uppercase flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-ink animate-pulse" />
+                OPERATIONAL
+              </span>
+            </div>
+
+            {/* Body */}
+            <div className="p-4 xs:p-6 md:p-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10">
+              {/* Identity */}
+              <div className="space-y-1">
+                <div className="text-xs font-mono font-bold text-white/60 tracking-[0.12em] mb-4 uppercase">System Of Record</div>
+                <h3 className="font-display text-2xl md:text-3xl font-extrabold text-white uppercase tracking-[-0.01em] leading-none">Howard Woon Hao Zhe</h3>
+                <p className="text-sm font-mono font-bold text-pop-yellow uppercase tracking-[0.12em] pt-3">Systems & AI Architect</p>
+              </div>
+
+              {/* Education */}
+              <div className="space-y-1">
+                <div className="text-xs font-mono font-bold text-white/60 tracking-[0.12em] mb-4 uppercase">Academic Foundation</div>
+                <h3 className="font-display text-lg md:text-xl font-extrabold text-white uppercase">Universiti Malaya</h3>
+                <p className="text-sm font-mono font-semibold text-white/80">B.Comp.Sc. / Software Engineering</p>
+              </div>
+
+              {/* Metadata */}
+              <div className="space-y-2">
+                <div className="text-xs font-mono font-bold text-white/60 tracking-[0.12em] mb-4 uppercase">Document Metadata</div>
+                <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 xs:gap-x-6 gap-y-3 text-sm font-mono font-semibold [overflow-wrap:anywhere]">
+                  <span className="text-white/60">DOCUMENT</span>
+                  <span className="text-white">HWZ-2026</span>
+                  <span className="text-white/60">REVISION</span>
+                  <span className="text-white">01.04</span>
+                  <span className="text-white/60">NODE</span>
+                  <span className="text-white">KUL-MY-01</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer Bar */}
+            <div className="border-t-3 border-white px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-6">
+              <span className="text-xs font-mono font-bold text-white/70 uppercase tracking-[0.12em] text-center md:text-left">Engineered Systems. Autonomous Pipelines.</span>
+
+              <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-1 sm:gap-8">
+                <a href={linkedInUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-mono font-extrabold text-white hover:text-pop-yellow active:text-pop-yellow transition-colors uppercase tracking-[0.1em] flex items-center gap-2.5 min-h-[44px]">
+                  <Linkedin className="w-5 h-5" strokeWidth={2.5} /> LINKEDIN
+                </a>
+                <a href="https://github.com/HowardWoon" target="_blank" rel="noopener noreferrer" className="text-sm font-mono font-extrabold text-white hover:text-pop-yellow active:text-pop-yellow transition-colors uppercase tracking-[0.1em] flex items-center gap-2.5 min-h-[44px]">
+                  <Github className="w-5 h-5" strokeWidth={2.5} /> GITHUB
+                </a>
+                <a href="/resume.pdf" target="_blank" rel="noopener noreferrer" className="text-sm font-mono font-extrabold text-white hover:text-pop-yellow active:text-pop-yellow transition-colors uppercase tracking-[0.1em] flex items-center gap-2.5 min-h-[44px]">
+                  <FileText className="w-5 h-5" strokeWidth={2.5} /> RESUME
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Block: Sitemap */}
+          <nav aria-label="Index Directory" className="w-full lg:w-60 flex flex-col space-y-1">
+            <span className="text-xs font-mono font-bold text-white/60 uppercase tracking-[0.12em] mb-2">Index Directory</span>
+            {[
+              ["#about", "01 // VISION"],
+              ["#projects", "02 // ARCHITECTURE"],
+              ["#experience", "03 // GOVERNANCE"],
+              ["#honors", "04 // HONORS"],
+            ].map(([href, label]) => (
+              <a key={href} href={href} className="group flex items-center gap-3 min-h-[44px] text-sm font-mono font-extrabold text-white/85 hover:text-pop-yellow active:text-pop-yellow transition-colors">
+                <span className="w-6 h-[3px] bg-white/30 group-hover:w-10 group-hover:bg-pop-yellow transition-all" />
+                {label}
+              </a>
+            ))}
+            <button
+              onClick={() => (window.__lenis ? window.__lenis.scrollTo(0) : window.scrollTo({ top: 0, behavior: 'smooth' }))}
+              className="group flex items-center gap-3 text-sm font-mono font-extrabold text-ink bg-pop-yellow mt-6 px-4 py-3 rounded-xl border-3 border-white shadow-[4px_4px_0_0_#FFFFFF] hover:-translate-y-0.5 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all text-left"
+            >
+              <span className="w-6 h-[3px] bg-ink" />
+              BACK TO TOP
+            </button>
+          </nav>
+
+        </div>
+      </footer>
     </section>
   );
 }

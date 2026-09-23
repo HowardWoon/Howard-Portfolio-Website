@@ -1,38 +1,42 @@
 'use client';
 
 import React, { useRef } from 'react';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useTransform, useReducedMotion } from 'framer-motion';
 
-export function TiltCard({ children, className }: { children: React.ReactNode; className?: string }) {
+/**
+ * Subtle 3D tilt wrapper.
+ * Fixes vs. previous version:
+ *  - `perspective-1000` was not a real Tailwind class → the tilt rendered as a flat skew. Perspective is now set inline.
+ *  - 7° on a 1000px-tall card made text swim and shifted click targets; default is now 3° and configurable.
+ *  - `translateZ(30px)` + preserve-3d caused blurry text in Chromium; removed.
+ *  - Disabled for reduced-motion users and touch (no hover) devices.
+ */
+export function TiltCard({
+  children,
+  className,
+  maxTilt = 3,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  maxTilt?: number;
+}) {
   const ref = useRef<HTMLDivElement>(null);
-  
+  const reduce = useReducedMotion();
+
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
-  const mouseXSpring = useSpring(x, { stiffness: 300, damping: 30 });
-  const mouseYSpring = useSpring(y, { stiffness: 300, damping: 30 });
+  const mouseXSpring = useSpring(x, { stiffness: 250, damping: 30 });
+  const mouseYSpring = useSpring(y, { stiffness: 250, damping: 30 });
 
-  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ['7deg', '-7deg']);
-  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ['-7deg', '7deg']);
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], [`${maxTilt}deg`, `-${maxTilt}deg`]);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], [`-${maxTilt}deg`, `${maxTilt}deg`]);
 
-  const glareX = useTransform(mouseXSpring, [-0.5, 0.5], ['100%', '0%']);
-  const glareY = useTransform(mouseYSpring, [-0.5, 0.5], ['100%', '0%']);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!ref.current) return;
+  const handleMouseMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!ref.current || reduce || e.pointerType === "touch") return; // no stuck tilt after taps
     const rect = ref.current.getBoundingClientRect();
-    
-    const width = rect.width;
-    const height = rect.height;
-    
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-    
-    const xPct = mouseX / width - 0.5;
-    const yPct = mouseY / height - 0.5;
-    
-    x.set(xPct);
-    y.set(yPct);
+    x.set((e.clientX - rect.left) / rect.width - 0.5);
+    y.set((e.clientY - rect.top) / rect.height - 0.5);
   };
 
   const handleMouseLeave = () => {
@@ -43,29 +47,12 @@ export function TiltCard({ children, className }: { children: React.ReactNode; c
   return (
     <motion.div
       ref={ref}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      style={{
-        rotateX,
-        rotateY,
-        transformStyle: 'preserve-3d',
-      }}
-      className={`relative perspective-1000 ${className || ''}`}
+      onPointerMove={handleMouseMove}
+      onPointerLeave={handleMouseLeave}
+      style={reduce ? undefined : { rotateX, rotateY, transformPerspective: 1600 }}
+      className={`relative ${className || ''}`}
     >
-      <motion.div
-        className="pointer-events-none absolute inset-0 z-50 rounded-[inherit] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-        style={{
-          background: 'radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.1) 0%, transparent 60%)',
-          left: glareX,
-          top: glareY,
-          transform: 'translate(-50%, -50%)',
-          width: '200%',
-          height: '200%',
-        }}
-      />
-      <div style={{ transform: 'translateZ(30px)' }} className="h-full w-full">
-        {children}
-      </div>
+      {children}
     </motion.div>
   );
 }

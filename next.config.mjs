@@ -1,7 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   typedRoutes: true,
-  transpilePackages: ['three', '@react-three/fiber', '@react-three/drei'],
+  // `three`, `@react-three/fiber` and `@react-three/drei` were listed here but are not dependencies → removed.
+  images: {
+    formats: ['image/avif', 'image/webp'],
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },

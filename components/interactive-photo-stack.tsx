@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 const photos = [
   { src: '/images/projects/zerolag/dashboard.jpeg', alt: 'Dashboard Console', rotation: -1.5 },
@@ -11,11 +12,14 @@ const photos = [
   { src: '/images/projects/zerolag/backend.jpeg', alt: 'Backend Telemetry', rotation: 1.5 },
 ];
 
+/**
+ * Skeuomorphic polaroid stack: taped prints on a desk.
+ * A11y: the stack is a real button (Enter/Space cycles), current photo is announced.
+ */
 export function InteractivePhotoStack({ customPhotos }: { customPhotos?: { src: string, alt: string, rotation: number }[] }) {
   const [cards, setCards] = useState(customPhotos || photos);
 
-  const handleNextPhoto = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const cycle = () => {
     setCards((prev) => {
       const newCards = [...prev];
       const topCard = newCards.shift();
@@ -25,7 +29,16 @@ export function InteractivePhotoStack({ customPhotos }: { customPhotos?: { src: 
   };
 
   return (
-    <div className="relative w-full h-full min-h-[300px] sm:min-h-[400px] lg:min-h-[450px] flex items-center justify-center cursor-pointer group" onClick={handleNextPhoto}>
+    <div
+      role="button"
+      tabIndex={0}
+      aria-label={cards[0]?.alt}
+      onClick={(e) => { e.stopPropagation(); cycle(); }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); cycle(); }
+      }}
+      className="relative w-full h-full min-h-[280px] sm:min-h-[380px] lg:min-h-[420px] flex items-center justify-center cursor-pointer group rounded-2xl"
+    >
       {cards.map((photo, index) => {
         const isTop = index === 0;
         return (
@@ -35,34 +48,35 @@ export function InteractivePhotoStack({ customPhotos }: { customPhotos?: { src: 
             initial={false}
             animate={{
               scale: isTop ? 1 : 1 - index * 0.04,
-              y: isTop ? 0 : index * 8,
-              rotate: isTop ? 0 : photo.rotation,
+              y: isTop ? 0 : index * 9,
+              rotate: isTop ? 0 : photo.rotation * 1.4,
               zIndex: cards.length - index,
-              opacity: isTop ? 1 : 1 - (index * 0.15),
+              opacity: index > 3 ? 0 : 1,
             }}
-            whileHover={isTop ? { scale: 1.02, rotate: -1, y: -4, transition: { duration: 0.2 } } : {}}
+            whileHover={isTop ? { scale: 1.02, rotate: -1.2, y: -5, transition: { duration: 0.2 } } : {}}
             transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-            className="absolute w-[98%] sm:w-[96%] aspect-video bg-white p-1.5 sm:p-2 rounded-lg shadow-2xl shadow-black/60 border border-neutral-200 origin-center max-h-full"
+            className="absolute w-[94%] aspect-video bg-white p-2 sm:p-2.5 pb-6 sm:pb-8 rounded-md border-3 border-ink shadow-brutal origin-center max-h-full"
           >
-            <div className="w-full h-full relative overflow-hidden rounded bg-neutral-100 border border-neutral-300">
-              <img src={photo.src} alt={photo.alt} className="absolute inset-0 w-full h-full object-contain pointer-events-none" />
+            {isTop && <span className="tape" aria-hidden />}
+            <div className="w-full h-full relative overflow-hidden rounded-sm bg-paper-deep border-2 border-ink">
+              {/* next/image: phones get a resized WebP/AVIF instead of the full 300–900 KB PNG screenshot */}
+              <Image
+                src={photo.src}
+                alt={photo.alt}
+                fill
+                sizes="(max-width: 1024px) 92vw, 40vw"
+                className="object-contain pointer-events-none"
+              />
             </div>
-            {isTop && (
-              <div className="absolute inset-0 bg-white/0 hover:bg-white/10 transition-colors pointer-events-none rounded-lg" />
-            )}
           </motion.div>
         );
       })}
-      
+
       {/* Interaction Hint */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="absolute -bottom-2 lg:-bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 text-[10px] sm:text-xs font-mono text-amber-500 bg-amber-500/10 px-3 py-1 rounded-full pointer-events-none border border-amber-500/20 opacity-0 group-hover:opacity-100 transition-opacity z-50"
-      >
-        <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-amber-400 animate-pulse" />
+      <div className="absolute -bottom-3 lg:-bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 nb-tag bg-white shadow-brutal-xs pointer-events-none z-50 max-w-[92%] text-center justify-center">
+        <span className="w-2 h-2 rounded-full bg-pop-red border border-ink animate-pulse" />
         CLICK ALBUM TO CYCLE
-      </motion.div>
+      </div>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-﻿export interface FieldRecord {
+export interface FieldRecord {
   id: string;
   image: string;
   recordId: string;

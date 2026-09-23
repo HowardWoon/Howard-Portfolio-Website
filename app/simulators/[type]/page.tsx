@@ -1,7 +1,10 @@
 import React from "react";
 import { ZeroLagSimulator, BilahujanSimulator, SensorXSimulator } from "@/components/project-simulators";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+
+export const dynamicParams = false;
 
 export async function generateStaticParams() {
   return [
@@ -13,6 +16,8 @@ export async function generateStaticParams() {
 
 export default async function SimulatorPage({ params }: { params: Promise<{ type: string }> }) {
   const { type } = await params;
+  // Unknown types used to render an empty shell with a 200 status
+  if (!['agentic', 'flood', 'energy'].includes(type)) notFound();
 
   return (
     <div className="min-h-screen bg-[#050608] text-white flex flex-col p-6 sm:p-12 font-sans selection:bg-amber-500/30">

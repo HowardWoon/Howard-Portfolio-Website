@@ -1,63 +1,95 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Magnetic } from "./magnetic-button";
-import { ExternalLink, Search } from "lucide-react";
+import { ExternalLink, FileText, Search } from "lucide-react";
 
 export function SiteHeader() {
+  const ref = useRef<HTMLElement>(null);
+
+  // Publish the real header height as --header-h (used for anchor offsets + the progress bar).
+  // Re-measured on resize / rotation / font-scaling so nothing ever hides under the header.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const set = () => document.documentElement.style.setProperty("--header-h", `${Math.round(el.getBoundingClientRect().height)}px`);
+    set();
+    const ro = new ResizeObserver(set);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   return (
-    <header className="fixed top-0 left-0 w-full flex items-center justify-between px-6 sm:px-10 lg:px-16 py-4 z-[9999] bg-[#090B10]/85 backdrop-blur-xl border-b border-white/10 shadow-2xl">
-      <motion.div 
+    <header
+      ref={ref}
+      className="site-header fixed top-0 left-0 w-full flex items-center justify-between gap-2 xs:gap-3 z-[9999] bg-white/95 backdrop-blur-md border-b-3 border-ink pb-2.5 sm:pb-3 pt-[max(0.625rem,var(--safe-top))] sm:pt-[max(0.75rem,var(--safe-top))] pl-[max(0.875rem,var(--safe-left))] pr-[max(0.875rem,var(--safe-right))] sm:pl-[max(2.5rem,var(--safe-left))] sm:pr-[max(2.5rem,var(--safe-right))] lg:pl-[max(4rem,var(--safe-left))] lg:pr-[max(4rem,var(--safe-right))]"
+    >
+      <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6 }}
-        className="flex items-center gap-4"
+        className="flex items-center gap-2 xs:gap-3 sm:gap-4 min-w-0"
       >
-        <Image src="/images/profile-icon.jpg" alt="Howard Woon" width={64} height={64} className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl object-cover shadow-lg shadow-amber-500/20 border border-white/10" priority />
-        <div>
-          <h1 className="font-black text-lg sm:text-2xl tracking-wide uppercase leading-none text-white flex items-center gap-2">
+        <a href="#" aria-label="Back to top" className="shrink-0 rounded-2xl p-1 -m-1">
+          <Image
+            src="/images/profile-icon.jpg"
+            alt="Howard Woon"
+            width={64}
+            height={64}
+            className="w-9 h-9 xs:w-11 xs:h-11 sm:w-14 sm:h-14 landscape-short:!w-10 landscape-short:!h-10 rounded-xl sm:rounded-2xl object-cover border-3 border-ink shadow-brutal-xs sm:shadow-brutal-sm bg-pop-yellow"
+            priority
+          />
+        </a>
+        <div className="min-w-0">
+          <h1 className="font-display font-extrabold text-[0.95rem] xs:text-base sm:text-2xl landscape-short:!text-lg tracking-tight uppercase leading-none text-ink flex flex-wrap items-center gap-x-2 gap-y-0.5 xs:flex-nowrap xs:whitespace-nowrap">
             HOWARD WOON
-            <span className="inline-block w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+            <span aria-hidden className="relative inline-flex w-2.5 h-2.5">
+              <span className="absolute inset-0 rounded-full bg-pop-red animate-ping opacity-60" />
+              <span className="relative w-2.5 h-2.5 rounded-full bg-pop-red border border-ink" />
+            </span>
           </h1>
-          <p className="text-sm sm:text-base font-mono text-neutral-400 tracking-wider mt-1.5 font-semibold">
+          <p className="text-[0.6875rem] sm:text-sm font-mono text-ink-muted tracking-[0.02em] sm:tracking-[0.08em] mt-1 sm:mt-1.5 font-bold xs:whitespace-nowrap">
             SYSTEMS & AI ARCHITECT
           </p>
         </div>
       </motion.div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6 }}
-        className="flex items-center gap-4 sm:gap-6"
+        className="flex items-center gap-2 sm:gap-4 shrink-0"
       >
-        <div className="hidden sm:flex items-center gap-2.5 bg-white/[0.04] backdrop-blur-md px-5 py-2.5 rounded-full border border-white/10 shadow-inner">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-sm font-mono font-bold tracking-wider text-neutral-300">
+        <div className="hidden lg:flex items-center gap-2.5 bg-white px-4 py-2 rounded-full border-3 border-ink shadow-brutal-sm">
+          <span className="nb-led" aria-hidden />
+          <span className="text-xs font-mono font-extrabold tracking-[0.08em] text-ink">
             AVAILABLE FOR HIRE 2026
           </span>
         </div>
 
         <Magnetic strength={0.3}>
           <a
-          href="/resume.pdf"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group flex items-center gap-2 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-black text-sm font-mono font-black uppercase tracking-[0.2em] px-7 py-3.5 rounded-full shadow-lg shadow-amber-500/25 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer pointer-events-auto"
-        >
-          <span>RESUME</span>
-          <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-        </a>
-          </Magnetic>
-          <button 
-            onClick={() => window.dispatchEvent(new Event('open-command-palette'))}
-            className="flex items-center justify-center w-10 h-10 md:w-11 md:h-11 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-colors pointer-events-auto backdrop-blur-md text-neutral-400 hover:text-white"
-            aria-label="Open Command Palette"
+            href="/resume.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="RESUME"
+            className="group nb-btn nb-btn-yellow w-10 h-10 p-0 min-[400px]:w-auto min-[400px]:h-auto min-[400px]:px-4 min-[400px]:py-2.5 sm:px-6 sm:py-3 landscape-short:!py-2"
           >
-            <Search className="w-4 h-4 md:w-5 md:h-5" />
-          </button>
+            <span className="sr-only min-[400px]:not-sr-only">RESUME</span>
+            <FileText className="w-4 h-4 min-[400px]:hidden" strokeWidth={2.75} aria-hidden />
+            <ExternalLink className="hidden sm:block w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" strokeWidth={2.5} />
+          </a>
+        </Magnetic>
+        <button
+          onClick={() => window.dispatchEvent(new Event('open-command-palette'))}
+          className="hidden xs:grid place-items-center w-10 h-10 md:w-12 md:h-12 landscape-short:!w-10 landscape-short:!h-10 rounded-full bg-white border-3 border-ink shadow-brutal-sm hover:bg-pop-lilac hover:-translate-y-0.5 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all text-ink"
+          aria-label="Open Command Palette"
+          title="Search (Ctrl/⌘ + K)"
+        >
+          <Search className="w-4 h-4 md:w-5 md:h-5" strokeWidth={2.75} />
+        </button>
       </motion.div>
     </header>
   );

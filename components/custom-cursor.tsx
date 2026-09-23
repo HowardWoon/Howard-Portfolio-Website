@@ -3,127 +3,92 @@
 import React, { useEffect, useState } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 
+/**
+ * Brutalist cursor: solid ink dot + chunky ring.
+ * Fixes vs. previous version:
+ *  - The 80px SOLID amber dot on hover sat on top of button labels and hid them. The hover state is now a
+ *    ring with a translucent, multiply-blended fill, so the label underneath stays readable.
+ *  - The native cursor was hidden by CSS before this component mounted (and forever if JS failed / on
+ *    hybrid devices). Now the `has-custom-cursor` class is only added once this cursor is live.
+ *  - Disabled for touch-primary devices and prefers-reduced-motion.
+ */
 export function CustomCursor() {
-  const [isMounted, setIsMounted] = useState(false);
+  const [enabled, setEnabled] = useState(false);
   const [isPointer, setIsPointer] = useState(false);
   const [isSpiderman, setIsSpiderman] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
 
   const cursorX = useMotionValue(-100);
   const cursorY = useMotionValue(-100);
 
-  // Smooth spring configuration for the outer ring
   const springConfig = { damping: 25, stiffness: 400, mass: 0.5 };
   const cursorXSpring = useSpring(cursorX, springConfig);
   const cursorYSpring = useSpring(cursorY, springConfig);
 
   useEffect(() => {
-    setIsMounted(true);
-    
-    // Check if device has a touch screen
-    if (window.matchMedia('(pointer: coarse)').matches) {
-      setIsMobile(true);
-      return;
-    }
+    const fine = window.matchMedia('(pointer: fine)').matches;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!fine || reduce) return;
+
+    setEnabled(true);
+    document.documentElement.classList.add('has-custom-cursor');
 
     const moveCursor = (e: MouseEvent) => {
       cursorX.set(e.clientX);
       cursorY.set(e.clientY);
-      
-      if (e.target && (e.target as HTMLElement).closest) {
-        if ((e.target as HTMLElement).closest('[data-spiderman]')) {
-          setIsSpiderman(true);
-        } else {
-          setIsSpiderman(false);
-        }
-      }
     };
 
     const handleMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      // Check if hovering over clickable elements
-      if (
-        target.tagName.toLowerCase() === 'a' ||
-        target.tagName.toLowerCase() === 'button' ||
-        target.closest('a') ||
-        target.closest('button') ||
-        target.closest('[data-magnetic]')
-      ) {
-        setIsPointer(true);
-      } else {
-        setIsPointer(false);
-      }
-      
-      if (target.closest('[data-spiderman]')) {
-        setIsSpiderman(true);
-      } else {
-        setIsSpiderman(false);
-      }
+      if (!target?.closest) return;
+      const interactive = target.closest('a, button, [role="button"], [data-magnetic], summary, label');
+      const typing = target.closest('input, textarea, select, [cmdk-input]');
+      setIsPointer(!!interactive && !typing);
+      setIsHidden(!!typing);
+      setIsSpiderman(!!target.closest('[data-spiderman]'));
     };
 
-    const handleMouseLeave = (e: MouseEvent) => {
-      if (
-        e.clientY <= 0 ||
-        e.clientX <= 0 ||
-        (e.clientX >= window.innerWidth || e.clientY >= window.innerHeight)
-      ) {
-        setIsHidden(true);
-      }
-    };
+    const handleMouseLeave = () => setIsHidden(true);
     const handleMouseEnter = () => setIsHidden(false);
 
-    window.addEventListener('mousemove', moveCursor);
-    window.addEventListener('mouseover', handleMouseOver);
-    document.addEventListener('mouseleave', handleMouseLeave);
-    document.addEventListener('mouseenter', handleMouseEnter);
+    window.addEventListener('mousemove', moveCursor, { passive: true });
+    window.addEventListener('mouseover', handleMouseOver, { passive: true });
+    document.documentElement.addEventListener('mouseleave', handleMouseLeave);
+    document.documentElement.addEventListener('mouseenter', handleMouseEnter);
 
     return () => {
+      document.documentElement.classList.remove('has-custom-cursor');
       window.removeEventListener('mousemove', moveCursor);
       window.removeEventListener('mouseover', handleMouseOver);
-      document.removeEventListener('mouseleave', handleMouseLeave);
-      document.removeEventListener('mouseenter', handleMouseEnter);
+      document.documentElement.removeEventListener('mouseleave', handleMouseLeave);
+      document.documentElement.removeEventListener('mouseenter', handleMouseEnter);
     };
   }, [cursorX, cursorY]);
 
-  if (!isMounted || isMobile) return null;
+  if (!enabled) return null;
 
   return (
     <>
-      {/* The Inverting Lens Dot */}
+      {/* Dot */}
       <motion.div
-        className={`fixed top-0 left-0 rounded-full pointer-events-none z-[100000] ${isSpiderman ? 'bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.8)]' : 'bg-amber-500 shadow-md shadow-amber-500/20'}`}
-        animate={{
-          width: isPointer ? 80 : 12,
-          height: isPointer ? 80 : 12,
-        }}
+        aria-hidden
+        className={`fixed top-0 left-0 rounded-full pointer-events-none z-[100000] border-2 border-ink ${isSpiderman ? 'bg-pop-red' : 'bg-pop-yellow'}`}
+        animate={{ width: isPointer ? 8 : 14, height: isPointer ? 8 : 14 }}
         transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-        style={{
-          x: cursorX,
-          y: cursorY,
-          translateX: '-50%',
-          translateY: '-50%',
-          opacity: isHidden ? 0 : 1,
-        }}
+        style={{ x: cursorX, y: cursorY, translateX: '-50%', translateY: '-50%', opacity: isHidden ? 0 : 1 }}
       />
-      
-      {/* Thick Solid Yellow Outer Ring */}
+
+      {/* Ring */}
       <motion.div
-        className="fixed top-0 left-0 w-12 h-12 rounded-full pointer-events-none z-[99999]"
+        aria-hidden
+        className="fixed top-0 left-0 w-11 h-11 rounded-full pointer-events-none z-[99999] border-[3px] mix-blend-multiply"
         animate={{
-          scale: isPointer ? 1.8 : (isSpiderman ? 1.5 : 1),
-          borderWidth: isPointer ? '2px' : '4px',
-          borderColor: isSpiderman ? 'rgba(59, 130, 246, 1)' : (isPointer ? 'rgba(245, 158, 11, 0.3)' : 'rgba(245, 158, 11, 1)'),
-          backgroundColor: isSpiderman ? 'rgba(59, 130, 246, 0.2)' : (isPointer ? 'rgba(245, 158, 11, 0.05)' : 'transparent'),
+          scale: isPointer ? 1.6 : isSpiderman ? 1.5 : 1,
+          borderColor: isSpiderman ? '#2B4BFF' : '#0A0A0A',
+          backgroundColor: isSpiderman ? 'rgba(43,75,255,0.18)' : isPointer ? 'rgba(255,199,0,0.45)' : 'rgba(255,199,0,0)',
         }}
         transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-        style={{
-          x: cursorXSpring,
-          y: cursorYSpring,
-          translateX: '-50%',
-          translateY: '-50%',
-          opacity: isHidden ? 0 : 1,
-        }}
+        style={{ x: cursorXSpring, y: cursorYSpring, translateX: '-50%', translateY: '-50%', opacity: isHidden ? 0 : 1 }}
       />
     </>
   );

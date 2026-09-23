@@ -15,29 +15,30 @@ import { SiteHeader } from '@/components/site-header';
 export function PortfolioPage() {
   return (
     <BootSequence>
-      <div className="relative min-h-screen overflow-x-clip bg-[#090B10] selection:bg-amber-500 selection:text-black">
-        
-        {/* Standard Page Header and Hero */}
+      <div className="relative min-h-screen overflow-x-clip bg-paper text-ink">
+
+        {/* Fixed header lives OUTSIDE any z-indexed wrapper. It used to sit inside a `relative z-10` div,
+            which capped its z-[9999] at 10 — so the marquee (z-20) and honours cards (z-10) scrolled OVER
+            the header and blocked taps on the Resume / Search buttons. */}
+        <SiteHeader />
+
+        {/* Hero */}
         <div className="w-full relative z-10">
-          <SiteHeader />
           <BikebearInspiredHero />
         </div>
 
-      <TechMarquee skills={['AUTOPILOT ASIA HACKATHON 2ND PLACE (SALES INTELLIGENCE)', 'STRAIGHT 4.00 CGPA COMPUTER SCIENCE (SOFTWARE ENGINEERING) FOR TWO SEMESTER', 'UM GAME JAM 2026 PUBLIC CHOICE AWARD', 'PERSATUAN KOMPUTER UNIVERSITI MALAYA (PEKOM) FINANCE LEAD 2026/2027', 'USM V HACK PRELIMINARY ROUND QUALIFIER']} />
-      <main className="w-full">
-        
+        <TechMarquee skills={['AUTOPILOT ASIA HACKATHON 2ND PLACE (SALES INTELLIGENCE)', 'STRAIGHT 4.00 CGPA COMPUTER SCIENCE (SOFTWARE ENGINEERING) FOR TWO SEMESTER', 'UM GAME JAM 2026 PUBLIC CHOICE AWARD', 'PERSATUAN KOMPUTER UNIVERSITI MALAYA (PEKOM) FINANCE LEAD 2026/2027', 'USM V HACK PRELIMINARY ROUND QUALIFIER']} />
 
-        <AboutSection />
+        <main id="main" className="w-full">
+          <AboutSection />
+          <StackedProjects />
+          <ExperienceSection />
+          <HonorsSection />
+          <ContactSection />
+        </main>
 
-        <StackedProjects />
-        <ExperienceSection />
-
-        <HonorsSection />
-
-        <ContactSection />
-      </main>
-
-      <ScrollToTop />
-    </div></BootSequence>
+        <ScrollToTop />
+      </div>
+    </BootSequence>
   );
 }

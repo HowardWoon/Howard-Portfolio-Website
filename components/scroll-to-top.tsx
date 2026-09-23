@@ -14,30 +14,25 @@ export function ScrollToTop() {
   });
 
   useEffect(() => {
-    const toggleVisibility = () => {
-      if (window.scrollY > 500) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
-      }
-    };
-
-    window.addEventListener("scroll", toggleVisibility);
+    const toggleVisibility = () => setIsVisible(window.scrollY > 500);
+    toggleVisibility();
+    window.addEventListener("scroll", toggleVisibility, { passive: true });
     return () => window.removeEventListener("scroll", toggleVisibility);
   }, []);
 
   const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+    // Use Lenis when active so the two scroll engines don't fight each other
+    if (window.__lenis) window.__lenis.scrollTo(0);
+    else window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
     <>
+      {/* Reading-progress bar sits just under the header's bottom border */}
       <motion.div
-        className="fixed top-0 left-0 right-0 h-[2px] bg-amber-400 origin-left z-[9999]"
-        style={{ scaleX }}
+        aria-hidden
+        className="fixed left-0 right-0 h-[5px] bg-pop-blue origin-left z-[9998] border-b-2 border-ink"
+        style={{ scaleX, top: "var(--header-h)" }}
       />
       <AnimatePresence>
         {isVisible && (
@@ -46,14 +41,14 @@ export function ScrollToTop() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.5, y: 20 }}
             transition={{ duration: 0.3 }}
-            className="fixed bottom-8 right-8 z-[90]"
+            className="fixed z-[90] bottom-[max(1rem,calc(var(--safe-bottom)+0.5rem))] right-[max(1rem,calc(var(--safe-right)+0.5rem))] sm:bottom-8 sm:right-8"
           >
             <button
               onClick={scrollToTop}
-              className="group flex items-center justify-center w-14 h-14 bg-[#121620] border-2 border-amber-500 rounded-full shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:shadow-[0_0_30px_rgba(245,158,11,0.6)] hover:bg-amber-500 transition-all duration-300 hover:scale-110 active:scale-95"
+              className="group grid place-items-center w-12 h-12 sm:w-14 sm:h-14 bg-pop-yellow border-3 border-ink rounded-full shadow-clay hover:-translate-y-1 active:translate-x-[3px] active:translate-y-[3px] active:shadow-clay-pressed transition-all"
               aria-label="Scroll to top"
             >
-              <ArrowUp className="w-6 h-6 text-amber-500 group-hover:text-[#121620] transition-colors" />
+              <ArrowUp className="w-6 h-6 text-ink group-hover:-translate-y-0.5 transition-transform" strokeWidth={3} />
             </button>
           </motion.div>
         )}

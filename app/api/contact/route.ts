@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { headers } from 'next/headers';
 import nodemailer from 'nodemailer';
@@ -26,6 +26,9 @@ export async function POST(request: NextRequest) {
       ipData.count += 1;
     }
     ipRequestMap.set(ip, ipData);
+    if (ipRequestMap.size > 5000) {
+      for (const [k, v] of ipRequestMap) if (now - v.lastReset > RATE_LIMIT_WINDOW_MS) ipRequestMap.delete(k);
+    }
 
     if (ipData.count > RATE_LIMIT) {
       return NextResponse.json(
@@ -37,7 +40,10 @@ export async function POST(request: NextRequest) {
     // 2. CSRF / Origin Check
     const origin = headersList.get('origin');
     const host = headersList.get('host');
-    if (origin && host && !origin.includes(host)) {
+    // Exact host match (the old `origin.includes(host)` accepted e.g. https://yoursite.vercel.app.evil.com)
+    let originHost: string | null = null;
+    try { originHost = origin ? new URL(origin).host : null; } catch { originHost = 'invalid'; }
+    if (originHost && host && originHost !== host) {
       return NextResponse.json(
         { error: 'Invalid origin.' },
         { status: 403 }
@@ -47,6 +53,18 @@ export async function POST(request: NextRequest) {
     // 3. Parse and Validate
     const body = await request.json();
     const { name, email, subject, message } = body;
+
+    if (
+      typeof name !== 'string' || typeof email !== 'string' || typeof message !== 'string' ||
+      (subject !== undefined && typeof subject !== 'string')
+    ) {
+      return NextResponse.json({ error: 'Invalid payload.' }, { status: 400 });
+    }
+
+    // Hard size limits (prevents mailbox / DB abuse with multi-MB payloads)
+    if (name.length > 120 || email.length > 200 || (subject?.length ?? 0) > 200 || message.length > 5000) {
+      return NextResponse.json({ error: 'Payload too large.' }, { status: 413 });
+    }
 
     if (!name || !email || !message) {
       return NextResponse.json(
@@ -76,9 +94,10 @@ export async function POST(request: NextRequest) {
     const cleanMessage = sanitize(message);
 
     // 5. Supabase Insertion (Keep this so they still have a database backup)
+    let delivered = false;
     const supabase = await createSupabaseServerClient();
     if (supabase) {
-      await supabase.from('contact_messages').insert([
+      const { error: dbError } = await supabase.from('contact_messages').insert([
         {
           name: cleanName,
           email: cleanEmail,
@@ -88,6 +107,8 @@ export async function POST(request: NextRequest) {
           is_read: false
         },
       ]);
+      if (dbError) console.error('[Contact] Supabase insert failed:', dbError.message);
+      else delivered = true;
     }
 
     // 6. Send Email via Nodemailer
@@ -109,8 +130,14 @@ export async function POST(request: NextRequest) {
       };
 
       await transporter.sendMail(mailOptions);
+      delivered = true;
     } else {
       console.warn('EMAIL_USER or EMAIL_PASS not set in environment variables. Email notification was skipped.');
+    }
+
+    // Previously returned 200 even when neither Supabase nor email was configured → messages silently lost
+    if (!delivered) {
+      return NextResponse.json({ error: 'Message could not be delivered.' }, { status: 503 });
     }
 
     return NextResponse.json(
