@@ -203,13 +203,7 @@ values
     '2024-06-30',
     false
   )
-on conflict (id) do update set
-  role = excluded.role,
-  company = excluded.company,
-  description = excluded.description,
-  start_date = excluded.start_date,
-  end_date = excluded.end_date,
-  is_current = excluded.is_current;
+on conflict (id) do nothing;  -- keep edits made in the admin dashboard when this script is re-run
 
 insert into public.projects (id, title, context, description, tags, project_url, display_order)
 values
@@ -258,13 +252,7 @@ values
     '/documents/supervity-pitchdeck.pdf',
     5
   )
-on conflict (id) do update set
-  title = excluded.title,
-  context = excluded.context,
-  description = excluded.description,
-  tags = excluded.tags,
-  project_url = excluded.project_url,
-  display_order = excluded.display_order;
+on conflict (id) do nothing;  -- keep edits made in the admin dashboard when this script is re-run
 
 insert into public.skills (id, name, category)
 values
@@ -286,6 +274,4 @@ values
   ('44444444-4444-4444-4444-444444444456', 'Git/GitHub', 'Tools'),
   ('44444444-4444-4444-4444-444444444457', 'Canva', 'Tools'),
   ('44444444-4444-4444-4444-444444444458', 'UI/UX Design', 'Tools')
-on conflict (id) do update set
-  name = excluded.name,
-  category = excluded.category;
+on conflict (id) do nothing;  -- keep edits made in the admin dashboard when this script is re-run

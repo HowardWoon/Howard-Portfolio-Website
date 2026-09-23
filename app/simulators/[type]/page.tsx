@@ -21,7 +21,11 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ type: string }> }): Promise<Metadata> {
   const { type } = await params;
   const sim = SIMULATORS.find((s) => s.type === type);
-  return { title: sim ? `${sim.label} Simulator // Howard Woon` : "Simulator // Howard Woon" };
+  return {
+    title: sim ? `${sim.label} Simulator // Howard Woon` : "Simulator // Howard Woon",
+    // own canonical URL (the root layout's canonical "/" told Google these pages were duplicates of the homepage)
+    alternates: { canonical: `/simulators/${type}` },
+  };
 }
 
 export default async function SimulatorPage({ params }: { params: Promise<{ type: string }> }) {

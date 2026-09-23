@@ -39,14 +39,16 @@ export function PortfolioPage() {
 
         <SiteHeader />
 
-        {/* Hero */}
-        <div id="main-content" tabIndex={-1} className="w-full relative z-10 outline-none">
-          <BikebearInspiredHero />
-        </div>
+        {/* One <main> landmark for ALL page content, hero included (the hero used to sit before <main>,
+            so screen-reader "jump to main" skipped the headline and the call-to-action buttons). */}
+        <main id="main-content" tabIndex={-1} className="w-full outline-none">
+          {/* Hero */}
+          <div className="w-full relative z-10">
+            <BikebearInspiredHero />
+          </div>
 
-        <TechMarquee skills={['SUPERVITY AUTOPILOT ASIA HACKATHON 2ND PLACE (SALES INTELLIGENCE)', 'STRAIGHT 4.00 CGPA COMPUTER SCIENCE (SOFTWARE ENGINEERING) FOR TWO SEMESTERS', 'UM GAME JAM 2026 PUBLIC CHOICE AWARD', 'PERSATUAN KOMPUTER UNIVERSITI MALAYA (PEKOM) FINANCE LEAD 2026/2027', 'USM V HACK PRELIMINARY ROUND QUALIFIER']} />
+          <TechMarquee skills={['SUPERVITY AUTOPILOT ASIA HACKATHON 2ND PLACE (SALES INTELLIGENCE)', 'STRAIGHT 4.00 CGPA COMPUTER SCIENCE (SOFTWARE ENGINEERING) FOR TWO SEMESTERS', 'UM GAME JAM 2026 PUBLIC CHOICE AWARD', 'PERSATUAN KOMPUTER UNIVERSITI MALAYA (PEKOM) FINANCE LEAD 2026/2027', 'USM V HACK PRELIMINARY ROUND QUALIFIER']} />
 
-        <main id="main" className="w-full">
           <AboutSection />
           <StackedProjects />
           <ExperienceSection />

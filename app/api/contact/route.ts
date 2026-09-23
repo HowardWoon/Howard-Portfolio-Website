@@ -74,7 +74,11 @@ export async function POST(request: NextRequest) {
     const { name, email, subject, message, hw_hp_field, startedAt } = parsed.data;
 
     // 4. Bot traps — pretend success so bots don't retry
-    const tooFast = typeof startedAt === 'number' && now - startedAt < 2500;
+    // `startedAt` comes from the visitor's clock. If that clock is AHEAD of the server, `elapsed` is negative:
+    // that is not a bot, so only a small positive gap counts as "filled in too fast" (real messages used to be
+    // silently dropped while the visitor was told "sent").
+    const elapsed = typeof startedAt === 'number' ? now - startedAt : Infinity;
+    const tooFast = elapsed >= 0 && elapsed < 2500;
     if (hw_hp_field || tooFast) {
       return NextResponse.json({ success: true, message: 'Message sent successfully.' }, { status: 200 });
     }

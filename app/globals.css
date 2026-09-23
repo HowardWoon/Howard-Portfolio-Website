@@ -117,30 +117,12 @@ html.lenis, html.lenis body { height: auto; }
     linear-gradient(to bottom, rgba(10, 10, 10, 0.06) 1px, transparent 1px);
   background-size: 48px 48px;
 }
-/* kept for backwards-compat with old class name */
-.tech-grid-bg { @apply bg-grid; }
 
 /* ---------- Marquee ---------- */
 @keyframes marquee {
   0% { transform: translateX(0%); }
   100% { transform: translateX(-50%); }
 }
-.animate-marquee-slow {
-  display: flex;
-  width: 200%;
-  animation: marquee 35s linear infinite;
-}
-.animate-marquee-slow:hover { animation-play-state: paused; }
-
-/* ---------- Rotating gauge dials (used by simulators) ---------- */
-@keyframes dialRotateA { 0%, 100% { transform: rotate(15deg); } 50% { transform: rotate(75deg); } }
-@keyframes dialRotateB { 0%, 100% { transform: rotate(135deg); } 50% { transform: rotate(195deg); } }
-@keyframes dialRotateC { 0%, 100% { transform: rotate(220deg); } 50% { transform: rotate(310deg); } }
-@keyframes dialRotateD { 0%, 100% { transform: rotate(45deg); } 50% { transform: rotate(120deg); } }
-.dial-spin-a { animation: dialRotateA 10s ease-in-out infinite; }
-.dial-spin-b { animation: dialRotateB 12s ease-in-out infinite; }
-.dial-spin-c { animation: dialRotateC 11s ease-in-out infinite; }
-.dial-spin-d { animation: dialRotateD 14s ease-in-out infinite; }
 
 /* ---------- Brutalist scrollbar ---------- */
 ::-webkit-scrollbar { width: 14px; height: 14px; }
@@ -151,18 +133,6 @@ html.lenis, html.lenis body { height: auto; }
   border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover { background: #ffb800; }
-
-@keyframes scrollRevealUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.scroll-reveal-up {
-  animation: scrollRevealUp linear both;
-  animation-timeline: view();
-  animation-range: entry 10% cover 30%;
-}
-
-@keyframes shimmer { 100% { transform: translateX(100%); } }
 
 /* Custom cursor: only hide the native cursor once the JS cursor is actually mounted
    (class is added by <CustomCursor/>). Text fields always keep the I-beam. */

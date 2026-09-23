@@ -6,21 +6,9 @@ import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Magnetic } from "./magnetic-button";
 import { Sparkles, Terminal } from "lucide-react";
+import { toLocal } from "@/lib/to-local";
+import { SpiderReveal } from "./spider-reveal";
 
-
-
-/**
- * Converts a pointer position to coordinates INSIDE `el` (its padding box), correcting for:
- *  - the hero's scroll-driven `scale(1 → 0.95)` (getBoundingClientRect is scaled, CSS lengths are not)
- *  - the element's border (clip-path / absolutely-positioned children are measured from inside it)
- * Without this, the lens drifted away from the cursor as soon as the page was scrolled slightly.
- */
-function toLocal(el: HTMLElement, clientX: number, clientY: number) {
-  const r = el.getBoundingClientRect();
-  const sx = r.width / el.offsetWidth || 1;
-  const sy = r.height / el.offsetHeight || 1;
-  return { x: (clientX - r.left) / sx - el.clientLeft, y: (clientY - r.top) / sy - el.clientTop };
-}
 
 /**
  * X-ray magnifier headline.
@@ -210,7 +198,7 @@ export default function BikebearHero() {
             </motion.div>
           </div>
 
-          {/* Right Column: Portrait Card with Interactive Tilt (5 cols) */}
+          {/* Right Column: Portrait Card (5 cols) */}
           <div className="lg:col-span-5 flex justify-center lg:justify-end w-full relative">
             {/* Big Bauhaus sun behind the portrait */}
             <div aria-hidden className="pointer-events-none absolute -top-6 right-0 sm:right-10 w-40 h-40 xs:w-56 xs:h-56 sm:w-72 sm:h-72 rounded-full bg-pop-yellow border-3 border-ink" />
@@ -236,9 +224,10 @@ export default function BikebearHero() {
                 </div>
               </div>
 
-              {/* Main Portrait Frame */}
+              {/* Main Portrait Frame — hover (or tap) reveals Spider-Man under the cursor, see spider-reveal.tsx */}
               <div
-                className="relative w-full max-w-[350px] sm:max-w-none sm:w-[460px] lg:w-[460px] xl:w-[520px] aspect-[5/6] xs:aspect-[6/7] sm:aspect-auto sm:h-[560px] lg:h-[600px] xl:h-[660px] rounded-[28px] xs:rounded-[36px] sm:rounded-[44px] border-3 border-ink bg-pop-yellow overflow-hidden shadow-brutal-lg sm:shadow-brutal-xl transition-colors duration-300 hover:border-pop-red pointer-events-auto"
+                data-xray
+                className="relative w-full max-w-[350px] sm:max-w-none sm:w-[460px] lg:w-[460px] xl:w-[520px] aspect-[5/6] xs:aspect-[6/7] sm:aspect-auto sm:h-[560px] lg:h-[600px] xl:h-[660px] rounded-[28px] xs:rounded-[36px] sm:rounded-[44px] border-3 border-ink bg-pop-yellow overflow-hidden shadow-brutal-lg sm:shadow-brutal-xl transition-colors duration-300 hover:border-pop-red pointer-events-auto cursor-crosshair"
               >
                 <Image
                   src="/images/howard-solid.jpeg"
@@ -249,6 +238,8 @@ export default function BikebearHero() {
                   priority
                   quality={85}
                 />
+
+                <SpiderReveal />
 
                 {/* Corner sticker */}
                 <div aria-hidden className="absolute left-4 bottom-4 w-14 h-14 rounded-full bg-white border-3 border-ink grid place-items-center shadow-brutal-sm animate-spin-slow">

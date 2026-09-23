@@ -409,7 +409,7 @@ export default function ExperienceSection() {
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          role="tablist"
+          role="group"
           aria-label="Filter experience"
           className="flex flex-wrap items-center gap-2 p-2 bg-white border-3 border-ink rounded-[22px] shadow-brutal-sm w-fit max-w-full"
         >
@@ -420,8 +420,7 @@ export default function ExperienceSection() {
             return (
               <button
                 key={f.id}
-                role="tab"
-                aria-selected={isActive}
+                aria-pressed={isActive}
                 onClick={() => setSelectedFilter(f.id)}
                 className={`relative px-4 py-2.5 rounded-2xl text-xs font-mono font-extrabold uppercase tracking-[0.08em] border-2 transition-all duration-150 ${
                   isActive

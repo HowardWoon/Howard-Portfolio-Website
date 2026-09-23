@@ -217,16 +217,7 @@ export default function AboutSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: idx * 0.1 }}
-                role="button"
-                tabIndex={0}
-                aria-pressed={isActive}
                 onClick={() => setActiveCard(pillar.id)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    setActiveCard(pillar.id);
-                  }
-                }}
                 className={`relative group cursor-pointer rounded-[26px] p-4 xs:p-6 sm:p-8 border-3 border-ink flex flex-col justify-between gap-6 transition-[transform,box-shadow,background-color] duration-200 ${
                   idx % 2 === 1 ? "lg:mt-10" : ""
                 } ${

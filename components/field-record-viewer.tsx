@@ -84,7 +84,7 @@ export function FieldRecordViewer({ records, currentIndex, onClose, onNavigate }
         <button
           onClick={onClose}
           aria-label="Close"
-          autoFocus
+          data-autofocus
           className="shrink-0 w-12 h-12 rounded-full bg-white border-3 border-ink shadow-brutal-sm grid place-items-center text-ink hover:bg-pop-red hover:text-white active:bg-pop-red active:text-white transition-colors"
         >
           <X className="w-5 h-5" strokeWidth={3} />

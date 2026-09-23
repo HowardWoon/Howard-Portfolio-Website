@@ -34,9 +34,9 @@ export function CommandPalette() {
     const down = (e: KeyboardEvent) => {
       if (e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        // While the "Initialize System" gate is up, the palette would open invisibly *behind* it
-        // (lower z-index) and steal keyboard focus.
-        if (document.querySelector(".boot-overlay")) return;
+        // Don't open behind the "Initialize System" gate or behind another open dialog (certificate /
+        // photo viewer): the palette would sit invisibly underneath and swallow the keystrokes.
+        if (document.querySelector('.boot-overlay, [aria-modal="true"]:not([aria-label="Command Palette"])')) return;
         setOpen((open) => !open);
       }
       if (e.key === "Escape") {
@@ -91,7 +91,7 @@ export function CommandPalette() {
             <div className="flex items-center border-b-3 border-ink px-4 py-3.5 bg-paper-cream">
               <Search className="w-5 h-5 text-ink mr-3" strokeWidth={2.75} />
               <Command.Input
-                autoFocus
+                data-autofocus
                 placeholder="Type a command or search..."
                 className="flex-1 bg-transparent text-ink placeholder:text-ink-muted outline-none border-none text-base font-semibold"
               />

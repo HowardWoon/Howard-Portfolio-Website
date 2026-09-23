@@ -13,7 +13,11 @@ const FOCUSABLE =
 export function useFocusTrap(ref: RefObject<HTMLElement | null>, active = true) {
   useEffect(() => {
     if (!active) return;
+    // Record the trigger FIRST, then move focus into the dialog. (With React's `autoFocus` the dialog
+    // grabbed focus before this effect ran, so the "trigger" recorded was the dialog's own close button,
+    // and closing the dialog dropped keyboard focus to <body> / the top of the page.)
     const previouslyFocused = document.activeElement as HTMLElement | null;
+    ref.current?.querySelector<HTMLElement>("[data-autofocus]")?.focus({ preventScroll: true });
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== "Tab" || !ref.current) return;

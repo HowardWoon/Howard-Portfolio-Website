@@ -345,7 +345,7 @@ function CertificateModal({ url, onClose }: { url: string; onClose: () => void }
         <button
           onClick={onClose}
           aria-label="Close"
-          autoFocus
+          data-autofocus
           className="w-12 h-12 rounded-full bg-white border-3 border-ink shadow-brutal-sm grid place-items-center text-ink hover:bg-pop-red hover:text-white active:bg-pop-red active:text-white transition-colors"
         >
           <X className="w-5 h-5" strokeWidth={3} />
@@ -513,26 +513,26 @@ export default function HonorsSection() {
                     : "bg-white shadow-clay hover:-translate-y-1"
                 }`}
               >
-                <div className="relative z-10 w-full flex items-start justify-between mb-5">
-                  <div className={`w-14 h-14 rounded-2xl grid place-items-center border-3 border-ink shadow-brutal-sm transition-transform group-hover:-rotate-6 ${isActive ? "bg-white" : cat.fill}`}>
+                <span className="relative z-10 w-full flex items-start justify-between mb-5">
+                  <span className={`w-14 h-14 rounded-2xl grid place-items-center border-3 border-ink shadow-brutal-sm transition-transform group-hover:-rotate-6 ${isActive ? "bg-white" : cat.fill}`}>
                     <Icon className="w-7 h-7 text-ink" strokeWidth={2.5} />
-                  </div>
-                  <div className="flex items-center gap-2 text-ink">
+                  </span>
+                  <span className="flex items-center gap-2 text-ink">
                     <span className="font-mono text-sm font-extrabold">[{cat.count}]</span>
                     <span className="grid place-items-center w-8 h-8 rounded-full border-2 border-ink bg-white">
                       {isActive ? <ChevronUp className="w-4 h-4" strokeWidth={3} /> : <ChevronDown className="w-4 h-4" strokeWidth={3} />}
                     </span>
-                  </div>
-                </div>
+                  </span>
+                </span>
 
-                <div className="relative z-10 space-y-1.5">
-                  <h3 className="font-display text-xl font-extrabold uppercase tracking-[-0.02em] text-ink">
+                <span className="relative z-10 block space-y-1.5">
+                  <span className="block font-display text-xl font-extrabold uppercase tracking-[-0.02em] text-ink">
                     {cat.label}
-                  </h3>
-                  <p className="text-xs font-mono font-bold text-ink/75">
+                  </span>
+                  <span className="block text-xs font-mono font-bold text-ink/75">
                     {"// "}{cat.desc}
-                  </p>
-                </div>
+                  </span>
+                </span>
               </motion.button>
             );
           })}

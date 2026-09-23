@@ -18,6 +18,7 @@ export function CustomCursor() {
   const [isPointer, setIsPointer] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
   const [onDark, setOnDark] = useState(false); // footer, modal backdrops, simulator screen
+  const [onXray, setOnXray] = useState(false); // hero portrait: the Spider-Man reveal circle IS the cursor there
   // The black ink cursor is invisible on the dark admin area → native cursor there
   const isAdmin = usePathname()?.startsWith('/admin') ?? false;
 
@@ -56,6 +57,7 @@ export function CustomCursor() {
       setIsHidden(!!typing || !!embedded);
       // The black multiply-blended ring was invisible on black surfaces (footer, dark overlays)
       setOnDark(!!target.closest('[data-dark-surface]'));
+      setOnXray(!!target.closest('[data-xray]'));
     };
 
     const handleMouseLeave = () => setIsHidden(true);
@@ -88,8 +90,8 @@ export function CustomCursor() {
         style={{ x: cursorX, y: cursorY, translateX: '-50%', translateY: '-50%', opacity: isHidden ? 0 : 1 }}
       />
 
-      {/* Ring — hidden over the portrait: the photo draws its own lens ring at the exact lens position,
-          while this ring trails on a spring and would sit off-centre from the lens */}
+      {/* Ring — trails the dot on a spring. Hidden over the hero portrait: there the Spider-Man reveal circle
+          follows the pointer exactly, and a lagging ring on top of it would look off-centre. */}
       <motion.div
         aria-hidden
         className={`fixed top-0 left-0 w-11 h-11 rounded-full pointer-events-none z-[99999] border-[3px] ${onDark ? '' : 'mix-blend-multiply'}`}
@@ -99,7 +101,7 @@ export function CustomCursor() {
           backgroundColor: isPointer ? 'rgba(255,199,0,0.45)' : 'rgba(255,199,0,0)',
         }}
         transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-        style={{ x: cursorXSpring, y: cursorYSpring, translateX: '-50%', translateY: '-50%', opacity: isHidden ? 0 : 1 }}
+        style={{ x: cursorXSpring, y: cursorYSpring, translateX: '-50%', translateY: '-50%', opacity: isHidden || onXray ? 0 : 1 }}
       />
     </>
   );
