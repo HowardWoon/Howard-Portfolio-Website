@@ -87,6 +87,7 @@ const projects: ProjectData[] = [
       ],
       tags: ["Sui Move", "Next.js", "USDC Stablecoin", "TypeScript", "Gonka Router"],
       prototypeUrl: "https://proofpay-choong-zhuo-lins-projects.vercel.app/",
+      deckUrl: "/proofpay_pitch_deck.pdf",
               galleryPhotos: [
           { src: "/images/muba/1789408409350.jpg", alt: "ProofPay Interface 1", rotation: -1.5 },
           { src: "/images/muba/1789408409711.jpg", alt: "ProofPay Interface 2", rotation: 2 },
