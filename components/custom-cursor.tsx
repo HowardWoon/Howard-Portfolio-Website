@@ -16,7 +16,6 @@ import { usePathname } from 'next/navigation';
 export function CustomCursor() {
   const [enabled, setEnabled] = useState(false);
   const [isPointer, setIsPointer] = useState(false);
-  const [isSpiderman, setIsSpiderman] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
   const [onDark, setOnDark] = useState(false); // footer, modal backdrops, simulator screen
   // The black ink cursor is invisible on the dark admin area → native cursor there
@@ -57,7 +56,6 @@ export function CustomCursor() {
       setIsHidden(!!typing || !!embedded);
       // The black multiply-blended ring was invisible on black surfaces (footer, dark overlays)
       setOnDark(!!target.closest('[data-dark-surface]'));
-      setIsSpiderman(!!target.closest('[data-spiderman]'));
     };
 
     const handleMouseLeave = () => setIsHidden(true);
@@ -84,8 +82,8 @@ export function CustomCursor() {
       {/* Dot */}
       <motion.div
         aria-hidden
-        className={`fixed top-0 left-0 rounded-full pointer-events-none z-[100000] border-2 border-ink ${isSpiderman ? 'bg-pop-red' : 'bg-pop-yellow'}`}
-        animate={{ width: isPointer || isSpiderman ? 8 : 14, height: isPointer || isSpiderman ? 8 : 14 }}
+        className={`fixed top-0 left-0 rounded-full pointer-events-none z-[100000] border-2 border-ink bg-pop-yellow`}
+        animate={{ width: isPointer ? 8 : 14, height: isPointer ? 8 : 14 }}
         transition={{ type: 'spring', stiffness: 400, damping: 25 }}
         style={{ x: cursorX, y: cursorY, translateX: '-50%', translateY: '-50%', opacity: isHidden ? 0 : 1 }}
       />
@@ -101,7 +99,7 @@ export function CustomCursor() {
           backgroundColor: isPointer ? 'rgba(255,199,0,0.45)' : 'rgba(255,199,0,0)',
         }}
         transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-        style={{ x: cursorXSpring, y: cursorYSpring, translateX: '-50%', translateY: '-50%', opacity: isHidden || isSpiderman ? 0 : 1 }}
+        style={{ x: cursorXSpring, y: cursorYSpring, translateX: '-50%', translateY: '-50%', opacity: isHidden ? 0 : 1 }}
       />
     </>
   );
