@@ -218,10 +218,9 @@ export default function StackedProjects() {
   return (
     <section
       id="projects"
-      className="relative w-full bg-paper text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-x-clip border-t-3 border-ink"
+      className="relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-x-clip border-t-3 border-ink"
     >
-      {/* Structural grid texture */}
-      <div aria-hidden className="absolute inset-0 bg-grid pointer-events-none [mask-image:linear-gradient(to_bottom,#000,transparent_40%)]" />
+      
 
       <div className="relative max-w-7xl mx-auto space-y-16 sm:space-y-20">
 

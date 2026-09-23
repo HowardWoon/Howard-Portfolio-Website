@@ -449,10 +449,10 @@ export default function HonorsSection() {
   return (
     <section
       id="honors"
-      className="relative w-full bg-paper text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-hidden border-t-3 border-ink flex flex-col"
+      className="relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-hidden border-t-3 border-ink flex flex-col"
     >
       {/* Structural grid + Bauhaus accents */}
-      <div aria-hidden className="absolute inset-0 bg-grid pointer-events-none [mask-image:linear-gradient(to_bottom,#000,transparent_35%)]" />
+      
       <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 w-40 h-40 rounded-full bg-pop-red border-3 border-ink hidden lg:block" />
       <div aria-hidden className="pointer-events-none absolute right-16 top-6 w-12 h-12 bg-pop-blue border-3 border-ink rotate-12 hidden lg:block" />
 
