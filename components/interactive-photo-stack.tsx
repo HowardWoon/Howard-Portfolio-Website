@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import { Maximize2 } from 'lucide-react';
 
 const photos = [
   { src: '/images/projects/zerolag/dashboard.jpeg', alt: 'Dashboard Console', rotation: -1.5 },
@@ -67,6 +68,16 @@ export function InteractivePhotoStack({ customPhotos }: { customPhotos?: { src: 
                 sizes="(max-width: 1024px) 92vw, 40vw"
                 className="object-contain pointer-events-none"
               />
+              {isTop && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); window.open(photo.src, '_blank'); }}
+                  className="absolute top-2 right-2 sm:top-3 sm:right-3 z-50 p-1.5 sm:p-2 bg-white border-2 border-ink rounded-lg shadow-brutal-xs hover:bg-pop-yellow hover:-translate-y-0.5 active:translate-y-0 transition-all text-ink flex items-center justify-center group/expand"
+                  title="View full resolution"
+                  aria-label="View full resolution"
+                >
+                  <Maximize2 className="w-3 h-3 sm:w-4 sm:h-4 group-hover/expand:scale-110 transition-transform" strokeWidth={2.5} />
+                </button>
+              )}
             </div>
           </motion.div>
         );

@@ -87,13 +87,17 @@ const projects: ProjectData[] = [
       ],
       tags: ["Sui Move", "Next.js", "USDC Stablecoin", "TypeScript", "Gonka Router"],
       prototypeUrl: "https://proofpay-choong-zhuo-lins-projects.vercel.app/",
-      galleryPhotos: [
-        { src: "/images/muba/zilian_muba.jpg", alt: "MUBA Zilian", rotation: -2 },
-        { src: "/images/muba/4ppl_muba.jpg", alt: "MUBA 4 People", rotation: 3 },
-        { src: "/images/muba/gonka_4ppl_muba.jpg", alt: "MUBA Gonka", rotation: -1 },
-        { src: "/images/muba/solo_muba.jpg", alt: "MUBA Solo", rotation: 2 }
-      ],
-      simulatorId: "proofpay",
+              galleryPhotos: [
+          { src: "/images/muba/1789408409350.jpg", alt: "ProofPay Interface 1", rotation: -1.5 },
+          { src: "/images/muba/1789408409711.jpg", alt: "ProofPay Interface 2", rotation: 2 },
+          { src: "/images/muba/1789408409917.jpg", alt: "ProofPay Interface 3", rotation: -1 },
+          { src: "/images/muba/1789408410071.jpg", alt: "ProofPay Interface 4", rotation: 1.5 },
+          { src: "/images/muba/zilian_muba.jpg", alt: "MUBA Zilian", rotation: -2 },
+          { src: "/images/muba/4ppl_muba.jpg", alt: "MUBA 4 People", rotation: 3 },
+          { src: "/images/muba/gonka_4ppl_muba.jpg", alt: "MUBA Gonka", rotation: -1 },
+          { src: "/images/muba/solo_muba.jpg", alt: "MUBA Solo", rotation: 2 }
+        ],
+        simulatorId: "proofpay",
       telemetryType: "proofpay",
     },
   {
