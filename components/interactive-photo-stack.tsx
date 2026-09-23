@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
-import { Maximize2 } from 'lucide-react';
+import { Maximize2, X } from 'lucide-react';
 
 const photos = [
   { src: '/images/projects/zerolag/dashboard.jpeg', alt: 'Dashboard Console', rotation: -1.5 },
@@ -19,6 +19,7 @@ const photos = [
  */
 export function InteractivePhotoStack({ customPhotos }: { customPhotos?: { src: string, alt: string, rotation: number }[] }) {
   const [cards, setCards] = useState(customPhotos || photos);
+  const [expandedPhoto, setExpandedPhoto] = useState<string | null>(null);
 
   const cycle = () => {
     setCards((prev) => {
@@ -30,7 +31,8 @@ export function InteractivePhotoStack({ customPhotos }: { customPhotos?: { src: 
   };
 
   return (
-    <div
+    <>
+      <div
       role="button"
       tabIndex={0}
       aria-label={cards[0]?.alt}
@@ -70,7 +72,7 @@ export function InteractivePhotoStack({ customPhotos }: { customPhotos?: { src: 
               />
               {isTop && (
                 <button
-                  onClick={(e) => { e.stopPropagation(); window.open(photo.src, '_blank'); }}
+                  onClick={(e) => { e.stopPropagation(); setExpandedPhoto(photo.src); }}
                   className="absolute top-2 right-2 sm:top-3 sm:right-3 z-50 p-1.5 sm:p-2 bg-white border-2 border-ink rounded-lg shadow-brutal-xs hover:bg-pop-yellow hover:-translate-y-0.5 active:translate-y-0 transition-all text-ink flex items-center justify-center group/expand"
                   title="View full resolution"
                   aria-label="View full resolution"
@@ -89,5 +91,40 @@ export function InteractivePhotoStack({ customPhotos }: { customPhotos?: { src: 
         CLICK ALBUM TO CYCLE
       </div>
     </div>
+      <AnimatePresence>
+        {expandedPhoto && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-ink/90 backdrop-blur-sm"
+            onClick={(e) => { e.stopPropagation(); setExpandedPhoto(null); }}
+          >
+            <button
+              onClick={(e) => { e.stopPropagation(); setExpandedPhoto(null); }}
+              className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 sm:p-3 bg-white border-3 border-ink rounded-xl shadow-brutal hover:-translate-y-1 hover:shadow-brutal-lg transition-all z-[110]"
+            >
+              <X className="w-5 h-5 sm:w-6 sm:h-6 text-ink" strokeWidth={3} />
+            </button>
+
+            <motion.div
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-6xl h-[85vh] sm:h-[90vh] bg-paper-deep rounded-2xl overflow-hidden border-4 border-ink shadow-2xl p-2 sm:p-4"
+            >
+              <Image
+                src={expandedPhoto}
+                alt="Expanded view"
+                fill
+                sizes="100vw"
+                className="object-contain"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
