@@ -1,21 +1,20 @@
- 
-// // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// 
 'use client';
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Check, PencilLine, Plus, Trash2 } from 'lucide-react';
-import type { ExperienceItem, Project } from '@/lib/site-data';
+import type { ExperienceRow, ProjectRow, SkillRow } from '@/lib/admin-types';
 
-type SkillItem = { id: string; name: string; category: string; };
-type ProjectItem = Project;
+type ExperienceItem = ExperienceRow;
+type ProjectItem = ProjectRow;
+type SkillItem = SkillRow;
 
 type DashboardClientProps = {
   initialExperiences: ExperienceItem[];
   initialProjects: ProjectItem[];
   initialSkills: SkillItem[];
   adminName?: string;
+  isLive?: boolean;
 };
 
 const emptyExperience = {
@@ -41,7 +40,7 @@ const emptySkill = {
   category: 'Languages'
 };
 
-export function DashboardClient({ initialExperiences, initialProjects, initialSkills, adminName }: DashboardClientProps) {
+export function DashboardClient({ initialExperiences, initialProjects, initialSkills, adminName, isLive = false }: DashboardClientProps) {
   const router = useRouter();
   const [experiences, setExperiences] = useState(initialExperiences);
   const [projects, setProjects] = useState(initialProjects);
@@ -53,6 +52,16 @@ export function DashboardClient({ initialExperiences, initialProjects, initialSk
   const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
   const [editingSkillId, setEditingSkillId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [notice, setNotice] = useState<{ kind: 'error' | 'ok'; text: string } | null>(null);
+
+  // Every save/delete used to be fired with `void …()` — failures became silent unhandled rejections.
+  const run = (label: string, action: () => Promise<void>, confirmText?: string) => {
+    if (confirmText && !window.confirm(confirmText)) return;
+    setNotice(null);
+    action()
+      .then(() => setNotice({ kind: 'ok', text: `${label} saved.` }))
+      .catch((err: unknown) => setNotice({ kind: 'error', text: err instanceof Error ? err.message : 'Something went wrong.' }));
+  };
 
   const reloadData = async () => {
     const response = await fetch('/api/admin/content', { cache: 'no-store' });
@@ -138,13 +147,26 @@ export function DashboardClient({ initialExperiences, initialProjects, initialSk
     await mutate(table, 'DELETE', { id });
   };
 
+  // previously only prefetched + refreshed the dashboard — it never actually opened the site
   const openPublicSite = () => {
-    router.prefetch('/');
-    router.refresh();
+    window.open('/', '_blank', 'noopener,noreferrer');
   };
 
   return (
     <div className="space-y-6">
+      {/* Honest status: the public portfolio renders content from the component files, not from these tables */}
+      <div className="rounded-2xl border border-amber-400/40 bg-amber-400/10 p-4 text-sm leading-6 text-amber-100">
+        <strong className="text-amber-300">Heads-up:</strong> the public portfolio currently renders its content from the code
+        (components/*.tsx), so edits saved here are stored in Supabase but do not change the live site yet.
+        {!isLive && ' Supabase is not configured — showing read-only sample data.'}
+      </div>
+
+      {notice && (
+        <div role="status" className={`rounded-2xl border p-4 text-sm ${notice.kind === 'error' ? 'border-red-400/40 bg-red-500/10 text-red-200' : 'border-emerald-400/40 bg-emerald-500/10 text-emerald-200'}`}>
+          {notice.text}
+        </div>
+      )}
+
       <section className="glass-panel rounded-[2rem] p-6 sm:p-8">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
@@ -184,7 +206,7 @@ export function DashboardClient({ initialExperiences, initialProjects, initialSk
               <input type="checkbox" checked={experienceForm.is_current} onChange={(event) => setExperienceForm({ ...experienceForm, is_current: event.target.checked })} />
               Current role
             </label>
-            <button type="button" className="pill-button pill-button-primary justify-center" onClick={() => void upsertExperience()}>
+            <button type="button" className="pill-button pill-button-primary justify-center" onClick={() => run('Experience', upsertExperience)}>
               <Plus className="h-4 w-4" />
               <span>{editingExperienceId ? 'Update Experience' : 'Add Experience'}</span>
             </button>
@@ -196,7 +218,7 @@ export function DashboardClient({ initialExperiences, initialProjects, initialSk
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="font-medium text-white">{item.role}</p>
-                    <p className="text-sm text-fog-500">{item.organization}</p>
+                    <p className="text-sm text-fog-500">{item.company}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
@@ -206,17 +228,17 @@ export function DashboardClient({ initialExperiences, initialProjects, initialSk
                         setEditingExperienceId(item.id);
                         setExperienceForm({
                           role: item.role,
-                          company: item.organization,
-                          description: Array.isArray(item.description) ? item.description.join(' ') : item.description,
-                          start_date: item.period ? item.period.split(' - ')[0] : '',
-                          end_date: item.period ? item.period.split(' - ')[1] : '',
-                          is_current: item.period ? item.period.toLowerCase().includes('present') : false
+                          company: item.company,
+                          description: item.description,
+                          start_date: item.start_date ?? '',
+                          end_date: item.end_date ?? '',
+                          is_current: item.is_current
                         });
                       }}
                     >
                       <PencilLine className="h-4 w-4" />
                     </button>
-                    <button type="button" className="rounded-full border border-white/10 p-2 text-fog-500 transition hover:text-red-300" onClick={() => void deleteRow('experiences', item.id)}>
+                    <button type="button" className="rounded-full border border-white/10 p-2 text-fog-500 transition hover:text-red-300" onClick={() => run('Deletion', () => deleteRow('experiences', item.id), 'Delete this record? This cannot be undone.')}>
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
@@ -241,7 +263,7 @@ export function DashboardClient({ initialExperiences, initialProjects, initialSk
               <input className="floating-field !py-0" placeholder=" " value={projectForm.project_url} onChange={(event) => setProjectForm({ ...projectForm, project_url: event.target.value })} />
               <input className="floating-field !py-0" placeholder=" " value={projectForm.display_order} onChange={(event) => setProjectForm({ ...projectForm, display_order: event.target.value })} />
             </div>
-            <button type="button" className="pill-button pill-button-primary justify-center" onClick={() => void upsertProject()}>
+            <button type="button" className="pill-button pill-button-primary justify-center" onClick={() => run('Project', upsertProject)}>
               <Plus className="h-4 w-4" />
               <span>{editingProjectId ? 'Update Project' : 'Add Project'}</span>
             </button>
@@ -258,18 +280,19 @@ export function DashboardClient({ initialExperiences, initialProjects, initialSk
                   <div className="flex items-center gap-2">
                     <button type="button" className="rounded-full border border-white/10 p-2 text-fog-500 transition hover:text-white" onClick={() => {
                       setEditingProjectId(item.id);
+                      // previously overwrote `context` with the description and reset display_order to 0
                       setProjectForm({
                         title: item.title,
-                        context: item.description,
-                        description: Array.isArray(item.description) ? item.description.join(' ') : item.description,
-                        tags: item.technologies ? item.technologies.join(", ") : "",
-                        project_url: item.githubUrl ?? "",
-                        display_order: "0"
+                        context: item.context,
+                        description: item.description,
+                        tags: item.tags.join(", "),
+                        project_url: item.project_url ?? "",
+                        display_order: String(item.display_order)
                       });
                     }}>
                       <PencilLine className="h-4 w-4" />
                     </button>
-                    <button type="button" className="rounded-full border border-white/10 p-2 text-fog-500 transition hover:text-red-300" onClick={() => void deleteRow('projects', item.id)}>
+                    <button type="button" className="rounded-full border border-white/10 p-2 text-fog-500 transition hover:text-red-300" onClick={() => run('Deletion', () => deleteRow('projects', item.id), 'Delete this record? This cannot be undone.')}>
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
@@ -295,7 +318,7 @@ export function DashboardClient({ initialExperiences, initialProjects, initialSk
             <option>AI/ML</option>
             <option>Design</option>
           </select>
-          <button type="button" className="pill-button pill-button-primary justify-center" onClick={() => void upsertSkill()}>
+          <button type="button" className="pill-button pill-button-primary justify-center" onClick={() => run('Skill', upsertSkill)}>
             <Plus className="h-4 w-4" />
             <span>{editingSkillId ? 'Update Skill' : 'Add Skill'}</span>
           </button>
@@ -313,7 +336,7 @@ export function DashboardClient({ initialExperiences, initialProjects, initialSk
                 }}>
                   <PencilLine className="h-4 w-4" />
                 </button>
-                <button type="button" className="rounded-full border border-white/10 p-2 text-fog-500 transition hover:text-red-300" onClick={() => void deleteRow('skills', item.id)}>
+                <button type="button" className="rounded-full border border-white/10 p-2 text-fog-500 transition hover:text-red-300" onClick={() => run('Deletion', () => deleteRow('skills', item.id), 'Delete this record? This cannot be undone.')}>
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
@@ -324,7 +347,7 @@ export function DashboardClient({ initialExperiences, initialProjects, initialSk
 
       <div className="flex justify-end">
         <button type="button" onClick={openPublicSite} className="pill-button pill-button-secondary">
-          <span>Sync public site</span>
+          <span>Open public site ↗</span>
         </button>
       </div>
     </div>

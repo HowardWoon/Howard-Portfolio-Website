@@ -1,48 +1,73 @@
 import React from "react";
+import type { Metadata } from "next";
 import { ZeroLagSimulator, BilahujanSimulator, SensorXSimulator } from "@/components/project-simulators";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
+// Only the three pre-rendered simulators exist; anything else is a real 404
 export const dynamicParams = false;
 
+const SIMULATORS = [
+  { type: "agentic", label: "ZeroLag" },
+  { type: "flood", label: "BILAHUJAN" },
+  { type: "energy", label: "Sensor X Sensei" },
+] as const;
+
 export async function generateStaticParams() {
-  return [
-    { type: 'agentic' },
-    { type: 'flood' },
-    { type: 'energy' }
-  ];
+  return SIMULATORS.map(({ type }) => ({ type }));
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ type: string }> }): Promise<Metadata> {
+  const { type } = await params;
+  const sim = SIMULATORS.find((s) => s.type === type);
+  return { title: sim ? `${sim.label} Simulator // Howard Woon` : "Simulator // Howard Woon" };
 }
 
 export default async function SimulatorPage({ params }: { params: Promise<{ type: string }> }) {
   const { type } = await params;
-  // Unknown types used to render an empty shell with a 200 status
-  if (!['agentic', 'flood', 'energy'].includes(type)) notFound();
+  if (!SIMULATORS.some((s) => s.type === type)) notFound();
 
   return (
-    <div className="min-h-screen bg-[#050608] text-white flex flex-col p-6 sm:p-12 font-sans selection:bg-amber-500/30">
-      
+    <div className="min-h-screen-safe bg-paper-cream bg-dots text-ink flex flex-col px-4 xs:px-5 sm:px-12 pt-[max(1.5rem,var(--safe-top))] pb-[max(2rem,var(--safe-bottom))] sm:py-12 font-sans">
+
       {/* Top Nav */}
-      <div className="mb-12 flex items-center justify-between max-w-6xl mx-auto w-full">
-        <Link href="/" className="inline-flex items-center gap-2 text-neutral-400 hover:text-amber-400 transition-colors text-sm font-mono tracking-wider uppercase">
-          <ArrowLeft className="w-4 h-4" />
+      <div className="mb-8 sm:mb-10 flex flex-wrap items-center justify-between gap-3 max-w-6xl mx-auto w-full">
+        <Link href="/#projects" className="nb-btn nb-btn-white px-4 py-2.5">
+          <ArrowLeft className="w-4 h-4" strokeWidth={2.75} />
           <span>Return to Portfolio</span>
         </Link>
-        <span className="text-xs font-mono text-neutral-600 uppercase tracking-widest border border-white/10 px-3 py-1 rounded-full">
+        <span className="nb-tag bg-pop-yellow">
           ISOLATED SIMULATION ENVIRONMENT
         </span>
       </div>
 
-      {/* Main Simulator Area */}
-      <main className="flex-1 w-full max-w-6xl mx-auto flex items-center justify-center">
-        <div className="w-full bg-[#0E121B] rounded-[32px] border border-white/10 p-6 sm:p-12 shadow-2xl relative overflow-hidden">
-          {/* Subtle Glow */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-amber-500/5 rounded-full blur-[120px] pointer-events-none" />
-          
+      {/* Simulator switcher — /simulators/flood and /simulators/energy were previously unreachable */}
+      <nav aria-label="Simulators" className="max-w-6xl mx-auto w-full mb-6 flex flex-wrap gap-2">
+        {SIMULATORS.map((s) => {
+          const active = s.type === type;
+          return (
+            <Link
+              key={s.type}
+              href={`/simulators/${s.type}`}
+              aria-current={active ? "page" : undefined}
+              className={`px-4 py-2.5 rounded-2xl border-3 border-ink font-mono text-xs font-extrabold uppercase tracking-[0.08em] transition-all ${
+                active ? "bg-ink text-white shadow-clay-pressed" : "bg-white text-ink shadow-brutal-xs hover:-translate-y-0.5 hover:shadow-brutal-sm"
+              }`}
+            >
+              {s.label}
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Main Simulator Area — a dark "device screen" inside the light page (skeuomorphic) */}
+      <main className="flex-1 w-full max-w-6xl mx-auto flex items-start justify-center">
+        <div className="w-full bg-[#0E121B] text-white rounded-[24px] sm:rounded-[32px] border-3 border-ink p-4 xs:p-6 sm:p-12 shadow-brutal-lg sm:shadow-brutal-xl relative overflow-hidden">
           <div className="relative z-10 w-full">
-            {type === 'agentic' && <ZeroLagSimulator />}
-            {type === 'flood' && <BilahujanSimulator />}
-            {type === 'energy' && <SensorXSimulator />}
+            {type === "agentic" && <ZeroLagSimulator />}
+            {type === "flood" && <BilahujanSimulator />}
+            {type === "energy" && <SensorXSimulator />}
           </div>
         </div>
       </main>

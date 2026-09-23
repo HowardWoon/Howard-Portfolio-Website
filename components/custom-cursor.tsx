@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
+import { usePathname } from 'next/navigation';
 
 /**
  * Brutalist cursor: solid ink dot + chunky ring.
@@ -17,6 +18,8 @@ export function CustomCursor() {
   const [isPointer, setIsPointer] = useState(false);
   const [isSpiderman, setIsSpiderman] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
+  // The black ink cursor is invisible on the dark admin area → native cursor there
+  const isAdmin = usePathname()?.startsWith('/admin') ?? false;
 
   const cursorX = useMotionValue(-100);
   const cursorY = useMotionValue(-100);
@@ -28,7 +31,10 @@ export function CustomCursor() {
   useEffect(() => {
     const fine = window.matchMedia('(pointer: fine)').matches;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!fine || reduce) return;
+    if (!fine || reduce || isAdmin) {
+      setEnabled(false);
+      return;
+    }
 
     setEnabled(true);
     document.documentElement.classList.add('has-custom-cursor');
@@ -63,7 +69,7 @@ export function CustomCursor() {
       document.documentElement.removeEventListener('mouseleave', handleMouseLeave);
       document.documentElement.removeEventListener('mouseenter', handleMouseEnter);
     };
-  }, [cursorX, cursorY]);
+  }, [cursorX, cursorY, isAdmin]);
 
   if (!enabled) return null;
 

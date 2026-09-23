@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Terminal, 
@@ -14,6 +14,18 @@ import {
 } from "lucide-react";
 
 type TabType = "slotify" | "zerolag" | "bilahujan" | "sensorx";
+
+/** setTimeout/setInterval that are all cleared when the simulator unmounts
+ *  (navigating away mid-run used to keep firing setState on an unmounted component). */
+function useTimers() {
+  const ids = useRef<number[]>([]);
+  useEffect(() => () => ids.current.forEach((id) => { clearTimeout(id); clearInterval(id); }), []);
+  return {
+    timeout: (fn: () => void, ms: number) => { ids.current.push(window.setTimeout(fn, ms)); },
+    interval: (fn: () => void, ms: number) => { const id = window.setInterval(fn, ms); ids.current.push(id); return id; },
+  };
+}
+
 
 export default function ProjectSimulators() {
   const [activeTab, setActiveTab] = useState<TabType>("slotify");
@@ -115,15 +127,17 @@ function SlotifySimulator() {
     "Ready for vehicle entry point allocation.",
   ]);
 
+  const timers = useTimers();
   const runDijkstra = () => {
+    if (isRouting) return;
     setIsRouting(true);
     setLogs(["[0.0ms] Vehicle detected at Entry Gate A.", "[0.4ms] Initializing Min-Heap Priority Queue..."]);
     
-    setTimeout(() => {
+    timers.timeout(() => {
       setLogs((prev) => [...prev, "[0.9ms] Relaxing edges for Vertex A1 (Occupied, weight: ∞)"]);
     }, 400);
 
-    setTimeout(() => {
+    timers.timeout(() => {
       setLogs((prev) => [
         ...prev,
         "[1.2ms] Evaluated Spot A2 (Weight: 18m) - Selected as global minimum.",
@@ -268,18 +282,20 @@ export function ZeroLagSimulator() {
     { name: "CRM Dispatch", desc: "Syncing vectorized payload to Supabase & CRM" },
   ];
 
+  const timers = useTimers();
   const triggerPipeline = () => {
+    if (isRunning) return;
     setIsRunning(true);
     setCurrentStage(1);
-    const interval = setInterval(() => {
-      setCurrentStage((prev) => {
-        if (prev >= 5) {
-          clearInterval(interval);
-          setIsRunning(false);
-          return 5;
-        }
-        return prev + 1;
-      });
+    // Side effects kept OUT of the state updater (updaters must be pure; StrictMode runs them twice)
+    let stage = 1;
+    const id = timers.interval(() => {
+      stage += 1;
+      setCurrentStage(Math.min(stage, 5));
+      if (stage >= 5) {
+        clearInterval(id);
+        setIsRunning(false);
+      }
     }, 600);
   };
 
@@ -383,26 +399,27 @@ export function BilahujanSimulator() {
   const [isSimulating, setIsSimulating] = useState(false);
   const [severity, setSeverity] = useState<number | null>(null);
 
+  const timers = useTimers();
   const triggerReport = () => {
     if (isSimulating) return;
     setIsSimulating(true);
     setLogs(["[Node] Citizen uploaded flood image at KL-007 (Ampang)"]);
     setSeverity(null);
     
-    setTimeout(() => {
+    timers.timeout(() => {
       setLogs(p => [...p, "[Vision] gemini-2.5-flash 12-pass analysis started..."]);
     }, 600);
 
-    setTimeout(() => {
+    timers.timeout(() => {
       setLogs(p => [...p, "[Vision] Pass 5 (Rooftop Cue): DETECTED", "[Vision] Severity Override applied -> 9 (CRITICAL)"]);
       setSeverity(9);
     }, 1800);
 
-    setTimeout(() => {
+    timers.timeout(() => {
       setLogs(p => [...p, "[Agent] New node detected via get_active_nodes MCP tool", "[Agent] Chain-of-Thought: 'Zone KL-007 has severity 9. I will dispatch an alert to NADMA.'"]);
     }, 3200);
 
-    setTimeout(() => {
+    timers.timeout(() => {
       setLogs(p => [...p, "[MCP] Executing: dispatch_alert(zone: 'KL-007', severity: 9)", "[System] Authority notification sent to JPS & NADMA via Firebase."]);
       setIsSimulating(false);
     }, 4800);
@@ -444,7 +461,7 @@ export function BilahujanSimulator() {
         {/* Left: Swarm Map / Status */}
         <div className="lg:col-span-4 bg-black/60 border border-white/10 rounded-2xl p-6 flex flex-col justify-between">
           <div className="space-y-2 text-xs font-mono">
-            <div className="text-neutral-500">// Firebase Node Status</div>
+            <div className="text-neutral-500">{"// Firebase Node Status"}</div>
             <div className="flex justify-between items-center text-neutral-300">
               <span>Active Citizen Nodes</span>
               <span className="text-cyan-400 font-bold">144 Nodes</span>

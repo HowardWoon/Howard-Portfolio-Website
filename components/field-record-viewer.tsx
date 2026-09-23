@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { FieldRecord } from "./field-archive-data";
+import { useFocusTrap } from "@/lib/use-focus-trap";
 import Image from "next/image";
 
 interface FieldRecordViewerProps {
@@ -22,6 +23,8 @@ interface FieldRecordViewerProps {
 export function FieldRecordViewer({ records, currentIndex, onClose, onNavigate }: FieldRecordViewerProps) {
   const [mounted, setMounted] = useState(false);
   const touchX = useRef<number | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, mounted);
   const currentRecord = records[currentIndex];
 
   const handlePrevious = useCallback(() => {
@@ -57,6 +60,7 @@ export function FieldRecordViewer({ records, currentIndex, onClose, onNavigate }
 
   return createPortal(
     <motion.div
+      ref={dialogRef}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       role="dialog"

@@ -57,6 +57,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${sans.variable} ${display.variable} ${mono.variable}`}>
       <body className="font-sans font-medium antialiased bg-paper text-ink">
+        {/* If JavaScript is off or fails to load, the "Initialize System" gate could never be dismissed
+            and the whole portfolio stayed hidden behind it. */}
+        <noscript>
+          <style>{`.boot-overlay{display:none!important}body{overflow:auto!important}`}</style>
+        </noscript>
         <SmoothScrollProvider>{children}</SmoothScrollProvider>
         <CommandPalette />
         <Analytics />

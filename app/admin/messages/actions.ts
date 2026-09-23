@@ -1,15 +1,13 @@
 "use server";
 
-import { createClient } from '@supabase/supabase-js';
 import { requireAdminUser } from '@/lib/admin-auth';
+import { createServiceRoleClient, hasServiceRole } from '@/lib/supabase/route';
 import { revalidatePath } from 'next/cache';
 
 function getAdminSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
-    process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
-    { auth: { persistSession: false } }
-  );
+  // createClient('') threw "supabaseUrl is required" when the service key wasn't set
+  if (!hasServiceRole()) throw new Error('Supabase service role is not configured.');
+  return createServiceRoleClient();
 }
 
 export async function markAsRead(id: string) {

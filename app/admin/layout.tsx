@@ -1,8 +1,19 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
 
+export const metadata: Metadata = {
+  title: 'Admin // Howard Woon',
+  robots: { index: false, follow: false },
+};
+
+/**
+ * The admin area keeps its own dark theme. After the public site switched to a white canvas,
+ * the admin pages (white text, `glass-panel` cards) rendered white-on-white and were unreadable.
+ * `.admin-theme` (globals.css) scopes the dark styles to /admin only.
+ */
 export default function AdminLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <main className="min-h-screen bg-ink-950 text-white">
+    <main className="admin-theme min-h-screen bg-ink-950 text-white">
       <div className="section-shell py-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <Link href="/" className="text-sm font-semibold tracking-[0.32em] text-white">

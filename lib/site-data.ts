@@ -1,4 +1,3 @@
-import {               Terminal } from 'lucide-react';
 export interface Project {
   id: string;
   index: string;
@@ -286,7 +285,7 @@ export const skillsMatrix = [
   },
 ];
 
-export const fallbackSkills = skillsMatrix.flatMap(ts => ts.skills.map((s, i) => ({ id: `${i}`, name: s, category: ts.category })));
+export const fallbackSkills = skillsMatrix.flatMap(ts => ts.skills.map((s, i) => ({ id: `${ts.category}-${i}`, name: s, category: ts.category })));
 export const fallbackExperiences = experiences.map((e, i) => ({ id: e.id, title: e.role, company: e.organization, date_range: e.period, description: e.description.join(' '), is_active: i===0 }));
 export const fallbackProjects = projects.map(p => ({ id: p.id, title: p.title, description: p.description, image_url: '', project_url: p.githubUrl, github_url: p.githubUrl, tags: p.technologies }));
 export const fallbackAwards = awards.map(a => ({ id: a.id, title: a.title, issuer: a.issuer, date_received: a.date, description: a.description }));

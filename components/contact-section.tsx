@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Mail,
@@ -32,6 +32,8 @@ export default function ContactSection() {
   const [emailRevealed, setEmailRevealed] = useState(false);
   const [formStatus, setFormStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
   const [activeIntent, setActiveIntent] = useState<string | null>(null);
+  const [honeypot, setHoneypot] = useState("");
+  const startedAt = useRef<number>(Date.now()); // bots submit instantly; the API ignores sends < 2.5s
 
   const emailAddress = personalDetails.email;
   const linkedInUrl = "https://www.linkedin.com/in/howard-woon-hao-zhe-730b9337a/";
@@ -66,7 +68,7 @@ export default function ContactSection() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, company_website: honeypot, startedAt: startedAt.current }),
       });
 
       if (res.ok) {
@@ -271,6 +273,19 @@ export default function ContactSection() {
 
             {/* Dispatch Form */}
             <form onSubmit={handleSubmit} className="space-y-5 pt-2">
+              {/* Honeypot: hidden from people and screen readers, filled in by spam bots */}
+              <div aria-hidden="true" className="absolute -left-[10000px] top-auto w-px h-px overflow-hidden">
+                <label htmlFor="company_website">Company website</label>
+                <input
+                  id="company_website"
+                  name="company_website"
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={honeypot}
+                  onChange={(e) => setHoneypot(e.target.value)}
+                />
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div className="space-y-2">
                   <label htmlFor="contact-name" className="nb-label">

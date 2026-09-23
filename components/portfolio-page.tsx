@@ -20,14 +20,31 @@ export function PortfolioPage() {
         {/* Fixed header lives OUTSIDE any z-indexed wrapper. It used to sit inside a `relative z-10` div,
             which capped its z-[9999] at 10 — so the marquee (z-20) and honours cards (z-10) scrolled OVER
             the header and blocked taps on the Resume / Search buttons. */}
+        {/* Skip link (keyboard / screen-reader users). It moves FOCUS as well as scroll —
+            a plain href="#…" is intercepted by Lenis, which scrolls but leaves focus at the top. */}
+        <a
+          href="#main-content"
+          onClick={(e) => {
+            const target = document.getElementById("main-content");
+            if (!target) return;
+            e.preventDefault();
+            target.focus({ preventScroll: true });
+            if (window.__lenis) window.__lenis.scrollTo(target, { immediate: true });
+            else target.scrollIntoView();
+          }}
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[999999] focus:px-4 focus:py-2 focus:bg-pop-yellow focus:text-ink focus:font-mono focus:font-bold focus:border-3 focus:border-ink focus:rounded-lg focus:shadow-brutal-sm"
+        >
+          Skip to content
+        </a>
+
         <SiteHeader />
 
         {/* Hero */}
-        <div className="w-full relative z-10">
+        <div id="main-content" tabIndex={-1} className="w-full relative z-10 outline-none">
           <BikebearInspiredHero />
         </div>
 
-        <TechMarquee skills={['AUTOPILOT ASIA HACKATHON 2ND PLACE (SALES INTELLIGENCE)', 'STRAIGHT 4.00 CGPA COMPUTER SCIENCE (SOFTWARE ENGINEERING) FOR TWO SEMESTER', 'UM GAME JAM 2026 PUBLIC CHOICE AWARD', 'PERSATUAN KOMPUTER UNIVERSITI MALAYA (PEKOM) FINANCE LEAD 2026/2027', 'USM V HACK PRELIMINARY ROUND QUALIFIER']} />
+        <TechMarquee skills={['SUPERVITY AUTOPILOT ASIA HACKATHON 2ND PLACE (SALES INTELLIGENCE)', 'STRAIGHT 4.00 CGPA COMPUTER SCIENCE (SOFTWARE ENGINEERING) FOR TWO SEMESTERS', 'UM GAME JAM 2026 PUBLIC CHOICE AWARD', 'PERSATUAN KOMPUTER UNIVERSITI MALAYA (PEKOM) FINANCE LEAD 2026/2027', 'USM V HACK PRELIMINARY ROUND QUALIFIER']} />
 
         <main id="main" className="w-full">
           <AboutSection />

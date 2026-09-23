@@ -1,8 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { createClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
-import { ADMIN_USER_UUID } from '@/lib/admin-constants';
+import { isAdminUser } from '@/lib/admin-auth';
+import { createRouteAuthClient, createServiceRoleClient, hasServiceRole } from '@/lib/supabase/route';
 import { hasSupabaseCredentials } from '@/lib/supabase/fallback';
 
 type AdminResource = 'experiences' | 'projects' | 'skills';
@@ -30,31 +29,17 @@ async function mutateResource(request: NextRequest, context: RouteContext, metho
     return NextResponse.json({ error: 'Unsupported resource' }, { status: 400 });
   }
 
-  if (!hasSupabaseCredentials() || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  if (!hasSupabaseCredentials() || !hasServiceRole()) {
     return NextResponse.json({ error: 'Admin writes are temporarily unavailable.' }, { status: 503 });
   }
 
-  const authClient = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '',
-    {
-      cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value;
-        },
-        set() {},
-        remove() {}
-      }
-    }
-  );
-
-  const { data: userData } = await authClient.auth.getUser();
-  if (!isAllowedAdmin(userData.user?.id, userData.user?.app_metadata?.role)) {
+  const { data: userData } = await createRouteAuthClient(request).auth.getUser();
+  if (!isAdminUser(userData.user)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
-  const adminClient = createAdminClient();
+  const adminClient = createServiceRoleClient();
 
   if (method === 'DELETE') {
     const id = String(body.id ?? '');
@@ -62,6 +47,8 @@ async function mutateResource(request: NextRequest, context: RouteContext, metho
 
     const { error } = await adminClient.from(resource).delete().eq('id', id);
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  } else if (!hasRequiredFields(resource, body)) {
+    return NextResponse.json({ error: 'Please fill in the required fields.' }, { status: 400 });
   } else if (method === 'PATCH') {
     const id = String(body.id ?? '');
     if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
@@ -79,18 +66,6 @@ async function mutateResource(request: NextRequest, context: RouteContext, metho
   revalidatePath('/admin/dashboard');
 
   return NextResponse.json({ ok: true });
-}
-
-function createAdminClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
-    process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
-    { auth: { persistSession: false } }
-  );
-}
-
-function isAllowedAdmin(userId?: string, role?: string) {
-  return Boolean(userId && (userId === ADMIN_USER_UUID || role === 'admin'));
 }
 
 function isResource(value: string): value is AdminResource {
@@ -124,4 +99,12 @@ function sanitizePayload(resource: AdminResource, body: Record<string, unknown>)
     name: String(body.name ?? ''),
     category: String(body.category ?? '')
   };
+}
+
+// The DB columns are NOT NULL, but '' passed the old checks and saved blank rows
+function hasRequiredFields(resource: AdminResource, body: Record<string, unknown>) {
+  const filled = (k: string) => String(body[k] ?? '').trim().length > 0;
+  if (resource === 'experiences') return filled('role') && filled('company') && filled('description');
+  if (resource === 'projects') return filled('title') && filled('context') && filled('description');
+  return filled('name') && filled('category');
 }

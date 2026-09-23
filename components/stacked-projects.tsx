@@ -64,7 +64,7 @@ const projects: ProjectData[] = [
       deckUrl: "/documents/supervity-pitchdeck.pdf",
       simulatorId: "zerolag",
       orchestratorUrl: "https://auto.supervity.ai/u/alpha/agent/workflow/019fd755-073c-7000-b437-02bfad99b025?tab=Workflow",
-      githubUrl: "https://github.com",
+      githubUrl: "",
       telemetryType: "agentic",
     },
     {
@@ -204,7 +204,7 @@ const projects: ProjectData[] = [
     ],
     tags: ["ESP32", "C++", "Next.js 15", "MQTT", "PostgreSQL", "Tailwind CSS"],
     simulatorId: "sensor-x",
-    githubUrl: "https://github.com",
+    githubUrl: "",
     telemetryType: "energy",
   },
 ];

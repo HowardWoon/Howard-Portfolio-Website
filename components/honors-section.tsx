@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { AnimatedCounter } from "./animated-counter";
+import { useFocusTrap } from "@/lib/use-focus-trap";
 import {
   Trophy,
   ArrowRight,
@@ -204,7 +205,6 @@ const honorsList: HonorItem[] = [
         </div>
       ),
       highlights: [],
-      certificateUrl: "/certificates/HowardWoon-Transcript-Sem2.pdf",
       icon: GraduationCap,
   },
   {
@@ -299,6 +299,8 @@ const honorsList: HonorItem[] = [
 function CertificateModal({ url, onClose }: { url: string; onClose: () => void }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, mounted);
   const isPdf = url.toLowerCase().endsWith(".pdf");
 
   useEffect(() => {
@@ -318,6 +320,7 @@ function CertificateModal({ url, onClose }: { url: string; onClose: () => void }
 
   return createPortal(
     <motion.div
+      ref={dialogRef}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -535,7 +538,7 @@ export default function HonorsSection() {
         </div>
 
         {/* Expanded Content Area */}
-        <div ref={resultsRef} className="relative flex-1 min-h-[400px]">
+        <div ref={resultsRef} className={`relative flex-1 ${activeCategory ? "min-h-[400px]" : ""}`}>
           <AnimatePresence mode="wait">
             {activeCategory && (
               <motion.div

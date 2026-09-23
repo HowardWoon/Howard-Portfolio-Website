@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useFocusTrap } from "@/lib/use-focus-trap";
 import { Command } from "cmdk";
 import { Search, Code, GraduationCap, Briefcase, Download, Mail } from "lucide-react";
 import { personalDetails } from "@/lib/site-data";
@@ -8,7 +9,12 @@ import { personalDetails } from "@/lib/site-data";
 /** Scroll to a section through Lenis (smooth + header offset) with a native fallback. */
 function goTo(hash: string) {
   const el = document.querySelector(hash);
-  if (!el) return;
+  // On /simulators/* or /admin/* the section doesn't exist → go to the home page section instead
+  // (previously the command silently did nothing there).
+  if (!el) {
+    window.location.href = `/${hash}`;
+    return;
+  }
   if (window.__lenis) {
     // Lenis applies the section's CSS scroll-margin-top (header offset) itself
     window.__lenis.scrollTo(el as HTMLElement);
@@ -21,6 +27,8 @@ function goTo(hash: string) {
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, open);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -69,7 +77,7 @@ export function CommandPalette() {
       )}
 
       {open && (
-        <div className="fixed inset-0 z-[10000] flex items-start justify-center pt-[max(4.5rem,12dvh)] sm:pt-[18vh] px-3 xs:px-4 bg-ink/40 backdrop-blur-[2px]" data-lenis-prevent>
+        <div ref={dialogRef} role="dialog" aria-modal="true" aria-label="Command Palette" className="fixed inset-0 z-[10000] flex items-start justify-center pt-[max(4.5rem,12dvh)] sm:pt-[18vh] px-3 xs:px-4 bg-ink/40 backdrop-blur-[2px]" data-lenis-prevent>
           <div className="fixed inset-0" onClick={() => setOpen(false)} />
 
           <Command

@@ -1,3 +1,21 @@
+-- =====================================================================
+-- Howard Woon portfolio — Supabase schema (safe to re-run)
+--
+-- Fixes vs. previous version:
+--  * `current_role` is a RESERVED word in Postgres → CREATE TABLE profiles failed with a syntax
+--    error and the whole script stopped. It is now quoted.
+--  * The profiles seed row used a fake id that must exist in auth.users (foreign key) → insert
+--    failed. The seed is removed (profiles is not read by the site).
+--  * contact_messages had no `subject` column, but the contact API inserts one → every insert
+--    failed ("column subject does not exist").
+--  * CREATE POLICY statements without DROP IF EXISTS → re-running the script errored.
+--  * A public INSERT policy on contact_messages let anyone write to the table straight through
+--    Supabase's REST API (bypassing validation/rate limits). Inserts now go only through the
+--    /api/contact route with the service-role key.
+--  * The admin UUID was hard-coded in 5 places; it now lives only in public.is_admin().
+--    >>> Replace the UUID below with YOUR auth user id (Supabase → Authentication → Users). <<<
+-- =====================================================================
+
 create extension if not exists pgcrypto;
 
 create or replace function public.set_updated_at()
@@ -25,7 +43,7 @@ create table if not exists public.profiles (
   updated_at timestamptz not null default now(),
   full_name text,
   bio text,
-  current_role text
+  "current_role" text
 );
 
 create table if not exists public.experiences (
@@ -61,9 +79,13 @@ create table if not exists public.contact_messages (
   created_at timestamptz not null default now(),
   name text not null,
   email text not null,
+  subject text,
   message text not null,
   is_read boolean not null default false
 );
+-- for databases created with the old script:
+alter table public.contact_messages add column if not exists subject text;
+create index if not exists contact_messages_inbox_idx on public.contact_messages (is_read, created_at desc);
 
 drop trigger if exists set_profiles_updated_at on public.profiles;
 create trigger set_profiles_updated_at
@@ -76,6 +98,7 @@ alter table public.projects enable row level security;
 alter table public.skills enable row level security;
 alter table public.contact_messages enable row level security;
 
+-- drop every policy name this project has ever used, so the script is re-runnable
 drop policy if exists "Public read profiles" on public.profiles;
 drop policy if exists "Public read experiences" on public.experiences;
 drop policy if exists "Public read projects" on public.projects;
@@ -85,83 +108,26 @@ drop policy if exists "Admin manage experiences" on public.experiences;
 drop policy if exists "Admin manage projects" on public.projects;
 drop policy if exists "Admin manage skills" on public.skills;
 drop policy if exists "Admin read contact messages" on public.contact_messages;
+drop policy if exists "Allow public insert to messages" on public.contact_messages;
+drop policy if exists "Allow admin full access to messages" on public.contact_messages;
+drop policy if exists "Allow public read on projects" on public.projects;
+drop policy if exists "Allow admin manage projects" on public.projects;
+drop policy if exists "Admin manage contact messages" on public.contact_messages;
 
-create policy "Public read profiles"
-on public.profiles
-for select
-to anon, authenticated
-using (true);
+-- public read
+create policy "Public read profiles"    on public.profiles    for select to anon, authenticated using (true);
+create policy "Public read experiences" on public.experiences for select to anon, authenticated using (true);
+create policy "Public read projects"    on public.projects    for select to anon, authenticated using (true);
+create policy "Public read skills"      on public.skills      for select to anon, authenticated using (true);
 
-create policy "Public read experiences"
-on public.experiences
-for select
-to anon, authenticated
-using (true);
+-- admin write
+create policy "Admin manage profiles"    on public.profiles    for all to authenticated using (public.is_admin(auth.uid())) with check (public.is_admin(auth.uid()));
+create policy "Admin manage experiences" on public.experiences for all to authenticated using (public.is_admin(auth.uid())) with check (public.is_admin(auth.uid()));
+create policy "Admin manage projects"    on public.projects    for all to authenticated using (public.is_admin(auth.uid())) with check (public.is_admin(auth.uid()));
+create policy "Admin manage skills"      on public.skills      for all to authenticated using (public.is_admin(auth.uid())) with check (public.is_admin(auth.uid()));
 
--- Enable RLS on messages
-ALTER TABLE IF EXISTS public.contact_messages ENABLE ROW LEVEL SECURITY;
-
--- 1. Allow public / anonymous visitors to submit contact messages
-CREATE POLICY "Allow public insert to messages"
-ON public.contact_messages
-FOR INSERT
-TO anon, authenticated
-WITH CHECK (true);
-
--- 2. Allow only the designated admin user to view and manage messages
-CREATE POLICY "Allow admin full access to messages"
-ON public.contact_messages
-FOR ALL
-TO authenticated
-USING (auth.uid() = '54c734ee-1e79-4e92-bf9b-8504a1854a31'::uuid)
-WITH CHECK (auth.uid() = '54c734ee-1e79-4e92-bf9b-8504a1854a31'::uuid);
-
--- Projects, Skills, Experiences: Public read, Admin write
-ALTER TABLE IF EXISTS public.projects ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow public read on projects" ON public.projects FOR SELECT USING (true);
-CREATE POLICY "Allow admin manage projects" ON public.projects FOR ALL TO authenticated
-USING (auth.uid() = '54c734ee-1e79-4e92-bf9b-8504a1854a31'::uuid)
-WITH CHECK (auth.uid() = '54c734ee-1e79-4e92-bf9b-8504a1854a31'::uuid);
-
-create policy "Public read skills"
-on public.skills
-for select
-to anon, authenticated
-using (true);
-
-create policy "Admin manage profiles"
-on public.profiles
-for all
-to authenticated
-using (public.is_admin(auth.uid()))
-with check (public.is_admin(auth.uid()));
-
-create policy "Admin manage experiences"
-on public.experiences
-for all
-to authenticated
-using (public.is_admin(auth.uid()))
-with check (public.is_admin(auth.uid()));
-
-create policy "Admin manage skills"
-on public.skills
-for all
-to authenticated
-using (public.is_admin(auth.uid()))
-with check (public.is_admin(auth.uid()));
-
-insert into public.profiles (id, full_name, bio, current_role)
-values (
-  '11111111-1111-1111-1111-111111111111',
-  'Howard Woon',
-  'Bachelor of Computer Science student at the University of Malaya, specializing in Software Engineering. Combining a strong technical appetite with hands-on leadership experience to engineer systems that are as efficient as they are impactful.',
-  'Software Engineer'
-)
-on conflict (id) do update set
-  updated_at = now(),
-  full_name = excluded.full_name,
-  bio = excluded.bio,
-  current_role = excluded.current_role;
+-- contact messages: NO public policy (inserts come from /api/contact via the service role, which bypasses RLS)
+create policy "Admin manage contact messages" on public.contact_messages for all to authenticated using (public.is_admin(auth.uid())) with check (public.is_admin(auth.uid()));
 
 insert into public.experiences (id, role, company, description, start_date, end_date, is_current)
 values

@@ -39,9 +39,15 @@ const config: Config = {
           emerald: "#10B981",
         },
         ink: {
+          950: "#0B0D12",     // admin area background
           DEFAULT: "#0A0A0A", // borders, shadows, headlines
           soft: "#2B2B2B",    // body copy (≈14:1 on white)
           muted: "#565656",   // secondary copy (≈7.4:1 on white – AAA)
+        },
+        // admin text colours (were referenced by /admin but never defined → fell back to inherited colour)
+        fog: {
+          100: "#E7E9EE",
+          500: "#A1A6B3",
         },
         paper: {
           DEFAULT: "#FFFFFF", // main canvas

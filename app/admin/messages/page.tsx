@@ -1,8 +1,9 @@
 import Link from 'next/link';
-import { createClient } from '@supabase/supabase-js';
 import { Mail, MailOpen, CalendarDays, ArrowUpRight, Check, Trash2, X } from 'lucide-react';
 import { requireAdminUser } from '@/lib/admin-auth';
+import { createServiceRoleClient, hasServiceRole } from '@/lib/supabase/route';
 import { markAsRead, markAsUnread, deleteMessage } from './actions';
+import { ConfirmSubmitButton } from './confirm-submit-button';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -20,17 +21,13 @@ type ContactMessage = {
 export default async function MessagesPage() {
   await requireAdminUser();
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
-    process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
-    { auth: { persistSession: false } }
-  );
-
-  const { data, error } = await supabase
-    .from('contact_messages')
-    .select('*')
-    .order('is_read', { ascending: true })
-    .order('created_at', { ascending: false });
+  const { data, error } = hasServiceRole()
+    ? await createServiceRoleClient()
+        .from('contact_messages')
+        .select('*')
+        .order('is_read', { ascending: true })
+        .order('created_at', { ascending: false })
+    : { data: null, error: { message: 'not configured' } };
 
   const messages = (data ?? []) as ContactMessage[];
   const unreadCount = messages.filter((message) => !message.is_read).length;
@@ -80,7 +77,7 @@ export default async function MessagesPage() {
                     {message.subject && (
                       <>
                         <span>•</span>
-                        <span className="text-amber-400/80 font-mono">"{message.subject}"</span>
+                        <span className="text-amber-400/80 font-mono">&ldquo;{message.subject}&rdquo;</span>
                       </>
                     )}
                   </p>
@@ -121,10 +118,14 @@ export default async function MessagesPage() {
                 </form>
 
                 <form action={deleteMessage.bind(null, message.id)}>
-                  <button type="submit" className="pill-button bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20 ml-auto">
+                  {/* asks for confirmation — one mis-click used to permanently delete a lead */}
+                  <ConfirmSubmitButton
+                    message={`Delete the message from ${message.name}? This cannot be undone.`}
+                    className="pill-button bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20 ml-auto"
+                  >
                     <Trash2 className="h-4 w-4" />
                     <span>Delete</span>
-                  </button>
+                  </ConfirmSubmitButton>
                 </form>
               </div>
             </article>
