@@ -64,7 +64,7 @@ const projects: ProjectData[] = [
       deckUrl: "/documents/supervity-pitchdeck.pdf",
       simulatorId: "zerolag",
       orchestratorUrl: "https://auto.supervity.ai/u/alpha/agent/workflow/019fd755-073c-7000-b437-02bfad99b025?tab=Workflow",
-      githubUrl: "",
+      githubUrl: "https://github.com",
       telemetryType: "agentic",
     },
     {
@@ -204,7 +204,7 @@ const projects: ProjectData[] = [
     ],
     tags: ["ESP32", "C++", "Next.js 15", "MQTT", "PostgreSQL", "Tailwind CSS"],
     simulatorId: "sensor-x",
-    githubUrl: "",
+    githubUrl: "https://github.com",
     telemetryType: "energy",
   },
 ];
@@ -255,7 +255,7 @@ const accent = {
   emerald: { fill: "bg-pop-mint", soft: "bg-[#DCFAEC]" },
 } as const;
 
-// GitHub links that are still placeholders ("") are hidden instead of shipped as dead links
+// GitHub links that are still placeholders ("https://github.com") are hidden instead of shipped as dead links
 const isRealRepo = (url?: string) => !!url && /github\.com\/[^/]+\/[^/]+/.test(url);
 
 function ProjectCard({ project }: { project: ProjectData }) {
@@ -498,4 +498,4 @@ function ProjectCard({ project }: { project: ProjectData }) {
       </TiltCard>
     </div>
   );
-}
+}

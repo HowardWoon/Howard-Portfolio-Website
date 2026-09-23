@@ -21,4 +21,4 @@ export function TechMarquee({ skills }: { skills: string[] }) {
       </div>
     </div>
   );
-}
+}

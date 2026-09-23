@@ -200,7 +200,7 @@ export default function BikebearHero() {
                 </a>
               </Magnetic>
               <Magnetic strength={0.3}>
-                <a href="/simulators/agentic" className="nb-btn nb-btn-white px-6 py-4">
+                <a href="#projects" className="nb-btn nb-btn-white px-6 py-4">
                   <Terminal className="w-4 h-4" strokeWidth={2.75} />
                   <span>LIVE SIMULATORS</span>
                 </a>
@@ -229,7 +229,7 @@ export default function BikebearHero() {
                   {[...Array(4)].map((_, i) => (
                     <div key={i} className="flex items-center" aria-hidden={i > 0}>
                       <span className="text-xs sm:text-sm font-mono font-extrabold text-ink uppercase tracking-[0.12em] px-4">
-                        LATEST: 2ND PLACE @ SUPERVITY AUTOPILOT ASIA HACKATHON ✈
+                        LATEST: 2ND PLACE @ SUPERVITY ASIA HACKATHON ✈
                       </span>
                       <span className="text-xl text-pop-red font-black mx-2 translate-y-[2px]">*</span>
                     </div>
@@ -295,4 +295,4 @@ export default function BikebearHero() {
       </div>
     </motion.section>
   );
-}
+}

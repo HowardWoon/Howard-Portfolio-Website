@@ -51,4 +51,4 @@ export function Magnetic({ children, className = "", strength = 0.5 }: MagneticP
       {children}
     </motion.div>
   );
-}
+}

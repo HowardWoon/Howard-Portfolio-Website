@@ -20,7 +20,7 @@ export default async function SimulatorPage({ params }: { params: Promise<{ type
   if (!['agentic', 'flood', 'energy'].includes(type)) notFound();
 
   return (
-    <div className="min-h-screen bg-paper-cream bg-dots text-ink flex flex-col p-6 sm:p-12 font-sans selection:bg-amber-500/30">
+    <div className="min-h-screen bg-[#050608] text-white flex flex-col p-6 sm:p-12 font-sans selection:bg-amber-500/30">
       
       {/* Top Nav */}
       <div className="mb-12 flex items-center justify-between max-w-6xl mx-auto w-full">
@@ -48,4 +48,4 @@ export default async function SimulatorPage({ params }: { params: Promise<{ type
       </main>
     </div>
   );
-}
+}

@@ -6,4 +6,4 @@ node_modules
 dist
 coverage
 .vercel
-tsconfig.tsbuildinfo
+tsconfig.tsbuildinfo
