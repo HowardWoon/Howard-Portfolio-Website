@@ -55,7 +55,7 @@ export const personalDetails = {
   statement: 'Howard is a software engineer & backend systems architect redefining high-throughput infrastructure, graph algorithms, and autonomous agentic AI workflows, one production prototype at a time.',
   email: 'howardwoonhz06@gmail.com',
   github: 'https://github.com/HowardWoon',
-  linkedin: 'https://linkedin.com/in/howardwoon',
+  linkedin: 'https://linkedin.com/in/howard-woon-hao-zhe-730b9337a',
   resumeUrl: '/resume.pdf',
   avatarUrl: '/images/howard-solid.jpeg',
 };

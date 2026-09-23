@@ -15,13 +15,13 @@
 
 <br />
 
-This repository houses the source code for my professional portfolio. Designed with an ultra-clean, restrained, premium aesthetic (inspired by Apple, Linear, and Vercel), it serves as both a resume and an active engineering showcase.
+This repository houses the source code for my professional portfolio. Designed with an ultra-clean, bold "Neo-Brutalist Playground" aesthetic (featuring bento grids, claymorphism, and skeuomorphic details), it serves as both a resume and an active engineering showcase.
 
 ## ⚡ Key Features
 
 - **Interactive System Simulators:** Live React simulations of backend algorithms and agentic workflows (Dijkstra Pathfinding, Agentic Intent Triage, IoT Telemetry).
 - **In-App Document Modals:** Embedded, non-blocking PDF pitch-deck viewers.
-- **Strict Visual Restraint:** A meticulously maintained design system utilizing grayscale depth mapping, a single high-contrast `signal` color (`#C9974C`), and precision typography.
+- **Strict Visual Restraint:** A meticulously maintained design system utilizing bold ink borders, high-contrast primary color blocks (`#FFC700`, `#2B4BFF`, `#FF4B2B`), and precision typography.
 - **High-Performance Architecture:** Zero unnecessary 3D WebGL bloat. Optimized static routing via Next.js 15 App Router, boasting a sub-4s build time and a lightweight ~100kB JS bundle.
 - **Fluid Interactions:** Staggered scroll reveals and physical hover lifts powered by Framer Motion.
 
