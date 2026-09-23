@@ -3,10 +3,29 @@
 import React, { useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Magnetic } from "./magnetic-button";
 import { Sparkles, Terminal } from "lucide-react";
 
+
+// Source photo size + hand centres (fractions of the photo), measured from
+// /images/howard-solid.jpeg and /images/spiderman.jpg (same camera position, different pose).
+// If you replace either photo, update these numbers.
+const PHOTO = { w: 853, h: 1280 };
+const HAND = { you: { x: 0.5627, y: 0.5156 }, spidey: { x: 0.545, y: 0.4336 } };
+
+/**
+ * Converts a pointer position to coordinates INSIDE `el` (its padding box), correcting for:
+ *  - the hero's scroll-driven `scale(1 → 0.95)` (getBoundingClientRect is scaled, CSS lengths are not)
+ *  - the element's border (clip-path / absolutely-positioned children are measured from inside it)
+ * Without this, the lens drifted away from the cursor as soon as the page was scrolled slightly.
+ */
+function toLocal(el: HTMLElement, clientX: number, clientY: number) {
+  const r = el.getBoundingClientRect();
+  const sx = r.width / el.offsetWidth || 1;
+  const sy = r.height / el.offsetHeight || 1;
+  return { x: (clientX - r.left) / sx - el.clientLeft, y: (clientY - r.top) / sy - el.clientTop };
+}
 
 /**
  * X-ray magnifier headline.
@@ -29,8 +48,8 @@ function MagnifiedHeadline() {
   // leave the headline stuck at 25% opacity with a magnifier circle frozen on screen.
   const handlePointerMove = (e: React.PointerEvent) => {
     if (e.pointerType === "touch" || !containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    setVars(e.clientX - rect.left, e.clientY - rect.top, true);
+    const { x, y } = toLocal(containerRef.current, e.clientX, e.clientY);
+    setVars(x, y, true);
   };
 
   const headlineClass =
@@ -96,29 +115,68 @@ function MagnifiedHeadline() {
 export default function BikebearHero() {
   const containerRef = useRef<HTMLElement>(null);
 
-  // Mouse Parallax for Portrait Card
-  const mouseX = useMotionValue(0);
-  const [maskPosition, setMaskPosition] = React.useState({ x: -1000, y: -1000, r: 40 });
+  // ── Spider-Man x-ray lens ────────────────────────────────────────────────────────────────
+  // Fixes for "the lens escapes my mouse / isn't under my cursor":
+  //  1. The portrait no longer tilts in 3D. The tilt rotated the photo under a still cursor, and a
+  //     rotated element's bounding box is not its real shape, so the lens was drawn off-target.
+  //  2. No CSS transition on the clip-path (it made the lens trail ~180 ms behind the pointer).
+  //  3. The lens ring is drawn INSIDE the photo from the exact same numbers as the clip-path, so ring
+  //     and lens can never separate (the global cursor ring used to lag on a spring and was a
+  //     different size than the lens → the red lens "exceeded" the ring).
+  //  4. Coordinates correct for the hero's scroll scale and the 3px border (toLocal).
+  //  5. Position is written to CSS variables (no React re-render on every mouse move) and is
+  //     re-computed while scrolling, so the lens stays glued to a stationary cursor.
+  const LENS_R = 44;       // mouse lens radius (px)
+  const LENS_R_TOUCH = 64; // tap-to-reveal radius on phones/tablets
+  const portraitRef = useRef<HTMLDivElement>(null);
+  const lastPointer = useRef<{ x: number; y: number } | null>(null);
   const tapTimer = useRef<number | undefined>(undefined);
-  React.useEffect(() => () => window.clearTimeout(tapTimer.current), []);
-  const mouseY = useMotionValue(0);
-  const springConfig = { damping: 25, stiffness: 150 };
-  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [10, -10]), springConfig);
-  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-10, 10]), springConfig);
 
-  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.pointerType === "touch") return; // no sticky 3D tilt after a tap on phones/tablets
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    mouseX.set(x);
-    mouseY.set(y);
-  };
+  const setLens = React.useCallback((x: number, y: number, r: number) => {
+    const el = portraitRef.current;
+    if (!el) return;
+    el.style.setProperty("--lx", `${x}px`);
+    el.style.setProperty("--ly", `${y}px`);
+    el.style.setProperty("--lr", `${r}px`);
+    el.dataset.lens = r > 0 ? "on" : "off";
 
-  const handleMouseLeave = () => {
-    mouseX.set(0);
-    mouseY.set(0);
-  };
+    // Hand sync: the two photos share the exact same camera/background, but Spider-Man holds his
+    // hand ~8% higher than you do. Near your hand the Spider-Man layer is nudged so his glove lands
+    // exactly on your hand; the nudge fades out (Gaussian) so the wall/head stay aligned elsewhere.
+    const w = el.clientWidth, h = el.clientHeight;
+    const s = Math.max(w / PHOTO.w, h / PHOTO.h);           // object-cover scale
+    const W = PHOTO.w * s, H = PHOTO.h * s;
+    const left = (w - W) / 2;                               // object-position: center top
+    const hx = left + HAND.you.x * W, hy = HAND.you.y * H;  // your hand, in frame pixels
+    const sigma = 0.14 * H;
+    const k = Math.exp(-((x - hx) ** 2 + (y - hy) ** 2) / (2 * sigma * sigma));
+    el.style.setProperty("--sdx", `${(HAND.you.x - HAND.spidey.x) * W * k}px`);
+    el.style.setProperty("--sdy", `${(HAND.you.y - HAND.spidey.y) * H * k}px`);
+  }, []);
+
+  const hideLens = React.useCallback(() => {
+    lastPointer.current = null;
+    setLens(-9999, -9999, 0);
+  }, [setLens]);
+
+  const moveLensTo = React.useCallback((clientX: number, clientY: number, r: number) => {
+    const el = portraitRef.current;
+    if (!el) return;
+    const { x, y } = toLocal(el, clientX, clientY);
+    setLens(x, y, r);
+  }, [setLens]);
+
+  // keep the lens under a stationary cursor while the page scrolls (Lenis / wheel)
+  React.useEffect(() => {
+    const onScroll = () => {
+      if (lastPointer.current) moveLensTo(lastPointer.current.x, lastPointer.current.y, LENS_R);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.clearTimeout(tapTimer.current);
+    };
+  }, [moveLensTo]);
 
   // Scroll Exit Animation
   const { scrollYProgress } = useScroll({
@@ -219,9 +277,6 @@ export default function BikebearHero() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              onPointerMove={handlePointerMove}
-              onPointerLeave={handleMouseLeave}
-              style={{ rotateX, rotateY, transformStyle: "preserve-3d", transformPerspective: 1200 }}
               className="relative group cursor-pointer flex flex-col items-center lg:items-end z-40 pointer-events-auto w-full sm:w-auto px-1 sm:px-0"
             >
               {/* News Ticker (Above Photo) */}
@@ -240,22 +295,24 @@ export default function BikebearHero() {
 
               {/* Main Portrait Frame */}
               <div
+                ref={portraitRef}
                 data-spiderman="true"
+                data-lens="off"
+                style={{ ["--lx" as string]: "-9999px", ["--ly" as string]: "-9999px", ["--lr" as string]: "0px" }}
                 onPointerMove={(e) => {
                   if (e.pointerType === "touch") return;
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  setMaskPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top, r: 40 });
+                  lastPointer.current = { x: e.clientX, y: e.clientY };
+                  moveLensTo(e.clientX, e.clientY, LENS_R);
                 }}
-                onPointerLeave={(e) => { if (e.pointerType !== "touch") setMaskPosition({ x: -1000, y: -1000, r: 40 }); }}
+                onPointerLeave={(e) => { if (e.pointerType !== "touch") hideLens(); }}
                 onPointerUp={(e) => {
                   // Touch easter egg: a tap reveals the x-ray lens at the tap point for 1.6s
                   if (e.pointerType !== "touch") return;
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  setMaskPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top, r: 70 });
+                  moveLensTo(e.clientX, e.clientY, LENS_R_TOUCH);
                   window.clearTimeout(tapTimer.current);
-                  tapTimer.current = window.setTimeout(() => setMaskPosition({ x: -1000, y: -1000, r: 40 }), 1600);
+                  tapTimer.current = window.setTimeout(hideLens, 1600);
                 }}
-                className="relative w-full max-w-[350px] sm:max-w-none sm:w-[460px] lg:w-[460px] xl:w-[520px] aspect-[5/6] xs:aspect-[6/7] sm:aspect-auto sm:h-[560px] lg:h-[600px] xl:h-[660px] rounded-[28px] xs:rounded-[36px] sm:rounded-[44px] border-3 border-ink bg-pop-yellow overflow-hidden shadow-brutal-lg sm:shadow-brutal-xl transition-colors duration-300 group-hover:border-pop-red pointer-events-auto cursor-pointer"
+                className="group/lens relative w-full max-w-[350px] sm:max-w-none sm:w-[460px] lg:w-[460px] xl:w-[520px] aspect-[5/6] xs:aspect-[6/7] sm:aspect-auto sm:h-[560px] lg:h-[600px] xl:h-[660px] rounded-[28px] xs:rounded-[36px] sm:rounded-[44px] border-3 border-ink bg-pop-yellow overflow-hidden shadow-brutal-lg sm:shadow-brutal-xl transition-colors duration-300 group-hover:border-pop-red pointer-events-auto cursor-pointer"
               >
                 <Image
                   src="/images/howard-solid.jpeg"
@@ -267,20 +324,35 @@ export default function BikebearHero() {
                   quality={85}
                 />
 
-                {/* Spiderman Overlay X-Ray Mask (not LCP-critical → no preload) */}
-                <Image
-                  src="/images/spiderman.jpg"
-                  alt="Howard Woon - Spiderman"
+                {/* Spider-Man x-ray layer: the wrapper is clipped to the lens (in frame coordinates);
+                    the image inside is nudged for hand-sync, so the nudge never moves the lens itself */}
+                <div
                   aria-hidden
-                  fill
-                  sizes="(max-width: 640px) 350px, (max-width: 1280px) 460px, 520px"
-                  className="object-cover object-top saturate-[1.15] contrast-[1.05] pointer-events-none"
+                  className="absolute inset-0 pointer-events-none"
+                  style={{ clipPath: "circle(var(--lr) at var(--lx) var(--ly))" }}
+                >
+                  <Image
+                    src="/images/spiderman.jpg"
+                    alt="Howard Woon - Spiderman"
+                    fill
+                    sizes="(max-width: 640px) 350px, (max-width: 1280px) 460px, 520px"
+                    className="object-cover object-top saturate-[1.15] contrast-[1.05]"
+                    style={{ transform: "translate(var(--sdx, 0px), var(--sdy, 0px))" }}
+                    loading="eager"
+                    quality={85}
+                  />
+                </div>
+
+                {/* Lens ring — same centre & radius as the clip-path above, so it always frames the lens exactly */}
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute z-10 rounded-full border-[3px] border-ink opacity-0 group-data-[lens=on]/lens:opacity-100 shadow-[0_0_0_2px_rgba(255,255,255,0.9),inset_0_0_0_2px_rgba(255,255,255,0.6)]"
                   style={{
-                    clipPath: `circle(${maskPosition.r}px at ${maskPosition.x}px ${maskPosition.y}px)`,
-                    transition: "clip-path 180ms ease-out"
+                    left: "calc(var(--lx) - var(--lr))",
+                    top: "calc(var(--ly) - var(--lr))",
+                    width: "calc(var(--lr) * 2)",
+                    height: "calc(var(--lr) * 2)",
                   }}
-                  loading="eager"
-                  quality={85}
                 />
 
                 {/* Corner sticker */}

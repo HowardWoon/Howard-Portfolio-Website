@@ -79,22 +79,23 @@ export function CustomCursor() {
       <motion.div
         aria-hidden
         className={`fixed top-0 left-0 rounded-full pointer-events-none z-[100000] border-2 border-ink ${isSpiderman ? 'bg-pop-red' : 'bg-pop-yellow'}`}
-        animate={{ width: isPointer ? 8 : 14, height: isPointer ? 8 : 14 }}
+        animate={{ width: isPointer || isSpiderman ? 8 : 14, height: isPointer || isSpiderman ? 8 : 14 }}
         transition={{ type: 'spring', stiffness: 400, damping: 25 }}
         style={{ x: cursorX, y: cursorY, translateX: '-50%', translateY: '-50%', opacity: isHidden ? 0 : 1 }}
       />
 
-      {/* Ring */}
+      {/* Ring — hidden over the portrait: the photo draws its own lens ring at the exact lens position,
+          while this ring trails on a spring and would sit off-centre from the lens */}
       <motion.div
         aria-hidden
         className="fixed top-0 left-0 w-11 h-11 rounded-full pointer-events-none z-[99999] border-[3px] mix-blend-multiply"
         animate={{
-          scale: isPointer ? 1.6 : isSpiderman ? 1.5 : 1,
-          borderColor: isSpiderman ? '#2B4BFF' : '#0A0A0A',
-          backgroundColor: isSpiderman ? 'rgba(43,75,255,0.18)' : isPointer ? 'rgba(255,199,0,0.45)' : 'rgba(255,199,0,0)',
+          scale: isPointer ? 1.6 : 1,
+          borderColor: '#0A0A0A',
+          backgroundColor: isPointer ? 'rgba(255,199,0,0.45)' : 'rgba(255,199,0,0)',
         }}
         transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-        style={{ x: cursorXSpring, y: cursorYSpring, translateX: '-50%', translateY: '-50%', opacity: isHidden ? 0 : 1 }}
+        style={{ x: cursorXSpring, y: cursorYSpring, translateX: '-50%', translateY: '-50%', opacity: isHidden || isSpiderman ? 0 : 1 }}
       />
     </>
   );

@@ -68,7 +68,7 @@ export default function ContactSection() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, company_website: honeypot, startedAt: startedAt.current }),
+        body: JSON.stringify({ ...formData, hw_hp_field: honeypot, startedAt: startedAt.current }),
       });
 
       if (res.ok) {
@@ -273,12 +273,14 @@ export default function ContactSection() {
 
             {/* Dispatch Form */}
             <form onSubmit={handleSubmit} className="space-y-5 pt-2">
-              {/* Honeypot: hidden from people and screen readers, filled in by spam bots */}
-              <div aria-hidden="true" className="absolute -left-[10000px] top-auto w-px h-px overflow-hidden">
-                <label htmlFor="company_website">Company website</label>
+              {/* Honeypot: filled in by spam bots only. `display:none` (not an off-screen position)
+                  because Chrome/Edge autofill can fill off-screen fields named like "website",
+                  which silently discarded real visitors' messages. */}
+              <div aria-hidden="true" style={{ display: "none" }}>
+                <label htmlFor="hw_hp_field">Leave this field empty</label>
                 <input
-                  id="company_website"
-                  name="company_website"
+                  id="hw_hp_field"
+                  name="hw_hp_field"
                   type="text"
                   tabIndex={-1}
                   autoComplete="off"

@@ -3,40 +3,69 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const SESSION_KEY = "hw-booted";
+/**
+ * "Initialize System" gate.
+ *
+ * Bug fixed: after the first click, a `sessionStorage` flag made every REFRESH skip the gate —
+ * the yellow screen flashed and then faded away on its own without being clicked.
+ * Now: every full page load (first visit, refresh, new tab) shows the gate and waits for a click.
+ * Only in-app navigation (e.g. coming back from /simulators via a link) skips it, because this
+ * module-level flag lives in memory and is reset by a real reload.
+ */
+let bootedThisPageLoad = false;
+
+function scrollAfterBoot() {
+  // Honour deep links like /#projects (the command palette and "Return to Portfolio" use them);
+  // previously the gate always scrolled back to the top.
+  const hash = window.location.hash;
+  const target = hash.length > 1 ? document.querySelector(hash) : null;
+  if (target) {
+    if (window.__lenis) window.__lenis.scrollTo(target as HTMLElement, { immediate: true });
+    else (target as HTMLElement).scrollIntoView();
+  } else {
+    if (window.__lenis) window.__lenis.scrollTo(0, { immediate: true });
+    else window.scrollTo(0, 0);
+  }
+}
 
 export function BootSequence({ children }: { children: React.ReactNode }) {
-  const [showBoot, setShowBoot] = useState(true);
+  const [showBoot, setShowBoot] = useState(() => !bootedThisPageLoad);
   const [bootState, setBootState] = useState<'idle' | 'booting' | 'complete'>('idle');
   const [progress, setProgress] = useState(0);
   const timers = useRef<number[]>([]);
 
-  // Lock page scroll while the gate is up (and pause Lenis)
+  // Lock page scroll while the gate is up (and pause Lenis); stop the browser from restoring an
+  // old scroll position behind the gate on refresh.
   useEffect(() => {
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     document.body.style.overflow = showBoot ? 'hidden' : '';
     // Lenis is created in a parent effect (runs after this one) → defer one tick
     const t = window.setTimeout(() => {
       if (showBoot) window.__lenis?.stop();
       else {
         window.__lenis?.start();
-        window.__lenis?.scrollTo(0, { immediate: true });
+        scrollAfterBoot();
       }
     }, 0);
     return () => clearTimeout(t);
   }, [showBoot]);
 
-  // Skip the gate for reduced-motion users and for repeat views in the same tab session
-  useEffect(() => {
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    let seen = false;
-    try { seen = sessionStorage.getItem(SESSION_KEY) === '1'; } catch { /* storage blocked */ }
-    if (prefersReduced || seen) setShowBoot(false);
-  }, []);
-
-  // Clear any pending intervals/timeouts on unmount (previously leaked)
+  // Clear any pending intervals/timeouts on unmount
   useEffect(() => () => timers.current.forEach((t) => { clearInterval(t); clearTimeout(t); }), []);
 
+  function finish() {
+    bootedThisPageLoad = true;
+    setShowBoot(false);
+  }
+
   function handleStartBoot() {
+    if (bootState !== 'idle') return; // ignore double clicks
+    // Reduced-motion visitors still get the gate, just without the 2.8 s animation
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      finish();
+      return;
+    }
+
     setBootState('booting');
 
     const progressInterval = window.setInterval(() => {
@@ -48,11 +77,7 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
       setProgress(100);
       setBootState('complete');
 
-      const t2 = window.setTimeout(() => {
-        window.scrollTo(0, 0);
-        try { sessionStorage.setItem(SESSION_KEY, '1'); } catch { /* ignore */ }
-        setShowBoot(false);
-      }, 800);
+      const t2 = window.setTimeout(finish, 800);
       timers.current.push(t2);
     }, 2000);
 

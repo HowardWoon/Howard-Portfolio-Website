@@ -24,7 +24,7 @@ const ContactSchema = z.object({
   email: z.string().trim().toLowerCase().email('Invalid email address format.').max(200),
   subject: z.string().trim().max(200).optional().default(''),
   message: z.string().trim().min(1, 'Message is required.').max(5000),
-  company_website: z.string().optional().default(''), // honeypot — humans never see this field
+  hw_hp_field: z.string().optional().default(''), // honeypot — humans never see this field
   startedAt: z.number().optional(),                   // ms timestamp when the form was rendered
 });
 
@@ -71,11 +71,11 @@ export async function POST(request: NextRequest) {
       const status = first?.code === 'too_big' ? 413 : 400;
       return NextResponse.json({ error: first?.message ?? 'Invalid payload.' }, { status });
     }
-    const { name, email, subject, message, company_website, startedAt } = parsed.data;
+    const { name, email, subject, message, hw_hp_field, startedAt } = parsed.data;
 
     // 4. Bot traps — pretend success so bots don't retry
     const tooFast = typeof startedAt === 'number' && now - startedAt < 2500;
-    if (company_website || tooFast) {
+    if (hw_hp_field || tooFast) {
       return NextResponse.json({ success: true, message: 'Message sent successfully.' }, { status: 200 });
     }
 
