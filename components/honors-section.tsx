@@ -613,7 +613,7 @@ export default function HonorsSection() {
                         <div className="flex-1" />
 
                         {/* Footer: Stat Callout & Certificate Link */}
-                        <div className="mt-auto pt-6 border-t-2 border-dashed border-ink flex flex-wrap items-end justify-between gap-5">
+                        <div className="mt-auto pt-6 border-t-2 border-dashed border-ink flex flex-col items-start gap-5">
 
                           {/* Big Stat Callout (sticker) */}
                           <div className="flex flex-col items-start">
