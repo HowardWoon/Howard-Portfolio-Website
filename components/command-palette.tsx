@@ -34,6 +34,9 @@ export function CommandPalette() {
     const down = (e: KeyboardEvent) => {
       if (e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
+        // While the "Initialize System" gate is up, the palette would open invisibly *behind* it
+        // (lower z-index) and steal keyboard focus.
+        if (document.querySelector(".boot-overlay")) return;
         setOpen((open) => !open);
       }
       if (e.key === "Escape") {

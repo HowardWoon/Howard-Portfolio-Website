@@ -52,6 +52,17 @@ function MagnifiedHeadline() {
     setVars(x, y, true);
   };
 
+  // Scrolling moves the text under a still cursor → the magnifier would freeze in the wrong place.
+  // Switch it off on scroll; the next mouse move switches it back on at the right spot.
+  React.useEffect(() => {
+    const off = () => {
+      const el = containerRef.current;
+      if (el?.dataset.hover === "true") setVars(-1000, -1000, false);
+    };
+    window.addEventListener("scroll", off, { passive: true });
+    return () => window.removeEventListener("scroll", off);
+  }, []);
+
   const headlineClass =
     "font-display text-[clamp(1.85rem,10.8vw,2.6rem)] leading-[0.95] sm:text-6xl md:text-7xl xl:text-[5.6rem] landscape-short:!text-5xl font-extrabold uppercase tracking-[-0.035em]";
   const chipClass =
@@ -277,7 +288,7 @@ export default function BikebearHero() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="relative group cursor-pointer flex flex-col items-center lg:items-end z-40 pointer-events-auto w-full sm:w-auto px-1 sm:px-0"
+              className="relative group flex flex-col items-center lg:items-end z-40 pointer-events-auto w-full sm:w-auto px-1 sm:px-0"
             >
               {/* News Ticker (Above Photo) */}
               <div className="w-full max-w-[350px] sm:max-w-none sm:w-[460px] lg:w-[460px] xl:w-[520px] mb-5 overflow-hidden bg-white rounded-2xl border-3 border-ink py-2.5 relative z-20 shadow-brutal pointer-events-auto">
@@ -312,7 +323,7 @@ export default function BikebearHero() {
                   window.clearTimeout(tapTimer.current);
                   tapTimer.current = window.setTimeout(hideLens, 1600);
                 }}
-                className="group/lens relative w-full max-w-[350px] sm:max-w-none sm:w-[460px] lg:w-[460px] xl:w-[520px] aspect-[5/6] xs:aspect-[6/7] sm:aspect-auto sm:h-[560px] lg:h-[600px] xl:h-[660px] rounded-[28px] xs:rounded-[36px] sm:rounded-[44px] border-3 border-ink bg-pop-yellow overflow-hidden shadow-brutal-lg sm:shadow-brutal-xl transition-colors duration-300 group-hover:border-pop-red pointer-events-auto cursor-pointer"
+                className="group/lens relative w-full max-w-[350px] sm:max-w-none sm:w-[460px] lg:w-[460px] xl:w-[520px] aspect-[5/6] xs:aspect-[6/7] sm:aspect-auto sm:h-[560px] lg:h-[600px] xl:h-[660px] rounded-[28px] xs:rounded-[36px] sm:rounded-[44px] border-3 border-ink bg-pop-yellow overflow-hidden shadow-brutal-lg sm:shadow-brutal-xl transition-colors duration-300 group-hover:border-pop-red pointer-events-auto cursor-crosshair"
               >
                 <Image
                   src="/images/howard-solid.jpeg"

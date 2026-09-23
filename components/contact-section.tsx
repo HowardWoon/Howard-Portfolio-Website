@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Mail,
@@ -34,6 +34,17 @@ export default function ContactSection() {
   const [activeIntent, setActiveIntent] = useState<string | null>(null);
   const [honeypot, setHoneypot] = useState("");
   const startedAt = useRef<number>(Date.now()); // bots submit instantly; the API ignores sends < 2.5s
+  const [errorText, setErrorText] = useState("");
+  // One reset timer at a time. Previously a 5-second "back to idle" timer from an earlier send could
+  // fire while a NEW send was in flight, re-enabling the button and allowing a double submit.
+  const resetTimer = useRef<number | undefined>(undefined);
+  const copyTimer = useRef<number | undefined>(undefined);
+  useEffect(() => () => { window.clearTimeout(resetTimer.current); window.clearTimeout(copyTimer.current); }, []);
+  const settle = (status: "success" | "error") => {
+    setFormStatus(status);
+    window.clearTimeout(resetTimer.current);
+    resetTimer.current = window.setTimeout(() => setFormStatus((s) => (s === status ? "idle" : s)), 5000);
+  };
 
   const emailAddress = personalDetails.email;
   const linkedInUrl = "https://www.linkedin.com/in/howard-woon-hao-zhe-730b9337a/";
@@ -43,7 +54,8 @@ export default function ContactSection() {
     try {
       await navigator.clipboard.writeText(emailAddress);
       setCopiedEmail(true);
-      setTimeout(() => setCopiedEmail(false), 2500);
+      window.clearTimeout(copyTimer.current);
+      copyTimer.current = window.setTimeout(() => setCopiedEmail(false), 2500);
     } catch {
       // Clipboard can be blocked (insecure context / permissions) → fall back to the mail client
       window.location.href = `mailto:${emailAddress}`;
@@ -62,7 +74,10 @@ export default function ContactSection() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.message) return;
+    if (formStatus === "sending") return;
 
+    window.clearTimeout(resetTimer.current);
+    setErrorText("");
     setFormStatus("sending");
     try {
       const res = await fetch("/api/contact", {
@@ -72,17 +87,18 @@ export default function ContactSection() {
       });
 
       if (res.ok) {
-        setFormStatus("success");
         setFormData({ name: "", email: "", subject: "", message: "" });
         setActiveIntent(null);
-        setTimeout(() => setFormStatus("idle"), 5000);
+        settle("success");
       } else {
-        setFormStatus("error");
-        setTimeout(() => setFormStatus("idle"), 5000);
+        // Show the server's reason (e.g. "Too many requests…", "Invalid email address format.")
+        const body = (await res.json().catch(() => null)) as { error?: string } | null;
+        setErrorText(body?.error ?? "");
+        settle("error");
       }
     } catch {
-      setFormStatus("error");
-      setTimeout(() => setFormStatus("idle"), 5000);
+      setErrorText("Network error. Please check your connection.");
+      settle("error");
     }
   };
 
@@ -366,6 +382,11 @@ export default function ContactSection() {
                   </>
                 )}
               </button>
+              {formStatus === "error" && errorText && (
+                <p role="alert" className="text-sm font-mono font-bold text-pop-redInk text-center">
+                  {errorText}
+                </p>
+              )}
             </form>
           </motion.div>
 
@@ -385,7 +406,7 @@ export default function ContactSection() {
       </div>
 
       {/* ENGINEERING TITLE BLOCK FOOTER */}
-      <footer className="relative z-10 bg-ink text-white mt-0 pt-16 sm:pt-20 pb-[max(3.5rem,calc(var(--safe-bottom)+2rem))] px-4 xs:px-5 sm:px-10 lg:px-16">
+      <footer data-dark-surface className="relative z-10 bg-ink text-white mt-0 pt-16 sm:pt-20 pb-[max(3.5rem,calc(var(--safe-bottom)+2rem))] px-4 xs:px-5 sm:px-10 lg:px-16">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-start gap-14 lg:gap-10">
 
           {/* Left: System of Record / Title Block (blueprint-style drawing frame) */}

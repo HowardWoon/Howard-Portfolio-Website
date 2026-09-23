@@ -17,8 +17,11 @@ let bootedThisPageLoad = false;
 function scrollAfterBoot() {
   // Honour deep links like /#projects (the command palette and "Return to Portfolio" use them);
   // previously the gate always scrolled back to the top.
-  const hash = window.location.hash;
-  const target = hash.length > 1 ? document.querySelector(hash) : null;
+  // getElementById (not querySelector): hashes like "#1st" or "#a=b" from shared/tracking links are
+  // not valid CSS selectors and made querySelector throw, which aborted the post-boot scroll.
+  let id = "";
+  try { id = decodeURIComponent(window.location.hash.slice(1)); } catch { /* malformed %-encoding */ }
+  const target = id ? document.getElementById(id) : null;
   if (target) {
     if (window.__lenis) window.__lenis.scrollTo(target as HTMLElement, { immediate: true });
     else (target as HTMLElement).scrollIntoView();
@@ -33,6 +36,9 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
   const [bootState, setBootState] = useState<'idle' | 'booting' | 'complete'>('idle');
   const [progress, setProgress] = useState(0);
   const timers = useRef<number[]>([]);
+  const justBooted = useRef(false); // true only right after the visitor clicks the gate
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   // Lock page scroll while the gate is up (and pause Lenis); stop the browser from restoring an
   // old scroll position behind the gate on refresh.
@@ -44,7 +50,13 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
       if (showBoot) window.__lenis?.stop();
       else {
         window.__lenis?.start();
-        scrollAfterBoot();
+        // Only after a real click. On in-site navigation (e.g. browser Back from /simulators) the
+        // gate is skipped and Next.js restores the previous scroll position — we must not force
+        // the page back to the top there.
+        if (justBooted.current) {
+          justBooted.current = false;
+          scrollAfterBoot();
+        }
       }
     }, 0);
     return () => clearTimeout(t);
@@ -55,6 +67,7 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
 
   function finish() {
     bootedThisPageLoad = true;
+    justBooted.current = true;
     setShowBoot(false);
   }
 
@@ -86,7 +99,10 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      {children}
+      {/* `inert` while the gate is up: keyboard / screen-reader users could previously Tab into the
+          hidden page behind the yellow screen (e.g. the "Skip to content" link appeared on top of it). */}
+      {/* applied only after hydration, so no-JS visitors (gate hidden by <noscript>) can still use the page */}
+      <div inert={mounted && showBoot}>{children}</div>
 
       <AnimatePresence>
         {showBoot && (

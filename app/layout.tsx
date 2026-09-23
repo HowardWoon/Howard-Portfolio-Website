@@ -31,12 +31,28 @@ const mono = JetBrains_Mono({
   display: 'swap',
 });
 
+const DESCRIPTION =
+  'Howard Woon (Universiti Malaya, 4.00 CGPA) is a software engineer building distributed backend architectures, graph algorithms, and autonomous agentic workflows.';
+
 export const metadata: Metadata = {
   // Without this, OG/Twitter image URLs resolve to http://localhost:3000 outside Vercel previews
   metadataBase: new URL('https://howard-woon-portfolio.vercel.app'),
   title: 'Howard Woon // Systems & AI Architect',
-  description:
-    'Howard Woon (Universiti Malaya, 4.00 CGPA) is a software engineer building distributed backend architectures, graph algorithms, and autonomous agentic workflows.',
+  description: DESCRIPTION,
+  alternates: { canonical: '/' },
+  // Without explicit Open Graph / Twitter fields, LinkedIn & X showed a small generic link card
+  openGraph: {
+    type: 'website',
+    url: '/',
+    siteName: 'Howard Woon',
+    title: 'Howard Woon // Systems & AI Architect',
+    description: DESCRIPTION,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Howard Woon // Systems & AI Architect',
+    description: DESCRIPTION,
+  },
 };
 
 export const viewport: Viewport = {

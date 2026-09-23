@@ -18,6 +18,7 @@ export function CustomCursor() {
   const [isPointer, setIsPointer] = useState(false);
   const [isSpiderman, setIsSpiderman] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
+  const [onDark, setOnDark] = useState(false); // footer, modal backdrops, simulator screen
   // The black ink cursor is invisible on the dark admin area → native cursor there
   const isAdmin = usePathname()?.startsWith('/admin') ?? false;
 
@@ -49,8 +50,13 @@ export function CustomCursor() {
       if (!target?.closest) return;
       const interactive = target.closest('a, button, [role="button"], [data-magnetic], summary, label');
       const typing = target.closest('input, textarea, select, [cmdk-input]');
+      // Inside an <iframe>/<object> (PDF certificates) the page stops receiving mouse events, so the
+      // custom cursor used to freeze at the frame's edge next to the real cursor → hide it there.
+      const embedded = target.closest('iframe, object');
       setIsPointer(!!interactive && !typing);
-      setIsHidden(!!typing);
+      setIsHidden(!!typing || !!embedded);
+      // The black multiply-blended ring was invisible on black surfaces (footer, dark overlays)
+      setOnDark(!!target.closest('[data-dark-surface]'));
       setIsSpiderman(!!target.closest('[data-spiderman]'));
     };
 
@@ -88,10 +94,10 @@ export function CustomCursor() {
           while this ring trails on a spring and would sit off-centre from the lens */}
       <motion.div
         aria-hidden
-        className="fixed top-0 left-0 w-11 h-11 rounded-full pointer-events-none z-[99999] border-[3px] mix-blend-multiply"
+        className={`fixed top-0 left-0 w-11 h-11 rounded-full pointer-events-none z-[99999] border-[3px] ${onDark ? '' : 'mix-blend-multiply'}`}
         animate={{
           scale: isPointer ? 1.6 : 1,
-          borderColor: '#0A0A0A',
+          borderColor: onDark ? '#FFFFFF' : '#0A0A0A',
           backgroundColor: isPointer ? 'rgba(255,199,0,0.45)' : 'rgba(255,199,0,0)',
         }}
         transition={{ type: 'spring', stiffness: 300, damping: 20 }}
