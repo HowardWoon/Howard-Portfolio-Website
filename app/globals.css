@@ -293,4 +293,4 @@ html.has-custom-cursor [cmdk-input] {
   .floating-label { @apply absolute left-4 top-4 text-ink-muted text-sm transition-all cursor-text pointer-events-none; }
   .section-shell { @apply max-w-7xl mx-auto px-6 py-12; }
   .muted-label { @apply text-ink-muted text-sm font-medium; }
-}
+}

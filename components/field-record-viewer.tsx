@@ -167,4 +167,4 @@ export function FieldRecordViewer({ records, currentIndex, onClose, onNavigate }
     </motion.div>,
     document.body
   );
-}
+}

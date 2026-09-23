@@ -135,4 +135,4 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
       </AnimatePresence>
     </>
   );
-}
+}

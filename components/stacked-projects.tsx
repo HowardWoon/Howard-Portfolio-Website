@@ -498,4 +498,4 @@ function ProjectCard({ project }: { project: ProjectData }) {
       </TiltCard>
     </div>
   );
-}
+}

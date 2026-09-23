@@ -148,4 +148,4 @@ export async function POST(request: NextRequest) {
     console.error('[Contact Handler Error]:', err);
     return NextResponse.json({ error: 'Failed to process request.' }, { status: 500 });
   }
-}
+}

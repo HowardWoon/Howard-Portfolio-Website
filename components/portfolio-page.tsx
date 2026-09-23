@@ -41,4 +41,4 @@ export function PortfolioPage() {
       </div>
     </BootSequence>
   );
-}
+}

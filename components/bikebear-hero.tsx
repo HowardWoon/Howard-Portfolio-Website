@@ -295,4 +295,4 @@ export default function BikebearHero() {
       </div>
     </motion.section>
   );
-}
+}

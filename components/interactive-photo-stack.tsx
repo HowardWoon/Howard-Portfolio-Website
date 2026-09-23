@@ -79,4 +79,4 @@ export function InteractivePhotoStack({ customPhotos }: { customPhotos?: { src: 
       </div>
     </div>
   );
-}
+}

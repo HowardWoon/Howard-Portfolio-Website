@@ -48,4 +48,4 @@ export default async function SimulatorPage({ params }: { params: Promise<{ type
       </main>
     </div>
   );
-}
+}
