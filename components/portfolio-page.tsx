@@ -23,7 +23,7 @@ export function PortfolioPage() {
         <SiteHeader />
 
         {/* Hero */}
-        <div className="w-full relative z-10">
+        <div id="main-content" className="w-full relative z-10">
           <BikebearInspiredHero />
         </div>
 
