@@ -47,7 +47,7 @@ const architecturePillars = [
       { label: "Orchestration", value: "LangGraph + CrewAI" },
       { label: "Guardrails", value: "Deterministic Tool Routing" },
     ],
-    telemetrySnippet: "Agent Pipeline: [Triage -> Planner -> Execution -> QA Review] ACTIVE",
+    telemetrySnippet: "Agent Pipeline: [Triage -> Planner -> Execution -> QA Review]",
   },
   {
     id: "algorithms",
@@ -64,7 +64,7 @@ const architecturePillars = [
       { label: "PRACTICAL APPLICATION", value: "Real-Time Pathfinding" },
       { label: "Optimization", value: "Spatial Graph Heuristics" },
     ],
-    telemetrySnippet: "[Pathfinding] Dijkstra executed: Sub-1.2ms latency ACTIVE",
+    telemetrySnippet: "[Pathfinding] Dijkstra executed: Sub-1.2ms latency",
   },
   {
     id: "governance",
@@ -81,7 +81,7 @@ const architecturePillars = [
       { label: "Oversight", value: "100% Audit Compliance" },
       { label: "Corporate Exp.", value: "Kraiburg TPE Finance" },
     ],
-    telemetrySnippet: "Audit Process: Zero Discrepancies | Ledger Verified ACTIVE",
+    telemetrySnippet: "Audit Process: Zero Discrepancies | Ledger Verified",
   },
 ];
 
@@ -229,7 +229,7 @@ export default function AboutSection() {
                   ))}
                 </div>
                 <div className="terminal flex items-start xs:items-center justify-between gap-3">
-                  <div className="flex items-center gap-2 min-w-0"><Activity className="w-4 h-4 text-pop-mint animate-pulse shrink-0" strokeWidth={2.5} /><span className="break-words [overflow-wrap:anywhere]">{pillar.telemetrySnippet}</span></div>
+                  <div className="flex items-center gap-2 min-w-0"><Activity className="w-4 h-4 text-pop-mint animate-pulse shrink-0" strokeWidth={2.5} /><span className="truncate">{pillar.telemetrySnippet}</span></div>
                   <span className={`text-[0.7rem] font-extrabold shrink-0 px-2 py-0.5 rounded border-2 border-ink text-ink ${c.fill}`}>ACTIVE</span>
                 </div>
               </motion.div>
@@ -262,7 +262,7 @@ export default function AboutSection() {
                     ))}
                   </div>
                   <div className="terminal flex items-start xs:items-center justify-between gap-3">
-                    <div className="flex items-center gap-2 min-w-0"><Activity className="w-4 h-4 text-pop-mint animate-pulse shrink-0" strokeWidth={2.5} /><span className="break-words [overflow-wrap:anywhere]">{pillar.telemetrySnippet}</span></div>
+                    <div className="flex items-center gap-2 min-w-0"><Activity className="w-4 h-4 text-pop-mint animate-pulse shrink-0" strokeWidth={2.5} /><span className="truncate">{pillar.telemetrySnippet}</span></div>
                     <span className={`text-[0.7rem] font-extrabold shrink-0 px-2 py-0.5 rounded border-2 border-ink text-ink ${c.fill}`}>ACTIVE</span>
                   </div>
                 </motion.div>
@@ -294,7 +294,7 @@ export default function AboutSection() {
                     ))}
                   </div>
                   <div className="terminal flex items-start xs:items-center justify-between gap-3">
-                    <div className="flex items-center gap-2 min-w-0"><Activity className="w-4 h-4 text-pop-mint animate-pulse shrink-0" strokeWidth={2.5} /><span className="break-words [overflow-wrap:anywhere]">{pillar.telemetrySnippet}</span></div>
+                    <div className="flex items-center gap-2 min-w-0"><Activity className="w-4 h-4 text-pop-mint animate-pulse shrink-0" strokeWidth={2.5} /><span className="truncate">{pillar.telemetrySnippet}</span></div>
                     <span className={`text-[0.7rem] font-extrabold shrink-0 px-2 py-0.5 rounded border-2 border-ink text-ink ${c.fill}`}>ACTIVE</span>
                   </div>
                 </motion.div>
