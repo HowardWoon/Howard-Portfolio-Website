@@ -8,11 +8,6 @@ import { Magnetic } from "./magnetic-button";
 import { Sparkles, Terminal } from "lucide-react";
 
 
-// The Spider-Man x-ray layer uses /images/spiderman-aligned.jpg: a pose-matched copy of the
-// Spider-Man photo, pre-aligned pixel-for-pixel to /images/howard-solid.jpeg (same 853×1280 size,
-// same camera; head, hands, arms, torso and legs sit exactly on yours). Because the alignment is
-// baked into the image, the layer is never moved or stretched at runtime.
-// If you ever replace howard-solid.jpeg, re-align the Spider-Man photo to it (same size, same pose).
 
 /**
  * Converts a pointer position to coordinates INSIDE `el` (its padding box), correcting for:
@@ -125,58 +120,6 @@ function MagnifiedHeadline() {
 
 export default function BikebearHero() {
   const containerRef = useRef<HTMLElement>(null);
-
-  // ── Spider-Man x-ray lens ────────────────────────────────────────────────────────────────
-  // Fixes for "the lens escapes my mouse / isn't under my cursor":
-  //  1. The portrait no longer tilts in 3D. The tilt rotated the photo under a still cursor, and a
-  //     rotated element's bounding box is not its real shape, so the lens was drawn off-target.
-  //  2. No CSS transition on the clip-path (it made the lens trail ~180 ms behind the pointer).
-  //  3. The lens ring is drawn INSIDE the photo from the exact same numbers as the clip-path, so ring
-  //     and lens can never separate (the global cursor ring used to lag on a spring and was a
-  //     different size than the lens → the red lens "exceeded" the ring).
-  //  4. Coordinates correct for the hero's scroll scale and the 3px border (toLocal).
-  //  5. Position is written to CSS variables (no React re-render on every mouse move) and is
-  //     re-computed while scrolling, so the lens stays glued to a stationary cursor.
-  const LENS_R = 44;       // mouse lens radius (px)
-  const LENS_R_TOUCH = 64; // tap-to-reveal radius on phones/tablets
-  const portraitRef = useRef<HTMLDivElement>(null);
-  const lastPointer = useRef<{ x: number; y: number } | null>(null);
-  const tapTimer = useRef<number | undefined>(undefined);
-
-  const setLens = React.useCallback((x: number, y: number, r: number) => {
-    const el = portraitRef.current;
-    if (!el) return;
-    el.style.setProperty("--lx", `${x}px`);
-    el.style.setProperty("--ly", `${y}px`);
-    el.style.setProperty("--lr", `${r}px`);
-    el.dataset.lens = r > 0 ? "on" : "off";
-    // No runtime "hand-sync" nudge any more: shifting the whole Spider-Man layer is what pushed his
-    // head half out of the lens. The pose match now lives in spiderman-aligned.jpg itself.
-  }, []);
-
-  const hideLens = React.useCallback(() => {
-    lastPointer.current = null;
-    setLens(-9999, -9999, 0);
-  }, [setLens]);
-
-  const moveLensTo = React.useCallback((clientX: number, clientY: number, r: number) => {
-    const el = portraitRef.current;
-    if (!el) return;
-    const { x, y } = toLocal(el, clientX, clientY);
-    setLens(x, y, r);
-  }, [setLens]);
-
-  // keep the lens under a stationary cursor while the page scrolls (Lenis / wheel)
-  React.useEffect(() => {
-    const onScroll = () => {
-      if (lastPointer.current) moveLensTo(lastPointer.current.x, lastPointer.current.y, LENS_R);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.clearTimeout(tapTimer.current);
-    };
-  }, [moveLensTo]);
 
   // Scroll Exit Animation
   const { scrollYProgress } = useScroll({
@@ -295,24 +238,7 @@ export default function BikebearHero() {
 
               {/* Main Portrait Frame */}
               <div
-                ref={portraitRef}
-                data-spiderman="true"
-                data-lens="off"
-                style={{ ["--lx" as string]: "-9999px", ["--ly" as string]: "-9999px", ["--lr" as string]: "0px" }}
-                onPointerMove={(e) => {
-                  if (e.pointerType === "touch") return;
-                  lastPointer.current = { x: e.clientX, y: e.clientY };
-                  moveLensTo(e.clientX, e.clientY, LENS_R);
-                }}
-                onPointerLeave={(e) => { if (e.pointerType !== "touch") hideLens(); }}
-                onPointerUp={(e) => {
-                  // Touch easter egg: a tap reveals the x-ray lens at the tap point for 1.6s
-                  if (e.pointerType !== "touch") return;
-                  moveLensTo(e.clientX, e.clientY, LENS_R_TOUCH);
-                  window.clearTimeout(tapTimer.current);
-                  tapTimer.current = window.setTimeout(hideLens, 1600);
-                }}
-                className="group/lens relative w-full max-w-[350px] sm:max-w-none sm:w-[460px] lg:w-[460px] xl:w-[520px] aspect-[5/6] xs:aspect-[6/7] sm:aspect-auto sm:h-[560px] lg:h-[600px] xl:h-[660px] rounded-[28px] xs:rounded-[36px] sm:rounded-[44px] border-3 border-ink bg-pop-yellow overflow-hidden shadow-brutal-lg sm:shadow-brutal-xl transition-colors duration-300 group-hover:border-pop-red pointer-events-auto cursor-crosshair"
+                className="relative w-full max-w-[350px] sm:max-w-none sm:w-[460px] lg:w-[460px] xl:w-[520px] aspect-[5/6] xs:aspect-[6/7] sm:aspect-auto sm:h-[560px] lg:h-[600px] xl:h-[660px] rounded-[28px] xs:rounded-[36px] sm:rounded-[44px] border-3 border-ink bg-pop-yellow overflow-hidden shadow-brutal-lg sm:shadow-brutal-xl transition-colors duration-300 hover:border-pop-red pointer-events-auto"
               >
                 <Image
                   src="/images/howard-solid.jpeg"
@@ -322,37 +248,6 @@ export default function BikebearHero() {
                   className="object-cover object-top saturate-[1.15] contrast-[1.05]"
                   priority
                   quality={85}
-                />
-
-                {/* Spider-Man x-ray layer: clipped to the lens (in frame coordinates). The image is
-                    pose-matched to the portrait and uses the exact same size/fit/position, so every
-                    body part under the lens lines up — nothing is translated or stretched. */}
-                <div
-                  aria-hidden
-                  className="absolute inset-0 pointer-events-none"
-                  style={{ clipPath: "circle(var(--lr) at var(--lx) var(--ly))" }}
-                >
-                  <Image
-                    src="/images/spiderman-aligned.jpg"
-                    alt="Howard Woon - Spiderman"
-                    fill
-                    sizes="(max-width: 640px) 350px, (max-width: 1280px) 460px, 520px"
-                    className="object-cover object-top saturate-[1.15] contrast-[1.05]"
-                    loading="eager"
-                    quality={85}
-                  />
-                </div>
-
-                {/* Lens ring — same centre & radius as the clip-path above, so it always frames the lens exactly */}
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute z-10 rounded-full border-[3px] border-ink opacity-0 group-data-[lens=on]/lens:opacity-100 shadow-[0_0_0_2px_rgba(255,255,255,0.9),inset_0_0_0_2px_rgba(255,255,255,0.6)]"
-                  style={{
-                    left: "calc(var(--lx) - var(--lr))",
-                    top: "calc(var(--ly) - var(--lr))",
-                    width: "calc(var(--lr) * 2)",
-                    height: "calc(var(--lr) * 2)",
-                  }}
                 />
 
                 {/* Corner sticker */}
