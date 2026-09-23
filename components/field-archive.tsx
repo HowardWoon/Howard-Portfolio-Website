@@ -1,9 +1,10 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import Image from "next/image";
 import { ARCHIVE_DATA } from "./field-archive-data";
-import { FieldRecordViewer } from "./field-record-viewer";
+import dynamic from "next/dynamic";
+const FieldRecordViewer = dynamic(() => import("./field-record-viewer").then(mod => mod.FieldRecordViewer), { ssr: false });
 
 interface FieldArchiveProps {
   archiveId: string;
@@ -115,3 +116,5 @@ export function FieldArchive({ archiveId }: FieldArchiveProps) {
     </div>
   );
 }
+
+

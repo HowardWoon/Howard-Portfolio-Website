@@ -139,7 +139,7 @@ function PekomTreasurerDashboard() {
             <div className="space-y-2">
               <h5 className="font-display text-ink font-extrabold text-base uppercase tracking-[-0.01em] border-b-2 border-ink pb-1.5">Executive Summary</h5>
               <p className="text-ink-soft">
-                Directed financial planning, budget execution, and reporting for the MYTECH Career Fair 2026. Managed an unprecedented RM50,200 budget and implemented strict financial governance, successfully securing 30 corporate sponsors and RM46,200 in revenue. By enforcing an 81.5% spending cap, the event generated a record-breaking RM9,272.90 pure surplus for Persatuan Komputer Universiti Malaya (PEKOM).
+                Directed financial planning, budget execution, and reporting for the MYTECH Career Fair 2026. Managed an unprecedented RM50,200 budget and implemented strict financial governance, successfully securing 30 corporate sponsors and RM46,200 in revenue. By enforcing an 81.5% spending cap, the event generated a record-breaking RM9,287.00 pure surplus for Persatuan Komputer Universiti Malaya (PEKOM).
               </p>
             </div>
 
@@ -149,7 +149,7 @@ function PekomTreasurerDashboard() {
                 <li><strong className="text-ink font-extrabold">Budget Oversight:</strong> Managed an unprecedented total budget of RM50,200.</li>
                 <li><strong className="text-ink font-extrabold">Revenue Generation:</strong> Secured RM46,200 in revenue through 30 corporate sponsorships (including partners like Garmin).</li>
                 <li><strong className="text-ink font-extrabold">Cost Control:</strong> Successfully enforced an 81.5% spending cap across all event operations.</li>
-                <li><strong className="text-ink font-extrabold">Profitability:</strong> Generated a record-breaking RM9,272.90 pure surplus for PEKOM.</li>
+                <li><strong className="text-ink font-extrabold">Profitability:</strong> Generated a record-breaking RM9,287.00 pure surplus for PEKOM.</li>
               </ul>
             </div>
 
@@ -186,8 +186,8 @@ function PekomTreasurerDashboard() {
             <div className="space-y-2">
               <h5 className="font-display text-ink font-extrabold text-base uppercase tracking-[-0.01em] border-b-2 border-ink pb-1.5">Key Achievements & Metrics</h5>
               <ul className="space-y-2 text-ink-soft list-disc list-outside ml-5 marker:text-ink">
-                <li><strong className="text-ink font-extrabold">Prize Pool Administration:</strong> Facilitated the financial oversight and planning surrounding a substantial USD 3,000 total prize pool for event participants, successfully distributing 89.2% of all funds directly into the student prize pool.</li>
-                <li><strong className="text-ink font-extrabold">Budget Oversight:</strong> Managed shared operational costs in conjunction with PEKOM CodeFest, tracking a combined expenditure of RM1,531.77 across both events and achieving an exceptional 99.87% budget accuracy rating.</li>
+                <li><strong className="text-ink font-extrabold">Prize Pool Administration:</strong> Facilitated the financial oversight and planning surrounding a substantial USD 3,000 total prize pool for event participants, successfully distributing 89.05% of all funds directly into the student prize pool.</li>
+                <li><strong className="text-ink font-extrabold">Budget Oversight:</strong> Managed shared operational costs in conjunction with PEKOM CodeFest, tracking a combined expenditure of RM1,531.77 (CodeFest Spend) across both events and achieving an exceptional 99.87% budget accuracy rating.</li>
               </ul>
             </div>
 
@@ -222,7 +222,7 @@ function PekomTreasurerDashboard() {
             <div className="space-y-2">
               <h5 className="font-display text-ink font-extrabold text-base uppercase tracking-[-0.01em] border-b-2 border-ink pb-1.5">Key Responsibilities & Achievements</h5>
               <ul className="space-y-2 text-ink-soft list-disc list-outside ml-5 marker:text-ink">
-                <li><strong className="text-ink font-extrabold">Budget Management & Optimization:</strong> Managed total event expenditures amounting to RM1,531.77, optimizing operational overhead to ensure exactly 66.7% of the budget was paid out as direct cash rewards to participants.</li>
+                <li><strong className="text-ink font-extrabold">Budget Management & Optimization:</strong> Managed total event expenditures amounting to RM1,531.77 (CodeFest Spend), optimizing operational overhead to ensure exactly 66.7% of the budget was paid out as direct cash rewards to participants.</li>
                 <li><strong className="text-ink font-extrabold">Expense Tracking:</strong> Monitored operational costs across multiple categories, including roll-up bunting, certificate printing, meals, and transportation.</li>
                 <li><strong className="text-ink font-extrabold">Financial Documentation:</strong> Developed and maintained a master reimbursement spreadsheet to compile all costs, ensuring absolute transparency and efficient financial settlement.</li>
               </ul>
@@ -307,7 +307,7 @@ function PekomTreasurerDashboard() {
                 <button
                   type="button"
                   aria-expanded={isExpanded}
-                  aria-controls={panelId}
+                  aria-controls={isExpanded ? panelId : undefined}
                   onClick={() => setExpandedEvent(isExpanded ? null : event.id)}
                   className={`w-full text-left p-4 flex items-center justify-between gap-3 rounded-[13px] ${isExpanded ? "bg-pop-yellow border-b-3 border-ink rounded-b-none" : ""}`}
                 >

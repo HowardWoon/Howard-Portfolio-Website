@@ -1,17 +1,16 @@
-import type { Metadata, Viewport } from 'next';
+﻿import type { Metadata, Viewport } from 'next';
 import { Inter, Bricolage_Grotesque, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import SmoothScrollProvider from '@/components/smooth-scroll-provider';
 import { CustomCursor } from '@/components/custom-cursor';
-import { CommandPalette } from '@/components/command-palette';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 
 /**
  * TYPE SYSTEM
- * - Display  : Bricolage Grotesque (200–800, optical sizing) → chunky, quirky, playful headlines
- * - Body/UI  : Inter (variable)                             → the most legible screen sans; body set at 500
- * - Mono     : JetBrains Mono (100–800)                      → tall x-height, heavier strokes than Geist Mono
+ * - Display  : Bricolage Grotesque (200â€“800, optical sizing) â†’ chunky, quirky, playful headlines
+ * - Body/UI  : Inter (variable)                             â†’ the most legible screen sans; body set at 500
+ * - Mono     : JetBrains Mono (100â€“800)                      â†’ tall x-height, heavier strokes than Geist Mono
  */
 const sans = Inter({
   subsets: ['latin'],
@@ -72,18 +71,25 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${sans.variable} ${display.variable} ${mono.variable}`}>
-      <body className="font-sans font-medium antialiased bg-paper text-ink">
+      <head>
+  <script
+    dangerouslySetInnerHTML={{
+      __html: `try{if(sessionStorage.getItem('hw-booted')==='1')document.documentElement.classList.add('hw-booted')}catch(e){}`,
+    }}
+  />
+</head>
+<body className="font-sans font-medium antialiased bg-paper text-ink">
         {/* If JavaScript is off or fails to load, the "Initialize System" gate could never be dismissed
             and the whole portfolio stayed hidden behind it. */}
         <noscript>
           <style>{`.boot-overlay{display:none!important}body{overflow:auto!important}`}</style>
         </noscript>
         <SmoothScrollProvider>{children}</SmoothScrollProvider>
-        <CommandPalette />
-        <Analytics />
+                <Analytics />
         <SpeedInsights />
         <CustomCursor />
       </body>
     </html>
   );
 }
+

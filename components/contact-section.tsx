@@ -32,6 +32,7 @@ export default function ContactSection() {
   const [emailRevealed, setEmailRevealed] = useState(false);
   const [formStatus, setFormStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
   const [activeIntent, setActiveIntent] = useState<string | null>(null);
+  const firstInteraction = useRef<number | null>(null);
   const [honeypot, setHoneypot] = useState("");
   const startedAt = useRef<number>(Date.now()); // bots submit instantly; the API ignores sends < 2.5s
   const [errorText, setErrorText] = useState("");
@@ -288,7 +289,7 @@ export default function ContactSection() {
             </div>
 
             {/* Dispatch Form */}
-            <form onSubmit={handleSubmit} className="space-y-5 pt-2">
+            <form onSubmit={handleSubmit} onFocusCapture={() => { firstInteraction.current ??= performance.now(); }} className="space-y-5 pt-2">
               {/* Honeypot: filled in by spam bots only. `display:none` (not an off-screen position)
                   because Chrome/Edge autofill can fill off-screen fields named like "website",
                   which silently discarded real visitors' messages. */}

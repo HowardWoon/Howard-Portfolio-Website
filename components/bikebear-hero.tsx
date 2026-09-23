@@ -4,6 +4,7 @@ import React, { useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { useBooted } from "./boot-sequence";
 import { Magnetic } from "./magnetic-button";
 import { Sparkles, Terminal } from "lucide-react";
 import { toLocal } from "@/lib/to-local";
@@ -107,6 +108,7 @@ function MagnifiedHeadline() {
 }
 
 export default function BikebearHero() {
+  const booted = useBooted();
   const containerRef = useRef<HTMLElement>(null);
 
   // Scroll Exit Animation
@@ -149,7 +151,7 @@ export default function BikebearHero() {
             {/* Brand Pill Badge */}
             <motion.div
               initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
+              animate={booted ? { opacity: 1, y: 0 } : undefined}
               transition={{ duration: 0.5, delay: 0.1 }}
               className="nb-kicker"
             >
@@ -160,7 +162,7 @@ export default function BikebearHero() {
             {/* Kinetic Typography Headline */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              animate={booted ? { opacity: 1, y: 0 } : undefined}
               transition={{ duration: 0.7, delay: 0.2 }}
               className="relative space-y-2"
             >
@@ -170,7 +172,7 @@ export default function BikebearHero() {
             {/* Sub-narrative Bio Copy */}
             <motion.p
               initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
+              animate={booted ? { opacity: 1, y: 0 } : undefined}
               transition={{ duration: 0.6, delay: 0.3 }}
               className="text-ink-soft text-lg sm:text-xl max-w-xl leading-relaxed font-sans font-medium"
             >
@@ -180,7 +182,7 @@ export default function BikebearHero() {
             {/* Call to Action Buttons */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              animate={booted ? { opacity: 1, y: 0 } : undefined}
               transition={{ duration: 0.6, delay: 0.4 }}
               className="flex flex-wrap items-center gap-3 xs:gap-4 pt-2 w-full"
             >
@@ -206,7 +208,7 @@ export default function BikebearHero() {
 
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
+              animate={booted ? { opacity: 1, scale: 1 } : undefined}
               transition={{ duration: 0.8, delay: 0.2 }}
               className="relative group flex flex-col items-center lg:items-end z-40 pointer-events-auto w-full sm:w-auto px-1 sm:px-0"
             >

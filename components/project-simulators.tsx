@@ -39,16 +39,17 @@ export function ZeroLagSimulator() {
   ];
 
   const timers = useTimers();
+  const DONE = stages.length + 1; // 6
+
   const triggerPipeline = () => {
     if (isRunning) return;
     setIsRunning(true);
-    setCurrentStage(1);
-    // Side effects kept OUT of the state updater (updaters must be pure; StrictMode runs them twice)
     let stage = 1;
+    setCurrentStage(stage);
     const id = timers.interval(() => {
       stage += 1;
-      setCurrentStage(Math.min(stage, 5));
-      if (stage >= 5) {
+      setCurrentStage(stage);
+      if (stage >= DONE) {
         clearInterval(id);
         setIsRunning(false);
       }
@@ -130,7 +131,7 @@ export function ZeroLagSimulator() {
         <div className="flex items-center gap-2 text-neutral-300">
           <Terminal className="w-4 h-4 text-amber-400" />
           <span>
-            {currentStage === 5 
+            {currentStage >= DONE 
               ? "Lead Qualified: Score 0.96 [High Priority] · Auto-Dispatched to Enterprise CRM." 
               : isRunning 
               ? `Executing Node #${currentStage}: ${stages[currentStage - 1]?.name}...` 
@@ -146,12 +147,22 @@ export function ZeroLagSimulator() {
 /* =========================================================================
    SIMULATOR 03: BILAHUJAN Flood Mesh
 ========================================================================= */
+type LogLine = { t: string; msg: string };
+const stamp = () => new Date().toLocaleTimeString('en-GB', { hour12: false });
+
 export function BilahujanSimulator() {
-  const [logs, setLogs] = useState<string[]>([
-    "[System] Firebase RTDB connected.",
-    "[Agent] Gemini 2.0 Flash Command Agent IDLE.",
-    "Awaiting citizen flood reports..."
+  const [logs, setLogs] = useState<LogLine[]>([
+    { t: '--:--:--', msg: '[System] Firebase RTDB connected.' },
+    { t: '--:--:--', msg: '[Agent] Gemini 2.0 Flash Command Agent IDLE.' },
+    { t: '--:--:--', msg: 'Awaiting citizen flood reports...' }
   ]);
+  const push = (...msgs: string[]) => setLogs(p => [...p, ...msgs.map(msg => ({ t: stamp(), msg }))]);
+  
+  const logRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = logRef.current;
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+  }, [logs]);
   const [isSimulating, setIsSimulating] = useState(false);
   const [severity, setSeverity] = useState<number | null>(null);
 
@@ -159,24 +170,24 @@ export function BilahujanSimulator() {
   const triggerReport = () => {
     if (isSimulating) return;
     setIsSimulating(true);
-    setLogs(["[Node] Citizen uploaded flood image at KL-007 (Ampang)"]);
+    setLogs([{ t: stamp(), msg: "[Node] Citizen uploaded flood image at KL-007 (Ampang)" }]);
     setSeverity(null);
     
     timers.timeout(() => {
-      setLogs(p => [...p, "[Vision] gemini-2.5-flash 12-pass analysis started..."]);
+      push("[Vision] gemini-2.5-flash 12-pass analysis started...");
     }, 600);
 
     timers.timeout(() => {
-      setLogs(p => [...p, "[Vision] Pass 5 (Rooftop Cue): DETECTED", "[Vision] Severity Override applied -> 9 (CRITICAL)"]);
+      push("[Vision] Pass 5 (Rooftop Cue): DETECTED", "[Vision] Severity Override applied -> 9 (CRITICAL)");
       setSeverity(9);
     }, 1800);
 
     timers.timeout(() => {
-      setLogs(p => [...p, "[Agent] New node detected via get_active_nodes MCP tool", "[Agent] Chain-of-Thought: 'Zone KL-007 has severity 9. I will dispatch an alert to NADMA.'"]);
+      push("[Agent] New node detected via get_active_nodes MCP tool", "[Agent] Chain-of-Thought: 'Zone KL-007 has severity 9. I will dispatch an alert to NADMA.'");
     }, 3200);
 
     timers.timeout(() => {
-      setLogs(p => [...p, "[MCP] Executing: dispatch_alert(zone: 'KL-007', severity: 9)", "[System] Authority notification sent to JPS & NADMA via Firebase."]);
+      push("[MCP] Executing: dispatch_alert(zone: 'KL-007', severity: 9)", "[System] Authority notification sent to JPS & NADMA via Firebase.");
       setIsSimulating(false);
     }, 4800);
   };
@@ -243,32 +254,31 @@ export function BilahujanSimulator() {
             <Terminal className="w-4 h-4" />
             <span>Command_Agent_Mission_Log.sh</span>
           </div>
-          <div className="space-y-2 h-[150px] overflow-y-auto pr-2">
-            {logs.map((log, i) => {
-              const isHighlight = log.includes("Severity Override") || log.includes("Authority notification sent");
-              const isAgent = log.includes("[Agent]");
-              const isVision = log.includes("[Vision]");
-              const isMCP = log.includes("[MCP]");
-              
-              let textColor = "text-neutral-300";
-              if (isHighlight) textColor = "text-red-400 font-bold";
-              else if (isAgent) textColor = "text-amber-300";
-              else if (isVision) textColor = "text-cyan-300";
-              else if (isMCP) textColor = "text-purple-400";
-              else if (log.includes("[System]")) textColor = "text-emerald-400";
+          <div ref={logRef} role="log" aria-live="polite" className="space-y-2 h-[150px] overflow-y-auto pr-2">
+            {logs.map((logObj, i) => {
+                const log = typeof logObj === "string" ? logObj : logObj.msg;
+                const time = typeof logObj === "string" ? "--:--:--" : logObj.t;
+                const isCritical = log.includes("CRITICAL") || log.includes("NADMA");
+                const isAgent = log.includes("[Agent]") || log.includes("[Vision]");
+                const isMcp = log.includes("[MCP]");
+                
+                let textColor = "text-neutral-400";
+                if (isCritical) textColor = "text-red-400";
+                else if (isAgent) textColor = "text-cyan-300";
+                else if (isMcp) textColor = "text-amber-400";
 
-              return (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className={textColor}
-                >
-                  <span className="opacity-50 mr-2" suppressHydrationWarning>{new Date().toISOString().split("T")[1].slice(0, 8)}</span>
-                  {log}
-                </motion.div>
-              );
-            })}
+                return (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className={textColor}
+                  >
+                    <span className="opacity-50 mr-2">{time}</span>
+                    {log}
+                  </motion.div>
+                );
+              })}
             {isSimulating && (
               <div className="flex items-center gap-2 text-neutral-500 pt-2">
                 <span className="animate-pulse">_</span>

@@ -25,7 +25,7 @@ const ContactSchema = z.object({
   subject: z.string().trim().max(200).optional().default(''),
   message: z.string().trim().min(1, 'Message is required.').max(5000),
   hw_hp_field: z.string().optional().default(''), // honeypot — humans never see this field
-  startedAt: z.number().optional(),                   // ms timestamp when the form was rendered
+  fillMs: z.number().int().nonnegative().max(86_400_000), // REQUIRED 
 });
 
 // Strip control characters (keeps newlines/tabs) — prevents header tricks in the email subject
@@ -71,15 +71,10 @@ export async function POST(request: NextRequest) {
       const status = first?.code === 'too_big' ? 413 : 400;
       return NextResponse.json({ error: first?.message ?? 'Invalid payload.' }, { status });
     }
-    const { name, email, subject, message, hw_hp_field, startedAt } = parsed.data;
+    const { name, email, subject, message, hw_hp_field, fillMs } = parsed.data;
 
     // 4. Bot traps — pretend success so bots don't retry
-    // `startedAt` comes from the visitor's clock. If that clock is AHEAD of the server, `elapsed` is negative:
-    // that is not a bot, so only a small positive gap counts as "filled in too fast" (real messages used to be
-    // silently dropped while the visitor was told "sent").
-    const elapsed = typeof startedAt === 'number' ? now - startedAt : Infinity;
-    const tooFast = elapsed >= 0 && elapsed < 2500;
-    if (hw_hp_field || tooFast) {
+    if (hw_hp_field || fillMs < 3000) {
       return NextResponse.json({ success: true, message: 'Message sent successfully.' }, { status: 200 });
     }
 

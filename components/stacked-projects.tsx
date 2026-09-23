@@ -1,5 +1,5 @@
 "use client";
-
+import Link from "next/link";
 import React from "react";
 import { motion } from "framer-motion";
 import { TiltCard } from './tilt-card';
@@ -44,14 +44,14 @@ const projects: ProjectData[] = [
       {
       id: "zerolag",
       number: "01",
-      badge: "🏆 2nd Place Winner · Supervity Asia Hackathon 2026",
+      badge: "ðŸ† 2nd Place Winner Â· Supervity Asia Hackathon 2026",
       badgeType: "gold",
       title: "ZeroLag",
       subtitle: "Governed AI Workforce & Autonomous Sales Pipeline",
       description:
         "A Bi-Modal AI Agent Architecture built to resolve B2B buying groups and halt PDPA/GDPR compliance violations. Engineered with deterministic halt states to prevent LLM compute waste and enterprise legal liability with zero pipeline pollution.",
       architecturePoints: [
-        "Layer 1 Execution Node: Master Orchestrator triggering 5 specialized Operators (Identity, Dedupe, Comply, Score, Draft)",
+        "Layer 1 Execution Node: Master Orchestrator triggering 5 specialized Operators (Ingestion, Scraper, Sentiment Scorer, Lead Ranker, CRM Dispatch)",
         "Layer 2 Governance Node: Dynamic ICP Thresholding & Human-in-the-loop Exception Workbench",
         "Compute-Optimized Logic Gates executing hard halts and raw PostgreSQL SQL Write-Backs"
       ],
@@ -70,7 +70,7 @@ const projects: ProjectData[] = [
     {
       id: "proofpay",
       number: "02",
-      badge: "🏅 2nd Runner Up (Sui) & Top 6 (Gonka AI) · MUBA 2026",
+      badge: "ðŸ… 2nd Runner Up (Sui) & Top 6 (Gonka AI) Â· MUBA 2026",
       badgeType: "gold",
       title: "PROOFPAY",
       subtitle: "Delivery-linked B2B Escrow & Settlement Platform",
@@ -104,7 +104,7 @@ const projects: ProjectData[] = [
   {
       id: "bilahujan",
       number: "03",
-      badge: "🏅 V Hack 2026 Case Study 3 — First Responder of the Future",
+      badge: "ðŸ… KitaHack 2026 National Innovation â€” First Responder of the Future",
       badgeType: "cyan",
       title: "BILAHUJAN",
       subtitle: "Decentralised Swarm Intelligence for Flood First Response",
@@ -129,7 +129,7 @@ const projects: ProjectData[] = [
 {
       id: "catfish",
       number: "04",
-      badge: "WIA1006 Machine Learning • Ultimate Pipeline",
+      badge: "WIA1006 Machine Learning â€¢ Ultimate Pipeline",
       badgeType: "cyan",
       title: "CATFISH DETECTOR AI",
       subtitle: "Detecting Deception Through Mathematical Behavioral Intelligence",
@@ -161,7 +161,7 @@ const projects: ProjectData[] = [
       {
       id: "slotify",
       number: "05",
-      badge: "Java Spring Boot • Data Structures",
+      badge: "Java Spring Boot â€¢ Data Structures",
       badgeType: "gold",
       title: "SLOTIFY",
       subtitle: "Multi-Data Structure Architecture & Algorithmic Router",
@@ -176,7 +176,7 @@ const projects: ProjectData[] = [
         { label: "Routing", value: "Dijkstra (O((V+E)logV))" },
         { label: "Data Cache", value: "AVL BST & HashMap" }
       ],
-      tags: ["Java 17", "Spring Boot", "Data Structures", "Dijkstra", "Min-Heap", "AVL BST"],
+      tags: ["Java 21", "Spring Boot", "Data Structures", "Dijkstra", "Min-Heap", "AVL BST"],
       githubUrl: "https://github.com/HowardWoon/Slotify",
       galleryPhotos: [
         { src: "/images/projects/slotify/01.png", alt: "Slotify Interface", rotation: -4 },
@@ -191,7 +191,7 @@ const projects: ProjectData[] = [
 {
     id: "sensor-x-sensei",
     number: "06",
-    badge: "⚡ UM Technothon 2026 Finalist · IoT Energy Grid",
+    badge: "âš¡ UM Technothon 2026 Finalist Â· IoT Energy Grid",
     badgeType: "emerald",
     title: "Sensor X Sensei",
     subtitle: "Automated Energy Management & Micro-Grid Telemetry",
@@ -209,7 +209,7 @@ const projects: ProjectData[] = [
     ],
     tags: ["ESP32", "C++", "Next.js 15", "MQTT", "PostgreSQL", "Tailwind CSS"],
     simulatorId: "sensor-x",
-    githubUrl: "",
+      githubUrl: "https://github.com/HowardWoon/Sensor-X-Sensei---UM-Technothon-2026",
     telemetryType: "energy",
   },
 ];
@@ -374,6 +374,12 @@ function ProjectCard({ project }: { project: ProjectData }) {
                     LAUNCH LIVE PROTOTYPE
                   </a>
                 )}
+{project.simulatorId && (
+  <Link href={`/simulators/${project.simulatorId}`} className="nb-btn nb-btn-ghost group">
+    <Terminal className="w-4 h-4 mr-2" />
+    RUN SIMULATOR
+  </Link>
+)}
 
                 {project.colabUrl && (
                   <a href={project.colabUrl} target="_blank" rel="noopener noreferrer" className="nb-btn bg-pop-orange px-5 py-3">
@@ -407,7 +413,7 @@ function ProjectCard({ project }: { project: ProjectData }) {
 
             </div>
 
-            {/* Right Column: Visual Architecture / Gallery (5 Cols) — a physical "desk" for the polaroids */}
+            {/* Right Column: Visual Architecture / Gallery (5 Cols) â€” a physical "desk" for the polaroids */}
             <div className="lg:col-span-5 w-full rounded-[26px] border-3 border-ink bg-paper-deep bg-dots p-5 sm:p-6 space-y-4 flex flex-col shadow-[inset_0_3px_0_rgba(0,0,0,0.06)]">
 
               {/* Visualizer Header */}
@@ -454,7 +460,7 @@ function ProjectCard({ project }: { project: ProjectData }) {
                     </div>
                     <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs font-mono font-semibold">
                       <span className="text-ink-muted">Calculated Safe Corridor:</span>
-                      <span className="text-[#0F7A4A] font-extrabold">Path Node #104 ➔ #289</span>
+                      <span className="text-[#0F7A4A] font-extrabold">Path Node #104 âž” #289</span>
                     </div>
                     <div className="w-full bg-paper-deep h-3 rounded-full overflow-hidden border-2 border-ink">
                       <div className="bg-pop-yellow h-full w-4/5 border-r-2 border-ink animate-pulse" />
@@ -479,7 +485,7 @@ function ProjectCard({ project }: { project: ProjectData }) {
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-3.5 bg-white border-3 border-ink rounded-2xl shadow-brutal-sm">
                       <div className="text-xs font-mono font-bold text-ink-muted">Current Load</div>
-                      <div className="font-display text-2xl font-extrabold text-ink mt-1">1.42 kW</div>
+                      <div className="font-display text-2xl font-extrabold text-ink mt-1">1.84 kW</div>
                     </div>
                     <div className="p-3.5 bg-pop-mint border-3 border-ink rounded-2xl shadow-brutal-sm">
                       <div className="text-xs font-mono font-bold text-ink/70">Idle Savings</div>

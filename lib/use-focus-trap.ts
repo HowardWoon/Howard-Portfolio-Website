@@ -22,7 +22,7 @@ export function useFocusTrap(ref: RefObject<HTMLElement | null>, active = true) 
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== "Tab" || !ref.current) return;
       const nodes = Array.from(ref.current.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
-        (el) => el.offsetParent !== null || el === document.activeElement
+        (el) => el.getClientRects().length > 0 || el === document.activeElement
       );
       if (nodes.length === 0) return;
       const first = nodes[0];

@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { createContext, useContext, useEffect, useRef, useState, useLayoutEffect } from "react";
+const BootedContext = createContext(true);
+export const useBooted = () => useContext(BootedContext);
 import { motion, AnimatePresence } from "framer-motion";
 
 /**
@@ -12,7 +14,7 @@ import { motion, AnimatePresence } from "framer-motion";
  * Only in-app navigation (e.g. coming back from /simulators via a link) skips it, because this
  * module-level flag lives in memory and is reset by a real reload.
  */
-let bootedThisPageLoad = false;
+
 
 function scrollAfterBoot() {
   // Honour deep links like /#projects (the command palette and "Return to Portfolio" use them);
@@ -32,7 +34,11 @@ function scrollAfterBoot() {
 }
 
 export function BootSequence({ children }: { children: React.ReactNode }) {
-  const [showBoot, setShowBoot] = useState(() => !bootedThisPageLoad);
+  const [showBoot, setShowBoot] = useState(true);
+  
+  useLayoutEffect(() => {
+    if (document.documentElement.classList.contains("hw-booted")) setShowBoot(false);
+  }, []);
   const [bootState, setBootState] = useState<'idle' | 'booting' | 'complete'>('idle');
   const [progress, setProgress] = useState(0);
   const timers = useRef<number[]>([]);
@@ -66,7 +72,8 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
   useEffect(() => () => timers.current.forEach((t) => { clearInterval(t); clearTimeout(t); }), []);
 
   function finish() {
-    bootedThisPageLoad = true;
+    try { sessionStorage.setItem("hw-booted", "1"); } catch {}
+    document.documentElement.classList.add("hw-booted");
     justBooted.current = true;
     setShowBoot(false);
   }
@@ -98,7 +105,7 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <>
+    <BootedContext.Provider value={!showBoot}>
       {/* `inert` while the gate is up: keyboard / screen-reader users could previously Tab into the
           hidden page behind the yellow screen (e.g. the "Skip to content" link appeared on top of it). */}
       {/* applied only after hydration, so no-JS visitors (gate hidden by <noscript>) can still use the page */}
@@ -132,13 +139,16 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.5 }}
                   >
-                    <button
+                      <button
                       onClick={handleStartBoot}
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") finish(); }}
+
                       autoFocus
                       className="nb-btn nb-btn-ink text-base sm:text-lg px-8 py-5 font-display normal-case tracking-[-0.01em] shadow-[inset_3px_3px_6px_rgba(255,255,255,0.25),inset_-4px_-4px_8px_rgba(0,0,0,0.5),6px_6px_0_0_#0A0A0A] hover:shadow-[inset_3px_3px_6px_rgba(255,255,255,0.25),inset_-4px_-4px_8px_rgba(0,0,0,0.5),9px_9px_0_0_#0A0A0A]"
                     >
                       Initialize System &rarr;
                     </button>
+<button onClick={finish} className="mt-4 text-xs font-mono font-bold text-ink hover:underline tracking-wider uppercase">Skip intro</button>
                   </motion.div>
                 )}
 
@@ -174,6 +184,6 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </BootedContext.Provider>
   );
 }

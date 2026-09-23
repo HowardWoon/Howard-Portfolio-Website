@@ -8,7 +8,20 @@ interface AnimatedCounterProps {
   className?: string;
 }
 
-const NUMERIC = /^([^0-9.]*)([0-9.]+)([^0-9.]*)$/;
+const NUMERIC = /^([^0-9]*?)(\d+(?:\.\d+)?)(.*)$/;
+const IS_RANK = (prefix: string, suffix: string) =>
+  /#|top/i.test(prefix) || /^(st|nd|rd|th)\b/i.test(suffix);
+
+function parse(value: string) {
+  const m = value.match(NUMERIC);
+  if (!m) return null;
+  const [, prefix, num, suffix] = m;
+  const n = parseFloat(num);
+  const decimals = num.includes('.') ? num.split('.')[1].length : 0;
+  const worthCounting = decimals > 0 || n >= 10;
+  if (!worthCounting || IS_RANK(prefix, suffix)) return null;
+  return { prefix, numStr: num, suffix, decimals };
+}
 
 /**
  * Counts numeric stats up from 0 when they scroll into view ("2nd", "Top 15", "4.00", "16.46x").
@@ -25,7 +38,7 @@ export function AnimatedCounter({ value, className = "" }: AnimatedCounterProps)
   const [displayValue, setDisplayValue] = useState(value);
   const shouldAnimate = useRef(false);
   const spring = useSpring(0, { duration: 1500, bounce: 0 });
-  const match = value.match(NUMERIC);
+  const match = parse(value);
 
   // Runs before paint on the client only
   useLayoutEffect(() => {
@@ -36,7 +49,7 @@ export function AnimatedCounter({ value, className = "" }: AnimatedCounterProps)
     const onScreen = r.top < window.innerHeight && r.bottom > 0;
     if (!onScreen) {
       shouldAnimate.current = true;
-      setDisplayValue(`${match[1]}0${match[3]}`);
+      setDisplayValue(`${match.prefix}0${match.suffix}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
@@ -44,8 +57,7 @@ export function AnimatedCounter({ value, className = "" }: AnimatedCounterProps)
   useEffect(() => {
     if (!isInView || !shouldAnimate.current || !match) return;
     shouldAnimate.current = false;
-    const [, prefix, numStr, suffix] = match;
-    const decimals = numStr.includes(".") ? numStr.split(".")[1].length : 0;
+    const { prefix, numStr, suffix, decimals } = match;
 
     spring.jump(0);
     const unsubscribe = spring.on("change", (latest) => {

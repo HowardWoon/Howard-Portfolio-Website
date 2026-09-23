@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation';
+﻿import { redirect } from 'next/navigation';
 import { LoginForm } from '@/components/admin/login-form';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { isAdminUser } from '@/lib/admin-auth';
@@ -11,9 +11,9 @@ export default async function AdminLoginPage() {
   const { data } = await supabase.auth.getUser();
 
   // Only the ADMIN goes straight to the dashboard. Any other signed-in account used to be bounced
-  // dashboard → login → dashboard forever (ERR_TOO_MANY_REDIRECTS) with no way to sign out.
+  // dashboard â†’ login â†’ dashboard forever (ERR_TOO_MANY_REDIRECTS) with no way to sign out.
   if (data.user && isAdminUser(data.user)) {
-    redirect('/admin/dashboard');
+    redirect('/admin/messages');
   }
 
   return (
@@ -22,3 +22,4 @@ export default async function AdminLoginPage() {
     </div>
   );
 }
+

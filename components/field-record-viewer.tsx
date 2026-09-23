@@ -1,4 +1,6 @@
-"use client";
+﻿"use client";
+import { useLatest } from '@/lib/use-latest';
+import { useScrollLock } from '@/lib/use-scroll-lock';
 
 import { useEffect, useCallback, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -17,7 +19,7 @@ interface FieldRecordViewerProps {
 
 /**
  * Bug fix: this modal used to render *inside* the experience card, whose framer-motion `layout`
- * transform + overflow-hidden turned `position: fixed` into "fixed to the card" → the lightbox was
+ * transform + overflow-hidden turned `position: fixed` into "fixed to the card" â†’ the lightbox was
  * clipped inside the card. It is now portaled to <body>.
  */
 export function FieldRecordViewer({ records, currentIndex, onClose, onNavigate }: FieldRecordViewerProps) {
@@ -37,24 +39,20 @@ export function FieldRecordViewer({ records, currentIndex, onClose, onNavigate }
 
   useEffect(() => setMounted(true), []);
 
+  useScrollLock();
+  const onCloseRef = useLatest(onClose);
+  const handlePrevRef = useLatest(handlePrevious);
+  const handleNextRef = useLatest(handleNext);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-      if (e.key === "ArrowLeft") handlePrevious();
-      if (e.key === "ArrowRight") handleNext();
+      if (e.key === "Escape") onCloseRef.current();
+      if (e.key === "ArrowLeft") handlePrevRef.current();
+      if (e.key === "ArrowRight") handleNextRef.current();
     };
-
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    window.__lenis?.stop();
     window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = prevOverflow;
-      window.__lenis?.start();
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [onClose, handlePrevious, handleNext]);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onCloseRef, handlePrevRef, handleNextRef]);
 
   if (!mounted) return null;
 
@@ -97,7 +95,7 @@ export function FieldRecordViewer({ records, currentIndex, onClose, onNavigate }
         onClick={(e) => e.stopPropagation()}
         className="relative w-full max-w-6xl mx-auto flex-1 min-h-0 flex flex-col lg:flex-row landscape-short:flex-row bg-white rounded-[22px] sm:rounded-[26px] border-3 border-ink shadow-brutal-lg sm:shadow-brutal-xl overflow-hidden"
       >
-        {/* Image — fixed share of the height on phones (it used to collapse to 0px inside the flex column) */}
+        {/* Image â€” fixed share of the height on phones (it used to collapse to 0px inside the flex column) */}
         <div
           className="relative shrink-0 lg:shrink lg:flex-1 h-[42%] min-h-[180px] landscape-short:h-auto landscape-short:flex-1 lg:h-auto bg-paper-deep flex items-center justify-center overflow-hidden touch-pan-y"
           onTouchStart={(e) => { touchX.current = e.touches[0].clientX; }}
@@ -173,3 +171,4 @@ export function FieldRecordViewer({ records, currentIndex, onClose, onNavigate }
     document.body
   );
 }
+

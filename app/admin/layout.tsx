@@ -1,4 +1,4 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -20,9 +20,7 @@ export default function AdminLayout({ children }: Readonly<{ children: React.Rea
             HW.
           </Link>
           <div className="flex items-center gap-4 text-sm text-fog-500">
-            <Link href="/admin/dashboard" className="transition hover:text-white">
-              Dashboard
-            </Link>
+            
             <Link href="/admin/messages" className="transition hover:text-white">
               Inbox
             </Link>
@@ -36,3 +34,4 @@ export default function AdminLayout({ children }: Readonly<{ children: React.Rea
     </main>
   );
 }
+

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import { useEffect, useRef } from "react";
@@ -10,12 +10,12 @@ import { toLocal } from "@/lib/to-local";
  * Place it INSIDE the portrait frame, right after your own <Image>. It listens to its parent (the frame):
  *  - Mouse / pen: a soft-edged circle follows the pointer and shows the Spider-Man photo underneath.
  *    The circle GROWS in when you enter the photo and SHRINKS out when you leave (smooth, ~0.25 s),
- *    while its POSITION is always exactly under the pointer (no lag, no spring → it can never "escape").
- *  - Touch: tap the photo → the circle grows at your finger, stays 1.4 s, then shrinks away.
+ *    while its POSITION is always exactly under the pointer (no lag, no spring â†’ it can never "escape").
+ *  - Touch: tap the photo â†’ the circle grows at your finger, stays 1.4 s, then shrinks away.
  *
- * Why it lines up: /images/spiderman.jpg and /images/howard-solid.jpeg are the same size (682 × 1024) and were
+ * Why it lines up: /images/spiderman.jpg and /images/howard-solid.jpeg are the same size (682 Ã— 1024) and were
  * shot from the same camera position, and both <Image>s use the SAME fill / object-cover / object-top / sizes /
- * quality / filters. So the two photos sit on exactly the same pixels — nothing is moved, scaled or squished.
+ * quality / filters. So the two photos sit on exactly the same pixels â€” nothing is moved, scaled or squished.
  * If you replace either photo, keep both files the same pixel size.
  */
 
@@ -137,7 +137,7 @@ export function SpiderReveal() {
   }, []);
 
   // Soft edge: solid for the inner 60% of the radius, then a smooth fade to the rim.
-  // When --r is 0px every stop collapses to 0 → the layer is fully hidden.
+  // When --r is 0px every stop collapses to 0 â†’ the layer is fully hidden.
   const mask =
     "radial-gradient(circle at var(--x) var(--y), #000 0px, #000 calc(var(--r) * 0.6), rgba(0,0,0,0.55) calc(var(--r) * 0.82), transparent var(--r))";
 
@@ -160,9 +160,10 @@ export function SpiderReveal() {
         fill
         sizes={PORTRAIT_SIZES}
         className="object-cover object-top saturate-[1.15] contrast-[1.05]"
-        loading="eager"
+        loading="lazy"
         quality={85}
       />
     </div>
   );
 }
+

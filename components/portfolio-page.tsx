@@ -1,4 +1,4 @@
-'use client';
+import { SkipLink } from '@/components/skip-link';
 import BikebearInspiredHero from '@/components/bikebear-hero';
 import AboutSection from '@/components/about-section';
 import StackedProjects from '@/components/stacked-projects';
@@ -10,6 +10,8 @@ import { BootSequence } from '@/components/boot-sequence';
 import { TechMarquee } from '@/components/marquees';
 import { ScrollToTop } from '@/components/scroll-to-top';
 import { SiteHeader } from '@/components/site-header';
+import dynamic from 'next/dynamic';
+const CommandPalette = dynamic(() => import('@/components/command-palette').then(mod => mod.CommandPalette), {});
 
 
 export function PortfolioPage() {
@@ -18,24 +20,11 @@ export function PortfolioPage() {
       <div className="relative min-h-screen overflow-x-clip bg-paper text-ink">
 
         {/* Fixed header lives OUTSIDE any z-indexed wrapper. It used to sit inside a `relative z-10` div,
-            which capped its z-[9999] at 10 — so the marquee (z-20) and honours cards (z-10) scrolled OVER
+            which capped its z-[9999] at 10 Ã¢â‚¬â€ so the marquee (z-20) and honours cards (z-10) scrolled OVER
             the header and blocked taps on the Resume / Search buttons. */}
-        {/* Skip link (keyboard / screen-reader users). It moves FOCUS as well as scroll —
-            a plain href="#…" is intercepted by Lenis, which scrolls but leaves focus at the top. */}
-        <a
-          href="#main-content"
-          onClick={(e) => {
-            const target = document.getElementById("main-content");
-            if (!target) return;
-            e.preventDefault();
-            target.focus({ preventScroll: true });
-            if (window.__lenis) window.__lenis.scrollTo(target, { immediate: true });
-            else target.scrollIntoView();
-          }}
-          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[999999] focus:px-4 focus:py-2 focus:bg-pop-yellow focus:text-ink focus:font-mono focus:font-bold focus:border-3 focus:border-ink focus:rounded-lg focus:shadow-brutal-sm"
-        >
-          Skip to content
-        </a>
+        {/* Skip link (keyboard / screen-reader users). It moves FOCUS as well as scroll Ã¢â‚¬â€
+            a plain href="#Ã¢â‚¬Â¦" is intercepted by Lenis, which scrolls but leaves focus at the top. */}
+        <SkipLink />
 
         <SiteHeader />
 
@@ -57,7 +46,11 @@ export function PortfolioPage() {
         </main>
 
         <ScrollToTop />
+        <CommandPalette />
       </div>
     </BootSequence>
   );
 }
+
+
+

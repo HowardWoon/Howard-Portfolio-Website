@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -26,7 +26,7 @@ export function LoginForm() {
       return;
     }
 
-    router.push('/admin/dashboard');
+    router.push('/admin/messages');
     router.refresh();
   };
 
@@ -89,3 +89,4 @@ export function LoginForm() {
     </form>
   );
 }
+
