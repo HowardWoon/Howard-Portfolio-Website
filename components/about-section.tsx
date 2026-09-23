@@ -203,78 +203,104 @@ export default function AboutSection() {
           </motion.p>
         </div>
 
-        {/* Core Architecture Bento Grid (4 Pillars) — staggered columns for a deliberately asymmetric rhythm */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-7 lg:gap-8 items-start">
+        {/* Core Architecture Bento Grid (4 Pillars) — True Masonry Layout */}
+        <div className="flex flex-col lg:hidden gap-7">
           {architecturePillars.map((pillar, idx) => {
             const Icon = pillar.icon;
             const isActive = activeCard === pillar.id;
             const c = colorMap[pillar.color as keyof typeof colorMap];
-
             return (
-              <motion.div
-                key={pillar.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: idx * 0.1 }}
-                onClick={() => setActiveCard(pillar.id)}
-                className={`relative group cursor-pointer rounded-[26px] p-4 xs:p-6 sm:p-8 border-3 border-ink flex flex-col justify-between gap-6 transition-[transform,box-shadow,background-color] duration-200 ${
-                  idx % 2 === 1 ? "lg:mt-10" : ""
-                } ${
-                  isActive
-                    ? `${c.soft} shadow-brutal-lg -translate-x-1 -translate-y-1`
-                    : "bg-white shadow-brutal hover:-translate-y-1 hover:shadow-brutal-lg"
-                }`}
-              >
-                {/* Top Card Bar: Category Tag + Icon */}
+              <motion.div key={pillar.id} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: idx * 0.1 }} onClick={() => setActiveCard(pillar.id)} className={`relative group cursor-pointer rounded-[26px] p-4 xs:p-6 sm:p-8 border-3 border-ink flex flex-col justify-between gap-6 transition-[transform,box-shadow,background-color] duration-200 ${isActive ? `${c.soft} shadow-brutal-lg -translate-x-1 -translate-y-1` : "bg-white shadow-brutal hover:-translate-y-1 hover:shadow-brutal-lg"}`}>
                 <div className="flex items-center justify-between gap-4">
-                  <span className={`nb-tag ${isActive ? c.fill : "bg-white"}`}>
-                    {pillar.category}
-                  </span>
-                  <div className={`w-12 h-12 rounded-2xl grid place-items-center border-3 border-ink shadow-clay transition-transform duration-300 group-hover:rotate-6 ${c.fill}`}>
-                    <Icon className="w-6 h-6 text-ink" strokeWidth={2.5} />
-                  </div>
+                  <span className={`nb-tag ${isActive ? c.fill : "bg-white"}`}>{pillar.category}</span>
+                  <div className={`w-12 h-12 rounded-2xl grid place-items-center border-3 border-ink shadow-clay transition-transform duration-300 group-hover:rotate-6 ${c.fill}`}><Icon className="w-6 h-6 text-ink" strokeWidth={2.5} /></div>
                 </div>
-
-                {/* Card Title & Description */}
                 <div className="space-y-3">
-                  <h3 className="font-display text-[clamp(1.25rem,6.4vw,1.5rem)] sm:text-[1.7rem] font-extrabold uppercase tracking-[-0.02em] leading-tight text-ink flex items-center gap-2">
-                    {pillar.title}
-                    <ArrowUpRight className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity text-pop-blue" strokeWidth={3} />
-                  </h3>
-                  <p className="text-sm font-mono font-bold text-pop-blue">
-                    {pillar.headline}
-                  </p>
-                  <p className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium pt-1">
-                    {pillar.description}
-                  </p>
+                  <h3 className="font-display text-[clamp(1.25rem,6.4vw,1.5rem)] sm:text-[1.7rem] font-extrabold uppercase tracking-[-0.02em] leading-tight text-ink flex items-center gap-2">{pillar.title}<ArrowUpRight className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity text-pop-blue" strokeWidth={3} /></h3>
+                  <p className="text-sm font-mono font-bold text-pop-blue">{pillar.headline}</p>
+                  <p className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium pt-1">{pillar.description}</p>
                 </div>
-
-                {/* Metrics Breakdown Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-5 border-t-2 border-dashed border-ink">
                   {pillar.metrics.map((metric, mIdx) => (
                     <div key={mIdx} className="bg-white rounded-xl p-3 border-2 border-ink">
-                      <div className="text-[0.7rem] font-mono font-bold text-ink-muted uppercase tracking-[0.06em] leading-tight">
-                        {metric.label}
-                      </div>
-                      <div className="text-sm font-sans font-extrabold text-ink mt-1.5 leading-snug break-words">
-                        {metric.value}
-                      </div>
+                      <div className="text-[0.7rem] font-mono font-bold text-ink-muted uppercase tracking-[0.06em] leading-tight">{metric.label}</div>
+                      <div className="text-sm font-sans font-extrabold text-ink mt-1.5 leading-snug break-words">{metric.value}</div>
                     </div>
                   ))}
                 </div>
-
-                {/* Live Telemetry Ticker — skeuomorphic LCD strip */}
                 <div className="terminal flex items-start xs:items-center justify-between gap-3">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <Activity className="w-4 h-4 text-pop-mint animate-pulse shrink-0" strokeWidth={2.5} />
-                    <span className="break-words [overflow-wrap:anywhere]">{pillar.telemetrySnippet}</span>
-                  </div>
+                  <div className="flex items-center gap-2 min-w-0"><Activity className="w-4 h-4 text-pop-mint animate-pulse shrink-0" strokeWidth={2.5} /><span className="break-words [overflow-wrap:anywhere]">{pillar.telemetrySnippet}</span></div>
                   <span className={`text-[0.7rem] font-extrabold shrink-0 px-2 py-0.5 rounded border-2 border-ink text-ink ${c.fill}`}>ACTIVE</span>
                 </div>
               </motion.div>
             );
           })}
+        </div>
+        <div className="hidden lg:grid grid-cols-2 gap-8 items-start">
+          <div className="flex flex-col gap-8">
+            {architecturePillars.filter((_, i) => i % 2 === 0).map((pillar, idx) => {
+              const Icon = pillar.icon;
+              const isActive = activeCard === pillar.id;
+              const c = colorMap[pillar.color as keyof typeof colorMap];
+              return (
+                <motion.div key={pillar.id} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: (idx * 2) * 0.1 }} onClick={() => setActiveCard(pillar.id)} className={`relative group cursor-pointer rounded-[26px] p-4 xs:p-6 sm:p-8 border-3 border-ink flex flex-col justify-between gap-6 transition-[transform,box-shadow,background-color] duration-200 ${isActive ? `${c.soft} shadow-brutal-lg -translate-x-1 -translate-y-1` : "bg-white shadow-brutal hover:-translate-y-1 hover:shadow-brutal-lg"}`}>
+                  <div className="flex items-center justify-between gap-4">
+                    <span className={`nb-tag ${isActive ? c.fill : "bg-white"}`}>{pillar.category}</span>
+                    <div className={`w-12 h-12 rounded-2xl grid place-items-center border-3 border-ink shadow-clay transition-transform duration-300 group-hover:rotate-6 ${c.fill}`}><Icon className="w-6 h-6 text-ink" strokeWidth={2.5} /></div>
+                  </div>
+                  <div className="space-y-3">
+                    <h3 className="font-display text-[clamp(1.25rem,6.4vw,1.5rem)] sm:text-[1.7rem] font-extrabold uppercase tracking-[-0.02em] leading-tight text-ink flex items-center gap-2">{pillar.title}<ArrowUpRight className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity text-pop-blue" strokeWidth={3} /></h3>
+                    <p className="text-sm font-mono font-bold text-pop-blue">{pillar.headline}</p>
+                    <p className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium pt-1">{pillar.description}</p>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-5 border-t-2 border-dashed border-ink">
+                    {pillar.metrics.map((metric, mIdx) => (
+                      <div key={mIdx} className="bg-white rounded-xl p-3 border-2 border-ink">
+                        <div className="text-[0.7rem] font-mono font-bold text-ink-muted uppercase tracking-[0.06em] leading-tight">{metric.label}</div>
+                        <div className="text-sm font-sans font-extrabold text-ink mt-1.5 leading-snug break-words">{metric.value}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="terminal flex items-start xs:items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 min-w-0"><Activity className="w-4 h-4 text-pop-mint animate-pulse shrink-0" strokeWidth={2.5} /><span className="break-words [overflow-wrap:anywhere]">{pillar.telemetrySnippet}</span></div>
+                    <span className={`text-[0.7rem] font-extrabold shrink-0 px-2 py-0.5 rounded border-2 border-ink text-ink ${c.fill}`}>ACTIVE</span>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+          <div className="flex flex-col gap-8 mt-10">
+            {architecturePillars.filter((_, i) => i % 2 === 1).map((pillar, idx) => {
+              const Icon = pillar.icon;
+              const isActive = activeCard === pillar.id;
+              const c = colorMap[pillar.color as keyof typeof colorMap];
+              return (
+                <motion.div key={pillar.id} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: (idx * 2 + 1) * 0.1 }} onClick={() => setActiveCard(pillar.id)} className={`relative group cursor-pointer rounded-[26px] p-4 xs:p-6 sm:p-8 border-3 border-ink flex flex-col justify-between gap-6 transition-[transform,box-shadow,background-color] duration-200 ${isActive ? `${c.soft} shadow-brutal-lg -translate-x-1 -translate-y-1` : "bg-white shadow-brutal hover:-translate-y-1 hover:shadow-brutal-lg"}`}>
+                  <div className="flex items-center justify-between gap-4">
+                    <span className={`nb-tag ${isActive ? c.fill : "bg-white"}`}>{pillar.category}</span>
+                    <div className={`w-12 h-12 rounded-2xl grid place-items-center border-3 border-ink shadow-clay transition-transform duration-300 group-hover:rotate-6 ${c.fill}`}><Icon className="w-6 h-6 text-ink" strokeWidth={2.5} /></div>
+                  </div>
+                  <div className="space-y-3">
+                    <h3 className="font-display text-[clamp(1.25rem,6.4vw,1.5rem)] sm:text-[1.7rem] font-extrabold uppercase tracking-[-0.02em] leading-tight text-ink flex items-center gap-2">{pillar.title}<ArrowUpRight className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity text-pop-blue" strokeWidth={3} /></h3>
+                    <p className="text-sm font-mono font-bold text-pop-blue">{pillar.headline}</p>
+                    <p className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium pt-1">{pillar.description}</p>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-5 border-t-2 border-dashed border-ink">
+                    {pillar.metrics.map((metric, mIdx) => (
+                      <div key={mIdx} className="bg-white rounded-xl p-3 border-2 border-ink">
+                        <div className="text-[0.7rem] font-mono font-bold text-ink-muted uppercase tracking-[0.06em] leading-tight">{metric.label}</div>
+                        <div className="text-sm font-sans font-extrabold text-ink mt-1.5 leading-snug break-words">{metric.value}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="terminal flex items-start xs:items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 min-w-0"><Activity className="w-4 h-4 text-pop-mint animate-pulse shrink-0" strokeWidth={2.5} /><span className="break-words [overflow-wrap:anywhere]">{pillar.telemetrySnippet}</span></div>
+                    <span className={`text-[0.7rem] font-extrabold shrink-0 px-2 py-0.5 rounded border-2 border-ink text-ink ${c.fill}`}>ACTIVE</span>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
         </div>
 
         {/* Categorized Technical Stack Matrix */}
