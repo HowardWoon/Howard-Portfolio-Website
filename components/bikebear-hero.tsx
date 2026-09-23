@@ -8,11 +8,11 @@ import { Magnetic } from "./magnetic-button";
 import { Sparkles, Terminal } from "lucide-react";
 
 
-// Source photo size + hand centres (fractions of the photo), measured from
-// /images/howard-solid.jpeg and /images/spiderman.jpg (same camera position, different pose).
-// If you replace either photo, update these numbers.
-const PHOTO = { w: 853, h: 1280 };
-const HAND = { you: { x: 0.5627, y: 0.5156 }, spidey: { x: 0.545, y: 0.4336 } };
+// The Spider-Man x-ray layer uses /images/spiderman-aligned.jpg: a pose-matched copy of the
+// Spider-Man photo, pre-aligned pixel-for-pixel to /images/howard-solid.jpeg (same 853×1280 size,
+// same camera; head, hands, arms, torso and legs sit exactly on yours). Because the alignment is
+// baked into the image, the layer is never moved or stretched at runtime.
+// If you ever replace howard-solid.jpeg, re-align the Spider-Man photo to it (same size, same pose).
 
 /**
  * Converts a pointer position to coordinates INSIDE `el` (its padding box), correcting for:
@@ -150,19 +150,8 @@ export default function BikebearHero() {
     el.style.setProperty("--ly", `${y}px`);
     el.style.setProperty("--lr", `${r}px`);
     el.dataset.lens = r > 0 ? "on" : "off";
-
-    // Hand sync: the two photos share the exact same camera/background, but Spider-Man holds his
-    // hand ~8% higher than you do. Near your hand the Spider-Man layer is nudged so his glove lands
-    // exactly on your hand; the nudge fades out (Gaussian) so the wall/head stay aligned elsewhere.
-    const w = el.clientWidth, h = el.clientHeight;
-    const s = Math.max(w / PHOTO.w, h / PHOTO.h);           // object-cover scale
-    const W = PHOTO.w * s, H = PHOTO.h * s;
-    const left = (w - W) / 2;                               // object-position: center top
-    const hx = left + HAND.you.x * W, hy = HAND.you.y * H;  // your hand, in frame pixels
-    const sigma = 0.14 * H;
-    const k = Math.exp(-((x - hx) ** 2 + (y - hy) ** 2) / (2 * sigma * sigma));
-    el.style.setProperty("--sdx", `${(HAND.you.x - HAND.spidey.x) * W * k}px`);
-    el.style.setProperty("--sdy", `${(HAND.you.y - HAND.spidey.y) * H * k}px`);
+    // No runtime "hand-sync" nudge any more: shifting the whole Spider-Man layer is what pushed his
+    // head half out of the lens. The pose match now lives in spiderman-aligned.jpg itself.
   }, []);
 
   const hideLens = React.useCallback(() => {
@@ -335,20 +324,20 @@ export default function BikebearHero() {
                   quality={85}
                 />
 
-                {/* Spider-Man x-ray layer: the wrapper is clipped to the lens (in frame coordinates);
-                    the image inside is nudged for hand-sync, so the nudge never moves the lens itself */}
+                {/* Spider-Man x-ray layer: clipped to the lens (in frame coordinates). The image is
+                    pose-matched to the portrait and uses the exact same size/fit/position, so every
+                    body part under the lens lines up — nothing is translated or stretched. */}
                 <div
                   aria-hidden
                   className="absolute inset-0 pointer-events-none"
                   style={{ clipPath: "circle(var(--lr) at var(--lx) var(--ly))" }}
                 >
                   <Image
-                    src="/images/spiderman.jpg"
+                    src="/images/spiderman-aligned.jpg"
                     alt="Howard Woon - Spiderman"
                     fill
                     sizes="(max-width: 640px) 350px, (max-width: 1280px) 460px, 520px"
                     className="object-cover object-top saturate-[1.15] contrast-[1.05]"
-                    style={{ transform: "translate(var(--sdx, 0px), var(--sdy, 0px))" }}
                     loading="eager"
                     quality={85}
                   />
