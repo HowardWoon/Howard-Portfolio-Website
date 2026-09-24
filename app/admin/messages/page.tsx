@@ -4,6 +4,7 @@ import { requireAdminUser } from '@/lib/admin-auth';
 import { createServiceRoleClient, hasServiceRole } from '@/lib/supabase/route';
 import { markAsRead, markAsUnread, deleteMessage } from './actions';
 import { ConfirmSubmitButton } from './confirm-submit-button';
+import { ClientDate } from './client-date';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -87,7 +88,7 @@ export default async function MessagesPage() {
                 </div>
                 <p className="flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-fog-500">
                   <CalendarDays className="h-4 w-4" />
-                  {new Date(message.created_at).toLocaleString()}
+                  <ClientDate date={message.created_at} />
                 </p>
               </div>
 

@@ -13,20 +13,23 @@ function getAdminSupabase() {
 export async function markAsRead(id: string) {
   await requireAdminUser();
   const supabase = getAdminSupabase();
-  await supabase.from('contact_messages').update({ is_read: true }).eq('id', id);
+  const { error } = await supabase.from('contact_messages').update({ is_read: true }).eq('id', id);
+  if (error) throw new Error(error.message);
   revalidatePath('/admin/messages');
 }
 
 export async function markAsUnread(id: string) {
   await requireAdminUser();
   const supabase = getAdminSupabase();
-  await supabase.from('contact_messages').update({ is_read: false }).eq('id', id);
+  const { error } = await supabase.from('contact_messages').update({ is_read: false }).eq('id', id);
+  if (error) throw new Error(error.message);
   revalidatePath('/admin/messages');
 }
 
 export async function deleteMessage(id: string) {
   await requireAdminUser();
   const supabase = getAdminSupabase();
-  await supabase.from('contact_messages').delete().eq('id', id);
+  const { error } = await supabase.from('contact_messages').delete().eq('id', id);
+  if (error) throw new Error(error.message);
   revalidatePath('/admin/messages');
 }
