@@ -33,6 +33,7 @@ test('BILAHUJAN log keeps distinct timestamps and scrolls to latest', async ({ p
 
 test('contact API rejects submissions without fill time', async ({ request }) => {
   const r = await request.post('/api/contact', { data: { name: 'a', email: 'a@b.co', message: 'hi' } });
+  expect(r.status()).toBe(400);
 });
 
 test.describe('mobile regressions', () => {
@@ -86,5 +87,14 @@ test('every RUN SIMULATOR link resolves', async ({ page, request }) => {
 test('no corrupted characters on the page', async ({ page }) => {
   await page.goto('/');
   const text = await page.locator('body').innerText();
-  expect(text).not.toMatch(/Ã|â€|ðŸ|·|âš|âž/);
+  const c = (n) => String.fromCodePoint(n);
+  const bad = new RegExp(
+    [
+      `${c(0xc3)}[${c(0x80)}-${c(0xbf)}]`,
+      `${c(0xe2)}${c(0x20ac)}`,
+      `${c(0xf0)}${c(0x178)}`,
+      `${c(0xc2)}[${c(0xa0)}-${c(0xbf)}]`,
+    ].join('|'),
+  );
+  expect(text).not.toMatch(bad);
 });
