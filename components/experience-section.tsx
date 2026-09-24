@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import { FieldArchive } from './field-archive';
+import { TraceRail } from './fx/trace-rail';
+import { SplitWords } from './fx/split-words';
 import { m, AnimatePresence } from 'framer-motion';
 import {
   Building2,
@@ -490,11 +492,11 @@ export default function ExperienceSection() {
       {/* Bauhaus accents */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -left-40 top-[45%] w-72 h-72 rounded-full border-3 border-ink bg-pop-yellow hidden xl:block"
+        className="fx-drift pointer-events-none absolute -left-40 top-[45%] w-72 h-72 rounded-full border-3 border-ink bg-pop-yellow hidden xl:block"
       />
       <svg
         aria-hidden
-        className="pointer-events-none absolute right-10 top-24 w-24 h-24 hidden lg:block"
+        className="fx-drift-rev pointer-events-none absolute right-10 top-24 w-24 h-24 hidden lg:block"
         viewBox="0 0 100 100"
       >
         <polygon points="50,6 96,92 4,92" fill="#FF4B2B" stroke="#0A0A0A" strokeWidth="6" strokeLinejoin="round" />
@@ -519,7 +521,7 @@ export default function ExperienceSection() {
             viewport={{ once: true }}
             className="nb-title text-[clamp(1.55rem,8.2vw,2.1rem)] sm:text-5xl lg:text-6xl max-w-3xl leading-[1.02]"
           >
-            EXECUTIVE LEADERSHIP & GOVERNANCE.
+            <SplitWords text="EXECUTIVE LEADERSHIP & GOVERNANCE." />
           </m.h2>
         </div>
 
@@ -559,6 +561,7 @@ export default function ExperienceSection() {
 
         {/* Experience Cards */}
         <div className="relative space-y-10 min-h-[500px]">
+          <TraceRail />
           <AnimatePresence mode="popLayout">
             {filteredExperiences.map((item) => {
               const a = accentFill[item.accentColor];

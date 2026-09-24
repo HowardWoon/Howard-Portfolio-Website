@@ -9,6 +9,8 @@ import { Magnetic } from './magnetic-button';
 import { Sparkles, Terminal } from 'lucide-react';
 import { toLocal } from '@/lib/to-local';
 import { SpiderReveal } from './spider-reveal';
+import { BauhausSolid } from './fx/bauhaus-solid';
+import { FX, SPRING_STAMP } from '@/lib/fx';
 
 /**
  * X-ray magnifier headline.
@@ -16,7 +18,7 @@ import { SpiderReveal } from './spider-reveal';
  * (no React state → no re-render on every mousemove).
  * A11y fix: the duplicated overlay copy is aria-hidden so screen readers read the headline once.
  */
-function MagnifiedHeadline() {
+function MagnifiedHeadline({ booted = true }: { booted?: boolean }) {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   const setVars = (x: number, y: number, on: boolean) => {
@@ -64,7 +66,20 @@ function MagnifiedHeadline() {
         className={`${headlineClass} text-ink transition-opacity duration-300 group-data-[hover=true]/headline:opacity-25`}
       >
         ENGINEERING <br />
-        <span className={`${chipClass} bg-pop-yellow border-ink shadow-brutal text-ink`}>SYSTEMS TO</span> <br />
+        {FX.headlineStamp ? (
+          <m.span
+            data-fx
+            className={`${chipClass} bg-pop-yellow border-ink shadow-brutal text-ink`}
+            initial={{ scale: 1.35, rotate: -9, opacity: 0, boxShadow: '0px 0px 0 0 #0A0A0A' }}
+            animate={booted ? { scale: 1, rotate: -1, opacity: 1, boxShadow: '5px 5px 0 0 #0A0A0A' } : undefined}
+            transition={{ ...SPRING_STAMP, delay: 0.55 }}
+          >
+            SYSTEMS TO
+          </m.span>
+        ) : (
+          <span className={`${chipClass} bg-pop-yellow border-ink shadow-brutal text-ink`}>SYSTEMS TO</span>
+        )}{' '}
+        <br />
         STAND OUT IN <br />A NOISY WORLD.
       </h2>
 
@@ -128,9 +143,25 @@ export default function BikebearHero() {
 
       {/* Bauhaus geometry (decorative) */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-28 bottom-6 w-44 h-44 rounded-full bg-pop-blue border-3 border-ink hidden xl:block" />
-        <div className="absolute left-[38%] top-28 w-10 h-10 bg-pop-red border-3 border-ink rotate-12 hidden lg:block" />
-        <svg className="absolute left-[46%] bottom-24 w-16 h-16 hidden lg:block animate-wobble" viewBox="0 0 100 100">
+        <div
+          className="fx-depth absolute -left-28 bottom-6 w-44 h-44 rounded-full bg-pop-blue border-3 border-ink hidden xl:block"
+          style={{ '--depth': -14 } as React.CSSProperties}
+        />
+        {FX.solids3d ? (
+          <div
+            className="fx-depth absolute left-[38%] top-28 hidden lg:block"
+            style={{ '--depth': 26 } as React.CSSProperties}
+          >
+            <BauhausSolid kind="cube" size={40} color="#FF4B2B" />
+          </div>
+        ) : (
+          <div className="absolute left-[38%] top-28 w-10 h-10 bg-pop-red border-3 border-ink rotate-12 hidden lg:block" />
+        )}
+        <svg
+          className="fx-depth absolute left-[46%] bottom-24 w-16 h-16 hidden lg:block animate-wobble"
+          style={{ '--depth': 20 } as React.CSSProperties}
+          viewBox="0 0 100 100"
+        >
           <polygon points="50,6 96,92 4,92" fill="#FFC700" stroke="#0A0A0A" strokeWidth="7" strokeLinejoin="round" />
         </svg>
       </div>
@@ -158,7 +189,7 @@ export default function BikebearHero() {
               transition={{ duration: 0.7, delay: 0.2 }}
               className="relative space-y-2"
             >
-              <MagnifiedHeadline />
+              <MagnifiedHeadline booted={booted} />
             </m.div>
 
             {/* Sub-narrative Bio Copy */}
@@ -200,11 +231,13 @@ export default function BikebearHero() {
             {/* Big Bauhaus sun behind the portrait */}
             <div
               aria-hidden
-              className="pointer-events-none absolute -top-6 right-0 sm:right-10 w-40 h-40 xs:w-56 xs:h-56 sm:w-72 sm:h-72 rounded-full bg-pop-yellow border-3 border-ink"
+              className="fx-depth pointer-events-none absolute -top-6 right-0 sm:right-10 w-40 h-40 xs:w-56 xs:h-56 sm:w-72 sm:h-72 rounded-full bg-pop-yellow border-3 border-ink"
+              style={{ '--depth': -10 } as React.CSSProperties}
             />
             <div
               aria-hidden
-              className="pointer-events-none absolute -bottom-6 left-0 lg:left-auto lg:right-[70%] w-20 h-20 xs:w-28 xs:h-28 bg-pop-lilac border-3 border-ink rounded-[28px] rotate-6"
+              className="fx-depth pointer-events-none absolute -bottom-6 left-0 lg:left-auto lg:right-[70%] w-20 h-20 xs:w-28 xs:h-28 bg-pop-lilac border-3 border-ink rounded-[28px] rotate-6"
+              style={{ '--depth': 18 } as React.CSSProperties}
             />
 
             <m.div
@@ -230,7 +263,7 @@ export default function BikebearHero() {
               {/* Main Portrait Frame — hover (or tap) reveals Spider-Man under the cursor, see spider-reveal.tsx */}
               <div
                 data-xray
-                className="relative w-full max-w-[350px] sm:max-w-none sm:w-[460px] lg:w-[460px] xl:w-[520px] aspect-[5/6] xs:aspect-[6/7] sm:aspect-auto sm:h-[560px] lg:h-[600px] xl:h-[660px] rounded-[28px] xs:rounded-[36px] sm:rounded-[44px] border-3 border-ink bg-pop-yellow overflow-hidden shadow-brutal-lg sm:shadow-brutal-xl transition-colors duration-300 hover:border-pop-red pointer-events-auto cursor-crosshair"
+                className="relative w-full max-w-[350px] sm:max-w-none sm:w-[460px] lg:w-[460px] xl:w-[520px] aspect-[5/6] xs:aspect-[6/7] sm:aspect-auto sm:h-[560px] lg:h-[600px] xl:h-[660px] rounded-[28px] xs:rounded-[36px] sm:rounded-[44px] border-3 border-ink bg-pop-yellow overflow-hidden shadow-brutal-lg sm:shadow-brutal-xl fx-shadow-follow transition-colors duration-300 hover:border-pop-red pointer-events-auto cursor-crosshair"
               >
                 <Image
                   src="/images/howard-solid.jpeg"

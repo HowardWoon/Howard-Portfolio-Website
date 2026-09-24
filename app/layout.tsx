@@ -96,7 +96,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* If JavaScript is off or fails to load, the "Initialize System" gate could never be dismissed
             and the whole portfolio stayed hidden behind it. */}
         <noscript>
-          <style>{`.boot-overlay{display:none!important}body{overflow:auto!important}[style*="opacity:0"]{opacity:1!important;transform:none!important}`}</style>
+          <style>{`.boot-overlay{display:none!important}body{overflow:auto!important}[style*="opacity:0"]{opacity:1!important;transform:none!important}[data-fx]{opacity:1!important;transform:none!important;filter:none!important}`}</style>
         </noscript>
         <MotionProvider>
           <SmoothScrollProvider>{children}</SmoothScrollProvider>

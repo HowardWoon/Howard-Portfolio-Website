@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { m } from 'framer-motion';
 import { Server, Cpu, GitBranch, ShieldCheck, Activity, Sparkles, ArrowUpRight, Layers, Code2 } from 'lucide-react';
+import { SplitWords } from './fx/split-words';
 
 const architecturePillars = [
   {
@@ -243,11 +244,11 @@ export default function AboutSection() {
       {/* Bauhaus accents */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-20 top-24 w-64 h-64 rounded-full border-3 border-ink bg-pop-blue hidden lg:block"
+        className="fx-drift pointer-events-none absolute -right-20 top-24 w-64 h-64 rounded-full border-3 border-ink bg-pop-blue hidden lg:block"
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute right-40 top-72 w-16 h-16 border-3 border-ink bg-pop-red rotate-45 hidden lg:block"
+        className="fx-drift-rev pointer-events-none absolute right-40 top-72 w-16 h-16 border-3 border-ink bg-pop-red rotate-45 hidden lg:block"
       />
 
       <div className="relative max-w-7xl mx-auto space-y-16">
@@ -271,8 +272,7 @@ export default function AboutSection() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="nb-title text-[clamp(1.55rem,8.2vw,2.1rem)] sm:text-5xl lg:text-6xl max-w-5xl leading-[1.02]"
           >
-            I ARCHITECT RESILIENT BACKENDS AND AUTONOMOUS AI PIPELINES, TURNING COMPLEX IDEAS INTO PRODUCTION-READY
-            SYSTEMS.
+            <SplitWords text="I ARCHITECT RESILIENT BACKENDS AND AUTONOMOUS AI PIPELINES, TURNING COMPLEX IDEAS INTO PRODUCTION-READY SYSTEMS." />
           </m.h2>
 
           <m.p

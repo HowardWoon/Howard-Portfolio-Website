@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import React from 'react';
+import { ScrollUnfold } from './fx/scroll-unfold';
+import { SplitWords } from './fx/split-words';
 import { Reveal } from './reveal';
 import { TiltCard } from './tilt-card';
 import { InteractivePhotoStack } from './interactive-photo-stack';
@@ -238,7 +240,7 @@ export default function StackedProjects() {
 
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
             <h2 className="nb-title text-[clamp(1.55rem,8.2vw,2.1rem)] sm:text-5xl lg:text-6xl max-w-3xl leading-[1.02]">
-              SCALABLE SYSTEMS & AUTONOMOUS ARCHITECTURES.
+              <SplitWords text="SCALABLE SYSTEMS & AUTONOMOUS ARCHITECTURES." />
             </h2>
             <p className="text-ink-soft text-sm sm:text-base font-mono font-semibold max-w-md bg-white border-3 border-ink rounded-2xl p-4 shadow-brutal-sm rotate-1">
               Scroll through the stack to deconstruct high-throughput backends, deterministic multi-agent LLM pipelines,
@@ -276,7 +278,7 @@ function ProjectCard({ project }: { project: ProjectData }) {
     project.telemetryType === 'proofpay';
 
   return (
-    <div className="w-full group">
+    <ScrollUnfold className="w-full group">
       <TiltCard maxTilt={2.5}>
         <Reveal
           delay={0.1}
@@ -537,6 +539,6 @@ function ProjectCard({ project }: { project: ProjectData }) {
           </div>
         </Reveal>
       </TiltCard>
-    </div>
+    </ScrollUnfold>
   );
 }

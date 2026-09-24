@@ -2,6 +2,9 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { m } from 'framer-motion';
+import { SplitWords } from './fx/split-words';
+import { BauhausSolid } from './fx/bauhaus-solid';
+import { FX } from '@/lib/fx';
 import {
   Mail,
   Copy,
@@ -133,9 +136,36 @@ export default function ContactSection() {
       {/* Bauhaus composition (replaces the particle canvas, which was invisible on a light canvas
           and was also being stretched: its bitmap was viewport-sized but CSS-sized to the whole section) */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-36 top-[38%] w-56 h-56 rounded-full bg-pop-yellow border-3 border-ink hidden xl:block" />
-        <div className="absolute right-12 top-20 w-24 h-24 rounded-full bg-pop-blue border-3 border-ink hidden lg:block" />
-        <div className="absolute right-44 top-40 w-14 h-14 bg-pop-red border-3 border-ink rotate-12 hidden lg:block" />
+        <div
+          className="fx-depth absolute -left-36 top-[38%] hidden xl:block"
+          style={{ '--depth': -20 } as React.CSSProperties}
+        >
+          {FX.solids3d ? (
+            <BauhausSolid kind="coin" size={56} color="#FFC700" />
+          ) : (
+            <div className="w-56 h-56 rounded-full bg-pop-yellow border-3 border-ink" />
+          )}
+        </div>
+        <div
+          className="fx-depth absolute right-12 top-20 hidden lg:block"
+          style={{ '--depth': 30 } as React.CSSProperties}
+        >
+          {FX.solids3d ? (
+            <BauhausSolid kind="coin" size={24} color="#454AE5" />
+          ) : (
+            <div className="w-24 h-24 rounded-full bg-pop-blue border-3 border-ink" />
+          )}
+        </div>
+        <div
+          className="fx-depth absolute right-44 top-40 hidden lg:block"
+          style={{ '--depth': 12 } as React.CSSProperties}
+        >
+          {FX.solids3d ? (
+            <BauhausSolid kind="cube" size={14} color="#FF4B2B" />
+          ) : (
+            <div className="w-14 h-14 bg-pop-red border-3 border-ink rotate-12" />
+          )}
+        </div>
       </div>
 
       <div className="relative max-w-7xl mx-auto space-y-14 px-4 xs:px-5 sm:px-10 lg:px-16">
@@ -157,7 +187,7 @@ export default function ContactSection() {
             viewport={{ once: true }}
             className="nb-title text-[clamp(1.7rem,9.5vw,2.4rem)] sm:text-6xl lg:text-7xl max-w-4xl leading-[0.98]"
           >
-            LET&apos;S ARCHITECT SOMETHING SPECIAL.
+            <SplitWords text="LET'S ARCHITECT SOMETHING SPECIAL." />
           </m.h2>
         </div>
 

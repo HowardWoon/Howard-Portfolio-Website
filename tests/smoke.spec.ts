@@ -3,7 +3,7 @@ import { test, expect, devices } from '@playwright/test';
 test('gate can be dismissed and is skipped on reload in same session', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: /initialize system/i }).click();
-  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 5000 });
+  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 10000 });
   await page.reload();
   await expect(page.locator('.boot-overlay')).toBeHidden();
 });

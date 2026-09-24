@@ -105,7 +105,7 @@ export function ZeroLagSimulator() {
                   ? 'border-amber-400 bg-amber-400/10 shadow-lg shadow-amber-500/10'
                   : isDone
                     ? 'border-emerald-500/40 bg-emerald-500/5 text-neutral-300'
-                    : 'border-white/10 bg-white/[0.02] text-neutral-500'
+                    : 'border-white/10 bg-white/[0.02] text-neutral-400'
               }`}
             >
               <div className="flex items-center justify-between">
@@ -225,7 +225,7 @@ export function BilahujanSimulator() {
           disabled={isSimulating}
           className={`px-5 py-2.5 rounded-full border text-xs font-mono font-bold uppercase tracking-wider transition-colors ${
             isSimulating
-              ? 'bg-neutral-800 border-neutral-700 text-neutral-500 cursor-not-allowed'
+              ? 'bg-neutral-800 border-neutral-700 text-neutral-400 cursor-not-allowed'
               : 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20'
           }`}
         >

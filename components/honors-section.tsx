@@ -3,6 +3,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { m, AnimatePresence } from 'framer-motion';
+import { BauhausSolid } from './fx/bauhaus-solid';
+import { SplitWords } from './fx/split-words';
+import { FX } from '@/lib/fx';
 import { AnimatedCounter } from './animated-counter';
 import { useFocusTrap } from '@/lib/use-focus-trap';
 import { useLatest } from '@/lib/use-latest';
@@ -624,12 +627,26 @@ export default function HonorsSection() {
 
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-16 -top-16 w-40 h-40 rounded-full bg-pop-red border-3 border-ink hidden lg:block"
-      />
+        className="fx-depth pointer-events-none absolute -right-16 -top-16 hidden lg:block"
+        style={{ '--depth': -22 } as React.CSSProperties}
+      >
+        {FX.solids3d ? (
+          <BauhausSolid kind="coin" size={40} color="#FF4B2B" />
+        ) : (
+          <div className="w-40 h-40 rounded-full bg-pop-red border-3 border-ink" />
+        )}
+      </div>
       <div
         aria-hidden
-        className="pointer-events-none absolute right-16 top-6 w-12 h-12 bg-pop-blue border-3 border-ink rotate-12 hidden lg:block"
-      />
+        className="fx-depth pointer-events-none absolute right-16 top-6 hidden lg:block"
+        style={{ '--depth': 18 } as React.CSSProperties}
+      >
+        {FX.solids3d ? (
+          <BauhausSolid kind="cube" size={12} color="#454AE5" />
+        ) : (
+          <div className="w-12 h-12 bg-pop-blue border-3 border-ink rotate-12" />
+        )}
+      </div>
 
       <div className="relative max-w-7xl mx-auto space-y-12 w-full flex-1 flex flex-col">
         {/* Section Header */}
@@ -651,7 +668,7 @@ export default function HonorsSection() {
               viewport={{ once: true }}
               className="nb-title text-[clamp(1.55rem,8.2vw,2.1rem)] sm:text-5xl lg:text-6xl max-w-3xl leading-[1.02]"
             >
-              HONORS & COMPETITIVE ACHIEVEMENTS.
+              <SplitWords text="HONORS & COMPETITIVE ACHIEVEMENTS." />
             </m.h2>
 
             <m.p

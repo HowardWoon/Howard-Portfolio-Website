@@ -53,3 +53,5 @@ trigger: always_on
 - Animations: import `m` (never `motion`) from `framer-motion`; `<LazyMotion strict>` in `components/motion-provider.tsx` throws if `motion.*` is used. Features are `domAnimation` (no `layout`/`drag` props - they need `domMax` and +20 kB).
 - Below-the-fold sections are imported through `components/lazy-sections.tsx` (client `next/dynamic`, still server-rendered). New big below-the-fold sections go there too. First Load JS budget for `/`: <= 190 kB.
 - Keep Prettier style (`.prettierrc`: singleQuote, printWidth 120). Run `npx prettier --write app components lib tests scripts` only as its own separate commit, never mixed with logic changes.
+- Interactive FX: All PointerField/scroll tracking must use a single `rAF` loop attached to `<html>` and drive CSS variables (`--px`, `--py`). Never tie `mousemove` or `scroll` to React state.
+- Motion bundles: All `framer-motion` features (except synchronous `<LazyMotion>`) must be lazy-loaded via `motion-features.ts` using `domMax` to preserve `layout` animations.
