@@ -212,11 +212,13 @@ function PillarCard({
           <Activity className="w-4 h-4 text-pop-mint animate-pulse shrink-0" strokeWidth={2.5} />
           <span className="truncate">{pillar.telemetrySnippet}</span>
         </div>
-        <span
-          className={`text-[0.7rem] font-extrabold shrink-0 px-2 py-0.5 rounded border-2 border-ink text-ink ${c.fill}`}
-        >
-          ACTIVE
-        </span>
+        {isActive && (
+          <span
+            className={`text-[0.7rem] font-extrabold shrink-0 px-2 py-0.5 rounded border-2 border-ink text-ink ${c.fill}`}
+          >
+            ACTIVE
+          </span>
+        )}
       </div>
     </motion.div>
   );
