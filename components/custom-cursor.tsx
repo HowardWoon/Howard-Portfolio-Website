@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { motion, useMotionValue, useSpring } from 'framer-motion';
+import { m, useMotionValue, AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 
 /**
@@ -19,15 +19,12 @@ export function CustomCursor() {
   const [isHidden, setIsHidden] = useState(false);
   const [onDark, setOnDark] = useState(false); // footer, modal backdrops, simulator screen
   const [onXray, setOnXray] = useState(false); // hero portrait: the Spider-Man reveal circle IS the cursor there
+  const [customText, setCustomText] = useState<string | null>(null);
   // The black ink cursor is invisible on the dark admin area → native cursor there
   const isAdmin = usePathname()?.startsWith('/admin') ?? false;
 
   const cursorX = useMotionValue(-100);
   const cursorY = useMotionValue(-100);
-
-  const springConfig = { damping: 25, stiffness: 400, mass: 0.5 };
-  const cursorXSpring = useSpring(cursorX, springConfig);
-  const cursorYSpring = useSpring(cursorY, springConfig);
 
   useEffect(() => {
     const fine = window.matchMedia('(pointer: fine)').matches;
@@ -58,6 +55,8 @@ export function CustomCursor() {
       // The black multiply-blended ring was invisible on black surfaces (footer, dark overlays)
       setOnDark(!!target.closest('[data-dark-surface]'));
       setOnXray(!!target.closest('[data-xray]'));
+      const t = target.closest('[data-cursor]');
+      setCustomText(t ? t.getAttribute('data-cursor') : null);
     };
 
     const handleMouseLeave = () => setIsHidden(true);
@@ -82,33 +81,45 @@ export function CustomCursor() {
   return (
     <>
       {/* Dot */}
-      <motion.div
+      <m.div
         aria-hidden
         className={`fixed top-0 left-0 rounded-full pointer-events-none z-[100000] border-2 border-ink bg-pop-yellow`}
-        animate={{ width: isPointer ? 8 : 14, height: isPointer ? 8 : 14 }}
+        animate={{ width: isPointer || customText ? 8 : 14, height: isPointer || customText ? 8 : 14 }}
         transition={{ type: 'spring', stiffness: 400, damping: 25 }}
         style={{ x: cursorX, y: cursorY, translateX: '-50%', translateY: '-50%', opacity: isHidden ? 0 : 1 }}
       />
 
-      {/* Ring — trails the dot on a spring. Hidden over the hero portrait: there the Spider-Man reveal circle
-          follows the pointer exactly, and a lagging ring on top of it would look off-centre. */}
-      <motion.div
+      {/* Ring — follows exactly (no spring lag so text is readable). Hidden over the hero portrait: there the Spider-Man reveal circle follows the pointer exactly. */}
+      <m.div
         aria-hidden
-        className={`fixed top-0 left-0 w-11 h-11 rounded-full pointer-events-none z-[99999] border-[3px] ${onDark ? '' : 'mix-blend-multiply'}`}
+        className={`fixed top-0 left-0 w-11 h-11 rounded-full pointer-events-none z-[99999] border-[3px] flex items-center justify-center ${onDark ? '' : 'mix-blend-multiply'}`}
         animate={{
-          scale: isPointer ? 1.6 : 1,
+          scale: customText ? 2.2 : isPointer ? 1.6 : 1,
           borderColor: onDark ? '#FFFFFF' : '#0A0A0A',
-          backgroundColor: isPointer ? 'rgba(255,199,0,0.45)' : 'rgba(255,199,0,0)',
+          backgroundColor: customText ? '#FFC700' : isPointer ? 'rgba(255,199,0,0.45)' : 'rgba(255,199,0,0)',
         }}
         transition={{ type: 'spring', stiffness: 300, damping: 20 }}
         style={{
-          x: cursorXSpring,
-          y: cursorYSpring,
+          x: cursorX,
+          y: cursorY,
           translateX: '-50%',
           translateY: '-50%',
           opacity: isHidden || onXray ? 0 : 1,
         }}
-      />
+      >
+        <AnimatePresence>
+          {customText && (
+            <m.span
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.5 }}
+              className="font-mono text-[7px] font-extrabold uppercase text-ink text-center leading-none"
+            >
+              {customText}
+            </m.span>
+          )}
+        </AnimatePresence>
+      </m.div>
     </>
   );
 }

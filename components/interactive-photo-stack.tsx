@@ -2,12 +2,13 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Maximize2, X } from 'lucide-react';
 import { useScrollLock } from '@/lib/use-scroll-lock';
 import { useFocusTrap } from '@/lib/use-focus-trap';
 import { useLatest } from '@/lib/use-latest';
+import { FX } from '@/lib/fx';
 
 type Photo = { src: string; alt: string; rotation: number };
 
@@ -91,7 +92,7 @@ function PhotoLightbox({
   }, [onCloseRef, prevRef, nextRef]);
 
   return createPortal(
-    <motion.div
+    <m.div
       ref={dialogRef}
       role="dialog"
       aria-modal="true"
@@ -125,7 +126,7 @@ function PhotoLightbox({
       {/* Stage: the panel hugs the photo's real aspect ratio, so wide screenshots on a portrait phone are no
           longer a thin strip inside a huge empty cream box. `cq*` units fall back to full width on iOS 15. */}
       <div className="relative flex-1 min-h-0 w-full max-w-6xl mx-auto flex items-center justify-center [container-type:size]">
-        <motion.div
+        <m.div
           initial={{ scale: 0.95, y: 20 }}
           animate={{ scale: 1, y: 0 }}
           exit={{ scale: 0.95, y: 20 }}
@@ -155,7 +156,7 @@ function PhotoLightbox({
               if (img.naturalWidth && img.naturalHeight) setRatio(img.naturalWidth / img.naturalHeight);
             }}
           />
-        </motion.div>
+        </m.div>
       </div>
 
       {list.length > 1 && (
@@ -181,7 +182,7 @@ function PhotoLightbox({
           </button>
         </div>
       )}
-    </motion.div>,
+    </m.div>,
     document.body,
   );
 }
@@ -196,6 +197,7 @@ export function InteractivePhotoStack({ customPhotos }: { customPhotos?: Photo[]
   const [cards, setCards] = useState(source);
   const [viewer, setViewer] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [fan, setFan] = useState(false); // FX-15: back photos fan out in 3D while a mouse hovers the stack
   useEffect(() => setMounted(true), []);
 
   const cycle = () => setCards((prev) => [...prev.slice(1), prev[0]]);
@@ -211,6 +213,9 @@ export function InteractivePhotoStack({ customPhotos }: { customPhotos?: Photo[]
     <>
       <div
         onClick={cycle}
+        data-cursor="view"
+        onPointerEnter={(e) => FX.photoFan && e.pointerType !== 'touch' && setFan(true)}
+        onPointerLeave={() => setFan(false)}
         className="relative w-full h-full min-h-[280px] sm:min-h-[380px] lg:min-h-[420px] flex items-center justify-center cursor-pointer group rounded-2xl has-[:focus-visible]:outline has-[:focus-visible]:outline-[3px] has-[:focus-visible]:outline-pop-blue"
       >
         <button
@@ -227,14 +232,15 @@ export function InteractivePhotoStack({ customPhotos }: { customPhotos?: Photo[]
         {cards.slice(0, 4).map((photo, index) => {
           const isTop = index === 0;
           return (
-            <motion.div
+            <m.div
               key={photo.src}
               layout
               initial={false}
               animate={{
                 scale: isTop ? 1 : 1 - index * 0.04,
-                y: isTop ? 0 : index * 9,
-                rotate: isTop ? 0 : photo.rotation * 1.4,
+                x: isTop || !fan ? 0 : (index % 2 ? 1 : -1) * index * 22,
+                y: isTop ? 0 : fan ? index * 4 : index * 9,
+                rotate: isTop ? 0 : photo.rotation * 1.4 + (fan ? (index % 2 ? 1 : -1) * index * 4 : 0),
                 zIndex: cards.length - index,
               }}
               whileHover={isTop ? { scale: 1.02, rotate: -1.2, y: -5, transition: { duration: 0.2 } } : {}}
@@ -268,7 +274,7 @@ export function InteractivePhotoStack({ customPhotos }: { customPhotos?: Photo[]
                   </button>
                 )}
               </div>
-            </motion.div>
+            </m.div>
           );
         })}
 

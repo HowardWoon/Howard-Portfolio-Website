@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import { ZeroLagSimulator, BilahujanSimulator, SensorXSimulator } from '@/components/project-simulators';
+import { PowerOn } from '@/components/fx/power-on';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
@@ -70,16 +71,13 @@ export default async function SimulatorPage({ params }: { params: Promise<{ type
 
       {/* Main Simulator Area — a dark "device screen" inside the light page (skeuomorphic) */}
       <main className="flex-1 w-full max-w-6xl mx-auto flex items-start justify-center">
-        <div
-          data-dark-surface
-          className="w-full bg-[#0E121B] text-white rounded-[24px] sm:rounded-[32px] border-3 border-ink p-4 xs:p-6 sm:p-12 shadow-brutal-lg sm:shadow-brutal-xl relative overflow-hidden"
-        >
+        <PowerOn className="w-full bg-[#0E121B] text-white rounded-[24px] sm:rounded-[32px] border-3 border-ink p-4 xs:p-6 sm:p-12 shadow-brutal-lg sm:shadow-brutal-xl relative overflow-hidden">
           <div className="relative z-10 w-full">
             {type === 'agentic' && <ZeroLagSimulator />}
             {type === 'flood' && <BilahujanSimulator />}
             {type === 'energy' && <SensorXSimulator />}
           </div>
-        </div>
+        </PowerOn>
       </main>
     </div>
   );

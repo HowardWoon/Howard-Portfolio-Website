@@ -1,7 +1,10 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
+import { SplitWords } from './fx/split-words';
+import { BauhausSolid } from './fx/bauhaus-solid';
+import { FX } from '@/lib/fx';
 import {
   Mail,
   Copy,
@@ -133,15 +136,42 @@ export default function ContactSection() {
       {/* Bauhaus composition (replaces the particle canvas, which was invisible on a light canvas
           and was also being stretched: its bitmap was viewport-sized but CSS-sized to the whole section) */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-36 top-[38%] w-56 h-56 rounded-full bg-pop-yellow border-3 border-ink hidden xl:block" />
-        <div className="absolute right-12 top-20 w-24 h-24 rounded-full bg-pop-blue border-3 border-ink hidden lg:block" />
-        <div className="absolute right-44 top-40 w-14 h-14 bg-pop-red border-3 border-ink rotate-12 hidden lg:block" />
+        <div
+          className="fx-depth absolute -left-36 top-[38%] hidden xl:block"
+          style={{ '--depth': -20 } as React.CSSProperties}
+        >
+          {FX.solids3d ? (
+            <BauhausSolid kind="coin" size={56} color="#FFC700" />
+          ) : (
+            <div className="w-56 h-56 rounded-full bg-pop-yellow border-3 border-ink" />
+          )}
+        </div>
+        <div
+          className="fx-depth absolute right-12 top-20 hidden lg:block"
+          style={{ '--depth': 30 } as React.CSSProperties}
+        >
+          {FX.solids3d ? (
+            <BauhausSolid kind="coin" size={24} color="#454AE5" />
+          ) : (
+            <div className="w-24 h-24 rounded-full bg-pop-blue border-3 border-ink" />
+          )}
+        </div>
+        <div
+          className="fx-depth absolute right-44 top-40 hidden lg:block"
+          style={{ '--depth': 12 } as React.CSSProperties}
+        >
+          {FX.solids3d ? (
+            <BauhausSolid kind="cube" size={14} color="#FF4B2B" />
+          ) : (
+            <div className="w-14 h-14 bg-pop-red border-3 border-ink rotate-12" />
+          )}
+        </div>
       </div>
 
       <div className="relative max-w-7xl mx-auto space-y-14 px-4 xs:px-5 sm:px-10 lg:px-16">
         {/* Section Header */}
         <div className="space-y-7">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -149,22 +179,22 @@ export default function ContactSection() {
           >
             <Sparkles className="w-4 h-4" strokeWidth={2.5} />
             <span>CONTACT // RECRUITER & PARTNERSHIP HUB</span>
-          </motion.div>
+          </m.div>
 
-          <motion.h2
+          <m.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="nb-title text-[clamp(1.7rem,9.5vw,2.4rem)] sm:text-6xl lg:text-7xl max-w-4xl leading-[0.98]"
           >
-            LET&apos;S ARCHITECT SOMETHING SPECIAL.
-          </motion.h2>
+            <SplitWords text="LET'S ARCHITECT SOMETHING SPECIAL." />
+          </m.h2>
         </div>
 
         {/* Main 2-Column Recruiter Hub (bento) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
           {/* Left Column: Identity, Availability & 1-Click Recruiter Pack (5 Cols) */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
@@ -287,10 +317,10 @@ export default function ContactSection() {
                 </div>
               </div>
             </div>
-          </motion.div>
+          </m.div>
 
           {/* Right Column: Interactive Dispatch Form with Quick-Intent Chips (7 Cols) */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
@@ -433,7 +463,7 @@ export default function ContactSection() {
                 </p>
               )}
             </form>
-          </motion.div>
+          </m.div>
         </div>
       </div>
 

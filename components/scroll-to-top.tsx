@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion';
+import { m, AnimatePresence, useScroll, useSpring } from 'framer-motion';
 import { ArrowUp } from 'lucide-react';
 
 export function ScrollToTop() {
@@ -54,14 +54,14 @@ export function ScrollToTop() {
   return (
     <>
       {/* Reading-progress bar sits just under the header's bottom border */}
-      <motion.div
+      <m.div
         aria-hidden
         className="fixed left-0 right-0 h-[5px] bg-pop-blue origin-left z-[9998] border-b-2 border-ink"
         style={{ scaleX, top: 'var(--header-h)' }}
       />
       <AnimatePresence>
         {isVisible && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, scale: 0.5, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.5, y: 20 }}
@@ -75,7 +75,7 @@ export function ScrollToTop() {
             >
               <ArrowUp className="w-6 h-6 text-ink group-hover:-translate-y-0.5 transition-transform" strokeWidth={3} />
             </button>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </>

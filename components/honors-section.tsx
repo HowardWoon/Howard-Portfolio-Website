@@ -2,7 +2,10 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
+import { BauhausSolid } from './fx/bauhaus-solid';
+import { SplitWords } from './fx/split-words';
+import { FX } from '@/lib/fx';
 import { AnimatedCounter } from './animated-counter';
 import { useFocusTrap } from '@/lib/use-focus-trap';
 import { useLatest } from '@/lib/use-latest';
@@ -481,7 +484,7 @@ function CertificateModal({ url, onClose }: { url: string; onClose: () => void }
   if (!mounted) return null;
 
   return createPortal(
-    <motion.div
+    <m.div
       ref={dialogRef}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -517,7 +520,7 @@ function CertificateModal({ url, onClose }: { url: string; onClose: () => void }
         </button>
       </div>
 
-      <motion.div
+      <m.div
         initial={{ scale: 0.96, y: 16, rotate: -1 }}
         animate={{ scale: 1, y: 0, rotate: 0 }}
         exit={{ scale: 0.96, y: 16 }}
@@ -550,8 +553,8 @@ function CertificateModal({ url, onClose }: { url: string; onClose: () => void }
           // eslint-disable-next-line @next/next/no-img-element
           <img src={url} alt="Certificate" className="w-full h-full object-contain p-1 sm:p-4" />
         )}
-      </motion.div>
-    </motion.div>,
+      </m.div>
+    </m.div>,
     document.body,
   );
 }
@@ -624,17 +627,31 @@ export default function HonorsSection() {
 
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-16 -top-16 w-40 h-40 rounded-full bg-pop-red border-3 border-ink hidden lg:block"
-      />
+        className="fx-depth pointer-events-none absolute -right-16 -top-16 hidden lg:block"
+        style={{ '--depth': -22 } as React.CSSProperties}
+      >
+        {FX.solids3d ? (
+          <BauhausSolid kind="coin" size={40} color="#FF4B2B" />
+        ) : (
+          <div className="w-40 h-40 rounded-full bg-pop-red border-3 border-ink" />
+        )}
+      </div>
       <div
         aria-hidden
-        className="pointer-events-none absolute right-16 top-6 w-12 h-12 bg-pop-blue border-3 border-ink rotate-12 hidden lg:block"
-      />
+        className="fx-depth pointer-events-none absolute right-16 top-6 hidden lg:block"
+        style={{ '--depth': 18 } as React.CSSProperties}
+      >
+        {FX.solids3d ? (
+          <BauhausSolid kind="cube" size={12} color="#454AE5" />
+        ) : (
+          <div className="w-12 h-12 bg-pop-blue border-3 border-ink rotate-12" />
+        )}
+      </div>
 
       <div className="relative max-w-7xl mx-auto space-y-12 w-full flex-1 flex flex-col">
         {/* Section Header */}
         <div className="space-y-7">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -642,19 +659,19 @@ export default function HonorsSection() {
           >
             <Sparkles className="w-4 h-4" strokeWidth={2.5} />
             <span>HONORS // ACADEMIC & COMPETITION DISTINCTIONS</span>
-          </motion.div>
+          </m.div>
 
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-            <motion.h2
+            <m.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               className="nb-title text-[clamp(1.55rem,8.2vw,2.1rem)] sm:text-5xl lg:text-6xl max-w-3xl leading-[1.02]"
             >
-              HONORS & COMPETITIVE ACHIEVEMENTS.
-            </motion.h2>
+              <SplitWords text="HONORS & COMPETITIVE ACHIEVEMENTS." />
+            </m.h2>
 
-            <motion.p
+            <m.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -663,7 +680,7 @@ export default function HonorsSection() {
             >
               A curated log of regional hackathon podiums, 4.00 CGPA academic distinctions, and engineering competition
               finals.
-            </motion.p>
+            </m.p>
           </div>
         </div>
 
@@ -674,7 +691,7 @@ export default function HonorsSection() {
             const Icon = cat.icon;
 
             return (
-              <motion.button
+              <m.button
                 key={cat.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -715,7 +732,7 @@ export default function HonorsSection() {
                     {cat.desc}
                   </span>
                 </span>
-              </motion.button>
+              </m.button>
             );
           })}
         </div>
@@ -724,7 +741,7 @@ export default function HonorsSection() {
         <div ref={resultsRef} className={`relative flex-1 ${activeCategory ? 'min-h-[400px]' : ''}`}>
           <AnimatePresence mode="wait">
             {activeCategory && (
-              <motion.div
+              <m.div
                 key={activeCategory}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -738,7 +755,7 @@ export default function HonorsSection() {
                   const c = colorFor[item.badgeColor];
 
                   return (
-                    <motion.div
+                    <m.div
                       key={item.id}
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -831,10 +848,10 @@ export default function HonorsSection() {
                           )}
                         </div>
                       </div>
-                    </motion.div>
+                    </m.div>
                   );
                 })}
-              </motion.div>
+              </m.div>
             )}
           </AnimatePresence>
         </div>

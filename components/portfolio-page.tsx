@@ -1,17 +1,17 @@
 import { SkipLink } from '@/components/skip-link';
 import BikebearInspiredHero from '@/components/bikebear-hero';
 import AboutSection from '@/components/about-section';
-import StackedProjects from '@/components/stacked-projects';
-import ExperienceSection from '@/components/experience-section';
-import HonorsSection from '@/components/honors-section';
-import ContactSection from '@/components/contact-section';
+import { StackedProjects, ExperienceSection, HonorsSection, ContactSection } from '@/components/lazy-sections';
 import { SiteFooter } from '@/components/site-footer';
+import dynamic from 'next/dynamic';
+const PointerField = dynamic(() => import('@/components/fx/pointer-field').then((mod) => mod.PointerField));
+const EasterEgg = dynamic(() => import('@/components/fx/easter-egg').then((mod) => mod.EasterEgg));
+const VelocitySkew = dynamic(() => import('@/components/fx/velocity-skew').then((mod) => mod.VelocitySkew));
 
 import { BootSequence } from '@/components/boot-sequence';
 import { TechMarquee } from '@/components/marquees';
 import { ScrollToTop } from '@/components/scroll-to-top';
 import { SiteHeader } from '@/components/site-header';
-import dynamic from 'next/dynamic';
 const CommandPalette = dynamic(() => import('@/components/command-palette').then((mod) => mod.CommandPalette), {});
 
 export function PortfolioPage() {
@@ -35,15 +35,17 @@ export function PortfolioPage() {
             <BikebearInspiredHero />
           </div>
 
-          <TechMarquee
-            skills={[
-              'SUPERVITY AUTOPILOT ASIA HACKATHON 2ND PLACE (SALES INTELLIGENCE)',
-              'STRAIGHT 4.00 CGPA COMPUTER SCIENCE (SOFTWARE ENGINEERING) FOR TWO SEMESTERS',
-              'UM GAME JAM 2026 PUBLIC CHOICE AWARD',
-              'PERSATUAN KOMPUTER UNIVERSITI MALAYA (PEKOM) FINANCE LEAD 2026/2027',
-              'USM V HACK PRELIMINARY ROUND QUALIFIER',
-            ]}
-          />
+          <VelocitySkew>
+            <TechMarquee
+              skills={[
+                'SUPERVITY AUTOPILOT ASIA HACKATHON 2ND PLACE (SALES INTELLIGENCE)',
+                'STRAIGHT 4.00 CGPA COMPUTER SCIENCE (SOFTWARE ENGINEERING) FOR TWO SEMESTERS',
+                'UM GAME JAM 2026 PUBLIC CHOICE AWARD',
+                'PERSATUAN KOMPUTER UNIVERSITI MALAYA (PEKOM) FINANCE LEAD 2026/2027',
+                'USM V HACK PRELIMINARY ROUND QUALIFIER',
+              ]}
+            />
+          </VelocitySkew>
 
           <AboutSection />
           <StackedProjects />
@@ -55,6 +57,8 @@ export function PortfolioPage() {
 
         <ScrollToTop />
         <CommandPalette />
+        <PointerField />
+        <EasterEgg />
       </div>
     </BootSequence>
   );

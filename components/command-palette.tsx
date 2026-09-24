@@ -5,6 +5,7 @@ import { useFocusTrap } from '@/lib/use-focus-trap';
 import { Command } from 'cmdk';
 import { Search, Code, GraduationCap, Briefcase, Download, Mail } from 'lucide-react';
 import { personalDetails } from '@/lib/site-data';
+import { ShapeBurst } from './fx/shape-burst';
 
 /** Scroll to a section through Lenis (smooth + header offset) with a native fallback. */
 function goTo(hash: string) {
@@ -109,8 +110,12 @@ export function CommandPalette() {
             </div>
 
             <Command.List className="max-h-[min(320px,50dvh)] overflow-y-auto overscroll-contain p-2">
-              <Command.Empty className="py-6 text-center text-sm font-semibold text-ink-muted">
-                No results found.
+              <Command.Empty className="py-12 text-center relative overflow-hidden">
+                <ShapeBurst />
+                <p className="text-sm font-mono font-bold text-ink relative z-10">NO COMMANDS FOUND.</p>
+                <p className="text-xs font-sans font-medium text-ink-soft mt-1 relative z-10">
+                  Try searching for &quot;contact&quot; or &quot;about&quot;
+                </p>
               </Command.Empty>
 
               <Command.Group heading="Navigation" className={groupClass}>

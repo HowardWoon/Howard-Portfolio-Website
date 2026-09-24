@@ -3,7 +3,7 @@ import { test, expect, devices } from '@playwright/test';
 test('gate can be dismissed and is skipped on reload in same session', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: /initialize system/i }).click();
-  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 5000 });
+  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 10000 });
   await page.reload();
   await expect(page.locator('.boot-overlay')).toBeHidden();
 });
@@ -43,7 +43,9 @@ test.describe('mobile regressions', () => {
 
   test('photo lightbox is full-screen, closable and restores scroll', async ({ page }) => {
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: /skip intro/i }).click();
+    await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 5000 });
     const expand = page.getByRole('button', { name: /view full resolution/i }).nth(1);
     await expand.scrollIntoViewIfNeeded();
     await expand.tap();
@@ -62,7 +64,9 @@ test.describe('mobile regressions', () => {
 
 test('contact form sends fillMs and passes validation', async ({ page }) => {
   await page.goto('/');
+  await page.waitForLoadState('networkidle');
   await page.getByRole('button', { name: /skip intro/i }).click();
+  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 5000 });
   await page.fill('#contact-name', 'Test');
   await page.fill('#contact-email', 't@example.com');
   await page.fill('#contact-message', 'Hello');

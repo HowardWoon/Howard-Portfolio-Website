@@ -3,6 +3,7 @@ import { Inter, Bricolage_Grotesque, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import SmoothScrollProvider from '@/components/smooth-scroll-provider';
 import { CustomCursor } from '@/components/custom-cursor';
+import { MotionProvider } from '@/components/motion-provider';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 
@@ -95,12 +96,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* If JavaScript is off or fails to load, the "Initialize System" gate could never be dismissed
             and the whole portfolio stayed hidden behind it. */}
         <noscript>
-          <style>{`.boot-overlay{display:none!important}body{overflow:auto!important}[style*="opacity:0"]{opacity:1!important;transform:none!important}`}</style>
+          <style>{`.boot-overlay{display:none!important}body{overflow:auto!important}[style*="opacity:0"]{opacity:1!important;transform:none!important}[data-fx]{opacity:1!important;transform:none!important;filter:none!important}`}</style>
         </noscript>
-        <SmoothScrollProvider>{children}</SmoothScrollProvider>
+        <MotionProvider>
+          <SmoothScrollProvider>{children}</SmoothScrollProvider>
+          <CustomCursor />
+        </MotionProvider>
         <Analytics />
         <SpeedInsights />
-        <CustomCursor />
       </body>
     </html>
   );

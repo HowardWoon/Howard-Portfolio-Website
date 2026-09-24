@@ -1,8 +1,8 @@
 'use client';
-import { motion, type HTMLMotionProps } from 'framer-motion';
+import { m, type HTMLMotionProps } from 'framer-motion';
 export function Reveal({ delay = 0, y = 20, ...rest }: HTMLMotionProps<'div'> & { delay?: number; y?: number }) {
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, y }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
