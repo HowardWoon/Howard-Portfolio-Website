@@ -133,6 +133,7 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
               <AnimatePresence mode="wait">
                 {bootState === 'idle' && (
                   <motion.div key="idle" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.5 }} className="flex flex-col items-center gap-6">
+                      <div className="w-full flex flex-col items-center gap-6">
                       <button
                       onClick={handleStartBoot}
                       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") finish(); }}
@@ -143,7 +144,8 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
                       Initialize System &rarr;
                     </button>
 <button onClick={finish} className="mt-4 text-xs font-mono font-bold text-ink hover:underline tracking-wider uppercase">Skip intro</button>
-                  </motion.div>
+                      </div>
+                    </motion.div>
                 )}
 
                 {bootState !== 'idle' && (
@@ -181,4 +183,5 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
     </BootedContext.Provider>
   );
 }
+
 
