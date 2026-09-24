@@ -1,6 +1,12 @@
 'use server';
 
 import { requireAdminUser } from '@/lib/admin-auth';
+
+function validateUUID(id: string) {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+    throw new Error('Invalid message ID format');
+  }
+}
 import { createServiceRoleClient, hasServiceRole } from '@/lib/supabase/route';
 import { revalidatePath } from 'next/cache';
 
