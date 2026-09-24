@@ -12,6 +12,38 @@ import { useLatest } from '@/lib/use-latest';
 type Photo = { src: string; alt: string; rotation: number };
 
 const photos: Photo[] = [
+  // Supervity Autopilot Asia Hackathon 2026 photos (added at Howard's request)
+  {
+    src: '/images/projects/zerolag/supervity_standing.jpg',
+    alt: 'Holding the 2nd place trophy and certificate at the felicitation ceremony',
+    rotation: -2,
+  },
+  {
+    src: '/images/projects/zerolag/supervity_formal.jpg',
+    alt: 'Two team members with their certificates at the felicitation ceremony',
+    rotation: 1.5,
+  },
+  {
+    src: '/images/projects/zerolag/supervity_selfie.jpg',
+    alt: 'Selfie with the 2nd place trophy in the ceremony hall',
+    rotation: -1,
+  },
+  {
+    src: '/images/projects/zerolag/supervity_with_apu.jpg',
+    alt: 'Selfie with the 2nd place trophy at the APU sign',
+    rotation: 2.5,
+  },
+  {
+    src: '/images/projects/zerolag/supervity_souvenir.jpg',
+    alt: 'Beside the Autopilot Asia Hackathon banner',
+    rotation: -1.5,
+  },
+  {
+    src: '/images/projects/zerolag/supervity_present.jpg',
+    alt: 'In the hall at the Autopilot Asia Hackathon',
+    rotation: 1,
+  },
+  // Original ZeroLag product screenshots
   { src: '/images/projects/zerolag/dashboard.jpeg', alt: 'Dashboard Console', rotation: -1.5 },
   { src: '/images/projects/zerolag/agent-flow.png', alt: 'Agent Architecture Flow', rotation: 3 },
   { src: '/images/projects/zerolag/ai_insight.jpeg', alt: 'AI Insights Module', rotation: 2 },

@@ -212,13 +212,13 @@ function PillarCard({
           <Activity className="w-4 h-4 text-pop-mint animate-pulse shrink-0" strokeWidth={2.5} />
           <span className="truncate">{pillar.telemetrySnippet}</span>
         </div>
-        {isActive && (
-          <span
-            className={`text-[0.7rem] font-extrabold shrink-0 px-2 py-0.5 rounded border-2 border-ink text-ink ${c.fill}`}
-          >
-            ACTIVE
-          </span>
-        )}
+        {/* Always rendered so every card keeps the same height; only the active card shows it. */}
+        <span
+          aria-hidden={!isActive}
+          className={`text-[0.7rem] font-extrabold shrink-0 px-2 py-0.5 rounded border-2 border-ink text-ink ${c.fill} ${isActive ? '' : 'invisible'}`}
+        >
+          ACTIVE
+        </span>
       </div>
     </motion.div>
   );
