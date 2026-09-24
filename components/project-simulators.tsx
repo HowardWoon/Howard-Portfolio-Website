@@ -75,9 +75,9 @@ export function ZeroLagSimulator() {
             <Cpu className="w-4 h-4" />
             <span>AGENTIC WORKFLOW · 2ND PLACE SUPERVITY APAC HACKATHON</span>
           </div>
-          <h3 className="text-2xl sm:text-3xl font-extrabold uppercase text-white mt-1">
+          <h1 className="text-2xl sm:text-3xl font-extrabold uppercase text-white mt-1">
             ZeroLag 5-Agent Autonomous Intelligence Engine
-          </h3>
+          </h1>
         </div>
 
         <button
@@ -215,9 +215,9 @@ export function BilahujanSimulator() {
             <Radio className="w-4 h-4" />
             <span>SWARM INTELLIGENCE + MCP TOOLS — V HACK 2026</span>
           </div>
-          <h3 className="text-2xl sm:text-3xl font-extrabold uppercase text-white mt-1">
+          <h1 className="text-2xl sm:text-3xl font-extrabold uppercase text-white mt-1">
             Autonomous Command Agent Terminal
-          </h3>
+          </h1>
         </div>
 
         <button
@@ -321,9 +321,9 @@ export function SensorXSimulator() {
             <Zap className="w-4 h-4" />
             <span>ESP32 FIRMWARE + MQTT PROTOCOL · UM TECHNOTHON 2026</span>
           </div>
-          <h3 className="text-2xl sm:text-3xl font-extrabold uppercase text-white mt-1">
+          <h1 className="text-2xl sm:text-3xl font-extrabold uppercase text-white mt-1">
             Sensor X Sensei Smart Grid & Load-Shedding Lab
-          </h3>
+          </h1>
         </div>
 
         <button
