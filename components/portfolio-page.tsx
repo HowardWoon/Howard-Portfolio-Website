@@ -2,9 +2,7 @@ import { SkipLink } from '@/components/skip-link';
 import BikebearInspiredHero from '@/components/bikebear-hero';
 import AboutSection from '@/components/about-section';
 import StackedProjects from '@/components/stacked-projects';
-import ExperienceSection from '@/components/experience-section';
-import HonorsSection from '@/components/honors-section';
-import ContactSection from '@/components/contact-section';
+import { ExperienceSection, HonorsSection, ContactSection } from '@/components/lazy-sections';
 import { SiteFooter } from '@/components/site-footer';
 
 import { BootSequence } from '@/components/boot-sequence';
