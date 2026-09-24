@@ -53,3 +53,6 @@ trigger: always_on
 - You broke a file: `git restore <file>` (uncommitted) or `git revert <hash>` (committed). Report it.
 - Tool or terminal hangs: stop the process, report which command hung. Do not start the same command again blindly.
 - You are not sure the site still works: say NOT VERIFIED. Never guess PASS.
+- Never create or rewrite a file with PowerShell (`>`, `Out-File`, `Set-Content`, `New-Item -Value`). It writes UTF-16 with a BOM. This already emptied 00/10/20/40 once.
+- Before starting `npm run start`, stop any old server on port 3000 (06-stability B2). An old server keeps serving a deleted `.next` and every JS file returns 400/404, which looks like a broken site but is not.
+- Never claim a commit hash in a report without `git branch -r --contains <hash>` output next to it.

@@ -8,8 +8,7 @@
  * Exit code 0 only when every executed step passed. Prints a table the AI must paste into its report.
  */
 import { spawnSync } from 'node:child_process';
-import { existsSync, readdirSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, statSync } from 'node:fs';
 
 const args = new Set(process.argv.slice(2));
 const results = [];
@@ -32,27 +31,31 @@ function run(name, cmd, { timeoutMin = 10 } = {}) {
   return { ok, out };
 }
 
-// 1. Repo hygiene: forbidden files at the root and spaces in public/ file names
-const forbidden = ['fix.py', 'rename_refs.py', 'temp.txt', 'temp2.txt', 'desktop.ini', 'align_env'];
-const foundForbidden = forbidden.filter((f) => existsSync(f));
-const spaced = [];
-const walk = (d) => {
-  for (const n of readdirSync(d)) {
-    const p = join(d, n);
-    if (statSync(p).isDirectory()) walk(p);
-    else if (/\s/.test(n)) spaced.push(p);
-  }
-};
-if (existsSync('public')) walk('public');
-const hygieneOk = foundForbidden.length === 0 && spaced.length === 0;
+// 1. Repo hygiene (tracked files only, so node_modules and .next never matter)
+const tracked = spawnSync('git ls-files', { shell: true, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
+const forbidden = ['fix.py', 'rename_refs.py', 'temp.txt', 'temp2.txt', 'desktop.ini'];
+const problems = [
+  ...tracked.filter((f) => forbidden.includes(f) || f.startsWith('align_env/')).map((f) => `forbidden file: ${f}`),
+  ...tracked.filter((f) => /\s/.test(f)).map((f) => `space in path: ${f}`),
+  ...tracked
+    .filter((f) => /\.(jpe?g|png|webp|gif|pdf|mp4)$/i.test(f) && !f.startsWith('public/') && !f.startsWith('app/'))
+    .map((f) => `binary outside public/: ${f}`),
+  ...['00-core', '05-obedience', '06-stability', '10-architecture', '20-responsive-a11y', '40-verification']
+    .map((r) => `.agents/rules/${r}.md`)
+    .filter((f) => !existsSync(f) || statSync(f).size < 400)
+    .map((f) => `rule file missing or empty: ${f}`),
+];
+// Large files are reported as a warning only (shrinking PDFs needs Howard's approval, see R3-10d).
+const bigFiles = tracked
+  .filter((f) => f.startsWith('public/') && existsSync(f) && statSync(f).size > 2 * 1024 * 1024)
+  .map((f) => `WARNING (not a failure) file over 2 MB: ${f} (${(statSync(f).size / 1048576).toFixed(1)} MB)`);
+const hygieneOk = problems.length === 0;
 results.push({
   name: 'repo hygiene',
   ok: hygieneOk,
   status: hygieneOk ? 0 : 1,
   secs: '0.0',
-  tail:
-    [...foundForbidden.map((f) => `forbidden file: ${f}`), ...spaced.map((f) => `space in name: ${f}`)].join('\n') ||
-    'clean',
+  tail: [...problems, ...bigFiles].join('\n') || 'clean',
 });
 console.log(`\n=== repo hygiene -> ${hygieneOk ? 'PASS' : 'FAIL'}\n${results.at(-1).tail}`);
 

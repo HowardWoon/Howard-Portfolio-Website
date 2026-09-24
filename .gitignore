@@ -22,3 +22,6 @@ temp*.txt
 # playwright
 test-results/
 playwright-report/
+
+# UI audit output (scripts/audit-ui.mjs)
+audit/
