@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, useMotionValue, useSpring, useReducedMotion } from 'framer-motion';
+import { m, useMotionValue, useSpring, useReducedMotion } from 'framer-motion';
 import { useRef, ReactNode, PointerEvent } from 'react';
 
 interface MagneticProps {
@@ -40,7 +40,7 @@ export function Magnetic({ children, className = '', strength = 0.5 }: MagneticP
   };
 
   return (
-    <motion.div
+    <m.div
       ref={ref}
       onPointerMove={handleMouseMove}
       onPointerLeave={handleMouseLeave}
@@ -49,6 +49,6 @@ export function Magnetic({ children, className = '', strength = 0.5 }: MagneticP
       data-magnetic
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }

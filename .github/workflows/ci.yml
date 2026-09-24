@@ -8,9 +8,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - name: Reject BOM / mojibake
-        run: |
-          ! grep -rlI $'^\xEF\xBB\xBF' app components lib tests *.ts *.mjs
-          ! grep -rnIE 'Ã|â€|ðŸ|·' app components lib
+        run: node scripts/check-encoding.mjs
       - run: npm ci
       - run: npm run typecheck
       - run: npm run lint

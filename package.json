@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "verify": "node scripts/verify.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

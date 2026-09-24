@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useRef, useState, useLayoutEffect } from 'react';
 const BootedContext = createContext(true);
 export const useBooted = () => useContext(BootedContext);
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 
 /**
  * "Initialize System" gate.
@@ -121,7 +121,7 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
 
       <AnimatePresence>
         {showBoot && (
-          <motion.div
+          <m.div
             className="boot-overlay fixed inset-0 z-[99999] bg-pop-yellow bg-dots flex items-center justify-center overflow-hidden"
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, scale: 1.04 }}
@@ -146,7 +146,7 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
             <div className="relative flex justify-center flex-col items-center gap-8 px-6">
               <AnimatePresence mode="wait">
                 {bootState === 'idle' && (
-                  <motion.div
+                  <m.div
                     key="idle"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -169,11 +169,11 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
                         Skip intro
                       </button>
                     </div>
-                  </motion.div>
+                  </m.div>
                 )}
 
                 {bootState !== 'idle' && (
-                  <motion.div
+                  <m.div
                     key="booting"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -187,7 +187,7 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
                       aria-valuemax={100}
                       aria-valuenow={Math.floor(progress)}
                     >
-                      <motion.div
+                      <m.div
                         className="h-full bg-pop-blue border-r-3 border-ink"
                         initial={{ width: 0 }}
                         animate={{ width: `${progress}%` }}
@@ -195,11 +195,11 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
                       />
                     </div>
                     <span className="nb-tag bg-white">Initializing... {Math.floor(progress)}%</span>
-                  </motion.div>
+                  </m.div>
                 )}
               </AnimatePresence>
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </BootedContext.Provider>

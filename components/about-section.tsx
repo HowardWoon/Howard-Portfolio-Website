@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { Server, Cpu, GitBranch, ShieldCheck, Activity, Sparkles, ArrowUpRight, Layers, Code2 } from 'lucide-react';
 
 const architecturePillars = [
@@ -155,7 +155,7 @@ function PillarCard({
   const c = colorMap[pillar.color as keyof typeof colorMap];
 
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -193,9 +193,7 @@ function PillarCard({
           />
         </h3>
         <p className="text-sm font-mono font-bold text-pop-blue">{pillar.headline}</p>
-        <p className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium pt-1">
-          {pillar.description}
-        </p>
+        <p className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium pt-1">{pillar.description}</p>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-5 border-t-2 border-dashed border-ink">
         {pillar.metrics.map((metric, mIdx) => (
@@ -214,13 +212,15 @@ function PillarCard({
           <Activity className="w-4 h-4 text-pop-mint animate-pulse shrink-0" strokeWidth={2.5} />
           <span className="truncate">{pillar.telemetrySnippet}</span>
         </div>
+        {/* Always rendered so every card keeps the same height; only the active card shows it. */}
         <span
-          className={`text-[0.7rem] font-extrabold shrink-0 px-2 py-0.5 rounded border-2 border-ink text-ink ${c.fill}`}
+          aria-hidden={!isActive}
+          className={`text-[0.7rem] font-extrabold shrink-0 px-2 py-0.5 rounded border-2 border-ink text-ink ${c.fill} ${isActive ? '' : 'invisible'}`}
         >
           ACTIVE
         </span>
       </div>
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -253,7 +253,7 @@ export default function AboutSection() {
       <div className="relative max-w-7xl mx-auto space-y-16">
         {/* Section Header */}
         <div className="space-y-7">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -262,9 +262,9 @@ export default function AboutSection() {
           >
             <Sparkles className="w-4 h-4" strokeWidth={2.5} />
             <span>ABOUT // SYSTEMS ARCHITECTURE & VISION</span>
-          </motion.div>
+          </m.div>
 
-          <motion.h2
+          <m.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -273,9 +273,9 @@ export default function AboutSection() {
           >
             I ARCHITECT RESILIENT BACKENDS AND AUTONOMOUS AI PIPELINES, TURNING COMPLEX IDEAS INTO PRODUCTION-READY
             SYSTEMS.
-          </motion.h2>
+          </m.h2>
 
-          <motion.p
+          <m.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -289,7 +289,7 @@ export default function AboutSection() {
             </span>
             ). Bridging low-latency algorithmic backend performance and AI orchestration with strong technical
             leadership and fiscal governance to deliver scalable, cost-effective solutions.
-          </motion.p>
+          </m.p>
         </div>
 
         {/* Core Architecture Bento Grid (4 Pillars) — True Masonry Layout */}
@@ -298,7 +298,7 @@ export default function AboutSection() {
             <PillarCard
               key={pillar.id}
               pillar={pillar}
-              
+
               activeCard={activeCard}
               setActiveCard={setActiveCard}
               colorMap={colorMap}
@@ -314,7 +314,7 @@ export default function AboutSection() {
                 <PillarCard
                   key={pillar.id}
                   pillar={pillar}
-                  
+
                   activeCard={activeCard}
                   setActiveCard={setActiveCard}
                   colorMap={colorMap}
@@ -329,7 +329,7 @@ export default function AboutSection() {
                 <PillarCard
                   key={pillar.id}
                   pillar={pillar}
-                  
+
                   activeCard={activeCard}
                   setActiveCard={setActiveCard}
                   colorMap={colorMap}
@@ -340,7 +340,7 @@ export default function AboutSection() {
         </div>
 
         {/* Categorized Technical Stack Matrix */}
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -401,7 +401,7 @@ export default function AboutSection() {
               </div>
             ))}
           </div>
-        </motion.div>
+        </m.div>
       </div>
     </section>
   );

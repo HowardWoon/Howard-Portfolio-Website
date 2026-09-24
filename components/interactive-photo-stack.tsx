@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Maximize2, X } from 'lucide-react';
 import { useScrollLock } from '@/lib/use-scroll-lock';
@@ -12,6 +12,38 @@ import { useLatest } from '@/lib/use-latest';
 type Photo = { src: string; alt: string; rotation: number };
 
 const photos: Photo[] = [
+  // Supervity Autopilot Asia Hackathon 2026 photos (added at Howard's request)
+  {
+    src: '/images/projects/zerolag/supervity_standing.jpg',
+    alt: 'Holding the 2nd place trophy and certificate at the felicitation ceremony',
+    rotation: -2,
+  },
+  {
+    src: '/images/projects/zerolag/supervity_formal.jpg',
+    alt: 'Two team members with their certificates at the felicitation ceremony',
+    rotation: 1.5,
+  },
+  {
+    src: '/images/projects/zerolag/supervity_selfie.jpg',
+    alt: 'Selfie with the 2nd place trophy in the ceremony hall',
+    rotation: -1,
+  },
+  {
+    src: '/images/projects/zerolag/supervity_with_apu.jpg',
+    alt: 'Selfie with the 2nd place trophy at the APU sign',
+    rotation: 2.5,
+  },
+  {
+    src: '/images/projects/zerolag/supervity_souvenir.jpg',
+    alt: 'Beside the Autopilot Asia Hackathon banner',
+    rotation: -1.5,
+  },
+  {
+    src: '/images/projects/zerolag/supervity_present.jpg',
+    alt: 'In the hall at the Autopilot Asia Hackathon',
+    rotation: 1,
+  },
+  // Original ZeroLag product screenshots
   { src: '/images/projects/zerolag/dashboard.jpeg', alt: 'Dashboard Console', rotation: -1.5 },
   { src: '/images/projects/zerolag/agent-flow.png', alt: 'Agent Architecture Flow', rotation: 3 },
   { src: '/images/projects/zerolag/ai_insight.jpeg', alt: 'AI Insights Module', rotation: 2 },
@@ -59,7 +91,7 @@ function PhotoLightbox({
   }, [onCloseRef, prevRef, nextRef]);
 
   return createPortal(
-    <motion.div
+    <m.div
       ref={dialogRef}
       role="dialog"
       aria-modal="true"
@@ -93,7 +125,7 @@ function PhotoLightbox({
       {/* Stage: the panel hugs the photo's real aspect ratio, so wide screenshots on a portrait phone are no
           longer a thin strip inside a huge empty cream box. `cq*` units fall back to full width on iOS 15. */}
       <div className="relative flex-1 min-h-0 w-full max-w-6xl mx-auto flex items-center justify-center [container-type:size]">
-        <motion.div
+        <m.div
           initial={{ scale: 0.95, y: 20 }}
           animate={{ scale: 1, y: 0 }}
           exit={{ scale: 0.95, y: 20 }}
@@ -123,7 +155,7 @@ function PhotoLightbox({
               if (img.naturalWidth && img.naturalHeight) setRatio(img.naturalWidth / img.naturalHeight);
             }}
           />
-        </motion.div>
+        </m.div>
       </div>
 
       {list.length > 1 && (
@@ -149,7 +181,7 @@ function PhotoLightbox({
           </button>
         </div>
       )}
-    </motion.div>,
+    </m.div>,
     document.body,
   );
 }
@@ -195,7 +227,7 @@ export function InteractivePhotoStack({ customPhotos }: { customPhotos?: Photo[]
         {cards.slice(0, 4).map((photo, index) => {
           const isTop = index === 0;
           return (
-            <motion.div
+            <m.div
               key={photo.src}
               layout
               initial={false}
@@ -236,7 +268,7 @@ export function InteractivePhotoStack({ customPhotos }: { customPhotos?: Photo[]
                   </button>
                 )}
               </div>
-            </motion.div>
+            </m.div>
           );
         })}
 

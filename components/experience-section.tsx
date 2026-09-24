@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { FieldArchive } from './field-archive';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import {
   Building2,
   Landmark,
@@ -440,7 +440,7 @@ function PekomTreasurerDashboard() {
 
                 <AnimatePresence initial={false}>
                   {isExpanded && (
-                    <motion.div
+                    <m.div
                       id={panelId}
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
@@ -450,7 +450,7 @@ function PekomTreasurerDashboard() {
                       <div className="px-3 xs:px-4 sm:px-5 pb-5 text-sm font-sans font-medium text-ink-soft leading-relaxed">
                         {event.desc}
                       </div>
-                    </motion.div>
+                    </m.div>
                   )}
                 </AnimatePresence>
               </div>
@@ -503,7 +503,7 @@ export default function ExperienceSection() {
       <div className="relative max-w-6xl mx-auto space-y-12">
         {/* Section Header */}
         <div className="space-y-7">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -511,20 +511,20 @@ export default function ExperienceSection() {
           >
             <Sparkles className="w-4 h-4" strokeWidth={2.5} />
             <span>EXPERIENCE // CAREER & INSTITUTIONAL GOVERNANCE</span>
-          </motion.div>
+          </m.div>
 
-          <motion.h2
+          <m.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="nb-title text-[clamp(1.55rem,8.2vw,2.1rem)] sm:text-5xl lg:text-6xl max-w-3xl leading-[1.02]"
           >
             EXECUTIVE LEADERSHIP & GOVERNANCE.
-          </motion.h2>
+          </m.h2>
         </div>
 
         {/* Segmented Filter Control — physical key row */}
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -555,7 +555,7 @@ export default function ExperienceSection() {
               </button>
             );
           })}
-        </motion.div>
+        </m.div>
 
         {/* Experience Cards */}
         <div className="relative space-y-10 min-h-[500px]">
@@ -565,7 +565,7 @@ export default function ExperienceSection() {
               const longHeadline = item.headline.length > 90;
 
               return (
-                <motion.div
+                <m.div
                   layout
                   key={item.id}
                   initial={{ opacity: 0, scale: 0.97, y: 20 }}
@@ -670,7 +670,7 @@ export default function ExperienceSection() {
                     {/* Specialized Dashboards */}
                     {item.id === 'pekom' && <PekomTreasurerDashboard />}
                   </div>
-                </motion.div>
+                </m.div>
               );
             })}
           </AnimatePresence>

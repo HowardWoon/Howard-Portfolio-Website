@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { Terminal, Play, Cpu, Zap, CheckCircle2, Radio } from 'lucide-react';
 
 /** setTimeout/setInterval that are all cleared when the simulator unmounts
@@ -62,7 +62,7 @@ export function ZeroLagSimulator() {
   };
 
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
@@ -75,9 +75,9 @@ export function ZeroLagSimulator() {
             <Cpu className="w-4 h-4" />
             <span>AGENTIC WORKFLOW · 2ND PLACE SUPERVITY APAC HACKATHON</span>
           </div>
-          <h3 className="text-2xl sm:text-3xl font-extrabold uppercase text-white mt-1">
+          <h1 className="text-2xl sm:text-3xl font-extrabold uppercase text-white mt-1">
             ZeroLag 5-Agent Autonomous Intelligence Engine
-          </h3>
+          </h1>
         </div>
 
         <button
@@ -143,7 +143,7 @@ export function ZeroLagSimulator() {
         </div>
         <span className="text-xs text-amber-400 uppercase font-bold">LangGraph Orchestrator</span>
       </div>
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -202,7 +202,7 @@ export function BilahujanSimulator() {
   };
 
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
@@ -215,9 +215,9 @@ export function BilahujanSimulator() {
             <Radio className="w-4 h-4" />
             <span>SWARM INTELLIGENCE + MCP TOOLS — V HACK 2026</span>
           </div>
-          <h3 className="text-2xl sm:text-3xl font-extrabold uppercase text-white mt-1">
+          <h1 className="text-2xl sm:text-3xl font-extrabold uppercase text-white mt-1">
             Autonomous Command Agent Terminal
-          </h3>
+          </h1>
         </div>
 
         <button
@@ -237,7 +237,7 @@ export function BilahujanSimulator() {
         {/* Left: Swarm Map / Status */}
         <div className="lg:col-span-4 bg-black/60 border border-white/10 rounded-2xl p-6 flex flex-col justify-between">
           <div className="space-y-2 text-xs font-mono">
-            <div className="text-neutral-500">{'// Firebase Node Status'}</div>
+            <div className="text-neutral-400">{'// Firebase Node Status'}</div>
             <div className="flex justify-between items-center text-neutral-300">
               <span>Active Citizen Nodes</span>
               <span className="text-cyan-400 font-bold">144 Nodes</span>
@@ -251,7 +251,7 @@ export function BilahujanSimulator() {
               {severity ? (
                 <span className="text-red-400 font-bold animate-pulse">Level {severity} CRITICAL</span>
               ) : (
-                <span className="text-neutral-500">Waiting for data</span>
+                <span className="text-neutral-400">Waiting for data</span>
               )}
             </div>
           </div>
@@ -259,7 +259,7 @@ export function BilahujanSimulator() {
 
         {/* Right: Live Terminal */}
         <div className="lg:col-span-8 bg-[#0C0E14] rounded-2xl border border-white/10 p-5 font-mono text-[11px] sm:text-xs">
-          <div className="text-neutral-500 mb-4 flex items-center gap-2">
+          <div className="text-neutral-400 mb-4 flex items-center gap-2">
             <Terminal className="w-4 h-4" />
             <span>Command_Agent_Mission_Log.sh</span>
           </div>
@@ -277,19 +277,14 @@ export function BilahujanSimulator() {
               else if (isMcp) textColor = 'text-amber-400';
 
               return (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className={textColor}
-                >
+                <m.div key={i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className={textColor}>
                   <span className="opacity-50 mr-2">{time}</span>
                   {log}
-                </motion.div>
+                </m.div>
               );
             })}
             {isSimulating && (
-              <div className="flex items-center gap-2 text-neutral-500 pt-2">
+              <div className="flex items-center gap-2 text-neutral-400 pt-2">
                 <span className="animate-pulse">_</span>
                 <span>Agent processing...</span>
               </div>
@@ -297,7 +292,7 @@ export function BilahujanSimulator() {
           </div>
         </div>
       </div>
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -308,7 +303,7 @@ export function SensorXSimulator() {
   const [isOccupied, setIsOccupied] = useState(true);
 
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
@@ -321,9 +316,9 @@ export function SensorXSimulator() {
             <Zap className="w-4 h-4" />
             <span>ESP32 FIRMWARE + MQTT PROTOCOL · UM TECHNOTHON 2026</span>
           </div>
-          <h3 className="text-2xl sm:text-3xl font-extrabold uppercase text-white mt-1">
+          <h1 className="text-2xl sm:text-3xl font-extrabold uppercase text-white mt-1">
             Sensor X Sensei Smart Grid & Load-Shedding Lab
-          </h3>
+          </h1>
         </div>
 
         <button
@@ -342,13 +337,13 @@ export function SensorXSimulator() {
         <div className="p-5 bg-black/60 border border-white/10 rounded-2xl space-y-1">
           <span className="text-xs font-mono text-neutral-400">ACTIVE POWER LOAD</span>
           <div className="text-3xl font-mono font-bold text-white">{isOccupied ? '1.84 kW' : '0.72 kW'}</div>
-          <span className="text-xs font-mono text-neutral-500">HVAC + Smart Relays</span>
+          <span className="text-xs font-mono text-neutral-400">HVAC + Smart Relays</span>
         </div>
 
         <div className="p-5 bg-black/60 border border-white/10 rounded-2xl space-y-1">
           <span className="text-xs font-mono text-neutral-400">IDLE POWER REDUCTION</span>
           <div className="text-3xl font-mono font-bold text-emerald-400">{isOccupied ? '0.0%' : '-60.8%'}</div>
-          <span className="text-xs font-mono text-neutral-500">Auto Load-Shed Activated</span>
+          <span className="text-xs font-mono text-neutral-400">Auto Load-Shed Activated</span>
         </div>
 
         <div className="p-5 bg-black/60 border border-white/10 rounded-2xl space-y-1">
@@ -356,9 +351,9 @@ export function SensorXSimulator() {
           <div className="text-lg font-mono font-bold text-amber-300 mt-2">
             {isOccupied ? 'PIR Active · NFC In' : 'PIR Idle · Auto Cutoff'}
           </div>
-          <span className="text-xs font-mono text-neutral-500">MQTT Broker: Connected</span>
+          <span className="text-xs font-mono text-neutral-400">MQTT Broker: Connected</span>
         </div>
       </div>
-    </motion.div>
+    </m.div>
   );
 }

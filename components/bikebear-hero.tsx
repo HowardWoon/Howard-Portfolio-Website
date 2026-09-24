@@ -3,7 +3,7 @@
 import React, { useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { m, useScroll, useTransform } from 'framer-motion';
 import { useBooted } from './boot-sequence';
 import { Magnetic } from './magnetic-button';
 import { Sparkles, Terminal } from 'lucide-react';
@@ -115,7 +115,7 @@ export default function BikebearHero() {
   const yTranslate = useTransform(scrollYProgress, [0, 0.8], [0, 50]);
 
   return (
-    <motion.section
+    <m.section
       ref={containerRef}
       style={{ opacity, scale, y: yTranslate }}
       className="relative min-h-screen-safe bg-paper text-ink flex flex-col justify-between overflow-hidden"
@@ -141,7 +141,7 @@ export default function BikebearHero() {
           {/* Left Column: Vision & Narrative (7 cols) */}
           <div className="lg:col-span-7 flex flex-col items-start space-y-7 relative z-30 pointer-events-auto">
             {/* Brand Pill Badge */}
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 15 }}
               animate={booted ? { opacity: 1, y: 0 } : undefined}
               transition={{ duration: 0.5, delay: 0.1 }}
@@ -149,20 +149,20 @@ export default function BikebearHero() {
             >
               <Sparkles className="w-4 h-4" strokeWidth={2.5} />
               <span>ABOUT // VISION & SYSTEMS ARCHITECTURE</span>
-            </motion.div>
+            </m.div>
 
             {/* Kinetic Typography Headline */}
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 20 }}
               animate={booted ? { opacity: 1, y: 0 } : undefined}
               transition={{ duration: 0.7, delay: 0.2 }}
               className="relative space-y-2"
             >
               <MagnifiedHeadline />
-            </motion.div>
+            </m.div>
 
             {/* Sub-narrative Bio Copy */}
-            <motion.p
+            <m.p
               initial={{ opacity: 0, y: 10 }}
               animate={booted ? { opacity: 1, y: 0 } : undefined}
               transition={{ duration: 0.6, delay: 0.3 }}
@@ -172,10 +172,10 @@ export default function BikebearHero() {
               <span className="nb-marker font-bold text-ink">low-latency distributed backends</span> and{' '}
               <span className="nb-marker font-bold text-ink">autonomous AI systems</span> — engineered with algorithmic
               precision, enterprise scalability, and strategic fiscal discipline.
-            </motion.p>
+            </m.p>
 
             {/* Call to Action Buttons */}
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 20 }}
               animate={booted ? { opacity: 1, y: 0 } : undefined}
               transition={{ duration: 0.6, delay: 0.4 }}
@@ -192,7 +192,7 @@ export default function BikebearHero() {
                   <span>LIVE SIMULATORS</span>
                 </Link>
               </Magnetic>
-            </motion.div>
+            </m.div>
           </div>
 
           {/* Right Column: Portrait Card (5 cols) */}
@@ -207,7 +207,7 @@ export default function BikebearHero() {
               className="pointer-events-none absolute -bottom-6 left-0 lg:left-auto lg:right-[70%] w-20 h-20 xs:w-28 xs:h-28 bg-pop-lilac border-3 border-ink rounded-[28px] rotate-6"
             />
 
-            <motion.div
+            <m.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={booted ? { opacity: 1, scale: 1 } : undefined}
               transition={{ duration: 0.8, delay: 0.2 }}
@@ -252,10 +252,10 @@ export default function BikebearHero() {
                   <span className="font-display font-extrabold text-xl text-ink">✦</span>
                 </div>
               </div>
-            </motion.div>
+            </m.div>
           </div>
         </div>
       </div>
-    </motion.section>
+    </m.section>
   );
 }

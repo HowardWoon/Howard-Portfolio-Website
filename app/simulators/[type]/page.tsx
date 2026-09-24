@@ -39,13 +39,13 @@ export default async function SimulatorPage({ params }: { params: Promise<{ type
   return (
     <div className="min-h-screen-safe bg-paper-cream bg-dots text-ink flex flex-col px-4 xs:px-5 sm:px-12 pt-[max(1.5rem,var(--safe-top))] pb-[max(2rem,var(--safe-bottom))] sm:py-12 font-sans">
       {/* Top Nav */}
-      <div className="mb-8 sm:mb-10 flex flex-wrap items-center justify-between gap-3 max-w-6xl mx-auto w-full">
+      <header className="mb-8 sm:mb-10 flex flex-wrap items-center justify-between gap-3 max-w-6xl mx-auto w-full">
         <Link href="/#projects" className="nb-btn nb-btn-white px-4 py-2.5">
           <ArrowLeft className="w-4 h-4" strokeWidth={2.75} />
           <span>Return to Portfolio</span>
         </Link>
         <span className="nb-tag bg-pop-yellow">ISOLATED SIMULATION ENVIRONMENT</span>
-      </div>
+      </header>
 
       {/* Simulator switcher — /simulators/flood and /simulators/energy were previously unreachable */}
       <nav aria-label="Simulators" className="max-w-6xl mx-auto w-full mb-6 flex flex-wrap gap-2">

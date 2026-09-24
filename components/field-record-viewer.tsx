@@ -4,7 +4,7 @@ import { useScrollLock } from '@/lib/use-scroll-lock';
 
 import { useEffect, useCallback, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { FieldRecord } from './field-archive-data';
 import { useFocusTrap } from '@/lib/use-focus-trap';
@@ -57,7 +57,7 @@ export function FieldRecordViewer({ records, currentIndex, onClose, onNavigate }
   if (!mounted) return null;
 
   return createPortal(
-    <motion.div
+    <m.div
       ref={dialogRef}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -90,7 +90,7 @@ export function FieldRecordViewer({ records, currentIndex, onClose, onNavigate }
         </button>
       </div>
 
-      <motion.div
+      <m.div
         initial={{ scale: 0.97, y: 16 }}
         animate={{ scale: 1, y: 0 }}
         onClick={(e) => e.stopPropagation()}
@@ -188,8 +188,8 @@ export function FieldRecordViewer({ records, currentIndex, onClose, onNavigate }
             <p className="text-sm text-ink-soft leading-relaxed font-sans font-medium">{currentRecord.caption}</p>
           </div>
         </div>
-      </motion.div>
-    </motion.div>,
+      </m.div>
+    </m.div>,
     document.body,
   );
 }
