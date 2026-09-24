@@ -193,9 +193,7 @@ function PillarCard({
           />
         </h3>
         <p className="text-sm font-mono font-bold text-pop-blue">{pillar.headline}</p>
-        <p className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium pt-1">
-          {pillar.description}
-        </p>
+        <p className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium pt-1">{pillar.description}</p>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-5 border-t-2 border-dashed border-ink">
         {pillar.metrics.map((metric, mIdx) => (
@@ -298,7 +296,7 @@ export default function AboutSection() {
             <PillarCard
               key={pillar.id}
               pillar={pillar}
-              
+
               activeCard={activeCard}
               setActiveCard={setActiveCard}
               colorMap={colorMap}
@@ -314,7 +312,7 @@ export default function AboutSection() {
                 <PillarCard
                   key={pillar.id}
                   pillar={pillar}
-                  
+
                   activeCard={activeCard}
                   setActiveCard={setActiveCard}
                   colorMap={colorMap}
@@ -329,7 +327,7 @@ export default function AboutSection() {
                 <PillarCard
                   key={pillar.id}
                   pillar={pillar}
-                  
+
                   activeCard={activeCard}
                   setActiveCard={setActiveCard}
                   colorMap={colorMap}

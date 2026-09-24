@@ -77,20 +77,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Person",
-              "name": "Howard Woon",
-              "url": "https://howard-woon-portfolio.vercel.app/",
-              "jobTitle": "Software Engineer & Systems Architect",
-              "worksFor": {
-                "@type": "Organization",
-                "name": "Universiti Malaya"
+              '@context': 'https://schema.org',
+              '@type': 'Person',
+              name: 'Howard Woon',
+              url: 'https://howard-woon-portfolio.vercel.app/',
+              jobTitle: 'Software Engineer & Systems Architect',
+              worksFor: {
+                '@type': 'Organization',
+                name: 'Universiti Malaya',
               },
-              "sameAs": [
-                "https://github.com/HowardWoon",
-                "https://linkedin.com/in/howard-woon-hao-zhe-730b9337a"
-              ]
-            })
+              sameAs: ['https://github.com/HowardWoon', 'https://linkedin.com/in/howard-woon-hao-zhe-730b9337a'],
+            }),
           }}
         />
       </head>
