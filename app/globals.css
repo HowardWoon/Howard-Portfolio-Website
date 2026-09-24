@@ -29,7 +29,9 @@
   }
   @media (max-width: 640px) {
     /* must target :root (not html) — :root has higher specificity and would win otherwise */
-    :root { --header-h: 72px; }
+    :root {
+      --header-h: 72px;
+    }
   }
 
   html {
@@ -43,7 +45,9 @@
   }
 
   @media (max-width: 640px) {
-    html { font-size: 100%; }
+    html {
+      font-size: 100%;
+    }
   }
 
   body {
@@ -57,30 +61,62 @@
     text-rendering: optimizeLegibility;
     -webkit-tap-highlight-color: transparent;
     /* Inter: disambiguated 1/l/I + open digits = better numbers in metrics */
-    font-feature-settings: "cv05", "cv08", "cv11", "ss03", "tnum" 0;
+    font-feature-settings:
+      'cv05',
+      'cv08',
+      'cv11',
+      'ss03',
+      'tnum' 0;
   }
 
   @supports (overflow: clip) {
     /* `clip` (unlike `hidden`) does not create a scroll container, so iOS can't be "rubber-banded" sideways */
-    html, body { overflow-x: clip; }
+    html,
+    body {
+      overflow-x: clip;
+    }
   }
 
-  h1, h2, h3, h4 {
+  h1,
+  h2,
+  h3,
+  h4 {
     font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
     font-optical-sizing: auto;
     overflow-wrap: break-word;
     text-wrap: balance;
   }
 
-  p { text-wrap: pretty; }
+  p {
+    text-wrap: pretty;
+  }
 
-  img, video, iframe, object, svg { max-width: 100%; }
+  img,
+  video,
+  iframe,
+  object,
+  svg {
+    max-width: 100%;
+  }
 
   /* When the phone keyboard scrolls a focused field into view, keep it clear of the fixed header */
-  input, textarea, select { scroll-margin-top: calc(var(--header-h) + 24px); scroll-margin-bottom: 24px; }
+  input,
+  textarea,
+  select {
+    scroll-margin-top: calc(var(--header-h) + 24px);
+    scroll-margin-bottom: 24px;
+  }
 
   /* Faster taps (no double-tap-zoom wait) on controls */
-  a, button, [role="button"], input, textarea, select, label { touch-action: manipulation; }
+  a,
+  button,
+  [role='button'],
+  input,
+  textarea,
+  select,
+  label {
+    touch-action: manipulation;
+  }
 
   /* Anchor jumps (#projects, #honors…) no longer hide under the fixed header.
      Lenis reads this too — don't also set scroll-padding-top on <html> or the offset doubles. */
@@ -101,10 +137,19 @@
 }
 
 /* ---------- Lenis (smooth scroll) required styles ---------- */
-html.lenis, html.lenis body { height: auto; }
-.lenis.lenis-smooth { scroll-behavior: auto !important; }
-.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
-.lenis.lenis-stopped { overflow: hidden; }
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
 
 /* ---------- Background textures ---------- */
 .bg-dots {
@@ -120,26 +165,38 @@ html.lenis, html.lenis body { height: auto; }
 
 /* ---------- Marquee ---------- */
 @keyframes marquee {
-  0% { transform: translateX(0%); }
-  100% { transform: translateX(-50%); }
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 /* ---------- Brutalist scrollbar ---------- */
-::-webkit-scrollbar { width: 14px; height: 14px; }
-::-webkit-scrollbar-track { background: var(--paper-cream); border-left: 2px solid var(--ink); }
+::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+::-webkit-scrollbar-track {
+  background: var(--paper-cream);
+  border-left: 2px solid var(--ink);
+}
 ::-webkit-scrollbar-thumb {
   background: var(--pop-yellow);
   border: 2px solid var(--ink);
   border-radius: 999px;
 }
-::-webkit-scrollbar-thumb:hover { background: #ffb800; }
+::-webkit-scrollbar-thumb:hover {
+  background: #ffb800;
+}
 
 /* Custom cursor: only hide the native cursor once the JS cursor is actually mounted
    (class is added by <CustomCursor/>). Text fields always keep the I-beam. */
 html.has-custom-cursor body,
 html.has-custom-cursor a,
 html.has-custom-cursor button,
-html.has-custom-cursor [role="button"] {
+html.has-custom-cursor [role='button'] {
   cursor: none !important;
 }
 html.has-custom-cursor input,
@@ -151,17 +208,28 @@ html.has-custom-cursor [cmdk-input] {
 
 /* Full-height sections that respect mobile browser toolbars (100vh is taller than the visible
    area on iOS Safari / Chrome Android, which pushed hero content below the fold) */
-.min-h-screen-safe { min-height: 100vh; min-height: 100svh; }
-.h-screen-safe { height: 100vh; height: 100dvh; }
+.min-h-screen-safe {
+  min-height: 100vh;
+  min-height: 100svh;
+}
+.h-screen-safe {
+  height: 100vh;
+  height: 100dvh;
+}
 
 /* Short landscape phones (e.g. 844×390): compact header so it doesn't eat 20% of the screen */
 @media (orientation: landscape) and (max-height: 500px) {
-  .site-header { padding-top: 0.35rem !important; padding-bottom: 0.35rem !important; }
+  .site-header {
+    padding-top: 0.35rem !important;
+    padding-bottom: 0.35rem !important;
+  }
 }
 
 /* Respect reduced motion everywhere (marquees, pulses, spins) */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
@@ -205,13 +273,27 @@ html.has-custom-cursor [cmdk-input] {
   .nb-btn {
     @apply inline-flex items-center justify-center gap-2 rounded-full border-3 border-ink px-6 py-3 font-mono text-xs font-extrabold uppercase tracking-[0.1em] text-ink text-center max-w-full shadow-clay transition-[transform,box-shadow,background-color] duration-150 ease-out hover:-translate-y-0.5 hover:shadow-[inset_3px_3px_6px_rgba(255,255,255,0.65),inset_-4px_-4px_8px_rgba(0,0,0,0.18),5px_5px_0_0_#0A0A0A] active:translate-x-[3px] active:translate-y-[3px] active:shadow-clay-pressed disabled:opacity-60 disabled:pointer-events-none;
   }
-  .nb-btn-yellow { @apply bg-pop-yellow; }
-  .nb-btn-white { @apply bg-white; }
-  .nb-btn-blue { @apply bg-pop-blue text-white; }
-  .nb-btn-mint { @apply bg-pop-mint; }
-  .nb-btn-lilac { @apply bg-pop-lilac; }
-  .nb-btn-pink { @apply bg-pop-pink; }
-  .nb-btn-ink { @apply bg-ink text-white; }
+  .nb-btn-yellow {
+    @apply bg-pop-yellow;
+  }
+  .nb-btn-white {
+    @apply bg-white;
+  }
+  .nb-btn-blue {
+    @apply bg-pop-blue text-white;
+  }
+  .nb-btn-mint {
+    @apply bg-pop-mint;
+  }
+  .nb-btn-lilac {
+    @apply bg-pop-lilac;
+  }
+  .nb-btn-pink {
+    @apply bg-pop-pink;
+  }
+  .nb-btn-ink {
+    @apply bg-ink text-white;
+  }
 
   .nb-chip {
     @apply inline-flex items-center gap-1.5 rounded-full border-2 border-ink bg-white px-3 py-1 font-mono text-xs font-semibold text-ink max-w-full [overflow-wrap:anywhere];
@@ -229,7 +311,10 @@ html.has-custom-cursor [cmdk-input] {
   .nb-led {
     /* skeuomorphic status LED */
     @apply inline-block h-3 w-3 shrink-0 rounded-full border-2 border-ink bg-pop-mint;
-    box-shadow: inset -1px -1px 2px rgba(0, 0, 0, 0.35), inset 1px 1px 2px rgba(255, 255, 255, 0.8), 0 0 8px rgba(61, 220, 151, 0.9);
+    box-shadow:
+      inset -1px -1px 2px rgba(0, 0, 0, 0.35),
+      inset 1px 1px 2px rgba(255, 255, 255, 0.8),
+      0 0 8px rgba(61, 220, 151, 0.9);
   }
 
   /* ===== FORM FIELDS ===== */
@@ -257,20 +342,44 @@ html.has-custom-cursor [cmdk-input] {
   .admin-theme .glass-panel {
     @apply bg-[#121620] text-white border border-white/10 shadow-none;
   }
-  .admin-theme .muted-label { @apply text-fog-500; }
-  .admin-theme .floating-label { @apply text-ink-muted; }
+  .admin-theme .muted-label {
+    @apply text-fog-500;
+  }
+  .admin-theme .floating-label {
+    @apply text-ink-muted;
+  }
 
   /* ===== LEGACY HELPERS (kept, restyled) ===== */
-  .glass-panel { @apply nb-card; }
-  .pill-button { @apply nb-btn; }
-  .pill-button-primary { @apply nb-btn-yellow; }
-  .pill-button-secondary { @apply nb-btn-white; }
-  .floating-field { @apply relative; }
-  .floating-input { @apply nb-field pt-6 pb-2; }
-  .floating-label { @apply absolute left-4 top-4 text-ink-muted text-sm transition-all cursor-text pointer-events-none; }
-  .section-shell { @apply max-w-7xl mx-auto px-6 py-12; }
-  .muted-label { @apply text-ink-muted text-sm font-medium; }
+  .glass-panel {
+    @apply nb-card;
+  }
+  .pill-button {
+    @apply nb-btn;
+  }
+  .pill-button-primary {
+    @apply nb-btn-yellow;
+  }
+  .pill-button-secondary {
+    @apply nb-btn-white;
+  }
+  .floating-field {
+    @apply relative;
+  }
+  .floating-input {
+    @apply nb-field pt-6 pb-2;
+  }
+  .floating-label {
+    @apply absolute left-4 top-4 text-ink-muted text-sm transition-all cursor-text pointer-events-none;
+  }
+  .section-shell {
+    @apply max-w-7xl mx-auto px-6 py-12;
+  }
+  .muted-label {
+    @apply text-ink-muted text-sm font-medium;
+  }
 }
 
 /* B-01 Boot Gate */
-html.hw-booted .boot-overlay { display: none !important; }
+html.hw-booted .boot-overlay {
+  display: none !important;
+}

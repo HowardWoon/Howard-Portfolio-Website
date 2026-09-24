@@ -1,7 +1,6 @@
-'use client';
 import Link from 'next/link';
 import React from 'react';
-import { motion } from 'framer-motion';
+import { Reveal } from './reveal';
 import { TiltCard } from './tilt-card';
 import { InteractivePhotoStack } from './interactive-photo-stack';
 import {
@@ -105,7 +104,7 @@ const projects: ProjectData[] = [
   {
     id: 'bilahujan',
     number: '03',
-    badge: '🏅 KitaHack 2026 National Innovation — First Responder of the Future',
+    badge: '🏅 V HACK 2026 QUALIFIER',
     badgeType: 'cyan',
     title: 'BILAHUJAN',
     subtitle: 'Decentralised Swarm Intelligence for Flood First Response',
@@ -203,7 +202,7 @@ const projects: ProjectData[] = [
     architecturePoints: [
       'Low-power ESP32 firmware communicating via lightweight MQTT brokers',
       'Next.js 15 telemetry dashboard streaming real-time kilowatt loads',
-      'Automated load-shedding algorithms cutting idle energy consumption by 38%',
+      'Automated load-shedding algorithms cutting idle energy consumption by -60.8%',
     ],
     metrics: [
       { label: 'Energy Reduction', value: '38.2% Idle Saved' },
@@ -524,7 +523,7 @@ function ProjectCard({ project }: { project: ProjectData }) {
                     </div>
                     <div className="p-3.5 bg-pop-mint border-3 border-ink rounded-2xl shadow-brutal-sm">
                       <div className="text-xs font-mono font-bold text-ink/70">Idle Savings</div>
-                      <div className="font-display text-2xl font-extrabold text-ink mt-1 whitespace-nowrap">-38.2%</div>
+                      <div className="font-display text-2xl font-extrabold text-ink mt-1 whitespace-nowrap">-60.8%</div>
                     </div>
                   </div>
 

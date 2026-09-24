@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence, useScroll, useSpring } from "framer-motion";
-import { ArrowUp } from "lucide-react";
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion';
+import { ArrowUp } from 'lucide-react';
 
 export function ScrollToTop() {
   const [isVisible, setIsVisible] = useState(false);
@@ -10,17 +10,29 @@ export function ScrollToTop() {
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
     damping: 30,
-    restDelta: 0.001
+    restDelta: 0.001,
   });
 
   useEffect(() => {
     const footer = document.querySelector('footer');
-    let footerVisible = false, typing = false;
+    let footerVisible = false,
+      typing = false;
     const update = () => setIsVisible(window.scrollY > 500 && !footerVisible && !typing);
-    const io = footer ? new IntersectionObserver(([e]) => { footerVisible = e.isIntersecting; update(); }) : null;
+    const io = footer
+      ? new IntersectionObserver(([e]) => {
+          footerVisible = e.isIntersecting;
+          update();
+        })
+      : null;
     if (footer) io!.observe(footer);
-    const onFocus = (e: FocusEvent) => { typing = (e.target as HTMLElement).matches('input, textarea, select'); update(); };
-    const onBlur = () => { typing = false; update(); };
+    const onFocus = (e: FocusEvent) => {
+      typing = (e.target as HTMLElement).matches('input, textarea, select');
+      update();
+    };
+    const onBlur = () => {
+      typing = false;
+      update();
+    };
     window.addEventListener('scroll', update, { passive: true });
     document.addEventListener('focusin', onFocus);
     document.addEventListener('focusout', onBlur);
@@ -36,7 +48,7 @@ export function ScrollToTop() {
   const scrollToTop = () => {
     // Use Lenis when active so the two scroll engines don't fight each other
     if (window.__lenis) window.__lenis.scrollTo(0);
-    else window.scrollTo({ top: 0, behavior: "smooth" });
+    else window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -45,7 +57,7 @@ export function ScrollToTop() {
       <motion.div
         aria-hidden
         className="fixed left-0 right-0 h-[5px] bg-pop-blue origin-left z-[9998] border-b-2 border-ink"
-        style={{ scaleX, top: "var(--header-h)" }}
+        style={{ scaleX, top: 'var(--header-h)' }}
       />
       <AnimatePresence>
         {isVisible && (

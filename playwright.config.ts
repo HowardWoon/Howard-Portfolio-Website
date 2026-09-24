@@ -8,7 +8,7 @@ export default defineConfig({
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
-    command: 'npm run build && npm run start',
+    command: process.env.CI ? 'npm run start' : 'npm run build && npm run start',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
   },

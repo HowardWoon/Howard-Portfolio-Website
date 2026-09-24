@@ -121,7 +121,7 @@ function PekomTreasurerDashboard() {
   const stats = [
     { label: 'Total Funds', value: 'RM 72,880+', icon: Wallet },
     { label: 'Sponsorships', value: 'RM 62,550', icon: BarChart3 },
-    { label: 'Net Surplus', value: 'RM 9,619+', icon: TrendingUp },
+    { label: 'Net Surplus', value: 'RM9,287.00', icon: TrendingUp },
     { label: 'Leverage Ratio', value: '16.46x', icon: Receipt },
   ];
 
@@ -143,7 +143,7 @@ function PekomTreasurerDashboard() {
             <p className="text-ink-soft">
               Directed financial planning, budget execution, and reporting for the MYTECH Career Fair 2026. Managed an
               unprecedented RM50,200 budget and implemented strict financial governance, successfully securing 30
-              corporate sponsors and RM46,200 in revenue. By enforcing an 81.5% spending cap, the event generated a
+              corporate sponsors and RM46,200 in revenue. By enforcing an 79.9% spending cap, the event generated a
               record-breaking RM9,287.00 pure surplus for Persatuan Komputer Universiti Malaya (PEKOM).
             </p>
           </div>
@@ -235,8 +235,8 @@ function PekomTreasurerDashboard() {
               </li>
               <li>
                 <strong className="text-ink font-extrabold">Budget Oversight:</strong> Managed shared operational costs
-                in conjunction with PEKOM CodeFest, tracking a combined expenditure of RM1,531.77 (CodeFest Spend)
-                across both events and achieving an exceptional 99.87% budget accuracy rating.
+                in conjunction with PEKOM CodeFest, tracking event expenditures effectively across both events and
+                achieving an exceptional 99.87% budget accuracy rating.
               </li>
             </ul>
           </div>

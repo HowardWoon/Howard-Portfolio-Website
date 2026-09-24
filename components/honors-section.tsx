@@ -51,9 +51,9 @@ const honorsList: HonorItem[] = [
     description:
       'Architected ZeroLag, an autonomous 5-agent sales intelligence command center. Outperformed over 55 enterprise and university teams across the Asia-Pacific region with sub-second lead scoring pipelines.',
     highlights: [
-      'Built deterministic LangGraph state machine orchestrating 5 AI agent operators',
+      'Built deterministic HubSpot orchestrating 5 AI agent operators',
       'Awarded 2nd Place in the competitive Sales Intelligence Track',
-      'Integrated real-time sentiment scoring with vectorized CRM dispatch',
+      'Integrated Supervity Master Orchestrator',
     ],
     certificateUrl: '/certificates/Sales_Intelligence_Winner_-_2nd_Place.png',
     icon: Trophy,

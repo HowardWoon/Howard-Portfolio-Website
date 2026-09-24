@@ -48,7 +48,7 @@ const architecturePillars = [
     accentHex: '#A855F7',
     headline: 'Graph Traversal, Min-Heaps & Sub-MS Optimization',
     description:
-      "Leveraging Dijkstra's shortest path, priority queues, and dynamic programming for real-time routing engines (e.g. BILAHUJAN flood response app at KitaHack 2026).",
+      "Leveraging Dijkstra's shortest path, priority queues, and dynamic programming for real-time routing engines (e.g. BILAHUJAN flood response app at V Hack 2026).",
     metrics: [
       { label: 'Complexity Focus', value: 'O(E + V log V) Routing' },
       { label: 'PRACTICAL APPLICATION', value: 'Real-Time Pathfinding' },
