@@ -1,161 +1,151 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import { motion } from "framer-motion";
-import { 
-  Server, 
-  Cpu, 
-  GitBranch, 
-  ShieldCheck, 
-  Activity, 
-  Sparkles, 
-  ArrowUpRight, 
-  Layers,
-  Code2
-} from "lucide-react";
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Server, Cpu, GitBranch, ShieldCheck, Activity, Sparkles, ArrowUpRight, Layers, Code2 } from 'lucide-react';
 
 const architecturePillars = [
   {
-    id: "backend",
-    category: "01 // DISTRIBUTED SYSTEMS",
-    title: "High-Throughput Backends",
+    id: 'backend',
+    category: '01 // DISTRIBUTED SYSTEMS',
+    title: 'High-Throughput Backends',
     icon: Server,
-    color: "amber",
-    accentHex: "#F59E0B",
-    headline: "Low-Latency Java 21 & Spring Boot Architecture",
+    color: 'amber',
+    accentHex: '#F59E0B',
+    headline: 'Low-Latency Java 21 & Spring Boot Architecture',
     description:
-      "Architecting concurrent, fault-tolerant backend services utilizing thread pooling and optimized REST/gRPC endpoints to handle high-throughput workloads at scale.",
+      'Architecting concurrent, fault-tolerant backend services utilizing thread pooling and optimized REST/gRPC endpoints to handle high-throughput workloads at scale.',
     metrics: [
-      { label: "Core Runtime", value: "Java 21 LTS / Node.js" },
-      { label: "Architecture", value: "Spring Boot / Microservices / Supabase" },
-      { label: "Throughput", value: "Sub-50ms API Latency" },
+      { label: 'Core Runtime', value: 'Java 21 LTS / Node.js' },
+      { label: 'Architecture', value: 'Spring Boot / Microservices / Supabase' },
+      { label: 'Throughput', value: 'Sub-50ms API Latency' },
     ],
-    telemetrySnippet: "ThreadPool[Active: 64, Idle: 16] · EventLoop: OK",
+    telemetrySnippet: 'ThreadPool[Active: 64, Idle: 16] · EventLoop: OK',
   },
   {
-    id: "agents",
-    category: "02 // AGENTIC AI",
-    title: "Autonomous Multi-Agent Pipelines",
+    id: 'agents',
+    category: '02 // AGENTIC AI',
+    title: 'Autonomous Multi-Agent Pipelines',
     icon: Cpu,
-    color: "cyan",
-    accentHex: "#00E5FF",
-    headline: "Deterministic 5-Operator Agentic Orchestration",
+    color: 'cyan',
+    accentHex: '#00E5FF',
+    headline: 'Deterministic 5-Operator Agentic Orchestration',
     description:
-      "Engineering state-machine AI workflows (LangGraph, CrewAI, local Ollama) that autonomously research, synthesize, and execute end-to-end tasks with verified guardrails.",
+      'Engineering state-machine AI workflows (LangGraph, CrewAI, local Ollama) that autonomously research, synthesize, and execute end-to-end tasks with verified guardrails.',
     metrics: [
-      { label: "Track Record", value: "2nd Place @ Autopilot Asia Hackathon (ZeroLag)" },
-      { label: "Orchestration", value: "LangGraph + CrewAI" },
-      { label: "Guardrails", value: "Deterministic Tool Routing" },
+      { label: 'Track Record', value: '2nd Place @ Autopilot Asia Hackathon (ZeroLag)' },
+      { label: 'Orchestration', value: 'LangGraph + CrewAI' },
+      { label: 'Guardrails', value: 'Deterministic Tool Routing' },
     ],
-    telemetrySnippet: "Agent Pipeline: [Triage -> Planner -> Execution -> QA Review]",
+    telemetrySnippet: 'Agent Pipeline: [Triage -> Planner -> Execution -> QA Review]',
   },
   {
-    id: "algorithms",
-    category: "03 // DATA STRUCTURES",
-    title: "Algorithmic Rigor & Graphs",
+    id: 'algorithms',
+    category: '03 // DATA STRUCTURES',
+    title: 'Algorithmic Rigor & Graphs',
     icon: GitBranch,
-    color: "purple",
-    accentHex: "#A855F7",
-    headline: "Graph Traversal, Min-Heaps & Sub-MS Optimization",
+    color: 'purple',
+    accentHex: '#A855F7',
+    headline: 'Graph Traversal, Min-Heaps & Sub-MS Optimization',
     description:
       "Leveraging Dijkstra's shortest path, priority queues, and dynamic programming for real-time routing engines (e.g. BILAHUJAN flood response app at KitaHack 2026).",
     metrics: [
-      { label: "Complexity Focus", value: "O(E + V log V) Routing" },
-      { label: "PRACTICAL APPLICATION", value: "Real-Time Pathfinding" },
-      { label: "Optimization", value: "Spatial Graph Heuristics" },
+      { label: 'Complexity Focus', value: 'O(E + V log V) Routing' },
+      { label: 'PRACTICAL APPLICATION', value: 'Real-Time Pathfinding' },
+      { label: 'Optimization', value: 'Spatial Graph Heuristics' },
     ],
-    telemetrySnippet: "[Pathfinding] Dijkstra executed: Sub-1.2ms latency",
+    telemetrySnippet: '[Pathfinding] Dijkstra executed: Sub-1.2ms latency',
   },
   {
-    id: "governance",
-    category: "04 // OPERATIONS & GOVERNANCE",
-    title: "Fiscal Governance & Security",
+    id: 'governance',
+    category: '04 // OPERATIONS & GOVERNANCE',
+    title: 'Fiscal Governance & Security',
     icon: ShieldCheck,
-    color: "emerald",
-    accentHex: "#10B981",
-    headline: "Corporate Financial Leadership & System Auditing",
+    color: 'emerald',
+    accentHex: '#10B981',
+    headline: 'Corporate Financial Leadership & System Auditing',
     description:
-      "Bridging software engineering with corporate financial stewardship, managing budgets, and executing system audits as PEKOM Finance Lead and Kraiburg TPE Finance Intern.",
+      'Bridging software engineering with corporate financial stewardship, managing budgets, and executing system audits as PEKOM Finance Lead and Kraiburg TPE Finance Intern.',
     metrics: [
-      { label: "Leadership", value: "Finance Lead 26/27 @ PEKOM" },
-      { label: "Oversight", value: "100% Audit Compliance" },
-      { label: "Corporate Exp.", value: "Kraiburg TPE Finance" },
+      { label: 'Leadership', value: 'Finance Lead 26/27 @ PEKOM' },
+      { label: 'Oversight', value: '100% Audit Compliance' },
+      { label: 'Corporate Exp.', value: 'Kraiburg TPE Finance' },
     ],
-    telemetrySnippet: "Audit Process: Zero Discrepancies | Ledger Verified",
+    telemetrySnippet: 'Audit Process: Zero Discrepancies | Ledger Verified',
   },
 ];
 
 type SkillStatus = 'production' | 'hackathon' | 'rnd';
 
-  const techStackGroups: { category: string, skills: {name: string, status: SkillStatus}[] }[] = [
-    {
-      category: "CORE LANGUAGES",
-      skills: [
-        {name: "Java 21", status: "production"}, 
-        {name: "Python 3.12", status: "production"}, 
-        {name: "TypeScript", status: "production"}, 
-        {name: "SQL (PostgreSQL)", status: "production"}, 
-        {name: "C++", status: "hackathon"}
-      ],
-    },
-    {
-      category: "BACKEND & APIs",
-      skills: [
-        {name: "Spring Boot 3", status: "production"}, 
-        {name: "FastAPI", status: "hackathon"}, 
-        {name: "Next.js 15", status: "production"}, 
-        {name: "Node.js", status: "production"}, 
-        {name: "Docker", status: "production"}
-      ],
-    },
-    {
-      category: "DATA & INFRASTRUCTURE",
-      skills: [
-        {name: "PostgreSQL", status: "production"}, 
-        {name: "Supabase", status: "hackathon"}, 
-        {name: "Git / Actions", status: "production"}, 
-        {name: "Vercel", status: "production"}, 
-        {name: "REST / gRPC APIs", status: "production"}
-      ],
-    },
-    {
-      category: "AI & AGENTIC SYSTEMS",
-      skills: [
-        {name: "LangChain", status: "rnd"}, 
-        {name: "LangGraph", status: "rnd"}, 
-        {name: "CrewAI", status: "hackathon"}, 
-        {name: "Ollama (Local LLMs)", status: "hackathon"}, 
-        {name: "Prompt Engineering", status: "production"}
-      ],
-    },
-    {
-      category: "UI & GRAPHICS",
-      skills: [
-        {name: "React", status: "production"}, 
-        {name: "Tailwind CSS", status: "production"}, 
-        {name: "WebGL", status: "rnd"}, 
-        {name: "Framer Motion", status: "production"}
-      ],
-    },
-    {
-      category: "IOT & HARDWARE",
-      skills: [
-        {name: "ESP32", status: "hackathon"}, 
-        {name: "Firmware (C/C++)", status: "hackathon"}, 
-        {name: "Sensor Networks", status: "hackathon"}
-      ],
-    },
-  ];
+const techStackGroups: { category: string; skills: { name: string; status: SkillStatus }[] }[] = [
+  {
+    category: 'CORE LANGUAGES',
+    skills: [
+      { name: 'Java 21', status: 'production' },
+      { name: 'Python 3.12', status: 'production' },
+      { name: 'TypeScript', status: 'production' },
+      { name: 'SQL (PostgreSQL)', status: 'production' },
+      { name: 'C++', status: 'hackathon' },
+    ],
+  },
+  {
+    category: 'BACKEND & APIs',
+    skills: [
+      { name: 'Spring Boot 3', status: 'production' },
+      { name: 'FastAPI', status: 'hackathon' },
+      { name: 'Next.js 15', status: 'production' },
+      { name: 'Node.js', status: 'production' },
+      { name: 'Docker', status: 'production' },
+    ],
+  },
+  {
+    category: 'DATA & INFRASTRUCTURE',
+    skills: [
+      { name: 'PostgreSQL', status: 'production' },
+      { name: 'Supabase', status: 'hackathon' },
+      { name: 'Git / Actions', status: 'production' },
+      { name: 'Vercel', status: 'production' },
+      { name: 'REST / gRPC APIs', status: 'production' },
+    ],
+  },
+  {
+    category: 'AI & AGENTIC SYSTEMS',
+    skills: [
+      { name: 'LangChain', status: 'rnd' },
+      { name: 'LangGraph', status: 'rnd' },
+      { name: 'CrewAI', status: 'hackathon' },
+      { name: 'Ollama (Local LLMs)', status: 'hackathon' },
+      { name: 'Prompt Engineering', status: 'production' },
+    ],
+  },
+  {
+    category: 'UI & GRAPHICS',
+    skills: [
+      { name: 'React', status: 'production' },
+      { name: 'Tailwind CSS', status: 'production' },
+      { name: 'WebGL', status: 'rnd' },
+      { name: 'Framer Motion', status: 'production' },
+    ],
+  },
+  {
+    category: 'IOT & HARDWARE',
+    skills: [
+      { name: 'ESP32', status: 'hackathon' },
+      { name: 'Firmware (C/C++)', status: 'hackathon' },
+      { name: 'Sensor Networks', status: 'hackathon' },
+    ],
+  },
+];
 
 export default function AboutSection() {
-  const [activeCard, setActiveCard] = useState<string>("backend");
+  const [activeCard, setActiveCard] = useState<string>('backend');
 
   // Accent → Neo-brutalist colour-block mapping (fills always carry black ink text → AAA contrast)
   const colorMap = {
-    amber: { fill: "bg-pop-yellow", soft: "bg-[#FFF3C4]", dot: "bg-pop-yellow" },
-    cyan: { fill: "bg-pop-cyan", soft: "bg-[#D9FBFF]", dot: "bg-pop-cyan" },
-    purple: { fill: "bg-pop-lilac", soft: "bg-[#EEE9FF]", dot: "bg-pop-lilac" },
-    emerald: { fill: "bg-pop-mint", soft: "bg-[#DCFAEC]", dot: "bg-pop-mint" },
+    amber: { fill: 'bg-pop-yellow', soft: 'bg-[#FFF3C4]', dot: 'bg-pop-yellow' },
+    cyan: { fill: 'bg-pop-cyan', soft: 'bg-[#D9FBFF]', dot: 'bg-pop-cyan' },
+    purple: { fill: 'bg-pop-lilac', soft: 'bg-[#EEE9FF]', dot: 'bg-pop-lilac' },
+    emerald: { fill: 'bg-pop-mint', soft: 'bg-[#DCFAEC]', dot: 'bg-pop-mint' },
   };
 
   return (
@@ -164,11 +154,16 @@ export default function AboutSection() {
       className="relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-28 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-hidden border-t-3 border-ink"
     >
       {/* Bauhaus accents */}
-      <div aria-hidden className="pointer-events-none absolute -right-20 top-24 w-64 h-64 rounded-full border-3 border-ink bg-pop-blue hidden lg:block" />
-      <div aria-hidden className="pointer-events-none absolute right-40 top-72 w-16 h-16 border-3 border-ink bg-pop-red rotate-45 hidden lg:block" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-20 top-24 w-64 h-64 rounded-full border-3 border-ink bg-pop-blue hidden lg:block"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute right-40 top-72 w-16 h-16 border-3 border-ink bg-pop-red rotate-45 hidden lg:block"
+      />
 
       <div className="relative max-w-7xl mx-auto space-y-16">
-
         {/* Section Header */}
         <div className="space-y-7">
           <motion.div
@@ -189,7 +184,8 @@ export default function AboutSection() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="nb-title text-[clamp(1.55rem,8.2vw,2.1rem)] sm:text-5xl lg:text-6xl max-w-5xl leading-[1.02]"
           >
-            I ARCHITECT RESILIENT BACKENDS AND AUTONOMOUS AI PIPELINES, TURNING COMPLEX IDEAS INTO PRODUCTION-READY SYSTEMS.
+            I ARCHITECT RESILIENT BACKENDS AND AUTONOMOUS AI PIPELINES, TURNING COMPLEX IDEAS INTO PRODUCTION-READY
+            SYSTEMS.
           </motion.h2>
 
           <motion.p
@@ -199,7 +195,13 @@ export default function AboutSection() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-ink-soft text-lg sm:text-xl max-w-3xl leading-relaxed font-sans font-medium"
           >
-            Software Engineering undergraduate at <strong className="text-ink font-extrabold">Universiti Malaya</strong> (<span className="inline-block bg-pop-yellow border-2 border-ink rounded-md px-1.5 text-ink font-mono font-extrabold text-[0.95em] leading-snug">4.00 CGPA</span>). Bridging low-latency algorithmic backend performance and AI orchestration with strong technical leadership and fiscal governance to deliver scalable, cost-effective solutions.
+            Software Engineering undergraduate at <strong className="text-ink font-extrabold">Universiti Malaya</strong>{' '}
+            (
+            <span className="inline-block bg-pop-yellow border-2 border-ink rounded-md px-1.5 text-ink font-mono font-extrabold text-[0.95em] leading-snug">
+              4.00 CGPA
+            </span>
+            ). Bridging low-latency algorithmic backend performance and AI orchestration with strong technical
+            leadership and fiscal governance to deliver scalable, cost-effective solutions.
           </motion.p>
         </div>
 
@@ -210,27 +212,58 @@ export default function AboutSection() {
             const isActive = activeCard === pillar.id;
             const c = colorMap[pillar.color as keyof typeof colorMap];
             return (
-              <motion.div key={pillar.id} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: idx * 0.1 }} onClick={() => setActiveCard(pillar.id)} className={`relative group cursor-pointer rounded-[26px] p-4 xs:p-6 sm:p-8 border-3 border-ink flex flex-col justify-between gap-6 transition-[transform,box-shadow,background-color] duration-200 ${isActive ? `${c.soft} shadow-brutal-lg -translate-x-1 -translate-y-1` : "bg-white shadow-brutal hover:-translate-y-1 hover:shadow-brutal-lg"}`}>
+              <motion.div
+                key={pillar.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: idx * 0.1 }}
+                onClick={() => setActiveCard(pillar.id)}
+                className={`relative group cursor-pointer rounded-[26px] p-4 xs:p-6 sm:p-8 border-3 border-ink flex flex-col justify-between gap-6 transition-[transform,box-shadow,background-color] duration-200 ${isActive ? `${c.soft} shadow-brutal-lg -translate-x-1 -translate-y-1` : 'bg-white shadow-brutal hover:-translate-y-1 hover:shadow-brutal-lg'}`}
+              >
                 <div className="flex items-center justify-between gap-4">
-                  <span className={`nb-tag ${isActive ? c.fill : "bg-white"}`}>{pillar.category}</span>
-                  <div className={`w-12 h-12 rounded-2xl grid place-items-center border-3 border-ink shadow-clay transition-transform duration-300 group-hover:rotate-6 ${c.fill}`}><Icon className="w-6 h-6 text-ink" strokeWidth={2.5} /></div>
+                  <span className={`nb-tag ${isActive ? c.fill : 'bg-white'}`}>{pillar.category}</span>
+                  <div
+                    className={`w-12 h-12 rounded-2xl grid place-items-center border-3 border-ink shadow-clay transition-transform duration-300 group-hover:rotate-6 ${c.fill}`}
+                  >
+                    <Icon className="w-6 h-6 text-ink" strokeWidth={2.5} />
+                  </div>
                 </div>
                 <div className="space-y-3">
-                  <h3 className="font-display text-[clamp(1.25rem,6.4vw,1.5rem)] sm:text-[1.7rem] font-extrabold uppercase tracking-[-0.02em] leading-tight text-ink flex items-center gap-2">{pillar.title}<ArrowUpRight className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity text-pop-blue" strokeWidth={3} /></h3>
+                  <h3 className="font-display text-[clamp(1.25rem,6.4vw,1.5rem)] sm:text-[1.7rem] font-extrabold uppercase tracking-[-0.02em] leading-tight text-ink flex items-center gap-2">
+                    {pillar.title}
+                    <ArrowUpRight
+                      className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity text-pop-blue"
+                      strokeWidth={3}
+                    />
+                  </h3>
                   <p className="text-sm font-mono font-bold text-pop-blue">{pillar.headline}</p>
-                  <p className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium pt-1">{pillar.description}</p>
+                  <p className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium pt-1">
+                    {pillar.description}
+                  </p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-5 border-t-2 border-dashed border-ink">
                   {pillar.metrics.map((metric, mIdx) => (
                     <div key={mIdx} className="bg-white rounded-xl p-3 border-2 border-ink">
-                      <div className="text-[0.7rem] font-mono font-bold text-ink-muted uppercase tracking-[0.06em] leading-tight">{metric.label}</div>
-                      <div className="text-sm font-sans font-extrabold text-ink mt-1.5 leading-snug break-words">{metric.value}</div>
+                      <div className="text-[0.7rem] font-mono font-bold text-ink-muted uppercase tracking-[0.06em] leading-tight">
+                        {metric.label}
+                      </div>
+                      <div className="text-sm font-sans font-extrabold text-ink mt-1.5 leading-snug break-words">
+                        {metric.value}
+                      </div>
                     </div>
                   ))}
                 </div>
                 <div className="terminal flex items-start xs:items-center justify-between gap-3">
-                  <div className="flex items-center gap-2 min-w-0"><Activity className="w-4 h-4 text-pop-mint animate-pulse shrink-0" strokeWidth={2.5} /><span className="truncate">{pillar.telemetrySnippet}</span></div>
-                  <span className={`text-[0.7rem] font-extrabold shrink-0 px-2 py-0.5 rounded border-2 border-ink text-ink ${c.fill}`}>ACTIVE</span>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Activity className="w-4 h-4 text-pop-mint animate-pulse shrink-0" strokeWidth={2.5} />
+                    <span className="truncate">{pillar.telemetrySnippet}</span>
+                  </div>
+                  <span
+                    className={`text-[0.7rem] font-extrabold shrink-0 px-2 py-0.5 rounded border-2 border-ink text-ink ${c.fill}`}
+                  >
+                    ACTIVE
+                  </span>
                 </div>
               </motion.div>
             );
@@ -238,68 +271,134 @@ export default function AboutSection() {
         </div>
         <div className="hidden lg:grid grid-cols-2 gap-8 items-start">
           <div className="flex flex-col gap-8">
-            {architecturePillars.filter((_, i) => i % 2 === 0).map((pillar, idx) => {
-              const Icon = pillar.icon;
-              const isActive = activeCard === pillar.id;
-              const c = colorMap[pillar.color as keyof typeof colorMap];
-              return (
-                <motion.div key={pillar.id} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: (idx * 2) * 0.1 }} onClick={() => setActiveCard(pillar.id)} className={`relative group cursor-pointer rounded-[26px] p-4 xs:p-6 sm:p-8 border-3 border-ink flex flex-col justify-between gap-6 transition-[transform,box-shadow,background-color] duration-200 ${isActive ? `${c.soft} shadow-brutal-lg -translate-x-1 -translate-y-1` : "bg-white shadow-brutal hover:-translate-y-1 hover:shadow-brutal-lg"}`}>
-                  <div className="flex items-center justify-between gap-4">
-                    <span className={`nb-tag ${isActive ? c.fill : "bg-white"}`}>{pillar.category}</span>
-                    <div className={`w-12 h-12 rounded-2xl grid place-items-center border-3 border-ink shadow-clay transition-transform duration-300 group-hover:rotate-6 ${c.fill}`}><Icon className="w-6 h-6 text-ink" strokeWidth={2.5} /></div>
-                  </div>
-                  <div className="space-y-3">
-                    <h3 className="font-display text-[clamp(1.25rem,6.4vw,1.5rem)] sm:text-[1.7rem] font-extrabold uppercase tracking-[-0.02em] leading-tight text-ink flex items-center gap-2">{pillar.title}<ArrowUpRight className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity text-pop-blue" strokeWidth={3} /></h3>
-                    <p className="text-sm font-mono font-bold text-pop-blue">{pillar.headline}</p>
-                    <p className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium pt-1">{pillar.description}</p>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-5 border-t-2 border-dashed border-ink">
-                    {pillar.metrics.map((metric, mIdx) => (
-                      <div key={mIdx} className="bg-white rounded-xl p-3 border-2 border-ink">
-                        <div className="text-[0.7rem] font-mono font-bold text-ink-muted uppercase tracking-[0.06em] leading-tight">{metric.label}</div>
-                        <div className="text-sm font-sans font-extrabold text-ink mt-1.5 leading-snug break-words">{metric.value}</div>
+            {architecturePillars
+              .filter((_, i) => i % 2 === 0)
+              .map((pillar, idx) => {
+                const Icon = pillar.icon;
+                const isActive = activeCard === pillar.id;
+                const c = colorMap[pillar.color as keyof typeof colorMap];
+                return (
+                  <motion.div
+                    key={pillar.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: idx * 2 * 0.1 }}
+                    onClick={() => setActiveCard(pillar.id)}
+                    className={`relative group cursor-pointer rounded-[26px] p-4 xs:p-6 sm:p-8 border-3 border-ink flex flex-col justify-between gap-6 transition-[transform,box-shadow,background-color] duration-200 ${isActive ? `${c.soft} shadow-brutal-lg -translate-x-1 -translate-y-1` : 'bg-white shadow-brutal hover:-translate-y-1 hover:shadow-brutal-lg'}`}
+                  >
+                    <div className="flex items-center justify-between gap-4">
+                      <span className={`nb-tag ${isActive ? c.fill : 'bg-white'}`}>{pillar.category}</span>
+                      <div
+                        className={`w-12 h-12 rounded-2xl grid place-items-center border-3 border-ink shadow-clay transition-transform duration-300 group-hover:rotate-6 ${c.fill}`}
+                      >
+                        <Icon className="w-6 h-6 text-ink" strokeWidth={2.5} />
                       </div>
-                    ))}
-                  </div>
-                  <div className="terminal flex items-start xs:items-center justify-between gap-3">
-                    <div className="flex items-center gap-2 min-w-0"><Activity className="w-4 h-4 text-pop-mint animate-pulse shrink-0" strokeWidth={2.5} /><span className="truncate">{pillar.telemetrySnippet}</span></div>
-                    <span className={`text-[0.7rem] font-extrabold shrink-0 px-2 py-0.5 rounded border-2 border-ink text-ink ${c.fill}`}>ACTIVE</span>
-                  </div>
-                </motion.div>
-              );
-            })}
+                    </div>
+                    <div className="space-y-3">
+                      <h3 className="font-display text-[clamp(1.25rem,6.4vw,1.5rem)] sm:text-[1.7rem] font-extrabold uppercase tracking-[-0.02em] leading-tight text-ink flex items-center gap-2">
+                        {pillar.title}
+                        <ArrowUpRight
+                          className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity text-pop-blue"
+                          strokeWidth={3}
+                        />
+                      </h3>
+                      <p className="text-sm font-mono font-bold text-pop-blue">{pillar.headline}</p>
+                      <p className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium pt-1">
+                        {pillar.description}
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-5 border-t-2 border-dashed border-ink">
+                      {pillar.metrics.map((metric, mIdx) => (
+                        <div key={mIdx} className="bg-white rounded-xl p-3 border-2 border-ink">
+                          <div className="text-[0.7rem] font-mono font-bold text-ink-muted uppercase tracking-[0.06em] leading-tight">
+                            {metric.label}
+                          </div>
+                          <div className="text-sm font-sans font-extrabold text-ink mt-1.5 leading-snug break-words">
+                            {metric.value}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="terminal flex items-start xs:items-center justify-between gap-3">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Activity className="w-4 h-4 text-pop-mint animate-pulse shrink-0" strokeWidth={2.5} />
+                        <span className="truncate">{pillar.telemetrySnippet}</span>
+                      </div>
+                      <span
+                        className={`text-[0.7rem] font-extrabold shrink-0 px-2 py-0.5 rounded border-2 border-ink text-ink ${c.fill}`}
+                      >
+                        ACTIVE
+                      </span>
+                    </div>
+                  </motion.div>
+                );
+              })}
           </div>
           <div className="flex flex-col gap-8 mt-10">
-            {architecturePillars.filter((_, i) => i % 2 === 1).map((pillar, idx) => {
-              const Icon = pillar.icon;
-              const isActive = activeCard === pillar.id;
-              const c = colorMap[pillar.color as keyof typeof colorMap];
-              return (
-                <motion.div key={pillar.id} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: (idx * 2 + 1) * 0.1 }} onClick={() => setActiveCard(pillar.id)} className={`relative group cursor-pointer rounded-[26px] p-4 xs:p-6 sm:p-8 border-3 border-ink flex flex-col justify-between gap-6 transition-[transform,box-shadow,background-color] duration-200 ${isActive ? `${c.soft} shadow-brutal-lg -translate-x-1 -translate-y-1` : "bg-white shadow-brutal hover:-translate-y-1 hover:shadow-brutal-lg"}`}>
-                  <div className="flex items-center justify-between gap-4">
-                    <span className={`nb-tag ${isActive ? c.fill : "bg-white"}`}>{pillar.category}</span>
-                    <div className={`w-12 h-12 rounded-2xl grid place-items-center border-3 border-ink shadow-clay transition-transform duration-300 group-hover:rotate-6 ${c.fill}`}><Icon className="w-6 h-6 text-ink" strokeWidth={2.5} /></div>
-                  </div>
-                  <div className="space-y-3">
-                    <h3 className="font-display text-[clamp(1.25rem,6.4vw,1.5rem)] sm:text-[1.7rem] font-extrabold uppercase tracking-[-0.02em] leading-tight text-ink flex items-center gap-2">{pillar.title}<ArrowUpRight className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity text-pop-blue" strokeWidth={3} /></h3>
-                    <p className="text-sm font-mono font-bold text-pop-blue">{pillar.headline}</p>
-                    <p className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium pt-1">{pillar.description}</p>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-5 border-t-2 border-dashed border-ink">
-                    {pillar.metrics.map((metric, mIdx) => (
-                      <div key={mIdx} className="bg-white rounded-xl p-3 border-2 border-ink">
-                        <div className="text-[0.7rem] font-mono font-bold text-ink-muted uppercase tracking-[0.06em] leading-tight">{metric.label}</div>
-                        <div className="text-sm font-sans font-extrabold text-ink mt-1.5 leading-snug break-words">{metric.value}</div>
+            {architecturePillars
+              .filter((_, i) => i % 2 === 1)
+              .map((pillar, idx) => {
+                const Icon = pillar.icon;
+                const isActive = activeCard === pillar.id;
+                const c = colorMap[pillar.color as keyof typeof colorMap];
+                return (
+                  <motion.div
+                    key={pillar.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: (idx * 2 + 1) * 0.1 }}
+                    onClick={() => setActiveCard(pillar.id)}
+                    className={`relative group cursor-pointer rounded-[26px] p-4 xs:p-6 sm:p-8 border-3 border-ink flex flex-col justify-between gap-6 transition-[transform,box-shadow,background-color] duration-200 ${isActive ? `${c.soft} shadow-brutal-lg -translate-x-1 -translate-y-1` : 'bg-white shadow-brutal hover:-translate-y-1 hover:shadow-brutal-lg'}`}
+                  >
+                    <div className="flex items-center justify-between gap-4">
+                      <span className={`nb-tag ${isActive ? c.fill : 'bg-white'}`}>{pillar.category}</span>
+                      <div
+                        className={`w-12 h-12 rounded-2xl grid place-items-center border-3 border-ink shadow-clay transition-transform duration-300 group-hover:rotate-6 ${c.fill}`}
+                      >
+                        <Icon className="w-6 h-6 text-ink" strokeWidth={2.5} />
                       </div>
-                    ))}
-                  </div>
-                  <div className="terminal flex items-start xs:items-center justify-between gap-3">
-                    <div className="flex items-center gap-2 min-w-0"><Activity className="w-4 h-4 text-pop-mint animate-pulse shrink-0" strokeWidth={2.5} /><span className="truncate">{pillar.telemetrySnippet}</span></div>
-                    <span className={`text-[0.7rem] font-extrabold shrink-0 px-2 py-0.5 rounded border-2 border-ink text-ink ${c.fill}`}>ACTIVE</span>
-                  </div>
-                </motion.div>
-              );
-            })}
+                    </div>
+                    <div className="space-y-3">
+                      <h3 className="font-display text-[clamp(1.25rem,6.4vw,1.5rem)] sm:text-[1.7rem] font-extrabold uppercase tracking-[-0.02em] leading-tight text-ink flex items-center gap-2">
+                        {pillar.title}
+                        <ArrowUpRight
+                          className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity text-pop-blue"
+                          strokeWidth={3}
+                        />
+                      </h3>
+                      <p className="text-sm font-mono font-bold text-pop-blue">{pillar.headline}</p>
+                      <p className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium pt-1">
+                        {pillar.description}
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-5 border-t-2 border-dashed border-ink">
+                      {pillar.metrics.map((metric, mIdx) => (
+                        <div key={mIdx} className="bg-white rounded-xl p-3 border-2 border-ink">
+                          <div className="text-[0.7rem] font-mono font-bold text-ink-muted uppercase tracking-[0.06em] leading-tight">
+                            {metric.label}
+                          </div>
+                          <div className="text-sm font-sans font-extrabold text-ink mt-1.5 leading-snug break-words">
+                            {metric.value}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="terminal flex items-start xs:items-center justify-between gap-3">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Activity className="w-4 h-4 text-pop-mint animate-pulse shrink-0" strokeWidth={2.5} />
+                        <span className="truncate">{pillar.telemetrySnippet}</span>
+                      </div>
+                      <span
+                        className={`text-[0.7rem] font-extrabold shrink-0 px-2 py-0.5 rounded border-2 border-ink text-ink ${c.fill}`}
+                      >
+                        ACTIVE
+                      </span>
+                    </div>
+                  </motion.div>
+                );
+              })}
           </div>
         </div>
 
@@ -345,23 +444,27 @@ export default function AboutSection() {
                 </h5>
                 <div className="flex flex-wrap gap-2">
                   {group.skills.map((skill) => {
-                      const dotColor = skill.status === 'production' ? 'bg-pop-mint' : skill.status === 'hackathon' ? 'bg-pop-yellow' : 'bg-pop-blue';
-                      return (
-                        <span
-                          key={skill.name}
-                          className="nb-chip transition-transform duration-150 hover:-translate-y-0.5 hover:shadow-brutal-xs"
-                        >
-                          <span className={`nb-dot ${dotColor}`} />
-                          {skill.name}
-                        </span>
-                      );
-                    })}
+                    const dotColor =
+                      skill.status === 'production'
+                        ? 'bg-pop-mint'
+                        : skill.status === 'hackathon'
+                          ? 'bg-pop-yellow'
+                          : 'bg-pop-blue';
+                    return (
+                      <span
+                        key={skill.name}
+                        className="nb-chip transition-transform duration-150 hover:-translate-y-0.5 hover:shadow-brutal-xs"
+                      >
+                        <span className={`nb-dot ${dotColor}`} />
+                        {skill.name}
+                      </span>
+                    );
+                  })}
                 </div>
               </div>
             ))}
           </div>
         </motion.div>
-
       </div>
     </section>
   );

@@ -101,7 +101,13 @@ export function CustomCursor() {
           backgroundColor: isPointer ? 'rgba(255,199,0,0.45)' : 'rgba(255,199,0,0)',
         }}
         transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-        style={{ x: cursorXSpring, y: cursorYSpring, translateX: '-50%', translateY: '-50%', opacity: isHidden || onXray ? 0 : 1 }}
+        style={{
+          x: cursorXSpring,
+          y: cursorYSpring,
+          translateX: '-50%',
+          translateY: '-50%',
+          opacity: isHidden || onXray ? 0 : 1,
+        }}
       />
     </>
   );

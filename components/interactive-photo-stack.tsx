@@ -1,132 +1,261 @@
 'use client';
-import { useScrollLock } from "@/lib/use-scroll-lock";
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
-import { Maximize2, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Maximize2, X } from 'lucide-react';
+import { useScrollLock } from '@/lib/use-scroll-lock';
+import { useFocusTrap } from '@/lib/use-focus-trap';
+import { useLatest } from '@/lib/use-latest';
 
-const photos = [
+type Photo = { src: string; alt: string; rotation: number };
+
+const photos: Photo[] = [
   { src: '/images/projects/zerolag/dashboard.jpeg', alt: 'Dashboard Console', rotation: -1.5 },
   { src: '/images/projects/zerolag/agent-flow.png', alt: 'Agent Architecture Flow', rotation: 3 },
-  { src: '/images/projects/zerolag/ai insight.jpeg', alt: 'AI Insights Module', rotation: 2 },
-  { src: '/images/projects/zerolag/ai policies.jpeg', alt: 'AI Agent Policies', rotation: -1 },
+  { src: '/images/projects/zerolag/ai_insight.jpeg', alt: 'AI Insights Module', rotation: 2 },
+  { src: '/images/projects/zerolag/ai_policies.jpeg', alt: 'AI Agent Policies', rotation: -1 },
   { src: '/images/projects/zerolag/backend.jpeg', alt: 'Backend Telemetry', rotation: 1.5 },
 ];
 
 /**
- * Skeuomorphic polaroid stack: taped prints on a desk.
- * A11y: the stack is a real button (Enter/Space cycles), current photo is announced.
+ * Full-screen photo viewer.
+ * Portaled to <body>: the gallery lives inside <TiltCard> (a transformed element), and a transformed
+ * ancestor turns `position: fixed` into "fixed to the card" — the old overlay was card-sized, tilted with
+ * the mouse and, on phones, its close button sat ~1000px above the screen while page scroll was locked.
  */
-export function InteractivePhotoStack({ customPhotos }: { customPhotos?: { src: string, alt: string, rotation: number }[] }) {
-  const [cards, setCards] = useState(customPhotos || photos);
-  const [expandedPhoto, setExpandedPhoto] = useState<string | null>(null);
-  useScrollLock(!!expandedPhoto);
+function PhotoLightbox({
+  list,
+  index,
+  onIndex,
+  onClose,
+}: {
+  list: Photo[];
+  index: number;
+  onIndex: (i: number) => void;
+  onClose: () => void;
+}) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const touchX = useRef<number | null>(null);
+  useScrollLock();
+  useFocusTrap(dialogRef, true);
+  const photo = list[index];
+  const [ratio, setRatio] = useState(16 / 9);
+  const prev = () => onIndex((index - 1 + list.length) % list.length);
+  const next = () => onIndex((index + 1) % list.length);
+  const onCloseRef = useLatest(onClose);
+  const prevRef = useLatest(prev);
+  const nextRef = useLatest(next);
 
-  const cycle = () => {
-    setCards((prev) => {
-      const newCards = [...prev];
-      const topCard = newCards.shift();
-      if (topCard) newCards.push(topCard);
-      return newCards;
-    });
-  };
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onCloseRef.current();
+      else if (e.key === 'ArrowLeft') prevRef.current();
+      else if (e.key === 'ArrowRight') nextRef.current();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onCloseRef, prevRef, nextRef]);
+
+  return createPortal(
+    <motion.div
+      ref={dialogRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${photo.alt} (${index + 1} of ${list.length})`}
+      data-lenis-prevent
+      data-dark-surface
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+      className="fixed inset-0 z-[10000] flex flex-col h-screen-safe bg-ink/90 backdrop-blur-sm pt-[max(0.75rem,var(--safe-top))] pb-[max(0.75rem,var(--safe-bottom))] pl-[max(0.75rem,var(--safe-left))] pr-[max(0.75rem,var(--safe-right))] sm:p-6"
+    >
+      <div
+        className="flex items-center justify-between gap-3 mb-3 shrink-0 w-full max-w-6xl mx-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <span className="nb-tag bg-pop-yellow">
+          {String(index + 1).padStart(2, '0')} / {String(list.length).padStart(2, '0')}
+        </span>
+        <button
+          type="button"
+          data-autofocus
+          onClick={onClose}
+          className="inline-flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 bg-white border-3 border-ink rounded-xl shadow-brutal hover:-translate-y-1 hover:shadow-brutal-lg transition-all"
+        >
+          <X className="w-5 h-5 sm:w-6 sm:h-6 text-ink" strokeWidth={3} />
+          <span className="font-mono font-bold text-xs sm:text-sm text-ink">Return to Website</span>
+        </button>
+      </div>
+
+      {/* Stage: the panel hugs the photo's real aspect ratio, so wide screenshots on a portrait phone are no
+          longer a thin strip inside a huge empty cream box. `cq*` units fall back to full width on iOS 15. */}
+      <div className="relative flex-1 min-h-0 w-full max-w-6xl mx-auto flex items-center justify-center [container-type:size]">
+        <motion.div
+          initial={{ scale: 0.95, y: 20 }}
+          animate={{ scale: 1, y: 0 }}
+          exit={{ scale: 0.95, y: 20 }}
+          onClick={(e) => e.stopPropagation()}
+          onTouchStart={(e) => {
+            touchX.current = e.touches[0].clientX;
+          }}
+          onTouchEnd={(e) => {
+            if (touchX.current === null) return;
+            const dx = e.changedTouches[0].clientX - touchX.current;
+            if (Math.abs(dx) > 45) (dx < 0 ? next : prev)();
+            touchX.current = null;
+          }}
+          style={{ aspectRatio: ratio, width: `min(100cqw, calc(100cqh * ${ratio}))`, maxHeight: '100%' }}
+          className="relative w-full bg-paper-deep rounded-2xl overflow-hidden border-4 border-ink shadow-2xl touch-pan-y"
+        >
+          <Image
+            key={photo.src}
+            src={photo.src}
+            alt={photo.alt}
+            fill
+            sizes="(max-width: 1200px) 100vw, 1150px"
+            className="object-contain p-1.5 sm:p-3"
+            priority
+            onLoad={(e) => {
+              const img = e.currentTarget;
+              if (img.naturalWidth && img.naturalHeight) setRatio(img.naturalWidth / img.naturalHeight);
+            }}
+          />
+        </motion.div>
+      </div>
+
+      {list.length > 1 && (
+        <div className="shrink-0 mt-3 flex items-center justify-center gap-4" onClick={(e) => e.stopPropagation()}>
+          <button
+            type="button"
+            onClick={prev}
+            aria-label="Previous photo"
+            className="w-12 h-12 rounded-full bg-white border-3 border-ink shadow-brutal-sm grid place-items-center text-ink hover:bg-pop-yellow active:bg-pop-yellow"
+          >
+            <ChevronLeft className="w-5 h-5" strokeWidth={3} />
+          </button>
+          <span className="font-mono text-xs font-bold text-white/80 max-w-[50vw] truncate text-center">
+            {photo.alt}
+          </span>
+          <button
+            type="button"
+            onClick={next}
+            aria-label="Next photo"
+            className="w-12 h-12 rounded-full bg-white border-3 border-ink shadow-brutal-sm grid place-items-center text-ink hover:bg-pop-yellow active:bg-pop-yellow"
+          >
+            <ChevronRight className="w-5 h-5" strokeWidth={3} />
+          </button>
+        </div>
+      )}
+    </motion.div>,
+    document.body,
+  );
+}
+
+/**
+ * Skeuomorphic polaroid stack: taped prints on a desk.
+ * Mouse/touch: click anywhere on the stack to cycle. Keyboard/screen readers: the (visually hidden)
+ * "Next photo" button. The expand button is no longer nested inside another button.
+ */
+export function InteractivePhotoStack({ customPhotos }: { customPhotos?: Photo[] }) {
+  const source = customPhotos || photos;
+  const [cards, setCards] = useState(source);
+  const [viewer, setViewer] = useState<number | null>(null);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  const cycle = () => setCards((prev) => [...prev.slice(1), prev[0]]);
+  const openViewer = (src: string) =>
+    setViewer(
+      Math.max(
+        0,
+        source.findIndex((p) => p.src === src),
+      ),
+    );
 
   return (
     <>
       <div
-      role="button"
-      tabIndex={0}
-      aria-label={cards[0]?.alt}
-      onClick={(e) => { e.stopPropagation(); cycle(); }}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); cycle(); }
-      }}
-      className="relative w-full h-full min-h-[280px] sm:min-h-[380px] lg:min-h-[420px] flex items-center justify-center cursor-pointer group rounded-2xl"
-    >
-      {cards.map((photo, index) => {
-        const isTop = index === 0;
-        return (
-          <motion.div
-            key={photo.src}
-            layout
-            initial={false}
-            animate={{
-              scale: isTop ? 1 : 1 - index * 0.04,
-              y: isTop ? 0 : index * 9,
-              rotate: isTop ? 0 : photo.rotation * 1.4,
-              zIndex: cards.length - index,
-              opacity: index > 3 ? 0 : 1,
-            }}
-            whileHover={isTop ? { scale: 1.02, rotate: -1.2, y: -5, transition: { duration: 0.2 } } : {}}
-            transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-            className="absolute w-[94%] aspect-video bg-white p-2 sm:p-2.5 pb-6 sm:pb-8 rounded-md border-3 border-ink shadow-brutal origin-center max-h-full"
-          >
-            {isTop && <span className="tape" aria-hidden />}
-            <div className="w-full h-full relative overflow-hidden rounded-sm bg-paper-deep border-2 border-ink">
-              {/* next/image: phones get a resized WebP/AVIF instead of the full 300–900 KB PNG screenshot */}
-              <Image
-                src={photo.src}
-                alt={photo.alt}
-                fill
-                sizes="(max-width: 1024px) 92vw, 40vw"
-                className="object-contain pointer-events-none"
-              />
-              {isTop && (
-                <button
-                  onClick={(e) => { e.stopPropagation(); setExpandedPhoto(photo.src); }}
-                  className="absolute top-2 right-2 sm:top-3 sm:right-3 z-50 p-1.5 sm:p-2 bg-white border-2 border-ink rounded-lg shadow-brutal-xs hover:bg-pop-yellow hover:-translate-y-0.5 active:translate-y-0 transition-all text-ink flex items-center justify-center group/expand"
-                  title="View full resolution"
-                  aria-label="View full resolution"
-                >
-                  <Maximize2 className="w-3 h-3 sm:w-4 sm:h-4 group-hover/expand:scale-110 transition-transform" strokeWidth={2.5} />
-                </button>
-              )}
-            </div>
-          </motion.div>
-        );
-      })}
+        onClick={cycle}
+        className="relative w-full h-full min-h-[280px] sm:min-h-[380px] lg:min-h-[420px] flex items-center justify-center cursor-pointer group rounded-2xl has-[:focus-visible]:outline has-[:focus-visible]:outline-[3px] has-[:focus-visible]:outline-pop-blue"
+      >
+        <button
+          type="button"
+          className="sr-only"
+          onClick={(e) => {
+            e.stopPropagation();
+            cycle();
+          }}
+        >
+          Next photo (showing {cards[0]?.alt})
+        </button>
 
-      {/* Interaction Hint */}
-      <div className="absolute -bottom-3 lg:-bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 nb-tag bg-white shadow-brutal-xs pointer-events-none z-50 max-w-[92%] text-center justify-center">
-        <span className="w-2 h-2 rounded-full bg-pop-red border border-ink animate-pulse" />
-        CLICK ALBUM TO CYCLE
-      </div>
-    </div>
-      <AnimatePresence>
-        {expandedPhoto && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-ink/90 backdrop-blur-sm"
-            onClick={(e) => { e.stopPropagation(); setExpandedPhoto(null); }}
-          >
-            <button
-              onClick={(e) => { e.stopPropagation(); setExpandedPhoto(null); }}
-              className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 sm:p-3 bg-white border-3 border-ink rounded-xl shadow-brutal hover:-translate-y-1 hover:shadow-brutal-lg transition-all z-[110]"
-            >
-              <X className="w-5 h-5 sm:w-6 sm:h-6 text-ink" strokeWidth={3} /><span className="font-mono font-bold text-xs sm:text-sm text-ink">Return to Website</span>
-            </button>
-
+        {cards.slice(0, 4).map((photo, index) => {
+          const isTop = index === 0;
+          return (
             <motion.div
-              initial={{ scale: 0.95, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 20 }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-6xl h-[85vh] sm:h-[90vh] bg-paper-deep rounded-2xl overflow-hidden border-4 border-ink shadow-2xl p-2 sm:p-4"
+              key={photo.src}
+              layout
+              initial={false}
+              animate={{
+                scale: isTop ? 1 : 1 - index * 0.04,
+                y: isTop ? 0 : index * 9,
+                rotate: isTop ? 0 : photo.rotation * 1.4,
+                zIndex: cards.length - index,
+              }}
+              whileHover={isTop ? { scale: 1.02, rotate: -1.2, y: -5, transition: { duration: 0.2 } } : {}}
+              transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+              className="absolute w-[94%] aspect-video bg-white p-2 sm:p-2.5 pb-6 sm:pb-8 rounded-md border-3 border-ink shadow-brutal origin-center max-h-full"
             >
-              <Image
-                src={expandedPhoto}
-                alt="Expanded view"
-                fill
-                sizes="100vw"
-                className="object-contain"
-              />
+              {isTop && <span className="tape" aria-hidden />}
+              <div className="w-full h-full relative overflow-hidden rounded-sm bg-paper-deep border-2 border-ink">
+                <Image
+                  src={photo.src}
+                  alt={photo.alt}
+                  fill
+                  sizes="(max-width: 1024px) 92vw, 40vw"
+                  className="object-contain pointer-events-none"
+                />
+                {isTop && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openViewer(photo.src);
+                    }}
+                    className="absolute top-1.5 right-1.5 sm:top-3 sm:right-3 z-50 w-10 h-10 sm:w-9 sm:h-9 grid place-items-center bg-white border-2 border-ink rounded-lg shadow-brutal-xs hover:bg-pop-yellow hover:-translate-y-0.5 active:translate-y-0 transition-all text-ink group/expand"
+                    title="View full resolution"
+                    aria-label={`View full resolution: ${photo.alt}`}
+                  >
+                    <Maximize2
+                      className="w-4 h-4 group-hover/expand:scale-110 transition-transform"
+                      strokeWidth={2.5}
+                    />
+                  </button>
+                )}
+              </div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          );
+        })}
+
+        <div
+          aria-hidden
+          className="absolute -bottom-3 lg:-bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 nb-tag bg-white shadow-brutal-xs pointer-events-none z-50 max-w-[92%] text-center justify-center"
+        >
+          <span className="w-2 h-2 rounded-full bg-pop-red border border-ink animate-pulse" />
+          CLICK ALBUM TO CYCLE
+        </div>
+      </div>
+
+      {mounted && (
+        <AnimatePresence>
+          {viewer !== null && (
+            <PhotoLightbox list={source} index={viewer} onIndex={setViewer} onClose={() => setViewer(null)} />
+          )}
+        </AnimatePresence>
+      )}
     </>
   );
 }

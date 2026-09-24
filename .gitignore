@@ -7,3 +7,18 @@ dist
 coverage
 .vercel
 tsconfig.tsbuildinfo
+
+# local tooling / OS noise
+align_env/
+.venv/
+venv/
+__pycache__/
+*.pyc
+desktop.ini
+Thumbs.db
+*.patch
+*.diff
+temp*.txt
+# playwright
+test-results/
+playwright-report/

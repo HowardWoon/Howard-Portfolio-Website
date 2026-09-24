@@ -22,9 +22,11 @@ function createQueryBuilder(table: string) {
     insert: () => Promise.resolve({ data: null, error: { message: 'Supabase is not configured.' } }),
     update: () => Promise.resolve({ data: null, error: { message: 'Supabase is not configured.' } }),
     delete: () => Promise.resolve({ data: null, error: { message: 'Supabase is not configured.' } }),
-    then: (onFulfilled: (value: { data: unknown; error: null }) => unknown, onRejected?: (reason: unknown) => unknown) =>
-      createResolvedResult(getFallbackMany(table)).then(onFulfilled, onRejected),
-    catch: (onRejected: (reason: unknown) => unknown) => createResolvedResult(getFallbackMany(table)).catch(onRejected)
+    then: (
+      onFulfilled: (value: { data: unknown; error: null }) => unknown,
+      onRejected?: (reason: unknown) => unknown,
+    ) => createResolvedResult(getFallbackMany(table)).then(onFulfilled, onRejected),
+    catch: (onRejected: (reason: unknown) => unknown) => createResolvedResult(getFallbackMany(table)).catch(onRejected),
   };
 
   return builder;
@@ -46,9 +48,9 @@ export function createFallbackSupabaseClient() {
   return {
     auth: {
       getUser: async () => ({ data: { user: null as SupabaseAuthUser | null }, error: null }),
-      signInWithPassword: async () => ({ data: null, error: { message: 'Supabase is not configured.' } })
+      signInWithPassword: async () => ({ data: null, error: { message: 'Supabase is not configured.' } }),
     },
-    from: (table: string) => createQueryBuilder(table)
+    from: (table: string) => createQueryBuilder(table),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any;
 }

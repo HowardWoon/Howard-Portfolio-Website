@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useInView, useSpring } from "framer-motion";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useInView, useSpring } from 'framer-motion';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 interface AnimatedCounterProps {
   value: string;
@@ -9,8 +9,7 @@ interface AnimatedCounterProps {
 }
 
 const NUMERIC = /^([^0-9]*?)(\d+(?:\.\d+)?)(.*)$/;
-const IS_RANK = (prefix: string, suffix: string) =>
-  /#|top/i.test(prefix) || /^(st|nd|rd|th)\b/i.test(suffix);
+const IS_RANK = (prefix: string, suffix: string) => /#|top/i.test(prefix) || /^(st|nd|rd|th)\b/i.test(suffix);
 
 function parse(value: string) {
   const m = value.match(NUMERIC);
@@ -32,9 +31,9 @@ function parse(value: string) {
  *   still off-screen are reset to 0 so the count-up starts cleanly; counters already on screen at
  *   load simply keep their value (no animation, no flicker).
  */
-export function AnimatedCounter({ value, className = "" }: AnimatedCounterProps) {
+export function AnimatedCounter({ value, className = '' }: AnimatedCounterProps) {
   const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-50px" });
+  const isInView = useInView(ref, { once: true, margin: '-50px' });
   const [displayValue, setDisplayValue] = useState(value);
   const shouldAnimate = useRef(false);
   const spring = useSpring(0, { duration: 1500, bounce: 0 });
@@ -44,7 +43,7 @@ export function AnimatedCounter({ value, className = "" }: AnimatedCounterProps)
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el || !match) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const r = el.getBoundingClientRect();
     const onScreen = r.top < window.innerHeight && r.bottom > 0;
     if (!onScreen) {
@@ -60,10 +59,10 @@ export function AnimatedCounter({ value, className = "" }: AnimatedCounterProps)
     const { prefix, numStr, suffix, decimals } = match;
 
     spring.jump(0);
-    const unsubscribe = spring.on("change", (latest) => {
+    const unsubscribe = spring.on('change', (latest) => {
       setDisplayValue(`${prefix}${decimals ? latest.toFixed(decimals) : Math.round(latest)}${suffix}`);
     });
-    const done = spring.on("animationComplete", () => setDisplayValue(value));
+    const done = spring.on('animationComplete', () => setDisplayValue(value));
     spring.set(parseFloat(numStr));
 
     return () => {

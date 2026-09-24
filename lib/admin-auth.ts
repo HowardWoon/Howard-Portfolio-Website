@@ -2,7 +2,8 @@ import { redirect } from 'next/navigation';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ADMIN_USER_UUID } from '@/lib/admin-constants';
 
-type MaybeAdmin = { id?: string | null; email?: string | null; app_metadata?: Record<string, unknown> } | null | undefined;
+type MaybeAdmin =
+  { id?: string | null; email?: string | null; app_metadata?: Record<string, unknown> } | null | undefined;
 
 /**
  * Single source of truth for "is this user the admin?".

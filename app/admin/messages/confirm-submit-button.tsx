@@ -2,7 +2,15 @@
 
 import type { ReactNode } from 'react';
 
-export function ConfirmSubmitButton({ message, className, children }: { message: string; className?: string; children: ReactNode }) {
+export function ConfirmSubmitButton({
+  message,
+  className,
+  children,
+}: {
+  message: string;
+  className?: string;
+  children: ReactNode;
+}) {
   return (
     <button
       type="submit"

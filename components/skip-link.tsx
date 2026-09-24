@@ -1,10 +1,10 @@
-﻿"use client";
+'use client';
 export function SkipLink() {
   return (
     <a
       href="#main-content"
       onClick={(e) => {
-        const target = document.getElementById("main-content");
+        const target = document.getElementById('main-content');
         if (!target) return;
         e.preventDefault();
         target.focus({ preventScroll: true });

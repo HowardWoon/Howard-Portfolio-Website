@@ -20,14 +20,12 @@ export async function createSupabaseServerClient() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         setAll(cookiesToSet: any[]) {
           try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            );
+            cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
           } catch {
             // Server Component cookie writes are not always available.
           }
         },
-      }
-    }
+      },
+    },
   );
 }

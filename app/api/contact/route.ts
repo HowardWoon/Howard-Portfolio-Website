@@ -25,7 +25,7 @@ const ContactSchema = z.object({
   subject: z.string().trim().max(200).optional().default(''),
   message: z.string().trim().min(1, 'Message is required.').max(5000),
   hw_hp_field: z.string().optional().default(''), // honeypot — humans never see this field
-  fillMs: z.number().int().nonnegative().max(86_400_000), // REQUIRED 
+  fillMs: z.number({ required_error: 'Please reload the page and try again.' }).int().nonnegative().max(86_400_000),
 });
 
 // Strip control characters (keeps newlines/tabs) — prevents header tricks in the email subject
@@ -41,7 +41,8 @@ const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 export async function POST(request: NextRequest) {
   try {
     // 1. Rate limiting (Vercel sets x-real-ip; x-forwarded-for's first hop is client-controlled)
-    const ip = request.headers.get('x-real-ip') || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown-ip';
+    const ip =
+      request.headers.get('x-real-ip') || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown-ip';
     const now = Date.now();
     const entry = ipRequestMap.get(ip);
     if (!entry || now - entry.lastReset > RATE_LIMIT_WINDOW_MS) {
@@ -58,7 +59,11 @@ export async function POST(request: NextRequest) {
     const host = request.headers.get('host');
     if (origin && host) {
       let originHost = '';
-      try { originHost = new URL(origin).host; } catch { /* invalid origin */ }
+      try {
+        originHost = new URL(origin).host;
+      } catch {
+        /* invalid origin */
+      }
       if (originHost !== host) {
         return NextResponse.json({ error: 'Invalid origin.' }, { status: 403 });
       }

@@ -1,10 +1,12 @@
-﻿"use client";
+'use client';
 
-import { useState } from "react";
-import Image from "next/image";
-import { ARCHIVE_DATA } from "./field-archive-data";
-import dynamic from "next/dynamic";
-const FieldRecordViewer = dynamic(() => import("./field-record-viewer").then(mod => mod.FieldRecordViewer), { ssr: false });
+import { useState } from 'react';
+import Image from 'next/image';
+import { ARCHIVE_DATA } from './field-archive-data';
+import dynamic from 'next/dynamic';
+const FieldRecordViewer = dynamic(() => import('./field-record-viewer').then((mod) => mod.FieldRecordViewer), {
+  ssr: false,
+});
 
 interface FieldArchiveProps {
   archiveId: string;
@@ -17,20 +19,17 @@ export function FieldArchive({ archiveId }: FieldArchiveProps) {
   if (!records || records.length === 0) return null;
 
   const tileBase =
-    "group relative bg-paper-deep rounded-2xl overflow-hidden cursor-pointer border-3 border-ink shadow-brutal-sm transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-brutal focus-visible:-translate-y-1";
+    'group relative bg-paper-deep rounded-2xl overflow-hidden cursor-pointer border-3 border-ink shadow-brutal-sm transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-brutal focus-visible:-translate-y-1';
 
   return (
     <div className="mt-8 pt-8 border-t-2 border-dashed border-ink">
       <div className="flex items-center gap-4 mb-6">
-        <span className="nb-tag bg-pop-mint">
-          FIELD ARCHIVE // {String(records.length).padStart(2, '0')} RECORDS
-        </span>
+        <span className="nb-tag bg-pop-mint">FIELD ARCHIVE // {String(records.length).padStart(2, '0')} RECORDS</span>
         <div className="flex-1 h-[3px] bg-ink rounded-full" />
       </div>
 
       {/* Bento Grid Layout */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4">
-
         {/* HERO IMAGE */}
         {records[0] && (
           <button
@@ -48,7 +47,9 @@ export function FieldArchive({ archiveId }: FieldArchiveProps) {
             {/* Hero Label (sticker) */}
             <div className="absolute left-4 bottom-4 right-4 flex flex-col items-start gap-1.5">
               <div className="nb-tag bg-white text-[0.7rem]">FIELD RECORD // {records[0].recordId}</div>
-              <div className="max-w-full [overflow-wrap:anywhere] font-display text-base sm:text-lg font-extrabold text-ink uppercase bg-pop-yellow border-3 border-ink rounded-xl px-3 py-1 shadow-brutal-xs">{records[0].category}</div>
+              <div className="max-w-full [overflow-wrap:anywhere] font-display text-base sm:text-lg font-extrabold text-ink uppercase bg-pop-yellow border-3 border-ink rounded-xl px-3 py-1 shadow-brutal-xs">
+                {records[0].category}
+              </div>
             </div>
           </button>
         )}
@@ -70,7 +71,11 @@ export function FieldArchive({ archiveId }: FieldArchiveProps) {
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
               />
               <div className="absolute left-3 bottom-3 right-3">
-                <div className="nb-tag bg-white text-[0.7rem] max-w-full">{record.recordId}{" // "}{record.category}</div>
+                <div className="nb-tag bg-white text-[0.7rem] max-w-full">
+                  {record.recordId}
+                  {' // '}
+                  {record.category}
+                </div>
               </div>
             </button>
           ))}
@@ -95,7 +100,11 @@ export function FieldArchive({ archiveId }: FieldArchiveProps) {
                 />
                 <div className="absolute left-3 bottom-3 right-3">
                   {/* full caption only where the square tiles are wide enough (it was cropped on phones/tablets) */}
-                  <div className="nb-tag bg-white text-[0.7rem] hidden xl:inline-flex">{record.recordId}{" // "}{record.category}</div>
+                  <div className="nb-tag bg-white text-[0.7rem] hidden xl:inline-flex">
+                    {record.recordId}
+                    {' // '}
+                    {record.category}
+                  </div>
                   <div className="nb-tag bg-white text-[0.7rem] xl:hidden">{record.recordId}</div>
                 </div>
               </button>
@@ -116,5 +125,3 @@ export function FieldArchive({ archiveId }: FieldArchiveProps) {
     </div>
   );
 }
-
-

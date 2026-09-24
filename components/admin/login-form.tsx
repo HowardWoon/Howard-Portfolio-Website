@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -18,16 +18,19 @@ export function LoginForm() {
     setLoading(true);
     setError('');
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    try {
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (signInError) {
-      setError(signInError.message);
+      if (signInError) {
+        setError(signInError.message);
+        return;
+      }
+
+      router.push('/admin/messages');
+      router.refresh();
+    } finally {
       setLoading(false);
-      return;
     }
-
-    router.push('/admin/messages');
-    router.refresh();
   };
 
   return (
@@ -35,7 +38,9 @@ export function LoginForm() {
       <div>
         <p className="muted-label mb-3">Admin access</p>
         <h1 className="text-3xl font-semibold text-white">Sign in</h1>
-        <p className="mt-3 text-sm leading-7 text-fog-500">Use your Supabase Auth credentials to manage experiences, projects, and skills.</p>
+        <p className="mt-3 text-sm leading-7 text-fog-500">
+          Use your Supabase Auth credentials to read contact messages.
+        </p>
       </div>
 
       <div className="mt-8 space-y-4">
@@ -83,10 +88,9 @@ export function LoginForm() {
         className="pill-button pill-button-primary mt-6 w-full disabled:cursor-not-allowed disabled:opacity-60"
       >
         <Lock className="h-4 w-4" />
-        <span>{loading ? 'Signing in...' : 'Enter Dashboard'}</span>
+        <span>{loading ? 'Signing in...' : 'Open Inbox'}</span>
         <ArrowRight className="h-4 w-4" />
       </button>
     </form>
   );
 }
-

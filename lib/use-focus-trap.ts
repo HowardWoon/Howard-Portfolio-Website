@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useEffect, type RefObject } from "react";
+import { useEffect, type RefObject } from 'react';
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), iframe, object, [tabindex]:not([tabindex="-1"])';
@@ -17,12 +17,12 @@ export function useFocusTrap(ref: RefObject<HTMLElement | null>, active = true) 
     // grabbed focus before this effect ran, so the "trigger" recorded was the dialog's own close button,
     // and closing the dialog dropped keyboard focus to <body> / the top of the page.)
     const previouslyFocused = document.activeElement as HTMLElement | null;
-    ref.current?.querySelector<HTMLElement>("[data-autofocus]")?.focus({ preventScroll: true });
+    ref.current?.querySelector<HTMLElement>('[data-autofocus]')?.focus({ preventScroll: true });
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== "Tab" || !ref.current) return;
+      if (e.key !== 'Tab' || !ref.current) return;
       const nodes = Array.from(ref.current.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
-        (el) => el.getClientRects().length > 0 || el === document.activeElement
+        (el) => el.getClientRects().length > 0 || el === document.activeElement,
       );
       if (nodes.length === 0) return;
       const first = nodes[0];
@@ -36,9 +36,9 @@ export function useFocusTrap(ref: RefObject<HTMLElement | null>, active = true) 
       }
     };
 
-    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener('keydown', onKeyDown);
     return () => {
-      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener('keydown', onKeyDown);
       // return focus to the trigger (e.g. the "VIEW CERTIFICATE" button)
       if (previouslyFocused && document.contains(previouslyFocused)) previouslyFocused.focus({ preventScroll: true });
     };

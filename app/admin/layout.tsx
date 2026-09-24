@@ -1,5 +1,6 @@
-﻿import Link from 'next/link';
+import Link from 'next/link';
 import type { Metadata } from 'next';
+import { SignOutButton } from '@/components/admin/sign-out-button';
 
 export const metadata: Metadata = {
   title: 'Admin // Howard Woon',
@@ -20,10 +21,10 @@ export default function AdminLayout({ children }: Readonly<{ children: React.Rea
             HW.
           </Link>
           <div className="flex items-center gap-4 text-sm text-fog-500">
-            
             <Link href="/admin/messages" className="transition hover:text-white">
               Inbox
             </Link>
+            <SignOutButton />
             <Link href="/" className="transition hover:text-white">
               Back to site
             </Link>
@@ -34,4 +35,3 @@ export default function AdminLayout({ children }: Readonly<{ children: React.Rea
     </main>
   );
 }
-

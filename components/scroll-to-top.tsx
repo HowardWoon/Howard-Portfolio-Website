@@ -14,10 +14,23 @@ export function ScrollToTop() {
   });
 
   useEffect(() => {
-    const toggleVisibility = () => setIsVisible(window.scrollY > 500);
-    toggleVisibility();
-    window.addEventListener("scroll", toggleVisibility, { passive: true });
-    return () => window.removeEventListener("scroll", toggleVisibility);
+    const footer = document.querySelector('footer');
+    let footerVisible = false, typing = false;
+    const update = () => setIsVisible(window.scrollY > 500 && !footerVisible && !typing);
+    const io = footer ? new IntersectionObserver(([e]) => { footerVisible = e.isIntersecting; update(); }) : null;
+    if (footer) io!.observe(footer);
+    const onFocus = (e: FocusEvent) => { typing = (e.target as HTMLElement).matches('input, textarea, select'); update(); };
+    const onBlur = () => { typing = false; update(); };
+    window.addEventListener('scroll', update, { passive: true });
+    document.addEventListener('focusin', onFocus);
+    document.addEventListener('focusout', onBlur);
+    update();
+    return () => {
+      io?.disconnect();
+      window.removeEventListener('scroll', update);
+      document.removeEventListener('focusin', onFocus);
+      document.removeEventListener('focusout', onBlur);
+    };
   }, []);
 
   const scrollToTop = () => {

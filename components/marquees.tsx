@@ -15,7 +15,10 @@ export function TechMarquee({ skills }: { skills: string[] }) {
               {skill}
             </span>
             {/* Bauhaus separator */}
-            <span aria-hidden className="inline-block w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-pop-blue border-3 border-ink mx-2 sm:mx-4" />
+            <span
+              aria-hidden
+              className="inline-block w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-pop-blue border-3 border-ink mx-2 sm:mx-4"
+            />
           </div>
         ))}
       </div>

@@ -51,7 +51,8 @@ export const personalDetails = {
   degree: 'Bachelor of Computer Science (Software Engineering)',
   cgpa: '4.00 / 4.00',
   location: 'Kajang, Selangor / Kuala Lumpur, Malaysia',
-  statement: 'Howard is a software engineer & backend systems architect redefining high-throughput infrastructure, graph algorithms, and autonomous agentic AI workflows, one production prototype at a time.',
+  statement:
+    'Howard is a software engineer & backend systems architect redefining high-throughput infrastructure, graph algorithms, and autonomous agentic AI workflows, one production prototype at a time.',
   email: 'howardwoonhz06@gmail.com',
   github: 'https://github.com/HowardWoon',
   linkedin: 'https://linkedin.com/in/howard-woon-hao-zhe-730b9337a',
@@ -87,7 +88,8 @@ export const projects: Project[] = [
     index: '01',
     title: 'ZeroLag',
     tagline: 'Autonomous Multi-Operator Sales Intelligence Pipeline',
-    description: 'Engineered an enterprise agentic triage system that ingests unstructured multi-channel communications, classifies intent with 98.6% confidence, and dispatches automated webhook responses with zero manual lag.',
+    description:
+      'Engineered an enterprise agentic triage system that ingests unstructured multi-channel communications, classifies intent with 98.6% confidence, and dispatches automated webhook responses with zero manual lag.',
     architectureHighlight: '5-Operator asynchronous DAG agent pipeline with real-time confidence thresholding.',
     category: 'Agentic AI',
     technologies: ['TypeScript', 'Next.js 15', 'FastAPI', 'Agentic Workflows', 'Tailwind CSS'],
@@ -103,8 +105,10 @@ export const projects: Project[] = [
     index: '02',
     title: 'ProofPay',
     tagline: 'Delivery-Linked B2B Escrow & Settlement Platform',
-    description: 'A decentralized B2B Transaction Truth Engine built on Sui. Turns purchase orders into programmable settlement agreements using milestone-based escrow releases and Gonka-powered AI evidence verification.',
-    architectureHighlight: 'Sui Move smart contract escrow with atomic PTB funding and Gonka Router multi-model AI evidence verification.',
+    description:
+      'A decentralized B2B Transaction Truth Engine built on Sui. Turns purchase orders into programmable settlement agreements using milestone-based escrow releases and Gonka-powered AI evidence verification.',
+    architectureHighlight:
+      'Sui Move smart contract escrow with atomic PTB funding and Gonka Router multi-model AI evidence verification.',
     category: 'Distributed Backends',
     technologies: ['Sui Move', 'Next.js', 'USDC Stablecoin', 'Gonka Router', 'TypeScript'],
     liveUrl: 'https://proofpay-choong-zhuo-lins-projects.vercel.app/',
@@ -118,7 +122,8 @@ export const projects: Project[] = [
     index: '03',
     title: 'Slotify',
     tagline: 'Minimum-Congestion Vehicle Routing & Parking Allocation Engine',
-    description: 'High-performance backend engine utilizing custom Graph algorithms (Dijkstra, Min-Heaps, and AVL Trees) for real-time parking spot reservation and sub-40ms vehicular routing.',
+    description:
+      'High-performance backend engine utilizing custom Graph algorithms (Dijkstra, Min-Heaps, and AVL Trees) for real-time parking spot reservation and sub-40ms vehicular routing.',
     architectureHighlight: 'O((V + E) log V) Dijkstra Graph Router with dynamic obstacle & congestion re-weighing.',
     category: 'Distributed Backends',
     technologies: ['Java 21', 'Spring Boot', 'Graph Algorithms', 'Min-Heaps', 'PostgreSQL'],
@@ -133,7 +138,8 @@ export const projects: Project[] = [
     index: '04',
     title: 'BILAHUJAN',
     tagline: 'Disaster Preparedness & AI Flood Telemetry Emergency Response',
-    description: 'Real-time disaster response system delivering predictive water level warnings, offline evacuation route generation, and automated crisis alert broadcasts for vulnerable municipal zones.',
+    description:
+      'Real-time disaster response system delivering predictive water level warnings, offline evacuation route generation, and automated crisis alert broadcasts for vulnerable municipal zones.',
     architectureHighlight: 'Live telemetry ingestion with GIS shelter pathfinding and automated SMS dispatch.',
     category: 'IoT & Cloud',
     technologies: ['Flutter', 'Python', 'FastAPI', 'GIS Mapping', 'Supabase'],
@@ -150,8 +156,10 @@ export const projects: Project[] = [
     index: '05',
     title: 'Sensor X Sensei',
     tagline: 'Smart Micro-Climate Energy Management System',
-    description: 'Intelligent, automated energy management solution for modern lecture halls leveraging IoT-based occupancy tracking to dynamically route power and HVAC ventilation only to occupied rows.',
-    architectureHighlight: 'Dual-rail power system via ESP32, authenticated via NFC with real-time C++ WebServer telemetry and Glassmorphism dashboard.',
+    description:
+      'Intelligent, automated energy management solution for modern lecture halls leveraging IoT-based occupancy tracking to dynamically route power and HVAC ventilation only to occupied rows.',
+    architectureHighlight:
+      'Dual-rail power system via ESP32, authenticated via NFC with real-time C++ WebServer telemetry and Glassmorphism dashboard.',
     category: 'IoT & Cloud',
     technologies: ['C++', 'ESP32', 'React', 'Tailwind CSS', 'IoT Sensors'],
     githubUrl: 'https://github.com/HowardWoon/Sensor-X-Sensei---UM-Technothon-2026',
@@ -228,7 +236,8 @@ export const awards: AwardItem[] = [
     issuer: 'UM Game Jam 2026 (PEKOM)',
     date: 'Apr 2026',
     highlight: 'National Game Jam',
-    description: 'Developed "The Goofy Experience" with Team Charlton—a medical horror/comedy game themed around "Losing Control". Implemented complex Perceptual Sabotage mechanics (UI hijacking, cursor manipulation) and a Chaos Buddy system to actively disorient players. Features 100% custom a cappella audio. Won against 39 universities nationwide.',
+    description:
+      'Developed "The Goofy Experience" with Team Charlton—a medical horror/comedy game themed around "Losing Control". Implemented complex Perceptual Sabotage mechanics (UI hijacking, cursor manipulation) and a Chaos Buddy system to actively disorient players. Features 100% custom a cappella audio. Won against 39 universities nationwide.',
     stats: 'Public Choice / 39 Teams',
     link: 'https://howard-woon.itch.io/the-goofy-experience',
     certificateUrl: '/certificates/UM GAME JAM 2026 HOWARD WOON HAO ZHE.png',
@@ -240,7 +249,8 @@ export const awards: AwardItem[] = [
     issuer: 'Supervity AutoPilot Asia Hackathon 2026',
     date: 'August 2026',
     highlight: 'Regional Hackathon Prize',
-    description: 'Built ZeroLag, an autonomous multi-agent sales command center, outperforming over 50 regional teams across APAC.',
+    description:
+      'Built ZeroLag, an autonomous multi-agent sales command center, outperforming over 50 regional teams across APAC.',
     stats: '2nd / 50+ Regional Teams',
     certificateUrl: '/certificates/Sales Intelligence Winner - 2nd Place.png',
   },
@@ -251,7 +261,8 @@ export const awards: AwardItem[] = [
     issuer: 'Faculty of Computer Science & IT, Universiti Malaya',
     date: '2025 – 2026',
     highlight: 'Academic Distinction',
-    description: 'Maintained a flawless 4.00 CGPA across all software engineering, data structures, algorithms, and distributed systems coursework.',
+    description:
+      'Maintained a flawless 4.00 CGPA across all software engineering, data structures, algorithms, and distributed systems coursework.',
     stats: 'Top 1% Academic Distinction',
   },
   {
@@ -285,29 +296,55 @@ export const skillsMatrix = [
   },
 ];
 
-export const fallbackSkills = skillsMatrix.flatMap(ts => ts.skills.map((s, i) => ({ id: `${ts.category}-${i}`, name: s, category: ts.category })));
-export const fallbackExperiences = experiences.map((e, i) => ({ id: e.id, title: e.role, company: e.organization, date_range: e.period, description: e.description.join(' '), is_active: i===0 }));
-export const fallbackProjects = projects.map(p => ({ id: p.id, title: p.title, description: p.description, image_url: '', project_url: p.githubUrl, github_url: p.githubUrl, tags: p.technologies }));
-export const fallbackAwards = awards.map(a => ({ id: a.id, title: a.title, issuer: a.issuer, date_received: a.date, description: a.description }));
+export const fallbackSkills = skillsMatrix.flatMap((ts) =>
+  ts.skills.map((s, i) => ({ id: `${ts.category}-${i}`, name: s, category: ts.category })),
+);
+export const fallbackExperiences = experiences.map((e, i) => ({
+  id: e.id,
+  title: e.role,
+  company: e.organization,
+  date_range: e.period,
+  description: e.description.join(' '),
+  is_active: i === 0,
+}));
+export const fallbackProjects = projects.map((p) => ({
+  id: p.id,
+  title: p.title,
+  description: p.description,
+  image_url: '',
+  project_url: p.githubUrl,
+  github_url: p.githubUrl,
+  tags: p.technologies,
+}));
+export const fallbackAwards = awards.map((a) => ({
+  id: a.id,
+  title: a.title,
+  issuer: a.issuer,
+  date_received: a.date,
+  description: a.description,
+}));
 
 export const faqs = [
   {
-    question: "What kind of role are you looking for?",
-    answer: "I am primarily looking for Backend Engineering, Systems Engineering, or Data Infrastructure roles where I can leverage Java, Python, and Spring Boot to build distributed logic and agentic workflows."
+    question: 'What kind of role are you looking for?',
+    answer:
+      'I am primarily looking for Backend Engineering, Systems Engineering, or Data Infrastructure roles where I can leverage Java, Python, and Spring Boot to build distributed logic and agentic workflows.',
   },
   {
-    question: "Are you open to internships or full-time?",
-    answer: "I am currently seeking software engineering internships or part-time contracting roles alongside my undergraduate studies at Universiti Malaya."
+    question: 'Are you open to internships or full-time?',
+    answer:
+      'I am currently seeking software engineering internships or part-time contracting roles alongside my undergraduate studies at Universiti Malaya.',
   },
   {
-    question: "What is your notice period / earliest start date?",
-    answer: "I am available to begin a new role within 2 weeks of offer acceptance, depending on academic term commitments."
+    question: 'What is your notice period / earliest start date?',
+    answer:
+      'I am available to begin a new role within 2 weeks of offer acceptance, depending on academic term commitments.',
   },
   {
-    question: "Which tech stack are you strongest in?",
-    answer: "My strongest ecosystem is Java/Spring Boot for scalable backends, coupled with Python (FastAPI) for AI and data orchestration. I am highly proficient with PostgreSQL, Docker, and graph algorithm implementations."
-  }
+    question: 'Which tech stack are you strongest in?',
+    answer:
+      'My strongest ecosystem is Java/Spring Boot for scalable backends, coupled with Python (FastAPI) for AI and data orchestration. I am highly proficient with PostgreSQL, Docker, and graph algorithm implementations.',
+  },
 ];
 
 export const fallbackProfile = personalDetails;
-

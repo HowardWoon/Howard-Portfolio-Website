@@ -33,7 +33,7 @@ export function TiltCard({
   const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], [`-${maxTilt}deg`, `${maxTilt}deg`]);
 
   const handleMouseMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!ref.current || reduce || e.pointerType === "touch") return; // no stuck tilt after taps
+    if (!ref.current || reduce || e.pointerType === 'touch') return; // no stuck tilt after taps
     const rect = ref.current.getBoundingClientRect();
     x.set((e.clientX - rect.left) / rect.width - 0.5);
     y.set((e.clientY - rect.top) / rect.height - 0.5);

@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { motion, useMotionValue, useSpring, useReducedMotion } from "framer-motion";
-import { useRef, ReactNode, PointerEvent } from "react";
+import { motion, useMotionValue, useSpring, useReducedMotion } from 'framer-motion';
+import { useRef, ReactNode, PointerEvent } from 'react';
 
 interface MagneticProps {
   children: ReactNode;
@@ -9,11 +9,11 @@ interface MagneticProps {
   strength?: number;
 }
 
-export function Magnetic({ children, className = "", strength = 0.5 }: MagneticProps) {
+export function Magnetic({ children, className = '', strength = 0.5 }: MagneticProps) {
   const ref = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  
+
   const prefersReducedMotion = useReducedMotion();
 
   const springConfig = { damping: 15, stiffness: 150, mass: 0.1 };
@@ -22,13 +22,13 @@ export function Magnetic({ children, className = "", strength = 0.5 }: MagneticP
 
   const handleMouseMove = (e: PointerEvent<HTMLDivElement>) => {
     // Touch taps emit a synthetic move with no leave → the button used to stay shifted off-centre on phones
-    if (prefersReducedMotion || e.pointerType === "touch" || !ref.current) return;
-    
+    if (prefersReducedMotion || e.pointerType === 'touch' || !ref.current) return;
+
     const { clientX, clientY } = e;
     const { height, width, left, top } = ref.current.getBoundingClientRect();
     const centerX = left + width / 2;
     const centerY = top + height / 2;
-    
+
     x.set((clientX - centerX) * strength);
     y.set((clientY - centerY) * strength);
   };

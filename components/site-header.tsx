@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import React, { useEffect, useRef } from "react";
-import Image from "next/image";
-import { motion } from "framer-motion";
-import { Magnetic } from "./magnetic-button";
-import { ExternalLink, FileText, Search } from "lucide-react";
+import React, { useEffect, useRef } from 'react';
+import Image from 'next/image';
+import { motion } from 'framer-motion';
+import { Magnetic } from './magnetic-button';
+import { ExternalLink, FileText, Search } from 'lucide-react';
 
 export function SiteHeader() {
   const ref = useRef<HTMLElement>(null);
@@ -14,7 +14,8 @@ export function SiteHeader() {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const set = () => document.documentElement.style.setProperty("--header-h", `${Math.round(el.getBoundingClientRect().height)}px`);
+    const set = () =>
+      document.documentElement.style.setProperty('--header-h', `${Math.round(el.getBoundingClientRect().height)}px`);
     set();
     const ro = new ResizeObserver(set);
     ro.observe(el);
@@ -64,9 +65,7 @@ export function SiteHeader() {
       >
         <div className="hidden lg:flex items-center gap-2.5 bg-white px-4 py-2 rounded-full border-3 border-ink shadow-brutal-sm">
           <span className="nb-led" aria-hidden />
-          <span className="text-xs font-mono font-extrabold tracking-[0.08em] text-ink">
-            AVAILABLE FOR HIRE 2026
-          </span>
+          <span className="text-xs font-mono font-extrabold tracking-[0.08em] text-ink">AVAILABLE FOR HIRE 2026</span>
         </div>
 
         <Magnetic strength={0.3}>
@@ -79,7 +78,10 @@ export function SiteHeader() {
           >
             <span className="sr-only min-[400px]:not-sr-only">RESUME</span>
             <FileText className="w-4 h-4 min-[400px]:hidden" strokeWidth={2.75} aria-hidden />
-            <ExternalLink className="hidden sm:block w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" strokeWidth={2.5} />
+            <ExternalLink
+              className="hidden sm:block w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
+              strokeWidth={2.5}
+            />
           </a>
         </Magnetic>
         <button

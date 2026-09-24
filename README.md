@@ -1,12 +1,12 @@
 <div align="center">
   <img src="https://howard-woon-portfolio.vercel.app/images/howard-solid.jpeg" alt="Howard Woon" width="120" height="120" style="border-radius: 50%;" />
-  
+
   <h1 align="center">Howard Woon · Software Engineer</h1>
-  
+
   <p align="center">
     <strong>A high-performance, system-architecture focused portfolio.</strong>
   </p>
-  
+
   <p align="center">
     <a href="https://howard-woon-portfolio.vercel.app">Live Portfolio</a> · 
     <a href="https://www.linkedin.com/in/howard-woon-hao-zhe-730b9337a/">LinkedIn</a>

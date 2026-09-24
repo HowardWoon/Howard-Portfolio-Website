@@ -1,15 +1,14 @@
-"use client";
+'use client';
 
-import React, { useRef } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useBooted } from "./boot-sequence";
-import { Magnetic } from "./magnetic-button";
-import { Sparkles, Terminal } from "lucide-react";
-import { toLocal } from "@/lib/to-local";
-import { SpiderReveal } from "./spider-reveal";
-
+import React, { useRef } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { useBooted } from './boot-sequence';
+import { Magnetic } from './magnetic-button';
+import { Sparkles, Terminal } from 'lucide-react';
+import { toLocal } from '@/lib/to-local';
+import { SpiderReveal } from './spider-reveal';
 
 /**
  * X-ray magnifier headline.
@@ -23,15 +22,15 @@ function MagnifiedHeadline() {
   const setVars = (x: number, y: number, on: boolean) => {
     const el = containerRef.current;
     if (!el) return;
-    el.style.setProperty("--mx", `${x}px`);
-    el.style.setProperty("--my", `${y}px`);
-    el.dataset.hover = on ? "true" : "false";
+    el.style.setProperty('--mx', `${x}px`);
+    el.style.setProperty('--my', `${y}px`);
+    el.dataset.hover = on ? 'true' : 'false';
   };
 
   // Mouse / pen only. On phones a tap fires a synthetic mousemove with no mouseleave, which used to
   // leave the headline stuck at 25% opacity with a magnifier circle frozen on screen.
   const handlePointerMove = (e: React.PointerEvent) => {
-    if (e.pointerType === "touch" || !containerRef.current) return;
+    if (e.pointerType === 'touch' || !containerRef.current) return;
     const { x, y } = toLocal(containerRef.current, e.clientX, e.clientY);
     setVars(x, y, true);
   };
@@ -41,16 +40,15 @@ function MagnifiedHeadline() {
   React.useEffect(() => {
     const off = () => {
       const el = containerRef.current;
-      if (el?.dataset.hover === "true") setVars(-1000, -1000, false);
+      if (el?.dataset.hover === 'true') setVars(-1000, -1000, false);
     };
-    window.addEventListener("scroll", off, { passive: true });
-    return () => window.removeEventListener("scroll", off);
+    window.addEventListener('scroll', off, { passive: true });
+    return () => window.removeEventListener('scroll', off);
   }, []);
 
   const headlineClass =
-    "font-display text-[clamp(1.85rem,10.8vw,2.6rem)] leading-[0.95] sm:text-6xl md:text-7xl xl:text-[5.6rem] landscape-short:!text-5xl font-extrabold uppercase tracking-[-0.035em]";
-  const chipClass =
-    "inline-block my-1 px-2 xs:px-3 border-3 rounded-xl xs:rounded-2xl -rotate-1";
+    'font-display text-[clamp(1.85rem,10.8vw,2.6rem)] leading-[0.95] sm:text-6xl md:text-7xl xl:text-[5.6rem] landscape-short:!text-5xl font-extrabold uppercase tracking-[-0.035em]';
+  const chipClass = 'inline-block my-1 px-2 xs:px-3 border-3 rounded-xl xs:rounded-2xl -rotate-1';
 
   return (
     <div
@@ -58,17 +56,16 @@ function MagnifiedHeadline() {
       onPointerMove={handlePointerMove}
       onPointerLeave={() => setVars(-1000, -1000, false)}
       data-hover="false"
-      style={{ ["--mx" as string]: "-1000px", ["--my" as string]: "-1000px" }}
+      style={{ ['--mx' as string]: '-1000px', ['--my' as string]: '-1000px' }}
       className="group/headline relative space-y-2"
     >
       {/* Base Normal Text */}
-      <h2 className={`${headlineClass} text-ink transition-opacity duration-300 group-data-[hover=true]/headline:opacity-25`}>
+      <h2
+        className={`${headlineClass} text-ink transition-opacity duration-300 group-data-[hover=true]/headline:opacity-25`}
+      >
         ENGINEERING <br />
-        <span className={`${chipClass} bg-pop-yellow border-ink shadow-brutal text-ink`}>
-          SYSTEMS TO
-        </span> <br />
-        STAND OUT IN <br />
-        A NOISY WORLD.
+        <span className={`${chipClass} bg-pop-yellow border-ink shadow-brutal text-ink`}>SYSTEMS TO</span> <br />
+        STAND OUT IN <br />A NOISY WORLD.
       </h2>
 
       {/* Scaled X-Ray Magnification Text (decorative duplicate) */}
@@ -76,18 +73,15 @@ function MagnifiedHeadline() {
         aria-hidden="true"
         className={`${headlineClass} text-pop-blue absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-150 group-data-[hover=true]/headline:opacity-100`}
         style={{
-          transform: "scale(1.15)",
-          transformOrigin: "var(--mx) var(--my)",
-          WebkitMaskImage: "radial-gradient(circle 140px at var(--mx) var(--my), black 60%, transparent 100%)",
-          maskImage: "radial-gradient(circle 140px at var(--mx) var(--my), black 60%, transparent 100%)",
+          transform: 'scale(1.15)',
+          transformOrigin: 'var(--mx) var(--my)',
+          WebkitMaskImage: 'radial-gradient(circle 140px at var(--mx) var(--my), black 60%, transparent 100%)',
+          maskImage: 'radial-gradient(circle 140px at var(--mx) var(--my), black 60%, transparent 100%)',
         }}
       >
         ENGINEERING <br />
-        <span className={`${chipClass} bg-pop-red border-ink text-white`}>
-          SYSTEMS TO
-        </span> <br />
-        STAND OUT IN <br />
-        A NOISY WORLD.
+        <span className={`${chipClass} bg-pop-red border-ink text-white`}>SYSTEMS TO</span> <br />
+        STAND OUT IN <br />A NOISY WORLD.
       </h2>
 
       {/* Decorative squiggle */}
@@ -114,7 +108,7 @@ export default function BikebearHero() {
   // Scroll Exit Animation
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start start", "end start"],
+    offset: ['start start', 'end start'],
   });
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 0.8], [1, 0.95]);
@@ -144,10 +138,8 @@ export default function BikebearHero() {
       {/* Main Hero Body */}
       <div className="relative flex-1 flex items-center w-full max-w-[1440px] mx-auto px-4 xs:px-5 sm:px-10 lg:px-16 pt-[calc(var(--header-h)+1.75rem)] sm:pt-[calc(var(--header-h)+3rem)] pb-14 z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center w-full">
-
           {/* Left Column: Vision & Narrative (7 cols) */}
           <div className="lg:col-span-7 flex flex-col items-start space-y-7 relative z-30 pointer-events-auto">
-
             {/* Brand Pill Badge */}
             <motion.div
               initial={{ opacity: 0, y: 15 }}
@@ -174,9 +166,12 @@ export default function BikebearHero() {
               initial={{ opacity: 0, y: 10 }}
               animate={booted ? { opacity: 1, y: 0 } : undefined}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-ink-soft text-lg sm:text-xl max-w-xl leading-relaxed font-sans font-medium"
+              className="text-ink-soft text-lg sm:text-xl max-w-xl leading-relaxed font-sans font-medium [overflow-wrap:anywhere]"
             >
-              Architecting robust, <span className="nb-marker font-bold text-ink">low-latency distributed backends</span> and <span className="nb-marker font-bold text-ink">autonomous AI systems</span> — engineered with algorithmic precision, enterprise scalability, and strategic fiscal discipline.
+              Architecting robust,{' '}
+              <span className="nb-marker font-bold text-ink">low-latency distributed backends</span> and{' '}
+              <span className="nb-marker font-bold text-ink">autonomous AI systems</span> — engineered with algorithmic
+              precision, enterprise scalability, and strategic fiscal discipline.
             </motion.p>
 
             {/* Call to Action Buttons */}
@@ -203,8 +198,14 @@ export default function BikebearHero() {
           {/* Right Column: Portrait Card (5 cols) */}
           <div className="lg:col-span-5 flex justify-center lg:justify-end w-full relative">
             {/* Big Bauhaus sun behind the portrait */}
-            <div aria-hidden className="pointer-events-none absolute -top-6 right-0 sm:right-10 w-40 h-40 xs:w-56 xs:h-56 sm:w-72 sm:h-72 rounded-full bg-pop-yellow border-3 border-ink" />
-            <div aria-hidden className="pointer-events-none absolute -bottom-6 left-0 lg:left-auto lg:right-[70%] w-20 h-20 xs:w-28 xs:h-28 bg-pop-lilac border-3 border-ink rounded-[28px] rotate-6" />
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -top-6 right-0 sm:right-10 w-40 h-40 xs:w-56 xs:h-56 sm:w-72 sm:h-72 rounded-full bg-pop-yellow border-3 border-ink"
+            />
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -bottom-6 left-0 lg:left-auto lg:right-[70%] w-20 h-20 xs:w-28 xs:h-28 bg-pop-lilac border-3 border-ink rounded-[28px] rotate-6"
+            />
 
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
@@ -244,14 +245,15 @@ export default function BikebearHero() {
                 <SpiderReveal />
 
                 {/* Corner sticker */}
-                <div aria-hidden className="absolute left-4 bottom-4 w-14 h-14 rounded-full bg-white border-3 border-ink grid place-items-center shadow-brutal-sm animate-spin-slow">
+                <div
+                  aria-hidden
+                  className="absolute left-4 bottom-4 w-14 h-14 rounded-full bg-white border-3 border-ink grid place-items-center shadow-brutal-sm animate-spin-slow"
+                >
                   <span className="font-display font-extrabold text-xl text-ink">✦</span>
                 </div>
               </div>
-
             </motion.div>
           </div>
-
         </div>
       </div>
     </motion.section>

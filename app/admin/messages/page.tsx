@@ -56,7 +56,10 @@ export default async function MessagesPage() {
           </div>
         ) : (
           messages.map((message) => (
-            <article key={message.id} className={`glass-panel rounded-[2rem] p-6 sm:p-7 transition-all ${!message.is_read ? 'border-amber-500/30 bg-[#0E121B]' : 'opacity-80'}`}>
+            <article
+              key={message.id}
+              className={`glass-panel rounded-[2rem] p-6 sm:p-7 transition-all ${!message.is_read ? 'border-amber-500/30 bg-[#0E121B]' : 'opacity-80'}`}
+            >
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-3">
@@ -101,7 +104,9 @@ export default async function MessagesPage() {
                   <span>Reply</span>
                 </Link>
 
-                <form action={message.is_read ? markAsUnread.bind(null, message.id) : markAsRead.bind(null, message.id)}>
+                <form
+                  action={message.is_read ? markAsUnread.bind(null, message.id) : markAsRead.bind(null, message.id)}
+                >
                   <button type="submit" className="pill-button bg-white/[0.04] text-white hover:bg-white/10">
                     {message.is_read ? (
                       <>

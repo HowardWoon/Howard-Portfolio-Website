@@ -1,25 +1,30 @@
-"use client";
+'use client';
 
-import React, { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
-import { 
-  Terminal, 
-  Play, 
-  Cpu, 
-  Zap, 
-  CheckCircle2,
-  Radio
-} from "lucide-react";
-
+import React, { useEffect, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
+import { Terminal, Play, Cpu, Zap, CheckCircle2, Radio } from 'lucide-react';
 
 /** setTimeout/setInterval that are all cleared when the simulator unmounts
  *  (navigating away mid-run used to keep firing setState on an unmounted component). */
 function useTimers() {
   const ids = useRef<number[]>([]);
-  useEffect(() => () => ids.current.forEach((id) => { clearTimeout(id); clearInterval(id); }), []);
+  useEffect(
+    () => () =>
+      ids.current.forEach((id) => {
+        clearTimeout(id);
+        clearInterval(id);
+      }),
+    [],
+  );
   return {
-    timeout: (fn: () => void, ms: number) => { ids.current.push(window.setTimeout(fn, ms)); },
-    interval: (fn: () => void, ms: number) => { const id = window.setInterval(fn, ms); ids.current.push(id); return id; },
+    timeout: (fn: () => void, ms: number) => {
+      ids.current.push(window.setTimeout(fn, ms));
+    },
+    interval: (fn: () => void, ms: number) => {
+      const id = window.setInterval(fn, ms);
+      ids.current.push(id);
+      return id;
+    },
   };
 }
 
@@ -31,11 +36,11 @@ export function ZeroLagSimulator() {
   const [isRunning, setIsRunning] = useState(false);
 
   const stages = [
-    { name: "Prospect Ingestion", desc: "Parsing metadata & LinkedIn public headers" },
-    { name: "Scraper Agent", desc: "Synthesizing recent company announcements & funding" },
-    { name: "Sentiment Scorer", desc: "Running zero-shot intent classifier" },
-    { name: "Lead Ranker", desc: "Calculating conversion affinity score (0.00 - 1.00)" },
-    { name: "CRM Dispatch", desc: "Syncing vectorized payload to Supabase & CRM" },
+    { name: 'Prospect Ingestion', desc: 'Parsing metadata & LinkedIn public headers' },
+    { name: 'Scraper Agent', desc: 'Synthesizing recent company announcements & funding' },
+    { name: 'Sentiment Scorer', desc: 'Running zero-shot intent classifier' },
+    { name: 'Lead Ranker', desc: 'Calculating conversion affinity score (0.00 - 1.00)' },
+    { name: 'CRM Dispatch', desc: 'Syncing vectorized payload to Supabase & CRM' },
   ];
 
   const timers = useTimers();
@@ -80,8 +85,8 @@ export function ZeroLagSimulator() {
           disabled={isRunning}
           className="flex items-center gap-2 px-6 py-3 rounded-full bg-amber-400 hover:bg-amber-300 text-black font-mono font-bold text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 transition-all active:scale-95 disabled:opacity-50"
         >
-          <Play className={`w-3.5 h-3.5 ${isRunning ? "animate-spin" : ""}`} />
-          <span>{isRunning ? "AGENTS EXECUTING..." : "DISPATCH AGENT PIPELINE"}</span>
+          <Play className={`w-3.5 h-3.5 ${isRunning ? 'animate-spin' : ''}`} />
+          <span>{isRunning ? 'AGENTS EXECUTING...' : 'DISPATCH AGENT PIPELINE'}</span>
         </button>
       </div>
 
@@ -97,10 +102,10 @@ export function ZeroLagSimulator() {
               key={idx}
               className={`p-4 rounded-2xl border transition-all duration-300 flex flex-col justify-between space-y-3 ${
                 isCurrent
-                  ? "border-amber-400 bg-amber-400/10 shadow-lg shadow-amber-500/10"
+                  ? 'border-amber-400 bg-amber-400/10 shadow-lg shadow-amber-500/10'
                   : isDone
-                  ? "border-emerald-500/40 bg-emerald-500/5 text-neutral-300"
-                  : "border-white/10 bg-white/[0.02] text-neutral-500"
+                    ? 'border-emerald-500/40 bg-emerald-500/5 text-neutral-300'
+                    : 'border-white/10 bg-white/[0.02] text-neutral-500'
               }`}
             >
               <div className="flex items-center justify-between">
@@ -114,12 +119,10 @@ export function ZeroLagSimulator() {
                 )}
               </div>
               <div>
-                <div className={`font-mono text-xs font-bold ${isCurrent ? "text-amber-300" : "text-white"}`}>
+                <div className={`font-mono text-xs font-bold ${isCurrent ? 'text-amber-300' : 'text-white'}`}>
                   {stage.name}
                 </div>
-                <div className="text-xs font-sans text-neutral-400 mt-1 leading-tight">
-                  {stage.desc}
-                </div>
+                <div className="text-xs font-sans text-neutral-400 mt-1 leading-tight">{stage.desc}</div>
               </div>
             </div>
           );
@@ -131,11 +134,11 @@ export function ZeroLagSimulator() {
         <div className="flex items-center gap-2 text-neutral-300">
           <Terminal className="w-4 h-4 text-amber-400" />
           <span>
-            {currentStage >= DONE 
-              ? "Lead Qualified: Score 0.96 [High Priority] · Auto-Dispatched to Enterprise CRM." 
-              : isRunning 
-              ? `Executing Node #${currentStage}: ${stages[currentStage - 1]?.name}...` 
-              : "System Idle. Click 'Dispatch Agent Pipeline' to execute state machine."}
+            {currentStage >= DONE
+              ? 'Lead Qualified: Score 0.96 [High Priority] · Auto-Dispatched to Enterprise CRM.'
+              : isRunning
+                ? `Executing Node #${currentStage}: ${stages[currentStage - 1]?.name}...`
+                : "System Idle. Click 'Dispatch Agent Pipeline' to execute state machine."}
           </span>
         </div>
         <span className="text-xs text-amber-400 uppercase font-bold">LangGraph Orchestrator</span>
@@ -154,10 +157,10 @@ export function BilahujanSimulator() {
   const [logs, setLogs] = useState<LogLine[]>([
     { t: '--:--:--', msg: '[System] Firebase RTDB connected.' },
     { t: '--:--:--', msg: '[Agent] Gemini 2.0 Flash Command Agent IDLE.' },
-    { t: '--:--:--', msg: 'Awaiting citizen flood reports...' }
+    { t: '--:--:--', msg: 'Awaiting citizen flood reports...' },
   ]);
-  const push = (...msgs: string[]) => setLogs(p => [...p, ...msgs.map(msg => ({ t: stamp(), msg }))]);
-  
+  const push = (...msgs: string[]) => setLogs((p) => [...p, ...msgs.map((msg) => ({ t: stamp(), msg }))]);
+
   const logRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = logRef.current;
@@ -170,24 +173,30 @@ export function BilahujanSimulator() {
   const triggerReport = () => {
     if (isSimulating) return;
     setIsSimulating(true);
-    setLogs([{ t: stamp(), msg: "[Node] Citizen uploaded flood image at KL-007 (Ampang)" }]);
+    setLogs([{ t: stamp(), msg: '[Node] Citizen uploaded flood image at KL-007 (Ampang)' }]);
     setSeverity(null);
-    
+
     timers.timeout(() => {
-      push("[Vision] gemini-2.5-flash 12-pass analysis started...");
+      push('[Vision] gemini-2.5-flash 12-pass analysis started...');
     }, 600);
 
     timers.timeout(() => {
-      push("[Vision] Pass 5 (Rooftop Cue): DETECTED", "[Vision] Severity Override applied -> 9 (CRITICAL)");
+      push('[Vision] Pass 5 (Rooftop Cue): DETECTED', '[Vision] Severity Override applied -> 9 (CRITICAL)');
       setSeverity(9);
     }, 1800);
 
     timers.timeout(() => {
-      push("[Agent] New node detected via get_active_nodes MCP tool", "[Agent] Chain-of-Thought: 'Zone KL-007 has severity 9. I will dispatch an alert to NADMA.'");
+      push(
+        '[Agent] New node detected via get_active_nodes MCP tool',
+        "[Agent] Chain-of-Thought: 'Zone KL-007 has severity 9. I will dispatch an alert to NADMA.'",
+      );
     }, 3200);
 
     timers.timeout(() => {
-      push("[MCP] Executing: dispatch_alert(zone: 'KL-007', severity: 9)", "[System] Authority notification sent to JPS & NADMA via Firebase.");
+      push(
+        "[MCP] Executing: dispatch_alert(zone: 'KL-007', severity: 9)",
+        '[System] Authority notification sent to JPS & NADMA via Firebase.',
+      );
       setIsSimulating(false);
     }, 4800);
   };
@@ -216,11 +225,11 @@ export function BilahujanSimulator() {
           disabled={isSimulating}
           className={`px-5 py-2.5 rounded-full border text-xs font-mono font-bold uppercase tracking-wider transition-colors ${
             isSimulating
-              ? "bg-neutral-800 border-neutral-700 text-neutral-500 cursor-not-allowed"
-              : "bg-cyan-500/10 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20"
+              ? 'bg-neutral-800 border-neutral-700 text-neutral-500 cursor-not-allowed'
+              : 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20'
           }`}
         >
-          {isSimulating ? "Agent Active..." : "Simulate Citizen Report"}
+          {isSimulating ? 'Agent Active...' : 'Simulate Citizen Report'}
         </button>
       </div>
 
@@ -228,7 +237,7 @@ export function BilahujanSimulator() {
         {/* Left: Swarm Map / Status */}
         <div className="lg:col-span-4 bg-black/60 border border-white/10 rounded-2xl p-6 flex flex-col justify-between">
           <div className="space-y-2 text-xs font-mono">
-            <div className="text-neutral-500">{"// Firebase Node Status"}</div>
+            <div className="text-neutral-500">{'// Firebase Node Status'}</div>
             <div className="flex justify-between items-center text-neutral-300">
               <span>Active Citizen Nodes</span>
               <span className="text-cyan-400 font-bold">144 Nodes</span>
@@ -256,29 +265,29 @@ export function BilahujanSimulator() {
           </div>
           <div ref={logRef} role="log" aria-live="polite" className="space-y-2 h-[150px] overflow-y-auto pr-2">
             {logs.map((logObj, i) => {
-                const log = typeof logObj === "string" ? logObj : logObj.msg;
-                const time = typeof logObj === "string" ? "--:--:--" : logObj.t;
-                const isCritical = log.includes("CRITICAL") || log.includes("NADMA");
-                const isAgent = log.includes("[Agent]") || log.includes("[Vision]");
-                const isMcp = log.includes("[MCP]");
-                
-                let textColor = "text-neutral-400";
-                if (isCritical) textColor = "text-red-400";
-                else if (isAgent) textColor = "text-cyan-300";
-                else if (isMcp) textColor = "text-amber-400";
+              const log = typeof logObj === 'string' ? logObj : logObj.msg;
+              const time = typeof logObj === 'string' ? '--:--:--' : logObj.t;
+              const isCritical = log.includes('CRITICAL') || log.includes('NADMA');
+              const isAgent = log.includes('[Agent]') || log.includes('[Vision]');
+              const isMcp = log.includes('[MCP]');
 
-                return (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className={textColor}
-                  >
-                    <span className="opacity-50 mr-2">{time}</span>
-                    {log}
-                  </motion.div>
-                );
-              })}
+              let textColor = 'text-neutral-400';
+              if (isCritical) textColor = 'text-red-400';
+              else if (isAgent) textColor = 'text-cyan-300';
+              else if (isMcp) textColor = 'text-amber-400';
+
+              return (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className={textColor}
+                >
+                  <span className="opacity-50 mr-2">{time}</span>
+                  {log}
+                </motion.div>
+              );
+            })}
             {isSimulating && (
               <div className="flex items-center gap-2 text-neutral-500 pt-2">
                 <span className="animate-pulse">_</span>
@@ -320,36 +329,32 @@ export function SensorXSimulator() {
         <button
           onClick={() => setIsOccupied(!isOccupied)}
           className={`px-5 py-2.5 rounded-full font-mono text-xs font-bold uppercase tracking-wider transition-all ${
-            isOccupied 
-              ? "bg-emerald-400 text-black shadow-lg shadow-emerald-500/20" 
-              : "bg-red-500/20 text-red-300 border border-red-500/40"
+            isOccupied
+              ? 'bg-emerald-400 text-black shadow-lg shadow-emerald-500/20'
+              : 'bg-red-500/20 text-red-300 border border-red-500/40'
           }`}
         >
-          {isOccupied ? "SIMULATE: ROOM VACATED" : "SIMULATE: STUDENT ENTERED"}
+          {isOccupied ? 'SIMULATE: ROOM VACATED' : 'SIMULATE: STUDENT ENTERED'}
         </button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="p-5 bg-black/60 border border-white/10 rounded-2xl space-y-1">
           <span className="text-xs font-mono text-neutral-400">ACTIVE POWER LOAD</span>
-          <div className="text-3xl font-mono font-bold text-white">
-            {isOccupied ? "1.84 kW" : "0.72 kW"}
-          </div>
+          <div className="text-3xl font-mono font-bold text-white">{isOccupied ? '1.84 kW' : '0.72 kW'}</div>
           <span className="text-xs font-mono text-neutral-500">HVAC + Smart Relays</span>
         </div>
 
         <div className="p-5 bg-black/60 border border-white/10 rounded-2xl space-y-1">
           <span className="text-xs font-mono text-neutral-400">IDLE POWER REDUCTION</span>
-          <div className="text-3xl font-mono font-bold text-emerald-400">
-            {isOccupied ? "0.0%" : "-60.8%"}
-          </div>
+          <div className="text-3xl font-mono font-bold text-emerald-400">{isOccupied ? '0.0%' : '-60.8%'}</div>
           <span className="text-xs font-mono text-neutral-500">Auto Load-Shed Activated</span>
         </div>
 
         <div className="p-5 bg-black/60 border border-white/10 rounded-2xl space-y-1">
           <span className="text-xs font-mono text-neutral-400">SENSOR FUSION STATUS</span>
           <div className="text-lg font-mono font-bold text-amber-300 mt-2">
-            {isOccupied ? "PIR Active · NFC In" : "PIR Idle · Auto Cutoff"}
+            {isOccupied ? 'PIR Active · NFC In' : 'PIR Idle · Auto Cutoff'}
           </div>
           <span className="text-xs font-mono text-neutral-500">MQTT Broker: Connected</span>
         </div>

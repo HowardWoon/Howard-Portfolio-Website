@@ -1,4 +1,4 @@
-"use server";
+'use server';
 
 import { requireAdminUser } from '@/lib/admin-auth';
 import { createServiceRoleClient, hasServiceRole } from '@/lib/supabase/route';
