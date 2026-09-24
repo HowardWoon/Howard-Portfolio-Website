@@ -1,4 +1,5 @@
 'use client';
+import { useScrollLock } from "@/lib/use-scroll-lock";
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -20,6 +21,7 @@ const photos = [
 export function InteractivePhotoStack({ customPhotos }: { customPhotos?: { src: string, alt: string, rotation: number }[] }) {
   const [cards, setCards] = useState(customPhotos || photos);
   const [expandedPhoto, setExpandedPhoto] = useState<string | null>(null);
+  useScrollLock(!!expandedPhoto);
 
   const cycle = () => {
     setCards((prev) => {
@@ -104,7 +106,7 @@ export function InteractivePhotoStack({ customPhotos }: { customPhotos?: { src: 
               onClick={(e) => { e.stopPropagation(); setExpandedPhoto(null); }}
               className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 sm:p-3 bg-white border-3 border-ink rounded-xl shadow-brutal hover:-translate-y-1 hover:shadow-brutal-lg transition-all z-[110]"
             >
-              <X className="w-5 h-5 sm:w-6 sm:h-6 text-ink" strokeWidth={3} />
+              <X className="w-5 h-5 sm:w-6 sm:h-6 text-ink" strokeWidth={3} /><span className="font-mono font-bold text-xs sm:text-sm text-ink">Return to Website</span>
             </button>
 
             <motion.div
