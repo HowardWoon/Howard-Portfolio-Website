@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { Magnetic } from './magnetic-button';
 import { ExternalLink, FileText, Search } from 'lucide-react';
 
@@ -27,7 +27,7 @@ export function SiteHeader() {
       ref={ref}
       className="site-header fixed top-0 left-0 w-full flex items-center justify-between gap-2 xs:gap-3 z-[9999] bg-white/95 backdrop-blur-md border-b-3 border-ink pb-2.5 sm:pb-3 pt-[max(0.625rem,var(--safe-top))] sm:pt-[max(0.75rem,var(--safe-top))] pl-[max(0.875rem,var(--safe-left))] pr-[max(0.875rem,var(--safe-right))] sm:pl-[max(2.5rem,var(--safe-left))] sm:pr-[max(2.5rem,var(--safe-right))] lg:pl-[max(4rem,var(--safe-left))] lg:pr-[max(4rem,var(--safe-right))]"
     >
-      <motion.div
+      <m.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6 }}
@@ -55,9 +55,9 @@ export function SiteHeader() {
             SYSTEMS & AI ARCHITECT
           </p>
         </div>
-      </motion.div>
+      </m.div>
 
-      <motion.div
+      <m.div
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6 }}
@@ -92,7 +92,7 @@ export function SiteHeader() {
         >
           <Search className="w-4 h-4 md:w-5 md:h-5" strokeWidth={2.75} />
         </button>
-      </motion.div>
+      </m.div>
     </header>
   );
 }

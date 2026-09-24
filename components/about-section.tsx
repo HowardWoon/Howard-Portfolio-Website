@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { Server, Cpu, GitBranch, ShieldCheck, Activity, Sparkles, ArrowUpRight, Layers, Code2 } from 'lucide-react';
 
 const architecturePillars = [
@@ -155,7 +155,7 @@ function PillarCard({
   const c = colorMap[pillar.color as keyof typeof colorMap];
 
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -220,7 +220,7 @@ function PillarCard({
           ACTIVE
         </span>
       </div>
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -253,7 +253,7 @@ export default function AboutSection() {
       <div className="relative max-w-7xl mx-auto space-y-16">
         {/* Section Header */}
         <div className="space-y-7">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -262,9 +262,9 @@ export default function AboutSection() {
           >
             <Sparkles className="w-4 h-4" strokeWidth={2.5} />
             <span>ABOUT // SYSTEMS ARCHITECTURE & VISION</span>
-          </motion.div>
+          </m.div>
 
-          <motion.h2
+          <m.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -273,9 +273,9 @@ export default function AboutSection() {
           >
             I ARCHITECT RESILIENT BACKENDS AND AUTONOMOUS AI PIPELINES, TURNING COMPLEX IDEAS INTO PRODUCTION-READY
             SYSTEMS.
-          </motion.h2>
+          </m.h2>
 
-          <motion.p
+          <m.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -289,7 +289,7 @@ export default function AboutSection() {
             </span>
             ). Bridging low-latency algorithmic backend performance and AI orchestration with strong technical
             leadership and fiscal governance to deliver scalable, cost-effective solutions.
-          </motion.p>
+          </m.p>
         </div>
 
         {/* Core Architecture Bento Grid (4 Pillars) — True Masonry Layout */}
@@ -340,7 +340,7 @@ export default function AboutSection() {
         </div>
 
         {/* Categorized Technical Stack Matrix */}
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -401,7 +401,7 @@ export default function AboutSection() {
               </div>
             ))}
           </div>
-        </motion.div>
+        </m.div>
       </div>
     </section>
   );

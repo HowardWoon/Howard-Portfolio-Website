@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef } from 'react';
-import { motion, useMotionValue, useSpring, useTransform, useReducedMotion } from 'framer-motion';
+import { m, useMotionValue, useSpring, useTransform, useReducedMotion } from 'framer-motion';
 
 /**
  * Subtle 3D tilt wrapper.
@@ -45,7 +45,7 @@ export function TiltCard({
   };
 
   return (
-    <motion.div
+    <m.div
       ref={ref}
       onPointerMove={handleMouseMove}
       onPointerLeave={handleMouseLeave}
@@ -53,6 +53,6 @@ export function TiltCard({
       className={`relative ${className || ''}`}
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }

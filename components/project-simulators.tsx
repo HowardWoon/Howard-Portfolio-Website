@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { Terminal, Play, Cpu, Zap, CheckCircle2, Radio } from 'lucide-react';
 
 /** setTimeout/setInterval that are all cleared when the simulator unmounts
@@ -62,7 +62,7 @@ export function ZeroLagSimulator() {
   };
 
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
@@ -143,7 +143,7 @@ export function ZeroLagSimulator() {
         </div>
         <span className="text-xs text-amber-400 uppercase font-bold">LangGraph Orchestrator</span>
       </div>
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -202,7 +202,7 @@ export function BilahujanSimulator() {
   };
 
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
@@ -277,15 +277,10 @@ export function BilahujanSimulator() {
               else if (isMcp) textColor = 'text-amber-400';
 
               return (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className={textColor}
-                >
+                <m.div key={i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className={textColor}>
                   <span className="opacity-50 mr-2">{time}</span>
                   {log}
-                </motion.div>
+                </m.div>
               );
             })}
             {isSimulating && (
@@ -297,7 +292,7 @@ export function BilahujanSimulator() {
           </div>
         </div>
       </div>
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -308,7 +303,7 @@ export function SensorXSimulator() {
   const [isOccupied, setIsOccupied] = useState(true);
 
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
@@ -359,6 +354,6 @@ export function SensorXSimulator() {
           <span className="text-xs font-mono text-neutral-500">MQTT Broker: Connected</span>
         </div>
       </div>
-    </motion.div>
+    </m.div>
   );
 }
