@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { createContext, useContext, useEffect, useRef, useState, useLayoutEffect } from "react";
 const BootedContext = createContext(true);
@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 /**
  * "Initialize System" gate.
  *
- * Bug fixed: after the first click, a `sessionStorage` flag made every REFRESH skip the gate —
+ * Bug fixed: after the first click, a `sessionStorage` flag made every REFRESH skip the gate â€”
  * the yellow screen flashed and then faded away on its own without being clicked.
  * Now: every full page load (first visit, refresh, new tab) shows the gate and waits for a click.
  * Only in-app navigation (e.g. coming back from /simulators via a link) skips it, because this
@@ -51,13 +51,13 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     document.body.style.overflow = showBoot ? 'hidden' : '';
-    // Lenis is created in a parent effect (runs after this one) → defer one tick
+    // Lenis is created in a parent effect (runs after this one) â†’ defer one tick
     const t = window.setTimeout(() => {
       if (showBoot) window.__lenis?.stop();
       else {
         window.__lenis?.start();
         // Only after a real click. On in-site navigation (e.g. browser Back from /simulators) the
-        // gate is skipped and Next.js restores the previous scroll position — we must not force
+        // gate is skipped and Next.js restores the previous scroll position â€” we must not force
         // the page back to the top there.
         if (justBooted.current) {
           justBooted.current = false;
@@ -132,13 +132,7 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
             <div className="relative flex justify-center flex-col items-center gap-8 px-6">
               <AnimatePresence mode="wait">
                 {bootState === 'idle' && (
-                  <motion.div
-                    key="idle"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.5 }}
-                  >
+                  <motion.div key="idle" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.5 }} className="flex flex-col items-center gap-6">
                       <button
                       onClick={handleStartBoot}
                       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") finish(); }}
@@ -187,3 +181,4 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
     </BootedContext.Provider>
   );
 }
+
