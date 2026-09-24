@@ -1,19 +1,9 @@
 'use client';
 
 import { Github, Linkedin, FileText } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { personalDetails } from '@/lib/site-data';
 
 export function SiteFooter() {
-  const [year, setYear] = useState<number | null>(null);
-
-  const emailAddress = personalDetails.email;
   const linkedInUrl = 'https://www.linkedin.com/in/howard-woon-hao-zhe-730b9337a/';
-  const githubUrl = 'https://github.com/HowardWoon';
-
-  useEffect(() => {
-    setYear(new Date().getFullYear());
-  }, []);
 
   return (
     <footer
