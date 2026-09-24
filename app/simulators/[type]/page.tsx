@@ -25,6 +25,10 @@ export async function generateMetadata({ params }: { params: Promise<{ type: str
     title: sim ? `${sim.label} Simulator // Howard Woon` : 'Simulator // Howard Woon',
     // own canonical URL (the root layout's canonical "/" told Google these pages were duplicates of the homepage)
     alternates: { canonical: `/simulators/${type}` },
+    openGraph: {
+      url: `/simulators/${type}`,
+      title: sim ? `${sim.label} Simulator // Howard Woon` : 'Simulator // Howard Woon',
+    },
   };
 }
 

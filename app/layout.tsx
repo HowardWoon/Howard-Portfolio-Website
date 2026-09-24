@@ -73,6 +73,26 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             __html: `try{if(sessionStorage.getItem('hw-booted')==='1')document.documentElement.classList.add('hw-booted')}catch(e){}`,
           }}
         />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Person",
+              "name": "Howard Woon",
+              "url": "https://howard-woon-portfolio.vercel.app/",
+              "jobTitle": "Software Engineer & Systems Architect",
+              "worksFor": {
+                "@type": "Organization",
+                "name": "Universiti Malaya"
+              },
+              "sameAs": [
+                "https://github.com/HowardWoon",
+                "https://linkedin.com/in/howard-woon-hao-zhe-730b9337a"
+              ]
+            })
+          }}
+        />
       </head>
       <body className="font-sans font-medium antialiased bg-paper text-ink">
         {/* If JavaScript is off or fails to load, the "Initialize System" gate could never be dismissed

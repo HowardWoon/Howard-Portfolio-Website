@@ -278,10 +278,7 @@ function ProjectCard({ project }: { project: ProjectData }) {
   return (
     <div className="w-full group">
       <TiltCard maxTilt={2.5}>
-        <motion.article
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+        <Reveal delay={0.1} y={40}
           transition={{ duration: 0.6 }}
           className="relative w-full rounded-[32px] border-3 border-ink bg-white shadow-brutal-lg transition-shadow duration-300 group-hover:shadow-brutal-xl overflow-hidden"
         >
@@ -536,7 +533,7 @@ function ProjectCard({ project }: { project: ProjectData }) {
               )}
             </div>
           </div>
-        </motion.article>
+        </Reveal>
       </TiltCard>
     </div>
   );

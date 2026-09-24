@@ -66,7 +66,7 @@ const honorsList: HonorItem[] = [
     title: '2ND RUNNER UP (PAYMENTS & STABLECOINS)',
     issuingBody: 'MUBA Blockchain Hackathon 2026',
     period: '2026',
-    statCallout: { value: '3rd', label: 'Payments & Stablecoins Track' },
+    statCallout: { value: '3rd', label: 'Sui Foundation track Track' },
     description:
       'Developed ProofPay, a delivery-linked B2B escrow and settlement platform built on Sui. Addressed B2B trust deadlocks using smart contract milestone releases and AI-driven evidence verification via Gonka Router.',
     highlights: [
@@ -78,7 +78,7 @@ const honorsList: HonorItem[] = [
   {
     id: 'game-jam',
     isFeatured: true,
-    badge: 'NATIONAL GAME JAM CHAMPION',
+    badge: 'NATIONAL GAME JAM PUBLIC CHOICE',
     badgeColor: 'gold',
     title: '1ST PLACE (PUBLIC CHOICE AWARD)',
     issuingBody: 'UM Game Jam 2026 (PEKOM)',

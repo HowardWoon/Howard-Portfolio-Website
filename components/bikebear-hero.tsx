@@ -69,7 +69,7 @@ function MagnifiedHeadline() {
       </h2>
 
       {/* Scaled X-Ray Magnification Text (decorative duplicate) */}
-      <h2
+      <div
         aria-hidden="true"
         className={`${headlineClass} text-pop-blue absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-150 group-data-[hover=true]/headline:opacity-100`}
         style={{
@@ -82,7 +82,7 @@ function MagnifiedHeadline() {
         ENGINEERING <br />
         <span className={`${chipClass} bg-pop-red border-ink text-white`}>SYSTEMS TO</span> <br />
         STAND OUT IN <br />A NOISY WORLD.
-      </h2>
+      </div>
 
       {/* Decorative squiggle */}
       <div className="w-48 sm:w-64 pt-3 relative z-10" aria-hidden>

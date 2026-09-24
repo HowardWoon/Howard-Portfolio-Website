@@ -333,7 +333,7 @@ export const faqs = [
   {
     question: 'Are you open to internships or full-time?',
     answer:
-      'I am currently seeking software engineering internships or part-time contracting roles alongside my undergraduate studies at Universiti Malaya.',
+      'I am currently seeking software engineering full-time roles alongside my undergraduate studies at Universiti Malaya.',
   },
   {
     question: 'What is your notice period / earliest start date?',
