@@ -36,7 +36,9 @@ test('contact API rejects submissions without fill time', async ({ request }) =>
 });
 
 test.describe('mobile regressions', () => {
-  test.use({ ...devices['iPhone 13'] });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { defaultBrowserType, ...iPhone13 } = devices['iPhone 13'];
+  test.use(iPhone13);
 
   test('photo lightbox is full-screen, closable and restores scroll', async ({ page }) => {
     await page.goto('/');
