@@ -1,6 +1,8 @@
 'use server';
 
 import { requireAdminUser } from '@/lib/admin-auth';
+import { createServiceRoleClient, hasServiceRole } from '@/lib/supabase/route';
+import { revalidatePath } from 'next/cache';
 
 function validateUUID(id: string) {
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
@@ -8,10 +10,8 @@ function validateUUID(id: string) {
   }
 }
 
-import { createServiceRoleClient, hasServiceRole } from '@/lib/supabase/route';
-import { revalidatePath } from 'next/cache';
-
 function getAdminSupabase() {
+  // createClient('') threw "supabaseUrl is required" when the service key wasn't set
   if (!hasServiceRole()) throw new Error('Supabase service role is not configured.');
   return createServiceRoleClient();
 }
