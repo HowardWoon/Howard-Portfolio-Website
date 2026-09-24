@@ -5,6 +5,7 @@ import StackedProjects from '@/components/stacked-projects';
 import ExperienceSection from '@/components/experience-section';
 import HonorsSection from '@/components/honors-section';
 import ContactSection from '@/components/contact-section';
+import { SiteFooter } from '@/components/site-footer';
 
 import { BootSequence } from '@/components/boot-sequence';
 import { TechMarquee } from '@/components/marquees';
@@ -50,6 +51,7 @@ export function PortfolioPage() {
           <HonorsSection />
           <ContactSection />
         </main>
+        <SiteFooter />
 
         <ScrollToTop />
         <CommandPalette />
