@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { m, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence, LayoutGroup } from 'framer-motion';
 import Image from 'next/image';
-import { ChevronLeft, ChevronRight, Maximize2, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Layers, LayoutGrid, Maximize2, X } from 'lucide-react';
 import { useScrollLock } from '@/lib/use-scroll-lock';
 import { useFocusTrap } from '@/lib/use-focus-trap';
 import { useLatest } from '@/lib/use-latest';
@@ -63,11 +63,13 @@ function PhotoLightbox({
   index,
   onIndex,
   onClose,
+  uid,
 }: {
   list: Photo[];
   index: number;
   onIndex: (i: number) => void;
   onClose: () => void;
+  uid: string;
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const touchX = useRef<number | null>(null);
@@ -127,6 +129,7 @@ function PhotoLightbox({
           longer a thin strip inside a huge empty cream box. `cq*` units fall back to full width on iOS 15. */}
       <div className="relative flex-1 min-h-0 w-full max-w-6xl mx-auto flex items-center justify-center [container-type:size]">
         <m.div
+          layoutId={FX.lightboxMorph ? `${uid}-${photo.src}` : undefined}
           initial={{ scale: 0.95, y: 20 }}
           animate={{ scale: 1, y: 0 }}
           exit={{ scale: 0.95, y: 20 }}
@@ -198,6 +201,9 @@ export function InteractivePhotoStack({ customPhotos }: { customPhotos?: Photo[]
   const [viewer, setViewer] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
   const [fan, setFan] = useState(false); // FX-15: back photos fan out in 3D while a mouse hovers the stack
+  // FX-41 Contact sheet: the stack morphs into a grid of every photo (shared layoutIds), and back.
+  const [sheet, setSheet] = useState(false);
+  const uid = useId();
   useEffect(() => setMounted(true), []);
 
   const cycle = () => setCards((prev) => [...prev.slice(1), prev[0]]);
@@ -211,89 +217,154 @@ export function InteractivePhotoStack({ customPhotos }: { customPhotos?: Photo[]
 
   return (
     <>
-      <div
-        onClick={cycle}
-        data-cursor="view"
-        onPointerEnter={(e) => FX.photoFan && e.pointerType !== 'touch' && setFan(true)}
-        onPointerLeave={() => setFan(false)}
-        className="relative w-full h-full min-h-[280px] sm:min-h-[380px] lg:min-h-[420px] flex items-center justify-center cursor-pointer group rounded-2xl has-[:focus-visible]:outline has-[:focus-visible]:outline-[3px] has-[:focus-visible]:outline-pop-blue"
-      >
-        <button
-          type="button"
-          className="sr-only"
-          onClick={(e) => {
-            e.stopPropagation();
-            cycle();
-          }}
-        >
-          Next photo (showing {cards[0]?.alt})
-        </button>
-
-        {cards.slice(0, 4).map((photo, index) => {
-          const isTop = index === 0;
-          return (
-            <m.div
-              key={photo.src}
-              layout
-              initial={false}
-              animate={{
-                scale: isTop ? 1 : 1 - index * 0.04,
-                x: isTop || !fan ? 0 : (index % 2 ? 1 : -1) * index * 22,
-                y: isTop ? 0 : fan ? index * 4 : index * 9,
-                rotate: isTop ? 0 : photo.rotation * 1.4 + (fan ? (index % 2 ? 1 : -1) * index * 4 : 0),
-                zIndex: cards.length - index,
-              }}
-              whileHover={isTop ? { scale: 1.02, rotate: -1.2, y: -5, transition: { duration: 0.2 } } : {}}
-              transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-              className="absolute w-[94%] aspect-video bg-white p-2 sm:p-2.5 pb-6 sm:pb-8 rounded-md border-3 border-ink shadow-brutal origin-center max-h-full"
-            >
-              {isTop && <span className="tape" aria-hidden />}
-              <div className="w-full h-full relative overflow-hidden rounded-sm bg-paper-deep border-2 border-ink">
-                <Image
-                  src={photo.src}
-                  alt={photo.alt}
-                  fill
-                  sizes="(max-width: 1024px) 92vw, 40vw"
-                  className="object-contain pointer-events-none"
-                />
-                {isTop && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openViewer(photo.src);
-                    }}
-                    className="absolute top-1.5 right-1.5 sm:top-3 sm:right-3 z-50 w-10 h-10 grid place-items-center bg-white border-2 border-ink rounded-lg shadow-brutal-xs hover:bg-pop-yellow hover:-translate-y-0.5 active:translate-y-0 transition-all text-ink group/expand"
-                    title="View full resolution"
-                    aria-label={`View full resolution: ${photo.alt}`}
-                  >
-                    <Maximize2
-                      className="w-4 h-4 group-hover/expand:scale-110 transition-transform"
-                      strokeWidth={2.5}
-                    />
-                  </button>
-                )}
-              </div>
-            </m.div>
-          );
-        })}
-
+      <LayoutGroup id={uid}>
         <div
-          aria-hidden
-          className="absolute -bottom-3 lg:-bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 nb-tag bg-white shadow-brutal-xs pointer-events-none z-50 max-w-[92%] text-center justify-center"
+          onClick={sheet ? undefined : cycle}
+          data-cursor="view"
+          onPointerEnter={(e) => FX.photoFan && e.pointerType !== 'touch' && setFan(true)}
+          onPointerLeave={() => setFan(false)}
+          className="relative w-full h-full min-h-[280px] sm:min-h-[380px] lg:min-h-[420px] flex items-center justify-center cursor-pointer group rounded-2xl has-[:focus-visible]:outline has-[:focus-visible]:outline-[3px] has-[:focus-visible]:outline-pop-blue"
         >
-          <span className="w-2 h-2 rounded-full bg-pop-red border border-ink animate-pulse" />
-          CLICK ALBUM TO CYCLE
-        </div>
-      </div>
+          {FX.contactSheet && source.length > 1 ? (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSheet((v) => !v);
+              }}
+              aria-pressed={sheet}
+              aria-label={sheet ? 'Back to photo stack' : `Show all ${source.length} photos as a contact sheet`}
+              title={sheet ? 'Stack view' : 'Contact sheet'}
+              className="absolute top-1.5 left-1.5 sm:top-3 sm:left-3 z-[60] w-10 h-10 grid place-items-center bg-white border-2 border-ink rounded-lg shadow-brutal-xs hover:bg-pop-yellow active:translate-y-0.5 transition-colors text-ink"
+            >
+              {sheet ? (
+                <Layers className="w-4 h-4" strokeWidth={2.5} aria-hidden />
+              ) : (
+                <LayoutGrid className="w-4 h-4" strokeWidth={2.5} aria-hidden />
+              )}
+            </button>
+          ) : null}
 
-      {mounted && (
-        <AnimatePresence>
-          {viewer !== null && (
-            <PhotoLightbox list={source} index={viewer} onIndex={setViewer} onClose={() => setViewer(null)} />
+          {sheet ? (
+            <div
+              data-lenis-prevent
+              className="absolute inset-0 pt-14 sm:pt-16 px-1 pb-2 overflow-y-auto overscroll-contain grid grid-cols-2 xs:grid-cols-3 gap-2 sm:gap-3 content-start"
+            >
+              {source.map((photo, i) => (
+                <m.button
+                  key={photo.src}
+                  type="button"
+                  layoutId={`${uid}-${photo.src}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setViewer(i);
+                  }}
+                  aria-label={`View full resolution: ${photo.alt}`}
+                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                  className="relative aspect-video bg-white p-1 rounded-md border-2 border-ink shadow-brutal-xs hover:-translate-y-0.5 hover:shadow-brutal-sm transition-shadow"
+                >
+                  <span className="relative block w-full h-full overflow-hidden rounded-sm bg-paper-deep">
+                    <Image
+                      src={photo.src}
+                      alt=""
+                      fill
+                      sizes="(max-width: 640px) 45vw, 14vw"
+                      className="object-contain"
+                    />
+                  </span>
+                </m.button>
+              ))}
+            </div>
+          ) : null}
+
+          {!sheet ? (
+            <button
+              type="button"
+              className="sr-only"
+              onClick={(e) => {
+                e.stopPropagation();
+                cycle();
+              }}
+            >
+              Next photo (showing {cards[0]?.alt})
+            </button>
+          ) : null}
+
+          {!sheet &&
+            cards.slice(0, 4).map((photo, index) => {
+              const isTop = index === 0;
+              return (
+                <m.div
+                  key={photo.src}
+                  layout
+                  layoutId={`${uid}-${photo.src}`}
+                  initial={false}
+                  animate={{
+                    scale: isTop ? 1 : 1 - index * 0.04,
+                    x: isTop || !fan ? 0 : (index % 2 ? 1 : -1) * index * 22,
+                    y: isTop ? 0 : fan ? index * 4 : index * 9,
+                    rotate: isTop ? 0 : photo.rotation * 1.4 + (fan ? (index % 2 ? 1 : -1) * index * 4 : 0),
+                    zIndex: cards.length - index,
+                  }}
+                  whileHover={isTop ? { scale: 1.02, rotate: -1.2, y: -5, transition: { duration: 0.2 } } : {}}
+                  transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+                  className="absolute w-[94%] aspect-video bg-white p-2 sm:p-2.5 pb-6 sm:pb-8 rounded-md border-3 border-ink shadow-brutal origin-center max-h-full"
+                >
+                  {isTop && <span className="tape" aria-hidden />}
+                  <div className="w-full h-full relative overflow-hidden rounded-sm bg-paper-deep border-2 border-ink">
+                    <Image
+                      src={photo.src}
+                      alt={photo.alt}
+                      fill
+                      sizes="(max-width: 1024px) 92vw, 40vw"
+                      className="object-contain pointer-events-none"
+                    />
+                    {isTop && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openViewer(photo.src);
+                        }}
+                        className="absolute top-1.5 right-1.5 sm:top-3 sm:right-3 z-50 w-10 h-10 grid place-items-center bg-white border-2 border-ink rounded-lg shadow-brutal-xs hover:bg-pop-yellow hover:-translate-y-0.5 active:translate-y-0 transition-all text-ink group/expand"
+                        title="View full resolution"
+                        aria-label={`View full resolution: ${photo.alt}`}
+                      >
+                        <Maximize2
+                          className="w-4 h-4 group-hover/expand:scale-110 transition-transform"
+                          strokeWidth={2.5}
+                        />
+                      </button>
+                    )}
+                  </div>
+                </m.div>
+              );
+            })}
+
+          {!sheet && (
+            <div
+              aria-hidden
+              className="absolute -bottom-3 lg:-bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 nb-tag bg-white shadow-brutal-xs pointer-events-none z-50 max-w-[92%] text-center justify-center"
+            >
+              <span className="w-2 h-2 rounded-full bg-pop-red border border-ink animate-pulse" />
+              CLICK ALBUM TO CYCLE
+            </div>
           )}
-        </AnimatePresence>
-      )}
+        </div>
+        {mounted && (
+          <AnimatePresence>
+            {viewer !== null && (
+              <PhotoLightbox
+                list={source}
+                index={viewer}
+                onIndex={setViewer}
+                onClose={() => setViewer(null)}
+                uid={uid}
+              />
+            )}
+          </AnimatePresence>
+        )}
+      </LayoutGroup>
     </>
   );
 }

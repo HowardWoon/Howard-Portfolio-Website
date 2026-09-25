@@ -2,6 +2,7 @@
 
 import { FX } from '@/lib/fx';
 import { SECTIONS, SECTION_IDS } from '@/lib/sections';
+import React from 'react';
 import { useActiveSection } from '@/lib/use-active-section';
 
 /**
@@ -11,6 +12,15 @@ import { useActiveSection } from '@/lib/use-active-section';
  * except when the active section actually changes.
  */
 export function SectionSpine() {
+  const [previewId, setPreviewId] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    const handle = (e: Event) => {
+      const ce = e as CustomEvent<{ id: string | null }>;
+      setPreviewId(ce.detail.id);
+    };
+    window.addEventListener('route-preview', handle);
+    return () => window.removeEventListener('route-preview', handle);
+  }, []);
   const active = useActiveSection(SECTION_IDS, FX.sectionSpine);
 
   if (!FX.sectionSpine) return null;
@@ -23,6 +33,7 @@ export function SectionSpine() {
       <span aria-hidden className="absolute right-[7px] top-3 bottom-3 w-[3px] bg-ink" />
       {SECTIONS.map((s) => {
         const on = active === s.id;
+        const preview = previewId === s.id;
         return (
           <a
             key={s.id}
@@ -41,7 +52,7 @@ export function SectionSpine() {
             </span>
             <span
               aria-hidden
-              className={`relative w-[17px] h-[17px] border-3 border-ink rotate-45 transition-colors duration-200 group-focus-visible:ring-2 group-focus-visible:ring-pop-blue ${
+              className={`relative w-[17px] h-[17px] ${preview ? 'bg-pop-yellow scale-125' : ''} border-3 border-ink rotate-45 transition-colors duration-200 group-focus-visible:ring-2 group-focus-visible:ring-pop-blue ${
                 on ? 'bg-pop-yellow' : 'bg-white'
               }`}
             />

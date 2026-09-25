@@ -44,6 +44,20 @@ export const FX = {
   routeWipe: true, // FX-35 Bauhaus wipe between the portfolio and the simulator pages
   stackFocus: true, // FX-36 tooling-matrix legend chips highlight every skill with that status
   sectionDock: true, // FX-37 mobile/tablet dock showing the current section; tap opens the command palette
+  // ---- Round 10 "Interactive Engineering Desk" (docs: R10 plan) ----
+  evidenceTrail: true, // FX-38 click a skill or tag -> trace every project that uses it
+  projectFocus: true, // FX-39 spotlight one project, dim the rest, step through with J/K
+  portfolioMemory: true, // FX-40 project-index tiles remember what you've read this visit
+  contactSheet: true, // FX-41 photo stack <-> contact-sheet grid (shared-layout morph)
+  archiveFilmstrip: true, // FX-42 field archive grid <-> horizontal film strip
+  shortcuts: true, // FX-43 keyboard shortcuts + "?" cheat sheet
+  guidedTour: true, // FX-44 guided tour through the sections (manual or auto-play)
+  // ---- Phase B ----
+  routePreview: true, // FX-45 hovering nav link highlights spine marker
+  heroInspection: true, // FX-46 hero inspection lens
+  honorConstellation: true, // FX-47 constellation and trail to honors
+  lightboxMorph: true, // FX-48 lightbox morphs from thumbnail
+  depthLock: true, // FX-49 depth lock on idle pointer
 } as const;
 
 export type FxName = keyof typeof FX;

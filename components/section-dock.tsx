@@ -5,6 +5,7 @@ import { Compass } from 'lucide-react';
 import { FX } from '@/lib/fx';
 import { SECTIONS, SECTION_IDS } from '@/lib/sections';
 import { useActiveSection } from '@/lib/use-active-section';
+import { useInteractionSelect } from '@/lib/interaction-store';
 
 /**
  * FX-37 Section Dock (below 1024 px). The page is ~35,000 px tall on a phone; this pill always says where you
@@ -53,9 +54,12 @@ export function SectionDock() {
     };
   }, []);
 
+  // Round 10: step aside while a viewer-mode HUD (trail / focus / tour) owns the bottom of the screen
+  const hudOpen = useInteractionSelect((s) => !!(s.trail || s.focus || s.tour));
+
   if (!FX.sectionDock) return null;
   const label = SECTIONS.find((s) => s.id === active)?.label;
-  const visible = !!label && !typing && !scrollingDown;
+  const visible = !!label && !typing && !scrollingDown && !hudOpen;
 
   return (
     <button

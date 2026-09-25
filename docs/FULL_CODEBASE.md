@@ -1,12 +1,12 @@
 # Howard Woon Portfolio — Full Source Code
 
-Generated 2026-09-25 from branch `main` at commit `debdfd2 feat(ui): spatial depth, letterpress, blueprint view, and page lift modal`. It contains **every git-tracked text file** in the repository, verbatim. Binary assets (images, PDFs) are listed by path and size only. Two files are listed but not inlined: see "Omitted files".
+Generated 2026-09-25 from branch `main` at commit `4f6faca chore: remove hardcoded admin UUID in sql init to fix GitGuardian alert`. Contains **every git-tracked code/text file** in the repository, verbatim. Binary assets (images, PDFs) are listed by path and size only. Files listed under "Omitted files" are not inlined.
 
 ## How to use this file (for an AI)
 
 - Each file is under its own heading `### path/to/file`, followed by its complete content in a code block.
 - The content is an exact copy. Do not assume anything exists that is not shown here or in the asset list.
-- To edit the real project, apply changes to the matching path in the repository, not to this file.
+- To change the real project, edit the matching path in the repository, not this file.
 
 ## File tree
 
@@ -60,10 +60,14 @@ components/field-archive.tsx
 components/field-record-viewer.tsx
 components/fx/bauhaus-piece.tsx
 components/fx/bauhaus-solid.tsx
+components/fx/boot-shatter.ts
 components/fx/coin-flip.tsx
 components/fx/easter-egg.tsx
+components/fx/mercury-field.tsx
+components/fx/offscreen-pause.tsx
 components/fx/pointer-field.tsx
 components/fx/power-on.tsx
+components/fx/route-wipe.tsx
 components/fx/scroll-unfold.tsx
 components/fx/shape-burst.tsx
 components/fx/shape-rain.tsx
@@ -85,6 +89,7 @@ components/project-index.tsx
 components/project-simulators.tsx
 components/reveal.tsx
 components/scroll-to-top.tsx
+components/section-dock.tsx
 components/section-spine.tsx
 components/site-footer.tsx
 components/site-header.tsx
@@ -93,18 +98,24 @@ components/smooth-scroll-provider.tsx
 components/spider-reveal.tsx
 components/stacked-projects.tsx
 components/tilt-card.tsx
+docs/FULL_CODEBASE.md
+docs/R9-FULL-AUDIT-AND-FIX-PLAN.md
+docs/UI-UX-ENHANCEMENT-IMPLEMENTATION-PLAN.md
 docs/UI-UX-Upgrade-Plan.md
 eslint.config.mjs
 lib/admin-auth.ts
 lib/admin-constants.ts
 lib/fx.ts
 lib/motion-pref.ts
+lib/pointer.ts
+lib/sections.ts
 lib/site-data.ts
 lib/supabase/browser.ts
 lib/supabase/fallback.ts
 lib/supabase/route.ts
 lib/supabase/server.ts
 lib/to-local.ts
+lib/use-active-section.ts
 lib/use-focus-trap.ts
 lib/use-latest.ts
 lib/use-scroll-lock.ts
@@ -171,6 +182,9 @@ scripts/verify.mjs
 sql/001_init.sql
 tailwind.config.ts
 tests/fx.spec.ts
+tests/hotfix.spec.ts
+tests/r8.spec.ts
+tests/r9.spec.ts
 tests/smoke.spec.ts
 tsconfig.json
 vercel.json
@@ -178,8 +192,11 @@ vercel.json
 
 ## Omitted files
 
-- `package-lock.json` — auto-generated npm lockfile (250 KB); regenerate with `npm install`
-- `docs/UI-UX-Upgrade-Plan.md` — the UI/UX plan document itself (kept as a separate file)
+- `package-lock.json` — auto-generated npm lockfile; regenerate with `npm install`
+- `docs/FULL_CODEBASE.md` — planning/report document (kept as a separate file, not website code)
+- `docs/R9-FULL-AUDIT-AND-FIX-PLAN.md` — planning/report document (kept as a separate file, not website code)
+- `docs/UI-UX-ENHANCEMENT-IMPLEMENTATION-PLAN.md` — planning/report document (kept as a separate file, not website code)
+- `docs/UI-UX-Upgrade-Plan.md` — planning/report document (kept as a separate file, not website code)
 
 ## Binary assets (not inlined)
 
@@ -235,7 +252,7 @@ vercel.json
 | `public/proofpay_pitch_deck.pdf` | 5582.8 KB |
 | `public/resume.pdf` | 204.5 KB |
 
-## Source files (112)
+## Source files (123)
 
 ### .agents/rules/00-core.md
 
@@ -481,7 +498,7 @@ trigger: always_on
 ## H. Code quality
 - TypeScript strict must stay clean; no `any` unless wrapped in a documented type guard.
 - Every `setTimeout`/`setInterval`/listener/observer/`requestAnimationFrame` must be cleaned up on unmount.
-- Animations: import `m` (never `motion`) from `framer-motion`; `<LazyMotion strict>` in `components/motion-provider.tsx` throws if `motion.*` is used. Features are `domAnimation` (no `layout`/`drag` props - they need `domMax` and +20 kB).
+- Animations: import `m` (never `motion`) from `framer-motion`; `<LazyMotion strict>` in `components/motion-provider.tsx` throws if `motion.*` is used. Features are `domMax` (which enables `layout` animations, at a +20 kB cost over `domAnimation`).
 - Below-the-fold sections are imported through `components/lazy-sections.tsx` (client `next/dynamic`, still server-rendered). New big below-the-fold sections go there too. First Load JS budget for `/`: <= 190 kB.
 - Keep Prettier style (`.prettierrc`: singleQuote, printWidth 120). Run `npx prettier --write app components lib tests scripts` only as its own separate commit, never mixed with logic changes.
 - Interactive FX: All PointerField/scroll tracking must use a single `rAF` loop attached to `<html>` and drive CSS variables (`--px`, `--py`). Never tie `mousemove` or `scroll` to React state.
@@ -718,7 +735,7 @@ jobs:
       - run: npm run lint
       - run: npm run build
       - name: Cache Playwright browsers
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
@@ -726,7 +743,7 @@ jobs:
       - run: npm run test:e2e
       - name: Upload Playwright report
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report
           path: playwright-report/
@@ -815,8 +832,8 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
 
 ## 5. Where things live
 - `app/` routes: `page.tsx` (home), `simulators/[type]` (only `agentic`, `flood`, `energy` exist), `admin/` (inbox only), `api/contact` (contact form), `layout.tsx` (fonts, metadata, JSON-LD, boot-gate script).
-- `components/` one file per section: `bikebear-hero`, `about-section`, `stacked-projects`, `experience-section`, `honors-section`, `contact-section`, `site-footer` (rendered after `</main>` in `portfolio-page.tsx`), plus shared UI (`site-header`, `boot-sequence`, `interactive-photo-stack` (its top-level `photos` array is the ZeroLag gallery; other projects pass `galleryPhotos` in `stacked-projects.tsx`), `field-archive*`, `command-palette`, `scroll-to-top`, `tilt-card`, `reveal`, `motion-provider` (all animations use `m.*` from framer-motion inside `<LazyMotion>`), `lazy-sections` (below-the-fold sections, code-split), ...).
-- `lib/` hooks and helpers: `use-scroll-lock`, `use-focus-trap`, `use-latest`, `to-local`, Supabase clients, `site-data.ts` (mostly legacy - content is inside the section components).
+- `components/` one file per section: `bikebear-hero`, `about-section`, `stacked-projects`, `experience-section`, `honors-section`, `contact-section`, `site-footer` (rendered after `</main>` in `portfolio-page.tsx`), plus shared UI (`site-header`, `boot-sequence`, `interactive-photo-stack` (its top-level `photos` array is the ZeroLag gallery; other projects pass `galleryPhotos` in `stacked-projects.tsx`), `field-archive*`, `command-palette`, `section-dock`, `scroll-to-top`, `tilt-card`, `reveal`, `motion-provider` (all animations use `m.*` from framer-motion inside `<LazyMotion>`), `lazy-sections` (below-the-fold sections, code-split), `fx/route-wipe`, ...).
+- `lib/` hooks and helpers: `use-scroll-lock`, `use-focus-trap`, `use-latest`, `to-local`, `use-active-section`, `sections`, Supabase clients, `site-data.ts` (mostly legacy - content is inside the section components).
 - `public/` assets. File names use `snake_case` / `kebab-case`, **never spaces**.
 - `tests/smoke.spec.ts` Playwright tests. `.github/workflows/ci.yml` CI. `scripts/` verify.mjs, audit-ui.mjs, check-encoding.mjs. `audit/` is output only and is git-ignored.
 ```
@@ -1661,7 +1678,7 @@ html[data-motion='calm'] .fx-drift-rev {
     opacity: 0;
     transition: opacity 0.25s ease;
   }
-  html[data-fx-pointer='on'] .fx-specular::after {
+  html[data-fx-pointer='on']:not(.fx-off-specular) .fx-specular::after {
     opacity: 1;
   }
 
@@ -1717,6 +1734,43 @@ html[data-motion='calm'] .fx-drift-rev {
   /* ===== CLAY / TACTILE CONTROLS ===== */
   .nb-btn {
     @apply inline-flex items-center justify-center gap-2 rounded-full border-3 border-ink px-6 py-3 font-mono text-xs font-extrabold uppercase tracking-[0.1em] text-ink text-center max-w-full shadow-clay transition-[transform,box-shadow,background-color] duration-150 ease-out hover:-translate-y-0.5 hover:shadow-[inset_3px_3px_6px_rgba(255,255,255,0.65),inset_-4px_-4px_8px_rgba(0,0,0,0.18),5px_5px_0_0_#0A0A0A] active:translate-x-[3px] active:translate-y-[3px] active:shadow-clay-pressed disabled:opacity-60 disabled:pointer-events-none;
+  }
+  /* FX-28 text roll (see components/fx/text-roll.tsx) */
+  .fx-roll {
+    position: relative;
+    display: inline-flex;
+    overflow: hidden;
+    vertical-align: top;
+    padding-block: 0.06em;
+  }
+  .fx-roll > span {
+    display: block;
+    transition: transform 0.45s cubic-bezier(0.2, 0.9, 0.1, 1);
+  }
+  .fx-roll > span + span {
+    position: absolute;
+    inset: 0.06em 0 0 0;
+    transform: translateY(115%);
+  }
+  :is(a, button):focus-visible .fx-roll > span:first-child {
+    transform: translateY(-115%);
+  }
+  :is(a, button):focus-visible .fx-roll > span + span {
+    transform: translateY(0);
+  }
+  @media (hover: hover) {
+    :is(a, button):hover .fx-roll > span:first-child {
+      transform: translateY(-115%);
+    }
+    :is(a, button):hover .fx-roll > span + span {
+      transform: translateY(0);
+    }
+  }
+
+  /* FIX: icons inside buttons/chips must never be squeezed to 0 px by long labels (LinkedIn icon vanished) */
+  .nb-btn > svg,
+  .nb-chip > svg {
+    flex-shrink: 0;
   }
   .nb-btn-yellow {
     @apply bg-pop-yellow;
@@ -1849,14 +1903,14 @@ html.hw-booted .boot-overlay {
 
   /* FX-02 depth parallax. Uses the individual `translate` property so it stacks with Tailwind's
      rotate/scale utilities instead of overwriting them. --depth = max px of travel (negative = opposite). */
-  .fx-depth {
+  html:not(.fx-off-depthParallax) .fx-depth {
     translate: calc(var(--px, 0) * var(--depth, 12) * 1px) calc(var(--py, 0) * var(--depth, 12) * 1px);
     transition: translate 0.7s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   /* FX-04 light-follow hard shadow: the brutal shadow leans away from the cursor like a desk lamp.
      Only when the pointer field is live (mouse devices, motion allowed). Same colour and base offset. */
-  html[data-fx-pointer='on'] .fx-shadow-follow {
+  html[data-fx-pointer='on']:not(.fx-off-shadowFollow) .fx-shadow-follow {
     --fx-o: 8px;
     box-shadow: calc(var(--fx-o) - var(--px, 0) * 5px) calc(var(--fx-o) - var(--py, 0) * 5px) 0 0 #0a0a0a;
     transition-property: box-shadow, border-color, color, background-color;
@@ -1864,7 +1918,7 @@ html.hw-booted .boot-overlay {
     transition-timing-function: ease-out;
   }
   @media (min-width: 640px) {
-    html[data-fx-pointer='on'] .fx-shadow-follow {
+    html[data-fx-pointer='on']:not(.fx-off-shadowFollow) .fx-shadow-follow {
       --fx-o: 12px;
     }
   }
@@ -1925,13 +1979,13 @@ html.hw-booted .boot-overlay {
   /* FX-13 scroll-driven drift for background geometry: pure CSS, zero JS, progressive enhancement. */
   @supports (animation-timeline: view()) {
     @media (prefers-reduced-motion: no-preference) {
-      .fx-drift,
-      .fx-drift-rev {
+      html:not(.fx-off-scrollDrift) .fx-drift,
+      html:not(.fx-off-scrollDrift) .fx-drift-rev {
         animation: fx-drift linear both;
         animation-timeline: view();
         animation-range: cover 0% cover 100%;
       }
-      .fx-drift-rev {
+      html:not(.fx-off-scrollDrift) .fx-drift-rev {
         animation-name: fx-drift-rev;
       }
     }
@@ -1939,7 +1993,7 @@ html.hw-booted .boot-overlay {
 }
 @layer utilities {
   /* FX-16 command palette drops in on a 3D hinge (CSS only) */
-  .fx-hinge {
+  html:not(.fx-off-paletteDrop) .fx-hinge {
     transform-origin: 50% 0%;
     animation: fx-hinge 0.34s cubic-bezier(0.2, 0.9, 0.1, 1) both;
   }
@@ -1947,7 +2001,7 @@ html.hw-booted .boot-overlay {
   /* FX-24 brutal glass: once you scroll, the header becomes frosted but keeps its 3px ink border */
   @supports (animation-timeline: scroll()) {
     @media (prefers-reduced-motion: no-preference) {
-      html:not([data-motion='calm']) .site-header {
+      html:not([data-motion='calm']):not(.fx-off-glassHeader) .site-header {
         animation: fx-glass linear both;
         animation-timeline: scroll(root);
         animation-range: 0 600px;
@@ -1956,15 +2010,13 @@ html.hw-booted .boot-overlay {
   }
 }
 @keyframes fx-glass {
+  /* D4: only the background alpha animates (the header keeps its static backdrop-blur-md). Animating
+     backdrop-filter re-rasterised the blur every scroll frame, and 0.8 let dark content ghost through. */
   from {
     background-color: rgb(255 255 255 / 0.95);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
   }
   to {
-    background-color: rgb(255 255 255 / 0.8);
-    -webkit-backdrop-filter: blur(18px) saturate(1.6);
-    backdrop-filter: blur(18px) saturate(1.6);
+    background-color: rgb(255 255 255 / 0.9);
   }
 }
 @keyframes fx-hinge {
@@ -2021,47 +2073,7 @@ html.hw-booted .boot-overlay {
 
 @layer utilities {
   /* FX-29 letterpress: the lamp (cursor) casts a faint blue offset under the headline letters */
-  html[data-fx-pointer='on'] .fx-letterpress {
-    text-shadow: calc(var(--px, 0) * -4px) calc(var(--py, 0) * -4px) 0 rgb(43 75 255 / 0.22);
-  }
-
-  /* FX-30 chromatic aberration: RGB fringes that grow with scroll speed (--fx-vel is -1..1) */
-  @media (prefers-reduced-motion: no-preference) {
-    html:not([data-motion='calm']) .fx-aberration {
-      text-shadow:
-        calc(var(--fx-vel, 0) * 3px) 0 0 rgb(255 75 43 / 0.85),
-        calc(var(--fx-vel, 0) * -3px) 0 0 rgb(43 75 255 / 0.85);
-    }
-  }
-}
-
-@layer utilities {
-  /* FX-31 Blueprint View */
-  .fx-blueprint {
-    perspective: 1500px;
-  }
-  .fx-blueprint .fx-stack {
-    transform: rotateX(60deg) rotateZ(-45deg) translateZ(-100px);
-    transform-style: preserve-3d;
-    transition: transform 0.8s cubic-bezier(0.2, 0.9, 0.1, 1);
-  }
-  .fx-blueprint .fx-layer {
-    transition: transform 0.8s cubic-bezier(0.2, 0.9, 0.1, 1);
-  }
-  .fx-blueprint .fx-layer:nth-child(1) {
-    transform: translateZ(20px);
-  }
-  .fx-blueprint .fx-layer:nth-child(2) {
-    transform: translateZ(60px);
-  }
-  .fx-blueprint .fx-layer:nth-child(3) {
-    transform: translateZ(100px);
-  }
-}
-
-@layer utilities {
-  /* FX-29 letterpress: the lamp (cursor) casts a faint blue offset under the headline letters */
-  html[data-fx-pointer='on'] .fx-letterpress {
+  html[data-fx-pointer='on']:not(.fx-off-letterpress) .fx-letterpress {
     text-shadow: calc(var(--px, 0) * -4px) calc(var(--py, 0) * -4px) 0 rgb(43 75 255 / 0.22);
   }
 
@@ -2084,7 +2096,7 @@ html.hw-booted .boot-overlay {
     transition: background-color 0.5s ease;
   }
   .fx-blueprint .fx-stack {
-    transform-origin: 50% 30%;
+    transform-origin: 50% 50%;
     transform-style: preserve-3d;
     transition: transform 0.8s cubic-bezier(0.2, 0.9, 0.1, 1);
   }
@@ -2094,6 +2106,8 @@ html.hw-booted .boot-overlay {
       box-shadow 0.8s ease;
   }
   .fx-blueprint[data-open='true'] {
+    overflow: clip; /* exploded layers can never spill onto the gallery or out of the card */
+    overflow-clip-margin: 24px;
     background-color: rgb(43 75 255 / 0.06);
     background-image:
       linear-gradient(rgb(43 75 255 / 0.14) 1px, transparent 1px),
@@ -2101,12 +2115,32 @@ html.hw-booted .boot-overlay {
     background-size: 24px 24px;
   }
   .fx-blueprint[data-open='true'] .fx-stack {
-    transform: rotateX(50deg) rotateZ(-32deg) scale(0.8);
+    transform: rotateX(46deg) rotateZ(-16deg) scale(0.78);
   }
   .fx-blueprint[data-open='true'] .fx-layer {
-    translate: 0 0 calc(var(--layer, 0) * 42px);
+    translate: 0 0 calc(var(--layer, 0) * 30px);
     box-shadow: 0 calc(var(--layer, 0) * 4px + 6px) 0 0 rgb(10 10 10 / 0.18);
   }
+}
+
+@layer components {
+  /* FX-36 Stack focus: matching skills lift, the rest step back (dashed border + muted ink, still AA contrast) */
+  .fx-stack-chip[data-match='true'] {
+    transform: translateY(-2px);
+    box-shadow: 3px 3px 0 0 #0a0a0a;
+  }
+  .fx-stack-chip[data-match='false'] {
+    border-style: dashed;
+    color: #565656;
+  }
+  .fx-stack-chip[data-match='false'] .nb-dot {
+    filter: grayscale(1);
+  }
+}
+
+/* D5: infinite decorative animations pause while their section is off-screen (see fx/offscreen-pause.tsx) */
+[data-offscreen] :is(.animate-pulse, .animate-ping, .animate-spin-slow, .animate-wobble, [class*='animate-[marquee']) {
+  animation-play-state: paused !important;
 }
 ```
 
@@ -2154,6 +2188,7 @@ export default function Icon() {
 import type { Metadata, Viewport } from 'next';
 import { Inter, Bricolage_Grotesque, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
+import { FX, type FxName } from '@/lib/fx';
 import SmoothScrollProvider from '@/components/smooth-scroll-provider';
 import { CustomCursor } from '@/components/custom-cursor';
 import { MotionProvider } from '@/components/motion-provider';
@@ -2218,13 +2253,26 @@ export const viewport: Viewport = {
   colorScheme: 'only light',
 };
 
+/**
+ * D1: CSS-only effects can't read lib/fx.ts, so every flag set to `false` becomes an `fx-off-<flag>` class on
+ * <html> (computed at build time on the server, zero client JS). globals.css gates each CSS effect on it.
+ */
+const FX_OFF_CLASSES = (Object.keys(FX) as FxName[])
+  .filter((k) => !FX[k])
+  .map((k) => `fx-off-${k}`)
+  .join(' ');
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${sans.variable} ${display.variable} ${mono.variable}`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${sans.variable} ${display.variable} ${mono.variable} ${FX_OFF_CLASSES}`}
+      suppressHydrationWarning
+    >
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{if(sessionStorage.getItem('hw-booted')==='1')document.documentElement.classList.add('hw-booted')}catch(e){}try{if(localStorage.getItem('hw-motion')==='calm')document.documentElement.dataset.motion='calm'}catch(e){}`,
+            __html: `try{if(sessionStorage.getItem('hw-booted')==='1')document.documentElement.classList.add('hw-booted')}catch(e){}try{if(localStorage.getItem('hw-motion')==='calm')document.documentElement.dataset.motion='calm'}catch(e){}document.addEventListener('click',function(e){var t=e.target,b=t&&t.closest?t.closest('[data-boot-action]'):null;if(b&&!window.__hwHydrated)window.__hwBoot=b.getAttribute('data-boot-action')},true);`,
           }}
         />
         <script
@@ -2403,6 +2451,7 @@ export default function robots(): MetadataRoute.Robots {
 ### app/simulators/[type]/page.tsx
 
 ```tsx
+import { RouteWipeClear, WipeLink } from '@/components/fx/route-wipe';
 import React from 'react';
 import type { Metadata } from 'next';
 import { ZeroLagSimulator, BilahujanSimulator, SensorXSimulator } from '@/components/project-simulators';
@@ -2444,12 +2493,13 @@ export default async function SimulatorPage({ params }: { params: Promise<{ type
 
   return (
     <div className="min-h-screen-safe bg-paper-cream bg-dots text-ink flex flex-col px-4 xs:px-5 sm:px-12 pt-[max(1.5rem,var(--safe-top))] pb-[max(2rem,var(--safe-bottom))] sm:py-12 font-sans">
+      <RouteWipeClear />
       {/* Top Nav */}
       <header className="mb-8 sm:mb-10 flex flex-wrap items-center justify-between gap-3 max-w-6xl mx-auto w-full">
-        <Link href="/#projects" className="nb-btn nb-btn-white px-4 py-2.5">
+        <WipeLink href="/#projects" className="nb-btn nb-btn-white px-4 py-2.5">
           <ArrowLeft className="w-4 h-4" strokeWidth={2.75} />
           <span>Return to Portfolio</span>
-        </Link>
+        </WipeLink>
         <span className="nb-tag bg-pop-yellow">ISOLATED SIMULATION ENVIRONMENT</span>
       </header>
 
@@ -2593,6 +2643,13 @@ const architecturePillars = [
 ];
 
 type SkillStatus = 'production' | 'hackathon' | 'rnd';
+
+// Same three legend labels and dot colours as before - now buttons that highlight matching skills (FX-36).
+const STATUS_KEYS: { status: SkillStatus; label: string; dot: string }[] = [
+  { status: 'production', label: 'Production Tested', dot: 'bg-pop-mint' },
+  { status: 'hackathon', label: 'Hackathon Proven', dot: 'bg-pop-yellow' },
+  { status: 'rnd', label: 'Active R&D', dot: 'bg-pop-blue' },
+];
 
 const techStackGroups: { category: string; skills: { name: string; status: SkillStatus }[] }[] = [
   {
@@ -2744,6 +2801,7 @@ function PillarCard({
 
 export default function AboutSection() {
   const [activeCard, setActiveCard] = useState<string>('backend');
+  const [statusFocus, setStatusFocus] = useState<SkillStatus | null>(null);
 
   // Accent → Neo-brutalist colour-block mapping (fills always carry black ink text → AAA contrast)
   const colorMap = {
@@ -2878,16 +2936,31 @@ export default function AboutSection() {
                 Verified Production & Research Stack
               </h4>
             </div>
-            <div className="flex flex-wrap items-center gap-2 text-xs font-mono font-bold text-ink">
-              <span className="nb-chip">
-                <span className="nb-dot bg-pop-mint" /> Production Tested
-              </span>
-              <span className="nb-chip">
-                <span className="nb-dot bg-pop-yellow" /> Hackathon Proven
-              </span>
-              <span className="nb-chip">
-                <span className="nb-dot bg-pop-blue" /> Active R&D
-              </span>
+            <div
+              role="group"
+              aria-label="Highlight skills by status"
+              className="flex flex-wrap items-center gap-2 text-xs font-mono font-bold text-ink"
+            >
+              {STATUS_KEYS.map((k) => {
+                const on = statusFocus === k.status;
+                if (!FX.stackFocus)
+                  return (
+                    <span key={k.status} className="nb-chip">
+                      <span className={`nb-dot ${k.dot}`} /> {k.label}
+                    </span>
+                  );
+                return (
+                  <button
+                    key={k.status}
+                    type="button"
+                    aria-pressed={on}
+                    onClick={() => setStatusFocus(on ? null : k.status)}
+                    className={`nb-chip nb-press min-h-[40px] cursor-pointer ${on ? '!bg-ink !text-white' : ''}`}
+                  >
+                    <span className={`nb-dot ${k.dot}`} /> {k.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -2911,7 +2984,8 @@ export default function AboutSection() {
                     return (
                       <span
                         key={skill.name}
-                        className="nb-chip transition-transform duration-150 hover:-translate-y-0.5 hover:shadow-brutal-xs"
+                        data-match={statusFocus ? (skill.status === statusFocus ? 'true' : 'false') : undefined}
+                        className="nb-chip fx-stack-chip transition-[transform,box-shadow,color,border-color] duration-200 hover:-translate-y-0.5 hover:shadow-brutal-xs"
                       >
                         <span className={`nb-dot ${dotColor}`} />
                         {skill.name}
@@ -3414,7 +3488,12 @@ export default function BikebearHero() {
               </div>
 
               {/* Main Portrait Frame – hover (or tap) reveals Spider-Man under the cursor, see spider-reveal.tsx */}
-              <TiltCard maxTilt={6} glare glareRadius="rounded-[28px] xs:rounded-[36px] sm:rounded-[44px]">
+              <TiltCard
+                maxTilt={6}
+                glare
+                glareRadius="rounded-[28px] xs:rounded-[36px] sm:rounded-[44px]"
+                className="w-full max-w-[350px] sm:w-auto sm:max-w-none"
+              >
                 <div
                   data-xray
                   className="relative w-full max-w-[350px] sm:max-w-none sm:w-[460px] lg:w-[460px] xl:w-[520px] aspect-[5/6] xs:aspect-[6/7] sm:aspect-auto sm:h-[560px] lg:h-[600px] xl:h-[660px] rounded-[28px] xs:rounded-[36px] sm:rounded-[44px] border-3 border-ink bg-pop-yellow overflow-hidden shadow-brutal-lg sm:shadow-brutal-xl fx-shadow-follow transition-colors duration-300 hover:border-pop-red pointer-events-auto cursor-crosshair"
@@ -3458,6 +3537,17 @@ import React, { createContext, useContext, useEffect, useRef, useState, useLayou
 const BootedContext = createContext(true);
 export const useBooted = () => useContext(BootedContext);
 import { m, AnimatePresence } from 'framer-motion';
+import { useLatest } from '@/lib/use-latest';
+import { FX, prefersReducedMotion } from '@/lib/fx';
+import { bootShatter } from './fx/boot-shatter';
+
+declare global {
+  interface Window {
+    /** Set by the inline script in app/layout.tsx when a gate button is clicked before React hydrated. */
+    __hwBoot?: 'init' | 'skip' | null;
+    __hwHydrated?: boolean;
+  }
+}
 
 /**
  * "Initialize System" gate.
@@ -3497,7 +3587,19 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
   const timers = useRef<number[]>([]);
   const justBooted = useRef(false); // true only right after the visitor clicks the gate
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  // Refs to the latest handlers so the one-time mount effect can replay an early click.
+  const startRef = useLatest(handleStartBoot);
+  const finishRef = useLatest(finish);
+  useEffect(() => {
+    setMounted(true);
+    // H1: a click on the gate that happened BEFORE hydration was captured by the inline script in
+    // app/layout.tsx. Replay it now, so the button never feels dead on a slow phone (or a CI runner).
+    window.__hwHydrated = true;
+    const early = window.__hwBoot;
+    window.__hwBoot = null;
+    if (early === 'skip') finishRef.current();
+    else if (early === 'init') startRef.current();
+  }, [startRef, finishRef]);
 
   // Lock page scroll while the gate is up (and pause Lenis); stop the browser from restoring an
   // old scroll position behind the gate on refresh.
@@ -3532,6 +3634,11 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
   );
 
   function finish() {
+    try {
+      if (FX.bootShatter && !prefersReducedMotion()) bootShatter();
+    } catch (e) {
+      console.error(e);
+    }
     try {
       sessionStorage.setItem('hw-booted', '1');
     } catch {}
@@ -3607,6 +3714,7 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
                   <div className="w-full flex flex-col items-center gap-6">
                     <button
                       onClick={handleStartBoot}
+                      data-boot-action="init"
                       autoFocus
                       className="nb-btn nb-btn-ink text-base sm:text-lg px-8 py-5 font-display normal-case tracking-[-0.01em] shadow-[inset_3px_3px_6px_rgba(255,255,255,0.25),inset_-4px_-4px_8px_rgba(0,0,0,0.5),6px_6px_0_0_#0A0A0A] hover:shadow-[inset_3px_3px_6px_rgba(255,255,255,0.25),inset_-4px_-4px_8px_rgba(0,0,0,0.5),9px_9px_0_0_#0A0A0A]"
                     >
@@ -3614,6 +3722,7 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
                     </button>
                     <button
                       onClick={finish}
+                      data-boot-action="skip"
                       className="mt-4 text-xs font-mono font-bold text-ink hover:underline tracking-wider uppercase px-3 py-2.5 min-h-[44px]"
                     >
                       Skip intro
@@ -3659,7 +3768,7 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
 import { useEffect, useRef, useState } from 'react';
 import { useFocusTrap } from '@/lib/use-focus-trap';
 import { Command } from 'cmdk';
-import { Search, Code, GraduationCap, Briefcase, Download, Mail, ZapOff } from 'lucide-react';
+import { Search, Code, GraduationCap, Briefcase, Download, Mail, Send, User, ZapOff } from 'lucide-react';
 import { personalDetails } from '@/lib/site-data';
 import { ShapeBurst } from './fx/shape-burst';
 import { isCalm, setCalm } from '@/lib/motion-pref';
@@ -3776,6 +3885,10 @@ export function CommandPalette() {
               </Command.Empty>
 
               <Command.Group heading="Navigation" className={groupClass}>
+                <Command.Item onSelect={() => runCommand(() => goTo('#about'))} className={itemClass}>
+                  <User className="w-5 h-5" strokeWidth={2.5} />
+                  <span>About</span>
+                </Command.Item>
                 <Command.Item onSelect={() => runCommand(() => goTo('#experience'))} className={itemClass}>
                   <Briefcase className="w-5 h-5" strokeWidth={2.5} />
                   <span>Experience</span>
@@ -3787,6 +3900,10 @@ export function CommandPalette() {
                 <Command.Item onSelect={() => runCommand(() => goTo('#honors'))} className={itemClass}>
                   <GraduationCap className="w-5 h-5" strokeWidth={2.5} />
                   <span>Honors & Awards</span>
+                </Command.Item>
+                <Command.Item onSelect={() => runCommand(() => goTo('#contact'))} className={itemClass}>
+                  <Send className="w-5 h-5" strokeWidth={2.5} />
+                  <span>Contact</span>
                 </Command.Item>
               </Command.Group>
 
@@ -3837,6 +3954,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { m } from 'framer-motion';
 import { SplitWords } from './fx/split-words';
 import { BauhausSolid } from './fx/bauhaus-solid';
+import dynamic from 'next/dynamic';
 import { FX } from '@/lib/fx';
 import {
   Mail,
@@ -3852,6 +3970,8 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { personalDetails } from '@/lib/site-data';
+
+const MercuryField = dynamic(() => import('./fx/mercury-field').then((mod) => mod.MercuryField), { ssr: false });
 
 const quickIntents = [
   {
@@ -3969,6 +4089,9 @@ export default function ContactSection() {
       {/* Bauhaus composition (replaces the particle canvas, which was invisible on a light canvas
           and was also being stretched: its bitmap was viewport-sized but CSS-sized to the whole section) */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        {FX.mercuryField ? (
+          <MercuryField className="absolute right-0 top-0 h-[440px] w-[30%] hidden xl:block [mask-image:linear-gradient(to_right,transparent,black_35%)]" />
+        ) : null}
         <div
           className="fx-depth absolute -left-36 top-[38%] hidden xl:block"
           style={{ '--depth': -20 } as React.CSSProperties}
@@ -4177,7 +4300,7 @@ export default function ContactSection() {
                     type="button"
                     aria-pressed={activeIntent === intent.label}
                     onClick={() => handleSelectIntent(intent)}
-                    className={`px-3.5 py-2 rounded-xl text-xs font-mono font-bold border-2 border-ink transition-all ${
+                    className={`min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-mono font-bold border-2 border-ink transition-all ${
                       activeIntent === intent.label
                         ? 'bg-pop-yellow text-ink shadow-clay-pressed translate-x-[2px] translate-y-[2px]'
                         : 'bg-white text-ink shadow-brutal-xs hover:-translate-y-0.5 hover:shadow-brutal-sm'
@@ -4329,6 +4452,7 @@ export default function ContactSection() {
 import React, { useEffect, useState } from 'react';
 import { m, useMotionValue, AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
+import { FX } from '@/lib/fx';
 
 /**
  * Brutalist cursor: solid ink dot + chunky ring.
@@ -4420,7 +4544,7 @@ export function CustomCursor() {
         aria-hidden
         className={`fixed top-0 left-0 w-11 h-11 rounded-full pointer-events-none z-[99999] border-[3px] flex items-center justify-center ${onDark ? '' : 'mix-blend-multiply'}`}
         animate={{
-          scale: customText ? 2.2 : isPointer ? 1.6 : 1,
+          scale: !FX.cursorMorph ? 1 : customText ? 2.2 : isPointer ? 1.6 : 1,
           borderColor: onDark ? '#FFFFFF' : '#0A0A0A',
           backgroundColor: customText ? '#FFC700' : isPointer ? 'rgba(255,199,0,0.45)' : 'rgba(255,199,0,0)',
         }}
@@ -4461,7 +4585,7 @@ import { FieldArchive } from './field-archive';
 import { TraceRail } from './fx/trace-rail';
 import { SplitWords } from './fx/split-words';
 import { m, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { SPRING_STAMP } from '@/lib/fx';
+import { FX, SPRING_STAMP } from '@/lib/fx';
 import {
   Building2,
   Landmark,
@@ -5010,7 +5134,7 @@ export default function ExperienceSection() {
                       layoutId="exp-filter-pill"
                       aria-hidden
                       className="absolute inset-0 rounded-2xl bg-ink shadow-clay-pressed"
-                      transition={SPRING_STAMP}
+                      transition={FX.jellyTabs ? SPRING_STAMP : { duration: 0 }}
                     />
                   ) : null}
                   <span className="relative z-10 flex items-center gap-2.5">
@@ -5620,6 +5744,119 @@ export function BauhausSolid({
 }
 ```
 
+### components/fx/boot-shatter.ts
+
+```ts
+/**
+ * FX-33 Boot Shatter. Imperative on purpose: it runs once, outside React, on a canvas appended to <body>.
+ * The overlay itself is hidden instantly by `html.hw-booted .boot-overlay { display:none }`, so this canvas
+ * is what the visitor sees for ~0.9 s. pointer-events: none -> it can never block a click or a test.
+ * Always removed: at the end of the animation AND by a safety timeout.
+ */
+export function bootShatter(base = '#FFC700'): void {
+  if (typeof window === 'undefined') return;
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const small = w < 640;
+  // D3: phones get a 1.5x canvas, bigger tiles and no second fringe pass (was a ~400 ms hitch at 4x CPU)
+  const dpr = Math.min(window.devicePixelRatio || 1, small ? 1.5 : 2);
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  canvas.width = Math.round(w * dpr);
+  canvas.height = Math.round(h * dpr);
+  canvas.setAttribute('aria-hidden', 'true');
+  canvas.setAttribute('data-fx-shatter', '');
+  Object.assign(canvas.style, {
+    position: 'fixed',
+    inset: '0',
+    width: '100%',
+    height: '100%',
+    zIndex: '100000',
+    pointerEvents: 'none',
+  });
+  document.body.appendChild(canvas);
+  ctx.scale(dpr, dpr);
+
+  const size = small ? 44 : 40; // ~500 tiles on phones, ~1300 at 1920x1080
+  const cols = Math.ceil(w / size);
+  const rows = Math.ceil(h / size);
+  const cx = w / 2;
+  const cy = h / 2;
+  const accents = ['#2B4BFF', '#FF4B2B', '#FFFFFF'] as const;
+
+  type Tile = { x: number; y: number; vx: number; vy: number; r: number; vr: number; c: string };
+  const tiles: Tile[] = [];
+  for (let j = 0; j < rows; j++) {
+    for (let i = 0; i < cols; i++) {
+      const x = i * size;
+      const y = j * size;
+      const dx = x + size / 2 - cx;
+      const dy = y + size / 2 - cy;
+      const d = Math.hypot(dx, dy) || 1;
+      const speed = 5 + Math.random() * 11;
+      const accent = Math.random() < 0.07 ? accents[Math.floor(Math.random() * accents.length)] : undefined;
+      tiles.push({
+        x,
+        y,
+        vx: (dx / d) * speed,
+        vy: (dy / d) * speed - 5,
+        r: 0,
+        vr: (Math.random() - 0.5) * 0.3,
+        c: accent ?? base,
+      });
+    }
+  }
+
+  const DURATION = 900;
+  const start = performance.now();
+  let raf = 0;
+  const cleanup = () => {
+    cancelAnimationFrame(raf);
+    canvas.remove();
+  };
+  const frame = (now: number) => {
+    const t = (now - start) / DURATION;
+    ctx.clearRect(0, 0, w, h);
+    if (t >= 1) {
+      cleanup();
+      return;
+    }
+    const fringe = t < 0.22 ? (0.22 - t) * 26 : 0; // chromatic aberration only while it's fastest
+    const s = size * (1 - t * 0.55);
+    for (const p of tiles) {
+      p.vy += 0.9;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.r += p.vr;
+      if (p.y > h + size) continue;
+      ctx.save();
+      ctx.translate(p.x + size / 2, p.y + size / 2);
+      ctx.rotate(p.r);
+      if (fringe > 0) {
+        ctx.globalAlpha = 0.55;
+        ctx.fillStyle = '#FF4B2B';
+        ctx.fillRect(-s / 2 - fringe, -s / 2, s, s);
+        if (!small) {
+          ctx.fillStyle = '#2B4BFF';
+          ctx.fillRect(-s / 2 + fringe, -s / 2, s, s);
+        }
+      }
+      ctx.globalAlpha = 1 - t * t;
+      ctx.fillStyle = p.c;
+      ctx.fillRect(-s / 2, -s / 2, s, s);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#0A0A0A';
+      ctx.strokeRect(-s / 2, -s / 2, s, s);
+      ctx.restore();
+    }
+    raf = requestAnimationFrame(frame);
+  };
+  raf = requestAnimationFrame(frame);
+  window.setTimeout(cleanup, DURATION + 500);
+}
+```
+
 ### components/fx/coin-flip.tsx
 
 ```tsx
@@ -5690,6 +5927,214 @@ export function EasterEgg() {
 }
 ```
 
+### components/fx/mercury-field.tsx
+
+```tsx
+'use client';
+
+import { useEffect, useRef } from 'react';
+import { FX, prefersReducedMotion } from '@/lib/fx';
+import { pointer } from '@/lib/pointer';
+import { useCalm } from '@/lib/motion-pref';
+
+const VERT = `#version 300 es
+in vec2 aPos;
+void main() { gl_Position = vec4(aPos, 0.0, 1.0); }`;
+
+// 2D signed-distance-style metaballs. f > 1.0 = inside (flat colour), 0.78..1.0 = ink outline band.
+const FRAG = `#version 300 es
+precision highp float;
+uniform vec2 uRes;
+uniform float uTime;
+uniform vec2 uPtr;
+out vec4 outColor;
+
+float ball(vec2 p, vec2 c, float r) {
+  vec2 d = p - c;
+  return (r * r) / max(dot(d, d), 1e-5);
+}
+
+void main() {
+  vec2 p = (gl_FragCoord.xy - 0.5 * uRes) / uRes.y;
+  float aspect = uRes.x / uRes.y;
+  float t = uTime * 0.22;
+  vec2 c1 = vec2(sin(t * 1.3) * 0.32 * aspect, cos(t * 0.9) * 0.20);
+  vec2 c2 = vec2(cos(t * 0.7 + 1.7) * 0.36 * aspect, sin(t * 1.1 + 0.4) * 0.22);
+  vec2 c3 = vec2(sin(t * 0.5 + 3.1) * 0.28 * aspect, sin(t * 1.7 + 2.2) * 0.18);
+  vec2 c4 = vec2(uPtr.x * 0.45 * aspect, -uPtr.y * 0.45);
+  float f1 = ball(p, c1, 0.15);
+  float f2 = ball(p, c2, 0.12);
+  float f3 = ball(p, c3, 0.10);
+  float f4 = ball(p, c4, 0.08);
+  float f = f1 + f2 + f3 + f4;
+  float w = fwidth(f);
+  float body = smoothstep(1.0 - w, 1.0 + w, f);
+  float edge = smoothstep(0.78 - w, 0.78 + w, f);
+  vec3 yellow = vec3(1.0, 0.780, 0.0);
+  vec3 blue = vec3(0.169, 0.294, 1.0);
+  vec3 red = vec3(1.0, 0.294, 0.169);
+  vec3 ink = vec3(0.039, 0.039, 0.039);
+  float m = max(max(f1, f2), max(f3, f4));
+  vec3 solid = (m == f2) ? blue : ((m == f3) ? red : yellow);
+  vec3 col = mix(ink, solid, body);
+  outColor = vec4(col * edge, edge); // premultiplied alpha
+}`;
+
+/** FX-34 Mercury Field. Pauses off-screen / in background tabs; static frame under reduced motion/Calm. */
+export function MercuryField({ className = '' }: { className?: string }) {
+  const ref = useRef<HTMLCanvasElement>(null);
+  const calm = useCalm(); // re-run when the visitor toggles Calm Mode (freeze to a still frame)
+
+  useEffect(() => {
+    const canvas = ref.current;
+    if (!FX.mercuryField || !canvas) return;
+    if (getComputedStyle(canvas).display === 'none') return; // hidden breakpoint: never create a context
+    const gl = canvas.getContext('webgl2', {
+      alpha: true,
+      premultipliedAlpha: true,
+      antialias: false,
+      powerPreference: 'low-power',
+    });
+    if (!gl) return; // no WebGL2: the static Bauhaus shapes remain, which is the current design
+
+    const compile = (type: number, src: string) => {
+      const s = gl.createShader(type);
+      if (!s) return null;
+      gl.shaderSource(s, src);
+      gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+        gl.deleteShader(s);
+        return null;
+      }
+      return s;
+    };
+    const vs = compile(gl.VERTEX_SHADER, VERT);
+    const fs = compile(gl.FRAGMENT_SHADER, FRAG);
+    const prog = gl.createProgram();
+    if (!vs || !fs || !prog) return;
+    gl.attachShader(prog, vs);
+    gl.attachShader(prog, fs);
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
+    gl.useProgram(prog);
+
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW); // one big triangle
+    const aPos = gl.getAttribLocation(prog, 'aPos');
+    gl.enableVertexAttribArray(aPos);
+    gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+    const uRes = gl.getUniformLocation(prog, 'uRes');
+    const uTime = gl.getUniformLocation(prog, 'uTime');
+    const uPtr = gl.getUniformLocation(prog, 'uPtr');
+
+    const still = calm || prefersReducedMotion();
+    const t0 = performance.now();
+    let raf = 0;
+    let visible = false;
+    let lost = false;
+
+    const resize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      const r = canvas.getBoundingClientRect();
+      canvas.width = Math.max(1, Math.round(r.width * dpr));
+      canvas.height = Math.max(1, Math.round(r.height * dpr));
+      gl.viewport(0, 0, canvas.width, canvas.height);
+    };
+    const draw = (now: number) => {
+      raf = 0;
+      if (lost) return;
+      const px = pointer.x; // written by FX-01 PointerField, no extra listener
+      const py = pointer.y;
+      gl.uniform2f(uRes, canvas.width, canvas.height);
+      gl.uniform1f(uTime, still ? 14 : (now - t0) / 1000);
+      gl.uniform2f(uPtr, px, py);
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      if (!still && visible && !document.hidden) raf = requestAnimationFrame(draw);
+    };
+    const kick = () => {
+      if (!raf) raf = requestAnimationFrame(draw);
+    };
+
+    const ro = new ResizeObserver(() => {
+      resize();
+      kick();
+    });
+    ro.observe(canvas);
+    const io = new IntersectionObserver((entries) => {
+      visible = entries[0]?.isIntersecting ?? false;
+      if (visible) kick();
+    });
+    io.observe(canvas);
+    const onVisibility = () => {
+      if (!document.hidden) kick();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    const onLost = (e: Event) => {
+      e.preventDefault();
+      lost = true;
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
+    };
+    canvas.addEventListener('webglcontextlost', onLost);
+
+    resize();
+    kick();
+
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      ro.disconnect();
+      io.disconnect();
+      document.removeEventListener('visibilitychange', onVisibility);
+      canvas.removeEventListener('webglcontextlost', onLost);
+      gl.deleteBuffer(buf);
+      gl.deleteProgram(prog);
+      gl.deleteShader(vs);
+      gl.deleteShader(fs);
+    };
+  }, [calm]);
+
+  return <canvas ref={ref} aria-hidden className={`pointer-events-none block ${className}`} />;
+}
+```
+
+### components/fx/offscreen-pause.tsx
+
+```tsx
+'use client';
+
+import { useEffect } from 'react';
+
+/**
+ * D5: marks page sections that are off-screen with `data-offscreen`, so their infinite decorative animations
+ * (pulse / ping / spin / wobble / marquee) pause via CSS. The attribute only flips when a section enters or
+ * leaves the viewport, so this costs nothing while scrolling.
+ */
+export function OffscreenPause() {
+  useEffect(() => {
+    const targets = document.querySelectorAll<HTMLElement>('main section[id], footer');
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          const el = e.target as HTMLElement;
+          if (e.isIntersecting) delete el.dataset.offscreen;
+          else el.dataset.offscreen = '';
+        }
+      },
+      { rootMargin: '200px 0px' },
+    );
+    targets.forEach((t) => io.observe(t));
+    return () => {
+      io.disconnect();
+      targets.forEach((t) => delete t.dataset.offscreen);
+    };
+  }, []);
+  return null;
+}
+```
+
 ### components/fx/pointer-field.tsx
 
 ```tsx
@@ -5698,12 +6143,16 @@ export function EasterEgg() {
 import { useEffect } from 'react';
 import { FX, canHover, prefersReducedMotion } from '@/lib/fx';
 import { useCalm } from '@/lib/motion-pref';
+import { pointer, POINTER_CONSUMERS } from '@/lib/pointer';
 
 /**
- * FX-01: one global, rAF-throttled pointer listener that writes the cursor position into two CSS custom
- * properties on <html>: --px and --py, each in the range -1..1 (0 = centre of the viewport).
- * Every depth / light effect is pure CSS reading these vars, so moving the mouse never re-renders React.
- * Off on touch-only devices and for reduced motion (the vars simply stay 0, which is the neutral pose).
+ * FX-01: one global, rAF-throttled pointer listener. It writes the cursor position (-1..1, 0 = centre) as
+ * --px / --py on the elements that actually read them (POINTER_CONSUMERS) and that are near the viewport.
+ *
+ * PERF: the vars used to be written on <html>. A custom property on <html> is inherited by every element,
+ * so each mouse move forced a style recalculation of the whole page (~2,600 nodes, ~70 ms per move).
+ * Writing only to the handful of visible consumers keeps each move well under 1 ms.
+ * Off on touch-only devices and for reduced motion / Calm (vars absent = neutral pose via var(--px, 0)).
  */
 export function PointerField() {
   const calm = useCalm();
@@ -5712,34 +6161,69 @@ export function PointerField() {
     if (calm || !FX.pointerField || !canHover() || prefersReducedMotion()) return;
     const root = document.documentElement;
     root.dataset.fxPointer = 'on';
+    const visible = new Set<HTMLElement>();
+    const observed = new WeakSet<Element>();
     let raf = 0;
-    let nx = 0;
-    let ny = 0;
+    let lastScan = 0;
+
+    const apply = (el: HTMLElement) => {
+      el.style.setProperty('--px', pointer.x.toFixed(3));
+      el.style.setProperty('--py', pointer.y.toFixed(3));
+    };
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          const el = e.target as HTMLElement;
+          if (e.isIntersecting) {
+            visible.add(el);
+            apply(el); // catch up immediately when it scrolls into view
+          } else visible.delete(el);
+        }
+      },
+      { rootMargin: '200px 0px' },
+    );
+    // Sections below the fold mount lazily, so new consumers are picked up on a throttled rescan.
+    const scan = () => {
+      lastScan = performance.now();
+      document.querySelectorAll(POINTER_CONSUMERS).forEach((el) => {
+        if (!observed.has(el)) {
+          observed.add(el);
+          io.observe(el);
+        }
+      });
+    };
+    scan();
+
     const write = () => {
       raf = 0;
-      root.style.setProperty('--px', nx.toFixed(3));
-      root.style.setProperty('--py', ny.toFixed(3));
+      if (performance.now() - lastScan > 1000) scan();
+      visible.forEach(apply);
     };
     const onMove = (e: PointerEvent) => {
       if (e.pointerType === 'touch') return;
-      nx = (e.clientX / window.innerWidth) * 2 - 1;
-      ny = (e.clientY / window.innerHeight) * 2 - 1;
+      pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+      pointer.y = (e.clientY / window.innerHeight) * 2 - 1;
       if (!raf) raf = requestAnimationFrame(write);
     };
     const reset = () => {
-      nx = 0;
-      ny = 0;
+      pointer.x = 0;
+      pointer.y = 0;
       if (!raf) raf = requestAnimationFrame(write);
     };
     window.addEventListener('pointermove', onMove, { passive: true });
-    document.documentElement.addEventListener('pointerleave', reset);
+    root.addEventListener('pointerleave', reset);
     return () => {
       window.removeEventListener('pointermove', onMove);
-      document.documentElement.removeEventListener('pointerleave', reset);
+      root.removeEventListener('pointerleave', reset);
       if (raf) cancelAnimationFrame(raf);
+      io.disconnect();
       delete root.dataset.fxPointer;
-      root.style.removeProperty('--px');
-      root.style.removeProperty('--py');
+      pointer.x = 0;
+      pointer.y = 0;
+      document.querySelectorAll<HTMLElement>(POINTER_CONSUMERS).forEach((el) => {
+        el.style.removeProperty('--px');
+        el.style.removeProperty('--py');
+      });
     };
   }, [calm]);
   return null;
@@ -5788,13 +6272,86 @@ export function PowerOn({ children, className = '' }: { children: ReactNode; cla
 }
 ```
 
+### components/fx/route-wipe.tsx
+
+```tsx
+'use client';
+
+import Link from 'next/link';
+import type { Route } from 'next';
+import { useRouter } from 'next/navigation';
+import { useEffect, type ComponentProps, type MouseEvent } from 'react';
+import { FX, prefersReducedMotion } from '@/lib/fx';
+
+/**
+ * FX-35 Route Wipe. A Bauhaus-yellow panel with an ink edge sweeps up, the route changes underneath,
+ * then the panel sweeps away on the new page (<RouteWipeClear /> must be rendered on both pages).
+ * Plain <Link> behaviour for: modifier/middle clicks, reduced motion, Calm Mode, FX flag off.
+ * The panel is imperative (outside React) because it has to survive the route change; it is always
+ * removed by the destination page or by a safety timeout.
+ */
+const WIPE_MS = 380;
+const EASE = 'cubic-bezier(0.2, 0.9, 0.1, 1)';
+
+function coverScreen(): void {
+  if (document.querySelector('[data-fx-wipe]')) return;
+  const el = document.createElement('div');
+  el.setAttribute('data-fx-wipe', '');
+  el.setAttribute('aria-hidden', 'true');
+  Object.assign(el.style, {
+    position: 'fixed',
+    inset: '0',
+    zIndex: '100000',
+    background: '#FFC700',
+    borderTop: '6px solid #0A0A0A',
+    transform: 'scaleY(0)',
+    transformOrigin: '50% 100%',
+    transition: `transform ${WIPE_MS}ms ${EASE}`,
+    pointerEvents: 'none',
+  });
+  document.body.appendChild(el);
+  requestAnimationFrame(() => requestAnimationFrame(() => (el.style.transform = 'scaleY(1)')));
+  window.setTimeout(() => el.remove(), 4000); // safety net: never leave the screen covered
+}
+
+type WipeLinkProps<T extends string> = Omit<ComponentProps<typeof Link>, 'href'> & { href: Route<T> };
+
+export function WipeLink<T extends string>({ onClick, href, ...props }: WipeLinkProps<T>) {
+  const router = useRouter();
+  const handle = (e: MouseEvent<HTMLAnchorElement>) => {
+    onClick?.(e);
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    if (!FX.routeWipe || prefersReducedMotion()) return;
+    e.preventDefault();
+    coverScreen();
+    window.setTimeout(() => router.push(href), WIPE_MS);
+  };
+  return <Link {...props} href={href} onClick={handle} />;
+}
+
+/** Render once on every page a WipeLink can lead to: uncovers the screen after the new route mounted. */
+export function RouteWipeClear() {
+  useEffect(() => {
+    const el = document.querySelector<HTMLElement>('[data-fx-wipe]');
+    if (!el) return;
+    el.style.transformOrigin = '50% 0%';
+    el.style.borderTop = '0';
+    el.style.borderBottom = '6px solid #0A0A0A';
+    requestAnimationFrame(() => (el.style.transform = 'scaleY(0)'));
+    const t = window.setTimeout(() => el.remove(), WIPE_MS + 80);
+    return () => window.clearTimeout(t);
+  }, []);
+  return null;
+}
+```
+
 ### components/fx/scroll-unfold.tsx
 
 ```tsx
 'use client';
 
-import { useRef, type ReactNode } from 'react';
-import { m, useScroll, useTransform } from 'framer-motion';
+import { useEffect, useRef, type ReactNode } from 'react';
+import { m, useMotionValue, useScroll, useTransform } from 'framer-motion';
 import { useMotionAllowed } from './use-motion-allowed';
 import { FX } from '@/lib/fx';
 
@@ -5802,20 +6359,30 @@ import { FX } from '@/lib/fx';
  * FX-07: a card rises out of a tilted-back 3D plane (like a drawing lifted off a drafting table) as it
  * scrolls into view, and is perfectly flat by the time its top reaches 55% of the viewport.
  * Scroll-linked (not time-based), so it never replays and never lags behind fast scrolling.
+ *
+ * FIX (Round 9): the motion values stay bound at all times and a `gate` value (1 = motion on, 0 = off)
+ * drives them to the flat resting pose. Previously the style switched to `undefined` when motion was off,
+ * and framer kept the last inline transform (rotateX 14deg, scale 0.93, y 48px) on every card for
+ * visitors with "Reduce motion" enabled or Calm Mode on.
  */
 export function ScrollUnfold({ children, className = '' }: { children: ReactNode; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const allowed = useMotionAllowed(FX.cardUnfold);
+  const gate = useMotionValue(1);
+  useEffect(() => {
+    gate.set(allowed ? 1 : 0);
+  }, [allowed, gate]);
+
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'start 0.55'] });
-  const rotateX = useTransform(scrollYProgress, [0, 1], [14, 0]);
-  const scale = useTransform(scrollYProgress, [0, 1], [0.93, 1]);
-  const y = useTransform(scrollYProgress, [0, 1], [48, 0]);
+  const rotateX = useTransform(() => gate.get() * 14 * (1 - scrollYProgress.get()));
+  const scale = useTransform(() => 1 - gate.get() * 0.07 * (1 - scrollYProgress.get()));
+  const y = useTransform(() => gate.get() * 48 * (1 - scrollYProgress.get()));
   return (
     <m.div
       data-fx
       ref={ref}
       className={className}
-      style={!allowed ? undefined : { rotateX, scale, y, transformPerspective: 1400, transformOrigin: '50% 100%' }}
+      style={{ rotateX, scale, y, transformPerspective: 1400, transformOrigin: '50% 100%' }}
     >
       {children}
     </m.div>
@@ -5991,39 +6558,20 @@ export function SplitWords({ text, delay = 0 }: { text: string; delay?: number }
 ### components/fx/text-roll.tsx
 
 ```tsx
-import React from 'react';
+import { FX } from '@/lib/fx';
 
+/**
+ * FX-28: the label rolls up out of a mask and an identical copy rolls in (hover AND keyboard focus).
+ * Exactly two spans: the copy is aria-hidden, so the accessible name stays "RUN SIMULATOR" (the previous
+ * per-character version was announced by screen readers as "R U N S I M U L A T O R" twice).
+ * Server-safe (no hooks). Pass a plain string only. Motion is removed by the global reduced-motion / Calm CSS.
+ */
 export function TextRoll({ children }: { children: string }) {
-  if (typeof children !== 'string') return <>{children}</>;
-
-  const chars = children.split('');
-
+  if (!FX.textRoll) return <>{children}</>;
   return (
-    <span className="relative inline-flex overflow-hidden">
-      {/* Primary text (moves up and out) */}
-      <span className="inline-flex">
-        {chars.map((char, i) => (
-          <span
-            key={`primary-${i}`}
-            className="inline-block whitespace-pre transition-transform duration-300 ease-[cubic-bezier(0.2,0.9,0.1,1)] group-hover:-translate-y-full"
-            style={{ transitionDelay: `${i * 15}ms` }}
-          >
-            {char}
-          </span>
-        ))}
-      </span>
-      {/* Secondary text (moves up and in from below) */}
-      <span className="absolute inset-0 inline-flex">
-        {chars.map((char, i) => (
-          <span
-            key={`secondary-${i}`}
-            className="inline-block whitespace-pre translate-y-full transition-transform duration-300 ease-[cubic-bezier(0.2,0.9,0.1,1)] group-hover:translate-y-0"
-            style={{ transitionDelay: `${i * 15}ms` }}
-          >
-            {char}
-          </span>
-        ))}
-      </span>
+    <span className="fx-roll">
+      <span>{children}</span>
+      <span aria-hidden="true">{children}</span>
     </span>
   );
 }
@@ -6096,7 +6644,7 @@ export function useMotionAllowed(flag: boolean = true): boolean {
 ```tsx
 'use client';
 
-import type { ReactNode } from 'react';
+import { useRef, useEffect, type ReactNode } from 'react';
 import { m, useScroll, useSpring, useTransform, useVelocity, useMotionValueEvent } from 'framer-motion';
 import { useMotionAllowed } from './use-motion-allowed';
 import { FX } from '@/lib/fx';
@@ -6113,16 +6661,27 @@ export function VelocitySkew({ children, className = 'relative z-20' }: { childr
   const skewY = useTransform(smooth, [-2500, 0, 2500], [2.5, 0, -2.5], { clamp: true });
   const scaleY = useTransform(smooth, [-2500, 0, 2500], [1.06, 1, 1.06], { clamp: true });
 
+  const ref = useRef<HTMLDivElement>(null);
+  const targetsRef = useRef<HTMLElement[]>([]);
+
+  useEffect(() => {
+    targetsRef.current = Array.from(document.querySelectorAll<HTMLElement>('.fx-aberration'));
+  }, []);
+
+  // PERF: write --fx-vel ONLY to the elements that actually use it (the hero headline).
+  // Writing it to <html> or the marquee wrapper causes massive style recalculations on every scroll frame.
   useMotionValueEvent(smooth, 'change', (v) => {
-    if (FX.aberration) {
-      const normalized = Math.max(-1, Math.min(1, v / 2500));
-      document.documentElement.style.setProperty('--fx-vel', normalized.toFixed(3));
-    }
+    if (!FX.aberration || !allowed) return;
+    const normalized = Math.max(-1, Math.min(1, v / 2500));
+    const val = normalized.toFixed(2);
+    targetsRef.current.forEach((el) => {
+      el.style.setProperty('--fx-vel', val);
+    });
   });
 
   // relative z-20 keeps the band above the neighbouring section exactly like the unwrapped marquee (z-20).
   return (
-    <m.div className={className} style={allowed ? { skewY, scaleY } : undefined}>
+    <m.div ref={ref} className={className} style={allowed ? { skewY, scaleY } : { skewY: 0, scaleY: 1 }}>
       {children}
     </m.div>
   );
@@ -6655,9 +7214,10 @@ function CertificateModal({ url, onClose }: { url: string; onClose: () => void }
       </div>
 
       <m.div
-        initial={{ y: 40, rotateX: -20, opacity: 0 }}
+        initial={FX.pageLift ? { y: 40, rotateX: -18, opacity: 0, transformPerspective: 1200 } : { opacity: 0 }}
         animate={{ y: 0, rotateX: 0, opacity: 1 }}
-        exit={{ y: 40, rotateX: -20, opacity: 0 }}
+        exit={FX.pageLift ? { y: 40, rotateX: 12, opacity: 0, transformPerspective: 1200 } : { opacity: 0 }}
+        style={{ transformOrigin: '50% 0%' }}
         onClick={(e) => e.stopPropagation()}
         className="relative w-full max-w-5xl mx-auto flex-1 min-h-0 bg-white rounded-[18px] sm:rounded-[22px] border-3 border-ink shadow-brutal-lg sm:shadow-brutal-xl flex items-center justify-center p-2 sm:p-3"
       >
@@ -7268,7 +7828,7 @@ export function InteractivePhotoStack({ customPhotos }: { customPhotos?: Photo[]
                       e.stopPropagation();
                       openViewer(photo.src);
                     }}
-                    className="absolute top-1.5 right-1.5 sm:top-3 sm:right-3 z-50 w-10 h-10 sm:w-9 sm:h-9 grid place-items-center bg-white border-2 border-ink rounded-lg shadow-brutal-xs hover:bg-pop-yellow hover:-translate-y-0.5 active:translate-y-0 transition-all text-ink group/expand"
+                    className="absolute top-1.5 right-1.5 sm:top-3 sm:right-3 z-50 w-10 h-10 grid place-items-center bg-white border-2 border-ink rounded-lg shadow-brutal-xs hover:bg-pop-yellow hover:-translate-y-0.5 active:translate-y-0 transition-all text-ink group/expand"
                     title="View full resolution"
                     aria-label={`View full resolution: ${photo.alt}`}
                   >
@@ -7323,7 +7883,9 @@ export const ContactSection = dynamic(() => import('@/components/contact-section
 ```tsx
 'use client';
 
-import { m, useMotionValue, useSpring, useReducedMotion } from 'framer-motion';
+import { m, useMotionValue, useSpring } from 'framer-motion';
+import { FX } from '@/lib/fx';
+import { useMotionAllowed } from './fx/use-motion-allowed';
 import { useRef, ReactNode, PointerEvent } from 'react';
 
 interface MagneticProps {
@@ -7340,7 +7902,9 @@ export function Magnetic({ children, className = '', strength = 0.5, stretch = f
   const scaleXBase = useMotionValue(1);
   const scaleYBase = useMotionValue(1);
 
-  const prefersReducedMotion = useReducedMotion();
+  // Round 9: OS reduced-motion AND Calm Mode (framer's useReducedMotion only saw the OS setting)
+  const prefersReducedMotion = !useMotionAllowed();
+  const doStretch = stretch && FX.magneticStretch;
 
   const springConfig = { damping: 15, stiffness: 150, mass: 0.1 };
   const springX = useSpring(x, springConfig);
@@ -7360,7 +7924,7 @@ export function Magnetic({ children, className = '', strength = 0.5, stretch = f
     x.set((clientX - centerX) * strength);
     y.set((clientY - centerY) * strength);
 
-    if (stretch) {
+    if (doStretch) {
       const diffX = clientX - centerX;
       const diffY = clientY - centerY;
       const dist = Math.sqrt(diffX * diffX + diffY * diffY);
@@ -7372,10 +7936,9 @@ export function Magnetic({ children, className = '', strength = 0.5, stretch = f
   };
 
   const handleMouseLeave = () => {
-    if (prefersReducedMotion) return;
     x.set(0);
     y.set(0);
-    if (stretch) {
+    if (doStretch) {
       scaleXBase.set(1);
       scaleYBase.set(1);
     }
@@ -7389,8 +7952,8 @@ export function Magnetic({ children, className = '', strength = 0.5, stretch = f
       style={{
         x: prefersReducedMotion ? 0 : springX,
         y: prefersReducedMotion ? 0 : springY,
-        scaleX: !prefersReducedMotion && stretch ? scaleX : 1,
-        scaleY: !prefersReducedMotion && stretch ? scaleY : 1,
+        scaleX: !prefersReducedMotion && doStretch ? scaleX : 1,
+        scaleY: !prefersReducedMotion && doStretch ? scaleY : 1,
       }}
       className={`inline-block ${className}`}
       data-magnetic
@@ -7504,6 +8067,7 @@ import AboutSection from '@/components/about-section';
 import { StackedProjects, ExperienceSection, HonorsSection, ContactSection } from '@/components/lazy-sections';
 import { SiteFooter } from '@/components/site-footer';
 import dynamic from 'next/dynamic';
+import { RouteWipeClear } from '@/components/fx/route-wipe';
 const PointerField = dynamic(() => import('@/components/fx/pointer-field').then((mod) => mod.PointerField));
 const EasterEgg = dynamic(() => import('@/components/fx/easter-egg').then((mod) => mod.EasterEgg));
 const VelocitySkew = dynamic(() => import('@/components/fx/velocity-skew').then((mod) => mod.VelocitySkew));
@@ -7513,6 +8077,8 @@ import { TechMarquee } from '@/components/marquees';
 import { ScrollToTop } from '@/components/scroll-to-top';
 import { SiteHeader } from '@/components/site-header';
 const CommandPalette = dynamic(() => import('@/components/command-palette').then((mod) => mod.CommandPalette), {});
+const OffscreenPause = dynamic(() => import('@/components/fx/offscreen-pause').then((mod) => mod.OffscreenPause));
+const SectionDock = dynamic(() => import('@/components/section-dock').then((mod) => mod.SectionDock));
 const SectionSpine = dynamic(() => import('@/components/section-spine').then((mod) => mod.SectionSpine));
 
 export function PortfolioPage() {
@@ -7558,6 +8124,9 @@ export function PortfolioPage() {
 
         <ScrollToTop />
         <SectionSpine />
+        <SectionDock />
+        <OffscreenPause />
+        <RouteWipeClear />
         <CommandPalette />
         <PointerField />
         <EasterEgg />
@@ -7959,7 +8528,7 @@ export function SensorXSimulator() {
 
         <button
           onClick={() => setIsOccupied(!isOccupied)}
-          className={`px-5 py-2.5 rounded-full font-mono text-xs font-bold uppercase tracking-wider transition-all ${
+          className={`min-h-[40px] px-5 py-2.5 rounded-full font-mono text-xs font-bold uppercase tracking-wider transition-all ${
             isOccupied
               ? 'bg-emerald-400 text-black shadow-lg shadow-emerald-500/20'
               : 'bg-red-500/20 text-red-300 border border-red-500/40'
@@ -8101,21 +8670,94 @@ export function ScrollToTop() {
 }
 ```
 
-### components/section-spine.tsx
+### components/section-dock.tsx
 
 ```tsx
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Compass } from 'lucide-react';
 import { FX } from '@/lib/fx';
+import { SECTIONS, SECTION_IDS } from '@/lib/sections';
+import { useActiveSection } from '@/lib/use-active-section';
 
-const SECTIONS = [
-  { id: 'about', label: 'About' },
-  { id: 'projects', label: 'Projects' },
-  { id: 'experience', label: 'Experience' },
-  { id: 'honors', label: 'Honors' },
-  { id: 'contact', label: 'Contact' },
-] as const;
+/**
+ * FX-37 Section Dock (below 1024 px). The page is ~35,000 px tall on a phone; this pill always says where you
+ * are and one tap opens the existing command palette (same `open-command-palette` event the header uses).
+ * Bottom-LEFT so it never collides with the scroll-to-top button (bottom-right). Hidden while typing,
+ * so the on-screen keyboard + contact form are never covered.
+ */
+export function SectionDock() {
+  const active = useActiveSection(SECTION_IDS, FX.sectionDock);
+  const [typing, setTyping] = useState(false);
+  const [scrollingDown, setScrollingDown] = useState(false);
+
+  // D6: hide while the visitor scrolls down (reading), show again on any scroll up - like mobile browser bars.
+  // State only changes when the direction flips, so this does not re-render on every scroll frame.
+  useEffect(() => {
+    let lastY = window.scrollY;
+    let down = false;
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (Math.abs(y - lastY) < 12) return;
+      const nowDown = y > lastY;
+      lastY = y;
+      if (nowDown !== down) {
+        down = nowDown;
+        setScrollingDown(nowDown);
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    const isField = (t: EventTarget | null) =>
+      t instanceof HTMLElement && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
+    const onIn = (e: FocusEvent) => {
+      if (isField(e.target)) setTyping(true);
+    };
+    const onOut = (e: FocusEvent) => {
+      if (isField(e.target)) setTyping(false);
+    };
+    document.addEventListener('focusin', onIn);
+    document.addEventListener('focusout', onOut);
+    return () => {
+      document.removeEventListener('focusin', onIn);
+      document.removeEventListener('focusout', onOut);
+    };
+  }, []);
+
+  if (!FX.sectionDock) return null;
+  const label = SECTIONS.find((s) => s.id === active)?.label;
+  const visible = !!label && !typing && !scrollingDown;
+
+  return (
+    <button
+      type="button"
+      onClick={() => window.dispatchEvent(new Event('open-command-palette'))}
+      aria-label={label ? `Current section: ${label}. Open navigation` : 'Open navigation'}
+      tabIndex={visible ? 0 : -1}
+      aria-hidden={visible ? undefined : true}
+      className={`lg:hidden fixed z-[90] left-[max(1rem,calc(var(--safe-left)+0.5rem))] bottom-[max(1rem,calc(var(--safe-bottom)+0.5rem))] sm:bottom-8 sm:left-8 inline-flex items-center gap-2 min-h-[48px] max-w-[60vw] px-4 rounded-full border-3 border-ink bg-white shadow-brutal-sm font-mono text-xs font-extrabold uppercase tracking-[0.1em] text-ink transition-[opacity,transform] duration-200 active:translate-x-[3px] active:translate-y-[3px] active:shadow-none ${
+        visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+      }`}
+    >
+      <Compass className="w-4 h-4 shrink-0" strokeWidth={2.75} aria-hidden />
+      <span className="truncate">{label ?? ''}</span>
+    </button>
+  );
+}
+```
+
+### components/section-spine.tsx
+
+```tsx
+'use client';
+
+import { FX } from '@/lib/fx';
+import { SECTIONS, SECTION_IDS } from '@/lib/sections';
+import { useActiveSection } from '@/lib/use-active-section';
 
 /**
  * FX-20: fixed scroll-spy rail. Only on very wide screens (>= 1400 px) where the right gutter is empty.
@@ -8124,20 +8766,7 @@ const SECTIONS = [
  * except when the active section actually changes.
  */
 export function SectionSpine() {
-  const [active, setActive] = useState('');
-
-  useEffect(() => {
-    if (!FX.sectionSpine) return;
-    const els = SECTIONS.map((s) => document.getElementById(s.id)).filter((e): e is HTMLElement => e !== null);
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) if (e.isIntersecting) setActive(e.target.id);
-      },
-      { rootMargin: '-45% 0px -50% 0px' },
-    );
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
-  }, []);
+  const active = useActiveSection(SECTION_IDS, FX.sectionSpine);
 
   if (!FX.sectionSpine) return null;
 
@@ -8159,7 +8788,7 @@ export function SectionSpine() {
             <span
               className={`font-mono text-xs font-extrabold uppercase tracking-[0.1em] px-2 py-1 border-2 border-ink rounded-md bg-white shadow-brutal-xs transition-[opacity,transform] duration-200 ${
                 on
-                  ? 'opacity-100 translate-x-0'
+                  ? 'opacity-0 translate-x-0 min-[1680px]:opacity-100 group-hover:opacity-100 group-focus-visible:opacity-100'
                   : 'opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 group-focus-visible:opacity-100 group-focus-visible:translate-x-0'
               }`}
             >
@@ -8415,7 +9044,7 @@ export function SiteHeader() {
         <MotionToggle className="hidden sm:grid w-10 h-10 md:w-12 md:h-12 landscape-short:!w-10 landscape-short:!h-10" />
         <button
           onClick={() => window.dispatchEvent(new Event('open-command-palette'))}
-          className="hidden xs:grid place-items-center w-10 h-10 md:w-12 md:h-12 landscape-short:!w-10 landscape-short:!h-10 rounded-full bg-white border-3 border-ink shadow-brutal-sm hover:bg-pop-lilac hover:-translate-y-0.5 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all text-ink"
+          className="hidden min-[320px]:grid place-items-center w-10 h-10 md:w-12 md:h-12 landscape-short:!w-10 landscape-short:!h-10 rounded-full bg-white border-3 border-ink shadow-brutal-sm hover:bg-pop-lilac hover:-translate-y-0.5 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all text-ink"
           aria-label="Open Command Palette"
           title="Search (Ctrl/⌘ + K)"
         >
@@ -8685,11 +9314,11 @@ export function SpiderReveal() {
 ```tsx
 'use client';
 
-import Link from 'next/link';
 import React from 'react';
 import { ProjectIndex, type ProjectIndexItem } from './project-index';
 import { ScrollUnfold } from './fx/scroll-unfold';
 import { TextRoll } from './fx/text-roll';
+import { WipeLink } from './fx/route-wipe';
 import { SplitWords } from './fx/split-words';
 import { Reveal } from './reveal';
 import { FX } from '@/lib/fx';
@@ -9011,7 +9640,7 @@ function ProjectCard({ project }: { project: ProjectData }) {
                   onClick={() => setBlueprint((v) => !v)}
                   aria-pressed={blueprint}
                   aria-label={`Blueprint view of ${project.title}`}
-                  className="nb-chip nb-press hidden lg:inline-flex min-h-[40px] cursor-pointer"
+                  className="nb-chip nb-press hidden xl:inline-flex min-h-[40px] cursor-pointer"
                 >
                   <Layers className="w-3.5 h-3.5" strokeWidth={2.75} aria-hidden />
                   BLUEPRINT
@@ -9125,13 +9754,13 @@ function ProjectCard({ project }: { project: ProjectData }) {
                     </a>
                   )}
                   {SIMULATOR_ROUTE[project.telemetryType] && (
-                    <Link
+                    <WipeLink
                       href={`/simulators/${SIMULATOR_ROUTE[project.telemetryType]}`}
                       className="group nb-btn nb-btn-white px-5 py-3 fx-specular nb-press"
                     >
                       <Terminal className="w-4 h-4" strokeWidth={2.75} />
                       <TextRoll>RUN SIMULATOR</TextRoll>
-                    </Link>
+                    </WipeLink>
                   )}
 
                   {project.colabUrl && (
@@ -9256,16 +9885,18 @@ function ProjectCard({ project }: { project: ProjectData }) {
                   </div>
 
                   {/* IoT Grid Dashboard */}
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 min-[340px]:grid-cols-2 gap-3">
                     <div className="p-3.5 bg-white border-3 border-ink rounded-2xl shadow-brutal-sm">
                       <div className="text-xs font-mono font-bold text-ink-muted">Current Load</div>
-                      <div className="font-display text-2xl font-extrabold text-ink mt-1 whitespace-nowrap">
+                      <div className="font-display text-[clamp(1.1rem,6.5vw,1.5rem)] font-extrabold text-ink mt-1 whitespace-nowrap">
                         1.84 kW
                       </div>
                     </div>
                     <div className="p-3.5 bg-pop-mint border-3 border-ink rounded-2xl shadow-brutal-sm">
                       <div className="text-xs font-mono font-bold text-ink/70">Idle Savings</div>
-                      <div className="font-display text-2xl font-extrabold text-ink mt-1 whitespace-nowrap">-60.8%</div>
+                      <div className="font-display text-[clamp(1.1rem,6.5vw,1.5rem)] font-extrabold text-ink mt-1 whitespace-nowrap">
+                        -60.8%
+                      </div>
                     </div>
                   </div>
 
@@ -9290,8 +9921,10 @@ function ProjectCard({ project }: { project: ProjectData }) {
 ```tsx
 'use client';
 
-import React, { useRef, useState, useEffect } from 'react';
-import { m, useMotionValue, useSpring, useTransform, useReducedMotion, useMotionTemplate } from 'framer-motion';
+import React, { useRef } from 'react';
+import { m, useMotionTemplate, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { FX } from '@/lib/fx';
+import { useMotionAllowed } from './fx/use-motion-allowed';
 
 /**
  * Subtle 3D tilt wrapper.
@@ -9299,7 +9932,9 @@ import { m, useMotionValue, useSpring, useTransform, useReducedMotion, useMotion
  *  - `perspective-1000` was not a real Tailwind class → the tilt rendered as a flat skew. Perspective is now set inline.
  *  - 7° on a 1000px-tall card made text swim and shifted click targets; default is now 3° and configurable.
  *  - `translateZ(30px)` + preserve-3d caused blurry text in Chromium; removed.
- *  - Disabled for reduced-motion users and touch (no hover) devices.
+ *  - Disabled for reduced-motion users, Calm Mode and touch (no hover) devices.
+ *  - Round 9: uses useMotionAllowed (OS setting + Calm Mode, hydration-safe) instead of framer's
+ *    useReducedMotion (OS only), and the glare honours FX.glareTilt.
  */
 export function TiltCard({
   children,
@@ -9315,34 +9950,29 @@ export function TiltCard({
   glareRadius?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const reduce = useReducedMotion();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const allowed = useMotionAllowed();
+  const glareOn = useMotionAllowed(FX.glareTilt && glare);
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-
   const mouseXSpring = useSpring(x, { stiffness: 250, damping: 30 });
   const mouseYSpring = useSpring(y, { stiffness: 250, damping: 30 });
 
   const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], [`${maxTilt}deg`, `-${maxTilt}deg`]);
   const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], [`-${maxTilt}deg`, `${maxTilt}deg`]);
 
-  const springX = useTransform(mouseXSpring, [-0.5, 0.5], [0, 100]);
-  const springY = useTransform(mouseYSpring, [-0.5, 0.5], [0, 100]);
-  const glareBg = useMotionTemplate`radial-gradient(circle at ${springX}% ${springY}%, rgb(255 255 255 / 0.15) 0%, transparent 60%)`;
+  const gx = useTransform(mouseXSpring, [-0.5, 0.5], [0, 100]);
+  const gy = useTransform(mouseYSpring, [-0.5, 0.5], [0, 100]);
+  const glareBg = useMotionTemplate`radial-gradient(circle at ${gx}% ${gy}%, rgb(255 255 255 / 0.15) 0%, transparent 60%)`;
 
-  const handleMouseMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!ref.current || reduce || e.pointerType === 'touch') return; // no stuck tilt after taps
+  const handleMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!ref.current || !allowed || e.pointerType === 'touch') return; // no stuck tilt after taps
     const rect = ref.current.getBoundingClientRect();
     x.set((e.clientX - rect.left) / rect.width - 0.5);
     y.set((e.clientY - rect.top) / rect.height - 0.5);
   };
 
-  const handleMouseLeave = () => {
+  const handleLeave = () => {
     x.set(0);
     y.set(0);
   };
@@ -9350,15 +9980,15 @@ export function TiltCard({
   return (
     <m.div
       ref={ref}
-      onPointerMove={handleMouseMove}
-      onPointerLeave={handleMouseLeave}
-      style={reduce ? undefined : { rotateX, rotateY, transformPerspective: 1600 }}
+      onPointerMove={handleMove}
+      onPointerLeave={handleLeave}
+      style={allowed ? { rotateX, rotateY, transformPerspective: 1600 } : { rotateX: 0, rotateY: 0 }}
       className={`relative ${className || ''}`}
     >
       {children}
-      {mounted && !reduce && glare && (
+      {glareOn ? (
         <m.div className={`pointer-events-none absolute inset-0 z-10 ${glareRadius}`} style={{ background: glareBg }} />
-      )}
+      ) : null}
     </m.div>
   );
 }
@@ -9474,6 +10104,10 @@ export const FX = {
   pageLift: true, // FX-32 certificate modal lifts off the desk in 3D
   bootShatter: true, // FX-33 boot gate breaks into Bauhaus tiles
   mercuryField: true, // FX-34 WebGL2 metaball "mercury" behind the contact header
+  // ---- Round 8 (advisor spec) ----
+  routeWipe: true, // FX-35 Bauhaus wipe between the portfolio and the simulator pages
+  stackFocus: true, // FX-36 tooling-matrix legend chips highlight every skill with that status
+  sectionDock: true, // FX-37 mobile/tablet dock showing the current section; tap opens the command palette
 } as const;
 
 export type FxName = keyof typeof FX;
@@ -9541,6 +10175,34 @@ function subscribe(cb: () => void): () => void {
 export function useCalm(): boolean {
   return useSyncExternalStore(subscribe, isCalm, () => false);
 }
+```
+
+### lib/pointer.ts
+
+```ts
+/**
+ * Latest normalised pointer position (-1..1, 0 = viewport centre), written by FX-01 PointerField.
+ * JS consumers (e.g. the Mercury Field shader) read it from here instead of from CSS variables.
+ */
+export const pointer = { x: 0, y: 0 };
+
+/** Elements whose CSS reads var(--px) / var(--py). PointerField writes the vars on these elements only. */
+export const POINTER_CONSUMERS = '.fx-depth, .fx-shadow-follow, .fx-specular, .fx-letterpress';
+```
+
+### lib/sections.ts
+
+```ts
+/** The home-page sections, in page order. Shared by the Section Spine (desktop) and the Section Dock (mobile). */
+export const SECTIONS = [
+  { id: 'about', label: 'About' },
+  { id: 'projects', label: 'Projects' },
+  { id: 'experience', label: 'Experience' },
+  { id: 'honors', label: 'Honors' },
+  { id: 'contact', label: 'Contact' },
+] as const;
+
+export const SECTION_IDS = SECTIONS.map((s) => s.id);
 ```
 
 ### lib/site-data.ts
@@ -10069,6 +10731,47 @@ export function toLocal(el: HTMLElement, clientX: number, clientY: number) {
   const sx = r.width / el.offsetWidth || 1;
   const sy = r.height / el.offsetHeight || 1;
   return { x: (clientX - r.left) / sx - el.clientLeft, y: (clientY - r.top) / sy - el.clientTop };
+}
+```
+
+### lib/use-active-section.ts
+
+```ts
+import { useEffect, useState } from 'react';
+
+/**
+ * Returns the id of the section that is crossing the middle band of the viewport, or '' when none is
+ * (hero, marquee, footer). IntersectionObserver only: no scroll listener, and React re-renders only when
+ * the active id changes.
+ *
+ * FIX: the previous version only ever SET the id and never cleared it, so after scrolling back to the hero
+ * (or down into the footer) the Section Dock kept showing the last section and covered the hero CTA.
+ */
+export function useActiveSection(ids: readonly string[], enabled = true): string {
+  const [active, setActive] = useState('');
+  const key = ids.join('|');
+
+  useEffect(() => {
+    if (!enabled) return;
+    const order = key.split('|');
+    const inBand = new Set<string>();
+    const els = order.map((id) => document.getElementById(id)).filter((e): e is HTMLElement => e !== null);
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) inBand.add(e.target.id);
+          else inBand.delete(e.target.id);
+        }
+        // first section (in page order) that is in the band, or '' when none is
+        setActive(order.find((id) => inBand.has(id)) ?? '');
+      },
+      { rootMargin: '-45% 0px -50% 0px' },
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [key, enabled]);
+
+  return active;
 }
 ```
 
@@ -10792,7 +11495,7 @@ language sql
 stable
 as $$
   select
-    user_id = '54c734ee-1e79-4e92-bf9b-8504a1854a31'::uuid
+    user_id = '00000000-0000-0000-0000-000000000000'::uuid -- << REPLACED TO FIX GITGUARDIAN ALERT
     or coalesce((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin', false)
 $$;
 
@@ -11226,7 +11929,11 @@ test('no hydration error with reduced motion', async ({ browser }) => {
 test('without JavaScript every FX element is in its final, visible pose', async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
-  await page.goto('/');
+  // With JavaScript off, Chromium disables native lazy-loading, so EVERY image loads eagerly and the
+  // `load` event can take > 45 s on a CI runner (first-time AVIF/WebP optimisation). This test only
+  // needs the HTML + CSS, so wait for DOMContentLoaded and for the stylesheet to be applied.
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('body')).toHaveCSS('font-weight', '500');
   const hidden = await page.$$eval(
     '[data-fx]',
     (els) => els.filter((e) => getComputedStyle(e).transform !== 'none' || getComputedStyle(e).opacity !== '1').length,
@@ -11251,6 +11958,227 @@ test.describe('touch devices', () => {
   test('pointer field stays off on touch-only devices', async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
     await expect(page.locator('html')).not.toHaveAttribute('data-fx-pointer', 'on');
+  });
+});
+```
+
+### tests/hotfix.spec.ts
+
+```ts
+import { test, expect } from '@playwright/test';
+
+// Regression guards for the two bugs fixed in the Round-7 hotfix (see docs/UI-UX-ENHANCEMENT-IMPLEMENTATION-PLAN.md, Part A).
+
+test('boot gate works even when clicked before React has hydrated', async ({ page }) => {
+  // Slow the CPU so the click reliably lands before hydration (the bug CI kept hitting).
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 6 });
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await page.getByRole('button', { name: /skip intro/i }).click();
+  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 20_000 });
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 1 });
+});
+
+test('project cards are flat until BLUEPRINT is pressed, and the exploded view stays in its column', async ({
+  page,
+  context,
+}) => {
+  await context.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/', { waitUntil: 'networkidle' });
+  const stacks = page.locator('.fx-blueprint .fx-stack');
+  expect(await stacks.count()).toBeGreaterThan(0);
+  const transforms = await stacks.evaluateAll((els) => els.map((e) => getComputedStyle(e).transform));
+  expect(transforms.every((t) => t === 'none')).toBe(true);
+
+  const card = page.locator('[id^="project-"]').first();
+  const btn = card.getByRole('button', { name: /blueprint view of/i });
+  await btn.scrollIntoViewIfNeeded();
+  await btn.click();
+  await expect(btn).toHaveAttribute('aria-pressed', 'true');
+  await page.waitForTimeout(1000);
+  const [col, gallery] = await Promise.all([
+    card.locator('.fx-blueprint').boundingBox(),
+    card.locator('.fx-blueprint + *').boundingBox(),
+  ]);
+  expect(col && gallery && col.x + col.width <= gallery.x + 1).toBe(true);
+  await page.keyboard.press('Escape');
+  await expect(btn).toHaveAttribute('aria-pressed', 'false');
+  await expect.poll(() => card.locator('.fx-stack').evaluate((e) => getComputedStyle(e).transform)).toBe('none');
+});
+
+test('boot shatter leaves no canvas behind', async ({ browser }) => {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  await page.goto('/', { waitUntil: 'networkidle' });
+  await page.getByRole('button', { name: /skip intro/i }).click();
+  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 5000 });
+  await expect(page.locator('[data-fx-shatter]')).toHaveCount(0, { timeout: 3000 });
+  await context.close();
+});
+```
+
+### tests/r8.spec.ts
+
+```ts
+import { test, expect, devices } from '@playwright/test';
+
+// Round-8 features: route wipe (FX-35), stack focus (FX-36), section dock (FX-37).
+
+test.describe('after boot', () => {
+  test.beforeEach(async ({ context }) => {
+    await context.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
+  });
+
+  test('RUN SIMULATOR wipes to the simulator and leaves no overlay behind', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'networkidle' });
+    const link = page.locator('a', { hasText: 'RUN SIMULATOR' }).first();
+    const href = await link.getAttribute('href');
+    await link.scrollIntoViewIfNeeded();
+    await link.click();
+    await expect(page).toHaveURL(new RegExp(`${href}$`));
+    await expect(page.locator('[data-fx-wipe]')).toHaveCount(0, { timeout: 5000 });
+    await expect(page.getByRole('link', { name: /return to portfolio/i })).toBeVisible();
+  });
+
+  test('tooling-matrix legend highlights matching skills and toggles off', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'networkidle' });
+    const key = page.getByRole('button', { name: /production tested/i });
+    await key.scrollIntoViewIfNeeded();
+    await key.click();
+    await expect(key).toHaveAttribute('aria-pressed', 'true');
+    expect(await page.locator('.fx-stack-chip[data-match="true"]').count()).toBeGreaterThan(0);
+    await key.click();
+    await expect(page.locator('.fx-stack-chip[data-match]')).toHaveCount(0);
+  });
+});
+
+test.describe('phone', () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { defaultBrowserType, ...iPhone13 } = devices['iPhone 13'];
+  test.use(iPhone13);
+
+  test('section dock names the current section and opens the command palette', async ({ page, context }) => {
+    await context.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
+    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.locator('#experience').scrollIntoViewIfNeeded();
+    await page.waitForTimeout(300);
+    await page.evaluate(() => window.scrollBy(0, -60)); // D6: the dock reappears on scroll up
+    const dock = page.getByRole('button', { name: /current section: experience/i });
+    await expect(dock).toBeVisible({ timeout: 7000 });
+    await dock.tap();
+    await expect(page.getByRole('dialog', { name: /command palette/i })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
+  });
+});
+```
+
+### tests/r9.spec.ts
+
+```ts
+import { test, expect, devices } from '@playwright/test';
+
+// Round-9 regression guards: each test protects a bug found in the multi-device audit.
+
+test.beforeEach(async ({ context }) => {
+  await context.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
+});
+
+test.describe('phone', () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { defaultBrowserType, ...iPhone13 } = devices['iPhone 13'];
+  test.use(iPhone13);
+
+  test('hero portrait is visible on phones (R9-01)', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'networkidle' });
+    const box = await page.locator('[data-xray]').boundingBox();
+    expect(box && box.width > 200 && box.height > 200).toBe(true);
+  });
+
+  test('section dock hides again when back at the hero (R9-03)', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.locator('#honors').scrollIntoViewIfNeeded();
+    await page.waitForTimeout(300);
+    await page.evaluate(() => window.scrollBy(0, -60)); // D6: the dock reappears on scroll up
+    await expect(page.getByRole('button', { name: /current section: honors/i })).toBeVisible({ timeout: 7000 });
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await expect(page.getByRole('button', { name: /current section/i })).toHaveCount(0, { timeout: 7000 });
+  });
+});
+
+test('scrolling never writes custom properties on <html> (R9-02 scroll lag)', async ({ page }) => {
+  await page.goto('/', { waitUntil: 'networkidle' });
+  const writes = await page.evaluate(async () => {
+    let n = 0;
+    const mo = new MutationObserver((ms) => {
+      for (const m of ms) if (m.attributeName === 'style') n++;
+    });
+    mo.observe(document.documentElement, { attributes: true });
+    for (let y = 0; y < 4000; y += 200) {
+      window.scrollTo(0, y);
+      await new Promise((r) => requestAnimationFrame(() => r(null)));
+    }
+    await new Promise((r) => setTimeout(r, 300));
+    mo.disconnect();
+    return n;
+  });
+  expect(writes).toBe(0);
+});
+
+test('CTA labels have a clean accessible name (R9-05)', async ({ page }) => {
+  await page.goto('/', { waitUntil: 'networkidle' });
+  await expect(page.getByRole('link', { name: 'RUN SIMULATOR', exact: true }).first()).toBeAttached();
+  await expect(page.getByRole('link', { name: 'LIVE SIMULATORS', exact: true })).toBeAttached();
+});
+
+test('project cards are flat for reduced-motion visitors (R9-06)', async ({ browser }) => {
+  const context = await browser.newContext({ reducedMotion: 'reduce' });
+  await context.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
+  const page = await context.newPage();
+  await page.goto('/', { waitUntil: 'networkidle' });
+  const card = page.locator('[id^="project-"]').nth(3);
+  await card.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(500);
+  const t = await card.evaluate((e) => (e.closest('[data-fx]') as HTMLElement | null)?.style.transform ?? '');
+  expect(t).not.toMatch(/rotateX\((?!0)|scale\(0\.9/);
+  await context.close();
+});
+
+test('button icons are never squeezed to zero width (R9-04)', async ({ page }) => {
+  await page.setViewportSize({ width: 430, height: 932 });
+  await page.goto('/', { waitUntil: 'networkidle' });
+  // rendered icons only (display:none icons have no client rects); a squeezed icon keeps its height but has 0 width
+  const widths = await page.$$eval('.nb-btn > svg', (els) =>
+    els.filter((e) => e.getClientRects().length > 0).map((e) => e.getBoundingClientRect().width),
+  );
+  expect(widths.length).toBeGreaterThan(0);
+  expect(Math.min(...widths)).toBeGreaterThan(8);
+});
+
+test('command palette can reach every section, including About and Contact (R9-07)', async ({ page }) => {
+  await page.goto('/', { waitUntil: 'networkidle' });
+  await page.keyboard.press('Control+k');
+  const dialog = page.getByRole('dialog', { name: /command palette/i });
+  await expect(dialog).toBeVisible();
+  for (const name of ['About', 'Projects', 'Experience', 'Honors & Awards', 'Contact']) {
+    await expect(dialog.getByRole('option', { name, exact: true })).toBeAttached();
+  }
+});
+
+test.describe('phone dock behaviour (D6)', () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { defaultBrowserType, ...iPhone13 } = devices['iPhone 13'];
+  test.use(iPhone13);
+
+  test('dock hides while scrolling down and returns on scroll up', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.locator('#experience').scrollIntoViewIfNeeded();
+    await page.waitForTimeout(300);
+    await page.evaluate(() => window.scrollBy(0, -60));
+    const dock = page.getByRole('button', { name: /current section: experience/i });
+    await expect(dock).toBeVisible({ timeout: 7000 });
+    await page.evaluate(() => window.scrollBy(0, 200));
+    await expect(page.getByRole('button', { name: /current section/i })).toHaveCount(0, { timeout: 5000 });
   });
 });
 ```

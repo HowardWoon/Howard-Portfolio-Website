@@ -1,7 +1,13 @@
 import { SkipLink } from '@/components/skip-link';
 import BikebearInspiredHero from '@/components/bikebear-hero';
 import AboutSection from '@/components/about-section';
-import { StackedProjects, ExperienceSection, HonorsSection, ContactSection } from '@/components/lazy-sections';
+import {
+  StackedProjects,
+  ExperienceSection,
+  HonorsSection,
+  ContactSection,
+  InteractionHud,
+} from '@/components/lazy-sections';
 import { SiteFooter } from '@/components/site-footer';
 import dynamic from 'next/dynamic';
 import { RouteWipeClear } from '@/components/fx/route-wipe';
@@ -62,6 +68,7 @@ export function PortfolioPage() {
         <ScrollToTop />
         <SectionSpine />
         <SectionDock />
+        <InteractionHud />
         <OffscreenPause />
         <RouteWipeClear />
         <CommandPalette />

@@ -738,3 +738,97 @@ html.hw-booted .boot-overlay {
 [data-offscreen] :is(.animate-pulse, .animate-ping, .animate-spin-slow, .animate-wobble, [class*='animate-[marquee']) {
   animation-play-state: paused !important;
 }
+
+/* ===================================================================================================
+   Round 10 "Interactive Engineering Desk" (FX-38 … FX-44). Tokens only: ink, paper, pop colours,
+   hard shadows. Every transition is removed by the global reduced-motion / Calm rules.
+   =================================================================================================== */
+@layer components {
+  /* FX-39 Project Focus: every other card steps back (opacity/filter only; never transform, which would
+     fight ScrollUnfold / TiltCard and trap fixed overlays). */
+  .fx-project-shell {
+    transition:
+      opacity 0.45s cubic-bezier(0.2, 0.9, 0.1, 1),
+      filter 0.45s cubic-bezier(0.2, 0.9, 0.1, 1);
+  }
+  [data-focus-active] > .fx-project-shell:not([data-focused]) {
+    opacity: 0.22;
+    filter: grayscale(1);
+  }
+  [data-focus-active] > .fx-project-shell[data-focused] [id^='project-'] {
+    outline: 4px solid #ffc700;
+    outline-offset: 6px;
+  }
+
+  /* FX-38 Evidence Trail: cards and index tiles on the trail get a blue hard outline */
+  .fx-project-shell[data-trail-hit] [id^='project-'],
+  .fx-trail-hit {
+    outline: 3px dashed #2b4bff;
+    outline-offset: 5px;
+  }
+  .fx-count {
+    display: inline-grid;
+    place-items: center;
+    min-width: 1.15rem;
+    height: 1.15rem;
+    padding: 0 0.25rem;
+    margin-left: 0.15rem;
+    border-radius: 999px;
+    background: #0a0a0a;
+    color: #fff;
+    font-size: 0.65rem;
+    line-height: 1;
+  }
+  .fx-trail-chip[aria-pressed='true'] .fx-count {
+    background: #ffc700;
+    color: #0a0a0a;
+  }
+
+  /* FX-42 film perforations (ink squares on a paper band) */
+  .fx-perf {
+    background: repeating-linear-gradient(90deg, #fff7e0 0 10px, #0a0a0a 10px 16px);
+    opacity: 0.85;
+  }
+
+  /* HUD entrance */
+  .fx-hud {
+    animation: fx-hud-in 0.32s cubic-bezier(0.2, 0.9, 0.1, 1) both;
+  }
+}
+@keyframes fx-hud-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 16px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (hover: hover) {
+  .nb-resume:hover {
+    transform: translate(-2px, -3px) rotate(-1deg);
+    box-shadow: 6px 6px 0 0 #0a0a0a !important;
+  }
+  .fx-case-folder {
+    position: relative;
+  }
+  .fx-case-folder::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 20px;
+    width: 60px;
+    height: 10px;
+    background: inherit;
+    border: 3px solid #0a0a0a;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    transition: transform 0.2s;
+    z-index: -1;
+  }
+  .fx-case-folder:hover::before {
+    transform: translateY(-4px);
+  }
+}

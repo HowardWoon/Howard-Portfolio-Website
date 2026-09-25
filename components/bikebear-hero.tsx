@@ -88,12 +88,19 @@ function MagnifiedHeadline({ booted = true }: { booted?: boolean }) {
       {/* Scaled X-Ray Magnification Text (decorative duplicate) */}
       <div
         aria-hidden="true"
-        className={`${headlineClass} text-pop-blue absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-150 group-data-[hover=true]/headline:opacity-100`}
+        className={`${headlineClass} text-pop-blue absolute inset-0 pointer-events-none opacity-0 transition-[opacity,clip-path] duration-150 group-data-[hover=true]/headline:opacity-100`}
         style={{
-          transform: 'scale(1.15)',
-          transformOrigin: 'var(--mx) var(--my)',
-          WebkitMaskImage: 'radial-gradient(circle 140px at var(--mx) var(--my), black 60%, transparent 100%)',
-          maskImage: 'radial-gradient(circle 140px at var(--mx) var(--my), black 60%, transparent 100%)',
+          ...(FX.heroInspection
+            ? {
+                WebkitTextStroke: '2px #0a0a0a',
+                clipPath: 'circle(70px at var(--mx) var(--my))',
+              }
+            : {
+                transform: 'scale(1.15)',
+                transformOrigin: 'var(--mx) var(--my)',
+                WebkitMaskImage: 'radial-gradient(circle 140px at var(--mx) var(--my), black 60%, transparent 100%)',
+                maskImage: 'radial-gradient(circle 140px at var(--mx) var(--my), black 60%, transparent 100%)',
+              }),
         }}
       >
         ENGINEERING <br />
