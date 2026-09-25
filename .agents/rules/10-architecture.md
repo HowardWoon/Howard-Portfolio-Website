@@ -50,7 +50,7 @@ trigger: always_on
 ## H. Code quality
 - TypeScript strict must stay clean; no `any` unless wrapped in a documented type guard.
 - Every `setTimeout`/`setInterval`/listener/observer/`requestAnimationFrame` must be cleaned up on unmount.
-- Animations: import `m` (never `motion`) from `framer-motion`; `<LazyMotion strict>` in `components/motion-provider.tsx` throws if `motion.*` is used. Features are `domAnimation` (no `layout`/`drag` props - they need `domMax` and +20 kB).
+- Animations: import `m` (never `motion`) from `framer-motion`; `<LazyMotion strict>` in `components/motion-provider.tsx` throws if `motion.*` is used. Features are `domMax` (which enables `layout` animations, at a +20 kB cost over `domAnimation`).
 - Below-the-fold sections are imported through `components/lazy-sections.tsx` (client `next/dynamic`, still server-rendered). New big below-the-fold sections go there too. First Load JS budget for `/`: <= 190 kB.
 - Keep Prettier style (`.prettierrc`: singleQuote, printWidth 120). Run `npx prettier --write app components lib tests scripts` only as its own separate commit, never mixed with logic changes.
 - Interactive FX: All PointerField/scroll tracking must use a single `rAF` loop attached to `<html>` and drive CSS variables (`--px`, `--py`). Never tie `mousemove` or `scroll` to React state.
