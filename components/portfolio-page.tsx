@@ -13,6 +13,7 @@ import { TechMarquee } from '@/components/marquees';
 import { ScrollToTop } from '@/components/scroll-to-top';
 import { SiteHeader } from '@/components/site-header';
 const CommandPalette = dynamic(() => import('@/components/command-palette').then((mod) => mod.CommandPalette), {});
+const SectionSpine = dynamic(() => import('@/components/section-spine').then((mod) => mod.SectionSpine));
 
 export function PortfolioPage() {
   return (
@@ -56,6 +57,7 @@ export function PortfolioPage() {
         <SiteFooter />
 
         <ScrollToTop />
+        <SectionSpine />
         <CommandPalette />
         <PointerField />
         <EasterEgg />

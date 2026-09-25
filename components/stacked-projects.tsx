@@ -1,5 +1,8 @@
+'use client';
+
 import Link from 'next/link';
 import React from 'react';
+import { ProjectIndex, type ProjectIndexItem } from './project-index';
 import { ScrollUnfold } from './fx/scroll-unfold';
 import { SplitWords } from './fx/split-words';
 import { Reveal } from './reveal';
@@ -224,6 +227,19 @@ const SIMULATOR_ROUTE: Partial<Record<ProjectData['telemetryType'], 'agentic' | 
   energy: 'energy',
 };
 
+const accent = {
+  gold: { fill: 'bg-pop-yellow', soft: 'bg-[#FFF3C4]' },
+  cyan: { fill: 'bg-pop-cyan', soft: 'bg-[#D9FBFF]' },
+  emerald: { fill: 'bg-pop-mint', soft: 'bg-[#DCFAEC]' },
+} as const;
+
+const INDEX_ITEMS: ProjectIndexItem[] = projects.map((p) => ({
+  id: p.simulatorId,
+  number: String(p.number),
+  title: p.title,
+  fill: accent[p.badgeType].fill,
+}));
+
 export default function StackedProjects() {
   return (
     <section
@@ -249,6 +265,8 @@ export default function StackedProjects() {
           </div>
         </div>
 
+        <ProjectIndex items={INDEX_ITEMS} />
+
         {/* Project Cards */}
         <div className="space-y-12 lg:space-y-20">
           {projects.map((project) => (
@@ -259,12 +277,6 @@ export default function StackedProjects() {
     </section>
   );
 }
-
-const accent = {
-  gold: { fill: 'bg-pop-yellow', soft: 'bg-[#FFF3C4]' },
-  cyan: { fill: 'bg-pop-cyan', soft: 'bg-[#D9FBFF]' },
-  emerald: { fill: 'bg-pop-mint', soft: 'bg-[#DCFAEC]' },
-} as const;
 
 // GitHub links that are still placeholders ("https://github.com") are hidden instead of shipped as dead links
 const isRealRepo = (url?: string) => !!url && /github\.com\/[^/]+\/[^/]+/.test(url);
@@ -284,7 +296,8 @@ function ProjectCard({ project }: { project: ProjectData }) {
           delay={0.1}
           y={40}
           transition={{ duration: 0.6 }}
-          className="relative w-full rounded-[32px] border-3 border-ink bg-white shadow-brutal-lg transition-shadow duration-300 group-hover:shadow-brutal-xl overflow-hidden"
+          id={`project-${project.simulatorId}`}
+          className="relative w-full rounded-[32px] border-3 border-ink bg-white shadow-brutal-lg transition-shadow duration-300 group-hover:shadow-brutal-xl overflow-hidden scroll-mt-[calc(var(--header-h,5rem)+1.5rem)]"
         >
           {/* Colour-block header strip (Bauhaus band) */}
           <div

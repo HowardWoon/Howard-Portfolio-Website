@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import { FieldArchive } from './field-archive';
 import { TraceRail } from './fx/trace-rail';
 import { SplitWords } from './fx/split-words';
-import { m, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence, LayoutGroup } from 'framer-motion';
+import { SPRING_STAMP } from '@/lib/fx';
 import {
   Building2,
   Landmark,
@@ -534,29 +535,37 @@ export default function ExperienceSection() {
           aria-label="Filter experience"
           className="flex flex-wrap items-center gap-2 p-2 bg-white border-3 border-ink rounded-[22px] shadow-brutal-sm w-fit max-w-full"
         >
-          {filters.map((f) => {
-            const count = f.id === 'all' ? experiences.length : experiences.filter((e) => e.category === f.id).length;
-            const isActive = selectedFilter === f.id;
+          <LayoutGroup id="exp-filter">
+            {filters.map((f) => {
+              const count = f.id === 'all' ? experiences.length : experiences.filter((e) => e.category === f.id).length;
+              const isActive = selectedFilter === f.id;
 
-            return (
-              <button
-                key={f.id}
-                aria-pressed={isActive}
-                onClick={() => setSelectedFilter(f.id)}
-                className={`relative px-4 py-2.5 rounded-2xl text-xs font-mono font-extrabold uppercase tracking-[0.08em] border-2 transition-all duration-150 ${
-                  isActive
-                    ? 'bg-ink text-white border-ink shadow-clay-pressed'
-                    : 'bg-white text-ink border-transparent hover:border-ink'
-                }`}
-              >
-                <span className="relative z-10 flex items-center gap-2.5">
-                  <span className={`nb-dot ${f.dotClass}`} />
-                  {f.label}
-                  <span className={`text-[0.7rem] ${isActive ? 'text-white/70' : 'text-ink-muted'}`}>({count})</span>
-                </span>
-              </button>
-            );
-          })}
+              return (
+                <button
+                  key={f.id}
+                  aria-pressed={isActive}
+                  onClick={() => setSelectedFilter(f.id)}
+                  className={`relative px-4 py-2.5 rounded-2xl text-xs font-mono font-extrabold uppercase tracking-[0.08em] border-2 transition-all duration-150 ${
+                    isActive ? 'text-white border-ink' : 'bg-white text-ink border-transparent hover:border-ink'
+                  }`}
+                >
+                  {isActive ? (
+                    <m.span
+                      layoutId="exp-filter-pill"
+                      aria-hidden
+                      className="absolute inset-0 rounded-2xl bg-ink shadow-clay-pressed"
+                      transition={SPRING_STAMP}
+                    />
+                  ) : null}
+                  <span className="relative z-10 flex items-center gap-2.5">
+                    <span className={`nb-dot ${f.dotClass}`} />
+                    {f.label}
+                    <span className={`text-[0.7rem] ${isActive ? 'text-white/70' : 'text-ink-muted'}`}>({count})</span>
+                  </span>
+                </button>
+              );
+            })}
+          </LayoutGroup>
         </m.div>
 
         {/* Experience Cards */}

@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { m } from 'framer-motion';
+import { m, LayoutGroup } from 'framer-motion';
 import { Server, Cpu, GitBranch, ShieldCheck, Activity, Sparkles, ArrowUpRight, Layers, Code2 } from 'lucide-react';
 import { SplitWords } from './fx/split-words';
+import { FX, SPRING_SOFT } from '@/lib/fx';
 
 const architecturePillars = [
   {
@@ -157,10 +158,11 @@ function PillarCard({
 
   return (
     <m.div
+      layout={FX.bentoReflow ? 'position' : false}
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.6, delay }}
+      transition={{ duration: 0.6, delay, layout: SPRING_SOFT }}
       onClick={() => setActiveCard(pillar.id)}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -293,51 +295,55 @@ export default function AboutSection() {
         </div>
 
         {/* Core Architecture Bento Grid (4 Pillars) — True Masonry Layout */}
-        <div className="flex flex-col lg:hidden gap-7">
-          {architecturePillars.map((pillar, idx) => (
-            <PillarCard
-              key={pillar.id}
-              pillar={pillar}
+        <LayoutGroup id="about-pillars-mobile">
+          <div className="flex flex-col lg:hidden gap-7">
+            {architecturePillars.map((pillar, idx) => (
+              <PillarCard
+                key={pillar.id}
+                pillar={pillar}
 
-              activeCard={activeCard}
-              setActiveCard={setActiveCard}
-              colorMap={colorMap}
-              delay={idx * 0.1}
-            />
-          ))}
-        </div>
-        <div className="hidden lg:grid grid-cols-2 gap-8 items-start">
-          <div className="flex flex-col gap-8">
-            {architecturePillars
-              .filter((_, i) => i % 2 === 0)
-              .map((pillar, idx) => (
-                <PillarCard
-                  key={pillar.id}
-                  pillar={pillar}
-
-                  activeCard={activeCard}
-                  setActiveCard={setActiveCard}
-                  colorMap={colorMap}
-                  delay={idx * 2 * 0.1}
-                />
-              ))}
+                activeCard={activeCard}
+                setActiveCard={setActiveCard}
+                colorMap={colorMap}
+                delay={idx * 0.1}
+              />
+            ))}
           </div>
-          <div className="flex flex-col gap-8 mt-10">
-            {architecturePillars
-              .filter((_, i) => i % 2 === 1)
-              .map((pillar, idx) => (
-                <PillarCard
-                  key={pillar.id}
-                  pillar={pillar}
+        </LayoutGroup>
+        <LayoutGroup id="about-pillars-desktop">
+          <div className="hidden lg:grid grid-cols-2 gap-8 items-start">
+            <div className="flex flex-col gap-8">
+              {architecturePillars
+                .filter((_, i) => i % 2 === 0)
+                .map((pillar, idx) => (
+                  <PillarCard
+                    key={pillar.id}
+                    pillar={pillar}
 
-                  activeCard={activeCard}
-                  setActiveCard={setActiveCard}
-                  colorMap={colorMap}
-                  delay={(idx * 2 + 1) * 0.1}
-                />
-              ))}
+                    activeCard={activeCard}
+                    setActiveCard={setActiveCard}
+                    colorMap={colorMap}
+                    delay={idx * 2 * 0.1}
+                  />
+                ))}
+            </div>
+            <div className="flex flex-col gap-8 mt-10">
+              {architecturePillars
+                .filter((_, i) => i % 2 === 1)
+                .map((pillar, idx) => (
+                  <PillarCard
+                    key={pillar.id}
+                    pillar={pillar}
+
+                    activeCard={activeCard}
+                    setActiveCard={setActiveCard}
+                    colorMap={colorMap}
+                    delay={(idx * 2 + 1) * 0.1}
+                  />
+                ))}
+            </div>
           </div>
-        </div>
+        </LayoutGroup>
 
         {/* Categorized Technical Stack Matrix */}
         <m.div
