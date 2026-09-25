@@ -52,6 +52,7 @@ export function SectionSpine() {
             </span>
             <span
               aria-hidden
+              data-preview={preview ? 'true' : undefined}
               className={`relative w-[17px] h-[17px] ${preview ? 'bg-pop-yellow scale-125' : ''} border-3 border-ink rotate-45 transition-colors duration-200 group-focus-visible:ring-2 group-focus-visible:ring-pop-blue ${
                 on ? 'bg-pop-yellow' : 'bg-white'
               }`}
