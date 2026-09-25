@@ -30,7 +30,7 @@ export function VelocitySkew({ children, className = 'relative z-20' }: { childr
     if (!FX.aberration || !allowed) return;
     const normalized = Math.max(-1, Math.min(1, v / 2500));
     const val = normalized.toFixed(2);
-    targetsRef.current.forEach(el => {
+    targetsRef.current.forEach((el) => {
       el.style.setProperty('--fx-vel', val);
     });
   });
