@@ -68,7 +68,11 @@ test('no hydration error with reduced motion', async ({ browser }) => {
 test('without JavaScript every FX element is in its final, visible pose', async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
-  await page.goto('/');
+  // With JavaScript off, Chromium disables native lazy-loading, so EVERY image loads eagerly and the
+  // `load` event can take > 45 s on a CI runner (first-time AVIF/WebP optimisation). This test only
+  // needs the HTML + CSS, so wait for DOMContentLoaded and for the stylesheet to be applied.
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('body')).toHaveCSS('font-weight', '500');
   const hidden = await page.$$eval(
     '[data-fx]',
     (els) => els.filter((e) => getComputedStyle(e).transform !== 'none' || getComputedStyle(e).opacity !== '1').length,

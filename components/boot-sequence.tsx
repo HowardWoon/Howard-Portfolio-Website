@@ -4,6 +4,15 @@ import React, { createContext, useContext, useEffect, useRef, useState, useLayou
 const BootedContext = createContext(true);
 export const useBooted = () => useContext(BootedContext);
 import { m, AnimatePresence } from 'framer-motion';
+import { useLatest } from '@/lib/use-latest';
+
+declare global {
+  interface Window {
+    /** Set by the inline script in app/layout.tsx when a gate button is clicked before React hydrated. */
+    __hwBoot?: 'init' | 'skip' | null;
+    __hwHydrated?: boolean;
+  }
+}
 
 /**
  * "Initialize System" gate.
@@ -43,7 +52,19 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
   const timers = useRef<number[]>([]);
   const justBooted = useRef(false); // true only right after the visitor clicks the gate
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  // Refs to the latest handlers so the one-time mount effect can replay an early click.
+  const startRef = useLatest(handleStartBoot);
+  const finishRef = useLatest(finish);
+  useEffect(() => {
+    setMounted(true);
+    // H1: a click on the gate that happened BEFORE hydration was captured by the inline script in
+    // app/layout.tsx. Replay it now, so the button never feels dead on a slow phone (or a CI runner).
+    window.__hwHydrated = true;
+    const early = window.__hwBoot;
+    window.__hwBoot = null;
+    if (early === 'skip') finishRef.current();
+    else if (early === 'init') startRef.current();
+  }, [startRef, finishRef]);
 
   // Lock page scroll while the gate is up (and pause Lenis); stop the browser from restoring an
   // old scroll position behind the gate on refresh.
@@ -153,6 +174,7 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
                   <div className="w-full flex flex-col items-center gap-6">
                     <button
                       onClick={handleStartBoot}
+                      data-boot-action="init"
                       autoFocus
                       className="nb-btn nb-btn-ink text-base sm:text-lg px-8 py-5 font-display normal-case tracking-[-0.01em] shadow-[inset_3px_3px_6px_rgba(255,255,255,0.25),inset_-4px_-4px_8px_rgba(0,0,0,0.5),6px_6px_0_0_#0A0A0A] hover:shadow-[inset_3px_3px_6px_rgba(255,255,255,0.25),inset_-4px_-4px_8px_rgba(0,0,0,0.5),9px_9px_0_0_#0A0A0A]"
                     >
@@ -160,6 +182,7 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
                     </button>
                     <button
                       onClick={finish}
+                      data-boot-action="skip"
                       className="mt-4 text-xs font-mono font-bold text-ink hover:underline tracking-wider uppercase px-3 py-2.5 min-h-[44px]"
                     >
                       Skip intro

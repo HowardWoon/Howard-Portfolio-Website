@@ -326,7 +326,7 @@ function ProjectCard({ project }: { project: ProjectData }) {
                   onClick={() => setBlueprint((v) => !v)}
                   aria-pressed={blueprint}
                   aria-label={`Blueprint view of ${project.title}`}
-                  className="nb-chip nb-press hidden lg:inline-flex min-h-[40px] cursor-pointer"
+                  className="nb-chip nb-press hidden xl:inline-flex min-h-[40px] cursor-pointer"
                 >
                   <Layers className="w-3.5 h-3.5" strokeWidth={2.75} aria-hidden />
                   BLUEPRINT
