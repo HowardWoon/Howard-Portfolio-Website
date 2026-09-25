@@ -384,7 +384,7 @@ export default function AboutSection() {
                     type="button"
                     aria-pressed={on}
                     onClick={() => setStatusFocus(on ? null : k.status)}
-                    className={`nb-chip nb-press min-h-[36px] cursor-pointer ${on ? '!bg-ink !text-white' : ''}`}
+                    className={`nb-chip nb-press min-h-[40px] cursor-pointer ${on ? '!bg-ink !text-white' : ''}`}
                   >
                     <span className={`nb-dot ${k.dot}`} /> {k.label}
                   </button>

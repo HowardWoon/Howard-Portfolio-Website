@@ -571,16 +571,18 @@ function ProjectCard({ project }: { project: ProjectData }) {
                   </div>
 
                   {/* IoT Grid Dashboard */}
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 min-[340px]:grid-cols-2 gap-3">
                     <div className="p-3.5 bg-white border-3 border-ink rounded-2xl shadow-brutal-sm">
                       <div className="text-xs font-mono font-bold text-ink-muted">Current Load</div>
-                      <div className="font-display text-2xl font-extrabold text-ink mt-1 whitespace-nowrap">
+                      <div className="font-display text-[clamp(1.1rem,6.5vw,1.5rem)] font-extrabold text-ink mt-1 whitespace-nowrap">
                         1.84 kW
                       </div>
                     </div>
                     <div className="p-3.5 bg-pop-mint border-3 border-ink rounded-2xl shadow-brutal-sm">
                       <div className="text-xs font-mono font-bold text-ink/70">Idle Savings</div>
-                      <div className="font-display text-2xl font-extrabold text-ink mt-1 whitespace-nowrap">-60.8%</div>
+                      <div className="font-display text-[clamp(1.1rem,6.5vw,1.5rem)] font-extrabold text-ink mt-1 whitespace-nowrap">
+                        -60.8%
+                      </div>
                     </div>
                   </div>
 

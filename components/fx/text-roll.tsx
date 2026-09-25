@@ -1,36 +1,17 @@
-import React from 'react';
+import { FX } from '@/lib/fx';
 
+/**
+ * FX-28: the label rolls up out of a mask and an identical copy rolls in (hover AND keyboard focus).
+ * Exactly two spans: the copy is aria-hidden, so the accessible name stays "RUN SIMULATOR" (the previous
+ * per-character version was announced by screen readers as "R U N S I M U L A T O R" twice).
+ * Server-safe (no hooks). Pass a plain string only. Motion is removed by the global reduced-motion / Calm CSS.
+ */
 export function TextRoll({ children }: { children: string }) {
-  if (typeof children !== 'string') return <>{children}</>;
-
-  const chars = children.split('');
-
+  if (!FX.textRoll) return <>{children}</>;
   return (
-    <span className="relative inline-flex overflow-hidden">
-      {/* Primary text (moves up and out) */}
-      <span className="inline-flex">
-        {chars.map((char, i) => (
-          <span
-            key={`primary-${i}`}
-            className="inline-block whitespace-pre transition-transform duration-300 ease-[cubic-bezier(0.2,0.9,0.1,1)] group-hover:-translate-y-full"
-            style={{ transitionDelay: `${i * 15}ms` }}
-          >
-            {char}
-          </span>
-        ))}
-      </span>
-      {/* Secondary text (moves up and in from below) */}
-      <span className="absolute inset-0 inline-flex">
-        {chars.map((char, i) => (
-          <span
-            key={`secondary-${i}`}
-            className="inline-block whitespace-pre translate-y-full transition-transform duration-300 ease-[cubic-bezier(0.2,0.9,0.1,1)] group-hover:translate-y-0"
-            style={{ transitionDelay: `${i * 15}ms` }}
-          >
-            {char}
-          </span>
-        ))}
-      </span>
+    <span className="fx-roll">
+      <span>{children}</span>
+      <span aria-hidden="true">{children}</span>
     </span>
   );
 }

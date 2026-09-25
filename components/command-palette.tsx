@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useFocusTrap } from '@/lib/use-focus-trap';
 import { Command } from 'cmdk';
-import { Search, Code, GraduationCap, Briefcase, Download, Mail, ZapOff } from 'lucide-react';
+import { Search, Code, GraduationCap, Briefcase, Download, Mail, Send, User, ZapOff } from 'lucide-react';
 import { personalDetails } from '@/lib/site-data';
 import { ShapeBurst } from './fx/shape-burst';
 import { isCalm, setCalm } from '@/lib/motion-pref';
@@ -120,6 +120,10 @@ export function CommandPalette() {
               </Command.Empty>
 
               <Command.Group heading="Navigation" className={groupClass}>
+                <Command.Item onSelect={() => runCommand(() => goTo('#about'))} className={itemClass}>
+                  <User className="w-5 h-5" strokeWidth={2.5} />
+                  <span>About</span>
+                </Command.Item>
                 <Command.Item onSelect={() => runCommand(() => goTo('#experience'))} className={itemClass}>
                   <Briefcase className="w-5 h-5" strokeWidth={2.5} />
                   <span>Experience</span>
@@ -131,6 +135,10 @@ export function CommandPalette() {
                 <Command.Item onSelect={() => runCommand(() => goTo('#honors'))} className={itemClass}>
                   <GraduationCap className="w-5 h-5" strokeWidth={2.5} />
                   <span>Honors & Awards</span>
+                </Command.Item>
+                <Command.Item onSelect={() => runCommand(() => goTo('#contact'))} className={itemClass}>
+                  <Send className="w-5 h-5" strokeWidth={2.5} />
+                  <span>Contact</span>
                 </Command.Item>
               </Command.Group>
 

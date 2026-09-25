@@ -268,7 +268,12 @@ export default function BikebearHero() {
               </div>
 
               {/* Main Portrait Frame – hover (or tap) reveals Spider-Man under the cursor, see spider-reveal.tsx */}
-              <TiltCard maxTilt={6} glare glareRadius="rounded-[28px] xs:rounded-[36px] sm:rounded-[44px]">
+              <TiltCard
+                maxTilt={6}
+                glare
+                glareRadius="rounded-[28px] xs:rounded-[36px] sm:rounded-[44px]"
+                className="w-full max-w-[350px] sm:w-auto sm:max-w-none"
+              >
                 <div
                   data-xray
                   className="relative w-full max-w-[350px] sm:max-w-none sm:w-[460px] lg:w-[460px] xl:w-[520px] aspect-[5/6] xs:aspect-[6/7] sm:aspect-auto sm:h-[560px] lg:h-[600px] xl:h-[660px] rounded-[28px] xs:rounded-[36px] sm:rounded-[44px] border-3 border-ink bg-pop-yellow overflow-hidden shadow-brutal-lg sm:shadow-brutal-xl fx-shadow-follow transition-colors duration-300 hover:border-pop-red pointer-events-auto cursor-crosshair"

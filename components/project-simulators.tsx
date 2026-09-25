@@ -323,7 +323,7 @@ export function SensorXSimulator() {
 
         <button
           onClick={() => setIsOccupied(!isOccupied)}
-          className={`px-5 py-2.5 rounded-full font-mono text-xs font-bold uppercase tracking-wider transition-all ${
+          className={`min-h-[40px] px-5 py-2.5 rounded-full font-mono text-xs font-bold uppercase tracking-wider transition-all ${
             isOccupied
               ? 'bg-emerald-400 text-black shadow-lg shadow-emerald-500/20'
               : 'bg-red-500/20 text-red-300 border border-red-500/40'

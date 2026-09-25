@@ -263,7 +263,7 @@ export function InteractivePhotoStack({ customPhotos }: { customPhotos?: Photo[]
                       e.stopPropagation();
                       openViewer(photo.src);
                     }}
-                    className="absolute top-1.5 right-1.5 sm:top-3 sm:right-3 z-50 w-10 h-10 sm:w-9 sm:h-9 grid place-items-center bg-white border-2 border-ink rounded-lg shadow-brutal-xs hover:bg-pop-yellow hover:-translate-y-0.5 active:translate-y-0 transition-all text-ink group/expand"
+                    className="absolute top-1.5 right-1.5 sm:top-3 sm:right-3 z-50 w-10 h-10 grid place-items-center bg-white border-2 border-ink rounded-lg shadow-brutal-xs hover:bg-pop-yellow hover:-translate-y-0.5 active:translate-y-0 transition-all text-ink group/expand"
                     title="View full resolution"
                     aria-label={`View full resolution: ${photo.alt}`}
                   >

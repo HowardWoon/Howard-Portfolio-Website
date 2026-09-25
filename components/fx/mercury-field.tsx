@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 import { FX, prefersReducedMotion } from '@/lib/fx';
+import { pointer } from '@/lib/pointer';
+import { useCalm } from '@/lib/motion-pref';
 
 const VERT = `#version 300 es
 in vec2 aPos;
@@ -49,6 +51,7 @@ void main() {
 /** FX-34 Mercury Field. Pauses off-screen / in background tabs; static frame under reduced motion/Calm. */
 export function MercuryField({ className = '' }: { className?: string }) {
   const ref = useRef<HTMLCanvasElement>(null);
+  const calm = useCalm(); // re-run when the visitor toggles Calm Mode (freeze to a still frame)
 
   useEffect(() => {
     const canvas = ref.current;
@@ -93,8 +96,7 @@ export function MercuryField({ className = '' }: { className?: string }) {
     const uTime = gl.getUniformLocation(prog, 'uTime');
     const uPtr = gl.getUniformLocation(prog, 'uPtr');
 
-    const root = document.documentElement;
-    const still = prefersReducedMotion();
+    const still = calm || prefersReducedMotion();
     const t0 = performance.now();
     let raf = 0;
     let visible = false;
@@ -110,8 +112,8 @@ export function MercuryField({ className = '' }: { className?: string }) {
     const draw = (now: number) => {
       raf = 0;
       if (lost) return;
-      const px = parseFloat(root.style.getPropertyValue('--px')) || 0; // written by FX-01, no extra listener
-      const py = parseFloat(root.style.getPropertyValue('--py')) || 0;
+      const px = pointer.x; // written by FX-01 PointerField, no extra listener
+      const py = pointer.y;
       gl.uniform2f(uRes, canvas.width, canvas.height);
       gl.uniform1f(uTime, still ? 14 : (now - t0) / 1000);
       gl.uniform2f(uPtr, px, py);
@@ -160,7 +162,7 @@ export function MercuryField({ className = '' }: { className?: string }) {
       gl.deleteShader(vs);
       gl.deleteShader(fs);
     };
-  }, []);
+  }, [calm]);
 
   return <canvas ref={ref} aria-hidden className={`pointer-events-none block ${className}`} />;
 }

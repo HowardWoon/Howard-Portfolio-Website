@@ -1,6 +1,8 @@
 'use client';
 
-import { m, useMotionValue, useSpring, useReducedMotion } from 'framer-motion';
+import { m, useMotionValue, useSpring } from 'framer-motion';
+import { FX } from '@/lib/fx';
+import { useMotionAllowed } from './fx/use-motion-allowed';
 import { useRef, ReactNode, PointerEvent } from 'react';
 
 interface MagneticProps {
@@ -17,7 +19,9 @@ export function Magnetic({ children, className = '', strength = 0.5, stretch = f
   const scaleXBase = useMotionValue(1);
   const scaleYBase = useMotionValue(1);
 
-  const prefersReducedMotion = useReducedMotion();
+  // Round 9: OS reduced-motion AND Calm Mode (framer's useReducedMotion only saw the OS setting)
+  const prefersReducedMotion = !useMotionAllowed();
+  const doStretch = stretch && FX.magneticStretch;
 
   const springConfig = { damping: 15, stiffness: 150, mass: 0.1 };
   const springX = useSpring(x, springConfig);
@@ -37,7 +41,7 @@ export function Magnetic({ children, className = '', strength = 0.5, stretch = f
     x.set((clientX - centerX) * strength);
     y.set((clientY - centerY) * strength);
 
-    if (stretch) {
+    if (doStretch) {
       const diffX = clientX - centerX;
       const diffY = clientY - centerY;
       const dist = Math.sqrt(diffX * diffX + diffY * diffY);
@@ -49,10 +53,9 @@ export function Magnetic({ children, className = '', strength = 0.5, stretch = f
   };
 
   const handleMouseLeave = () => {
-    if (prefersReducedMotion) return;
     x.set(0);
     y.set(0);
-    if (stretch) {
+    if (doStretch) {
       scaleXBase.set(1);
       scaleYBase.set(1);
     }
@@ -66,8 +69,8 @@ export function Magnetic({ children, className = '', strength = 0.5, stretch = f
       style={{
         x: prefersReducedMotion ? 0 : springX,
         y: prefersReducedMotion ? 0 : springY,
-        scaleX: !prefersReducedMotion && stretch ? scaleX : 1,
-        scaleY: !prefersReducedMotion && stretch ? scaleY : 1,
+        scaleX: !prefersReducedMotion && doStretch ? scaleX : 1,
+        scaleY: !prefersReducedMotion && doStretch ? scaleY : 1,
       }}
       className={`inline-block ${className}`}
       data-magnetic

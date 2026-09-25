@@ -349,7 +349,7 @@ export default function ContactSection() {
                     type="button"
                     aria-pressed={activeIntent === intent.label}
                     onClick={() => handleSelectIntent(intent)}
-                    className={`px-3.5 py-2 rounded-xl text-xs font-mono font-bold border-2 border-ink transition-all ${
+                    className={`min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-mono font-bold border-2 border-ink transition-all ${
                       activeIntent === intent.label
                         ? 'bg-pop-yellow text-ink shadow-clay-pressed translate-x-[2px] translate-y-[2px]'
                         : 'bg-white text-ink shadow-brutal-xs hover:-translate-y-0.5 hover:shadow-brutal-sm'
