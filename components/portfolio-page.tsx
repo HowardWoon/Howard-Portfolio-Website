@@ -14,6 +14,7 @@ import { TechMarquee } from '@/components/marquees';
 import { ScrollToTop } from '@/components/scroll-to-top';
 import { SiteHeader } from '@/components/site-header';
 const CommandPalette = dynamic(() => import('@/components/command-palette').then((mod) => mod.CommandPalette), {});
+const OffscreenPause = dynamic(() => import('@/components/fx/offscreen-pause').then((mod) => mod.OffscreenPause));
 const SectionDock = dynamic(() => import('@/components/section-dock').then((mod) => mod.SectionDock));
 const SectionSpine = dynamic(() => import('@/components/section-spine').then((mod) => mod.SectionSpine));
 
@@ -61,6 +62,7 @@ export function PortfolioPage() {
         <ScrollToTop />
         <SectionSpine />
         <SectionDock />
+        <OffscreenPause />
         <RouteWipeClear />
         <CommandPalette />
         <PointerField />

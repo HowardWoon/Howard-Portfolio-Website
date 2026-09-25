@@ -5,7 +5,7 @@ import { FieldArchive } from './field-archive';
 import { TraceRail } from './fx/trace-rail';
 import { SplitWords } from './fx/split-words';
 import { m, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { SPRING_STAMP } from '@/lib/fx';
+import { FX, SPRING_STAMP } from '@/lib/fx';
 import {
   Building2,
   Landmark,
@@ -554,7 +554,7 @@ export default function ExperienceSection() {
                       layoutId="exp-filter-pill"
                       aria-hidden
                       className="absolute inset-0 rounded-2xl bg-ink shadow-clay-pressed"
-                      transition={SPRING_STAMP}
+                      transition={FX.jellyTabs ? SPRING_STAMP : { duration: 0 }}
                     />
                   ) : null}
                   <span className="relative z-10 flex items-center gap-2.5">

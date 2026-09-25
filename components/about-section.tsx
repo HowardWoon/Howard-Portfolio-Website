@@ -378,6 +378,12 @@ export default function AboutSection() {
             >
               {STATUS_KEYS.map((k) => {
                 const on = statusFocus === k.status;
+                if (!FX.stackFocus)
+                  return (
+                    <span key={k.status} className="nb-chip">
+                      <span className={`nb-dot ${k.dot}`} /> {k.label}
+                    </span>
+                  );
                 return (
                   <button
                     key={k.status}

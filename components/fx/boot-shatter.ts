@@ -8,7 +8,9 @@ export function bootShatter(base = '#FFC700'): void {
   if (typeof window === 'undefined') return;
   const w = window.innerWidth;
   const h = window.innerHeight;
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const small = w < 640;
+  // D3: phones get a 1.5x canvas, bigger tiles and no second fringe pass (was a ~400 ms hitch at 4x CPU)
+  const dpr = Math.min(window.devicePixelRatio || 1, small ? 1.5 : 2);
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
@@ -27,7 +29,7 @@ export function bootShatter(base = '#FFC700'): void {
   document.body.appendChild(canvas);
   ctx.scale(dpr, dpr);
 
-  const size = w < 640 ? 28 : 40; // ~500 tiles on phones, ~1300 at 1920x1080
+  const size = small ? 44 : 40; // ~500 tiles on phones, ~1300 at 1920x1080
   const cols = Math.ceil(w / size);
   const rows = Math.ceil(h / size);
   const cx = w / 2;
@@ -86,8 +88,10 @@ export function bootShatter(base = '#FFC700'): void {
         ctx.globalAlpha = 0.55;
         ctx.fillStyle = '#FF4B2B';
         ctx.fillRect(-s / 2 - fringe, -s / 2, s, s);
-        ctx.fillStyle = '#2B4BFF';
-        ctx.fillRect(-s / 2 + fringe, -s / 2, s, s);
+        if (!small) {
+          ctx.fillStyle = '#2B4BFF';
+          ctx.fillRect(-s / 2 + fringe, -s / 2, s, s);
+        }
       }
       ctx.globalAlpha = 1 - t * t;
       ctx.fillStyle = p.c;

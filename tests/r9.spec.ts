@@ -20,6 +20,8 @@ test.describe('phone', () => {
   test('section dock hides again when back at the hero (R9-03)', async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
     await page.locator('#honors').scrollIntoViewIfNeeded();
+    await page.waitForTimeout(300);
+    await page.evaluate(() => window.scrollBy(0, -60)); // D6: the dock reappears on scroll up
     await expect(page.getByRole('button', { name: /current section: honors/i })).toBeVisible({ timeout: 7000 });
     await page.evaluate(() => window.scrollTo(0, 0));
     await expect(page.getByRole('button', { name: /current section/i })).toHaveCount(0, { timeout: 7000 });
@@ -83,4 +85,21 @@ test('command palette can reach every section, including About and Contact (R9-0
   for (const name of ['About', 'Projects', 'Experience', 'Honors & Awards', 'Contact']) {
     await expect(dialog.getByRole('option', { name, exact: true })).toBeAttached();
   }
+});
+
+test.describe('phone dock behaviour (D6)', () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { defaultBrowserType, ...iPhone13 } = devices['iPhone 13'];
+  test.use(iPhone13);
+
+  test('dock hides while scrolling down and returns on scroll up', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.locator('#experience').scrollIntoViewIfNeeded();
+    await page.waitForTimeout(300);
+    await page.evaluate(() => window.scrollBy(0, -60));
+    const dock = page.getByRole('button', { name: /current section: experience/i });
+    await expect(dock).toBeVisible({ timeout: 7000 });
+    await page.evaluate(() => window.scrollBy(0, 200));
+    await expect(page.getByRole('button', { name: /current section/i })).toHaveCount(0, { timeout: 5000 });
+  });
 });

@@ -39,6 +39,8 @@ test.describe('phone', () => {
     await context.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
     await page.goto('/', { waitUntil: 'networkidle' });
     await page.locator('#experience').scrollIntoViewIfNeeded();
+    await page.waitForTimeout(300);
+    await page.evaluate(() => window.scrollBy(0, -60)); // D6: the dock reappears on scroll up
     const dock = page.getByRole('button', { name: /current section: experience/i });
     await expect(dock).toBeVisible({ timeout: 7000 });
     await dock.tap();

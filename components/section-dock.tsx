@@ -15,6 +15,26 @@ import { useActiveSection } from '@/lib/use-active-section';
 export function SectionDock() {
   const active = useActiveSection(SECTION_IDS, FX.sectionDock);
   const [typing, setTyping] = useState(false);
+  const [scrollingDown, setScrollingDown] = useState(false);
+
+  // D6: hide while the visitor scrolls down (reading), show again on any scroll up - like mobile browser bars.
+  // State only changes when the direction flips, so this does not re-render on every scroll frame.
+  useEffect(() => {
+    let lastY = window.scrollY;
+    let down = false;
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (Math.abs(y - lastY) < 12) return;
+      const nowDown = y > lastY;
+      lastY = y;
+      if (nowDown !== down) {
+        down = nowDown;
+        setScrollingDown(nowDown);
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   useEffect(() => {
     const isField = (t: EventTarget | null) =>
@@ -35,7 +55,7 @@ export function SectionDock() {
 
   if (!FX.sectionDock) return null;
   const label = SECTIONS.find((s) => s.id === active)?.label;
-  const visible = !!label && !typing;
+  const visible = !!label && !typing && !scrollingDown;
 
   return (
     <button

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { m, useMotionValue, AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
+import { FX } from '@/lib/fx';
 
 /**
  * Brutalist cursor: solid ink dot + chunky ring.
@@ -94,7 +95,7 @@ export function CustomCursor() {
         aria-hidden
         className={`fixed top-0 left-0 w-11 h-11 rounded-full pointer-events-none z-[99999] border-[3px] flex items-center justify-center ${onDark ? '' : 'mix-blend-multiply'}`}
         animate={{
-          scale: customText ? 2.2 : isPointer ? 1.6 : 1,
+          scale: !FX.cursorMorph ? 1 : customText ? 2.2 : isPointer ? 1.6 : 1,
           borderColor: onDark ? '#FFFFFF' : '#0A0A0A',
           backgroundColor: customText ? '#FFC700' : isPointer ? 'rgba(255,199,0,0.45)' : 'rgba(255,199,0,0)',
         }}

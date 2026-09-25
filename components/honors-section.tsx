@@ -521,9 +521,10 @@ function CertificateModal({ url, onClose }: { url: string; onClose: () => void }
       </div>
 
       <m.div
-        initial={{ y: 40, rotateX: -20, opacity: 0 }}
+        initial={FX.pageLift ? { y: 40, rotateX: -18, opacity: 0, transformPerspective: 1200 } : { opacity: 0 }}
         animate={{ y: 0, rotateX: 0, opacity: 1 }}
-        exit={{ y: 40, rotateX: -20, opacity: 0 }}
+        exit={FX.pageLift ? { y: 40, rotateX: 12, opacity: 0, transformPerspective: 1200 } : { opacity: 0 }}
+        style={{ transformOrigin: '50% 0%' }}
         onClick={(e) => e.stopPropagation()}
         className="relative w-full max-w-5xl mx-auto flex-1 min-h-0 bg-white rounded-[18px] sm:rounded-[22px] border-3 border-ink shadow-brutal-lg sm:shadow-brutal-xl flex items-center justify-center p-2 sm:p-3"
       >

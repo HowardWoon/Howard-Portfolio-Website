@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, Bricolage_Grotesque, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
+import { FX, type FxName } from '@/lib/fx';
 import SmoothScrollProvider from '@/components/smooth-scroll-provider';
 import { CustomCursor } from '@/components/custom-cursor';
 import { MotionProvider } from '@/components/motion-provider';
@@ -65,9 +66,22 @@ export const viewport: Viewport = {
   colorScheme: 'only light',
 };
 
+/**
+ * D1: CSS-only effects can't read lib/fx.ts, so every flag set to `false` becomes an `fx-off-<flag>` class on
+ * <html> (computed at build time on the server, zero client JS). globals.css gates each CSS effect on it.
+ */
+const FX_OFF_CLASSES = (Object.keys(FX) as FxName[])
+  .filter((k) => !FX[k])
+  .map((k) => `fx-off-${k}`)
+  .join(' ');
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${sans.variable} ${display.variable} ${mono.variable}`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${sans.variable} ${display.variable} ${mono.variable} ${FX_OFF_CLASSES}`}
+      suppressHydrationWarning
+    >
       <head>
         <script
           dangerouslySetInnerHTML={{

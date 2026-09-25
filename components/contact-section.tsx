@@ -5,7 +5,6 @@ import { m } from 'framer-motion';
 import { SplitWords } from './fx/split-words';
 import { BauhausSolid } from './fx/bauhaus-solid';
 import dynamic from 'next/dynamic';
-const MercuryField = dynamic(() => import('./fx/mercury-field').then((mod) => mod.MercuryField), { ssr: false });
 import { FX } from '@/lib/fx';
 import {
   Mail,
@@ -21,6 +20,8 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { personalDetails } from '@/lib/site-data';
+
+const MercuryField = dynamic(() => import('./fx/mercury-field').then((mod) => mod.MercuryField), { ssr: false });
 
 const quickIntents = [
   {

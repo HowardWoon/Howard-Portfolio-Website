@@ -274,7 +274,7 @@ html[data-motion='calm'] .fx-drift-rev {
     opacity: 0;
     transition: opacity 0.25s ease;
   }
-  html[data-fx-pointer='on'] .fx-specular::after {
+  html[data-fx-pointer='on']:not(.fx-off-specular) .fx-specular::after {
     opacity: 1;
   }
 
@@ -499,14 +499,14 @@ html.hw-booted .boot-overlay {
 
   /* FX-02 depth parallax. Uses the individual `translate` property so it stacks with Tailwind's
      rotate/scale utilities instead of overwriting them. --depth = max px of travel (negative = opposite). */
-  .fx-depth {
+  html:not(.fx-off-depthParallax) .fx-depth {
     translate: calc(var(--px, 0) * var(--depth, 12) * 1px) calc(var(--py, 0) * var(--depth, 12) * 1px);
     transition: translate 0.7s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   /* FX-04 light-follow hard shadow: the brutal shadow leans away from the cursor like a desk lamp.
      Only when the pointer field is live (mouse devices, motion allowed). Same colour and base offset. */
-  html[data-fx-pointer='on'] .fx-shadow-follow {
+  html[data-fx-pointer='on']:not(.fx-off-shadowFollow) .fx-shadow-follow {
     --fx-o: 8px;
     box-shadow: calc(var(--fx-o) - var(--px, 0) * 5px) calc(var(--fx-o) - var(--py, 0) * 5px) 0 0 #0a0a0a;
     transition-property: box-shadow, border-color, color, background-color;
@@ -514,7 +514,7 @@ html.hw-booted .boot-overlay {
     transition-timing-function: ease-out;
   }
   @media (min-width: 640px) {
-    html[data-fx-pointer='on'] .fx-shadow-follow {
+    html[data-fx-pointer='on']:not(.fx-off-shadowFollow) .fx-shadow-follow {
       --fx-o: 12px;
     }
   }
@@ -575,13 +575,13 @@ html.hw-booted .boot-overlay {
   /* FX-13 scroll-driven drift for background geometry: pure CSS, zero JS, progressive enhancement. */
   @supports (animation-timeline: view()) {
     @media (prefers-reduced-motion: no-preference) {
-      .fx-drift,
-      .fx-drift-rev {
+      html:not(.fx-off-scrollDrift) .fx-drift,
+      html:not(.fx-off-scrollDrift) .fx-drift-rev {
         animation: fx-drift linear both;
         animation-timeline: view();
         animation-range: cover 0% cover 100%;
       }
-      .fx-drift-rev {
+      html:not(.fx-off-scrollDrift) .fx-drift-rev {
         animation-name: fx-drift-rev;
       }
     }
@@ -589,7 +589,7 @@ html.hw-booted .boot-overlay {
 }
 @layer utilities {
   /* FX-16 command palette drops in on a 3D hinge (CSS only) */
-  .fx-hinge {
+  html:not(.fx-off-paletteDrop) .fx-hinge {
     transform-origin: 50% 0%;
     animation: fx-hinge 0.34s cubic-bezier(0.2, 0.9, 0.1, 1) both;
   }
@@ -597,7 +597,7 @@ html.hw-booted .boot-overlay {
   /* FX-24 brutal glass: once you scroll, the header becomes frosted but keeps its 3px ink border */
   @supports (animation-timeline: scroll()) {
     @media (prefers-reduced-motion: no-preference) {
-      html:not([data-motion='calm']) .site-header {
+      html:not([data-motion='calm']):not(.fx-off-glassHeader) .site-header {
         animation: fx-glass linear both;
         animation-timeline: scroll(root);
         animation-range: 0 600px;
@@ -606,15 +606,13 @@ html.hw-booted .boot-overlay {
   }
 }
 @keyframes fx-glass {
+  /* D4: only the background alpha animates (the header keeps its static backdrop-blur-md). Animating
+     backdrop-filter re-rasterised the blur every scroll frame, and 0.8 let dark content ghost through. */
   from {
     background-color: rgb(255 255 255 / 0.95);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
   }
   to {
-    background-color: rgb(255 255 255 / 0.8);
-    -webkit-backdrop-filter: blur(18px) saturate(1.6);
-    backdrop-filter: blur(18px) saturate(1.6);
+    background-color: rgb(255 255 255 / 0.9);
   }
 }
 @keyframes fx-hinge {
@@ -671,7 +669,7 @@ html.hw-booted .boot-overlay {
 
 @layer utilities {
   /* FX-29 letterpress: the lamp (cursor) casts a faint blue offset under the headline letters */
-  html[data-fx-pointer='on'] .fx-letterpress {
+  html[data-fx-pointer='on']:not(.fx-off-letterpress) .fx-letterpress {
     text-shadow: calc(var(--px, 0) * -4px) calc(var(--py, 0) * -4px) 0 rgb(43 75 255 / 0.22);
   }
 
@@ -734,4 +732,9 @@ html.hw-booted .boot-overlay {
   .fx-stack-chip[data-match='false'] .nb-dot {
     filter: grayscale(1);
   }
+}
+
+/* D5: infinite decorative animations pause while their section is off-screen (see fx/offscreen-pause.tsx) */
+[data-offscreen] :is(.animate-pulse, .animate-ping, .animate-spin-slow, .animate-wobble, [class*='animate-[marquee']) {
+  animation-play-state: paused !important;
 }
