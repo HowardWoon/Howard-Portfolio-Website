@@ -34,7 +34,7 @@ language sql
 stable
 as $$
   select
-    user_id = '54c734ee-1e79-4e92-bf9b-8504a1854a31'::uuid
+    user_id = '00000000-0000-0000-0000-000000000000'::uuid -- << REPLACED TO FIX GITGUARDIAN ALERT
     or coalesce((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin', false)
 $$;
 
