@@ -7,6 +7,7 @@ import { m, useScroll, useTransform } from 'framer-motion';
 import { useBooted } from './boot-sequence';
 import { Magnetic } from './magnetic-button';
 import { Sparkles, Terminal } from 'lucide-react';
+import { TextRoll } from './fx/text-roll';
 import { toLocal } from '@/lib/to-local';
 import { SpiderReveal } from './spider-reveal';
 import { BauhausSolid } from './fx/bauhaus-solid';
@@ -212,15 +213,17 @@ export default function BikebearHero() {
               transition={{ duration: 0.6, delay: 0.4 }}
               className="flex flex-wrap items-center gap-3 xs:gap-4 pt-2 w-full"
             >
-              <Magnetic strength={0.3}>
-                <a href="#projects" className="nb-btn nb-btn-ink px-7 py-4">
-                  EXPLORE PROJECTS ↗
+              <Magnetic strength={0.3} stretch>
+                <a href="#projects" className="group nb-btn nb-btn-ink px-7 py-4 fx-specular nb-press">
+                  <TextRoll>EXPLORE PROJECTS</TextRoll> {String.fromCodePoint(0x2197)}
                 </a>
               </Magnetic>
-              <Magnetic strength={0.3}>
-                <Link href="/simulators/agentic" className="nb-btn nb-btn-white px-6 py-4">
+              <Magnetic strength={0.3} stretch>
+                <Link href="/simulators/agentic" className="group nb-btn nb-btn-white px-6 py-4 fx-specular nb-press">
                   <Terminal className="w-4 h-4" strokeWidth={2.75} />
-                  <span>LIVE SIMULATORS</span>
+                  <span>
+                    <TextRoll>LIVE SIMULATORS</TextRoll>
+                  </span>
                 </Link>
               </Magnetic>
             </m.div>

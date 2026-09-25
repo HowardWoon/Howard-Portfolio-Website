@@ -4,6 +4,7 @@ import Link from 'next/link';
 import React from 'react';
 import { ProjectIndex, type ProjectIndexItem } from './project-index';
 import { ScrollUnfold } from './fx/scroll-unfold';
+import { TextRoll } from './fx/text-roll';
 import { SplitWords } from './fx/split-words';
 import { Reveal } from './reveal';
 import { TiltCard } from './tilt-card';
@@ -393,7 +394,7 @@ function ProjectCard({ project }: { project: ProjectData }) {
                     href={project.prototypeUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="nb-btn nb-btn-yellow px-5 py-3"
+                    className="group nb-btn nb-btn-yellow px-5 py-3 fx-specular nb-press"
                   >
                     <Terminal className="w-4 h-4" strokeWidth={2.75} />
                     LAUNCH LIVE PROTOTYPE
@@ -402,10 +403,10 @@ function ProjectCard({ project }: { project: ProjectData }) {
                 {SIMULATOR_ROUTE[project.telemetryType] && (
                   <Link
                     href={`/simulators/${SIMULATOR_ROUTE[project.telemetryType]}`}
-                    className="nb-btn nb-btn-white px-5 py-3"
+                    className="group nb-btn nb-btn-white px-5 py-3 fx-specular nb-press"
                   >
                     <Terminal className="w-4 h-4" strokeWidth={2.75} />
-                    RUN SIMULATOR
+                    <TextRoll>RUN SIMULATOR</TextRoll>
                   </Link>
                 )}
 
@@ -414,10 +415,10 @@ function ProjectCard({ project }: { project: ProjectData }) {
                     href={project.colabUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="nb-btn bg-pop-orange px-5 py-3"
+                    className="group nb-btn bg-pop-orange px-5 py-3 fx-specular nb-press"
                   >
                     <Activity className="w-4 h-4" strokeWidth={2.75} />
-                    OPEN IN GOOGLE COLAB
+                    <TextRoll>OPEN IN GOOGLE COLAB</TextRoll>
                   </a>
                 )}
 
@@ -426,7 +427,7 @@ function ProjectCard({ project }: { project: ProjectData }) {
                     href={project.orchestratorUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="nb-btn nb-btn-lilac px-5 py-3"
+                    className="group nb-btn nb-btn-lilac px-5 py-3 fx-specular nb-press"
                   >
                     <Network className="w-4 h-4" strokeWidth={2.75} />
                     VIEW MASTER ORCHESTRATOR
@@ -438,7 +439,7 @@ function ProjectCard({ project }: { project: ProjectData }) {
                     href={project.deckUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="nb-btn nb-btn-white px-5 py-3"
+                    className="group nb-btn nb-btn-white px-5 py-3 fx-specular nb-press"
                   >
                     <FileText className="w-4 h-4" strokeWidth={2.75} />
                     <span>PITCH DECK</span>
@@ -451,10 +452,12 @@ function ProjectCard({ project }: { project: ProjectData }) {
                     href={project.githubUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="nb-btn nb-btn-ink px-5 py-3"
+                    className="group nb-btn nb-btn-ink px-5 py-3 fx-specular nb-press"
                   >
                     <Github className="w-4 h-4" strokeWidth={2.5} />
-                    <span>GITHUB</span>
+                    <span>
+                      <TextRoll>GITHUB</TextRoll>
+                    </span>
                   </a>
                 )}
               </div>

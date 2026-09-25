@@ -252,6 +252,49 @@ html[data-motion='calm'] .fx-drift-rev {
 }
 
 @layer components {
+  /* FX-25: the cursor is a desk lamp (same --px/--py as FX-01/04). The sheen sits on the lamp side. */
+  .fx-specular {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+  }
+  .fx-specular::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 1;
+    background: radial-gradient(
+      140% 90% at calc(50% + var(--px, 0) * 45%) calc(10% + var(--py, 0) * 30%),
+      rgb(255 255 255 / 0.55),
+      rgb(255 255 255 / 0) 60%
+    );
+    mix-blend-mode: soft-light;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  html[data-fx-pointer='on'] .fx-specular::after {
+    opacity: 1;
+  }
+
+  /* FX: a control travels exactly onto its hard shadow when pressed (brutal-sm = 3px, brutal = 5px) */
+  .nb-press {
+    transition:
+      transform 0.12s cubic-bezier(0.2, 0.9, 0.1, 1),
+      box-shadow 0.12s cubic-bezier(0.2, 0.9, 0.1, 1);
+  }
+  .nb-press:active {
+    transform: translate(3px, 3px);
+    box-shadow: 0 0 0 0 #0a0a0a;
+  }
+  @media (hover: hover) {
+    .nb-press:hover {
+      transform: translate(-1px, -1px);
+      box-shadow: 4px 4px 0 0 #0a0a0a;
+    }
+  }
+
   /* ===== NEO-BRUTALIST SURFACES ===== */
   .nb-card {
     @apply relative bg-white border-3 border-ink rounded-[22px] shadow-brutal;
