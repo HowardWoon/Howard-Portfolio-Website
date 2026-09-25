@@ -25,3 +25,5 @@ playwright-report/
 
 # UI audit output (scripts/audit-ui.mjs)
 audit/
+audit-live/
+ci-log.txt
