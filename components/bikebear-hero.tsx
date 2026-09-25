@@ -7,6 +7,8 @@ import { m, useScroll, useTransform } from 'framer-motion';
 import { useBooted } from './boot-sequence';
 import { Magnetic } from './magnetic-button';
 import { Sparkles, Terminal } from 'lucide-react';
+import { TextRoll } from './fx/text-roll';
+import { TiltCard } from './tilt-card';
 import { toLocal } from '@/lib/to-local';
 import { SpiderReveal } from './spider-reveal';
 import { BauhausSolid } from './fx/bauhaus-solid';
@@ -63,7 +65,7 @@ function MagnifiedHeadline({ booted = true }: { booted?: boolean }) {
     >
       {/* Base Normal Text */}
       <h2
-        className={`${headlineClass} text-ink transition-opacity duration-300 group-data-[hover=true]/headline:opacity-25`}
+        className={`${headlineClass} text-ink transition-opacity duration-300 group-data-[hover=true]/headline:opacity-25 fx-letterpress fx-aberration`}
       >
         ENGINEERING <br />
         {FX.headlineStamp ? (
@@ -212,15 +214,17 @@ export default function BikebearHero() {
               transition={{ duration: 0.6, delay: 0.4 }}
               className="flex flex-wrap items-center gap-3 xs:gap-4 pt-2 w-full"
             >
-              <Magnetic strength={0.3}>
-                <a href="#projects" className="nb-btn nb-btn-ink px-7 py-4">
-                  EXPLORE PROJECTS ↗
+              <Magnetic strength={0.3} stretch>
+                <a href="#projects" className="group nb-btn nb-btn-ink px-7 py-4 fx-specular nb-press">
+                  <TextRoll>EXPLORE PROJECTS</TextRoll> {String.fromCodePoint(0x2197)}
                 </a>
               </Magnetic>
-              <Magnetic strength={0.3}>
-                <Link href="/simulators/agentic" className="nb-btn nb-btn-white px-6 py-4">
+              <Magnetic strength={0.3} stretch>
+                <Link href="/simulators/agentic" className="group nb-btn nb-btn-white px-6 py-4 fx-specular nb-press">
                   <Terminal className="w-4 h-4" strokeWidth={2.75} />
-                  <span>LIVE SIMULATORS</span>
+                  <span>
+                    <TextRoll>LIVE SIMULATORS</TextRoll>
+                  </span>
                 </Link>
               </Magnetic>
             </m.div>
@@ -237,7 +241,7 @@ export default function BikebearHero() {
             <div
               aria-hidden
               className="fx-depth pointer-events-none absolute -bottom-6 left-0 lg:left-auto lg:right-[70%] w-20 h-20 xs:w-28 xs:h-28 bg-pop-lilac border-3 border-ink rounded-[28px] rotate-6"
-              style={{ '--depth': 18 } as React.CSSProperties}
+              style={{ '--depth': 6 } as React.CSSProperties}
             />
 
             <m.div
@@ -247,7 +251,10 @@ export default function BikebearHero() {
               className="relative group flex flex-col items-center lg:items-end z-40 pointer-events-auto w-full sm:w-auto px-1 sm:px-0"
             >
               {/* News Ticker (Above Photo) */}
-              <div className="w-full max-w-[350px] sm:max-w-none sm:w-[460px] lg:w-[460px] xl:w-[520px] mb-5 overflow-hidden bg-white rounded-2xl border-3 border-ink py-2.5 relative z-20 shadow-brutal pointer-events-auto">
+              <div
+                className="fx-depth w-full max-w-[350px] sm:max-w-none sm:w-[460px] lg:w-[460px] xl:w-[520px] mb-5 overflow-hidden bg-white rounded-2xl border-3 border-ink py-2.5 relative z-20 shadow-brutal pointer-events-auto"
+                style={{ '--depth': 18 } as React.CSSProperties}
+              >
                 <div className="flex whitespace-nowrap animate-[marquee_20s_linear_infinite] w-max">
                   {[...Array(4)].map((_, i) => (
                     <div key={i} className="flex items-center" aria-hidden={i > 0}>
@@ -260,31 +267,33 @@ export default function BikebearHero() {
                 </div>
               </div>
 
-              {/* Main Portrait Frame — hover (or tap) reveals Spider-Man under the cursor, see spider-reveal.tsx */}
-              <div
-                data-xray
-                className="relative w-full max-w-[350px] sm:max-w-none sm:w-[460px] lg:w-[460px] xl:w-[520px] aspect-[5/6] xs:aspect-[6/7] sm:aspect-auto sm:h-[560px] lg:h-[600px] xl:h-[660px] rounded-[28px] xs:rounded-[36px] sm:rounded-[44px] border-3 border-ink bg-pop-yellow overflow-hidden shadow-brutal-lg sm:shadow-brutal-xl fx-shadow-follow transition-colors duration-300 hover:border-pop-red pointer-events-auto cursor-crosshair"
-              >
-                <Image
-                  src="/images/howard-solid.jpeg"
-                  alt="Howard Woon - Systems & AI Architect"
-                  fill
-                  sizes="(max-width: 640px) 350px, (max-width: 1280px) 460px, 520px"
-                  className="object-cover object-top saturate-[1.15] contrast-[1.05]"
-                  priority
-                  quality={85}
-                />
-
-                <SpiderReveal />
-
-                {/* Corner sticker */}
+              {/* Main Portrait Frame – hover (or tap) reveals Spider-Man under the cursor, see spider-reveal.tsx */}
+              <TiltCard maxTilt={6} glare glareRadius="rounded-[28px] xs:rounded-[36px] sm:rounded-[44px]">
                 <div
-                  aria-hidden
-                  className="absolute left-4 bottom-4 w-14 h-14 rounded-full bg-white border-3 border-ink grid place-items-center shadow-brutal-sm animate-spin-slow"
+                  data-xray
+                  className="relative w-full max-w-[350px] sm:max-w-none sm:w-[460px] lg:w-[460px] xl:w-[520px] aspect-[5/6] xs:aspect-[6/7] sm:aspect-auto sm:h-[560px] lg:h-[600px] xl:h-[660px] rounded-[28px] xs:rounded-[36px] sm:rounded-[44px] border-3 border-ink bg-pop-yellow overflow-hidden shadow-brutal-lg sm:shadow-brutal-xl fx-shadow-follow transition-colors duration-300 hover:border-pop-red pointer-events-auto cursor-crosshair"
                 >
-                  <span className="font-display font-extrabold text-xl text-ink">✦</span>
+                  <Image
+                    src="/images/howard-solid.jpeg"
+                    alt="Howard Woon - Systems & AI Architect"
+                    fill
+                    sizes="(max-width: 640px) 350px, (max-width: 1280px) 460px, 520px"
+                    className="object-cover object-top saturate-[1.15] contrast-[1.05]"
+                    priority
+                    quality={85}
+                  />
+
+                  <SpiderReveal />
+
+                  {/* Corner sticker */}
+                  <div
+                    aria-hidden
+                    className="absolute left-4 bottom-4 w-14 h-14 rounded-full bg-white border-3 border-ink grid place-items-center shadow-brutal-sm animate-spin-slow"
+                  >
+                    <span className="font-display font-extrabold text-xl text-ink">✦</span>
+                  </div>
                 </div>
-              </div>
+              </TiltCard>
             </m.div>
           </div>
         </div>

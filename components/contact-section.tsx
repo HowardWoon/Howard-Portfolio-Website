@@ -434,7 +434,7 @@ export default function ContactSection() {
               <button
                 type="submit"
                 disabled={formStatus === 'sending'}
-                className={`nb-btn w-full py-4 text-sm ${submitColor}`}
+                className={`nb-btn w-full py-4 text-sm fx-specular nb-press ${submitColor}`}
               >
                 {formStatus === 'sending' ? (
                   <>

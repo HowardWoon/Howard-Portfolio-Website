@@ -252,6 +252,49 @@ html[data-motion='calm'] .fx-drift-rev {
 }
 
 @layer components {
+  /* FX-25: the cursor is a desk lamp (same --px/--py as FX-01/04). The sheen sits on the lamp side. */
+  .fx-specular {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+  }
+  .fx-specular::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 1;
+    background: radial-gradient(
+      140% 90% at calc(50% + var(--px, 0) * 45%) calc(10% + var(--py, 0) * 30%),
+      rgb(255 255 255 / 0.55),
+      rgb(255 255 255 / 0) 60%
+    );
+    mix-blend-mode: soft-light;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  html[data-fx-pointer='on'] .fx-specular::after {
+    opacity: 1;
+  }
+
+  /* FX: a control travels exactly onto its hard shadow when pressed (brutal-sm = 3px, brutal = 5px) */
+  .nb-press {
+    transition:
+      transform 0.12s cubic-bezier(0.2, 0.9, 0.1, 1),
+      box-shadow 0.12s cubic-bezier(0.2, 0.9, 0.1, 1);
+  }
+  .nb-press:active {
+    transform: translate(3px, 3px);
+    box-shadow: 0 0 0 0 #0a0a0a;
+  }
+  @media (hover: hover) {
+    .nb-press:hover {
+      transform: translate(-1px, -1px);
+      box-shadow: 4px 4px 0 0 #0a0a0a;
+    }
+  }
+
   /* ===== NEO-BRUTALIST SURFACES ===== */
   .nb-card {
     @apply relative bg-white border-3 border-ink rounded-[22px] shadow-brutal;
@@ -586,5 +629,95 @@ html.hw-booted .boot-overlay {
   to {
     translate: 0 50px;
     rotate: -12deg;
+  }
+}
+
+@layer utilities {
+  /* FX-29 letterpress: the lamp (cursor) casts a faint blue offset under the headline letters */
+  html[data-fx-pointer='on'] .fx-letterpress {
+    text-shadow: calc(var(--px, 0) * -4px) calc(var(--py, 0) * -4px) 0 rgb(43 75 255 / 0.22);
+  }
+
+  /* FX-30 chromatic aberration: RGB fringes that grow with scroll speed (--fx-vel is -1..1) */
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-motion='calm']) .fx-aberration {
+      text-shadow:
+        calc(var(--fx-vel, 0) * 3px) 0 0 rgb(255 75 43 / 0.85),
+        calc(var(--fx-vel, 0) * -3px) 0 0 rgb(43 75 255 / 0.85);
+    }
+  }
+}
+
+@layer utilities {
+  /* FX-31 Blueprint View */
+  .fx-blueprint {
+    perspective: 1500px;
+  }
+  .fx-blueprint .fx-stack {
+    transform: rotateX(60deg) rotateZ(-45deg) translateZ(-100px);
+    transform-style: preserve-3d;
+    transition: transform 0.8s cubic-bezier(0.2, 0.9, 0.1, 1);
+  }
+  .fx-blueprint .fx-layer {
+    transition: transform 0.8s cubic-bezier(0.2, 0.9, 0.1, 1);
+  }
+  .fx-blueprint .fx-layer:nth-child(1) {
+    transform: translateZ(20px);
+  }
+  .fx-blueprint .fx-layer:nth-child(2) {
+    transform: translateZ(60px);
+  }
+  .fx-blueprint .fx-layer:nth-child(3) {
+    transform: translateZ(100px);
+  }
+}
+
+@layer utilities {
+  /* FX-29 letterpress: the lamp (cursor) casts a faint blue offset under the headline letters */
+  html[data-fx-pointer='on'] .fx-letterpress {
+    text-shadow: calc(var(--px, 0) * -4px) calc(var(--py, 0) * -4px) 0 rgb(43 75 255 / 0.22);
+  }
+
+  /* FX-30 chromatic aberration: RGB fringes that grow with scroll speed (--fx-vel is -1..1) */
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-motion='calm']) .fx-aberration {
+      text-shadow:
+        calc(var(--fx-vel, 0) * 3px) 0 0 rgb(255 75 43 / 0.85),
+        calc(var(--fx-vel, 0) * -3px) 0 0 rgb(43 75 255 / 0.85);
+    }
+  }
+}
+
+@layer components {
+  /* FX-31 Blueprint View. Uses the independent translate property for Z so framer's inline
+     transform on children (Reveal / m.*) can never override it. */
+  .fx-blueprint {
+    perspective: 1800px;
+    border-radius: 20px;
+    transition: background-color 0.5s ease;
+  }
+  .fx-blueprint .fx-stack {
+    transform-origin: 50% 30%;
+    transform-style: preserve-3d;
+    transition: transform 0.8s cubic-bezier(0.2, 0.9, 0.1, 1);
+  }
+  .fx-blueprint .fx-layer {
+    transition:
+      translate 0.8s cubic-bezier(0.2, 0.9, 0.1, 1),
+      box-shadow 0.8s ease;
+  }
+  .fx-blueprint[data-open='true'] {
+    background-color: rgb(43 75 255 / 0.06);
+    background-image:
+      linear-gradient(rgb(43 75 255 / 0.14) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(43 75 255 / 0.14) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .fx-blueprint[data-open='true'] .fx-stack {
+    transform: rotateX(50deg) rotateZ(-32deg) scale(0.8);
+  }
+  .fx-blueprint[data-open='true'] .fx-layer {
+    translate: 0 0 calc(var(--layer, 0) * 42px);
+    box-shadow: 0 calc(var(--layer, 0) * 4px + 6px) 0 0 rgb(10 10 10 / 0.18);
   }
 }

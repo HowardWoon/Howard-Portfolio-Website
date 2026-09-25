@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { m } from 'framer-motion';
 import { Magnetic } from './magnetic-button';
 import { MotionToggle } from './motion-toggle';
+import { TextRoll } from './fx/text-roll';
 import { ExternalLink, FileText, Search } from 'lucide-react';
 
 export function SiteHeader() {
@@ -69,15 +70,17 @@ export function SiteHeader() {
           <span className="text-xs font-mono font-extrabold tracking-[0.08em] text-ink">AVAILABLE FOR HIRE 2026</span>
         </div>
 
-        <Magnetic strength={0.3}>
+        <Magnetic strength={0.3} stretch>
           <a
             href="/resume.pdf"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="RESUME"
-            className="group nb-btn nb-btn-yellow w-10 h-10 p-0 min-[400px]:w-auto min-[400px]:h-auto min-[400px]:px-4 min-[400px]:py-2.5 sm:px-6 sm:py-3 landscape-short:!py-2"
+            className="group nb-btn nb-btn-yellow w-10 h-10 p-0 min-[400px]:w-auto min-[400px]:h-auto min-[400px]:px-4 min-[400px]:py-2.5 sm:px-6 sm:py-3 landscape-short:!py-2 fx-specular nb-press"
           >
-            <span className="sr-only min-[400px]:not-sr-only">RESUME</span>
+            <span className="sr-only min-[400px]:not-sr-only">
+              <TextRoll>RESUME</TextRoll>
+            </span>
             <FileText className="w-4 h-4 min-[400px]:hidden" strokeWidth={2.75} aria-hidden />
             <ExternalLink
               className="hidden sm:block w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
