@@ -4,6 +4,7 @@ import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { m } from 'framer-motion';
 import { Magnetic } from './magnetic-button';
+import { MotionToggle } from './motion-toggle';
 import { ExternalLink, FileText, Search } from 'lucide-react';
 
 export function SiteHeader() {
@@ -84,6 +85,7 @@ export function SiteHeader() {
             />
           </a>
         </Magnetic>
+        <MotionToggle className="hidden sm:grid w-10 h-10 md:w-12 md:h-12 landscape-short:!w-10 landscape-short:!h-10" />
         <button
           onClick={() => window.dispatchEvent(new Event('open-command-palette'))}
           className="hidden xs:grid place-items-center w-10 h-10 md:w-12 md:h-12 landscape-short:!w-10 landscape-short:!h-10 rounded-full bg-white border-3 border-ink shadow-brutal-sm hover:bg-pop-lilac hover:-translate-y-0.5 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all text-ink"

@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import Lenis from 'lenis';
+import { useCalm } from '@/lib/motion-pref';
 
 declare global {
   interface Window {
@@ -10,9 +11,11 @@ declare global {
 }
 
 export default function SmoothScrollProvider({ children }: { children: React.ReactNode }) {
+  const calm = useCalm();
+
   useEffect(() => {
     // Respect user's motion preferences
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (calm || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       return;
     }
 
@@ -38,7 +41,7 @@ export default function SmoothScrollProvider({ children }: { children: React.Rea
       lenis.destroy();
       delete window.__lenis;
     };
-  }, []);
+  }, [calm]);
 
   return <>{children}</>;
 }

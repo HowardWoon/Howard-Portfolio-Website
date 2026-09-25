@@ -236,6 +236,21 @@ html.has-custom-cursor [cmdk-input] {
   }
 }
 
+/* FX-18 Calm Mode: identical to prefers-reduced-motion, but chosen by the visitor */
+html[data-motion='calm'] *,
+html[data-motion='calm'] *::before,
+html[data-motion='calm'] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+/* scroll-driven animations ignore duration, so switch them off explicitly */
+html[data-motion='calm'] .fx-drift,
+html[data-motion='calm'] .fx-drift-rev {
+  animation: none !important;
+}
+
 @layer components {
   /* ===== NEO-BRUTALIST SURFACES ===== */
   .nb-card {
@@ -389,6 +404,19 @@ html.hw-booted .boot-overlay {
    no colour, font, border or layout token is changed here.
    ===================================================================== */
 @layer utilities {
+  /* FX-19 depth-of-field: the page behind an overlay goes out of focus.
+     filter only (no transform) - overlays are portaled to <body>, so nothing fixed lives inside. */
+  #main-content,
+  .site-header {
+    transition: filter 0.35s ease;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-motion='calm'])[data-overlay='open'] #main-content,
+    html:not([data-motion='calm'])[data-overlay='open'] .site-header {
+      filter: blur(2px) saturate(0.85);
+    }
+  }
+
   /* FX-02 depth parallax. Uses the individual `translate` property so it stacks with Tailwind's
      rotate/scale utilities instead of overwriting them. --depth = max px of travel (negative = opposite). */
   .fx-depth {

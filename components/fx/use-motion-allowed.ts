@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { prefersReducedMotion } from '@/lib/fx';
+import { useCalm } from '@/lib/motion-pref';
 
 /**
  * Hydration-safe motion switch. Returns true on the server AND on the first client render (so the HTML
@@ -9,9 +10,10 @@ import { prefersReducedMotion } from '@/lib/fx';
  * Change only styles/props with this hook, never which elements are rendered.
  */
 export function useMotionAllowed(flag: boolean = true): boolean {
+  const calm = useCalm();
   const [allowed, setAllowed] = useState(true);
   useEffect(() => {
-    if (!flag || prefersReducedMotion()) setAllowed(false);
-  }, [flag]);
-  return flag && allowed;
+    setAllowed(flag && !prefersReducedMotion());
+  }, [flag, calm]);
+  return flag && allowed && !calm;
 }

@@ -22,6 +22,24 @@ export const FX = {
   photoFan: true, // FX-15 project photo stack fans out in 3D on hover
   paletteDrop: true, // FX-16 command palette drops in on a 3D hinge
   easterEgg: true, // FX-17 type "bauhaus" anywhere -> shape rain
+  // ---- Round 7 "Living Blueprint" (docs: UI-UX plan) ----
+  calmMode: true, // FX-18 visitor toggle that switches every effect off (same as prefers-reduced-motion)
+  depthOfField: true, // FX-19 page behind a modal / lightbox softly blurs (spatial layering)
+  sectionSpine: true, // FX-20 fixed scroll-spy rail on wide screens
+  projectIndex: true, // FX-21 bento index of all projects above the project stack
+  bentoReflow: true, // FX-22 About pillars slide into place when one expands
+  jellyTabs: true, // FX-23 Experience filter pill travels between tabs (FLIP + spring)
+  glassHeader: true, // FX-24 header turns into brutal frosted glass once you scroll
+  specular: true, // FX-25 lamp-light sheen on primary buttons
+  glareTilt: true, // FX-26 glare highlight on tilt cards
+  magneticStretch: true, // FX-27 magnetic buttons stretch toward the cursor, then snap
+  textRoll: true, // FX-28 button labels roll up on hover / focus
+  letterpress: true, // FX-29 hero headline casts a lamp shadow
+  aberration: true, // FX-30 marquee colour fringes at high scroll speed
+  blueprintView: true, // FX-31 project card explodes into isometric layers
+  pageLift: true, // FX-32 certificate modal lifts off the desk in 3D
+  bootShatter: true, // FX-33 boot gate breaks into Bauhaus tiles
+  mercuryField: true, // FX-34 WebGL2 metaball "mercury" behind the contact header
 } as const;
 
 export type FxName = keyof typeof FX;
@@ -42,5 +60,6 @@ export function canHover(): boolean {
 
 export function prefersReducedMotion(): boolean {
   if (typeof window === 'undefined') return true;
+  if (document.documentElement.dataset.motion === 'calm') return true; // Calm Mode (FX-18)
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }

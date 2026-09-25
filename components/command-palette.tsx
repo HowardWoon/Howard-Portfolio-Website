@@ -3,9 +3,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useFocusTrap } from '@/lib/use-focus-trap';
 import { Command } from 'cmdk';
-import { Search, Code, GraduationCap, Briefcase, Download, Mail } from 'lucide-react';
+import { Search, Code, GraduationCap, Briefcase, Download, Mail, ZapOff } from 'lucide-react';
 import { personalDetails } from '@/lib/site-data';
 import { ShapeBurst } from './fx/shape-burst';
+import { isCalm, setCalm } from '@/lib/motion-pref';
 
 /** Scroll to a section through Lenis (smooth + header offset) with a native fallback. */
 function goTo(hash: string) {
@@ -134,6 +135,10 @@ export function CommandPalette() {
               </Command.Group>
 
               <Command.Group heading="Actions" className={`${groupClass} border-t-2 border-dashed border-ink mt-1`}>
+                <Command.Item onSelect={() => runCommand(() => setCalm(!isCalm()))} className={itemClass}>
+                  <ZapOff className="w-5 h-5" strokeWidth={2.5} />
+                  <span>Calm mode (reduce motion)</span>
+                </Command.Item>
                 <Command.Item
                   onSelect={() =>
                     runCommand(async () => {

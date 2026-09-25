@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { FX, canHover, prefersReducedMotion } from '@/lib/fx';
+import { useCalm } from '@/lib/motion-pref';
 
 /**
  * FX-01: one global, rAF-throttled pointer listener that writes the cursor position into two CSS custom
@@ -10,8 +11,10 @@ import { FX, canHover, prefersReducedMotion } from '@/lib/fx';
  * Off on touch-only devices and for reduced motion (the vars simply stay 0, which is the neutral pose).
  */
 export function PointerField() {
+  const calm = useCalm();
+
   useEffect(() => {
-    if (!FX.pointerField || !canHover() || prefersReducedMotion()) return;
+    if (calm || !FX.pointerField || !canHover() || prefersReducedMotion()) return;
     const root = document.documentElement;
     root.dataset.fxPointer = 'on';
     let raf = 0;
@@ -43,6 +46,6 @@ export function PointerField() {
       root.style.removeProperty('--px');
       root.style.removeProperty('--py');
     };
-  }, []);
+  }, [calm]);
   return null;
 }
