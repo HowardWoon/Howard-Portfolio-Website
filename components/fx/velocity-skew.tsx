@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, type ReactNode } from 'react';
+import { useRef, useEffect, type ReactNode } from 'react';
 import { m, useScroll, useSpring, useTransform, useVelocity, useMotionValueEvent } from 'framer-motion';
 import { useMotionAllowed } from './use-motion-allowed';
 import { FX } from '@/lib/fx';
@@ -18,13 +18,21 @@ export function VelocitySkew({ children, className = 'relative z-20' }: { childr
   const scaleY = useTransform(smooth, [-2500, 0, 2500], [1.06, 1, 1.06], { clamp: true });
 
   const ref = useRef<HTMLDivElement>(null);
-  // PERF: write --fx-vel on THIS wrapper only. Writing it on <html> made the browser recalculate the style of
-  // every element on the page (~2,600 nodes) on every scroll frame.
+  const targetsRef = useRef<HTMLElement[]>([]);
+
+  useEffect(() => {
+    targetsRef.current = Array.from(document.querySelectorAll<HTMLElement>('.fx-aberration'));
+  }, []);
+
+  // PERF: write --fx-vel ONLY to the elements that actually use it (the hero headline).
+  // Writing it to <html> or the marquee wrapper causes massive style recalculations on every scroll frame.
   useMotionValueEvent(smooth, 'change', (v) => {
-    const el = ref.current;
-    if (!el || !FX.aberration || !allowed) return;
+    if (!FX.aberration || !allowed) return;
     const normalized = Math.max(-1, Math.min(1, v / 2500));
-    el.style.setProperty('--fx-vel', normalized.toFixed(2));
+    const val = normalized.toFixed(2);
+    targetsRef.current.forEach(el => {
+      el.style.setProperty('--fx-vel', val);
+    });
   });
 
   // relative z-20 keeps the band above the neighbouring section exactly like the unwrapped marquee (z-20).
