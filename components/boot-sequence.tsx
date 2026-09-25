@@ -5,6 +5,8 @@ const BootedContext = createContext(true);
 export const useBooted = () => useContext(BootedContext);
 import { m, AnimatePresence } from 'framer-motion';
 import { useLatest } from '@/lib/use-latest';
+import { FX, prefersReducedMotion } from '@/lib/fx';
+import { bootShatter } from './fx/boot-shatter';
 
 declare global {
   interface Window {
@@ -99,6 +101,11 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
   );
 
   function finish() {
+    try {
+      if (FX.bootShatter && !prefersReducedMotion()) bootShatter();
+    } catch (e) {
+      console.error(e);
+    }
     try {
       sessionStorage.setItem('hw-booted', '1');
     } catch {}

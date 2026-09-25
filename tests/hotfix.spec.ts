@@ -39,3 +39,13 @@ test('project cards are flat until BLUEPRINT is pressed, and the exploded view s
   await expect(btn).toHaveAttribute('aria-pressed', 'false');
   await expect.poll(() => card.locator('.fx-stack').evaluate((e) => getComputedStyle(e).transform)).toBe('none');
 });
+
+test('boot shatter leaves no canvas behind', async ({ browser }) => {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  await page.goto('/', { waitUntil: 'networkidle' });
+  await page.getByRole('button', { name: /skip intro/i }).click();
+  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 5000 });
+  await expect(page.locator('[data-fx-shatter]')).toHaveCount(0, { timeout: 3000 });
+  await context.close();
+});

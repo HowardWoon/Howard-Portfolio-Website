@@ -4,6 +4,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { m } from 'framer-motion';
 import { SplitWords } from './fx/split-words';
 import { BauhausSolid } from './fx/bauhaus-solid';
+import dynamic from 'next/dynamic';
+const MercuryField = dynamic(() => import('./fx/mercury-field').then((mod) => mod.MercuryField), { ssr: false });
 import { FX } from '@/lib/fx';
 import {
   Mail,
@@ -136,6 +138,9 @@ export default function ContactSection() {
       {/* Bauhaus composition (replaces the particle canvas, which was invisible on a light canvas
           and was also being stretched: its bitmap was viewport-sized but CSS-sized to the whole section) */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        {FX.mercuryField ? (
+          <MercuryField className="absolute right-0 top-0 h-[440px] w-[30%] hidden xl:block [mask-image:linear-gradient(to_right,transparent,black_35%)]" />
+        ) : null}
         <div
           className="fx-depth absolute -left-36 top-[38%] hidden xl:block"
           style={{ '--depth': -20 } as React.CSSProperties}
