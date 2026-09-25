@@ -7,6 +7,7 @@ import { ScrollUnfold } from './fx/scroll-unfold';
 import { TextRoll } from './fx/text-roll';
 import { SplitWords } from './fx/split-words';
 import { Reveal } from './reveal';
+import { FX } from '@/lib/fx';
 import { TiltCard } from './tilt-card';
 import { InteractivePhotoStack } from './interactive-photo-stack';
 import {
@@ -283,6 +284,15 @@ export default function StackedProjects() {
 const isRealRepo = (url?: string) => !!url && /github\.com\/[^/]+\/[^/]+/.test(url);
 
 function ProjectCard({ project }: { project: ProjectData }) {
+  const [blueprint, setBlueprint] = React.useState(false);
+  React.useEffect(() => {
+    if (!blueprint) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setBlueprint(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [blueprint]);
   const a = accent[project.badgeType];
   const isGallery =
     project.telemetryType === 'agentic' ||
@@ -309,157 +319,187 @@ function ProjectCard({ project }: { project: ProjectData }) {
               <span className="w-3.5 h-3.5 bg-pop-blue border-2 border-ink" />
               <span className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[14px] border-l-transparent border-r-transparent border-b-ink" />
             </div>
-            <span className="font-mono text-xs font-extrabold tracking-[0.12em] text-ink">
-              {project.number} / {String(projects.length).padStart(2, '0')}
-            </span>
+            <div className="flex items-center gap-3">
+              {FX.blueprintView ? (
+                <button
+                  type="button"
+                  onClick={() => setBlueprint((v) => !v)}
+                  aria-pressed={blueprint}
+                  aria-label={`Blueprint view of ${project.title}`}
+                  className="nb-chip nb-press hidden lg:inline-flex min-h-[40px] cursor-pointer"
+                >
+                  <Layers className="w-3.5 h-3.5" strokeWidth={2.75} aria-hidden />
+                  BLUEPRINT
+                </button>
+              ) : null}
+              <span className="font-mono text-xs font-extrabold tracking-[0.12em] text-ink">
+                {project.number} / {String(projects.length).padStart(2, '0')}
+              </span>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start p-4 xs:p-6 sm:p-10 lg:p-12">
             {/* Left Column: Narrative, Architecture & Benchmarks (7 Cols) */}
-            <div className="lg:col-span-7 space-y-6">
-              {/* Top Bar: Project Index + Award Badge */}
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="nb-num">{project.number}</span>
+            <div className="lg:col-span-7 fx-blueprint" data-open={blueprint ? 'true' : 'false'}>
+              <div className="fx-stack space-y-6">
+                {/* Top Bar: Project Index + Award Badge */}
                 <div
-                  className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-mono font-bold tracking-[0.04em] border-2 border-ink text-ink shadow-brutal-xs ${a.soft}`}
+                  className="flex flex-wrap items-center gap-3 fx-layer"
+                  style={{ '--layer': 0 } as React.CSSProperties}
                 >
-                  <Award className="w-4 h-4 shrink-0" strokeWidth={2.5} />
-                  <span>{project.badge}</span>
+                  <span className="nb-num">{project.number}</span>
+                  <div
+                    className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-mono font-bold tracking-[0.04em] border-2 border-ink text-ink shadow-brutal-xs ${a.soft}`}
+                  >
+                    <Award className="w-4 h-4 shrink-0" strokeWidth={2.5} />
+                    <span>{project.badge}</span>
+                  </div>
                 </div>
-              </div>
 
-              {/* Title & Subtitle */}
-              <div className="space-y-2">
-                <h3 className="font-display text-[clamp(1.6rem,8.5vw,2.25rem)] sm:text-5xl font-extrabold uppercase tracking-[-0.03em] leading-[0.95] text-ink flex items-center gap-3">
-                  {project.title}
-                  <ArrowUpRight
-                    className="w-7 h-7 text-pop-blue opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
-                    strokeWidth={3}
-                  />
-                </h3>
-                <p className="text-sm sm:text-base font-mono text-pop-blue font-bold tracking-[0.01em]">
-                  {project.subtitle}
+                {/* Title & Subtitle */}
+                <div className="space-y-2 fx-layer" style={{ '--layer': 1 } as React.CSSProperties}>
+                  <h3 className="font-display text-[clamp(1.6rem,8.5vw,2.25rem)] sm:text-5xl font-extrabold uppercase tracking-[-0.03em] leading-[0.95] text-ink flex items-center gap-3">
+                    {project.title}
+                    <ArrowUpRight
+                      className="w-7 h-7 text-pop-blue opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
+                      strokeWidth={3}
+                    />
+                  </h3>
+                  <p className="text-sm sm:text-base font-mono text-pop-blue font-bold tracking-[0.01em]">
+                    {project.subtitle}
+                  </p>
+                </div>
+
+                {/* Narrative Description */}
+                <p
+                  className="text-ink-soft text-base leading-relaxed font-sans font-medium fx-layer"
+                  style={{ '--layer': 2 } as React.CSSProperties}
+                >
+                  {project.description}
                 </p>
-              </div>
 
-              {/* Narrative Description */}
-              <p className="text-ink-soft text-base leading-relaxed font-sans font-medium">{project.description}</p>
-
-              {/* Key Architectural Highlights */}
-              <div className="space-y-3 nb-inset p-4 sm:p-5">
-                <span className="text-xs font-mono font-extrabold text-ink uppercase tracking-[0.12em] block mb-1">
-                  KEY ARCHITECTURAL HIGHLIGHTS:
-                </span>
-                {project.architecturePoints.map((point, pIdx) => (
-                  <div
-                    key={pIdx}
-                    className="flex items-start gap-2.5 text-sm font-sans font-medium text-ink-soft leading-snug"
-                  >
-                    <CheckCircle2 className="w-5 h-5 text-ink fill-pop-mint shrink-0" strokeWidth={2.25} />
-                    <span>{point}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Live Benchmarks & Metric Chips (bento) */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {project.metrics.map((m, mIdx) => (
-                  <div
-                    key={mIdx}
-                    className={`rounded-2xl p-3.5 border-3 border-ink ${mIdx === 0 ? a.fill : 'bg-white'} shadow-brutal-sm`}
-                  >
-                    <div className="text-[0.7rem] font-mono font-bold text-ink/70 uppercase tracking-[0.06em]">
-                      {m.label}
-                    </div>
-                    <div className="font-display text-lg font-extrabold text-ink mt-1 leading-tight break-words">
-                      {m.value}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Tech Stack Pills */}
-              <div className="flex flex-wrap gap-2 pt-1">
-                {project.tags.map((tag) => (
-                  <span key={tag} className="nb-chip hover:bg-pop-yellow transition-colors">
-                    {tag}
+                {/* Key Architectural Highlights */}
+                <div className="space-y-3 nb-inset p-4 sm:p-5 fx-layer" style={{ '--layer': 3 } as React.CSSProperties}>
+                  <span className="text-xs font-mono font-extrabold text-ink uppercase tracking-[0.12em] block mb-1">
+                    KEY ARCHITECTURAL HIGHLIGHTS:
                   </span>
-                ))}
-              </div>
+                  {project.architecturePoints.map((point, pIdx) => (
+                    <div
+                      key={pIdx}
+                      className="flex items-start gap-2.5 text-sm font-sans font-medium text-ink-soft leading-snug"
+                    >
+                      <CheckCircle2 className="w-5 h-5 text-ink fill-pop-mint shrink-0" strokeWidth={2.25} />
+                      <span>{point}</span>
+                    </div>
+                  ))}
+                </div>
 
-              {/* Action Buttons */}
-              <div className="flex flex-wrap items-center gap-3 pt-3">
-                {project.prototypeUrl && (
-                  <a
-                    href={project.prototypeUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group nb-btn nb-btn-yellow px-5 py-3 fx-specular nb-press"
-                  >
-                    <Terminal className="w-4 h-4" strokeWidth={2.75} />
-                    LAUNCH LIVE PROTOTYPE
-                  </a>
-                )}
-                {SIMULATOR_ROUTE[project.telemetryType] && (
-                  <Link
-                    href={`/simulators/${SIMULATOR_ROUTE[project.telemetryType]}`}
-                    className="group nb-btn nb-btn-white px-5 py-3 fx-specular nb-press"
-                  >
-                    <Terminal className="w-4 h-4" strokeWidth={2.75} />
-                    <TextRoll>RUN SIMULATOR</TextRoll>
-                  </Link>
-                )}
+                {/* Live Benchmarks & Metric Chips (bento) */}
+                <div
+                  className="grid grid-cols-1 sm:grid-cols-3 gap-3 fx-layer"
+                  style={{ '--layer': 4 } as React.CSSProperties}
+                >
+                  {project.metrics.map((m, mIdx) => (
+                    <div
+                      key={mIdx}
+                      className={`rounded-2xl p-3.5 border-3 border-ink ${mIdx === 0 ? a.fill : 'bg-white'} shadow-brutal-sm`}
+                    >
+                      <div className="text-[0.7rem] font-mono font-bold text-ink/70 uppercase tracking-[0.06em]">
+                        {m.label}
+                      </div>
+                      <div className="font-display text-lg font-extrabold text-ink mt-1 leading-tight break-words">
+                        {m.value}
+                      </div>
+                    </div>
+                  ))}
+                </div>
 
-                {project.colabUrl && (
-                  <a
-                    href={project.colabUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group nb-btn bg-pop-orange px-5 py-3 fx-specular nb-press"
-                  >
-                    <Activity className="w-4 h-4" strokeWidth={2.75} />
-                    <TextRoll>OPEN IN GOOGLE COLAB</TextRoll>
-                  </a>
-                )}
-
-                {project.orchestratorUrl && (
-                  <a
-                    href={project.orchestratorUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group nb-btn nb-btn-lilac px-5 py-3 fx-specular nb-press"
-                  >
-                    <Network className="w-4 h-4" strokeWidth={2.75} />
-                    VIEW MASTER ORCHESTRATOR
-                  </a>
-                )}
-
-                {project.deckUrl && (
-                  <a
-                    href={project.deckUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group nb-btn nb-btn-white px-5 py-3 fx-specular nb-press"
-                  >
-                    <FileText className="w-4 h-4" strokeWidth={2.75} />
-                    <span>PITCH DECK</span>
-                    <ExternalLink className="w-3.5 h-3.5" strokeWidth={2.75} />
-                  </a>
-                )}
-
-                {isRealRepo(project.githubUrl) && (
-                  <a
-                    href={project.githubUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group nb-btn nb-btn-ink px-5 py-3 fx-specular nb-press"
-                  >
-                    <Github className="w-4 h-4" strokeWidth={2.5} />
-                    <span>
-                      <TextRoll>GITHUB</TextRoll>
+                {/* Tech Stack Pills */}
+                <div className="flex flex-wrap gap-2 pt-1 fx-layer" style={{ '--layer': 5 } as React.CSSProperties}>
+                  {project.tags.map((tag) => (
+                    <span key={tag} className="nb-chip hover:bg-pop-yellow transition-colors">
+                      {tag}
                     </span>
-                  </a>
-                )}
+                  ))}
+                </div>
+
+                {/* Action Buttons */}
+                <div
+                  className="flex flex-wrap items-center gap-3 pt-3 fx-layer"
+                  style={{ '--layer': 6 } as React.CSSProperties}
+                >
+                  {project.prototypeUrl && (
+                    <a
+                      href={project.prototypeUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group nb-btn nb-btn-yellow px-5 py-3 fx-specular nb-press"
+                    >
+                      <Terminal className="w-4 h-4" strokeWidth={2.75} />
+                      LAUNCH LIVE PROTOTYPE
+                    </a>
+                  )}
+                  {SIMULATOR_ROUTE[project.telemetryType] && (
+                    <Link
+                      href={`/simulators/${SIMULATOR_ROUTE[project.telemetryType]}`}
+                      className="group nb-btn nb-btn-white px-5 py-3 fx-specular nb-press"
+                    >
+                      <Terminal className="w-4 h-4" strokeWidth={2.75} />
+                      <TextRoll>RUN SIMULATOR</TextRoll>
+                    </Link>
+                  )}
+
+                  {project.colabUrl && (
+                    <a
+                      href={project.colabUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group nb-btn bg-pop-orange px-5 py-3 fx-specular nb-press"
+                    >
+                      <Activity className="w-4 h-4" strokeWidth={2.75} />
+                      <TextRoll>OPEN IN GOOGLE COLAB</TextRoll>
+                    </a>
+                  )}
+
+                  {project.orchestratorUrl && (
+                    <a
+                      href={project.orchestratorUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group nb-btn nb-btn-lilac px-5 py-3 fx-specular nb-press"
+                    >
+                      <Network className="w-4 h-4" strokeWidth={2.75} />
+                      VIEW MASTER ORCHESTRATOR
+                    </a>
+                  )}
+
+                  {project.deckUrl && (
+                    <a
+                      href={project.deckUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group nb-btn nb-btn-white px-5 py-3 fx-specular nb-press"
+                    >
+                      <FileText className="w-4 h-4" strokeWidth={2.75} />
+                      <span>PITCH DECK</span>
+                      <ExternalLink className="w-3.5 h-3.5" strokeWidth={2.75} />
+                    </a>
+                  )}
+
+                  {isRealRepo(project.githubUrl) && (
+                    <a
+                      href={project.githubUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group nb-btn nb-btn-ink px-5 py-3 fx-specular nb-press"
+                    >
+                      <Github className="w-4 h-4" strokeWidth={2.5} />
+                      <span>
+                        <TextRoll>GITHUB</TextRoll>
+                      </span>
+                    </a>
+                  )}
+                </div>
               </div>
             </div>
 
