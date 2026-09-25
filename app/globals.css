@@ -683,3 +683,18 @@ html.hw-booted .boot-overlay {
     box-shadow: 0 calc(var(--layer, 0) * 4px + 6px) 0 0 rgb(10 10 10 / 0.18);
   }
 }
+
+@layer components {
+  /* FX-36 Stack focus: matching skills lift, the rest step back (dashed border + muted ink, still AA contrast) */
+  .fx-stack-chip[data-match='true'] {
+    transform: translateY(-2px);
+    box-shadow: 3px 3px 0 0 #0a0a0a;
+  }
+  .fx-stack-chip[data-match='false'] {
+    border-style: dashed;
+    color: #565656;
+  }
+  .fx-stack-chip[data-match='false'] .nb-dot {
+    filter: grayscale(1);
+  }
+}

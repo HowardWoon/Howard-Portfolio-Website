@@ -79,6 +79,13 @@ const architecturePillars = [
 
 type SkillStatus = 'production' | 'hackathon' | 'rnd';
 
+// Same three legend labels and dot colours as before - now buttons that highlight matching skills (FX-36).
+const STATUS_KEYS: { status: SkillStatus; label: string; dot: string }[] = [
+  { status: 'production', label: 'Production Tested', dot: 'bg-pop-mint' },
+  { status: 'hackathon', label: 'Hackathon Proven', dot: 'bg-pop-yellow' },
+  { status: 'rnd', label: 'Active R&D', dot: 'bg-pop-blue' },
+];
+
 const techStackGroups: { category: string; skills: { name: string; status: SkillStatus }[] }[] = [
   {
     category: 'CORE LANGUAGES',
@@ -229,6 +236,7 @@ function PillarCard({
 
 export default function AboutSection() {
   const [activeCard, setActiveCard] = useState<string>('backend');
+  const [statusFocus, setStatusFocus] = useState<SkillStatus | null>(null);
 
   // Accent → Neo-brutalist colour-block mapping (fills always carry black ink text → AAA contrast)
   const colorMap = {
@@ -363,16 +371,25 @@ export default function AboutSection() {
                 Verified Production & Research Stack
               </h4>
             </div>
-            <div className="flex flex-wrap items-center gap-2 text-xs font-mono font-bold text-ink">
-              <span className="nb-chip">
-                <span className="nb-dot bg-pop-mint" /> Production Tested
-              </span>
-              <span className="nb-chip">
-                <span className="nb-dot bg-pop-yellow" /> Hackathon Proven
-              </span>
-              <span className="nb-chip">
-                <span className="nb-dot bg-pop-blue" /> Active R&D
-              </span>
+            <div
+              role="group"
+              aria-label="Highlight skills by status"
+              className="flex flex-wrap items-center gap-2 text-xs font-mono font-bold text-ink"
+            >
+              {STATUS_KEYS.map((k) => {
+                const on = statusFocus === k.status;
+                return (
+                  <button
+                    key={k.status}
+                    type="button"
+                    aria-pressed={on}
+                    onClick={() => setStatusFocus(on ? null : k.status)}
+                    className={`nb-chip nb-press min-h-[36px] cursor-pointer ${on ? '!bg-ink !text-white' : ''}`}
+                  >
+                    <span className={`nb-dot ${k.dot}`} /> {k.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -396,7 +413,8 @@ export default function AboutSection() {
                     return (
                       <span
                         key={skill.name}
-                        className="nb-chip transition-transform duration-150 hover:-translate-y-0.5 hover:shadow-brutal-xs"
+                        data-match={statusFocus ? (skill.status === statusFocus ? 'true' : 'false') : undefined}
+                        className="nb-chip fx-stack-chip transition-[transform,box-shadow,color,border-color] duration-200 hover:-translate-y-0.5 hover:shadow-brutal-xs"
                       >
                         <span className={`nb-dot ${dotColor}`} />
                         {skill.name}

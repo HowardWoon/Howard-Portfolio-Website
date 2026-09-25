@@ -40,6 +40,10 @@ export const FX = {
   pageLift: true, // FX-32 certificate modal lifts off the desk in 3D
   bootShatter: true, // FX-33 boot gate breaks into Bauhaus tiles
   mercuryField: true, // FX-34 WebGL2 metaball "mercury" behind the contact header
+  // ---- Round 8 (advisor spec) ----
+  routeWipe: true, // FX-35 Bauhaus wipe between the portfolio and the simulator pages
+  stackFocus: true, // FX-36 tooling-matrix legend chips highlight every skill with that status
+  sectionDock: true, // FX-37 mobile/tablet dock showing the current section; tap opens the command palette
 } as const;
 
 export type FxName = keyof typeof FX;

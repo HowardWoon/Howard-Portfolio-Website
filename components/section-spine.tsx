@@ -1,15 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { FX } from '@/lib/fx';
-
-const SECTIONS = [
-  { id: 'about', label: 'About' },
-  { id: 'projects', label: 'Projects' },
-  { id: 'experience', label: 'Experience' },
-  { id: 'honors', label: 'Honors' },
-  { id: 'contact', label: 'Contact' },
-] as const;
+import { SECTIONS, SECTION_IDS } from '@/lib/sections';
+import { useActiveSection } from '@/lib/use-active-section';
 
 /**
  * FX-20: fixed scroll-spy rail. Only on very wide screens (>= 1400 px) where the right gutter is empty.
@@ -18,20 +11,7 @@ const SECTIONS = [
  * except when the active section actually changes.
  */
 export function SectionSpine() {
-  const [active, setActive] = useState('');
-
-  useEffect(() => {
-    if (!FX.sectionSpine) return;
-    const els = SECTIONS.map((s) => document.getElementById(s.id)).filter((e): e is HTMLElement => e !== null);
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) if (e.isIntersecting) setActive(e.target.id);
-      },
-      { rootMargin: '-45% 0px -50% 0px' },
-    );
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
-  }, []);
+  const active = useActiveSection(SECTION_IDS, FX.sectionSpine);
 
   if (!FX.sectionSpine) return null;
 

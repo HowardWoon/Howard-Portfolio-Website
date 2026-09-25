@@ -1,10 +1,10 @@
 'use client';
 
-import Link from 'next/link';
 import React from 'react';
 import { ProjectIndex, type ProjectIndexItem } from './project-index';
 import { ScrollUnfold } from './fx/scroll-unfold';
 import { TextRoll } from './fx/text-roll';
+import { WipeLink } from './fx/route-wipe';
 import { SplitWords } from './fx/split-words';
 import { Reveal } from './reveal';
 import { FX } from '@/lib/fx';
@@ -440,13 +440,13 @@ function ProjectCard({ project }: { project: ProjectData }) {
                     </a>
                   )}
                   {SIMULATOR_ROUTE[project.telemetryType] && (
-                    <Link
+                    <WipeLink
                       href={`/simulators/${SIMULATOR_ROUTE[project.telemetryType]}`}
                       className="group nb-btn nb-btn-white px-5 py-3 fx-specular nb-press"
                     >
                       <Terminal className="w-4 h-4" strokeWidth={2.75} />
                       <TextRoll>RUN SIMULATOR</TextRoll>
-                    </Link>
+                    </WipeLink>
                   )}
 
                   {project.colabUrl && (
