@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { m, AnimatePresence } from 'framer-motion';
+import { useInteractionSelect } from '@/lib/interaction-store';
 import { BauhausSolid } from './fx/bauhaus-solid';
 import { SplitWords } from './fx/split-words';
 import { FX } from '@/lib/fx';
@@ -563,6 +564,8 @@ function CertificateModal({ url, onClose }: { url: string; onClose: () => void }
 export default function HonorsSection() {
   const [selectedCert, setSelectedCert] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<'gold' | 'emerald' | 'cyan' | null>('gold');
+  // FX-47: Evidence Trail can reach honor cards linked to projects on the trail
+  const trail = useInteractionSelect((s) => s.trail);
 
   const categories = [
     {
@@ -754,16 +757,20 @@ export default function HonorsSection() {
                   const Icon = item.icon;
                   const isFeatured = item.isFeatured;
                   const c = colorFor[item.badgeColor];
+                  const linked = item.id === 'supervity' ? 'zerolag' : item.id === 'proofpay' ? 'proofpay' : undefined;
+                  const hit = !!trail && trail.ids.some((id) => linked === id);
 
                   return (
                     <m.div
                       key={item.id}
+                      data-honor-projects={linked}
+                      data-trail-hit={hit ? '' : undefined}
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.4, delay: itemIdx * 0.08 }}
                       className={`relative group rounded-[28px] border-3 border-ink bg-white overflow-hidden flex flex-col h-full transition-[transform,box-shadow] duration-200 hover:-translate-x-1 hover:-translate-y-1 ${
                         isFeatured ? 'shadow-brutal-lg hover:shadow-brutal-xl' : 'shadow-brutal hover:shadow-brutal-lg'
-                      }`}
+                      } ${hit ? 'fx-trail-hit' : ''}`}
                     >
                       {/* Top Bar */}
                       <div

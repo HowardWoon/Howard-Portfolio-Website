@@ -41,6 +41,14 @@ export function ProjectIndex({ items }: { items: readonly ProjectIndexItem[] }) 
           <a
             key={p.id}
             href={`#project-${p.id}`}
+            onPointerEnter={() =>
+              FX.honorConstellation &&
+              document.querySelector(`[data-project-id="${p.id}"]`)?.setAttribute('data-preview', '')
+            }
+            onPointerLeave={() =>
+              FX.honorConstellation &&
+              document.querySelector(`[data-project-id="${p.id}"]`)?.removeAttribute('data-preview')
+            }
             aria-current={on ? 'true' : undefined}
             onClick={(e) => {
               const el = document.getElementById(`project-${p.id}`);

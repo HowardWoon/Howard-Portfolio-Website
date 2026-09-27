@@ -14,7 +14,7 @@ test('evidence trail: a skill in the Tooling Matrix traces the projects that use
   const hud = page.getByRole('region', { name: /evidence trail for python 3\.12/i });
   await expect(hud).toBeVisible();
   await expect(hud).toContainText('1 / 2');
-  await expect(page.locator('[data-trail-hit]')).toHaveCount(2);
+  await expect(page.locator('[data-trail-hit]')).toHaveCount(3); // 2 project cards + 1 honor card (FX-47)
   await page.keyboard.press('j');
   await expect(hud).toContainText('2 / 2');
   await page.keyboard.press('Escape');
