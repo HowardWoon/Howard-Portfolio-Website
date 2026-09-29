@@ -253,9 +253,11 @@ for (const supported of [true, false]) {
 /* ---------------------------------------------------------------- FX-69 deep links + FX-70 print */
 test('?bp=slotify:L4 opens the Slotify bench on layer 4 (FX-69)', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto('/?bp=slotify:L4', { waitUntil: 'networkidle' });
+  // `load`, not `networkidle`: the link scrolls through every project, and on a cold CI runner each image it passes
+  // is optimised on first request, which can keep the network busy for longer than the test timeout.
+  await page.goto('/?bp=slotify:L4', { waitUntil: 'load' });
   const active = page.locator('#project-slotify .fx-layer[data-bp-active]');
-  await expect(active).toHaveAttribute('data-bp-label', /L4/, { timeout: 8000 });
+  await expect(active).toHaveAttribute('data-bp-label', /L4/, { timeout: 20000 });
 });
 
 test('?photo=zerolag:3 opens the lightbox on photo 3; copy link copies that view (FX-69)', async ({
@@ -264,9 +266,9 @@ test('?photo=zerolag:3 opens the lightbox on photo 3; copy link copies that view
 }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto('/?photo=zerolag:3', { waitUntil: 'networkidle' });
+  await page.goto('/?photo=zerolag:3', { waitUntil: 'load' }); // see the ?bp test
   const dialog = page.getByRole('dialog').filter({ has: page.getByRole('button', { name: 'Next photo' }) });
-  await expect(dialog).toBeVisible({ timeout: 8000 });
+  await expect(dialog).toBeVisible({ timeout: 20000 });
   await expect(dialog.locator('[aria-live="polite"]')).toHaveText(/^03 \/ \d\d$/);
   await dialog.getByRole('button', { name: 'Copy link to this view' }).click();
   await expect(page.getByRole('status').filter({ hasText: 'Link copied' })).toBeVisible();
@@ -275,8 +277,8 @@ test('?photo=zerolag:3 opens the lightbox on photo 3; copy link copies that view
 
 test('an unknown or malformed deep link does nothing (FX-69)', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto('/?bp=nope:L9&photo=zerolag:abc', { waitUntil: 'networkidle' });
-  await page.waitForTimeout(1200);
+  await page.goto('/?bp=nope:L9&photo=zerolag:abc', { waitUntil: 'load' });
+  await page.waitForTimeout(2500); // a valid link acts after 400 ms
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.locator('.fx-blueprint[data-open="true"]')).toHaveCount(0);
 });
