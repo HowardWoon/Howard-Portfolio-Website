@@ -75,6 +75,7 @@ export const FX = {
   lampSpot: true, // FX-67 a soft lamp light follows the mouse over dark surfaces
   hapticTick: true, // FX-68 a tiny vibration on Android when a press stamp fires
   deepLinks: true, // FX-69 ?bp=<project>:L<n> and ?photo=<gallery>:<n> open that exact view; copy-link buttons
+  logoWall: true, // FX-71 Arena Wall: rows of round seals rolling past each other (competitions, organisations, stack)
 } as const;
 
 export type FxName = keyof typeof FX;

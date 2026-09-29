@@ -11,7 +11,7 @@ export function OffscreenPause() {
   useEffect(() => {
     const targets = document.querySelectorAll<HTMLElement>(
       // sections, the hero (ticker, sticker, triangle) and the tech marquee wrapper (P2-12)
-      'main section[id], main > div > section, [data-offscreen-pause], footer',
+      'main section[id], main > div > section, [data-offscreen-pause], .fx-wall, footer', // .fx-wall: FX-71 Arena Wall
     );
     const io = new IntersectionObserver(
       (entries) => {

@@ -14,6 +14,7 @@ import { FX, POP_COLORS, prefersReducedMotion } from '@/lib/fx';
  *   pops and fades in 0.5 s. One delegated listener; the node is appended to <body> and removed when done.
  *
  * Both do nothing for reduced motion / Calm Mode, and nothing runs per scroll or pointer-move frame.
+ * FX-71: keeps a keyboard-focused Arena Wall seal in view (see the last effect).
  */
 const GLYPHS = '#%&*+=<>/_01';
 const DECODE_MS = 650;
@@ -103,6 +104,24 @@ export function AmbientFx() {
       document.removeEventListener('pointerdown', onDown);
       delete document.documentElement.dataset.fxAmbient;
     };
+  }, []);
+
+  // FX-71 Arena Wall keyboard support: a row holding focus stops and becomes a scroller (globals.css); bring the
+  // focused seal to the middle of its row, horizontally only (the page does not jump).
+  useEffect(() => {
+    if (!FX.logoWall) return;
+    const onFocus = (e: FocusEvent) => {
+      const seal = (e.target as Element | null)?.closest?.('.fx-seal');
+      const row = seal?.closest('.fx-wall-row');
+      if (!seal || !row) return;
+      requestAnimationFrame(() => {
+        const r = row.getBoundingClientRect();
+        const s = seal.getBoundingClientRect();
+        row.scrollTo({ left: row.scrollLeft + (s.left + s.width / 2) - (r.left + r.width / 2) });
+      });
+    };
+    document.addEventListener('focusin', onFocus);
+    return () => document.removeEventListener('focusin', onFocus);
   }, []);
 
   return null;

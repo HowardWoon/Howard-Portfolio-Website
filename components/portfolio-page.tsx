@@ -10,6 +10,7 @@ import {
   AmbientFx,
 } from '@/components/lazy-sections';
 import { SiteFooter } from '@/components/site-footer';
+import { LogoWall } from '@/components/logo-wall';
 import dynamic from 'next/dynamic';
 import { RouteWipeClear } from '@/components/fx/route-wipe';
 const PointerField = dynamic(() => import('@/components/fx/pointer-field').then((mod) => mod.PointerField));
@@ -62,6 +63,7 @@ export function PortfolioPage() {
           <StackedProjects />
           <ExperienceSection />
           <HonorsSection />
+          <LogoWall />
           <ContactSection />
         </main>
         <SiteFooter />

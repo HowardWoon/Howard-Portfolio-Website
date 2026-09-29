@@ -1227,6 +1227,33 @@ has(
 );
 has('R14', 'FX-70e', 'Cursor and scan hidden in print', 'app/globals.css', '.fx-cursor,', '.bp-scan,');
 has('R14', 'FX-69b', 'Toast is a polite live region', 'lib/share.ts', "setAttribute('aria-live', 'polite')");
+has(
+  'R14',
+  'FX-71',
+  'Arena Wall: flag, server component, mounted before Contact',
+  'components/portfolio-page.tsx',
+  '<LogoWall />',
+);
+lacks(
+  'R14',
+  'FX-71b',
+  'Arena Wall stays a server component (no client JS)',
+  'components/logo-wall.tsx',
+  "'use client'",
+);
+has(
+  'R14',
+  'FX-71c',
+  'Arena Wall CSS: opposite rows, pause, keyboard scroller, reduced motion',
+  'app/globals.css',
+  ".fx-wall-row[data-dir='r'] .fx-wall-track",
+  '.fx-wall-row:has(:focus-visible)',
+  '@keyframes fx-wall-drift-r',
+  ".fx-wall-track > .fx-seal[aria-hidden='true']",
+);
+has('R14', 'FX-71d', 'Arena Wall keyboard focus is centred', 'components/fx/ambient-fx.tsx', "closest('.fx-wall-row')");
+has('R14', 'FX-71e', 'Arena Wall tests', 'tests/arena-wall.spec.ts', 'keyboard: every seal', 'reduced motion: a still');
+has('R14', 'FX-71f', 'Arena Wall flag', 'lib/fx.ts', 'logoWall: true');
 has('R14', 'TEST', 'R14 regression tests', 'tests/r14.spec.ts', '(B-01)', '(B-02)', '(B-04)', '(FX-65)', '(FX-69)');
 
 /* ================================================================================================ run */

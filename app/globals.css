@@ -1377,6 +1377,118 @@ html.fx-off-ambientOrbits .fx-orbit {
   }
 }
 
+/* FX-71 Arena Wall (components/logo-wall.tsx): rows of round seals rolling in opposite directions */
+.fx-wall-track {
+  animation: marquee var(--wall-speed, 56s) linear infinite;
+}
+.fx-wall-row[data-dir='r'] .fx-wall-track {
+  animation-direction: reverse;
+}
+/* keyboard: a row holding focus stops rolling and becomes a plain scroller, so the browser brings the focused
+   seal into view (a paused marquee could hold it off-screen) */
+.fx-wall-row:has(:focus-visible) {
+  animation: none !important;
+  translate: none;
+  margin-inline: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-padding-inline: 1.5rem;
+}
+.fx-wall-row:has(:focus-visible) .fx-wall-track {
+  animation: none !important;
+  padding-inline: 1rem;
+}
+@media (hover: hover) and (pointer: fine) {
+  .fx-wall-row:hover .fx-wall-track {
+    animation-play-state: paused;
+  }
+}
+[data-offscreen] .fx-wall-track {
+  animation-play-state: paused;
+}
+.fx-seal {
+  transition:
+    rotate 0.35s cubic-bezier(0.2, 0.9, 0.1, 1),
+    scale 0.35s cubic-bezier(0.2, 0.9, 0.1, 1),
+    box-shadow 0.2s ease;
+}
+.fx-seal-fill {
+  clip-path: circle(0% at 50% 100%);
+  transition: clip-path 0.45s cubic-bezier(0.2, 0.9, 0.1, 1);
+}
+.fx-seal:hover,
+.fx-seal:focus-visible {
+  rotate: -8deg;
+  scale: 1.07;
+  box-shadow: 6px 6px 0 0 #0a0a0a;
+}
+.fx-seal:hover .fx-seal-fill,
+.fx-seal:focus-visible .fx-seal-fill {
+  clip-path: circle(75% at 50% 100%);
+}
+.fx-seal:active {
+  scale: 0.97;
+  box-shadow: 2px 2px 0 0 #0a0a0a;
+}
+/* the rows also slide against each other as the band scrolls through the viewport ("cross over") */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-motion='calm']):not(.fx-off-logoWall) .fx-wall-row {
+      animation: fx-wall-drift linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+    html:not([data-motion='calm']):not(.fx-off-logoWall) .fx-wall-row[data-dir='r'] {
+      animation-name: fx-wall-drift-r;
+    }
+  }
+}
+@keyframes fx-wall-drift {
+  from {
+    translate: 6% 0;
+  }
+  to {
+    translate: -6% 0;
+  }
+}
+@keyframes fx-wall-drift-r {
+  from {
+    translate: -6% 0;
+  }
+  to {
+    translate: 6% 0;
+  }
+}
+/* reduced motion / Calm: a still, centred wall of the first set only */
+@media (prefers-reduced-motion: reduce) {
+  .fx-wall-track {
+    animation: none !important;
+    width: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 1rem;
+  }
+  .fx-wall-track > .fx-seal[aria-hidden='true'] {
+    display: none;
+  }
+}
+html[data-motion='calm'] .fx-wall-track {
+  animation: none !important;
+  width: auto;
+  flex-wrap: wrap;
+  justify-content: center;
+  row-gap: 1rem;
+}
+html[data-motion='calm'] .fx-wall-track > .fx-seal[aria-hidden='true'] {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fx-seal,
+  .fx-seal-fill {
+    transition: none;
+  }
+}
+
 /* FX-70 print: a clean one-click PDF of the portfolio */
 @media print {
   .site-header,
@@ -1409,6 +1521,14 @@ html.fx-off-ambientOrbits .fx-orbit {
   }
   main section {
     break-inside: auto;
+  }
+  .fx-wall-track {
+    width: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .fx-wall-track > .fx-seal[aria-hidden='true'] {
+    display: none;
   }
 }
 
