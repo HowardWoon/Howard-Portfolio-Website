@@ -368,14 +368,14 @@ function ProjectCard({ project }: { project: ProjectData }) {
           >
             {/* Colour-block header strip (Bauhaus band) */}
             <div
-              className={`flex items-center justify-between gap-3 px-4 xs:px-6 sm:px-10 py-3 border-b-3 border-ink ${a.fill}`}
+              className={`flex flex-wrap items-center justify-between gap-3 px-4 xs:px-6 sm:px-10 py-3 border-b-3 border-ink max-w-full ${a.fill}`}
             >
               <div className="flex items-center gap-2" aria-hidden>
                 <span className="w-3.5 h-3.5 rounded-full bg-pop-red border-2 border-ink" />
                 <span className="w-3.5 h-3.5 bg-pop-blue border-2 border-ink" />
                 <span className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[14px] border-l-transparent border-r-transparent border-b-ink" />
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center justify-between gap-3 max-w-full">
                 {FX.blueprintView ? (
                   <button
                     type="button"
@@ -662,16 +662,16 @@ function ProjectCard({ project }: { project: ProjectData }) {
                     </div>
 
                     {/* IoT Grid Dashboard */}
-                    <div className="grid grid-cols-1 min-[340px]:grid-cols-2 gap-3">
-                      <div className="p-3.5 bg-white border-3 border-ink rounded-2xl shadow-brutal-sm">
+                    <div className="grid grid-cols-1 min-[412px]:grid-cols-2 gap-3">
+                      <div className="p-3.5 bg-white border-3 border-ink rounded-2xl shadow-brutal-sm min-w-0">
                         <div className="text-xs font-mono font-bold text-ink-muted">Current Load</div>
-                        <div className="font-display text-[clamp(1.1rem,6.5vw,1.5rem)] font-extrabold text-ink mt-1 whitespace-nowrap">
+                        <div className="font-display text-[clamp(1.1rem,6.5vw,1.5rem)] font-extrabold text-ink mt-1 [overflow-wrap:anywhere]">
                           1.84 kW
                         </div>
                       </div>
-                      <div className="p-3.5 bg-pop-mint border-3 border-ink rounded-2xl shadow-brutal-sm">
+                      <div className="p-3.5 bg-pop-mint border-3 border-ink rounded-2xl shadow-brutal-sm min-w-0">
                         <div className="text-xs font-mono font-bold text-ink/70">Idle Savings</div>
-                        <div className="font-display text-[clamp(1.1rem,6.5vw,1.5rem)] font-extrabold text-ink mt-1 whitespace-nowrap">
+                        <div className="font-display text-[clamp(1.1rem,6.5vw,1.5rem)] font-extrabold text-ink mt-1 [overflow-wrap:anywhere]">
                           -60.8%
                         </div>
                       </div>

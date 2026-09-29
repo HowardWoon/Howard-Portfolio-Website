@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, type ReactNode } from 'react';
+import { useRef, useEffect, useState, type ReactNode } from 'react';
 import { m, useScroll, useSpring, useTransform, useVelocity, useMotionValueEvent } from 'framer-motion';
 import { useMotionAllowed } from './use-motion-allowed';
 import { FX } from '@/lib/fx';
@@ -20,6 +20,15 @@ export function VelocitySkew({ children, className = 'relative z-20' }: { childr
   const ref = useRef<HTMLDivElement>(null);
   const targetsRef = useRef<HTMLElement[]>([]);
 
+  const [isCoarse, setIsCoarse] = useState(true);
+  useEffect(() => {
+    const mq = window.matchMedia('(pointer: coarse)');
+    const update = () => setIsCoarse(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
+
   useEffect(() => {
     targetsRef.current = Array.from(document.querySelectorAll<HTMLElement>('.fx-aberration'));
   }, []);
@@ -27,7 +36,7 @@ export function VelocitySkew({ children, className = 'relative z-20' }: { childr
   // PERF: write --fx-vel ONLY to the elements that actually use it (the hero headline).
   // Writing it to <html> or the marquee wrapper causes massive style recalculations on every scroll frame.
   useMotionValueEvent(smooth, 'change', (v) => {
-    if (!FX.aberration || !allowed) return;
+    if (!FX.aberration || !allowed || scrollY.get() > 1200) return;
     const normalized = Math.max(-1, Math.min(1, v / 2500));
     const val = normalized.toFixed(2);
     targetsRef.current.forEach((el) => {
@@ -37,7 +46,7 @@ export function VelocitySkew({ children, className = 'relative z-20' }: { childr
 
   // relative z-20 keeps the band above the neighbouring section exactly like the unwrapped marquee (z-20).
   return (
-    <m.div ref={ref} className={className} style={allowed ? { skewY, scaleY } : { skewY: 0, scaleY: 1 }}>
+    <m.div ref={ref} className={className} style={allowed && !isCoarse ? { skewY, scaleY } : { skewY: 0, scaleY: 1 }}>
       {children}
     </m.div>
   );

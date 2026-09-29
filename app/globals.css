@@ -726,12 +726,10 @@ html.hw-booted .boot-overlay {
     width: 100%;
     transform-origin: 0 0;
     perspective: 1600px;
-    will-change: transform;
   }
   .fx-blueprint[data-open='true'] .fx-stack {
     transform-origin: 50% 50%;
     transform-style: preserve-3d;
-    will-change: transform;
   }
   /* each layer becomes a physical plate: paper fill + ink rim + hard drop shadow, all painted OUTSIDE the
      box (spread shadows), so text never re-wraps and the closed layout is untouched */
@@ -761,8 +759,10 @@ html.hw-booted .boot-overlay {
   }
   /* driven per frame (drag / tween / spin / slider): no CSS easing on top of the rAF values */
   .fx-blueprint[data-bp-live] .bp-fit,
+  .fx-blueprint[data-bp-live] .fx-stack,
   .fx-blueprint[data-bp-live] .fx-layer {
     transition: none;
+    will-change: transform;
   }
   /* plate labels ("L4 · ARCHITECTURE") ride on their plate in 3D */
   .fx-blueprint[data-open='true'] .fx-layer::before {

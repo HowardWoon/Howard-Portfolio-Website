@@ -387,11 +387,11 @@ function PekomTreasurerDashboard() {
 
       <div className="p-3 xs:p-5 sm:p-6">
         {/* KPI Dashboard (bento) */}
-        <div className="grid grid-cols-1 min-[360px]:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+        <div className="grid grid-cols-1 min-[412px]:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
           {stats.map((stat, i) => (
             <div
               key={i}
-              className={`flex flex-col items-start p-3.5 rounded-2xl border-3 border-ink shadow-brutal-sm ${
+              className={`flex flex-col items-start p-3.5 rounded-2xl border-3 border-ink shadow-brutal-sm min-w-0 ${
                 ['bg-pop-yellow', 'bg-white', 'bg-pop-mint', 'bg-pop-lilac'][i % 4]
               }`}
             >
@@ -399,7 +399,7 @@ function PekomTreasurerDashboard() {
               <div className="text-[0.7rem] font-mono font-bold text-ink/70 uppercase tracking-normal [overflow-wrap:anywhere]">
                 {stat.label}
               </div>
-              <div className="font-display text-lg sm:text-xl font-extrabold text-ink mt-0.5 leading-tight">
+              <div className="font-display text-lg sm:text-xl font-extrabold text-ink mt-0.5 leading-tight [overflow-wrap:anywhere]">
                 {stat.value}
               </div>
             </div>

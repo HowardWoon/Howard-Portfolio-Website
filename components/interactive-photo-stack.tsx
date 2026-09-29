@@ -63,13 +63,11 @@ function PhotoLightbox({
   index,
   onIndex,
   onClose,
-  uid,
 }: {
   list: Photo[];
   index: number;
   onIndex: (i: number) => void;
   onClose: () => void;
-  uid: string;
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const touchX = useRef<number | null>(null);
@@ -105,13 +103,13 @@ function PhotoLightbox({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={onClose}
-      className="fixed inset-0 z-[10000] flex flex-col h-screen-safe bg-ink/90 backdrop-blur-sm pt-[max(0.75rem,var(--safe-top))] pb-[max(0.75rem,var(--safe-bottom))] pl-[max(0.75rem,var(--safe-left))] pr-[max(0.75rem,var(--safe-right))] sm:p-6"
+      className="fixed inset-0 z-[10000] flex flex-col h-screen-safe bg-ink/90 sm:backdrop-blur-sm pt-[max(0.75rem,var(--safe-top))] pb-[max(0.75rem,var(--safe-bottom))] pl-[max(0.75rem,var(--safe-left))] pr-[max(0.75rem,var(--safe-right))] sm:p-6"
     >
       <div
         className="flex items-center justify-between gap-3 mb-3 shrink-0 w-full max-w-6xl mx-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <span className="nb-tag bg-pop-yellow">
+        <span className="nb-tag bg-pop-yellow" aria-live="polite">
           {String(index + 1).padStart(2, '0')} / {String(list.length).padStart(2, '0')}
         </span>
         <button
@@ -129,10 +127,6 @@ function PhotoLightbox({
           longer a thin strip inside a huge empty cream box. `cq*` units fall back to full width on iOS 15. */}
       <div className="relative flex-1 min-h-0 w-full max-w-6xl mx-auto flex items-center justify-center [container-type:size]">
         <m.div
-          layoutId={FX.lightboxMorph ? `${uid}-${photo.src}` : undefined}
-          initial={{ scale: 0.95, y: 20 }}
-          animate={{ scale: 1, y: 0 }}
-          exit={{ scale: 0.95, y: 20 }}
           onClick={(e) => e.stopPropagation()}
           onTouchStart={(e) => {
             touchX.current = e.touches[0].clientX;
@@ -159,6 +153,19 @@ function PhotoLightbox({
               if (img.naturalWidth && img.naturalHeight) setRatio(img.naturalWidth / img.naturalHeight);
             }}
           />
+          {list.length > 1 && (
+            <>
+              <Image src={list[(index + 1) % list.length].src} alt="" fill sizes="1px" className="hidden" priority />
+              <Image
+                src={list[(index - 1 + list.length) % list.length].src}
+                alt=""
+                fill
+                sizes="1px"
+                className="hidden"
+                priority
+              />
+            </>
+          )}
         </m.div>
       </div>
 
@@ -198,6 +205,13 @@ function PhotoLightbox({
 export function InteractivePhotoStack({ customPhotos }: { customPhotos?: Photo[] }) {
   const source = customPhotos || photos;
   const [cards, setCards] = useState(source);
+  const [ratios, setRatios] = useState<Record<string, number>>({});
+  const isPortrait = (src: string) => (ratios[src] ?? 1.6) < 1;
+  const onImgLoad = (src: string) => (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const { naturalWidth: w, naturalHeight: h } = e.currentTarget;
+    if (w && h) setRatios((r) => (r[src] ? r : { ...r, [src]: w / h }));
+  };
+  const dragged = useRef(false);
   const [viewer, setViewer] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
   const [fan, setFan] = useState(false); // FX-15: back photos fan out in 3D while a mouse hovers the stack
@@ -219,11 +233,21 @@ export function InteractivePhotoStack({ customPhotos }: { customPhotos?: Photo[]
     <>
       <LayoutGroup id={uid}>
         <div
-          onClick={sheet ? undefined : cycle}
+          onClick={
+            sheet
+              ? undefined
+              : () => {
+                  if (dragged.current) {
+                    dragged.current = false;
+                    return;
+                  }
+                  cycle();
+                }
+          }
           data-cursor="view"
           onPointerEnter={(e) => FX.photoFan && e.pointerType !== 'touch' && setFan(true)}
           onPointerLeave={() => setFan(false)}
-          className="relative w-full h-full min-h-[280px] sm:min-h-[380px] lg:min-h-[420px] flex items-center justify-center cursor-pointer group rounded-2xl has-[:focus-visible]:outline has-[:focus-visible]:outline-[3px] has-[:focus-visible]:outline-pop-blue"
+          className="relative w-full h-[min(460px,118vw)] sm:h-[420px] lg:h-[460px] flex items-center justify-center cursor-pointer group rounded-2xl has-[:focus-visible]:outline has-[:focus-visible]:outline-[3px] has-[:focus-visible]:outline-pop-blue"
         >
           {FX.contactSheet && source.length > 1 ? (
             <button
@@ -297,7 +321,23 @@ export function InteractivePhotoStack({ customPhotos }: { customPhotos?: Photo[]
                 <m.div
                   key={photo.src}
                   layout
-                  layoutId={`${uid}-${photo.src}`}
+                  drag={isTop ? 'x' : false}
+                  dragSnapToOrigin
+                  dragElastic={0.5}
+                  onDragStart={() => {
+                    dragged.current = true;
+                  }}
+                  onDragEnd={(_, info) => {
+                    if (Math.abs(info.offset.x) > 80 || Math.abs(info.velocity.x) > 500) {
+                      if (info.offset.x < 0) cycle();
+                      else setCards((p) => [p[p.length - 1], ...p.slice(0, -1)]);
+                    }
+                    setTimeout(() => {
+                      dragged.current = false;
+                    }, 0);
+                  }}
+                  style={{ touchAction: 'pan-y' }}
+                  layoutId={FX.lightboxMorph ? `${uid}-${photo.src}` : undefined}
                   initial={false}
                   animate={{
                     scale: isTop ? 1 : 1 - index * 0.04,
@@ -308,9 +348,12 @@ export function InteractivePhotoStack({ customPhotos }: { customPhotos?: Photo[]
                   }}
                   whileHover={isTop ? { scale: 1.02, rotate: -1.2, y: -5, transition: { duration: 0.2 } } : {}}
                   transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-                  className="absolute w-[94%] aspect-video bg-white p-2 sm:p-2.5 pb-6 sm:pb-8 rounded-md border-3 border-ink shadow-brutal origin-center max-h-full"
+                  className={`absolute ${isPortrait(photo.src) ? 'w-[62%] sm:w-[54%] aspect-[3/4]' : 'w-[94%] aspect-video'} bg-white p-2 sm:p-2.5 pb-6 sm:pb-8 rounded-md border-3 border-ink shadow-brutal origin-center max-h-full`}
                 >
                   {isTop && <span className="tape" aria-hidden />}
+                  {isTop && (
+                    <span className="absolute top-2.5 sm:top-3 right-2.5 sm:right-3 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold tracking-wider text-ink/40 bg-black/5 z-10 select-none pointer-events-none">{`${String(source.indexOf(photo) + 1).padStart(2, '0')} / ${source.length}`}</span>
+                  )}
                   <div className="w-full h-full relative overflow-hidden rounded-sm bg-paper-deep border-2 border-ink">
                     <Image
                       src={photo.src}
@@ -318,6 +361,7 @@ export function InteractivePhotoStack({ customPhotos }: { customPhotos?: Photo[]
                       fill
                       sizes="(max-width: 1024px) 92vw, 40vw"
                       className="object-contain pointer-events-none"
+                      onLoad={onImgLoad(photo.src)}
                     />
                     {isTop && (
                       <button
@@ -344,7 +388,7 @@ export function InteractivePhotoStack({ customPhotos }: { customPhotos?: Photo[]
           {!sheet && (
             <div
               aria-hidden
-              className="absolute -bottom-3 lg:-bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 nb-tag bg-white shadow-brutal-xs pointer-events-none z-50 max-w-[92%] text-center justify-center"
+              className="absolute -bottom-3 lg:-bottom-4 left-1/2 -translate-x-1/2 w-max max-w-[92%] whitespace-nowrap flex items-center gap-2 nb-tag bg-white shadow-brutal-xs pointer-events-none z-50"
             >
               <span className="w-2 h-2 rounded-full bg-pop-red border border-ink animate-pulse" />
               CLICK ALBUM TO CYCLE
@@ -354,13 +398,7 @@ export function InteractivePhotoStack({ customPhotos }: { customPhotos?: Photo[]
         {mounted && (
           <AnimatePresence>
             {viewer !== null && (
-              <PhotoLightbox
-                list={source}
-                index={viewer}
-                onIndex={setViewer}
-                onClose={() => setViewer(null)}
-                uid={uid}
-              />
+              <PhotoLightbox list={source} index={viewer} onIndex={setViewer} onClose={() => setViewer(null)} />
             )}
           </AnimatePresence>
         )}

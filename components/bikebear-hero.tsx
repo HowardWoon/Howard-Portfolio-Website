@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { m, useScroll, useTransform } from 'framer-motion';
+import { m, useScroll, useTransform, useMotionValue } from 'framer-motion';
 import { useBooted } from './boot-sequence';
 import { Magnetic } from './magnetic-button';
 import { Sparkles, Terminal } from 'lucide-react';
@@ -134,12 +134,21 @@ export default function BikebearHero() {
     target: containerRef,
     offset: ['start start', 'end start'],
   });
-  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.8], [1, 0.95]);
-  const yTranslate = useTransform(scrollYProgress, [0, 0.8], [0, 50]);
+  const gate = useMotionValue(0);
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px) and (min-height: 700px)');
+    const set = () => gate.set(mq.matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 1 : 0);
+    set();
+    mq.addEventListener('change', set);
+    return () => mq.removeEventListener('change', set);
+  }, [gate]);
+  const opacity = useTransform(() => 1 - gate.get() * Math.min(1, scrollYProgress.get() / 0.8));
+  const scale = useTransform(() => 1 - gate.get() * 0.05 * Math.min(1, scrollYProgress.get() / 0.8));
+  const yTranslate = useTransform(() => gate.get() * 50 * Math.min(1, scrollYProgress.get() / 0.8));
 
   return (
     <m.section
+      id="hero"
       ref={containerRef}
       style={{ opacity, scale, y: yTranslate }}
       className="relative min-h-screen-safe bg-paper text-ink flex flex-col justify-between overflow-hidden"

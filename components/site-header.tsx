@@ -27,7 +27,7 @@ export function SiteHeader() {
   return (
     <header
       ref={ref}
-      className="site-header fixed top-0 left-0 w-full flex items-center justify-between gap-2 xs:gap-3 z-[9999] bg-white/95 backdrop-blur-md border-b-3 border-ink pb-2.5 sm:pb-3 pt-[max(0.625rem,var(--safe-top))] sm:pt-[max(0.75rem,var(--safe-top))] pl-[max(0.875rem,var(--safe-left))] pr-[max(0.875rem,var(--safe-right))] sm:pl-[max(2.5rem,var(--safe-left))] sm:pr-[max(2.5rem,var(--safe-right))] lg:pl-[max(4rem,var(--safe-left))] lg:pr-[max(4rem,var(--safe-right))]"
+      className="site-header fixed top-0 left-0 w-full flex items-center justify-between gap-2 xs:gap-3 z-[9999] bg-white/95 sm:[@media(pointer:fine)]:backdrop-blur-md border-b-3 border-ink pb-2.5 sm:pb-3 pt-[max(0.625rem,var(--safe-top))] sm:pt-[max(0.75rem,var(--safe-top))] pl-[max(0.875rem,var(--safe-left))] pr-[max(0.875rem,var(--safe-right))] sm:pl-[max(2.5rem,var(--safe-left))] sm:pr-[max(2.5rem,var(--safe-right))] lg:pl-[max(4rem,var(--safe-left))] lg:pr-[max(4rem,var(--safe-right))]"
     >
       <m.div
         initial={{ opacity: 0, x: -20 }}
@@ -109,7 +109,7 @@ export function SiteHeader() {
             />
           </a>
         </Magnetic>
-        <MotionToggle className="hidden sm:grid w-10 h-10 md:w-12 md:h-12 landscape-short:!w-10 landscape-short:!h-10" />
+        <MotionToggle className="grid w-10 h-10 md:w-12 md:h-12 landscape-short:!w-10 landscape-short:!h-10" />
         <button
           onClick={() => window.dispatchEvent(new Event('open-command-palette'))}
           className="hidden min-[320px]:grid place-items-center w-10 h-10 md:w-12 md:h-12 landscape-short:!w-10 landscape-short:!h-10 rounded-full bg-white border-3 border-ink shadow-brutal-sm hover:bg-pop-lilac hover:-translate-y-0.5 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all text-ink"

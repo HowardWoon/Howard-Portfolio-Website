@@ -20,7 +20,11 @@ export function ScrollUnfold({ children, className = '' }: { children: ReactNode
   const allowed = useMotionAllowed(FX.cardUnfold);
   const gate = useMotionValue(1);
   useEffect(() => {
-    gate.set(allowed ? 1 : 0);
+    const mq = window.matchMedia('(min-width: 1024px) and (pointer: fine)');
+    const set = () => gate.set(allowed && mq.matches ? 1 : 0);
+    set();
+    mq.addEventListener('change', set);
+    return () => mq.removeEventListener('change', set);
   }, [allowed, gate]);
 
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'start 0.55'] });

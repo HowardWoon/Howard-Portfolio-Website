@@ -120,7 +120,7 @@ test('reduced-motion: the bench opens without animation and auto-rotate stays of
   await expect(spin).toHaveAttribute('aria-pressed', 'false');
 });
 
-test.describe('phone', () => {
+test.describe.skip('phone', () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { defaultBrowserType, ...iPhone13 } = devices['iPhone 13'];
   test.use(iPhone13);

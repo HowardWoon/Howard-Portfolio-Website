@@ -1,45 +1,58 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { m, AnimatePresence, useScroll, useSpring } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
+import { m, AnimatePresence, useScroll, useSpring, useMotionValueEvent } from 'framer-motion';
 import { ArrowUp } from 'lucide-react';
 
 export function ScrollToTop() {
   const [isVisible, setIsVisible] = useState(false);
-  const { scrollYProgress } = useScroll();
+  const { scrollY, scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
     damping: 30,
     restDelta: 0.001,
   });
 
+  const flags = useRef({ past: false, footer: false, typing: false });
+  const recompute = () => {
+    const f = flags.current;
+    const next = f.past && !f.footer && !f.typing;
+    setIsVisible((v) => (v === next ? v : next));
+  };
+
+  useMotionValueEvent(scrollY, 'change', (y) => {
+    const past = y > 500;
+    if (past !== flags.current.past) {
+      flags.current.past = past;
+      recompute();
+    }
+  });
+
   useEffect(() => {
     const footer = document.querySelector('footer');
-    let footerVisible = false,
-      typing = false;
-    const update = () => setIsVisible(window.scrollY > 500 && !footerVisible && !typing);
     const io = footer
       ? new IntersectionObserver(([e]) => {
-          footerVisible = e.isIntersecting;
-          update();
+          flags.current.footer = e.isIntersecting;
+          recompute();
         })
       : null;
     if (footer) io!.observe(footer);
+
     const onFocus = (e: FocusEvent) => {
-      typing = (e.target as HTMLElement).matches('input, textarea, select');
-      update();
+      flags.current.typing = (e.target as HTMLElement).matches('input, textarea, select');
+      recompute();
     };
     const onBlur = () => {
-      typing = false;
-      update();
+      flags.current.typing = false;
+      recompute();
     };
-    window.addEventListener('scroll', update, { passive: true });
+
     document.addEventListener('focusin', onFocus);
     document.addEventListener('focusout', onBlur);
-    update();
+    recompute();
+
     return () => {
       io?.disconnect();
-      window.removeEventListener('scroll', update);
       document.removeEventListener('focusin', onFocus);
       document.removeEventListener('focusout', onBlur);
     };
