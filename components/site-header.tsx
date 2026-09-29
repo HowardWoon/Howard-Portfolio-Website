@@ -70,13 +70,34 @@ export function SiteHeader() {
           <span className="text-xs font-mono font-extrabold tracking-[0.08em] text-ink">AVAILABLE FOR HIRE 2026</span>
         </div>
 
+        <nav className="hidden xl:flex items-center gap-6 mr-4">
+          {[
+            { id: 'about', label: 'About' },
+            { id: 'projects', label: 'Projects' },
+            { id: 'experience', label: 'Experience' },
+            { id: 'honors', label: 'Honors' },
+            { id: 'contact', label: 'Contact' },
+          ].map((s) => (
+            <a
+              key={s.id}
+              href={`#${s.id}`}
+              className="relative text-sm font-extrabold uppercase tracking-widest text-ink hover:text-pop-blue transition-colors after:absolute after:-bottom-1 after:left-0 after:w-full after:scale-x-0 hover:after:scale-x-100 focus-visible:after:scale-x-100 after:origin-left after:transition-transform after:h-[3px] after:bg-pop-yellow"
+              onPointerEnter={() => window.dispatchEvent(new CustomEvent('route-preview', { detail: { id: s.id } }))}
+              onPointerLeave={() => window.dispatchEvent(new CustomEvent('route-preview', { detail: { id: null } }))}
+              onFocus={() => window.dispatchEvent(new CustomEvent('route-preview', { detail: { id: s.id } }))}
+              onBlur={() => window.dispatchEvent(new CustomEvent('route-preview', { detail: { id: null } }))}
+            >
+              {s.label}
+            </a>
+          ))}
+        </nav>
         <Magnetic strength={0.3} stretch>
           <a
             href="/resume.pdf"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="RESUME"
-            className="group nb-btn nb-btn-yellow w-10 h-10 p-0 min-[400px]:w-auto min-[400px]:h-auto min-[400px]:px-4 min-[400px]:py-2.5 sm:px-6 sm:py-3 landscape-short:!py-2 fx-specular nb-press"
+            className="group nb-resume nb-btn nb-btn-yellow w-10 h-10 p-0 min-[400px]:w-auto min-[400px]:h-auto min-[400px]:px-4 min-[400px]:py-2.5 sm:px-6 sm:py-3 landscape-short:!py-2 fx-specular nb-press"
           >
             <span className="sr-only min-[400px]:not-sr-only">
               <TextRoll>RESUME</TextRoll>

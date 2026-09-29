@@ -63,11 +63,13 @@ function PhotoLightbox({
   index,
   onIndex,
   onClose,
+  uid,
 }: {
   list: Photo[];
   index: number;
   onIndex: (i: number) => void;
   onClose: () => void;
+  uid: string;
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const touchX = useRef<number | null>(null);
@@ -127,6 +129,7 @@ function PhotoLightbox({
           longer a thin strip inside a huge empty cream box. `cq*` units fall back to full width on iOS 15. */}
       <div className="relative flex-1 min-h-0 w-full max-w-6xl mx-auto flex items-center justify-center [container-type:size]">
         <m.div
+          layoutId={FX.lightboxMorph ? `${uid}-${photo.src}` : undefined}
           initial={{ scale: 0.95, y: 20 }}
           animate={{ scale: 1, y: 0 }}
           exit={{ scale: 0.95, y: 20 }}
@@ -348,15 +351,20 @@ export function InteractivePhotoStack({ customPhotos }: { customPhotos?: Photo[]
             </div>
           )}
         </div>
+        {mounted && (
+          <AnimatePresence>
+            {viewer !== null && (
+              <PhotoLightbox
+                list={source}
+                index={viewer}
+                onIndex={setViewer}
+                onClose={() => setViewer(null)}
+                uid={uid}
+              />
+            )}
+          </AnimatePresence>
+        )}
       </LayoutGroup>
-
-      {mounted && (
-        <AnimatePresence>
-          {viewer !== null && (
-            <PhotoLightbox list={source} index={viewer} onIndex={setViewer} onClose={() => setViewer(null)} />
-          )}
-        </AnimatePresence>
-      )}
     </>
   );
 }

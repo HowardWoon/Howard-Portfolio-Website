@@ -52,6 +52,12 @@ export const FX = {
   archiveFilmstrip: true, // FX-42 field archive grid <-> horizontal film strip
   shortcuts: true, // FX-43 keyboard shortcuts + "?" cheat sheet
   guidedTour: true, // FX-44 guided tour through the sections (manual or auto-play)
+  // ---- Phase B ----
+  routePreview: true, // FX-45 hovering nav link highlights spine marker
+  heroInspection: true, // FX-46 hero inspection lens
+  honorConstellation: true, // FX-47 constellation and trail to honors
+  lightboxMorph: true, // FX-48 lightbox morphs from thumbnail
+  depthLock: true, // FX-49 depth lock on idle pointer
 } as const;
 
 export type FxName = keyof typeof FX;

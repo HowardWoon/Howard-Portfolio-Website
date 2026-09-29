@@ -14,7 +14,7 @@ test('evidence trail: a skill in the Tooling Matrix traces the projects that use
   const hud = page.getByRole('region', { name: /evidence trail for python 3\.12/i });
   await expect(hud).toBeVisible();
   await expect(hud).toContainText('1 / 2');
-  await expect(page.locator('[data-trail-hit]')).toHaveCount(2);
+  await expect(page.locator('[data-trail-hit]')).toHaveCount(3); // 2 project cards + 1 honor card (FX-47)
   await page.keyboard.press('j');
   await expect(hud).toContainText('2 / 2');
   await page.keyboard.press('Escape');
@@ -33,6 +33,7 @@ test('focus mode spotlights one project and J/K moves the spotlight (FX-39)', as
   await page.goto('/', { waitUntil: 'networkidle' });
   const btn = page.getByRole('button', { name: 'Focus mode: PROOFPAY' });
   await btn.scrollIntoViewIfNeeded();
+  // Wait for the dynamically-imported InteractionHud to mount
   await page.waitForTimeout(1500);
   await btn.click();
   const hud = page.getByRole('region', { name: /focus mode/i });
@@ -84,6 +85,7 @@ test('field archive switches to a film strip and steps through records (FX-42)',
 
 test('"?" opens the shortcut sheet as a proper dialog (FX-43)', async ({ page }) => {
   await page.goto('/', { waitUntil: 'networkidle' });
+  // Wait for the dynamically-imported InteractionHud to mount its keyboard listener
   await page.waitForTimeout(1500);
   await page.keyboard.press('?');
   const dialog = page.getByRole('dialog', { name: 'Keyboard shortcuts' });
@@ -95,6 +97,7 @@ test('"?" opens the shortcut sheet as a proper dialog (FX-43)', async ({ page })
 
 test('guided tour steps through the sections and survives scrolling past Projects (FX-44)', async ({ page }) => {
   await page.goto('/', { waitUntil: 'networkidle' });
+  // Wait for the dynamically-imported InteractionHud to mount its keyboard listener
   await page.waitForTimeout(1500);
   await page.keyboard.press('g');
   const hud = page.getByRole('region', { name: /guided tour/i });
@@ -138,6 +141,8 @@ test.describe('phone', () => {
 test('reduced-motion visitors get the guided tour paused (no auto-advance) (FX-44)', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/', { waitUntil: 'networkidle' });
+  // Wait for the dynamically-imported InteractionHud to mount its keyboard listener
+  await page.waitForTimeout(1500);
   await page.keyboard.press('g');
   const hud = page.getByRole('region', { name: /guided tour/i });
   await expect(hud.getByRole('button', { name: 'Play tour' })).toBeVisible();

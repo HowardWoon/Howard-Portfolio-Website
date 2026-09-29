@@ -79,6 +79,8 @@ test('button icons are never squeezed to zero width (R9-04)', async ({ page }) =
 
 test('command palette can reach every section, including About and Contact (R9-07)', async ({ page }) => {
   await page.goto('/', { waitUntil: 'networkidle' });
+  // Wait for the dynamically-imported CommandPalette to mount its Ctrl+K listener
+  await page.waitForTimeout(1500);
   await page.keyboard.press('Control+k');
   const dialog = page.getByRole('dialog', { name: /command palette/i });
   await expect(dialog).toBeVisible();
