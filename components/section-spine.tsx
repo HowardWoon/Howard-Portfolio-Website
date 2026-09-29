@@ -14,6 +14,7 @@ import { useActiveSection } from '@/lib/use-active-section';
 export function SectionSpine() {
   const [previewId, setPreviewId] = React.useState<string | null>(null);
   React.useEffect(() => {
+    if (!FX.routePreview) return;
     const handle = (e: Event) => {
       const ce = e as CustomEvent<{ id: string | null }>;
       setPreviewId(ce.detail.id);
@@ -53,9 +54,7 @@ export function SectionSpine() {
             <span
               aria-hidden
               data-preview={preview ? 'true' : undefined}
-              className={`relative w-[17px] h-[17px] ${preview ? 'bg-pop-yellow scale-125' : ''} border-3 border-ink rotate-45 transition-colors duration-200 group-focus-visible:ring-2 group-focus-visible:ring-pop-blue ${
-                on ? 'bg-pop-yellow' : 'bg-white'
-              }`}
+              className={`relative w-[17px] h-[17px] ${on || preview ? 'bg-pop-yellow' : 'bg-white'} ${preview ? 'scale-125' : ''} border-3 border-ink rotate-45 transition-colors duration-200 group-focus-visible:ring-2 group-focus-visible:ring-pop-blue`}
             />
           </a>
         );

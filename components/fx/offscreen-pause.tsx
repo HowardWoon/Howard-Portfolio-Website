@@ -9,7 +9,10 @@ import { useEffect } from 'react';
  */
 export function OffscreenPause() {
   useEffect(() => {
-    const targets = document.querySelectorAll<HTMLElement>('main section[id], footer');
+    const targets = document.querySelectorAll<HTMLElement>(
+      // sections, the hero (ticker, sticker, triangle) and the tech marquee wrapper (P2-12)
+      'main section[id], main > div > section, [data-offscreen-pause], footer',
+    );
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {

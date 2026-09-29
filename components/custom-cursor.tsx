@@ -14,13 +14,26 @@ import { FX } from '@/lib/fx';
  *    hybrid devices). Now the `has-custom-cursor` class is only added once this cursor is live.
  *  - Disabled for touch-primary devices and prefers-reduced-motion.
  */
+type CursorLook = {
+  isPointer: boolean;
+  isHidden: boolean;
+  onDark: boolean;
+  onXray: boolean;
+  customText: string | null;
+};
+const IDLE_LOOK: CursorLook = { isPointer: false, isHidden: false, onDark: false, onXray: false, customText: null };
+
 export function CustomCursor() {
   const [enabled, setEnabled] = useState(false);
-  const [isPointer, setIsPointer] = useState(false);
-  const [isHidden, setIsHidden] = useState(false);
-  const [onDark, setOnDark] = useState(false); // footer, modal backdrops, simulator screen
-  const [onXray, setOnXray] = useState(false); // hero portrait: the Spider-Man reveal circle IS the cursor there
-  const [customText, setCustomText] = useState<string | null>(null);
+  // One state object, replaced only when a field actually changes (P2-19): mouseover fires on every element
+  // boundary, and six separate setters used to re-render the cursor each time.
+  //  onDark = footer, modal backdrops, simulator screen; onXray = hero portrait (the reveal circle IS the cursor)
+  const [look, setLook] = useState<CursorLook>(IDLE_LOOK);
+  const { isPointer, isHidden, onDark, onXray, customText } = look;
+  const patch = (next: Partial<CursorLook>) =>
+    setLook((prev) =>
+      (Object.keys(next) as (keyof CursorLook)[]).every((k) => prev[k] === next[k]) ? prev : { ...prev, ...next },
+    );
   // The black ink cursor is invisible on the dark admin area → native cursor there
   const isAdmin = usePathname()?.startsWith('/admin') ?? false;
 
@@ -51,17 +64,19 @@ export function CustomCursor() {
       // Inside an <iframe>/<object> (PDF certificates) the page stops receiving mouse events, so the
       // custom cursor used to freeze at the frame's edge next to the real cursor → hide it there.
       const embedded = target.closest('iframe, object');
-      setIsPointer(!!interactive && !typing);
-      setIsHidden(!!typing || !!embedded);
-      // The black multiply-blended ring was invisible on black surfaces (footer, dark overlays)
-      setOnDark(!!target.closest('[data-dark-surface]'));
-      setOnXray(!!target.closest('[data-xray]'));
       const t = target.closest('[data-cursor]');
-      setCustomText(t ? t.getAttribute('data-cursor') : null);
+      patch({
+        isPointer: !!interactive && !typing,
+        isHidden: !!typing || !!embedded,
+        // The black multiply-blended ring was invisible on black surfaces (footer, dark overlays)
+        onDark: !!target.closest('[data-dark-surface]'),
+        onXray: !!target.closest('[data-xray]'),
+        customText: t ? t.getAttribute('data-cursor') : null,
+      });
     };
 
-    const handleMouseLeave = () => setIsHidden(true);
-    const handleMouseEnter = () => setIsHidden(false);
+    const handleMouseLeave = () => patch({ isHidden: true });
+    const handleMouseEnter = () => patch({ isHidden: false });
 
     window.addEventListener('mousemove', moveCursor, { passive: true });
     window.addEventListener('mouseover', handleMouseOver, { passive: true });

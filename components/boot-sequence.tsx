@@ -116,8 +116,8 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
 
   function handleStartBoot() {
     if (bootState !== 'idle') return; // ignore double clicks
-    // Reduced-motion visitors still get the gate, just without the 2.8 s animation
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    // Reduced-motion (OS setting or Calm Mode) visitors still get the gate, just without the 2.8 s animation
+    if (prefersReducedMotion()) {
       finish();
       return;
     }
@@ -174,10 +174,7 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
 
             <div className="relative flex justify-center flex-col items-center gap-8 px-6">
               {bootState === 'idle' && (
-                <div
-                  key="idle"
-                  className="flex flex-col items-center gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500"
-                >
+                <div key="idle" className="flex flex-col items-center gap-6">
                   <div className="w-full flex flex-col items-center gap-6">
                     <button
                       onClick={handleStartBoot}
@@ -199,10 +196,7 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
               )}
 
               {bootState !== 'idle' && (
-                <div
-                  key="booting"
-                  className="w-[min(22rem,80vw)] flex flex-col items-center gap-4 animate-in fade-in duration-300"
-                >
+                <div key="booting" className="w-[min(22rem,80vw)] flex flex-col items-center gap-4">
                   <div
                     className="h-7 w-full bg-white border-3 border-ink rounded-full overflow-hidden shadow-brutal"
                     role="progressbar"

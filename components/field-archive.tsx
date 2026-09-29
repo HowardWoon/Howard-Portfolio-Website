@@ -102,7 +102,7 @@ export function FieldArchive({ archiveId }: FieldArchiveProps) {
         <div className="relative">
           <div
             ref={trackRef}
-            data-lenis-prevent
+            data-lenis-prevent-horizontal
             className="flex gap-4 overflow-x-auto overscroll-x-contain snap-x snap-mandatory pb-4 [scrollbar-width:thin]"
           >
             {/* edge spacers: (100% - frame width) / 2 minus the 1rem gap, so the FIRST and LAST frames can reach the centre */}

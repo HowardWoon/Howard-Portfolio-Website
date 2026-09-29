@@ -53,7 +53,7 @@ export const FX = {
   shortcuts: true, // FX-43 keyboard shortcuts + "?" cheat sheet
   guidedTour: true, // FX-44 guided tour through the sections (manual or auto-play)
   // ---- Phase B ----
-  routePreview: true, // FX-45 hovering nav link highlights spine marker
+  routePreview: true, // FX-50 hovering a nav link highlights its spine marker (kill switch for the spine listener)
   heroInspection: true, // FX-46 hero inspection lens
   honorConstellation: true, // FX-47 constellation and trail to honors
   lightboxMorph: true, // FX-48 lightbox morphs from thumbnail

@@ -46,7 +46,12 @@ export function VelocitySkew({ children, className = 'relative z-20' }: { childr
 
   // relative z-20 keeps the band above the neighbouring section exactly like the unwrapped marquee (z-20).
   return (
-    <m.div ref={ref} className={className} style={allowed && !isCoarse ? { skewY, scaleY } : { skewY: 0, scaleY: 1 }}>
+    <m.div
+      ref={ref}
+      data-offscreen-pause
+      className={className}
+      style={allowed && !isCoarse ? { skewY, scaleY } : { skewY: 0, scaleY: 1 }}
+    >
       {children}
     </m.div>
   );

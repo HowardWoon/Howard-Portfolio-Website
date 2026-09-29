@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useFocusTrap } from '@/lib/use-focus-trap';
+import { useScrollLock } from '@/lib/use-scroll-lock';
 import { Command } from 'cmdk';
 import {
   Search,
@@ -40,6 +41,7 @@ function goTo(hash: string) {
 
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
+  useScrollLock(open); // the wheel outside the list must not scroll the page behind the palette
   const [toast, setToast] = useState<string | null>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   useFocusTrap(dialogRef, open);
@@ -136,13 +138,13 @@ export function CommandPalette() {
                   <User className="w-5 h-5" strokeWidth={2.5} />
                   <span>About</span>
                 </Command.Item>
-                <Command.Item onSelect={() => runCommand(() => goTo('#experience'))} className={itemClass}>
-                  <Briefcase className="w-5 h-5" strokeWidth={2.5} />
-                  <span>Experience</span>
-                </Command.Item>
                 <Command.Item onSelect={() => runCommand(() => goTo('#projects'))} className={itemClass}>
                   <Code className="w-5 h-5" strokeWidth={2.5} />
                   <span>Projects</span>
+                </Command.Item>
+                <Command.Item onSelect={() => runCommand(() => goTo('#experience'))} className={itemClass}>
+                  <Briefcase className="w-5 h-5" strokeWidth={2.5} />
+                  <span>Experience</span>
                 </Command.Item>
                 <Command.Item onSelect={() => runCommand(() => goTo('#honors'))} className={itemClass}>
                   <GraduationCap className="w-5 h-5" strokeWidth={2.5} />
