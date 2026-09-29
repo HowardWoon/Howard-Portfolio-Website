@@ -247,11 +247,22 @@ export default function BikebearHero() {
                 className="fx-depth w-full max-w-[350px] sm:max-w-none sm:w-[460px] lg:w-[460px] xl:w-[520px] mb-5 overflow-hidden bg-white rounded-2xl border-3 border-ink py-2.5 relative z-20 shadow-brutal pointer-events-auto"
                 style={{ '--depth': 18 } as React.CSSProperties}
               >
-                <div className="flex whitespace-nowrap animate-[marquee_20s_linear_infinite] w-max">
+                {/* Two items, told apart by their tag: the newest (MUBA) in yellow, the dated one (Supervity) in blue */}
+                <div className="flex whitespace-nowrap animate-[marquee_40s_linear_infinite] w-max">
                   {[...Array(4)].map((_, i) => (
                     <div key={i} className="flex items-center" aria-hidden={i > 0}>
-                      <span className="text-xs sm:text-sm font-mono font-extrabold text-ink uppercase tracking-[0.12em] px-4">
-                        LATEST: 2ND PLACE @ SUPERVITY AUTOPILOT ASIA HACKATHON ✈
+                      <span className="ml-4 shrink-0 rounded-md border-2 border-ink bg-pop-yellow px-1.5 py-0.5 font-mono text-[0.7rem] font-extrabold uppercase tracking-[0.1em] text-ink">
+                        LATEST
+                      </span>
+                      <span className="text-xs sm:text-sm font-mono font-extrabold text-ink uppercase tracking-[0.12em] px-3">
+                        2ND RUNNER UP (SUI) + TOP 6 (GONKA AI) @ MUBA BLOCKCHAIN HACKATHON 2026 🏅
+                      </span>
+                      <span className="text-xl text-pop-red font-black mx-2 translate-y-[2px]">*</span>
+                      <span className="ml-2 shrink-0 rounded-md border-2 border-ink bg-pop-blue px-1.5 py-0.5 font-mono text-[0.7rem] font-extrabold uppercase tracking-[0.1em] text-white">
+                        8 AUG 2026
+                      </span>
+                      <span className="text-xs sm:text-sm font-mono font-bold text-ink-soft uppercase tracking-[0.12em] px-3">
+                        2ND PLACE @ SUPERVITY AUTOPILOT ASIA HACKATHON ✈
                       </span>
                       <span className="text-xl text-pop-red font-black mx-2 translate-y-[2px]">*</span>
                     </div>

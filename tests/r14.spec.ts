@@ -307,3 +307,17 @@ test('print hides the header and floating UI and expands the accordions (FX-70)'
   await expect(page.locator('[id^="pekom-event-"]')).toHaveCount(0);
   await expect(rest).not.toHaveCount(total);
 });
+
+/* ---------------------------------------------------------------- hero news ticker (owner request, 29 Sep 2026) */
+test('hero ticker leads with MUBA and keeps Supervity, each with its own tag', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await home(page);
+  const first = page.locator('#hero [class*="animate-[marquee"] > div').first();
+  await expect(first).not.toHaveAttribute('aria-hidden', 'true');
+  const text = (await first.innerText()).replace(/\s+/g, ' ');
+  expect(text).toMatch(/^LATEST 2ND RUNNER UP \(SUI\) \+ TOP 6 \(GONKA AI\) @ MUBA BLOCKCHAIN HACKATHON 2026/);
+  expect(text).toContain('8 AUG 2026 2ND PLACE @ SUPERVITY AUTOPILOT ASIA HACKATHON');
+  const bg = (t: string) => first.getByText(t, { exact: true }).evaluate((e) => getComputedStyle(e).backgroundColor);
+  expect(await bg('LATEST')).toBe('rgb(255, 199, 0)');
+  expect(await bg('8 AUG 2026')).toBe('rgb(43, 75, 255)');
+});
