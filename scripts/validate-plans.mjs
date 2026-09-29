@@ -184,10 +184,10 @@ has(
 has(
   'R7',
   'S1.4',
-  'MotionToggle in header (hidden sm:grid)',
+  'MotionToggle in header (from 375 px since R12 P1-08: hidden xs:grid)',
   'components/site-header.tsx',
   '<MotionToggle',
-  'hidden sm:grid',
+  'hidden xs:grid',
 );
 has('R7', 'S1.4b', 'Command palette: Calm mode action', 'components/command-palette.tsx', 'Calm mode (reduce motion)');
 has('R7', 'S1.5', 'Scroll lock sets data-overlay (depth-of-field)', 'lib/use-scroll-lock.ts', 'overlay');
@@ -713,10 +713,10 @@ has(
 has(
   'R11',
   'D3',
-  'Fixed-height stage (68 % desktop / 66 % narrow)',
+  'Inline stage height = visible height under the header (R12 P0-02 replaced the 68 % / 66 % rule)',
   'components/blueprint-stage.tsx',
-  'window.innerHeight * 0.66, 380, 600',
-  'window.innerHeight * 0.68, 440, 680',
+  'window.innerHeight - headerH - 24',
+  'clamp(avail * 0.72, 320, 680)',
 );
 has(
   'R11',
@@ -838,9 +838,11 @@ custom('ALL', 'G2', 'No test.skip / test.only anywhere in tests/', () => {
   const hit = walk('tests').find((f) => /\btest\.(skip|only)\(/.test(read(f)));
   return hit ? `${hit} uses test.skip/only` : true;
 });
-custom('ALL', 'G3', 'Test suite size = 45 tests (28 R7-R9 + 11 R10 + 6 R11)', () => {
+// R12 P2-17 removed the "exactly 45" constraint (it forced useful tests to be deleted). The suite may grow;
+// it must never shrink below the R7-R11 baseline.
+custom('ALL', 'G3', 'Test suite size >= 45 (R7-R11 baseline; never fewer)', () => {
   const n = walk('tests').reduce((a, f) => a + ((read(f) ?? '').match(/^\s*test\(/gm)?.length ?? 0), 0);
-  return n === 45 ? true : `found ${n} tests (expected 45)`;
+  return n >= 45 ? true : `found ${n} tests (baseline 45)`;
 });
 exists(
   'ALL',
@@ -855,8 +857,151 @@ custom('ALL', 'G5', 'No file name with spaces under public/', () => {
   return bad ? `file name with a space: ${bad}` : true;
 });
 
+/* ================================================================================================ R12 */
+has(
+  'R12',
+  'P0-03',
+  'Header left block never collapses; pill only where it fits',
+  'components/site-header.tsx',
+  'min-w-0 xl:shrink-0',
+  'hidden lg:flex xl:hidden min-[1680px]:flex',
+);
+has(
+  'R12',
+  'P0-04',
+  'Turntable has its own rAF handle',
+  'components/blueprint-stage.tsx',
+  'const spinRaf = useRef(0)',
+  'const stopSpin = useCallback',
+);
+has(
+  'R12',
+  'P0-05',
+  'Bench re-fits on resize and rotation (inline only)',
+  'components/blueprint-stage.tsx',
+  "addEventListener('orientationchange', onResize)",
+  'if (!sheetRef.current) setStageH(computeStageH())',
+);
+has(
+  'R12',
+  'P1-04a',
+  'No orbit jump after a pinch',
+  'components/blueprint-stage.tsx',
+  'if (ptrs.current.size === 1) {',
+  'pinch: -1',
+);
+has(
+  'R12',
+  'P1-04c',
+  'Plates move with a valid translate3d transform',
+  'components/blueprint-stage.tsx',
+  'translate3d(0px, ${(n * sd * gn).toFixed(2)}px, ${(n * gn + lift).toFixed(2)}px)',
+);
+has(
+  'R12',
+  'P1-04c2',
+  'Plate transition animates transform',
+  'app/globals.css',
+  'transform 0.35s cubic-bezier(0.2, 0.9, 0.1, 1)',
+);
+has(
+  'R12',
+  '§7',
+  'Bench sheet: portal, placeholder, touch-action, hint',
+  'components/blueprint-stage.tsx',
+  'function useBenchSheet()',
+  'BLUEPRINT OPEN',
+  'SWIPE ← → FOR LAYERS · PINCH TO ZOOM',
+  "'data-sheet': ''",
+);
+has(
+  'R12',
+  '§7css',
+  'Sheet stage orbits in both axes',
+  'app/globals.css',
+  "[data-open='true'][data-sheet]",
+  'touch-action: none;',
+);
+has(
+  'R12',
+  'P1-02',
+  'Hero exit gated to single-screen heroes',
+  'components/bikebear-hero.tsx',
+  '(min-width: 1024px) and (min-height: 700px)',
+);
+has(
+  'R12',
+  '§8.1',
+  'Portrait prints',
+  'components/interactive-photo-stack.tsx',
+  'w-[62%] sm:w-[54%] aspect-[3/4]',
+  'w-max max-w-[92%] whitespace-nowrap',
+);
+has(
+  'R12',
+  '§8.4',
+  'Lightbox zoom, thumbnails, keys, preload',
+  'components/interactive-photo-stack.tsx',
+  'const zoomTo =',
+  'Go to photo ${i + 1} of ${list.length}',
+  "k === 'Home'",
+  'sizes={LB_SIZES} className="hidden"',
+);
+has(
+  'R12',
+  'P1-05',
+  'Stat tiles contain their values',
+  'components/stacked-projects.tsx',
+  'min-[340px]:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2',
+  'text-[clamp(1.05rem,5.4vw,1.5rem)] lg:text-2xl',
+);
+has(
+  'R12',
+  'P1-06',
+  'Telemetry lines wrap on phones',
+  'components/about-section.tsx',
+  'min-w-0 [overflow-wrap:anywhere] sm:truncate',
+);
+has(
+  'R12',
+  'P1-07',
+  'Contact never drops a real message',
+  'components/contact-section.tsx',
+  'const markStart = () =>',
+  'onPointerDownCapture={markStart}',
+  'elapsed < 3200',
+);
+has('R12', 'S1', 'ScrollToTop uses a motion value event', 'components/scroll-to-top.tsx', 'useMotionValueEvent');
+has(
+  'R12',
+  'S6',
+  'Hero and marquee pause off-screen',
+  'components/fx/offscreen-pause.tsx',
+  'main > div > section, [data-offscreen-pause]',
+);
+has(
+  'R12',
+  'P2-01',
+  'Scroll lock releases only with the last overlay',
+  'lib/use-scroll-lock.ts',
+  'if (openCount > 0) return;',
+);
+has('R12', 'P2-03', 'Palette scroll lock', 'components/command-palette.tsx', 'useScrollLock(open)');
+has('R12', 'P2-14', 'CSP report target', 'next.config.mjs', 'report-uri /api/csp-report');
+exists('R12', 'P2-14b', 'CSP report sink + scroll probe', 'app/api/csp-report/route.ts', 'scripts/scroll-probe.mjs');
+custom('R12', 'P2-18', 'One-off patch scripts and stale snapshot removed', () => {
+  const left = [
+    'apply_phase_b_1.py',
+    'apply_phase_b_2.py',
+    'apply_phase_b_3.py',
+    'apply_phase_b_4.py',
+    'docs/FULL_CODEBASE.md',
+  ].filter((f) => existsSync(f));
+  return left.length ? `still present: ${left.join(', ')}` : true;
+});
+
 /* ================================================================================================ run */
-const rounds = ['R7', 'R8', 'R9', 'R10', 'R11', 'ALL'];
+const rounds = ['R7', 'R8', 'R9', 'R10', 'R11', 'R12', 'ALL'];
 let failed = 0;
 let total = 0;
 for (const r of rounds) {
