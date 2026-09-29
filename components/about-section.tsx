@@ -1,10 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { m, LayoutGroup } from 'framer-motion';
 import { Server, Cpu, GitBranch, ShieldCheck, Activity, Sparkles, ArrowUpRight, Layers, Code2 } from 'lucide-react';
 import { SplitWords } from './fx/split-words';
 import { FX, SPRING_SOFT } from '@/lib/fx';
+import { startTrail, useInteractionSelect } from '@/lib/interaction-store';
+import { projectsWithSkill, skillKey } from '@/lib/skills';
 
 const architecturePillars = [
   {
@@ -237,6 +239,21 @@ function PillarCard({
 export default function AboutSection() {
   const [activeCard, setActiveCard] = useState<string>('backend');
   const [statusFocus, setStatusFocus] = useState<SkillStatus | null>(null);
+  // FX-38 Evidence Trail: how many project cards use each skill. Read from the project cards' data attributes
+  // after mount (the Projects section is server-rendered below), so the project data stays the single source.
+  const [evidence, setEvidence] = useState<Record<string, number>>({});
+  const trail = useInteractionSelect((s) => s.trail);
+  useEffect(() => {
+    if (!FX.evidenceTrail) return;
+    const counts: Record<string, number> = {};
+    techStackGroups.forEach((g) =>
+      g.skills.forEach((sk) => {
+        const k = skillKey(sk.name);
+        counts[k] = projectsWithSkill(k).length;
+      }),
+    );
+    setEvidence(counts);
+  }, []);
 
   // Accent → Neo-brutalist colour-block mapping (fills always carry black ink text → AAA contrast)
   const colorMap = {
@@ -416,10 +433,35 @@ export default function AboutSection() {
                         : skill.status === 'hackathon'
                           ? 'bg-pop-yellow'
                           : 'bg-pop-blue';
+                    const key = skillKey(skill.name);
+                    const count = evidence[key] ?? 0;
+                    const match = statusFocus ? (skill.status === statusFocus ? 'true' : 'false') : undefined;
+                    if (count > 0) {
+                      const lit = trail?.key === key;
+                      return (
+                        <button
+                          key={skill.name}
+                          type="button"
+                          data-match={match}
+                          aria-pressed={lit}
+                          aria-label={`Trace ${skill.name}: used in ${count} project${count > 1 ? 's' : ''}`}
+                          onClick={() => startTrail(key, skill.name, projectsWithSkill(key))}
+                          className={`nb-chip nb-press fx-stack-chip fx-trail-chip cursor-pointer min-h-[32px] [@media(pointer:coarse)]:min-h-[40px] transition-[transform,box-shadow,color,border-color] duration-200 hover:-translate-y-0.5 hover:shadow-brutal-xs ${
+                            lit ? '!bg-ink !text-white' : ''
+                          }`}
+                        >
+                          <span className={`nb-dot ${dotColor}`} />
+                          {skill.name}
+                          <span aria-hidden className="fx-count">
+                            {count}
+                          </span>
+                        </button>
+                      );
+                    }
                     return (
                       <span
                         key={skill.name}
-                        data-match={statusFocus ? (skill.status === statusFocus ? 'true' : 'false') : undefined}
+                        data-match={match}
                         className="nb-chip fx-stack-chip transition-[transform,box-shadow,color,border-color] duration-200 hover:-translate-y-0.5 hover:shadow-brutal-xs"
                       >
                         <span className={`nb-dot ${dotColor}`} />

@@ -59,10 +59,22 @@ export function PointerField() {
       if (performance.now() - lastScan > 1000) scan();
       visible.forEach(apply);
     };
+    let idleTimer: ReturnType<typeof setTimeout> | undefined;
+    const setIdle = () => {
+      if (FX.depthLock) {
+        visible.forEach((el) => el.style.setProperty('--glare-o', '0.6'));
+      }
+    };
+
     const onMove = (e: PointerEvent) => {
       if (e.pointerType === 'touch') return;
       pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
       pointer.y = (e.clientY / window.innerHeight) * 2 - 1;
+      if (FX.depthLock) {
+        clearTimeout(idleTimer);
+        idleTimer = setTimeout(setIdle, 150);
+        visible.forEach((el) => el.style.removeProperty('--glare-o'));
+      }
       if (!raf) raf = requestAnimationFrame(write);
     };
     const reset = () => {
@@ -76,6 +88,7 @@ export function PointerField() {
       window.removeEventListener('pointermove', onMove);
       root.removeEventListener('pointerleave', reset);
       if (raf) cancelAnimationFrame(raf);
+      clearTimeout(idleTimer);
       io.disconnect();
       delete root.dataset.fxPointer;
       pointer.x = 0;
