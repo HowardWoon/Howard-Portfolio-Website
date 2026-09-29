@@ -812,7 +812,7 @@ export function BlueprintStage({
                 type="button"
                 onClick={onRequestClose}
                 data-autofocus={sheet ? 'true' : undefined}
-                aria-label="Close Blueprint"
+                aria-label="Close blueprint"
                 title="Close"
                 className="flex items-center justify-center w-10 h-10 rounded-full border-3 border-ink bg-white text-ink hover:bg-pop-yellow hover:scale-105 transition-transform shadow-brutal-sm"
               >

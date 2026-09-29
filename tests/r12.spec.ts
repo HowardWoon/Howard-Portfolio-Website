@@ -310,3 +310,11 @@ test('CSP report endpoint accepts a report (P2-14)', async ({ request }) => {
   });
   expect(r.status()).toBe(204);
 });
+
+test('bench closes from its "Close blueprint" button (R11 UI name kept)', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await home(page);
+  const { card } = await openBench(page);
+  await card.getByRole('button', { name: 'Close blueprint' }).click();
+  await expect(card.locator('.fx-blueprint')).toHaveAttribute('data-open', 'false', { timeout: 3000 });
+});
