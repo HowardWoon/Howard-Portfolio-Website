@@ -31,8 +31,12 @@ jobs:
       - name: Reject BOM / mojibake
         run: node scripts/check-encoding.mjs
       - run: npm ci
+      - name: Plan checks (static, R7-R12)
+        run: node scripts/validate-plans.mjs
       - run: npm run typecheck
       - run: npm run lint
+      - name: Format check
+        run: npx prettier --check app components lib tests scripts
       - run: npm run build
       - name: Cache Playwright browsers
         uses: actions/cache@v6

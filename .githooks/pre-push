@@ -1,0 +1,11 @@
+#!/bin/sh
+# Blocks pushes that would turn CI red: runs exactly what CI runs (plan checks, typecheck, lint, format,
+# build and the full Playwright suite). Enabled by `git config core.hooksPath .githooks` (same as pre-commit).
+# Takes about 3 minutes. Never bypass with --no-verify.
+echo "pre-push: running full verification (build + e2e), about 3 minutes..."
+node scripts/verify.mjs --e2e
+status=$?
+if [ $status -ne 0 ]; then
+  echo "pre-push: BLOCKED. CI would fail. Fix the failures above, commit, and push again."
+  exit 1
+fi

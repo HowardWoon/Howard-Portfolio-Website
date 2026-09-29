@@ -76,6 +76,7 @@ else
   });
 
 // 3. Static checks
+run('plan checks (validate-plans.mjs)', 'node scripts/validate-plans.mjs', { timeoutMin: 2 });
 run('typecheck', 'npm run typecheck', { timeoutMin: 5 });
 const lint = run('lint', 'npm run lint', { timeoutMin: 5 });
 const warn = (lint.out.match(/(\d+) warnings?/) || [])[1];

@@ -834,9 +834,11 @@ nowhere(
   "framer-motion 'motion' is never imported (use m.* inside LazyMotion)",
   /import\s*{[^}]*\bmotion\b[^}]*}\s*from\s*'framer-motion'/,
 );
-custom('ALL', 'G2', 'No test.skip / test.only anywhere in tests/', () => {
-  const hit = walk('tests').find((f) => /\btest\.(skip|only)\(/.test(read(f)));
-  return hit ? `${hit} uses test.skip/only` : true;
+// Every silencing form counts: test.skip / test.only / test.fixme and the describe.* variants
+// (a `test.describe.skip` once hid the R11 phone test from CI while CI stayed green).
+custom('ALL', 'G2', 'No skipped / focused / fixme tests anywhere in tests/', () => {
+  const hit = walk('tests').find((f) => /\btest\.(?:describe\.)?(?:skip|only|fixme)\(/.test(read(f)));
+  return hit ? `${hit} uses skip/only/fixme` : true;
 });
 // R12 P2-17 removed the "exactly 45" constraint (it forced useful tests to be deleted). The suite may grow;
 // it must never shrink below the R7-R11 baseline.
