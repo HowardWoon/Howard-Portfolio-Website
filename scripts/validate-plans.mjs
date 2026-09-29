@@ -1002,8 +1002,81 @@ custom('R12', 'P2-18', 'One-off patch scripts and stale snapshot removed', () =>
   return left.length ? `still present: ${left.join(', ')}` : true;
 });
 
+/* ================================================================================================ R13 */
+has(
+  'R13',
+  'FX',
+  'FX-55 … FX-60 flags',
+  'lib/fx.ts',
+  'kickerDecode:',
+  'pressStamp:',
+  'sectionScan:',
+  'tilt3d:',
+  'titleWave:',
+  'ambientOrbits:',
+);
+has(
+  'R13',
+  'LAZY',
+  'AmbientFx is code-split from the client module',
+  'components/lazy-sections.tsx',
+  'export const AmbientFx = dynamic(',
+  "import('@/components/fx/ambient-fx')",
+);
+has(
+  'R13',
+  'FX-55',
+  'Kicker decode restores the exact text, off for reduced motion',
+  'components/fx/ambient-fx.tsx',
+  'text.data = final',
+  'prefersReducedMotion()',
+  '.nb-kicker',
+);
+has(
+  'R13',
+  'FX-56',
+  'Press stamp: delegated, aria-hidden, self-removing',
+  'components/fx/ambient-fx.tsx',
+  "addEventListener('pointerdown'",
+  "setAttribute('aria-hidden', 'true')",
+  'el.remove()',
+);
+has(
+  'R13',
+  'CSS',
+  'Stamp / scan / tilt / wave CSS gated by motion, Calm and flags',
+  'app/globals.css',
+  '@keyframes fx-stamp',
+  '@keyframes fx-section-scan',
+  ':not(.fx-off-sectionScan)',
+  ':not(.fx-off-tilt3d)',
+  ':not(.fx-off-titleWave)',
+  'rotate: 1 -1 0 14deg',
+);
+has(
+  'R13',
+  'FX-60',
+  'Orbits are decorative, hidden below xl, paused off-screen',
+  'components/fx/ambient-orbits.tsx',
+  'aria-hidden',
+  'hidden xl:block',
+  'animate-spin-slow',
+  'pointer-events-none',
+);
+has(
+  'R13',
+  'TEST',
+  'R13 regression tests',
+  'tests/r13.spec.ts',
+  '(FX-55)',
+  '(FX-56)',
+  'FX-57, FX-58, FX-59',
+  '(FX-60)',
+  'reduced motion',
+);
+
 /* ================================================================================================ run */
-const rounds = ['R7', 'R8', 'R9', 'R10', 'R11', 'R12', 'ALL'];
+const rounds = ['R7', 'R8', 'R9', 'R10', 'R11', 'R12', 'R13', 'ALL'];
 let failed = 0;
 let total = 0;
 for (const r of rounds) {
