@@ -191,6 +191,8 @@ export function BlueprintStage({
       bottom: 16,
       plates: plates.current.map((el) => [el.offsetTop, el.offsetTop + el.offsetHeight] as [number, number]),
     };
+    // sheet mode: the stage is flex-1 (no inline height), so feed its real height to the scan line
+    stage.style.setProperty('--bp-h', `${stage.clientHeight}px`);
   }, []);
 
   const apply = useCallback(() => {
@@ -207,7 +209,7 @@ export function BlueprintStage({
       const stagger = clamp(v.k * 1.35 - n * 0.05, 0, 1);
       const gn = v.g * stagger;
       const lift = isoN === n ? LIFT * v.l * v.k : 0;
-      el.style.transform = `translate3d(0px, ${(n * sd * gn).toFixed(2)}px ${(n * gn + lift).toFixed(2)}px)`;
+      el.style.transform = `translate3d(0px, ${(n * sd * gn).toFixed(2)}px, ${(n * gn + lift).toFixed(2)}px)`;
     });
     stack.style.transform = `rotateX(${v.p.toFixed(2)}deg) rotateZ(${v.y.toFixed(2)}deg)`;
     if (gizmoRef.current)
@@ -297,17 +299,22 @@ export function BlueprintStage({
   /* ------------------------------------------------------------------ open / close lifecycle */
   const openView = () => ({ ...PRESETS.iso, g: OPEN_GAP, z: 1, px: 0, py: 0, k: 1, l: 0 });
 
+  // inline stage height = what is really visible under the fixed header, never taller than the closed column
+  const naturalH = useRef(0);
+  const computeStageH = useCallback(() => {
+    const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 80;
+    const avail = window.innerHeight - headerH - 24;
+    const target = Math.round(clamp(avail * 0.72, 320, 680));
+    return naturalH.current > 0 ? Math.min(target, Math.max(320, naturalH.current)) : target;
+  }, []);
+
   useLayoutEffect(() => {
     const stage = stageRef.current;
     if (!stage) return;
     if (open && !mounted) {
+      naturalH.current = stage.offsetHeight;
       setPlaceholderH(stage.offsetHeight);
-      if (!sheet) {
-        const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 80;
-        const avail = window.innerHeight - headerH - 24;
-        const target = Math.round(clamp(avail * 0.72, 320, 680));
-        setStageH(target);
-      }
+      if (!sheet) setStageH(computeStageH());
       setMounted(true);
     } else if (open && mounted) {
       // re-opened while the close animation was still running
@@ -357,10 +364,7 @@ export function BlueprintStage({
     const onResize = () => {
       window.clearTimeout(t);
       t = window.setTimeout(() => {
-        const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 80;
-        const avail = window.innerHeight - headerH - 24;
-        const target = Math.round(clamp(avail * 0.72, 320, 680));
-        setStageH(target);
+        if (!sheetRef.current) setStageH(computeStageH()); // the sheet is flex-1: it follows the viewport by itself
         requestAnimationFrame(() => {
           measure();
           apply();
@@ -368,11 +372,13 @@ export function BlueprintStage({
       }, 120);
     };
     window.addEventListener('resize', onResize);
+    window.addEventListener('orientationchange', onResize);
     return () => {
       window.removeEventListener('resize', onResize);
+      window.removeEventListener('orientationchange', onResize);
       window.clearTimeout(t);
     };
-  }, [mounted, measure, apply]);
+  }, [mounted, measure, apply, computeStageH]);
 
   /* ------------------------------------------------------------------ isolation (layer inspection) */
   useEffect(() => {
@@ -410,6 +416,18 @@ export function BlueprintStage({
     if (!mounted || !open || !sheet) return;
     const t = window.setTimeout(() => setIso((c) => (c === null ? 0 : c)), still() ? 0 : 1200);
     return () => window.clearTimeout(t);
+  }, [mounted, open, sheet]);
+
+  // sheet: a one-time gesture hint, gone after a few seconds or at the first touch
+  const [hint, setHint] = useState(false);
+  useEffect(() => {
+    if (!mounted || !open || !sheet) return;
+    setHint(true);
+    const t = window.setTimeout(() => setHint(false), 4500);
+    return () => {
+      window.clearTimeout(t);
+      setHint(false);
+    };
   }, [mounted, open, sheet]);
 
   const toggleIso = (n: number) => setIso((cur) => (cur === n ? null : n));
@@ -467,6 +485,7 @@ export function BlueprintStage({
   const onPointerDown = (e: React.PointerEvent) => {
     if (!mounted || (e.pointerType === 'mouse' && e.button !== 0)) return;
     if ((e.target as HTMLElement).closest('[data-bp-ui]')) return;
+    setHint(false);
     ptrs.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     const d = drag.current;
     if (ptrs.current.size === 2) {
@@ -501,10 +520,6 @@ export function BlueprintStage({
     ptrs.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     const d = drag.current;
     const v = view.current;
-    if (sheetRef.current && isoRef.current !== null && tool === 'orbit') {
-      apply();
-      return;
-    }
     if (ptrs.current.size === 2 && d.pinch > 0) {
       const [a, b] = Array.from(ptrs.current.values());
       v.z = clamp((d.z0 * Math.hypot(a.x - b.x, a.y - b.y)) / d.pinch, Z_MIN, Z_MAX);
@@ -512,6 +527,8 @@ export function BlueprintStage({
       apply();
       return;
     }
+    // sheet + a plate isolated: one-finger horizontal moves are layer flicks (handled on release), not orbit
+    if (sheetRef.current && isoRef.current !== null && tool === 'orbit') return;
     if (!d.active) {
       if (Math.hypot(e.clientX - d.sx, e.clientY - d.sy) < 6) return;
       d.active = true;
@@ -547,9 +564,17 @@ export function BlueprintStage({
   const endPointer = (e: React.PointerEvent) => {
     ptrs.current.delete(e.pointerId);
     const d = drag.current;
+    // one finger of a pinch lifted: continue from where the remaining finger is now (no jump), no flick
+    if (ptrs.current.size === 1) {
+      const [p] = Array.from(ptrs.current.values());
+      Object.assign(d, { pinch: -1, lx: p.x, ly: p.y, vx: 0, vy: 0, t: performance.now() });
+      return;
+    }
+    const wasPinch = d.pinch !== 0;
     const dx = e.clientX - d.x0,
       dy = e.clientY - d.y0;
     if (
+      !wasPinch &&
       sheetRef.current &&
       isoRef.current !== null &&
       Math.abs(dx) > 60 &&
@@ -585,6 +610,7 @@ export function BlueprintStage({
   };
 
   // a drag must never also "click" a link/plate underneath; a plain click on a plate isolates it
+  const lastTap = useRef(0);
   const onClickCapture = (e: React.MouseEvent) => {
     if (!mounted) return;
     if (drag.current.moved) {
@@ -595,6 +621,16 @@ export function BlueprintStage({
     }
     const target = e.target as HTMLElement;
     if (target.closest('a,button,input,[data-bp-ui]')) return;
+    // sheet: double-tap anywhere on the stage returns to the whole model
+    const now = performance.now();
+    const double = sheetRef.current && now - lastTap.current < 320;
+    lastTap.current = double ? 0 : now;
+    if (double) {
+      e.preventDefault();
+      e.stopPropagation();
+      setIso(null);
+      return;
+    }
     const plate = target.closest<HTMLElement>('.fx-layer');
     const n = plate ? plates.current.indexOf(plate) : -1;
     if (n >= 0) toggleIso(n);
@@ -726,6 +762,15 @@ export function BlueprintStage({
           {/* scan line + corner ticks (decorative) */}
           <span aria-hidden className="bp-scan" />
           <span aria-hidden className="bp-corner bp-corner-br" />
+
+          {sheet && hint ? (
+            <span
+              aria-hidden
+              className="absolute left-1/2 bottom-3 -translate-x-1/2 z-20 w-max max-w-[calc(100%-1.5rem)] nb-tag bg-ink text-white text-[0.62rem] pointer-events-none"
+            >
+              SWIPE ← → FOR LAYERS · PINCH TO ZOOM
+            </span>
+          ) : null}
 
           {/* head: title + live readout + gizmo + close */}
           <div

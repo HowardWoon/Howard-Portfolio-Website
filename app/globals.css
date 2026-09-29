@@ -34,6 +34,12 @@
     }
   }
 
+  /* P2-02: the portfolio page no longer shifts sideways when a modal locks scrolling. Scoped to the page with
+     the site header (always taller than the screen), so short pages never show an empty gutter strip. */
+  html:has(.site-header) {
+    scrollbar-gutter: stable;
+  }
+
   html {
     background-color: var(--paper);
     color: var(--ink);
@@ -712,6 +718,11 @@ html.hw-booted .boot-overlay {
       24px 24px;
     box-shadow: inset 0 0 0 3px #0a0a0a;
   }
+  /* full-screen sheet: page scroll is locked, so one-finger drags orbit in both axes */
+  .fx-blueprint[data-open='true'][data-sheet] {
+    touch-action: none;
+    border-radius: 16px;
+  }
   .fx-blueprint[data-open='true'][data-tool='pan'] {
     touch-action: none;
     cursor: move;
@@ -742,7 +753,7 @@ html.hw-booted .boot-overlay {
       0 0 0 12.5px #0a0a0a,
       7px 9px 0 12.5px rgb(10 10 10 / 0.22);
     transition:
-      translate 0.35s cubic-bezier(0.2, 0.9, 0.1, 1),
+      transform 0.35s cubic-bezier(0.2, 0.9, 0.1, 1),
       opacity 0.3s ease,
       box-shadow 0.3s ease,
       filter 0.3s ease;
@@ -1015,6 +1026,12 @@ html.hw-booted .boot-overlay {
     opacity: 0.22;
     filter: grayscale(1);
   }
+  /* phones: opacity only - a grayscale filter on 2,500 px tall cards is a huge off-screen surface (P2-10) */
+  @media (pointer: coarse) {
+    [data-focus-active] > .fx-project-shell:not([data-focused]) {
+      filter: none;
+    }
+  }
   [data-focus-active] > .fx-project-shell[data-focused] [id^='project-'] {
     outline: 4px solid #ffc700;
     outline-offset: 6px;
@@ -1022,6 +1039,7 @@ html.hw-booted .boot-overlay {
 
   /* FX-38 Evidence Trail: cards and index tiles on the trail get a blue hard outline */
   .fx-project-shell[data-trail-hit] [id^='project-'],
+  .fx-project-shell[data-preview] [id^='project-'],
   .fx-trail-hit {
     outline: 3px dashed #2b4bff;
     outline-offset: 5px;
