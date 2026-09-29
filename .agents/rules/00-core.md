@@ -25,7 +25,7 @@ You are working on Howard Woon's live portfolio. Recruiters see every mistake. B
 - Never write ad-hoc regex "mass edit" scripts over many files (the old `fix.py` that stripped `'use client'` and rewrote `</motion.div>` is an example of what not to do). Edit files individually and review each diff.
 
 ## D. Git hygiene
-- Work on a branch: `fix/<short-topic>` or `feat/<short-topic>`. One logical change per commit. Message format: `type(scope): summary` (types: fix, feat, perf, a11y, refactor, test, chore, docs).
+- Work directly on `main`. One logical change per commit. Message format: `type(scope): summary` (types: fix, feat, perf, a11y, refactor, test, chore, docs).
 - Never commit: virtual environments, `node_modules`, `.next`, `.env*` files with secrets, patch/diff files, temp or transcript files, screenshots used for debugging, `desktop.ini`/`Thumbs.db`, helper scripts written only for one task. Check `git status` before every commit.
 - Never force-push `main`. Never rewrite history unless Howard asks.
 

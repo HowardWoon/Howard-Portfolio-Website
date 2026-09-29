@@ -41,7 +41,7 @@ trigger: always_on
 4. After every edit run `node scripts/check-encoding.mjs`. Exit code must be 0.
 
 ## E. Git safety
-1. Work on a branch `fix/<id>-<topic>`, never directly on main.
+1. Commit on `main` only after `node scripts/verify.mjs --e2e` passes.
 2. Before commit: `node scripts/verify.mjs --no-build` must print `RESULT: ALL PASS`.
    The pre-commit hook enforces this. NEVER use `git commit --no-verify`.
 3. Never `git push --force`, `git reset --hard`, `git clean -fd` or `git rebase` on main without Howard's written OK.

@@ -331,6 +331,7 @@ function ProjectCard({ project }: { project: ProjectData }) {
   React.useEffect(() => {
     if (!blueprint) return;
     const onKey = (e: KeyboardEvent) => {
+      if (document.querySelector('[aria-modal="true"]')) return;
       if (e.key === 'Escape') setBlueprint(false);
     };
     window.addEventListener('keydown', onKey);

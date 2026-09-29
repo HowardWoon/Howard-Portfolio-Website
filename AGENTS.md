@@ -15,7 +15,7 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
 ## 3. Start-of-task checklist (every single task)
 1. Read this file and ALL of `.agents/rules/*.md` (00, 05, 06, 10, 20, 40). If any of them is missing or empty, STOP and tell Howard.
 2. First line of your reply: the `RULES ACK:` line defined in `.agents/rules/05-obedience.md` section A.
-3. Run `git status` and `git log --oneline -5`. You must be on a `fix/...` branch that is up to date with origin/main.
+3. Run `git status` and `git log --oneline -5`. You must be on `main`, up to date with `origin/main`.
 4. Restate the request in one sentence and list the exact files you expect to touch.
    If anything touches content, design, links, JSON-LD, dependencies or CSP: write "APPROVAL NEEDED:" and stop.
 5. Read every file you will edit in full before editing it.

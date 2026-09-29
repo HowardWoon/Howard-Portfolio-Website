@@ -33,7 +33,7 @@ export function SiteHeader() {
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6 }}
-        className="flex items-center gap-2 xs:gap-3 sm:gap-4 min-w-0"
+        className="flex items-center gap-2 xs:gap-3 sm:gap-4 min-w-0 xl:shrink-0"
       >
         <a href="#" aria-label="Back to top" className="shrink-0 rounded-2xl p-1 -m-1">
           <Image
@@ -65,7 +65,7 @@ export function SiteHeader() {
         transition={{ duration: 0.6 }}
         className="flex items-center gap-2 sm:gap-4 shrink-0"
       >
-        <div className="hidden lg:flex items-center gap-2.5 bg-white px-4 py-2 rounded-full border-3 border-ink shadow-brutal-sm">
+        <div className="hidden lg:flex xl:hidden min-[1680px]:flex items-center gap-2.5 bg-white px-4 py-2 rounded-full border-3 border-ink shadow-brutal-sm">
           <span className="nb-led" aria-hidden />
           <span className="text-xs font-mono font-extrabold tracking-[0.08em] text-ink">AVAILABLE FOR HIRE 2026</span>
         </div>

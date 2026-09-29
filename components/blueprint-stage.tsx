@@ -132,6 +132,12 @@ export function BlueprintStage({
   const [preview, setPreview] = useState<number | null>(null);
   const [tool, setTool] = useState<'orbit' | 'pan'>('orbit');
   const [spin, setSpin] = useState(false);
+  const spinRaf = useRef(0);
+  const stopSpin = useCallback(() => {
+    cancelAnimationFrame(spinRaf.current);
+    spinRaf.current = 0;
+    setSpin(false);
+  }, []);
   const [preset, setPreset] = useState<Preset | null>('iso');
   const [coarse, setCoarse] = useState(false);
 
@@ -275,10 +281,9 @@ export function BlueprintStage({
       // freeze the stage at (at most) ~78% of the viewport so the whole model is visible at once
       const natural = stage.offsetHeight;
       // the console sits BELOW the stage, so the stage itself gets ~60-70% of the viewport
-      const narrow = stage.clientWidth < 560;
-      const target = Math.round(
-        narrow ? clamp(window.innerHeight * 0.66, 380, 600) : clamp(window.innerHeight * 0.68, 440, 680),
-      );
+      const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 80;
+      const avail = window.innerHeight - headerH - 24;
+      const target = Math.round(clamp(avail * 0.72, 320, 680));
       setStageH(Math.min(natural, target));
       setCoarse(window.matchMedia('(pointer: coarse)').matches);
       setMounted(true);
@@ -288,7 +293,7 @@ export function BlueprintStage({
       tween(openView(), 600, syncGapInput);
     } else if (!open && mounted) {
       // close: re-assemble (tween back to identity), then hand the column back to normal flow
-      setSpin(false);
+      stopSpin();
       setIso(null);
       isoRef.current = null;
       tween({ ...CLOSED }, 600, () => {
@@ -330,8 +335,14 @@ export function BlueprintStage({
     const onResize = () => {
       window.clearTimeout(t);
       t = window.setTimeout(() => {
-        measure();
-        apply();
+        const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 80;
+        const avail = window.innerHeight - headerH - 24;
+        const target = Math.round(clamp(avail * 0.72, 320, 680));
+        setStageH(target);
+        requestAnimationFrame(() => {
+          measure();
+          apply();
+        });
       }, 120);
     };
     window.addEventListener('resize', onResize);
@@ -355,7 +366,7 @@ export function BlueprintStage({
     if (!mounted || !open) return;
     if (isoRef.current === iso) return;
     isoRef.current = iso;
-    setSpin(false);
+    stopSpin();
     const v = view.current;
     if (iso === null) {
       tween({ l: 0, px: 0, py: 0 }, 600);
@@ -375,6 +386,10 @@ export function BlueprintStage({
       return next < 0 || next >= BP_LAYERS.length ? null : next;
     });
 
+  /* ------------------------------------------------------------------ pointer: orbit / pan / pinch */
+  const ptrs = useRef(new Map<number, { x: number; y: number }>());
+  const drag = useRef({ active: false, sx: 0, sy: 0, lx: 0, ly: 0, vx: 0, vy: 0, t: 0, pinch: 0, z0: 1, moved: false });
+
   /* ------------------------------------------------------------------ auto-rotate (turntable) */
   useEffect(() => {
     if (!spin || !mounted) return;
@@ -389,15 +404,16 @@ export function BlueprintStage({
     const step = (now: number) => {
       view.current.y = clamp(base + 34 * Math.sin((now - t0) / 1400), Y_MIN, Y_MAX);
       apply();
-      raf.current = requestAnimationFrame(step);
+      spinRaf.current = requestAnimationFrame(step);
     };
-    raf.current = requestAnimationFrame(step);
-    return () => stop();
+    spinRaf.current = requestAnimationFrame(step);
+    const d = drag.current;
+    return () => {
+      cancelAnimationFrame(spinRaf.current);
+      spinRaf.current = 0;
+      if (!raf.current && !d.active) live(false);
+    };
   }, [spin, mounted, apply, live, stop]);
-
-  /* ------------------------------------------------------------------ pointer: orbit / pan / pinch */
-  const ptrs = useRef(new Map<number, { x: number; y: number }>());
-  const drag = useRef({ active: false, sx: 0, sy: 0, lx: 0, ly: 0, vx: 0, vy: 0, t: 0, pinch: 0, z0: 1, moved: false });
 
   const onPointerDown = (e: React.PointerEvent) => {
     if (!mounted || (e.pointerType === 'mouse' && e.button !== 0)) return;
@@ -445,7 +461,7 @@ export function BlueprintStage({
       d.active = true;
       d.moved = true;
       stop();
-      setSpin(false);
+      stopSpin();
       setPreset(null);
       stageRef.current?.setPointerCapture(e.pointerId);
       stageRef.current?.setAttribute('data-bp-dragging', '');
@@ -575,17 +591,17 @@ export function BlueprintStage({
 
   /* ------------------------------------------------------------------ console actions */
   const goPreset = (key: Preset) => {
-    setSpin(false);
+    stopSpin();
     setPreset(key);
     tween({ p: PRESETS[key].p, y: PRESETS[key].y, px: 0, py: 0 });
   };
   const zoomBy = (f: number) => {
-    setSpin(false);
+    stopSpin();
     setPreset(null);
     tween({ z: clamp(view.current.z * f, Z_MIN, Z_MAX) }, 250);
   };
   function reset() {
-    setSpin(false);
+    stopSpin();
     isoRef.current = null; // handled here, so the fly-to effect does not start a competing tween
     setIso(null);
     setPreset('iso');
