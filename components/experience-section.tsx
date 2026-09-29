@@ -20,7 +20,6 @@ import {
   BarChart3,
   Receipt,
   ChevronDown,
-  ChevronUp,
 } from 'lucide-react';
 
 type FilterCategory = 'all' | 'corporate' | 'leadership' | 'academic';
@@ -436,11 +435,12 @@ function PekomTreasurerDashboard() {
                     {event.name}
                   </span>
                   <span className="grid place-items-center w-8 h-8 shrink-0 rounded-full border-2 border-ink bg-white">
-                    {isExpanded ? (
-                      <ChevronUp className="w-4 h-4 text-ink" strokeWidth={3} />
-                    ) : (
-                      <ChevronDown className="w-4 h-4 text-ink" strokeWidth={3} />
-                    )}
+                    {/* FX-72: one chevron that turns, instead of two icons swapping */}
+                    <ChevronDown
+                      className={`fx-morph w-4 h-4 text-ink ${isExpanded ? 'rotate-180' : ''}`}
+                      strokeWidth={3}
+                      aria-hidden
+                    />
                   </span>
                 </button>
 
@@ -491,7 +491,7 @@ export default function ExperienceSection() {
   return (
     <section
       id="experience"
-      className="relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-hidden border-t-3 border-ink"
+      className="relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-clip border-t-3 border-ink"
     >
       {/* Bauhaus accents */}
       <div

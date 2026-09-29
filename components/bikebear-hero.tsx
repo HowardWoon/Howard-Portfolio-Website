@@ -31,7 +31,8 @@ function MagnifiedHeadline() {
   };
 
   // Mouse / pen only. On phones a tap fires a synthetic mousemove with no mouseleave, which used to
-  // leave the headline stuck at 25% opacity with a magnifier circle frozen on screen.
+  // leave a magnifier circle frozen on screen. The headline itself stays solid under the lens (it used to fade
+  // to 25 %, which read as washed-out grey), and the lens has no clip-path transition, so it never trails.
   const handlePointerMove = (e: React.PointerEvent) => {
     if (e.pointerType === 'touch' || !containerRef.current) return;
     const { x, y } = toLocal(containerRef.current, e.clientX, e.clientY);
@@ -63,9 +64,7 @@ function MagnifiedHeadline() {
       className="group/headline relative space-y-2"
     >
       {/* Base Normal Text */}
-      <h2
-        className={`${headlineClass} text-ink transition-opacity duration-300 group-data-[hover=true]/headline:opacity-25 fx-letterpress fx-aberration`}
-      >
+      <h2 className={`${headlineClass} text-ink fx-letterpress fx-aberration`}>
         ENGINEERING <br />
         {FX.headlineStamp ? (
           // FX-05 stamp, in CSS since R14 (.fx-stamp-in): the words are in the server HTML from the first paint
@@ -80,7 +79,7 @@ function MagnifiedHeadline() {
       {/* Scaled X-Ray Magnification Text (decorative duplicate) */}
       <div
         aria-hidden="true"
-        className={`${headlineClass} text-pop-blue absolute inset-0 pointer-events-none opacity-0 transition-[opacity,clip-path] duration-150 group-data-[hover=true]/headline:opacity-100`}
+        className={`${headlineClass} text-pop-blue absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-150 group-data-[hover=true]/headline:opacity-100`}
         style={{
           ...(FX.heroInspection
             ? {

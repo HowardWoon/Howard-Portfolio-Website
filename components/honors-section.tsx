@@ -23,7 +23,6 @@ import {
   X,
   CheckCircle2,
   ChevronDown,
-  ChevronUp,
   Calendar,
   ExternalLink,
   FileText,
@@ -411,7 +410,7 @@ export default function HonorsSection() {
   return (
     <section
       id="honors"
-      className="relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-hidden border-t-3 border-ink flex flex-col"
+      className="relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-clip border-t-3 border-ink flex flex-col"
     >
       {/* Structural grid + Bauhaus accents */}
       {FX.ambientOrbits ? <AmbientOrbits side="left" square="bg-pop-red" /> : null}
@@ -487,11 +486,12 @@ export default function HonorsSection() {
                   <span className="flex items-center gap-2 text-ink">
                     <span className="font-mono text-sm font-extrabold">[{cat.count}]</span>
                     <span className="grid place-items-center w-8 h-8 rounded-full border-2 border-ink bg-white">
-                      {isActive ? (
-                        <ChevronUp className="w-4 h-4" strokeWidth={3} />
-                      ) : (
-                        <ChevronDown className="w-4 h-4" strokeWidth={3} />
-                      )}
+                      {/* FX-72: one chevron that turns, instead of two icons swapping */}
+                      <ChevronDown
+                        className={`fx-morph w-4 h-4 ${isActive ? 'rotate-180' : ''}`}
+                        strokeWidth={3}
+                        aria-hidden
+                      />
                     </span>
                   </span>
                 </span>

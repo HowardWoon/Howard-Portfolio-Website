@@ -94,9 +94,10 @@ export function LogoWall() {
     >
       <div className="relative z-[1] flex flex-col items-center gap-4 px-4 mb-10 sm:mb-14 text-center">
         <span className="nb-kicker bg-white">TRACK RECORD // ARENAS &amp; STACK</span>
+        {/* FX-75: stage curtains part to reveal the title (CSS, globals.css) */}
         <h2
           id="arena-wall-title"
-          className="nb-title text-[clamp(1.9rem,8vw,4.5rem)] leading-[0.95] flex flex-wrap items-center justify-center gap-x-4 gap-y-1"
+          className="fx-curtain nb-title text-[clamp(1.9rem,8vw,4.5rem)] leading-[0.95] flex flex-wrap items-center justify-center gap-x-4 gap-y-1"
         >
           <span className="font-bold">WHERE I BUILD</span>
           <span aria-hidden className="inline-block w-10 sm:w-16 h-[5px] bg-white border-2 border-ink" />

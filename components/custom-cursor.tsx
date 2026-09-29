@@ -96,14 +96,8 @@ export function CustomCursor() {
 
   return (
     <>
-      {/* Dot */}
-      <m.div
-        aria-hidden
-        className={`fx-cursor fixed top-0 left-0 rounded-full pointer-events-none z-[100000] border-2 border-ink bg-pop-yellow`}
-        animate={{ width: isPointer || customText ? 8 : 14, height: isPointer || customText ? 8 : 14 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-        style={{ x: cursorX, y: cursorY, translateX: '-50%', translateY: '-50%', opacity: isHidden ? 0 : 1 }}
-      />
+      {/* Dot: drawn by the operating system as a CSS cursor image (globals.css, `html.has-custom-cursor`), so it is
+          exactly where the mouse is with zero lag. A JS-driven dot is always at least one frame behind. */}
 
       {/* Ring — follows exactly (no spring lag so text is readable). Hidden over the hero portrait: there the Spider-Man reveal circle follows the pointer exactly. */}
       <m.div

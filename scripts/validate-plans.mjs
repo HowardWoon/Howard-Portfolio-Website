@@ -1256,8 +1256,35 @@ has('R14', 'FX-71e', 'Arena Wall tests', 'tests/arena-wall.spec.ts', 'keyboard: 
 has('R14', 'FX-71f', 'Arena Wall flag', 'lib/fx.ts', 'logoWall: true');
 has('R14', 'TEST', 'R14 regression tests', 'tests/r14.spec.ts', '(B-01)', '(B-02)', '(B-04)', '(FX-65)', '(FX-69)');
 
+/* ================================================================================================ R15 */
+has('R15', 'FX', 'FX-72 … FX-75 flags', 'lib/fx.ts', 'iconMorph:', 'focusLock:', 'kineticType:', 'curtainGate:');
+has('R15', 'FX-72', 'Honours chevron turns (one icon)', 'components/honors-section.tsx', 'fx-morph');
+has('R15', 'FX-72b', 'PEKOM chevron turns (one icon)', 'components/experience-section.tsx', 'fx-morph');
+has(
+  'R15',
+  'CSS',
+  'FX-72 … FX-75 CSS',
+  'app/globals.css',
+  '.fx-morph {',
+  '@keyframes fx-focus-lock',
+  '@keyframes fx-weight',
+  '@keyframes fx-curtain-l',
+);
+has('R15', 'FX-75', 'Arena Wall title carries the curtain', 'components/logo-wall.tsx', 'fx-curtain nb-title');
+for (const f of ['about', 'experience', 'honors', 'contact'])
+  lacks(
+    'R15',
+    `CLIP-${f}`,
+    `#${f} clips with overflow-clip (overflow-hidden captures view() timelines)`,
+    `components/${f}-section.tsx`,
+    'text-ink py-24 sm:py-28 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-hidden',
+    'text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-hidden',
+    'pb-0 overflow-hidden',
+  );
+has('R15', 'TEST', 'R15 regression tests', 'tests/r15.spec.ts', '(FX-72)', '(FX-73)', '(FX-74)', '(FX-75)', 'overflow');
+
 /* ================================================================================================ run */
-const rounds = ['R7', 'R8', 'R9', 'R10', 'R11', 'R12', 'R13', 'R14', 'ALL'];
+const rounds = ['R7', 'R8', 'R9', 'R10', 'R11', 'R12', 'R13', 'R14', 'R15', 'ALL'];
 let failed = 0;
 let total = 0;
 for (const r of rounds) {

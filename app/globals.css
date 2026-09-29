@@ -199,11 +199,21 @@ html.lenis body {
 
 /* Custom cursor: only hide the native cursor once the JS cursor is actually mounted
    (class is added by <CustomCursor/>). Text fields always keep the I-beam. */
-html.has-custom-cursor body,
+/* The cursor dot is a native cursor image (same yellow dot, ink border): the OS draws it, so it never lags.
+   14 px dot everywhere, 8 px over links and buttons (where the JS ring grows around it). */
+html.has-custom-cursor body {
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Ccircle cx='8' cy='8' r='6' fill='%23FFC700' stroke='%230A0A0A' stroke-width='2'/%3E%3C/svg%3E")
+      8 8,
+    auto;
+}
 html.has-custom-cursor a,
 html.has-custom-cursor button,
 html.has-custom-cursor [role='button'] {
-  cursor: none !important;
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10'%3E%3Ccircle cx='5' cy='5' r='4' fill='%23FFC700' stroke='%230A0A0A' stroke-width='2'/%3E%3C/svg%3E")
+      5 5,
+    pointer !important;
 }
 html.has-custom-cursor input,
 html.has-custom-cursor textarea,
@@ -1486,6 +1496,92 @@ html[data-motion='calm'] .fx-wall-track > .fx-seal[aria-hidden='true'] {
   .fx-seal,
   .fx-seal-fill {
     transition: none;
+  }
+}
+
+/* ================================================================ Round 15 (lecturer's UI/UX list) */
+/* FX-72 icon morph: one chevron turns with a small spring overshoot instead of two icons swapping */
+.fx-morph {
+  transition: transform 0.45s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* FX-73 focus lock-on: the keyboard focus ring starts wide and snaps onto its target */
+  html:not([data-motion='calm']):not(.fx-off-focusLock) :focus-visible {
+    animation: fx-focus-lock 0.32s cubic-bezier(0.2, 0.9, 0.1, 1.3);
+  }
+}
+@keyframes fx-focus-lock {
+  from {
+    outline-offset: 12px;
+    outline-color: transparent;
+  }
+}
+
+/* FX-74 kinetic type: section titles gain weight (Bricolage Grotesque is variable) as they rise into view.
+   Runs alongside the FX-B12 rise on the same element; the end state is the designed extra-bold. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-motion='calm']):not(.fx-off-cssReveal):not(.fx-off-kineticType) .fx-rise.nb-title {
+      animation:
+        fx-hero-in linear both,
+        fx-weight linear both;
+      animation-timeline: view(), view();
+      animation-range:
+        entry 0% entry 45%,
+        entry 10% cover 35%;
+    }
+  }
+}
+@keyframes fx-weight {
+  from {
+    font-weight: 300;
+    letter-spacing: 0.02em;
+  }
+  to {
+    font-weight: 800;
+  }
+}
+
+/* FX-75 curtain gate: two panels (ink / blue) part like stage curtains as the Arena Wall title scrolls up */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-motion='calm']):not(.fx-off-curtainGate) .fx-curtain {
+      position: relative;
+    }
+    html:not([data-motion='calm']):not(.fx-off-curtainGate) .fx-curtain::before,
+    html:not([data-motion='calm']):not(.fx-off-curtainGate) .fx-curtain::after {
+      content: '';
+      position: absolute;
+      top: -6px;
+      bottom: -6px;
+      width: 51%;
+      z-index: 2;
+      pointer-events: none;
+      border: 3px solid var(--ink);
+      animation: fx-curtain-l linear both;
+      animation-timeline: view();
+      animation-range: entry 60% cover 45%;
+    }
+    html:not([data-motion='calm']):not(.fx-off-curtainGate) .fx-curtain::before {
+      left: -1%;
+      background: var(--ink);
+    }
+    html:not([data-motion='calm']):not(.fx-off-curtainGate) .fx-curtain::after {
+      right: -1%;
+      background: var(--pop-blue);
+      animation-name: fx-curtain-r;
+    }
+  }
+}
+@keyframes fx-curtain-l {
+  to {
+    translate: -110vw 0;
+  }
+}
+@keyframes fx-curtain-r {
+  to {
+    translate: 110vw 0;
   }
 }
 

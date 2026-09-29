@@ -75,6 +75,11 @@ export const FX = {
   lampSpot: true, // FX-67 a soft lamp light follows the mouse over dark surfaces
   hapticTick: true, // FX-68 a tiny vibration on Android when a press stamp fires
   deepLinks: true, // FX-69 ?bp=<project>:L<n> and ?photo=<gallery>:<n> open that exact view; copy-link buttons
+  // ---- Round 15 (lecturer's UI/UX list; CSS only, off for reduced motion / Calm) ----
+  iconMorph: true, // FX-72 accordion chevrons turn (spring) instead of swapping icons
+  focusLock: true, // FX-73 the keyboard focus ring snaps onto its target like a lock-on
+  kineticType: true, // FX-74 section titles gain weight (variable font) as they scroll in
+  curtainGate: true, // FX-75 two panels part like stage curtains to reveal the Arena Wall title
   logoWall: true, // FX-71 Arena Wall: rows of round seals rolling past each other (competitions, organisations, stack)
 } as const;
 

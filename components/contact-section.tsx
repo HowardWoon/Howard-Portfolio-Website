@@ -147,7 +147,7 @@ export default function ContactSection() {
     <section
       id="contact"
       onPointerDownCapture={markStart}
-      className="relative w-full bg-paper-cream bg-dots text-ink pt-24 sm:pt-32 pb-0 overflow-hidden border-t-3 border-ink"
+      className="relative w-full bg-paper-cream bg-dots text-ink pt-24 sm:pt-32 pb-0 overflow-clip border-t-3 border-ink"
     >
       {/* Bauhaus composition (replaces the particle canvas, which was invisible on a light canvas
           and was also being stretched: its bitmap was viewport-sized but CSS-sized to the whole section) */}
