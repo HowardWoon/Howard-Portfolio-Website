@@ -26,6 +26,13 @@
     --safe-bottom: env(safe-area-inset-bottom, 0px);
     --safe-left: env(safe-area-inset-left, 0px);
     --safe-right: env(safe-area-inset-right, 0px);
+    /* R16 motion tokens: CSS mirrors of lib/fx.ts (EASE_SNAP / EASE_SOFT) so JS and CSS motion never drift.
+       Stamp = a rubber stamp hitting paper, Slide = a sheet moving on the desk, Glow = the lamp light changing. */
+    --ease-snap: cubic-bezier(0.2, 0.9, 0.1, 1);
+    --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+    --dur-stamp: 180ms;
+    --dur-slide: 640ms;
+    --dur-glow: 1000ms;
   }
   @media (max-width: 640px) {
     /* must target :root (not html) — :root has higher specificity and would win otherwise */
@@ -1498,6 +1505,28 @@ html[data-motion='calm'] .fx-wall-track > .fx-seal[aria-hidden='true'] {
     transition: none;
   }
 }
+/* FX-94 Arena Pinboard (components/logo-wall.tsx). Seals hang slightly off-square like pinned badges (zero
+   specificity, so the FX-71 hover tilt still wins). Mouse only: the seals either side of the hovered one lift too
+   (dock-style) and a stage light follows the pointer along the band (transform only). Rows are never dimmed:
+   translucent seals turned muddy over the yellow band and let the backdrop shapes show through. */
+html:not(.fx-off-arenaPinboard) :where(.fx-seal:nth-child(odd)) {
+  rotate: 2.5deg;
+}
+html:not(.fx-off-arenaPinboard) :where(.fx-seal:nth-child(even)) {
+  rotate: -2deg;
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html:not([data-motion='calm']):not(.fx-off-arenaPinboard) .fx-seal:hover + .fx-seal,
+  html:not([data-motion='calm']):not(.fx-off-arenaPinboard) .fx-seal:has(+ .fx-seal:hover) {
+    scale: 1.035;
+    rotate: 0deg;
+  }
+  html[data-fx-pointer='on']:not(.fx-off-arenaPinboard) .fx-wall-lamp {
+    background: radial-gradient(closest-side, rgb(255 255 255 / 0.55), transparent);
+    translate: calc(var(--px, 0) * 50vw) 0;
+    transition: translate 0.3s ease-out;
+  }
+}
 
 /* ================================================================ Round 15 (lecturer's UI/UX list) */
 /* FX-72 icon morph: one chevron turns with a small spring overshoot instead of two icons swapping */
@@ -1696,4 +1725,114 @@ html[data-motion='calm'] .fx-wall-track > .fx-seal[aria-hidden='true'] {
     rotate: 0deg;
     box-shadow: 5px 5px 0 0 #0a0a0a;
   }
+}
+
+/* ================================================================ Round 16 "Drafting Desk Physics", session 1
+   (docs/R16-DRAFTING-DESK-PHYSICS-PLAN.md). Theme tokens only, no new colour; every animation is off for reduced
+   motion / Calm, and the heavy ones also stand down in the FX-93 lite tier. */
+
+/* FX-76 Chromatic Tide (components/fx/tide-canvas.tsx): one fixed desk surface under the page. The page root is a
+   stacking context without a transform (so position: fixed inside it still means the viewport), and the canvas sits
+   at z -1 inside it: above the root's own background, below all content. Only this one element's background-color
+   transitions, so a tint change never restyles the rest of the page. Tints are the existing section soft fills at
+   55 % over the cream. */
+.fx-page-root {
+  isolation: isolate;
+}
+.fx-tide-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-color: var(--paper-cream);
+}
+.fx-tide-canvas::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--tide, var(--paper-cream));
+  opacity: 0.55;
+  transition: background-color var(--dur-glow) var(--ease-soft);
+}
+/* the cream sections hand their background colour to the desk; bg-dots (a background-image) stays on them */
+html[data-tide='on'] .fx-page-root,
+html[data-tide='on'] .fx-tide-surface {
+  background-color: transparent;
+}
+@media print {
+  .fx-tide-canvas {
+    display: none;
+  }
+  html[data-tide='on'] .fx-tide-surface {
+    background-color: var(--paper-cream);
+  }
+}
+
+/* FX-77 Sunset Handoff: as the hero leaves, its yellow sun sinks and swells behind the portrait while FX-76 turns the
+   desk amber for About. Driven by the hero's own exit (named view timeline), desktop only. `transform` composes with
+   the sun's FX-02 depth parallax, which uses the separate `translate` property. */
+@supports (animation-timeline: view()) {
+  @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+    html:not([data-motion='calm']):not(.fx-off-sunsetHandoff) #hero {
+      view-timeline-name: --hero-exit;
+    }
+    html:not([data-motion='calm']):not(.fx-off-sunsetHandoff) .fx-sunset {
+      animation: fx-sunset linear both;
+      animation-timeline: --hero-exit;
+      animation-range: exit 0% exit 85%;
+    }
+  }
+}
+@keyframes fx-sunset {
+  from {
+    transform: none;
+  }
+  to {
+    transform: translateY(18%) scale(1.15);
+  }
+}
+
+/* FX-79 Dot Parallax: the section dot texture moves to its own plane (::before) that drifts against the scroll, so
+   the content floats a few millimetres above the desk. Same gradient and size as .bg-dots. The plane is taller than
+   the section, so the section clips it (overflow: clip is not a scroll container: sticky and Lenis are unaffected).
+   Phones keep the static dots. ::after stays free for FX-57. */
+@supports (animation-timeline: view()) {
+  @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+    html:not([data-motion='calm']):not([data-fx-tier='lite']):not(.fx-off-dotParallax) .fx-dot-plane {
+      isolation: isolate;
+      overflow: clip;
+      background-image: none;
+      view-timeline-name: --dot-plane;
+    }
+    html:not([data-motion='calm']):not([data-fx-tier='lite']):not(.fx-off-dotParallax) .fx-dot-plane::before {
+      content: '';
+      position: absolute;
+      inset: -160px 0;
+      z-index: -1;
+      pointer-events: none;
+      background-image: radial-gradient(rgba(10, 10, 10, 0.14) 1.2px, transparent 1.2px);
+      background-size: 22px 22px;
+      animation: fx-dot-plane linear both;
+      animation-timeline: --dot-plane;
+      animation-range: cover 0% cover 100%;
+    }
+  }
+}
+@keyframes fx-dot-plane {
+  from {
+    translate: 0 -160px;
+  }
+  to {
+    translate: 0 160px;
+  }
+}
+
+/* FX-93 Frame Governor lite tier (components/fx/frame-governor.tsx): a device that can't keep scrolling smooth
+   drops the costliest paint work. FX-34 mercury freezes to a still frame (JS), FX-79 is gated above. */
+html[data-fx-tier='lite'] #main-content,
+html[data-fx-tier='lite'] .site-header {
+  filter: none !important; /* FX-19 depth-of-field blur */
+}
+html[data-fx-tier='lite'] .fx-aberration {
+  --fx-vel: 0 !important; /* FX-30: beats the inline value VelocitySkew writes, so the fringes stay at zero */
 }

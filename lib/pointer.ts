@@ -5,4 +5,4 @@
 export const pointer = { x: 0, y: 0 };
 
 /** Elements whose CSS reads var(--px) / var(--py). PointerField writes the vars on these elements only. */
-export const POINTER_CONSUMERS = '.fx-depth, .fx-shadow-follow, .fx-specular, .fx-letterpress, .fx-lamp';
+export const POINTER_CONSUMERS = '.fx-depth, .fx-shadow-follow, .fx-specular, .fx-letterpress, .fx-lamp, .fx-wall-lamp';

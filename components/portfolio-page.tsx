@@ -8,6 +8,8 @@ import {
   ContactSection,
   InteractionHud,
   AmbientFx,
+  TideCanvas,
+  FrameGovernor,
 } from '@/components/lazy-sections';
 import { SiteFooter } from '@/components/site-footer';
 import { LogoWall } from '@/components/logo-wall';
@@ -29,7 +31,9 @@ const SectionSpine = dynamic(() => import('@/components/section-spine').then((mo
 export function PortfolioPage() {
   return (
     <BootSequence>
-      <div className="relative min-h-screen overflow-x-clip bg-paper text-ink">
+      <div className="fx-page-root relative min-h-screen overflow-x-clip bg-paper text-ink">
+        {/* FX-76: the fixed desk surface, first so it paints under everything (z -1 inside .fx-page-root) */}
+        <TideCanvas />
         {/* Fixed header lives OUTSIDE any z-indexed wrapper. It used to sit inside a `relative z-10` div,
             which capped its z-[9999] at 10 — so the marquee (z-20) and honours cards (z-10) scrolled OVER
             the header and blocked taps on the Resume / Search buttons. */}
@@ -73,6 +77,7 @@ export function PortfolioPage() {
         <SectionDock />
         <InteractionHud />
         <AmbientFx />
+        <FrameGovernor />
         <OffscreenPause />
         <RouteWipeClear />
         <CommandPalette />

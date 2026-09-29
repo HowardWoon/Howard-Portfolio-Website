@@ -225,10 +225,10 @@ export default function BikebearHero() {
 
           {/* Right Column: Portrait Card (5 cols) */}
           <div className="lg:col-span-5 flex justify-center lg:justify-end w-full relative">
-            {/* Big Bauhaus sun behind the portrait */}
+            {/* Big Bauhaus sun behind the portrait (FX-77 .fx-sunset: sinks and swells as the hero leaves) */}
             <div
               aria-hidden
-              className="fx-depth pointer-events-none absolute -top-6 right-0 sm:right-10 w-40 h-40 xs:w-56 xs:h-56 sm:w-72 sm:h-72 rounded-full bg-pop-yellow border-3 border-ink"
+              className="fx-depth fx-sunset pointer-events-none absolute -top-6 right-0 sm:right-10 w-40 h-40 xs:w-56 xs:h-56 sm:w-72 sm:h-72 rounded-full bg-pop-yellow border-3 border-ink"
               style={{ '--depth': -10 } as React.CSSProperties}
             />
             <div

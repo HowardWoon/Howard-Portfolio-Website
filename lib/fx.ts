@@ -81,6 +81,12 @@ export const FX = {
   kineticType: true, // FX-74 section titles gain weight (variable font) as they scroll in
   curtainGate: true, // FX-75 two panels part like stage curtains to reveal the Arena Wall title
   logoWall: true, // FX-71 Arena Wall: rows of round seals rolling past each other (competitions, organisations, stack)
+  // ---- Round 16 "Drafting Desk Physics" (docs/R16-DRAFTING-DESK-PHYSICS-PLAN.md), session 1 ----
+  frameGovernor: true, // FX-93 heavy effects drop to a lite tier when the device can't keep scrolling smooth
+  chromaticTide: true, // FX-76 the desk surface glides between the section soft tints as you scroll
+  sunsetHandoff: true, // FX-77 the hero sun sinks and swells as the hero leaves, handing its colour to About
+  dotParallax: true, // FX-79 the dot texture sits on its own plane and moves slower than the content
+  arenaPinboard: true, // FX-94 Arena Wall: colour-blocked tilted seals, Bauhaus backdrop, stage light, dock hover
 } as const;
 
 export type FxName = keyof typeof FX;

@@ -16,6 +16,14 @@ export const AmbientFx = dynamic(() => import('@/components/fx/ambient-fx').then
   ssr: false,
 });
 
+// Round 16: the tide canvas (FX-76) and the frame governor (FX-93) are client-only and never needed for first paint.
+export const TideCanvas = dynamic(() => import('@/components/fx/tide-canvas').then((mod) => mod.TideCanvas), {
+  ssr: false,
+});
+export const FrameGovernor = dynamic(() => import('@/components/fx/frame-governor').then((mod) => mod.FrameGovernor), {
+  ssr: false,
+});
+
 export const InteractionHud = dynamic(() => import('@/components/interaction-hud').then((mod) => mod.InteractionHud), {
   ssr: false,
 });

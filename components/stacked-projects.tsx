@@ -291,7 +291,7 @@ export default function StackedProjects() {
   return (
     <section
       id="projects"
-      className="relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-x-clip border-t-3 border-ink"
+      className="fx-tide-surface fx-dot-plane relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-x-clip border-t-3 border-ink"
     >
       {FX.ambientOrbits ? <AmbientOrbits side="left" square="bg-pop-blue" /> : null}
       <div className="relative max-w-7xl mx-auto space-y-16 sm:space-y-20">

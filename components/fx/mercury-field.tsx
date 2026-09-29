@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { FX, prefersReducedMotion } from '@/lib/fx';
 import { pointer } from '@/lib/pointer';
 import { useCalm } from '@/lib/motion-pref';
+import { useFxLite } from '@/lib/fx-tier';
 
 const VERT = `#version 300 es
 in vec2 aPos;
@@ -52,6 +53,7 @@ void main() {
 export function MercuryField({ className = '' }: { className?: string }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const calm = useCalm(); // re-run when the visitor toggles Calm Mode (freeze to a still frame)
+  const lite = useFxLite(); // FX-93: a struggling device gets the same still frame
 
   useEffect(() => {
     const canvas = ref.current;
@@ -96,7 +98,7 @@ export function MercuryField({ className = '' }: { className?: string }) {
     const uTime = gl.getUniformLocation(prog, 'uTime');
     const uPtr = gl.getUniformLocation(prog, 'uPtr');
 
-    const still = calm || prefersReducedMotion();
+    const still = calm || lite || prefersReducedMotion();
     const t0 = performance.now();
     let raf = 0;
     let visible = false;
@@ -162,7 +164,7 @@ export function MercuryField({ className = '' }: { className?: string }) {
       gl.deleteShader(vs);
       gl.deleteShader(fs);
     };
-  }, [calm]);
+  }, [calm, lite]);
 
   return <canvas ref={ref} aria-hidden className={`pointer-events-none block ${className}`} />;
 }
