@@ -22,7 +22,7 @@ This repository houses the source code for my professional portfolio. Designed w
 - **Interactive System Simulators:** Live React simulations of backend algorithms and agentic workflows (Dijkstra Pathfinding, Agentic Intent Triage, IoT Telemetry).
 - **In-App Document Modals:** Embedded, non-blocking PDF pitch-deck viewers.
 - **Strict Visual Restraint:** A meticulously maintained design system utilizing bold ink borders, high-contrast primary color blocks (`#FFC700`, `#2B4BFF`, `#FF4B2B`), and precision typography.
-- **High-Performance Architecture:** Zero unnecessary 3D WebGL bloat. Optimized static routing via Next.js 15 App Router, boasting a sub-4s build time and a lightweight ~100kB JS bundle.
+- **High-Performance Architecture:** WebGL is used only where it earns its place (the Mercury Field hero effect). Static routing via the Next.js 15 App Router, below-the-fold sections code-split, and a First Load JS budget of 190 kB for `/` (about 187 kB today).
 - **Fluid Interactions:** Staggered scroll reveals and physical hover lifts powered by Framer Motion.
 
 ## 🛠️ Technical Stack
@@ -56,7 +56,7 @@ Visit `http://localhost:3000` to view the application.
 
 - `app/`: Next.js 15 routing, global CSS, and layout configurations.
 - `components/`: Modular React components, including the interactive `project-simulators.tsx` and the main `portfolio-page.tsx` view.
-- `lib/site-data.ts`: The single source of truth for all content, rendering the portfolio highly maintainable without diving into component markup.
+- Section content lives as typed arrays at the top of each section component in `components/`. `lib/site-data.ts` is legacy (only the contact email and admin fallbacks read it).
 
 <br />
 

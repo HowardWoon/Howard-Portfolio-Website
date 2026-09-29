@@ -16,7 +16,8 @@ import { createRequire } from 'node:module';
 
 const arg = (k, d) => (process.argv.find((a) => a.startsWith(`--${k}=`)) || '').split('=').slice(1).join('=') || d;
 const BASE = arg('base', 'http://localhost:3000').replace(/\/$/, '');
-const OUT = arg('out', 'audit');
+const MOTION = process.argv.includes('--motion');
+const OUT = arg('out', MOTION ? 'audit/motion' : 'audit');
 const PATHS = arg('paths', '/,/simulators/agentic,/simulators/flood,/simulators/energy').split(',');
 mkdirSync(`${OUT}/screens`, { recursive: true });
 
@@ -50,7 +51,8 @@ for (const path of PATHS) {
       deviceScaleFactor: 1,
       hasTouch: w < 1024,
       isMobile: w < 768,
-      reducedMotion: 'reduce',
+      // --motion: run with animations ON (the default pass is reduced-motion, which hides motion-only bugs)
+      reducedMotion: MOTION ? 'no-preference' : 'reduce',
       bypassCSP: true,
     });
     // Skip the boot gate exactly like a returning visitor in the same tab session.

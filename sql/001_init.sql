@@ -1,6 +1,15 @@
 -- =====================================================================
 -- Howard Woon portfolio — Supabase schema (safe to re-run)
 --
+-- ADMIN ACCESS (read before re-running on the live database):
+--  * public.is_admin() below contains the ZERO UUID placeholder (the real admin UUID was removed after a
+--    GitGuardian alert). Re-running this script replaces the live function, so the UUID check stops
+--    matching anyone.
+--  * The admin keeps access ONLY through the JWT claim app_metadata.role = 'admin'. Set it once for the
+--    admin user (Supabase dashboard > Authentication > Users > raw app meta data, or SQL:
+--      update auth.users set raw_app_meta_data = raw_app_meta_data || '{"role":"admin"}' where id = '<uuid>';
+--    ) and sign in again so the new token carries the claim.
+--
 -- Fixes vs. previous version:
 --  * `current_role` is a RESERVED word in Postgres → CREATE TABLE profiles failed with a syntax
 --    error and the whole script stopped. It is now quoted.

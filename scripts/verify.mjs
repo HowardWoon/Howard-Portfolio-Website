@@ -33,9 +33,13 @@ function run(name, cmd, { timeoutMin = 10 } = {}) {
 
 // 1. Repo hygiene (tracked files only, so node_modules and .next never matter)
 const tracked = spawnSync('git ls-files', { shell: true, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
-const forbidden = ['fix.py', 'rename_refs.py', 'temp.txt', 'temp2.txt', 'desktop.ini'];
+// one-off patch scripts and stale snapshots must never be committed again (R12 P2-18)
+const forbidden = ['fix.py', 'rename_refs.py', 'temp.txt', 'temp2.txt', 'desktop.ini', 'docs/FULL_CODEBASE.md'];
+const forbiddenPattern = /^(apply_phase_[a-z0-9_]*|patch-[a-z0-9-]*)\.py$/i;
 const problems = [
-  ...tracked.filter((f) => forbidden.includes(f) || f.startsWith('align_env/')).map((f) => `forbidden file: ${f}`),
+  ...tracked
+    .filter((f) => forbidden.includes(f) || forbiddenPattern.test(f) || f.startsWith('align_env/'))
+    .map((f) => `forbidden file: ${f}`),
   ...tracked.filter((f) => /\s/.test(f)).map((f) => `space in path: ${f}`),
   ...tracked
     .filter((f) => /\.(jpe?g|png|webp|gif|pdf|mp4)$/i.test(f) && !f.startsWith('public/') && !f.startsWith('app/'))
