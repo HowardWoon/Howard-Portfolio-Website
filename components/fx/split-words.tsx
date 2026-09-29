@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useRef } from 'react';
+import React, { Fragment, useRef } from 'react';
 import { m, useInView } from 'framer-motion';
 import { FX, EASE_SNAP } from '@/lib/fx';
 
@@ -30,6 +30,7 @@ export function SplitWords({ text, delay = 0 }: { text: string; delay?: number }
             <m.span
               data-fx="word"
               className="inline-block"
+              style={{ '--i': i } as React.CSSProperties} // FX-59 title-wave stagger
               initial={{ y: '105%' }}
               animate={inView ? { y: '0%' } : undefined}
               transition={{ duration: 0.7, ease: EASE_SNAP, delay: delay + i * 0.045 }}

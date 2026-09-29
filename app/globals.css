@@ -1110,3 +1110,121 @@ html.hw-booted .boot-overlay {
     transform: translateY(-4px);
   }
 }
+
+/* ===================================================================================================
+   Round 13 "Motion Studio" (FX-55 … FX-60). Theme tokens only (ink, pop colours, hard shadows), no new copy.
+   Every effect is off for prefers-reduced-motion and Calm Mode, and each has a kill switch in lib/fx.ts
+   (the flag bridge turns a false flag into html.fx-off-<flag>).
+   =================================================================================================== */
+
+/* FX-56 press stamp: a Bauhaus shape that pops at the pointer (created by components/fx/ambient-fx.tsx) */
+.fx-stamp {
+  position: fixed;
+  z-index: 10001;
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  pointer-events: none;
+  background: var(--stamp-c, #ffc700);
+  border: 3px solid #0a0a0a;
+  box-shadow: 2px 2px 0 #0a0a0a;
+  animation: fx-stamp 0.5s cubic-bezier(0.2, 0.9, 0.1, 1) both;
+}
+.fx-stamp[data-fx-stamp='circle'] {
+  border-radius: 9999px;
+}
+.fx-stamp[data-fx-stamp='triangle'] {
+  border: 0;
+  box-shadow: none;
+  background: #0a0a0a;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+.fx-stamp[data-fx-stamp='triangle']::after {
+  content: '';
+  position: absolute;
+  inset: 5px 4px 3px;
+  background: var(--stamp-c, #ffc700);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+@keyframes fx-stamp {
+  0% {
+    opacity: 1;
+    transform: scale(0.3) rotate(0deg);
+  }
+  45% {
+    opacity: 1;
+    transform: scale(1.15) rotate(var(--stamp-r, 12deg));
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.9) translateY(-18px) rotate(var(--stamp-r, 12deg));
+  }
+}
+
+/* FX-57 section scan: a yellow/blue/red band runs along each section's top rule while the section enters.
+   Scroll-driven (compositor, no JS); browsers without view timelines simply show the plain rule. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-motion='calm']):not(.fx-off-sectionScan) main section[id]::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 38%;
+      height: 3px;
+      z-index: 5;
+      pointer-events: none;
+      background: linear-gradient(90deg, #ffc700 0 33.3%, #2b4bff 33.3% 66.6%, #ff4b2b 66.6% 100%);
+      translate: -100% 0;
+      animation: fx-section-scan linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 100%;
+    }
+  }
+}
+@keyframes fx-section-scan {
+  from {
+    translate: -100% 0;
+  }
+  to {
+    translate: 265% 0;
+  }
+}
+
+/* FX-58 3D project-index tiles: a mouse tilts the tile toward the viewer (individual `rotate` property, so it
+   composes with the tile's own translate/press transforms instead of replacing them) */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html:not([data-motion='calm']):not(.fx-off-tilt3d) .fx-tilt3d-grid {
+    perspective: 900px;
+  }
+  html:not([data-motion='calm']):not(.fx-off-tilt3d) .fx-tilt3d {
+    transform-style: preserve-3d;
+    transition-property: opacity, rotate, box-shadow, transform;
+    transition-duration: 0.3s;
+    transition-timing-function: cubic-bezier(0.2, 0.9, 0.1, 1);
+  }
+  html:not([data-motion='calm']):not(.fx-off-tilt3d) .fx-tilt3d:hover {
+    rotate: 1 -1 0 14deg;
+  }
+
+  /* FX-59 title wave: hovering a section title ripples its words (the words keep their FX-06 mask rise) */
+  html:not([data-motion='calm']):not(.fx-off-titleWave) .nb-title:hover [data-fx='word'] {
+    animation: fx-title-wave 0.55s cubic-bezier(0.2, 0.9, 0.1, 1) both;
+    animation-delay: calc(var(--i, 0) * 35ms);
+  }
+}
+@keyframes fx-title-wave {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  40% {
+    translate: 0 -0.14em;
+  }
+}
+
+/* FX-60 ambient orbits: slow rotating rings and squares in the section margins (see components/fx/ambient-orbits.tsx).
+   They use .animate-spin-slow, so D5 already pauses them while the section is off-screen. */
+html.fx-off-ambientOrbits .fx-orbit {
+  display: none;
+}

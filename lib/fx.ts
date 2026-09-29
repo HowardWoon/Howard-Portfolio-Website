@@ -58,6 +58,13 @@ export const FX = {
   honorConstellation: true, // FX-47 constellation and trail to honors
   lightboxMorph: true, // FX-48 lightbox morphs from thumbnail
   depthLock: true, // FX-49 depth lock on idle pointer
+  // ---- Round 13 "Motion Studio" (theme tokens only, no new copy; all off for reduced motion / Calm) ----
+  kickerDecode: true, // FX-55 section kickers decode from scrambled glyphs into their real text on first view
+  pressStamp: true, // FX-56 pressing a button stamps a Bauhaus shape (circle / square / triangle) at the pointer
+  sectionScan: true, // FX-57 a yellow/blue/red band sweeps along each section's top rule as it scrolls in
+  tilt3d: true, // FX-58 project-index tiles tilt in 3D under a mouse
+  titleWave: true, // FX-59 section-title words ripple on hover (mouse)
+  ambientOrbits: true, // FX-60 slow rotating Bauhaus orbits in the section margins (wide screens)
 } as const;
 
 export type FxName = keyof typeof FX;

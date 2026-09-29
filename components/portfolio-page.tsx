@@ -7,6 +7,7 @@ import {
   HonorsSection,
   ContactSection,
   InteractionHud,
+  AmbientFx,
 } from '@/components/lazy-sections';
 import { SiteFooter } from '@/components/site-footer';
 import dynamic from 'next/dynamic';
@@ -69,6 +70,7 @@ export function PortfolioPage() {
         <SectionSpine />
         <SectionDock />
         <InteractionHud />
+        <AmbientFx />
         <OffscreenPause />
         <RouteWipeClear />
         <CommandPalette />

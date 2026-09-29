@@ -9,6 +9,7 @@ import { SplitWords } from './fx/split-words';
 import { FX } from '@/lib/fx';
 import { AnimatedCounter } from './animated-counter';
 import { ResultsBoard, RolesGrid, Transcript } from './honors-academic';
+import { AmbientOrbits } from './fx/ambient-orbits';
 import { useFocusTrap } from '@/lib/use-focus-trap';
 import { useLatest } from '@/lib/use-latest';
 import { useScrollLock } from '@/lib/use-scroll-lock';
@@ -408,6 +409,7 @@ export default function HonorsSection() {
       className="relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-hidden border-t-3 border-ink flex flex-col"
     >
       {/* Structural grid + Bauhaus accents */}
+      {FX.ambientOrbits ? <AmbientOrbits side="left" square="bg-pop-red" /> : null}
 
       <div
         aria-hidden

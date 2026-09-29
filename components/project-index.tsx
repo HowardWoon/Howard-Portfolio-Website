@@ -30,7 +30,7 @@ export function ProjectIndex({ items }: { items: readonly ProjectIndexItem[] }) 
   if (!FX.projectIndex) return null;
 
   return (
-    <nav aria-label="Project index" className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+    <nav aria-label="Project index" className="fx-tilt3d-grid grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
       {items.map((p) => {
         const on = active === p.id;
         const seen = FX.portfolioMemory && visited.includes(p.id);
@@ -59,7 +59,7 @@ export function ProjectIndex({ items }: { items: readonly ProjectIndexItem[] }) 
               history.replaceState(null, '', `#project-${p.id}`);
               if (focus) setFocus(p.id); // in Focus Mode, the index moves the spotlight
             }}
-            className={`relative flex flex-col gap-1 min-h-[64px] min-w-0 p-3 rounded-2xl border-3 border-ink text-ink transition-opacity duration-300 ${
+            className={`fx-tilt3d relative flex flex-col gap-1 min-h-[64px] min-w-0 p-3 rounded-2xl border-3 border-ink text-ink transition-opacity duration-300 ${
               on ? `${p.fill} shadow-none translate-x-[3px] translate-y-[3px]` : 'nb-press bg-white shadow-brutal-sm'
             } ${dim ? 'opacity-40' : ''} ${hit ? 'fx-trail-hit' : ''}`}
           >

@@ -11,6 +11,7 @@ import { FX } from '@/lib/fx';
 import { exitFocus, markVisited, setFocus, startTrail, useInteractionSelect } from '@/lib/interaction-store';
 import { projectsWithSkill, scrollToProject, skillKey } from '@/lib/skills';
 import { TiltCard } from './tilt-card';
+import { AmbientOrbits } from './fx/ambient-orbits';
 import { InteractivePhotoStack } from './interactive-photo-stack';
 import { BlueprintStage, BP_LAYERS } from './blueprint-stage';
 import {
@@ -291,6 +292,7 @@ export default function StackedProjects() {
       id="projects"
       className="relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-x-clip border-t-3 border-ink"
     >
+      {FX.ambientOrbits ? <AmbientOrbits side="left" square="bg-pop-blue" /> : null}
       <div className="relative max-w-7xl mx-auto space-y-16 sm:space-y-20">
         {/* Section Header */}
         <div className="space-y-7">
