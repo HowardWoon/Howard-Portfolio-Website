@@ -222,7 +222,7 @@ function PillarCard({
       <div className="terminal flex items-start xs:items-center justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0">
           <Activity className="w-4 h-4 text-pop-mint animate-pulse shrink-0" strokeWidth={2.5} />
-          <span className="truncate">{pillar.telemetrySnippet}</span>
+          <span className="min-w-0 [overflow-wrap:anywhere] sm:truncate">{pillar.telemetrySnippet}</span>
         </div>
         {/* Always rendered so every card keeps the same height; only the active card shows it. */}
         <span
@@ -238,6 +238,17 @@ function PillarCard({
 
 export default function AboutSection() {
   const [activeCard, setActiveCard] = useState<string>('backend');
+  // P2-08: the pillars have a phone list and a masonry desktop list. Both are server-rendered (CSS picks one),
+  // but after mount only the list for the current breakpoint stays mounted: half the layout-animated cards,
+  // in-view observers and re-measures per click. null = not measured yet (SSR / first paint).
+  const [isLg, setIsLg] = useState<boolean | null>(null);
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)');
+    const set = () => setIsLg(mq.matches);
+    set();
+    mq.addEventListener('change', set);
+    return () => mq.removeEventListener('change', set);
+  }, []);
   const [statusFocus, setStatusFocus] = useState<SkillStatus | null>(null);
   // FX-38 Evidence Trail: how many project cards use each skill. Read from the project cards' data attributes
   // after mount (the Projects section is server-rendered below), so the project data stays the single source.
@@ -320,55 +331,59 @@ export default function AboutSection() {
         </div>
 
         {/* Core Architecture Bento Grid (4 Pillars) — True Masonry Layout */}
-        <LayoutGroup id="about-pillars-mobile">
-          <div className="flex flex-col lg:hidden gap-7">
-            {architecturePillars.map((pillar, idx) => (
-              <PillarCard
-                key={pillar.id}
-                pillar={pillar}
+        {isLg !== true && (
+          <LayoutGroup id="about-pillars-mobile">
+            <div className="flex flex-col lg:hidden gap-7">
+              {architecturePillars.map((pillar, idx) => (
+                <PillarCard
+                  key={pillar.id}
+                  pillar={pillar}
 
-                activeCard={activeCard}
-                setActiveCard={setActiveCard}
-                colorMap={colorMap}
-                delay={idx * 0.1}
-              />
-            ))}
-          </div>
-        </LayoutGroup>
-        <LayoutGroup id="about-pillars-desktop">
-          <div className="hidden lg:grid grid-cols-2 gap-8 items-start">
-            <div className="flex flex-col gap-8">
-              {architecturePillars
-                .filter((_, i) => i % 2 === 0)
-                .map((pillar, idx) => (
-                  <PillarCard
-                    key={pillar.id}
-                    pillar={pillar}
-
-                    activeCard={activeCard}
-                    setActiveCard={setActiveCard}
-                    colorMap={colorMap}
-                    delay={idx * 2 * 0.1}
-                  />
-                ))}
+                  activeCard={activeCard}
+                  setActiveCard={setActiveCard}
+                  colorMap={colorMap}
+                  delay={idx * 0.1}
+                />
+              ))}
             </div>
-            <div className="flex flex-col gap-8 mt-10">
-              {architecturePillars
-                .filter((_, i) => i % 2 === 1)
-                .map((pillar, idx) => (
-                  <PillarCard
-                    key={pillar.id}
-                    pillar={pillar}
+          </LayoutGroup>
+        )}
+        {isLg !== false && (
+          <LayoutGroup id="about-pillars-desktop">
+            <div className="hidden lg:grid grid-cols-2 gap-8 items-start">
+              <div className="flex flex-col gap-8">
+                {architecturePillars
+                  .filter((_, i) => i % 2 === 0)
+                  .map((pillar, idx) => (
+                    <PillarCard
+                      key={pillar.id}
+                      pillar={pillar}
 
-                    activeCard={activeCard}
-                    setActiveCard={setActiveCard}
-                    colorMap={colorMap}
-                    delay={(idx * 2 + 1) * 0.1}
-                  />
-                ))}
+                      activeCard={activeCard}
+                      setActiveCard={setActiveCard}
+                      colorMap={colorMap}
+                      delay={idx * 2 * 0.1}
+                    />
+                  ))}
+              </div>
+              <div className="flex flex-col gap-8 mt-10">
+                {architecturePillars
+                  .filter((_, i) => i % 2 === 1)
+                  .map((pillar, idx) => (
+                    <PillarCard
+                      key={pillar.id}
+                      pillar={pillar}
+
+                      activeCard={activeCard}
+                      setActiveCard={setActiveCard}
+                      colorMap={colorMap}
+                      delay={(idx * 2 + 1) * 0.1}
+                    />
+                  ))}
+              </div>
             </div>
-          </div>
-        </LayoutGroup>
+          </LayoutGroup>
+        )}
 
         {/* Categorized Technical Stack Matrix */}
         <m.div

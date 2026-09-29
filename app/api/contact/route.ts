@@ -80,6 +80,7 @@ export async function POST(request: NextRequest) {
 
     // 4. Bot traps — pretend success so bots don't retry
     if (hw_hp_field || fillMs < 3000) {
+      console.warn('[Contact] dropped by bot trap', { honeypot: Boolean(hw_hp_field), fillMs });
       return NextResponse.json({ success: true, message: 'Message sent successfully.' }, { status: 200 });
     }
 

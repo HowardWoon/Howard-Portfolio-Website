@@ -81,7 +81,14 @@ export default function ContactSection() {
     }
   };
 
+  // The server drops anything "filled" in under 3 s as a bot. Start the clock at the FIRST interaction
+  // anywhere in the section (the quick-intent chips sit outside the <form>), never lose a real message.
+  const markStart = () => {
+    firstInteraction.current ??= performance.now();
+  };
+
   const handleSelectIntent = (intent: (typeof quickIntents)[0]) => {
+    markStart();
     setActiveIntent(intent.label);
     setFormData((prev) => {
       const isUntouched = prev.message === '' || quickIntents.some((qi) => qi.text === prev.message);
@@ -101,6 +108,11 @@ export default function ContactSection() {
     window.clearTimeout(resetTimer.current);
     setErrorText('');
     setFormStatus('sending');
+    markStart();
+    const started = firstInteraction.current as number;
+    const elapsed = performance.now() - started;
+    // fast human (autofill + chip + send): wait out the bot threshold instead of having the message dropped
+    if (elapsed < 3200) await new Promise((r) => setTimeout(r, 3200 - elapsed));
     try {
       const res = await fetch('/api/contact', {
         method: 'POST',
@@ -108,7 +120,7 @@ export default function ContactSection() {
         body: JSON.stringify({
           ...formData,
           hw_hp_field: honeypot,
-          fillMs: firstInteraction.current == null ? 0 : Math.round(performance.now() - firstInteraction.current),
+          fillMs: Math.round(performance.now() - started),
         }),
       });
 
@@ -134,6 +146,7 @@ export default function ContactSection() {
   return (
     <section
       id="contact"
+      onPointerDownCapture={markStart}
       className="relative w-full bg-paper-cream bg-dots text-ink pt-24 sm:pt-32 pb-0 overflow-hidden border-t-3 border-ink"
     >
       {/* Bauhaus composition (replaces the particle canvas, which was invisible on a light canvas
@@ -363,13 +376,7 @@ export default function ContactSection() {
             </div>
 
             {/* Dispatch Form */}
-            <form
-              onSubmit={handleSubmit}
-              onFocusCapture={() => {
-                firstInteraction.current ??= performance.now();
-              }}
-              className="space-y-5 pt-2"
-            >
+            <form onSubmit={handleSubmit} onFocusCapture={markStart} className="space-y-5 pt-2">
               {/* Honeypot: filled in by spam bots only. `display:none` (not an off-screen position)
                   because Chrome/Edge autofill can fill off-screen fields named like "website",
                   which silently discarded real visitors' messages. */}
