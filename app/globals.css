@@ -602,7 +602,8 @@ html.hw-booted .boot-overlay {
 
   /* FX-24 brutal glass: once you scroll, the header becomes frosted but keeps its 3px ink border */
   @supports (animation-timeline: scroll()) {
-    @media (prefers-reduced-motion: no-preference) {
+    /* R14 B-03: only where the header is translucent + blurred (>= 640 px, fine pointer); phones keep it solid */
+    @media (prefers-reduced-motion: no-preference) and (min-width: 640px) and (pointer: fine) {
       html:not([data-motion='calm']):not(.fx-off-glassHeader) .site-header {
         animation: fx-glass linear both;
         animation-timeline: scroll(root);
@@ -1165,7 +1166,7 @@ html.hw-booted .boot-overlay {
    Scroll-driven (compositor, no JS); browsers without view timelines simply show the plain rule. */
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
-    html:not([data-motion='calm']):not(.fx-off-sectionScan) main section[id]::after {
+    html:not([data-motion='calm']):not(.fx-off-sectionScan) main section[id]:not(#hero)::after {
       content: '';
       position: absolute;
       top: 0;
@@ -1227,4 +1228,254 @@ html.hw-booted .boot-overlay {
    They use .animate-spin-slow, so D5 already pauses them while the section is off-screen. */
 html.fx-off-ambientOrbits .fx-orbit {
   display: none;
+}
+
+/* ===================================================================================================
+   Round 14 (FX-61 … FX-70). Theme tokens only, no new copy. Motion is off for reduced motion and Calm
+   Mode (scroll-driven ones explicitly, because they ignore the global duration override); each has a flag.
+   =================================================================================================== */
+
+/* FX-61 hero entrance in CSS: the server HTML is visible, and the entrance starts at first paint for returning
+   visitors (html.hw-booted is set before paint) or as the boot gate lifts (the gate adds hw-booted). */
+@media (prefers-reduced-motion: no-preference) {
+  html.hw-booted:not([data-motion='calm']):not(.fx-off-heroCssEntrance) .fx-hero-in {
+    animation: fx-hero-in 0.55s cubic-bezier(0.2, 0.9, 0.1, 1) both;
+    animation-delay: calc(var(--d, 0) * 90ms);
+  }
+  html.hw-booted:not([data-motion='calm']):not(.fx-off-heroCssEntrance) .fx-hero-pop {
+    animation-name: fx-hero-pop;
+    animation-duration: 0.7s;
+  }
+}
+@keyframes fx-hero-in {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@keyframes fx-hero-pop {
+  from {
+    opacity: 0;
+    scale: 0.92;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+/* FX-62 blueprint floor: as the hero scrolls away, its grid tilts back into a drafting-table floor */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) and (min-width: 375px) {
+    html:not([data-motion='calm']):not(.fx-off-blueprintFloor) .fx-floor-grid {
+      transform-origin: 50% 100%;
+      animation: fx-floor linear both;
+      animation-timeline: view();
+      animation-range: exit 0% exit 100%;
+    }
+  }
+}
+@keyframes fx-floor {
+  from {
+    transform: perspective(900px) rotateX(0deg);
+    opacity: 1;
+  }
+  to {
+    transform: perspective(900px) rotateX(42deg) translateY(10%);
+    opacity: 0.2;
+  }
+}
+
+/* FX-63 reading-progress ring on the back-to-top button (a scroll-linked value, not motion: kept for everyone) */
+.fx-ring-bar {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+}
+@supports (animation-timeline: scroll()) {
+  html:not(.fx-off-progressRing) .fx-ring-bar {
+    animation: fx-ring linear both;
+    animation-timeline: scroll(root);
+  }
+}
+@supports not (animation-timeline: scroll()) {
+  .fx-ring {
+    display: none;
+  }
+}
+@keyframes fx-ring {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* FX-64 ink-wipe reveal: archive and contact-sheet images wipe in diagonally as they scroll into view */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-motion='calm']):not(.fx-off-inkWipe) .fx-wipe {
+      animation: fx-wipe linear both;
+      animation-timeline: view();
+      animation-range: entry 5% entry 75%;
+    }
+  }
+}
+@keyframes fx-wipe {
+  from {
+    clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+  }
+  to {
+    clip-path: polygon(0 0, 130% 0, 100% 100%, 0 100%);
+  }
+}
+
+/* FX-66 card turn: the selected honours category turns like a card (individual rotate/scale properties, so it
+   composes with framer's inline transform and the pressed translate) */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion='calm']):not(.fx-off-cardTurn) .fx-card-grid {
+    perspective: 700px;
+  }
+  html:not([data-motion='calm']):not(.fx-off-cardTurn) [data-honor-category][aria-expanded='true'] {
+    animation: fx-card-turn 0.5s cubic-bezier(0.2, 0.9, 0.1, 1);
+  }
+}
+@keyframes fx-card-turn {
+  0% {
+    rotate: y 0deg;
+    scale: 1;
+  }
+  50% {
+    rotate: y -14deg;
+    scale: 1.03;
+  }
+  100% {
+    rotate: y 0deg;
+    scale: 1;
+  }
+}
+
+/* FX-67 lamp spotlight on dark surfaces: a soft yellow light follows the mouse (FX-01 --px/--py, mouse only) */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html:not([data-motion='calm']):not(.fx-off-lampSpot) .fx-lamp {
+    position: relative;
+    isolation: isolate;
+  }
+  html:not([data-motion='calm']):not(.fx-off-lampSpot) .fx-lamp::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: inherit;
+    background: radial-gradient(
+      480px circle at calc(50% + var(--px, 0) * 50%) calc(50% + var(--py, 0) * 50%),
+      rgb(255 199 0 / 0.14),
+      transparent 62%
+    );
+  }
+}
+
+/* FX-70 print: a clean one-click PDF of the portfolio */
+@media print {
+  .site-header,
+  nav[aria-label='Section navigation'],
+  .fx-hud,
+  .fx-orbit,
+  .fx-stamp,
+  .boot-overlay,
+  canvas,
+  button[aria-label='Scroll to top'],
+  button[aria-label^='Current section'] {
+    display: none !important;
+  }
+  html,
+  body {
+    background: #fff !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  a[href^='http']::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.75em;
+    word-break: break-all;
+  }
+  main section {
+    break-inside: auto;
+  }
+}
+
+/* FX-65 view transition for the honours categories (lib/view-transition.ts). Only the results panel animates:
+   the default whole-page cross-fade is switched off so fixed UI and marquees never flicker. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+::view-transition-old(honors-results) {
+  animation: fx-vt-out 0.22s cubic-bezier(0.4, 0, 1, 1) both;
+}
+::view-transition-new(honors-results) {
+  animation: fx-vt-in 0.38s cubic-bezier(0.2, 0.9, 0.1, 1) both;
+}
+@keyframes fx-vt-out {
+  to {
+    opacity: 0;
+    translate: 0 -14px;
+  }
+}
+@keyframes fx-vt-in {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+  }
+}
+
+/* FX-69 "Link copied" toast (lib/share.ts): above every overlay, clear of the home indicator */
+.fx-toast {
+  position: fixed;
+  left: 50%;
+  bottom: max(1.5rem, calc(var(--safe-bottom) + 1rem));
+  z-index: 10002;
+  translate: -50% 0;
+  padding: 0.5rem 1rem;
+  pointer-events: none;
+}
+
+/* R14 B-12 CSS reveal for section headers and cards: the server HTML is visible, the rise runs on the compositor
+   as the element scrolls in (no framer whileInView observers / main-thread work). Firefox: shown as-is. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-motion='calm']):not(.fx-off-cssReveal) .fx-rise {
+      animation: fx-hero-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 45%;
+    }
+  }
+}
+
+/* FX-05 headline stamp in CSS (R14): "SYSTEMS TO" slams onto the headline after the hero entrance. Individual
+   scale/rotate properties compose with the chip's own -rotate-1; the overshoot curve gives the stamp its bounce. */
+@media (prefers-reduced-motion: no-preference) {
+  html.hw-booted:not([data-motion='calm']):not(.fx-off-headlineStamp) .fx-stamp-in {
+    animation: fx-stamp-in 0.6s cubic-bezier(0.2, 0.9, 0.1, 1.4) 0.55s both;
+  }
+}
+@keyframes fx-stamp-in {
+  from {
+    opacity: 0;
+    scale: 1.35;
+    rotate: -8deg;
+    box-shadow: 0 0 0 0 #0a0a0a;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+    rotate: 0deg;
+    box-shadow: 5px 5px 0 0 #0a0a0a;
+  }
 }

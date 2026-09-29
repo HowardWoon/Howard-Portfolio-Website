@@ -506,34 +506,21 @@ export default function ExperienceSection() {
       <div className="relative max-w-6xl mx-auto space-y-12">
         {/* Section Header */}
         <div className="space-y-7">
-          <m.div
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="nb-kicker"
-          >
+          <m.div className="fx-rise nb-kicker">
             <Sparkles className="w-4 h-4" strokeWidth={2.5} />
             <span>EXPERIENCE // CAREER & INSTITUTIONAL GOVERNANCE</span>
           </m.div>
 
-          <m.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="nb-title text-[clamp(1.55rem,8.2vw,2.1rem)] sm:text-5xl lg:text-6xl max-w-3xl leading-[1.02]"
-          >
+          <m.h2 className="fx-rise nb-title text-[clamp(1.55rem,8.2vw,2.1rem)] sm:text-5xl lg:text-6xl max-w-3xl leading-[1.02]">
             <SplitWords text="EXECUTIVE LEADERSHIP & GOVERNANCE." />
           </m.h2>
         </div>
 
         {/* Segmented Filter Control — physical key row */}
         <m.div
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
           role="group"
           aria-label="Filter experience"
-          className="flex flex-wrap items-center gap-2 p-2 bg-white border-3 border-ink rounded-[22px] shadow-brutal-sm w-fit max-w-full"
+          className="fx-rise grid grid-cols-1 min-[360px]:grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 p-2 bg-white border-3 border-ink rounded-[22px] shadow-brutal-sm w-full sm:w-fit max-w-full"
         >
           <LayoutGroup id="exp-filter">
             {filters.map((f) => {
@@ -545,7 +532,7 @@ export default function ExperienceSection() {
                   key={f.id}
                   aria-pressed={isActive}
                   onClick={() => setSelectedFilter(f.id)}
-                  className={`relative px-4 py-2.5 rounded-2xl text-xs font-mono font-extrabold uppercase tracking-[0.08em] border-2 transition-all duration-150 ${
+                  className={`relative px-3 sm:px-4 py-2.5 rounded-2xl text-xs font-mono font-extrabold uppercase tracking-[0.08em] border-2 transition-all duration-150 ${
                     isActive ? 'text-white border-ink' : 'bg-white text-ink border-transparent hover:border-ink'
                   }`}
                 >
@@ -557,7 +544,7 @@ export default function ExperienceSection() {
                       transition={FX.jellyTabs ? SPRING_STAMP : { duration: 0 }}
                     />
                   ) : null}
-                  <span className="relative z-10 flex items-center gap-2.5">
+                  <span className="relative z-10 flex items-center justify-center gap-2.5">
                     <span className={`nb-dot ${f.dotClass}`} />
                     {f.label}
                     <span className={`text-[0.7rem] ${isActive ? 'text-white/70' : 'text-ink-muted'}`}>({count})</span>

@@ -153,13 +153,11 @@ function PillarCard({
   activeCard,
   setActiveCard,
   colorMap,
-  delay,
 }: {
   pillar: (typeof architecturePillars)[0];
   activeCard: string;
   setActiveCard: (id: string) => void;
   colorMap: Record<string, { fill: string; soft: string; dot: string }>;
-  delay: number;
 }) {
   const Icon = pillar.icon;
   const isActive = activeCard === pillar.id;
@@ -168,10 +166,7 @@ function PillarCard({
   return (
     <m.div
       layout={FX.bentoReflow ? 'position' : false}
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6, delay, layout: SPRING_SOFT }}
+      transition={{ layout: SPRING_SOFT }}
       onClick={() => setActiveCard(pillar.id)}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -182,7 +177,7 @@ function PillarCard({
       tabIndex={0}
       role="button"
       aria-pressed={isActive}
-      className={`relative group cursor-pointer rounded-[26px] p-4 xs:p-6 sm:p-8 border-3 border-ink flex flex-col justify-between gap-6 transition-[transform,box-shadow,background-color] duration-200 focus-visible:outline focus-visible:outline-4 focus-visible:outline-pop-blue ${
+      className={`fx-rise relative group cursor-pointer rounded-[26px] p-4 xs:p-6 sm:p-8 border-3 border-ink flex flex-col justify-between gap-6 transition-[transform,box-shadow,background-color] duration-200 focus-visible:outline focus-visible:outline-4 focus-visible:outline-pop-blue ${
         isActive
           ? `${c.soft} shadow-brutal-lg -translate-x-1 -translate-y-1`
           : 'bg-white shadow-brutal hover:-translate-y-1 hover:shadow-brutal-lg'
@@ -219,10 +214,10 @@ function PillarCard({
           </div>
         ))}
       </div>
-      <div className="terminal flex items-start xs:items-center justify-between gap-3">
+      <div className="terminal flex items-start justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0">
           <Activity className="w-4 h-4 text-pop-mint animate-pulse shrink-0" strokeWidth={2.5} />
-          <span className="min-w-0 [overflow-wrap:anywhere] sm:truncate">{pillar.telemetrySnippet}</span>
+          <span className="min-w-0 [overflow-wrap:anywhere]">{pillar.telemetrySnippet}</span>
         </div>
         {/* Always rendered so every card keeps the same height; only the active card shows it. */}
         <span
@@ -292,34 +287,16 @@ export default function AboutSection() {
       <div className="relative max-w-7xl mx-auto space-y-16">
         {/* Section Header */}
         <div className="space-y-7">
-          <m.div
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="nb-kicker"
-          >
+          <div className="nb-kicker fx-rise">
             <Sparkles className="w-4 h-4" strokeWidth={2.5} />
             <span>ABOUT // SYSTEMS ARCHITECTURE & VISION</span>
-          </m.div>
+          </div>
 
-          <m.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="nb-title text-[clamp(1.55rem,8.2vw,2.1rem)] sm:text-5xl lg:text-6xl max-w-5xl leading-[1.02]"
-          >
+          <h2 className="fx-rise nb-title text-[clamp(1.55rem,8.2vw,2.1rem)] sm:text-5xl lg:text-6xl max-w-5xl leading-[1.02]">
             <SplitWords text="I ARCHITECT RESILIENT BACKENDS AND AUTONOMOUS AI PIPELINES, TURNING COMPLEX IDEAS INTO PRODUCTION-READY SYSTEMS." />
-          </m.h2>
+          </h2>
 
-          <m.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-ink-soft text-lg sm:text-xl max-w-3xl leading-relaxed font-sans font-medium"
-          >
+          <p className="fx-rise text-ink-soft text-lg sm:text-xl max-w-3xl leading-relaxed font-sans font-medium">
             Software Engineering undergraduate at <strong className="text-ink font-extrabold">Universiti Malaya</strong>{' '}
             (
             <span className="inline-block bg-pop-yellow border-2 border-ink rounded-md px-1.5 text-ink font-mono font-extrabold text-[0.95em] leading-snug">
@@ -327,14 +304,14 @@ export default function AboutSection() {
             </span>
             ). Bridging low-latency algorithmic backend performance and AI orchestration with strong technical
             leadership and fiscal governance to deliver scalable, cost-effective solutions.
-          </m.p>
+          </p>
         </div>
 
         {/* Core Architecture Bento Grid (4 Pillars) — True Masonry Layout */}
         {isLg !== true && (
           <LayoutGroup id="about-pillars-mobile">
             <div className="flex flex-col lg:hidden gap-7">
-              {architecturePillars.map((pillar, idx) => (
+              {architecturePillars.map((pillar) => (
                 <PillarCard
                   key={pillar.id}
                   pillar={pillar}
@@ -342,7 +319,6 @@ export default function AboutSection() {
                   activeCard={activeCard}
                   setActiveCard={setActiveCard}
                   colorMap={colorMap}
-                  delay={idx * 0.1}
                 />
               ))}
             </div>
@@ -354,7 +330,7 @@ export default function AboutSection() {
               <div className="flex flex-col gap-8">
                 {architecturePillars
                   .filter((_, i) => i % 2 === 0)
-                  .map((pillar, idx) => (
+                  .map((pillar) => (
                     <PillarCard
                       key={pillar.id}
                       pillar={pillar}
@@ -362,14 +338,13 @@ export default function AboutSection() {
                       activeCard={activeCard}
                       setActiveCard={setActiveCard}
                       colorMap={colorMap}
-                      delay={idx * 2 * 0.1}
                     />
                   ))}
               </div>
               <div className="flex flex-col gap-8 mt-10">
                 {architecturePillars
                   .filter((_, i) => i % 2 === 1)
-                  .map((pillar, idx) => (
+                  .map((pillar) => (
                     <PillarCard
                       key={pillar.id}
                       pillar={pillar}
@@ -377,7 +352,6 @@ export default function AboutSection() {
                       activeCard={activeCard}
                       setActiveCard={setActiveCard}
                       colorMap={colorMap}
-                      delay={(idx * 2 + 1) * 0.1}
                     />
                   ))}
               </div>
@@ -386,13 +360,7 @@ export default function AboutSection() {
         )}
 
         {/* Categorized Technical Stack Matrix */}
-        <m.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="nb-card-lg p-4 xs:p-6 sm:p-8 lg:p-10 space-y-8 lg:mt-10"
-        >
+        <div className="fx-rise nb-card-lg p-4 xs:p-6 sm:p-8 lg:p-10 space-y-8 lg:mt-10">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-b-3 border-ink pb-6">
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-xs font-mono font-extrabold text-pop-blue tracking-[0.12em] uppercase">
@@ -488,7 +456,7 @@ export default function AboutSection() {
               </div>
             ))}
           </div>
-        </m.div>
+        </div>
       </div>
     </section>
   );

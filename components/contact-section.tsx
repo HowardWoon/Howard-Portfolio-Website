@@ -190,22 +190,12 @@ export default function ContactSection() {
       <div className="relative max-w-7xl mx-auto space-y-14 px-4 xs:px-5 sm:px-10 lg:px-16">
         {/* Section Header */}
         <div className="space-y-7">
-          <m.div
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="nb-kicker"
-          >
+          <m.div className="fx-rise nb-kicker">
             <Sparkles className="w-4 h-4" strokeWidth={2.5} />
             <span>CONTACT // RECRUITER & PARTNERSHIP HUB</span>
           </m.div>
 
-          <m.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="nb-title text-[clamp(1.7rem,9.5vw,2.4rem)] sm:text-6xl lg:text-7xl max-w-4xl leading-[0.98]"
-          >
+          <m.h2 className="fx-rise nb-title text-[clamp(1.7rem,9.5vw,2.4rem)] sm:text-6xl lg:text-7xl max-w-4xl leading-[0.98]">
             <SplitWords text="LET'S ARCHITECT SOMETHING SPECIAL." />
           </m.h2>
         </div>
@@ -213,13 +203,7 @@ export default function ContactSection() {
         {/* Main 2-Column Recruiter Hub (bento) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
           {/* Left Column: Identity, Availability & 1-Click Recruiter Pack (5 Cols) */}
-          <m.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="lg:col-span-5 space-y-6"
-          >
+          <m.div className="fx-rise lg:col-span-5 space-y-6">
             <div className="nb-card-lg p-4 xs:p-6 sm:p-8 space-y-6">
               {/* Recruiter Live Status Pill */}
               <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#DCFAEC] border-2 border-ink text-ink text-xs font-mono font-extrabold tracking-[0.06em]">
@@ -339,13 +323,7 @@ export default function ContactSection() {
           </m.div>
 
           {/* Right Column: Interactive Dispatch Form with Quick-Intent Chips (7 Cols) */}
-          <m.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="lg:col-span-7 nb-card-lg p-4 xs:p-6 sm:p-10 space-y-6"
-          >
+          <m.div className="fx-rise lg:col-span-7 nb-card-lg p-4 xs:p-6 sm:p-10 space-y-6">
             <div className="space-y-2">
               <span className="nb-tag bg-pop-lilac">DIRECT TRANSMISSION CONSOLE</span>
               <h3 className="font-display text-[clamp(1.4rem,7vw,1.875rem)] font-extrabold uppercase text-ink tracking-[-0.02em] pt-2">
@@ -362,6 +340,7 @@ export default function ContactSection() {
                     key={intent.label}
                     type="button"
                     aria-pressed={activeIntent === intent.label}
+                    data-fx-stamp-target
                     onClick={() => handleSelectIntent(intent)}
                     className={`min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-mono font-bold border-2 border-ink transition-all ${
                       activeIntent === intent.label

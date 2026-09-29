@@ -1,3 +1,4 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { fallbackExperiences, fallbackProfile, fallbackProjects, fallbackSkills } from '@/lib/site-data';
 
 type SupabaseAuthUser = {
@@ -6,13 +7,27 @@ type SupabaseAuthUser = {
   app_metadata?: { role?: string };
 };
 
-function createResolvedResult(data: unknown) {
+function createResolvedResult(data: unknown): Promise<FallbackResult> {
   return Promise.resolve({ data, error: null });
 }
 
-function createQueryBuilder(table: string) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const builder: any = {
+type FallbackResult = { data: unknown; error: { message: string } | null };
+/** the chainable subset of the Supabase query builder the site uses; awaiting it resolves to the fallback rows */
+type FallbackQuery = PromiseLike<FallbackResult> & {
+  select: () => FallbackQuery;
+  order: () => FallbackQuery;
+  eq: () => FallbackQuery;
+  limit: () => FallbackQuery;
+  maybeSingle: () => Promise<FallbackResult>;
+  single: () => Promise<FallbackResult>;
+  insert: () => Promise<FallbackResult>;
+  update: () => Promise<FallbackResult>;
+  delete: () => Promise<FallbackResult>;
+  catch: (onRejected: (reason: unknown) => unknown) => Promise<unknown>;
+};
+
+function createQueryBuilder(table: string): FallbackQuery {
+  const builder: FallbackQuery = {
     select: () => builder,
     order: () => builder,
     eq: () => builder,
@@ -22,10 +37,7 @@ function createQueryBuilder(table: string) {
     insert: () => Promise.resolve({ data: null, error: { message: 'Supabase is not configured.' } }),
     update: () => Promise.resolve({ data: null, error: { message: 'Supabase is not configured.' } }),
     delete: () => Promise.resolve({ data: null, error: { message: 'Supabase is not configured.' } }),
-    then: (
-      onFulfilled: (value: { data: unknown; error: null }) => unknown,
-      onRejected?: (reason: unknown) => unknown,
-    ) => createResolvedResult(getFallbackMany(table)).then(onFulfilled, onRejected),
+    then: (onFulfilled, onRejected) => createResolvedResult(getFallbackMany(table)).then(onFulfilled, onRejected),
     catch: (onRejected: (reason: unknown) => unknown) => createResolvedResult(getFallbackMany(table)).catch(onRejected),
   };
 
@@ -51,8 +63,8 @@ export function createFallbackSupabaseClient() {
       signInWithPassword: async () => ({ data: null, error: { message: 'Supabase is not configured.' } }),
     },
     from: (table: string) => createQueryBuilder(table),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } as any;
+    // Callers treat this exactly like the real client; the offline stand-in implements the subset the site uses.
+  } as unknown as SupabaseClient;
 }
 
 export function hasSupabaseCredentials() {

@@ -4,7 +4,8 @@ import React, { useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { m, AnimatePresence, LayoutGroup } from 'framer-motion';
 import Image from 'next/image';
-import { ChevronLeft, ChevronRight, Layers, LayoutGrid, Maximize2, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Layers, LayoutGrid, Link2, Maximize2, X } from 'lucide-react';
+import { copyLink, readDeepLink, shareUrl } from '@/lib/share';
 import { useScrollLock } from '@/lib/use-scroll-lock';
 import { useFocusTrap } from '@/lib/use-focus-trap';
 import { useLatest } from '@/lib/use-latest';
@@ -70,11 +71,14 @@ function PhotoLightbox({
   index,
   onIndex,
   onClose,
+  shareId,
 }: {
   list: Photo[];
   index: number;
   onIndex: (i: number) => void;
   onClose: () => void;
+  /** FX-69: gallery id used in `?photo=<id>:<n>` share links */
+  shareId?: string;
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -235,6 +239,18 @@ function PhotoLightbox({
         <span className="nb-tag bg-pop-yellow" aria-live="polite">
           {String(index + 1).padStart(2, '0')} / {String(list.length).padStart(2, '0')}
         </span>
+        <div className="flex-1" />
+        {FX.deepLinks && shareId ? (
+          <button
+            type="button"
+            onClick={() => copyLink(shareUrl('photo', shareId, index + 1))}
+            aria-label="Copy link to this view"
+            title="Copy link to this view"
+            className="grid place-items-center w-11 h-11 sm:w-12 sm:h-12 shrink-0 bg-white border-3 border-ink rounded-xl shadow-brutal hover:bg-pop-yellow transition-colors text-ink"
+          >
+            <Link2 className="w-5 h-5" strokeWidth={3} aria-hidden />
+          </button>
+        ) : null}
         <button
           type="button"
           data-autofocus
@@ -343,7 +359,7 @@ function PhotoLightbox({
  * Mouse/touch: click anywhere on the stack to cycle. Keyboard/screen readers: the (visually hidden)
  * "Next photo" button. The expand button is no longer nested inside another button.
  */
-export function InteractivePhotoStack({ customPhotos }: { customPhotos?: Photo[] }) {
+export function InteractivePhotoStack({ customPhotos, galleryId }: { customPhotos?: Photo[]; galleryId?: string }) {
   const source = customPhotos || photos;
   const [cards, setCards] = useState(source);
   const [ratios, setRatios] = useState<Record<string, number>>({});
@@ -360,6 +376,18 @@ export function InteractivePhotoStack({ customPhotos }: { customPhotos?: Photo[]
   const [sheet, setSheet] = useState(false);
   const uid = useId();
   useEffect(() => setMounted(true), []);
+  // FX-69: `?photo=<this gallery>:<n>` opens the lightbox on photo n
+  const stackRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!FX.deepLinks || !galleryId) return;
+    const link = readDeepLink('photo');
+    if (!link || link.id !== galleryId || link.n > source.length) return;
+    const t = window.setTimeout(() => {
+      stackRef.current?.scrollIntoView({ block: 'center' });
+      setViewer(link.n - 1);
+    }, 400);
+    return () => window.clearTimeout(t);
+  }, [galleryId, source.length]);
 
   const cycle = () => setCards((prev) => [...prev.slice(1), prev[0]]);
   const openViewer = (src: string) =>
@@ -374,6 +402,7 @@ export function InteractivePhotoStack({ customPhotos }: { customPhotos?: Photo[]
     <>
       <LayoutGroup id={uid}>
         <div
+          ref={stackRef}
           onClick={
             sheet
               ? undefined
@@ -434,7 +463,7 @@ export function InteractivePhotoStack({ customPhotos }: { customPhotos?: Photo[]
                       alt=""
                       fill
                       sizes="(max-width: 640px) 45vw, 14vw"
-                      className="object-contain"
+                      className="fx-wipe object-contain"
                     />
                   </span>
                 </m.button>
@@ -542,7 +571,13 @@ export function InteractivePhotoStack({ customPhotos }: { customPhotos?: Photo[]
         {mounted && (
           <AnimatePresence>
             {viewer !== null && (
-              <PhotoLightbox list={source} index={viewer} onIndex={setViewer} onClose={() => setViewer(null)} />
+              <PhotoLightbox
+                list={source}
+                index={viewer}
+                onIndex={setViewer}
+                onClose={() => setViewer(null)}
+                shareId={galleryId}
+              />
             )}
           </AnimatePresence>
         )}

@@ -13,6 +13,7 @@ import { AmbientOrbits } from './fx/ambient-orbits';
 import { useFocusTrap } from '@/lib/use-focus-trap';
 import { useLatest } from '@/lib/use-latest';
 import { useScrollLock } from '@/lib/use-scroll-lock';
+import { useViewTransitions, withViewTransition } from '@/lib/view-transition';
 import {
   Trophy,
   ArrowRight,
@@ -387,8 +388,12 @@ export default function HonorsSection() {
 
   const activeItems = honorsList.filter((i) => i.badgeColor === activeCategory);
   const resultsRef = useRef<HTMLDivElement>(null);
+  // FX-65: where the View Transitions API runs, it animates the switch (framer's exit is skipped so the two
+  // animations never stack); elsewhere framer's AnimatePresence does it as before.
+  const vt = useViewTransitions();
   const pick = (id: typeof activeCategory) => {
-    setActiveCategory(id);
+    if (vt) withViewTransition(() => setActiveCategory(id));
+    else setActiveCategory(id);
     // On phones the 3 category keys stack, so the opened list appears off-screen below them → bring it into view
     if (id && window.innerWidth < 768) {
       window.setTimeout(() => {
@@ -437,33 +442,17 @@ export default function HonorsSection() {
       <div className="relative max-w-7xl mx-auto space-y-12 w-full flex-1 flex flex-col">
         {/* Section Header */}
         <div className="space-y-7">
-          <m.div
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="nb-kicker"
-          >
+          <m.div className="fx-rise nb-kicker">
             <Sparkles className="w-4 h-4" strokeWidth={2.5} />
             <span>HONORS // ACADEMIC & COMPETITION DISTINCTIONS</span>
           </m.div>
 
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-            <m.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="nb-title text-[clamp(1.55rem,8.2vw,2.1rem)] sm:text-5xl lg:text-6xl max-w-3xl leading-[1.02]"
-            >
+            <m.h2 className="fx-rise nb-title text-[clamp(1.55rem,8.2vw,2.1rem)] sm:text-5xl lg:text-6xl max-w-3xl leading-[1.02]">
               <SplitWords text="HONORS & COMPETITIVE ACHIEVEMENTS." />
             </m.h2>
 
-            <m.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="text-sm font-mono font-semibold text-ink-soft max-w-sm leading-relaxed bg-white border-3 border-ink rounded-2xl p-4 shadow-brutal-sm -rotate-1"
-            >
+            <m.p className="fx-rise text-sm font-mono font-semibold text-ink-soft max-w-sm leading-relaxed bg-white border-3 border-ink rounded-2xl p-4 shadow-brutal-sm -rotate-1">
               A curated log of regional hackathon podiums, 4.00 CGPA academic distinctions, and engineering competition
               finals.
             </m.p>
@@ -471,21 +460,19 @@ export default function HonorsSection() {
         </div>
 
         {/* Interactive Category Keys (clay) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {categories.map((cat, idx) => {
+        <div className="fx-card-grid grid grid-cols-1 md:grid-cols-3 gap-5">
+          {categories.map((cat) => {
             const isActive = activeCategory === cat.id;
             const Icon = cat.icon;
 
             return (
               <m.button
                 key={cat.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
                 aria-expanded={isActive}
+                data-honor-category
+                data-fx-stamp-target
                 onClick={() => pick(isActive ? null : cat.id)}
-                className={`group relative w-full flex flex-col items-start text-left p-6 rounded-[26px] border-3 border-ink transition-[transform,box-shadow,background-color] duration-150 ${
+                className={`fx-rise group relative w-full flex flex-col items-start text-left p-6 rounded-[26px] border-3 border-ink transition-[transform,box-shadow,background-color] duration-150 ${
                   isActive
                     ? `${cat.fill} shadow-clay-pressed translate-x-[3px] translate-y-[3px]`
                     : 'bg-white shadow-clay hover:-translate-y-1'
@@ -524,14 +511,18 @@ export default function HonorsSection() {
         </div>
 
         {/* Expanded Content Area */}
-        <div ref={resultsRef} className={`relative flex-1 ${activeCategory ? 'min-h-[400px]' : ''}`}>
-          <AnimatePresence mode="wait">
+        <div
+          ref={resultsRef}
+          style={{ viewTransitionName: 'honors-results' }}
+          className={`relative flex-1 ${activeCategory ? 'min-h-[400px]' : ''}`}
+        >
+          <AnimatePresence mode={vt ? 'sync' : 'wait'}>
             {activeCategory && (
               <m.div
                 key={activeCategory}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20, position: 'absolute', inset: 0 }}
+                exit={vt ? undefined : { opacity: 0, y: -20, position: 'absolute', inset: 0 }}
                 transition={{ duration: 0.4, type: 'spring', bounce: 0.2 }}
                 className={`grid grid-cols-1 lg:grid-cols-2 ${activeItems.length > 2 ? 'xl:grid-cols-3' : 'items-start'} gap-7`}
               >

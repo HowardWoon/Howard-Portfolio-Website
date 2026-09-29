@@ -4,7 +4,9 @@ import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from
 import { createPortal } from 'react-dom';
 import { useScrollLock } from '@/lib/use-scroll-lock';
 import { useFocusTrap } from '@/lib/use-focus-trap';
-import { ChevronLeft, ChevronRight, Move, Orbit, RotateCcw, Rotate3d, X, ZoomIn, ZoomOut } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Link2, Move, Orbit, RotateCcw, Rotate3d, X, ZoomIn, ZoomOut } from 'lucide-react';
+import { FX } from '@/lib/fx';
+import { copyLink, shareUrl } from '@/lib/share';
 import { isCalm } from '@/lib/motion-pref';
 import { prefersReducedMotion } from '@/lib/fx';
 
@@ -124,12 +126,18 @@ export function BlueprintStage({
   open,
   onRequestClose,
   title,
+  shareId,
+  initialLayer = null,
   children,
 }: {
   open: boolean;
   /** the stage's own close button / console asks the card to close the blueprint */
   onRequestClose: () => void;
   title: string;
+  /** FX-69: project id used in `?bp=<id>:L<n>` share links (no copy button without it) */
+  shareId?: string;
+  /** FX-69: layer index (0-6) to inspect once the bench has opened, from a shared link */
+  initialLayer?: number | null;
   children: React.ReactNode;
 }) {
   const stageRef = useRef<HTMLDivElement>(null);
@@ -410,6 +418,13 @@ export function BlueprintStage({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [iso]);
+
+  // FX-69: a shared link names a layer; inspect it once the open tween has settled (instantly for reduced motion)
+  useEffect(() => {
+    if (!mounted || !open || initialLayer === null) return;
+    const t = window.setTimeout(() => setIso(initialLayer), still() ? 0 : 1000);
+    return () => window.clearTimeout(t);
+  }, [mounted, open, initialLayer]);
 
   // sheet: auto-inspect L1 after the open tween
   useEffect(() => {
@@ -808,6 +823,17 @@ export function BlueprintStage({
                   <div className="absolute bottom-[3px] left-[17px] w-1 h-1 rounded-full bg-ink" />
                 </div>
               </div>
+              {FX.deepLinks && shareId ? (
+                <button
+                  type="button"
+                  onClick={() => copyLink(shareUrl('bp', shareId, (iso ?? 0) + 1))}
+                  aria-label="Copy link to this view"
+                  title="Copy link to this view"
+                  className="flex items-center justify-center w-10 h-10 rounded-full border-3 border-ink bg-white text-ink hover:bg-pop-yellow transition-colors shadow-brutal-sm"
+                >
+                  <Link2 className="w-4 h-4" strokeWidth={3} aria-hidden />
+                </button>
+              ) : null}
               <button
                 type="button"
                 onClick={onRequestClose}

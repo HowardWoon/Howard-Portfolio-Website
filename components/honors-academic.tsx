@@ -112,17 +112,22 @@ export function Transcript({ semesters = UM_TRANSCRIPT }: { semesters?: Semester
                 <h5 className="font-mono text-[0.7rem] font-extrabold uppercase tracking-[0.1em] text-ink">
                   {sem.label}
                 </h5>
-                <span className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.06em] text-ink-muted">
+                <span className="font-mono text-[0.7rem] font-bold uppercase tracking-[0.06em] text-ink-muted">
                   GPA: {sem.gpa} · {plus}× A+
                 </span>
               </div>
               <ul className="divide-y-2 divide-dashed divide-ink/15">
                 {sem.courses.map((c) => (
-                  <li key={c.code} className="grid grid-cols-[auto_1fr_auto] items-center gap-3 py-2">
-                    <span className="rounded-md border-2 border-ink bg-paper-deep px-1.5 py-0.5 font-mono text-[0.68rem] font-extrabold tracking-[0.02em] text-ink tabular-nums">
+                  <li
+                    key={c.code}
+                    className="grid grid-cols-[1fr_auto] min-[360px]:grid-cols-[auto_1fr_auto] items-center gap-x-3 gap-y-1.5 py-2"
+                  >
+                    <span className="col-span-2 min-[360px]:col-span-1 justify-self-start rounded-md border-2 border-ink bg-paper-deep px-1.5 py-0.5 font-mono text-[0.72rem] font-extrabold tracking-[0.02em] text-ink tabular-nums">
                       {c.code}
                     </span>
-                    <span className="min-w-0 text-sm font-sans font-semibold leading-snug text-ink-soft">{c.name}</span>
+                    <span className="min-w-0 text-sm font-sans font-semibold leading-snug text-ink-soft [overflow-wrap:break-word]">
+                      {c.name}
+                    </span>
                     <span
                       className={`grid h-7 w-9 place-items-center rounded-lg border-2 border-ink font-mono text-xs font-extrabold text-ink ${
                         c.grade === 'A+' ? 'bg-pop-mint shadow-brutal-xs' : 'bg-white'
@@ -154,7 +159,7 @@ const RESULT_STYLE: Record<Result, { chip: string; label: string }> = {
 function ScopeTag({ scope }: { scope: Entry['scope'] }) {
   return (
     <span
-      className={`inline-flex rounded border-[1.5px] border-ink px-1 font-mono text-[0.6rem] font-extrabold uppercase tracking-[0.06em] ${
+      className={`inline-flex rounded border-[1.5px] border-ink px-1 font-mono text-[0.7rem] font-extrabold uppercase tracking-[0.06em] ${
         scope === 'Kebangsaan' ? 'bg-pop-blue text-white' : 'bg-white text-ink'
       }`}
     >
@@ -188,11 +193,13 @@ export function ResultsBoard({
             key={e.name}
             className={`flex flex-col justify-between gap-2 rounded-xl border-2 border-ink p-2.5 shadow-brutal-xs ${RESULT_STYLE[e.result].chip}`}
           >
-            <span className="inline-flex items-center gap-1 font-mono text-[0.65rem] font-extrabold tracking-[0.1em] text-ink">
+            <span className="inline-flex items-center gap-1 font-mono text-[0.7rem] font-extrabold tracking-[0.1em] text-ink">
               <Award className="w-3.5 h-3.5" strokeWidth={2.75} aria-hidden />
               {RESULT_STYLE[e.result].label}
             </span>
-            <span className="text-[0.82rem] font-sans font-bold leading-snug text-ink">{e.name}</span>
+            <span className="text-[0.82rem] font-sans font-bold leading-snug text-ink [overflow-wrap:break-word]">
+              {e.name}
+            </span>
             <span className="self-start">
               <ScopeTag scope={e.scope} />
             </span>
@@ -205,11 +212,13 @@ export function ResultsBoard({
         {shown.map((e) => (
           <li key={e.name} className="grid grid-cols-[1fr_auto] items-center gap-3 py-2">
             <span className="min-w-0">
-              <span className="block text-sm font-sans font-semibold leading-snug text-ink-soft">{e.name}</span>
+              <span className="block text-sm font-sans font-semibold leading-snug text-ink-soft [overflow-wrap:break-word]">
+                {e.name}
+              </span>
               <ScopeTag scope={e.scope} />
             </span>
             <span
-              className={`rounded-md border-2 border-ink px-1.5 py-0.5 font-mono text-[0.62rem] font-extrabold tracking-[0.06em] text-ink ${RESULT_STYLE[e.result].chip}`}
+              className={`rounded-md border-2 border-ink px-1.5 py-0.5 font-mono text-[0.7rem] font-extrabold tracking-[0.06em] text-ink ${RESULT_STYLE[e.result].chip}`}
             >
               {RESULT_STYLE[e.result].label}
             </span>
@@ -253,11 +262,13 @@ export function RolesGrid({ roles = KMNS_ROLES }: { roles?: typeof KMNS_ROLES })
             key={r.org}
             className={`flex flex-col gap-1.5 rounded-xl border-2 border-ink p-2.5 ${r.lead ? 'bg-[#DCFAEC] shadow-brutal-xs' : 'bg-white'}`}
           >
-            <span className="inline-flex items-center gap-1 self-start rounded-md border-2 border-ink bg-white px-1.5 py-0.5 font-mono text-[0.62rem] font-extrabold tracking-[0.08em] text-ink">
+            <span className="inline-flex items-center gap-1 self-start rounded-md border-2 border-ink bg-white px-1.5 py-0.5 font-mono text-[0.7rem] font-extrabold tracking-[0.08em] text-ink">
               {r.lead ? <Crown className="w-3 h-3" strokeWidth={3} aria-hidden /> : null}
               {r.role}
             </span>
-            <span className="text-[0.82rem] font-sans font-semibold leading-snug text-ink-soft">{r.org}</span>
+            <span className="text-[0.82rem] font-sans font-semibold leading-snug text-ink-soft [overflow-wrap:break-word]">
+              {r.org}
+            </span>
           </li>
         ))}
       </ul>

@@ -8,7 +8,7 @@ export function SiteFooter() {
   return (
     <footer
       data-dark-surface
-      className="relative z-10 bg-ink text-white mt-0 pt-16 sm:pt-20 pb-[max(3.5rem,calc(var(--safe-bottom)+2rem))] px-4 xs:px-5 sm:px-10 lg:px-16"
+      className="fx-lamp relative z-10 bg-ink text-white mt-0 pt-16 sm:pt-20 pb-[max(3.5rem,calc(var(--safe-bottom)+2rem))] px-4 xs:px-5 sm:px-10 lg:px-16"
     >
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-start gap-14 lg:gap-10">
         {/* Left: System of Record / Title Block (blueprint-style drawing frame) */}

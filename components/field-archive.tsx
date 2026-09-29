@@ -122,7 +122,7 @@ export function FieldArchive({ archiveId }: FieldArchiveProps) {
                   alt={record.caption}
                   fill
                   sizes="(max-width: 640px) 78vw, 34vw"
-                  className="object-cover"
+                  className="fx-wipe object-cover"
                 />
                 {/* film perforations */}
                 <span aria-hidden className="absolute inset-x-0 top-0 h-3 fx-perf" />
@@ -177,7 +177,7 @@ export function FieldArchive({ archiveId }: FieldArchiveProps) {
                 alt={records[0].caption}
                 fill
                 sizes="(max-width: 768px) 100vw, 60vw"
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                className="fx-wipe object-cover transition-transform duration-700 group-hover:scale-105"
               />
               {/* Hero Label (sticker) */}
               <div className="absolute left-4 bottom-4 right-4 flex flex-col items-start gap-1.5">
@@ -203,7 +203,7 @@ export function FieldArchive({ archiveId }: FieldArchiveProps) {
                   alt={record.caption}
                   fill
                   sizes="(max-width: 768px) 50vw, 30vw"
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="fx-wipe object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute left-3 bottom-3 right-3">
                   <div className="nb-tag bg-white text-[0.7rem] max-w-full">
@@ -231,7 +231,7 @@ export function FieldArchive({ archiveId }: FieldArchiveProps) {
                     alt={record.caption}
                     fill
                     sizes="(max-width: 640px) 50vw, 25vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="fx-wipe object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute left-3 bottom-3 right-3">
                     {/* full caption only where the square tiles are wide enough (it was cropped on phones/tablets) */}

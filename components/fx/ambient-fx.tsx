@@ -61,7 +61,8 @@ export function AmbientFx() {
       },
       { rootMargin: '0px 0px -10% 0px' },
     );
-    document.querySelectorAll('.nb-kicker').forEach((k) => io.observe(k));
+    // R14 B-10: section kickers only; the hero kicker (hero <section> has id="hero") is part of the first paint
+    document.querySelectorAll('main section[id]:not(#hero) .nb-kicker').forEach((k) => io.observe(k));
     return () => {
       io.disconnect();
       cancels.forEach((c) => c());
@@ -93,6 +94,8 @@ export function AmbientFx() {
       el.addEventListener('animationend', done, { once: true });
       window.setTimeout(done, 900); // safety net if the animation never runs
       document.body.appendChild(el);
+      // FX-68 haptic tick on touch (Android; iOS ignores vibrate)
+      if (FX.hapticTick && e.pointerType === 'touch') navigator.vibrate?.(8);
     };
     document.addEventListener('pointerdown', onDown, { passive: true });
     document.documentElement.dataset.fxAmbient = 'on'; // listeners are live (tests wait for this)

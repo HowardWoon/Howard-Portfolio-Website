@@ -10,6 +10,7 @@ import { Reveal } from './reveal';
 import { FX } from '@/lib/fx';
 import { exitFocus, markVisited, setFocus, startTrail, useInteractionSelect } from '@/lib/interaction-store';
 import { projectsWithSkill, scrollToProject, skillKey } from '@/lib/skills';
+import { readDeepLink } from '@/lib/share';
 import { TiltCard } from './tilt-card';
 import { AmbientOrbits } from './fx/ambient-orbits';
 import { InteractivePhotoStack } from './interactive-photo-stack';
@@ -330,6 +331,19 @@ const isRealRepo = (url?: string) => !!url && /github\.com\/[^/]+\/[^/]+/.test(u
 
 function ProjectCard({ project }: { project: ProjectData }) {
   const [blueprint, setBlueprint] = React.useState(false);
+  // FX-69: `?bp=<this project>:L<n>` opens this card's bench on layer n (after the page has settled)
+  const [sharedLayer, setSharedLayer] = React.useState<number | null>(null);
+  React.useEffect(() => {
+    if (!FX.deepLinks || !FX.blueprintView) return;
+    const link = readDeepLink('bp');
+    if (!link || link.id !== project.simulatorId || link.n > BP_LAYERS.length) return;
+    const t = window.setTimeout(() => {
+      scrollToProject(project.simulatorId);
+      setSharedLayer(link.n - 1);
+      setBlueprint(true);
+    }, 400);
+    return () => window.clearTimeout(t);
+  }, [project.simulatorId]);
   React.useEffect(() => {
     if (!blueprint) return;
     const onKey = (e: KeyboardEvent) => {
@@ -417,7 +431,16 @@ function ProjectCard({ project }: { project: ProjectData }) {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start p-4 xs:p-6 sm:p-10 lg:p-12">
               {/* Left Column: Narrative, Architecture & Benchmarks (7 Cols) */}
               <div className="lg:col-span-7 min-w-0">
-                <BlueprintStage open={blueprint} onRequestClose={() => setBlueprint(false)} title={project.title}>
+                <BlueprintStage
+                  open={blueprint}
+                  onRequestClose={() => {
+                    setBlueprint(false);
+                    setSharedLayer(null);
+                  }}
+                  title={project.title}
+                  shareId={project.simulatorId}
+                  initialLayer={sharedLayer}
+                >
                   {/* Top Bar: Project Index + Award Badge */}
                   <div className="flex flex-wrap items-center gap-3 fx-layer" data-bp-label={`L1 · ${BP_LAYERS[0]}`}>
                     <span className="nb-num">{project.number}</span>
@@ -616,7 +639,7 @@ function ProjectCard({ project }: { project: ProjectData }) {
                 {/* Conditional Graphic Visualizers */}
                 {project.telemetryType === 'agentic' && (
                   <div className="flex-1 w-full flex items-center justify-center min-h-[300px] sm:min-h-[400px] lg:min-h-[440px] py-4">
-                    <InteractivePhotoStack />
+                    <InteractivePhotoStack galleryId={project.simulatorId} />
                   </div>
                 )}
 
@@ -624,7 +647,7 @@ function ProjectCard({ project }: { project: ProjectData }) {
                   project.telemetryType === 'slotify' ||
                   project.telemetryType === 'proofpay') && (
                   <div className="flex-1 w-full flex items-center justify-center min-h-[300px] sm:min-h-[400px] lg:min-h-[440px] py-4">
-                    <InteractivePhotoStack customPhotos={project.galleryPhotos} />
+                    <InteractivePhotoStack customPhotos={project.galleryPhotos} galleryId={project.simulatorId} />
                   </div>
                 )}
 

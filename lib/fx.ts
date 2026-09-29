@@ -65,6 +65,16 @@ export const FX = {
   tilt3d: true, // FX-58 project-index tiles tilt in 3D under a mouse
   titleWave: true, // FX-59 section-title words ripple on hover (mouse)
   ambientOrbits: true, // FX-60 slow rotating Bauhaus orbits in the section margins (wide screens)
+  // ---- Round 14 (docs/R14-FULL-AUDIT-AND-UIUX-PLAN.md) ----
+  heroCssEntrance: true, // FX-61 hero entrance in CSS: visible in the server HTML, animates from first paint
+  blueprintFloor: true, // FX-62 the hero grid tilts back into a 3D drafting floor as the hero scrolls away
+  progressRing: true, // FX-63 reading-progress ring on the back-to-top button
+  inkWipe: true, // FX-64 archive / contact-sheet images wipe in diagonally as they scroll into view
+  viewTransitions: true, // FX-65 honours categories + experience filters morph with the View Transitions API
+  cardTurn: true, // FX-66 the selected honours category turns like a card
+  lampSpot: true, // FX-67 a soft lamp light follows the mouse over dark surfaces
+  hapticTick: true, // FX-68 a tiny vibration on Android when a press stamp fires
+  deepLinks: true, // FX-69 ?bp=<project>:L<n> and ?photo=<gallery>:<n> open that exact view; copy-link buttons
 } as const;
 
 export type FxName = keyof typeof FX;

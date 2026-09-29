@@ -18,7 +18,10 @@ import { FX } from '@/lib/fx';
 export function ScrollUnfold({ children, className = '' }: { children: ReactNode; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const allowed = useMotionAllowed(FX.cardUnfold);
-  const gate = useMotionValue(1);
+  // R14: start FLAT (0). The server HTML and the first paint then show flat cards on every device; the unfold is
+  // switched on after mount only where it is allowed (desktop, fine pointer, motion allowed). Starting at 1 left
+  // every card tilted until hydration, including on phones and for reduced-motion visitors.
+  const gate = useMotionValue(0);
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 1024px) and (pointer: fine)');
     const set = () => gate.set(allowed && mq.matches ? 1 : 0);

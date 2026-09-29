@@ -13,19 +13,30 @@ export function ScrollToTop() {
     restDelta: 0.001,
   });
 
-  const flags = useRef({ past: false, footer: false, typing: false });
+  // R14 B-04: the button steps aside while the visitor scrolls DOWN (reading), so it never sits on a control they
+  // are about to tap; any scroll UP brings it back. Direction is measured against an anchor (Lenis moves only a few
+  // px per frame), and state changes only when a flag flips.
+  const flags = useRef({ past: false, footer: false, typing: false, down: false, anchor: 0 });
   const recompute = () => {
     const f = flags.current;
-    const next = f.past && !f.footer && !f.typing;
+    const next = f.past && !f.footer && !f.typing && !f.down;
     setIsVisible((v) => (v === next ? v : next));
   };
 
   useMotionValueEvent(scrollY, 'change', (y) => {
+    const f = flags.current;
     const past = y > 500;
-    if (past !== flags.current.past) {
-      flags.current.past = past;
-      recompute();
+    let changed = past !== f.past;
+    f.past = past;
+    if (Math.abs(y - f.anchor) >= 12) {
+      const down = y > f.anchor;
+      f.anchor = y;
+      if (down !== f.down) {
+        f.down = down;
+        changed = true;
+      }
     }
+    if (changed) recompute();
   });
 
   useEffect(() => {
@@ -90,10 +101,32 @@ export function ScrollToTop() {
           >
             <button
               onClick={scrollToTop}
-              className="group grid place-items-center w-12 h-12 sm:w-14 sm:h-14 bg-pop-yellow border-3 border-ink rounded-full shadow-clay hover:-translate-y-1 active:translate-x-[3px] active:translate-y-[3px] active:shadow-clay-pressed transition-all"
+              className="group relative grid place-items-center w-11 h-11 sm:w-14 sm:h-14 bg-pop-yellow border-3 border-ink rounded-full shadow-clay hover:-translate-y-1 active:translate-x-[3px] active:translate-y-[3px] active:shadow-clay-pressed transition-all"
               aria-label="Scroll to top"
             >
-              <ArrowUp className="w-6 h-6 text-ink group-hover:-translate-y-0.5 transition-transform" strokeWidth={3} />
+              {/* FX-63 reading-progress ring (CSS scroll timeline; static where unsupported) */}
+              <svg
+                aria-hidden
+                viewBox="0 0 48 48"
+                className="fx-ring absolute -inset-[3px] -rotate-90 pointer-events-none"
+              >
+                <circle cx="24" cy="24" r="22" fill="none" stroke="#0A0A0A" strokeOpacity=".12" strokeWidth="3" />
+                <circle
+                  cx="24"
+                  cy="24"
+                  r="22"
+                  fill="none"
+                  stroke="#2B4BFF"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  pathLength={100}
+                  className="fx-ring-bar"
+                />
+              </svg>
+              <ArrowUp
+                className="relative w-5 h-5 sm:w-6 sm:h-6 text-ink group-hover:-translate-y-0.5 transition-transform"
+                strokeWidth={3}
+              />
             </button>
           </m.div>
         )}

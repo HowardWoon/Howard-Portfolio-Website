@@ -4,7 +4,6 @@ import React, { useRef, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { m, useScroll, useTransform, useMotionValue } from 'framer-motion';
-import { useBooted } from './boot-sequence';
 import { Magnetic } from './magnetic-button';
 import { Sparkles, Terminal } from 'lucide-react';
 import { TextRoll } from './fx/text-roll';
@@ -12,7 +11,7 @@ import { TiltCard } from './tilt-card';
 import { toLocal } from '@/lib/to-local';
 import { SpiderReveal } from './spider-reveal';
 import { BauhausSolid } from './fx/bauhaus-solid';
-import { FX, SPRING_STAMP } from '@/lib/fx';
+import { FX } from '@/lib/fx';
 
 /**
  * X-ray magnifier headline.
@@ -20,7 +19,7 @@ import { FX, SPRING_STAMP } from '@/lib/fx';
  * (no React state → no re-render on every mousemove).
  * A11y fix: the duplicated overlay copy is aria-hidden so screen readers read the headline once.
  */
-function MagnifiedHeadline({ booted = true }: { booted?: boolean }) {
+function MagnifiedHeadline() {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   const setVars = (x: number, y: number, on: boolean) => {
@@ -69,15 +68,8 @@ function MagnifiedHeadline({ booted = true }: { booted?: boolean }) {
       >
         ENGINEERING <br />
         {FX.headlineStamp ? (
-          <m.span
-            data-fx
-            className={`${chipClass} bg-pop-yellow border-ink shadow-brutal text-ink`}
-            initial={{ scale: 1.35, rotate: -9, opacity: 0, boxShadow: '0px 0px 0 0 #0A0A0A' }}
-            animate={booted ? { scale: 1, rotate: -1, opacity: 1, boxShadow: '5px 5px 0 0 #0A0A0A' } : undefined}
-            transition={{ ...SPRING_STAMP, delay: 0.55 }}
-          >
-            SYSTEMS TO
-          </m.span>
+          // FX-05 stamp, in CSS since R14 (.fx-stamp-in): the words are in the server HTML from the first paint
+          <span className={`${chipClass} fx-stamp-in bg-pop-yellow border-ink shadow-brutal text-ink`}>SYSTEMS TO</span>
         ) : (
           <span className={`${chipClass} bg-pop-yellow border-ink shadow-brutal text-ink`}>SYSTEMS TO</span>
         )}{' '}
@@ -126,7 +118,6 @@ function MagnifiedHeadline({ booted = true }: { booted?: boolean }) {
 }
 
 export default function BikebearHero() {
-  const booted = useBooted();
   const containerRef = useRef<HTMLElement>(null);
 
   // Scroll Exit Animation
@@ -156,7 +147,7 @@ export default function BikebearHero() {
       {/* Structural grid + dot texture */}
       <div
         aria-hidden
-        className="absolute inset-0 bg-grid [mask-image:radial-gradient(ellipse_75%_65%_at_45%_45%,#000_60%,transparent_100%)] pointer-events-none"
+        className="fx-floor-grid absolute inset-0 bg-grid [mask-image:radial-gradient(ellipse_75%_65%_at_45%_45%,#000_60%,transparent_100%)] pointer-events-none"
       />
 
       {/* Bauhaus geometry (decorative) */}
@@ -189,46 +180,33 @@ export default function BikebearHero() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center w-full">
           {/* Left Column: Vision & Narrative (7 cols) */}
           <div className="lg:col-span-7 flex flex-col items-start space-y-7 relative z-30 pointer-events-auto">
-            {/* Brand Pill Badge */}
-            <m.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={booted ? { opacity: 1, y: 0 } : undefined}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="nb-kicker"
-            >
+            {/* Brand Pill Badge. FX-61: the hero entrance is CSS (.fx-hero-in, keyed off html.hw-booted), so the
+                server HTML is visible and the entrance starts at first paint instead of after hydration. */}
+            <div className="nb-kicker fx-hero-in" style={{ '--d': 1 } as React.CSSProperties}>
               <Sparkles className="w-4 h-4" strokeWidth={2.5} />
               <span>ABOUT // VISION & SYSTEMS ARCHITECTURE</span>
-            </m.div>
+            </div>
 
             {/* Kinetic Typography Headline */}
-            <m.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={booted ? { opacity: 1, y: 0 } : undefined}
-              transition={{ duration: 0.7, delay: 0.2 }}
-              className="relative space-y-2"
-            >
-              <MagnifiedHeadline booted={booted} />
-            </m.div>
+            <div className="relative space-y-2 fx-hero-in" style={{ '--d': 2 } as React.CSSProperties}>
+              <MagnifiedHeadline />
+            </div>
 
             {/* Sub-narrative Bio Copy */}
-            <m.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={booted ? { opacity: 1, y: 0 } : undefined}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-ink-soft text-lg sm:text-xl max-w-xl leading-relaxed font-sans font-medium [overflow-wrap:anywhere]"
+            <p
+              style={{ '--d': 3 } as React.CSSProperties}
+              className="fx-hero-in text-ink-soft text-lg sm:text-xl max-w-xl leading-relaxed font-sans font-medium [overflow-wrap:anywhere]"
             >
               Architecting robust,{' '}
               <span className="nb-marker font-bold text-ink">low-latency distributed backends</span> and{' '}
               <span className="nb-marker font-bold text-ink">autonomous AI systems</span> — engineered with algorithmic
               precision, enterprise scalability, and strategic fiscal discipline.
-            </m.p>
+            </p>
 
             {/* Call to Action Buttons */}
-            <m.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={booted ? { opacity: 1, y: 0 } : undefined}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="flex flex-wrap items-center gap-3 xs:gap-4 pt-2 w-full"
+            <div
+              style={{ '--d': 4 } as React.CSSProperties}
+              className="fx-hero-in flex flex-wrap items-center gap-3 xs:gap-4 pt-2 w-full"
             >
               <Magnetic strength={0.3} stretch>
                 <a href="#projects" className="group nb-btn nb-btn-ink px-7 py-4 fx-specular nb-press">
@@ -243,7 +221,7 @@ export default function BikebearHero() {
                   </span>
                 </Link>
               </Magnetic>
-            </m.div>
+            </div>
           </div>
 
           {/* Right Column: Portrait Card (5 cols) */}
@@ -260,11 +238,9 @@ export default function BikebearHero() {
               style={{ '--depth': 6 } as React.CSSProperties}
             />
 
-            <m.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={booted ? { opacity: 1, scale: 1 } : undefined}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="relative group flex flex-col items-center lg:items-end z-40 pointer-events-auto w-full sm:w-auto px-1 sm:px-0"
+            <div
+              style={{ '--d': 2 } as React.CSSProperties}
+              className="fx-hero-in fx-hero-pop relative group flex flex-col items-center lg:items-end z-40 pointer-events-auto w-full sm:w-auto px-1 sm:px-0"
             >
               {/* News Ticker (Above Photo) */}
               <div
@@ -315,7 +291,7 @@ export default function BikebearHero() {
                   </div>
                 </div>
               </TiltCard>
-            </m.div>
+            </div>
           </div>
         </div>
       </div>
