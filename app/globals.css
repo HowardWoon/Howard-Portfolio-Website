@@ -684,38 +684,298 @@ html.hw-booted .boot-overlay {
 }
 
 @layer components {
-  /* FX-31 Blueprint View. Uses the independent translate property for Z so framer's inline
-     transform on children (Reveal / m.*) can never override it. */
+  /* FX-31 + FX-45 Blueprint Inspection Bench (components/blueprint-stage.tsx).
+     Closed: every rule below is inert, the column renders exactly as before.
+     Open: the column becomes a fixed-height drafting stage; the model (.bp-fit > .fx-stack > .fx-layer plates)
+     is driven by inline transforms written in rAF, so the CSS only styles plates and chrome. */
   .fx-blueprint {
-    perspective: 1800px;
     border-radius: 20px;
     transition: background-color 0.5s ease;
   }
-  .fx-blueprint .fx-stack {
-    transform-origin: 50% 50%;
-    transform-style: preserve-3d;
-    transition: transform 0.8s cubic-bezier(0.2, 0.9, 0.1, 1);
-  }
-  .fx-blueprint .fx-layer {
-    transition:
-      translate 0.8s cubic-bezier(0.2, 0.9, 0.1, 1),
-      box-shadow 0.8s ease;
-  }
   .fx-blueprint[data-open='true'] {
-    overflow: clip; /* exploded layers can never spill onto the gallery or out of the card */
-    overflow-clip-margin: 24px;
+    overflow: clip;
+    cursor: grab;
+    touch-action: pan-y; /* vertical swipes still scroll the page; horizontal swipes orbit; pinch zooms */
+    user-select: none;
+    -webkit-user-select: none;
+    outline-offset: 4px;
     background-color: rgb(43 75 255 / 0.06);
     background-image:
       linear-gradient(rgb(43 75 255 / 0.14) 1px, transparent 1px),
-      linear-gradient(90deg, rgb(43 75 255 / 0.14) 1px, transparent 1px);
-    background-size: 24px 24px;
+      linear-gradient(90deg, rgb(43 75 255 / 0.14) 1px, transparent 1px),
+      linear-gradient(rgb(43 75 255 / 0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(43 75 255 / 0.07) 1px, transparent 1px);
+    background-size:
+      96px 96px,
+      96px 96px,
+      24px 24px,
+      24px 24px;
+    box-shadow: inset 0 0 0 3px #0a0a0a;
+  }
+  .fx-blueprint[data-open='true'][data-tool='pan'] {
+    touch-action: none;
+    cursor: move;
+  }
+  .fx-blueprint[data-open='true'][data-bp-dragging] {
+    cursor: grabbing;
+  }
+  .fx-blueprint[data-open='true'] .bp-fit {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    transform-origin: 0 0;
+    perspective: 1600px;
+    will-change: transform;
   }
   .fx-blueprint[data-open='true'] .fx-stack {
-    transform: rotateX(46deg) rotateZ(-16deg) scale(0.78);
+    transform-origin: 50% 50%;
+    transform-style: preserve-3d;
+    will-change: transform;
   }
+  /* each layer becomes a physical plate: paper fill + ink rim + hard drop shadow, all painted OUTSIDE the
+     box (spread shadows), so text never re-wraps and the closed layout is untouched */
   .fx-blueprint[data-open='true'] .fx-layer {
-    translate: 0 0 calc(var(--layer, 0) * 30px);
-    box-shadow: 0 calc(var(--layer, 0) * 4px + 6px) 0 0 rgb(10 10 10 / 0.18);
+    position: relative;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow:
+      0 0 0 10px #fff,
+      0 0 0 12.5px #0a0a0a,
+      7px 9px 0 12.5px rgb(10 10 10 / 0.22);
+    transition:
+      translate 0.35s cubic-bezier(0.2, 0.9, 0.1, 1),
+      opacity 0.3s ease,
+      box-shadow 0.3s ease,
+      filter 0.3s ease;
+  }
+  .fx-blueprint[data-open='true'] .fx-layer:nth-child(odd) {
+    background-color: #fffdf5;
+    box-shadow:
+      0 0 0 10px #fffdf5,
+      0 0 0 12.5px #0a0a0a,
+      7px 9px 0 12.5px rgb(10 10 10 / 0.22);
+  }
+  .fx-blueprint[data-open='true'] .bp-fit {
+    transition: transform 0.6s cubic-bezier(0.2, 0.9, 0.1, 1); /* "camera fly-to" when a layer is inspected */
+  }
+  /* driven per frame (drag / tween / spin / slider): no CSS easing on top of the rAF values */
+  .fx-blueprint[data-bp-live] .bp-fit,
+  .fx-blueprint[data-bp-live] .fx-layer {
+    transition: none;
+  }
+  /* plate labels ("L4 · ARCHITECTURE") ride on their plate in 3D */
+  .fx-blueprint[data-open='true'] .fx-layer::before {
+    content: attr(data-bp-label);
+    position: absolute;
+    left: -12px;
+    top: -34px;
+    padding: 2px 8px;
+    border: 2px solid #0a0a0a;
+    border-radius: 6px;
+    background: #0a0a0a;
+    color: #fff;
+    font:
+      800 10px/1.4 var(--font-mono, ui-monospace),
+      monospace;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .fx-blueprint[data-open='true'] .fx-layer:first-child::before {
+    top: -30px;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .fx-blueprint[data-open='true']:not([data-bp-dragging]) .fx-layer:hover {
+      box-shadow:
+        0 0 0 10px #fff,
+        0 0 0 12.5px #2b4bff,
+        7px 9px 0 12.5px rgb(43 75 255 / 0.3);
+    }
+    .fx-blueprint[data-open='true']:not([data-bp-dragging]) .fx-layer:hover::before {
+      background: #2b4bff;
+      border-color: #2b4bff;
+    }
+  }
+  /* layer inspection: the chosen plate lifts (JS adds Z) and glows yellow; the rest become ghost plates */
+  .fx-blueprint[data-open='true'] .fx-stack[data-bp-isolating] > .fx-layer:not([data-bp-active]) {
+    opacity: 0.2;
+    filter: grayscale(1);
+  }
+  .fx-blueprint[data-open='true'] .fx-layer[data-bp-active] {
+    box-shadow:
+      0 0 0 10px #fff,
+      0 0 0 13.5px #0a0a0a,
+      0 0 0 19px #ffc700,
+      10px 14px 0 19px rgb(10 10 10 / 0.25);
+  }
+  .fx-blueprint[data-open='true'] .fx-layer[data-bp-active]::before {
+    background: #ffc700;
+    color: #0a0a0a;
+  }
+
+  /* chrome: scan line, corner ticks, hint, stamp, gizmo, range */
+  .bp-scan {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 3px;
+    z-index: 15;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, #2b4bff 20%, #00e5ff 50%, #2b4bff 80%, transparent);
+    box-shadow: 0 0 18px 4px rgb(0 229 255 / 0.45);
+    opacity: 0;
+    animation: bp-scan 1.3s 0.25s cubic-bezier(0.45, 0, 0.2, 1) both;
+  }
+  @keyframes bp-scan {
+    0% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    85% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(var(--bp-h, 640px));
+    }
+  }
+  .bp-corner {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    z-index: 10;
+    pointer-events: none;
+    border-color: #2b4bff;
+  }
+  .bp-corner-br {
+    right: 10px;
+    bottom: 10px;
+    border-right: 3px solid;
+    border-bottom: 3px solid;
+  }
+  .bp-hint {
+    position: absolute;
+    left: 50%;
+    bottom: 14px;
+    z-index: 16;
+    max-width: calc(100% - 2rem);
+    white-space: normal;
+    text-align: center;
+    pointer-events: none;
+    transform: translateX(-50%);
+    animation: bp-hint 4.2s 1s ease both;
+  }
+  @keyframes bp-hint {
+    0% {
+      opacity: 0;
+      transform: translate(-50%, 8px);
+    }
+    12%,
+    80% {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(-50%, -4px);
+    }
+  }
+  .fx-blueprint[data-bp-dragging] .bp-hint {
+    display: none;
+  }
+  .bp-stamp {
+    animation: bp-stamp 0.45s 1.4s cubic-bezier(0.2, 0.9, 0.1, 1.4) both;
+  }
+  @keyframes bp-stamp {
+    from {
+      opacity: 0;
+      transform: scale(1.6) rotate(-8deg);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) rotate(-2deg);
+    }
+  }
+  .bp-gizmo-wrap {
+    width: 44px;
+    height: 44px;
+    border: 2px solid #0a0a0a;
+    border-radius: 9999px;
+    background: #fff;
+    perspective: 160px;
+    display: grid;
+    place-items: center;
+  }
+  .bp-gizmo {
+    position: relative;
+    width: 0;
+    height: 0;
+    transform-style: preserve-3d;
+  }
+  .bp-axis {
+    position: absolute;
+    left: -1.5px;
+    top: -1.5px;
+    width: 3px;
+    height: 3px;
+    border-radius: 2px;
+    transform-origin: 1.5px 1.5px;
+  }
+  .bp-axis-x {
+    width: 17px;
+    background: #ff4b2b;
+  }
+  .bp-axis-y {
+    height: 17px;
+    background: #2b4bff;
+  }
+  .bp-axis-z {
+    height: 17px;
+    background: #ffc700;
+    box-shadow: 0 0 0 1px #0a0a0a;
+    transform: rotateX(-90deg);
+  }
+  .bp-range {
+    appearance: none;
+    -webkit-appearance: none;
+    height: 36px;
+    background: transparent;
+    cursor: pointer;
+  }
+  .bp-range::-webkit-slider-runnable-track {
+    height: 8px;
+    border: 2px solid #0a0a0a;
+    border-radius: 9999px;
+    background: repeating-linear-gradient(90deg, #fff 0 10px, #2b4bff22 10px 12px);
+  }
+  .bp-range::-moz-range-track {
+    height: 8px;
+    border: 2px solid #0a0a0a;
+    border-radius: 9999px;
+    background: #fff;
+  }
+  .bp-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px;
+    height: 22px;
+    margin-top: -9px;
+    border: 3px solid #0a0a0a;
+    border-radius: 6px;
+    background: #ffc700;
+    box-shadow: 2px 2px 0 #0a0a0a;
+  }
+  .bp-range::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border: 3px solid #0a0a0a;
+    border-radius: 6px;
+    background: #ffc700;
+  }
+  .bp-range:focus-visible {
+    outline: 3px solid #2b4bff;
+    outline-offset: 2px;
+    border-radius: 8px;
   }
 }
 

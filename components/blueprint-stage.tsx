@@ -397,19 +397,7 @@ export function BlueprintStage({
 
   /* ------------------------------------------------------------------ pointer: orbit / pan / pinch */
   const ptrs = useRef(new Map<number, { x: number; y: number }>());
-  const drag = useRef({
-    active: false,
-    sx: 0,
-    sy: 0,
-    lx: 0,
-    ly: 0,
-    vx: 0,
-    vy: 0,
-    t: 0,
-    pinch: 0,
-    z0: 1,
-    moved: false,
-  });
+  const drag = useRef({ active: false, sx: 0, sy: 0, lx: 0, ly: 0, vx: 0, vy: 0, t: 0, pinch: 0, z0: 1, moved: false });
 
   const onPointerDown = (e: React.PointerEvent) => {
     if (!mounted || (e.pointerType === 'mouse' && e.button !== 0)) return;
