@@ -57,7 +57,14 @@ const photos: Photo[] = [
  * Portaled to <body>: the gallery lives inside <TiltCard> (a transformed element), and a transformed
  * ancestor turns `position: fixed` into "fixed to the card" — the old overlay was card-sized, tilted with
  * the mouse and, on phones, its close button sat ~1000px above the screen while page scroll was locked.
+ *
+ * Zoom (R12 §8.4): pinch, double-tap / double-click, mouse wheel, + / - / 0 keys. While zoomed, one finger or
+ * the mouse pans (clamped to the photo). At 1x a horizontal swipe changes photo and a downward swipe closes.
+ * The zoom is written straight to the wrapper's style (no React state per pointer frame).
  */
+const Z_MAX = 4;
+const LB_SIZES = '(max-width: 1200px) 100vw, 1150px';
+
 function PhotoLightbox({
   list,
   index,
@@ -70,26 +77,142 @@ function PhotoLightbox({
   onClose: () => void;
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
-  const touchX = useRef<number | null>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const zoomRef = useRef<HTMLDivElement>(null);
+  const thumbsRef = useRef<HTMLDivElement>(null);
   useScrollLock();
   useFocusTrap(dialogRef, true);
   const photo = list[index];
   const [ratio, setRatio] = useState(16 / 9);
+  const [zoomed, setZoomed] = useState(false);
   const prev = () => onIndex((index - 1 + list.length) % list.length);
   const next = () => onIndex((index + 1) % list.length);
-  const onCloseRef = useLatest(onClose);
-  const prevRef = useLatest(prev);
-  const nextRef = useLatest(next);
+
+  /* ---------------- zoom + pan (ref-driven) */
+  const z = useRef({ s: 1, x: 0, y: 0 });
+  const writeZoom = () => {
+    const panel = panelRef.current;
+    const c = z.current;
+    if (panel) {
+      const mx = ((c.s - 1) * panel.clientWidth) / 2;
+      const my = ((c.s - 1) * panel.clientHeight) / 2;
+      c.x = Math.min(mx, Math.max(-mx, c.x));
+      c.y = Math.min(my, Math.max(-my, c.y));
+    }
+    if (zoomRef.current)
+      zoomRef.current.style.transform = `translate(${c.x.toFixed(1)}px, ${c.y.toFixed(1)}px) scale(${c.s.toFixed(3)})`;
+    setZoomed(c.s > 1.01);
+  };
+  /** zoom to `s`, keeping the point (cx, cy) (relative to the panel centre) under the finger / cursor */
+  const zoomTo = (s: number, cx = 0, cy = 0) => {
+    const c = z.current;
+    const ns = Math.min(Z_MAX, Math.max(1, s));
+    c.x = cx - ((cx - c.x) * ns) / c.s;
+    c.y = cy - ((cy - c.y) * ns) / c.s;
+    c.s = ns;
+    if (ns === 1) c.x = c.y = 0;
+    writeZoom();
+  };
+  const fromCentre = (clientX: number, clientY: number): [number, number] => {
+    const r = panelRef.current?.getBoundingClientRect();
+    return r ? [clientX - (r.left + r.width / 2), clientY - (r.top + r.height / 2)] : [0, 0];
+  };
+  // a new photo always starts at 1x, and its thumbnail scrolls into view
+  useEffect(() => {
+    z.current = { s: 1, x: 0, y: 0 };
+    if (zoomRef.current) zoomRef.current.style.transform = '';
+    setZoomed(false);
+    thumbsRef.current
+      ?.querySelector<HTMLElement>('[aria-current="true"]')
+      ?.scrollIntoView({ block: 'nearest', inline: 'center' });
+  }, [index]);
+
+  const ptrs = useRef(new Map<number, { x: number; y: number }>());
+  const g = useRef({ x0: 0, y0: 0, lx: 0, ly: 0, d0: 1, s0: 1, pinched: false, lastTap: 0 });
+  const onPointerDown = (e: React.PointerEvent) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    ptrs.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    const st = g.current;
+    if (ptrs.current.size === 2) {
+      const [a, b] = Array.from(ptrs.current.values());
+      st.d0 = Math.hypot(a.x - b.x, a.y - b.y) || 1;
+      st.s0 = z.current.s;
+      st.pinched = true;
+    } else if (ptrs.current.size === 1) {
+      Object.assign(st, { x0: e.clientX, y0: e.clientY, lx: e.clientX, ly: e.clientY, pinched: false });
+    }
+  };
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!ptrs.current.has(e.pointerId)) return;
+    ptrs.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    const st = g.current;
+    if (ptrs.current.size === 2) {
+      const [a, b] = Array.from(ptrs.current.values());
+      const [cx, cy] = fromCentre((a.x + b.x) / 2, (a.y + b.y) / 2);
+      zoomTo((st.s0 * Math.hypot(a.x - b.x, a.y - b.y)) / st.d0, cx, cy);
+      return;
+    }
+    if (z.current.s > 1) {
+      z.current.x += e.clientX - st.lx;
+      z.current.y += e.clientY - st.ly;
+      writeZoom();
+    }
+    st.lx = e.clientX;
+    st.ly = e.clientY;
+  };
+  const onPointerUp = (e: React.PointerEvent) => {
+    if (!ptrs.current.delete(e.pointerId)) return;
+    const st = g.current;
+    if (ptrs.current.size === 1) {
+      // one finger of a pinch lifted: keep panning from where the other finger is (no jump)
+      const [p] = Array.from(ptrs.current.values());
+      st.lx = p.x;
+      st.ly = p.y;
+      return;
+    }
+    if (ptrs.current.size > 0 || st.pinched) return;
+    const dx = e.clientX - st.x0;
+    const dy = e.clientY - st.y0;
+    if (Math.hypot(dx, dy) < 10) {
+      // tap: a second tap within 300 ms toggles 1x <-> 2.5x at that point
+      const now = performance.now();
+      if (now - st.lastTap < 300) {
+        st.lastTap = 0;
+        if (z.current.s > 1) zoomTo(1);
+        else zoomTo(2.5, ...fromCentre(e.clientX, e.clientY));
+      } else st.lastTap = now;
+      return;
+    }
+    if (z.current.s > 1) return; // that was a pan
+    if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) (dx < 0 ? next : prev)();
+    else if (dy > 120 && dy > Math.abs(dx)) onClose(); // swipe down to close
+  };
+  const onWheel = (e: React.WheelEvent) => {
+    const [cx, cy] = fromCentre(e.clientX, e.clientY);
+    zoomTo(z.current.s * Math.exp(-e.deltaY * 0.0025), cx, cy);
+  };
+
+  const keyRef = useLatest((e: KeyboardEvent) => {
+    const k = e.key;
+    if (k === 'Escape') onClose();
+    else if (k === 'ArrowLeft') prev();
+    else if (k === 'ArrowRight') next();
+    else if (k === 'Home') onIndex(0);
+    else if (k === 'End') onIndex(list.length - 1);
+    else if (k === '+' || k === '=') zoomTo(z.current.s * 1.5);
+    else if (k === '-' || k === '_') zoomTo(z.current.s / 1.5);
+    else if (k === '0') zoomTo(1);
+    else return;
+    e.preventDefault();
+  });
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onCloseRef.current();
-      else if (e.key === 'ArrowLeft') prevRef.current();
-      else if (e.key === 'ArrowRight') nextRef.current();
-    };
+    const onKey = (e: KeyboardEvent) => keyRef.current(e);
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [onCloseRef, prevRef, nextRef]);
+  }, [keyRef]);
+
+  const neighbours = list.length > 1 ? [(index + 1) % list.length, (index - 1 + list.length) % list.length] : [];
 
   return createPortal(
     <m.div
@@ -127,45 +250,38 @@ function PhotoLightbox({
           longer a thin strip inside a huge empty cream box. `cq*` units fall back to full width on iOS 15. */}
       <div className="relative flex-1 min-h-0 w-full max-w-6xl mx-auto flex items-center justify-center [container-type:size]">
         <m.div
+          ref={panelRef}
           onClick={(e) => e.stopPropagation()}
-          onTouchStart={(e) => {
-            touchX.current = e.touches[0].clientX;
-          }}
-          onTouchEnd={(e) => {
-            if (touchX.current === null) return;
-            const dx = e.changedTouches[0].clientX - touchX.current;
-            if (Math.abs(dx) > 45) (dx < 0 ? next : prev)();
-            touchX.current = null;
-          }}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
+          onWheel={onWheel}
           style={{ aspectRatio: ratio, width: `min(100cqw, calc(100cqh * ${ratio}))`, maxHeight: '100%' }}
-          className="relative w-full bg-paper-deep rounded-2xl overflow-hidden border-4 border-ink shadow-2xl touch-pan-y"
+          className={`relative w-full bg-paper-deep rounded-2xl overflow-hidden border-4 border-ink shadow-2xl touch-none select-none ${
+            zoomed ? 'cursor-grab active:cursor-grabbing' : 'cursor-zoom-in'
+          }`}
         >
-          <Image
-            key={photo.src}
-            src={photo.src}
-            alt={photo.alt}
-            fill
-            sizes="(max-width: 1200px) 100vw, 1150px"
-            className="object-contain p-1.5 sm:p-3"
-            priority
-            onLoad={(e) => {
-              const img = e.currentTarget;
-              if (img.naturalWidth && img.naturalHeight) setRatio(img.naturalWidth / img.naturalHeight);
-            }}
-          />
-          {list.length > 1 && (
-            <>
-              <Image src={list[(index + 1) % list.length].src} alt="" fill sizes="1px" className="hidden" priority />
-              <Image
-                src={list[(index - 1 + list.length) % list.length].src}
-                alt=""
-                fill
-                sizes="1px"
-                className="hidden"
-                priority
-              />
-            </>
-          )}
+          <div ref={zoomRef} className="absolute inset-0 origin-center">
+            <Image
+              key={photo.src}
+              src={photo.src}
+              alt={photo.alt}
+              fill
+              sizes={LB_SIZES}
+              draggable={false}
+              className="object-contain p-1.5 sm:p-3 pointer-events-none"
+              priority
+              onLoad={(e) => {
+                const img = e.currentTarget;
+                if (img.naturalWidth && img.naturalHeight) setRatio(img.naturalWidth / img.naturalHeight);
+              }}
+            />
+          </div>
+          {/* neighbours preloaded at the SAME sizes, so the next swipe shows the already-cached file */}
+          {neighbours.map((n) => (
+            <Image key={`pre-${list[n].src}`} src={list[n].src} alt="" fill sizes={LB_SIZES} className="hidden" />
+          ))}
         </m.div>
       </div>
 
@@ -190,6 +306,31 @@ function PhotoLightbox({
           >
             <ChevronRight className="w-5 h-5" strokeWidth={3} />
           </button>
+        </div>
+      )}
+
+      {list.length > 1 && (
+        <div
+          ref={thumbsRef}
+          onClick={(e) => e.stopPropagation()}
+          className="shrink-0 mt-3 w-full max-w-6xl mx-auto flex gap-2 overflow-x-auto overscroll-x-contain px-1 py-1.5 [scrollbar-width:none] landscape-short:hidden"
+        >
+          {list.map((p, i) => (
+            <button
+              key={p.src}
+              type="button"
+              onClick={() => onIndex(i)}
+              aria-label={`Go to photo ${i + 1} of ${list.length}`}
+              aria-current={i === index ? 'true' : undefined}
+              className={`relative shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 bg-paper-deep transition-transform ${
+                i === index
+                  ? 'border-pop-yellow outline outline-2 outline-pop-yellow -translate-y-0.5'
+                  : 'border-ink opacity-70 hover:opacity-100'
+              }`}
+            >
+              <Image src={p.src} alt="" fill sizes="56px" className="object-cover" />
+            </button>
+          ))}
         </div>
       )}
     </m.div>,
@@ -352,7 +493,10 @@ export function InteractivePhotoStack({ customPhotos }: { customPhotos?: Photo[]
                 >
                   {isTop && <span className="tape" aria-hidden />}
                   {isTop && (
-                    <span className="absolute top-2.5 sm:top-3 right-2.5 sm:right-3 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold tracking-wider text-ink/40 bg-black/5 z-10 select-none pointer-events-none">{`${String(source.indexOf(photo) + 1).padStart(2, '0')} / ${source.length}`}</span>
+                    <span
+                      aria-hidden
+                      className="absolute top-[1.75rem] sm:top-[2.25rem] right-[4.1rem] sm:right-[4.6rem] z-[55] px-1.5 py-0.5 rounded-md border-2 border-ink bg-white font-mono text-[0.62rem] font-extrabold tracking-[0.08em] text-ink select-none pointer-events-none"
+                    >{`${String(source.indexOf(photo) + 1).padStart(2, '0')} / ${String(source.length).padStart(2, '0')}`}</span>
                   )}
                   <div className="w-full h-full relative overflow-hidden rounded-sm bg-paper-deep border-2 border-ink">
                     <Image
