@@ -37,6 +37,15 @@ async function platesInside(stage: Locator) {
   });
 }
 
+/** the inspected plate is fully inside the stage (the camera framed it) */
+async function activeInside(stage: Locator) {
+  return stage.evaluate((el) => {
+    const s = el.getBoundingClientRect();
+    const r = el.querySelector('.fx-layer[data-bp-active]')!.getBoundingClientRect();
+    return r.left >= s.left - 1 && r.right <= s.right + 1 && r.top >= s.top - 1 && r.bottom <= s.bottom + 1;
+  });
+}
+
 const readout = (stage: Locator) => stage.locator('span.text-pop-blue').first();
 
 test('blueprint opens as a 3D bench with every plate inside the stage (FX-45)', async ({ page }) => {
@@ -120,31 +129,56 @@ test('reduced-motion: the bench opens without animation and auto-rotate stays of
   await expect(spin).toHaveAttribute('aria-pressed', 'false');
 });
 
-test.describe.skip('phone', () => {
+// Phones open the bench as a full-screen sheet (R12 §7), so this test checks the sheet instead of the card column.
+test.describe('phone', () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { defaultBrowserType, ...iPhone13 } = devices['iPhone 13'];
   test.use(iPhone13);
 
   test('blueprint works on phones: fits the screen, tap targets are 40 px (FX-45)', async ({ page }) => {
-    const { card, stage } = await openBlueprint(page);
-    expect(await platesInside(stage)).toBe(true);
+    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.evaluate(() => (window as unknown as { __lenis?: { stop: () => void } }).__lenis?.stop());
+    const btn = page.locator('#project-slotify').getByRole('button', { name: /blueprint view of/i });
+    await btn.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+    await page.waitForTimeout(300);
+    await btn.focus();
+    await page.keyboard.press('Enter');
+    const dialog = page.getByRole('dialog', { name: /blueprint of/i });
+    await expect(dialog).toBeVisible();
+    await page.waitForTimeout(2000); // open tween + auto-inspect L1
+    const stage = dialog.locator('.fx-blueprint[data-open="true"]');
+    // the sheet auto-inspects L1: the camera frames that plate only (the ghosted plates may leave the stage)
+    await expect(stage.locator('.fx-layer[data-bp-active]')).toHaveAttribute('data-bp-label', /L1/);
+    expect(await activeInside(stage)).toBe(true);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
-    const sizes = await card.locator('[data-bp-ui] button').evaluateAll((els) =>
+    const sizes = await dialog.locator('[data-bp-ui] button').evaluateAll((els) =>
       els
         .filter((e) => e.getClientRects().length)
         .map((e) => {
-          // layout size (offset*), not getBoundingClientRect: the card itself may still be scaled by ScrollUnfold
           const h = e as HTMLElement;
           return [Math.min(h.offsetWidth, h.offsetHeight), h.getAttribute('aria-label') ?? h.textContent];
         }),
     );
+    expect(sizes.length).toBeGreaterThan(5);
     expect(sizes.filter(([s]) => (s as number) < 40)).toEqual([]);
-    await card.getByRole('button', { name: 'Inspect layer 4: architecture' }).tap();
+    // step to L4 with the console stepper: the inspected plate is framed wide enough to read
+    for (let i = 0; i < 3; i++) await dialog.getByRole('button', { name: 'Next layer' }).tap();
+    await expect(stage.locator('.fx-layer[data-bp-active]')).toHaveAttribute('data-bp-label', /L4/);
     await page.waitForTimeout(900);
     const [plate, box] = await Promise.all([
       stage.locator('.fx-layer[data-bp-active]').boundingBox(),
       stage.boundingBox(),
     ]);
     expect(plate!.width).toBeGreaterThan(box!.width * 0.6);
+    expect(await activeInside(stage)).toBe(true);
+    // Reset returns to the whole model, and then every plate is inside the stage
+    await dialog.getByRole('button', { name: 'Reset view' }).tap();
+    await expect(stage.locator('.fx-layer[data-bp-active]')).toHaveCount(0);
+    await page.waitForTimeout(900);
+    expect(await platesInside(stage)).toBe(true);
+    // close restores the page: dialog gone, page scroll unlocked
+    await dialog.getByRole('button', { name: 'Close blueprint' }).tap();
+    await expect(dialog).toHaveCount(0, { timeout: 3000 });
+    expect(await page.evaluate(() => document.body.style.overflow)).toBe('');
   });
 });
