@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { m } from 'framer-motion';
 import { FX } from '@/lib/fx';
 
@@ -10,6 +10,11 @@ import { FX } from '@/lib/fx';
  * through unchanged, so the finished screen looks exactly as before.
  */
 export function PowerOn({ children, className = '' }: { children: ReactNode; className?: string }) {
+  // FX-85: arriving through the portal morph, the screen is the morph target, so it must already be at full size
+  // (a CRT line would make the button shrink into a sliver). Only ever true on a client-side navigation.
+  const [arrivedByPortal] = useState(
+    () => typeof document !== 'undefined' && document.documentElement.classList.contains('fx-portal'),
+  );
   // Always the same element. With reduced motion, MotionConfig reducedMotion="user" jumps straight to the end state.
   if (!FX.powerOn) {
     return (
@@ -23,7 +28,7 @@ export function PowerOn({ children, className = '' }: { children: ReactNode; cla
       data-fx
       data-dark-surface
       className={className}
-      initial={{ scaleY: 0.012, scaleX: 0.55, filter: 'brightness(2.6)' }}
+      initial={arrivedByPortal ? false : { scaleY: 0.012, scaleX: 0.55, filter: 'brightness(2.6)' }}
       animate={{
         scaleY: [0.012, 0.012, 1],
         scaleX: [0.55, 1, 1],

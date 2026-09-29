@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
+import { WipeLink } from './fx/route-wipe';
 import { m, useScroll, useTransform, useMotionValue } from 'framer-motion';
 import { Magnetic } from './magnetic-button';
 import { Sparkles, Terminal } from 'lucide-react';
@@ -147,7 +147,11 @@ export default function BikebearHero() {
       <div
         aria-hidden
         className="fx-floor-grid absolute inset-0 bg-grid [mask-image:radial-gradient(ellipse_75%_65%_at_45%_45%,#000_60%,transparent_100%)] pointer-events-none"
-      />
+      >
+        {/* FX-78 grid gravity: the same grid a second time, only visible in a soft circle under the lamp (mouse);
+            a child of the floor so it tilts with FX-62 */}
+        {FX.gridGravity ? <div className="fx-grid-lens absolute inset-0 bg-grid hidden lg:block" /> : null}
+      </div>
 
       {/* Bauhaus geometry (decorative) */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -213,12 +217,17 @@ export default function BikebearHero() {
                 </a>
               </Magnetic>
               <Magnetic strength={0.3} stretch>
-                <Link href="/simulators/agentic" className="group nb-btn nb-btn-white px-6 py-4 fx-specular nb-press">
+                {/* FX-85: the button morphs into the simulator screen (View Transitions); otherwise the FX-35 wipe */}
+                <WipeLink
+                  href="/simulators/agentic"
+                  portal="out"
+                  className="group nb-btn nb-btn-white px-6 py-4 fx-specular nb-press"
+                >
                   <Terminal className="w-4 h-4" strokeWidth={2.75} />
                   <span>
                     <TextRoll>LIVE SIMULATORS</TextRoll>
                   </span>
-                </Link>
+                </WipeLink>
               </Magnetic>
             </div>
           </div>

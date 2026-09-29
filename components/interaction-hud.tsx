@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight, Focus, Keyboard, Pause, Play, Route, Waypoints, X } from 'lucide-react';
 import { FX } from '@/lib/fx';
 import { isCalm, setCalm } from '@/lib/motion-pref';
+import { isSkim, setSkim } from '@/lib/skim';
 import {
   clearModes,
   getInteraction,
@@ -170,6 +171,10 @@ export function InteractionHud() {
         case 'c':
         case 'C':
           setCalm(!isCalm());
+          break;
+        case 's':
+        case 'S':
+          if (FX.skimLens) setSkim(!isSkim()); // FX-92
           break;
         case '/':
           e.preventDefault();
@@ -342,6 +347,7 @@ const SHORTCUTS: [string, string][] = [
   ['G', 'Start the guided tour'],
   ['/', 'Open the command palette'],
   ['C', 'Calm mode (reduce motion)'],
+  ...(FX.skimLens ? ([['S', 'Skim mode']] as [string, string][]) : []),
   ['T', 'Back to top'],
   ['Esc', 'Close the current mode'],
   ['?', 'Show / hide this sheet'],

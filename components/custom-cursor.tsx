@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { m, useMotionValue, AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
+import { ArrowUpRight, Maximize2, Move, Play } from 'lucide-react';
 import { FX } from '@/lib/fx';
 
 /**
@@ -14,14 +15,36 @@ import { FX } from '@/lib/fx';
  *    hybrid devices). Now the `has-custom-cursor` class is only added once this cursor is live.
  *  - Disabled for touch-primary devices and prefers-reduced-motion.
  */
+/** FX-88: the tool a click will use, shown as an icon inside the ring (no words, so no new copy) */
+type Glyph = 'external' | 'expand' | 'move' | 'play';
+const GLYPH_ICON = { external: ArrowUpRight, expand: Maximize2, move: Move, play: Play } as const;
+
 type CursorLook = {
   isPointer: boolean;
   isHidden: boolean;
   onDark: boolean;
   onXray: boolean;
   customText: string | null;
+  glyph: Glyph | null;
 };
-const IDLE_LOOK: CursorLook = { isPointer: false, isHidden: false, onDark: false, onXray: false, customText: null };
+const IDLE_LOOK: CursorLook = {
+  isPointer: false,
+  isHidden: false,
+  onDark: false,
+  onXray: false,
+  customText: null,
+  glyph: null,
+};
+
+function glyphFor(target: HTMLElement, interactive: Element | null): Glyph | null {
+  if (!FX.cursorGlyphs) return null;
+  if (target.closest('.fx-blueprint')) return 'move';
+  if (!interactive) return null;
+  if (interactive.matches('a[href^="/simulators/"]')) return 'play';
+  if (interactive.matches('a[target="_blank"]')) return 'external';
+  if (interactive.matches('[aria-label^="View full resolution"]')) return 'expand';
+  return null;
+}
 
 export function CustomCursor() {
   const [enabled, setEnabled] = useState(false);
@@ -29,7 +52,8 @@ export function CustomCursor() {
   // boundary, and six separate setters used to re-render the cursor each time.
   //  onDark = footer, modal backdrops, simulator screen; onXray = hero portrait (the reveal circle IS the cursor)
   const [look, setLook] = useState<CursorLook>(IDLE_LOOK);
-  const { isPointer, isHidden, onDark, onXray, customText } = look;
+  const { isPointer, isHidden, onDark, onXray, customText, glyph } = look;
+  const GlyphIcon = glyph && !customText ? GLYPH_ICON[glyph] : null;
   const patch = (next: Partial<CursorLook>) =>
     setLook((prev) =>
       (Object.keys(next) as (keyof CursorLook)[]).every((k) => prev[k] === next[k]) ? prev : { ...prev, ...next },
@@ -72,6 +96,7 @@ export function CustomCursor() {
         onDark: !!target.closest('[data-dark-surface]'),
         onXray: !!target.closest('[data-xray]'),
         customText: t ? t.getAttribute('data-cursor') : null,
+        glyph: typing ? null : glyphFor(target, interactive),
       });
     };
 
@@ -126,6 +151,19 @@ export function CustomCursor() {
               className="font-mono text-[7px] font-extrabold uppercase text-ink text-center leading-none"
             >
               {customText}
+            </m.span>
+          )}
+          {GlyphIcon && (
+            <m.span
+              key={glyph}
+              data-cursor-glyph={glyph}
+              initial={{ opacity: 0, scale: 0.4 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.4 }}
+              transition={{ type: 'spring', stiffness: 520, damping: 22 }}
+              className={`grid place-items-center ${onDark ? 'text-white' : 'text-ink'}`}
+            >
+              <GlyphIcon className="w-3 h-3" strokeWidth={3} />
             </m.span>
           )}
         </AnimatePresence>

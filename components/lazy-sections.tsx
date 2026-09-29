@@ -23,6 +23,10 @@ export const TideCanvas = dynamic(() => import('@/components/fx/tide-canvas').th
 export const FrameGovernor = dynamic(() => import('@/components/fx/frame-governor').then((mod) => mod.FrameGovernor), {
   ssr: false,
 });
+// Round 16 sessions 2-5 (FX-83, 84, 86, 87, 89, 92): one client-only chunk
+export const DeskFx = dynamic(() => import('@/components/fx/desk-fx').then((mod) => mod.DeskFx), {
+  ssr: false,
+});
 
 export const InteractionHud = dynamic(() => import('@/components/interaction-hud').then((mod) => mod.InteractionHud), {
   ssr: false,

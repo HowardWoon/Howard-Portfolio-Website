@@ -410,7 +410,7 @@ export default function HonorsSection() {
   return (
     <section
       id="honors"
-      className="fx-tide-surface fx-dot-plane relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-clip border-t-3 border-ink flex flex-col"
+      className="fx-tide-surface fx-dot-plane fx-sheet relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-clip border-t-3 border-ink flex flex-col"
     >
       {/* Structural grid + Bauhaus accents */}
       {FX.ambientOrbits ? <AmbientOrbits side="left" square="bg-pop-red" /> : null}
@@ -542,7 +542,9 @@ export default function HonorsSection() {
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.4, delay: itemIdx * 0.08 }}
                       className={`relative group rounded-[28px] border-3 border-ink bg-white overflow-hidden flex flex-col ${activeItems.length > 2 ? 'h-full' : ''} transition-[transform,box-shadow] duration-200 hover:-translate-x-1 hover:-translate-y-1 ${
-                        isFeatured ? 'shadow-brutal-lg hover:shadow-brutal-xl' : 'shadow-brutal hover:shadow-brutal-lg'
+                        isFeatured
+                          ? `shadow-brutal-lg hover:shadow-brutal-xl ${FX.podiumGlint ? 'fx-glint' : ''}`
+                          : 'shadow-brutal hover:shadow-brutal-lg'
                       } ${hit ? 'fx-trail-hit' : ''}`}
                     >
                       {/* Top Bar */}

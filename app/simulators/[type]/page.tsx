@@ -43,7 +43,7 @@ export default async function SimulatorPage({ params }: { params: Promise<{ type
       <RouteWipeClear />
       {/* Top Nav */}
       <header className="mb-8 sm:mb-10 flex flex-wrap items-center justify-between gap-3 max-w-6xl mx-auto w-full">
-        <WipeLink href="/#projects" className="nb-btn nb-btn-white px-4 py-2.5">
+        <WipeLink href="/#projects" portal="back" className="nb-btn nb-btn-white px-4 py-2.5">
           <ArrowLeft className="w-4 h-4" strokeWidth={2.75} />
           <span>Return to Portfolio</span>
         </WipeLink>
@@ -73,7 +73,7 @@ export default async function SimulatorPage({ params }: { params: Promise<{ type
 
       {/* Main Simulator Area — a dark "device screen" inside the light page (skeuomorphic) */}
       <main className="flex-1 w-full max-w-6xl mx-auto flex items-start justify-center">
-        <PowerOn className="w-full bg-[#0E121B] text-white rounded-[24px] sm:rounded-[32px] border-3 border-ink p-4 xs:p-6 sm:p-12 shadow-brutal-lg sm:shadow-brutal-xl relative overflow-hidden">
+        <PowerOn className="fx-sim-screen w-full bg-[#0E121B] text-white rounded-[24px] sm:rounded-[32px] border-3 border-ink p-4 xs:p-6 sm:p-12 shadow-brutal-lg sm:shadow-brutal-xl relative overflow-hidden">
           <div className="relative z-10 w-full">
             {type === 'agentic' && <ZeroLagSimulator />}
             {type === 'flood' && <BilahujanSimulator />}

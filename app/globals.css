@@ -528,8 +528,10 @@ html.hw-booted .boot-overlay {
   }
 
   /* FX-04 light-follow hard shadow: the brutal shadow leans away from the cursor like a desk lamp.
-     Only when the pointer field is live (mouse devices, motion allowed). Same colour and base offset. */
-  html[data-fx-pointer='on']:not(.fx-off-shadowFollow) .fx-shadow-follow {
+     Only when the pointer field is live (mouse devices, motion allowed), or when FX-89 tilt drives the lamp on an
+     Android phone. Same colour and base offset. */
+  html[data-fx-pointer='on']:not(.fx-off-shadowFollow) .fx-shadow-follow,
+  html[data-fx-gyro='on']:not(.fx-off-shadowFollow) .fx-shadow-follow {
     --fx-o: 8px;
     box-shadow: calc(var(--fx-o) - var(--px, 0) * 5px) calc(var(--fx-o) - var(--py, 0) * 5px) 0 0 #0a0a0a;
     transition-property: box-shadow, border-color, color, background-color;
@@ -537,7 +539,8 @@ html.hw-booted .boot-overlay {
     transition-timing-function: ease-out;
   }
   @media (min-width: 640px) {
-    html[data-fx-pointer='on']:not(.fx-off-shadowFollow) .fx-shadow-follow {
+    html[data-fx-pointer='on']:not(.fx-off-shadowFollow) .fx-shadow-follow,
+    html[data-fx-gyro='on']:not(.fx-off-shadowFollow) .fx-shadow-follow {
       --fx-o: 12px;
     }
   }
@@ -1835,4 +1838,267 @@ html[data-fx-tier='lite'] .site-header {
 }
 html[data-fx-tier='lite'] .fx-aberration {
   --fx-vel: 0 !important; /* FX-30: beats the inline value VelocitySkew writes, so the fringes stay at zero */
+}
+
+/* ================================================================ Round 16, sessions 2-5 */
+
+/* FX-78 Grid Gravity: a second copy of the hero grid, visible only in a soft circle under the lamp (mouse). Hidden
+   until the pointer field is live, otherwise it would simply double the grid. */
+.fx-grid-lens {
+  opacity: 0;
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html[data-fx-pointer='on']:not([data-motion='calm']):not([data-fx-tier='lite']):not(.fx-off-gridGravity)
+    .fx-grid-lens {
+    opacity: 1;
+    -webkit-mask-image: radial-gradient(
+      240px circle at calc(50% + var(--px, 0) * 50%) calc(50% + var(--py, 0) * 50%),
+      #000 0%,
+      transparent 72%
+    );
+    mask-image: radial-gradient(
+      240px circle at calc(50% + var(--px, 0) * 50%) calc(50% + var(--py, 0) * 50%),
+      #000 0%,
+      transparent 72%
+    );
+  }
+}
+
+/* FX-80 Paper Stack: once more than 40 % of a section has scrolled above the screen, it sinks slightly (bottom edge
+   fixed) as the next sheet slides over it, and the desk (FX-76) shows at its sides. `transform: none` before the
+   range, so the section is never a containing block for fixed children while at rest. Contact is excluded (the
+   page comes to rest there, FX-83 takes over). Desktop only. */
+@supports (animation-timeline: view()) {
+  @media (min-width: 1024px) and (min-height: 700px) and (prefers-reduced-motion: no-preference) {
+    html:not([data-motion='calm']):not([data-fx-tier='lite']):not(.fx-off-paperStack) .fx-sheet {
+      transform-origin: 50% 100%;
+      animation: fx-sheet-sink linear both;
+      animation-timeline: view();
+      animation-range: exit 40% exit 100%;
+    }
+  }
+}
+@keyframes fx-sheet-sink {
+  from {
+    transform: none;
+  }
+  to {
+    transform: scale(0.97);
+  }
+}
+
+/* FX-81 Deck Recede: FX-07 unfolds a project card as it enters; this tips it back as it leaves the top of the
+   screen, like a card returned to the deck. Transform only (FX-39 owns the cards' opacity). Not while the card's
+   Blueprint bench is open or while it is the focused card. */
+@supports (animation-timeline: view()) {
+  @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+    html:not([data-motion='calm']):not([data-fx-tier='lite']):not(.fx-off-deckRecede)
+      .fx-project-shell:not([data-blueprint-open]):not([data-focused]) {
+      transform-origin: 50% 100%;
+      animation: fx-deck-recede linear both;
+      animation-timeline: view();
+      animation-range: exit 55% exit 100%;
+    }
+  }
+}
+@keyframes fx-deck-recede {
+  from {
+    transform: none;
+  }
+  to {
+    transform: perspective(1400px) rotateX(4deg) scale(0.96);
+  }
+}
+
+/* FX-82 Draft-to-Ink: each section-title word is drawn as a 1.5 px ink outline, then fills with ink from the
+   baseline up as it rises into the reading zone, left to right (--i from SplitWords). At every frame the word is
+   either a solid ink outline or ink-filled, so it always reads. Plain ink everywhere else. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-motion='calm']):not([data-fx-tier='lite']):not(.fx-off-draftToInk) .fx-ink-word {
+      -webkit-text-stroke: 1.5px var(--ink);
+      background-image: linear-gradient(to top, var(--ink) 50%, transparent 50%);
+      background-size: 100% 200%;
+      background-repeat: no-repeat;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: fx-ink-fill linear both;
+      animation-timeline: view();
+      animation-range: entry calc(20% + min(var(--i, 0), 10) * 4%) cover calc(32% + min(var(--i, 0), 10) * 1.5%);
+    }
+  }
+}
+@keyframes fx-ink-fill {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 0 100%;
+  }
+}
+@media print {
+  .fx-ink-word {
+    color: var(--ink) !important;
+    background: none !important;
+    -webkit-text-stroke: 0 !important;
+  }
+}
+
+/* FX-83 Foundation Reveal (components/fx/desk-fx.tsx sets html[data-foundation] and --footer-h): the footer sits
+   fixed under the page inside a clip-path box of its own height, so the page lifts off it. The box keeps the
+   footer's height in the flow: scroll length, anchors and "back to top" are unchanged. Screens only. */
+@media screen and (min-width: 1024px) and (min-height: 760px) {
+  html[data-foundation='on'] .fx-foundation {
+    position: relative;
+    height: var(--footer-h);
+    clip-path: inset(0);
+  }
+  html[data-foundation='on'] .fx-foundation > footer {
+    position: fixed !important; /* beats FX-67 .fx-lamp { position: relative } */
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+}
+
+/* FX-84 Shutter Jump (lib/jump.ts): the old view tips back and slides up, the destination rises on a diagonal cut.
+   The header is its own layer, so it stays perfectly still. */
+html.fx-jumping .site-header {
+  view-transition-name: site-header;
+}
+html.fx-jumping::view-transition-old(root) {
+  animation: fx-flip-out var(--dur-slide) var(--ease-soft) both;
+}
+html.fx-jumping::view-transition-new(root) {
+  animation: fx-flip-in var(--dur-slide) var(--ease-soft) both;
+}
+@keyframes fx-flip-out {
+  to {
+    transform: translateY(-6%) scale(0.96);
+    opacity: 0;
+  }
+}
+@keyframes fx-flip-in {
+  from {
+    clip-path: polygon(0 100%, 100% 112%, 100% 100%, 0 100%);
+  }
+  to {
+    clip-path: polygon(0 -12%, 100% 0, 100% 100%, 0 100%);
+  }
+}
+/* a jump moves focus to the section (keyboard / screen readers); sections are landmarks, not controls, so no ring
+   (same as #main-content) */
+main section[id][tabindex='-1']:focus {
+  outline: none;
+}
+
+/* FX-85 Portal Morph (components/fx/route-wipe.tsx): the simulator button and the simulator screen share one
+   view-transition name, so one grows into the other; the rest of the page cross-fades. */
+html.fx-portal .fx-sim-screen {
+  view-transition-name: sim-screen;
+}
+::view-transition-group(sim-screen) {
+  animation-duration: 560ms;
+  animation-timing-function: var(--ease-soft);
+  border-radius: 24px;
+  overflow: clip;
+}
+::view-transition-old(sim-screen),
+::view-transition-new(sim-screen) {
+  animation-duration: 560ms;
+  height: 100%;
+  object-fit: cover;
+}
+html.fx-portal::view-transition-old(root) {
+  animation: fx-portal-out 280ms ease both;
+}
+html.fx-portal::view-transition-new(root) {
+  animation: fx-portal-in 380ms 140ms ease both;
+}
+@keyframes fx-portal-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes fx-portal-in {
+  from {
+    opacity: 0;
+  }
+}
+/* back from a simulator: the card the visitor came from is outlined for a moment ("you were here") */
+.fx-portal-home {
+  outline: 4px solid var(--pop-blue);
+  outline-offset: 8px;
+  border-radius: 34px;
+}
+
+/* FX-87 Directional Ink (header nav): the underline grows from the side the mouse entered and leaves the way it
+   left (desk-fx.tsx writes data-ink-from). Keyboard focus grows from the left, as before. */
+.fx-dir-ink[data-ink-from='l']::after {
+  transform-origin: left;
+}
+.fx-dir-ink[data-ink-from='r']::after {
+  transform-origin: right;
+}
+
+/* FX-90 Podium Glint: a featured honours card catches one glint of lamp light when it appears. Never loops. */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion='calm']):not(.fx-off-podiumGlint) .fx-glint[data-glint='go']::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    pointer-events: none;
+    border-radius: inherit;
+    background: linear-gradient(115deg, transparent 35%, rgb(255 255 255 / 0.6) 50%, transparent 65%);
+    translate: -120% 0;
+    animation: fx-glint 0.9s 0.35s var(--ease-soft) both;
+  }
+}
+@keyframes fx-glint {
+  to {
+    translate: 120% 0;
+  }
+}
+
+/* FX-91 Postage Composer (contact-section.tsx): each shape stamps in when its field is filled; the three lock
+   together with a small turn when the form is complete. */
+.fx-postage[data-postage='sealed'] {
+  rotate: -8deg;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion='calm']):not(.fx-off-postageComposer) .fx-postage {
+    transition: rotate 0.45s cubic-bezier(0.2, 0.9, 0.1, 1.4);
+  }
+  html:not([data-motion='calm']):not(.fx-off-postageComposer) .fx-postage-shape[data-on] {
+    animation: fx-postage-stamp 0.42s cubic-bezier(0.2, 0.9, 0.1, 1.4) both;
+  }
+}
+@keyframes fx-postage-stamp {
+  from {
+    scale: 1.7;
+    rotate: -18deg;
+    opacity: 0.4;
+  }
+  to {
+    scale: 1;
+    rotate: 0deg;
+    opacity: 1;
+  }
+}
+
+/* FX-92 Skim Lens (lib/skim.ts): body copy on light surfaces steps back to the existing muted ink (#565656, 7.4:1),
+   card titles get the existing highlighter stripe, headings stay full ink. A yellow rule under the header shows the
+   mode is on. Dark surfaces (terminal, simulator previews) are left alone. */
+html[data-skim='on'] main .text-ink-soft:not([data-dark-surface] *) {
+  color: #565656;
+}
+html[data-skim='on'] main h3:not([data-dark-surface] h3) {
+  background: linear-gradient(transparent 55%, var(--pop-yellow) 55%, var(--pop-yellow) 92%, transparent 92%);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+html[data-skim='on'] .site-header {
+  box-shadow: 0 6px 0 0 var(--pop-yellow);
 }

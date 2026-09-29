@@ -81,7 +81,7 @@ export function SiteHeader() {
             <a
               key={s.id}
               href={`#${s.id}`}
-              className="relative text-sm font-extrabold uppercase tracking-widest text-ink hover:text-pop-blue transition-colors after:absolute after:-bottom-1 after:left-0 after:w-full after:scale-x-0 hover:after:scale-x-100 focus-visible:after:scale-x-100 after:origin-left after:transition-transform after:h-[3px] after:bg-pop-yellow"
+              className="fx-dir-ink relative py-0.5 text-sm font-extrabold uppercase tracking-widest text-ink hover:text-pop-blue transition-colors after:absolute after:-bottom-0.5 after:left-0 after:w-full after:scale-x-0 hover:after:scale-x-100 focus-visible:after:scale-x-100 after:origin-left after:transition-transform after:h-[3px] after:bg-pop-yellow"
               onPointerEnter={() => window.dispatchEvent(new CustomEvent('route-preview', { detail: { id: s.id } }))}
               onPointerLeave={() => window.dispatchEvent(new CustomEvent('route-preview', { detail: { id: null } }))}
               onFocus={() => window.dispatchEvent(new CustomEvent('route-preview', { detail: { id: s.id } }))}

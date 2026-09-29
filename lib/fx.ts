@@ -87,6 +87,21 @@ export const FX = {
   sunsetHandoff: true, // FX-77 the hero sun sinks and swells as the hero leaves, handing its colour to About
   dotParallax: true, // FX-79 the dot texture sits on its own plane and moves slower than the content
   arenaPinboard: true, // FX-94 Arena Wall: colour-blocked tilted seals, Bauhaus backdrop, stage light, dock hover
+  // ---- Round 16 sessions 2-5 ----
+  gridGravity: true, // FX-78 the hero grid darkens in a soft circle under the lamp (mouse)
+  paperStack: true, // FX-80 the section being left sinks slightly as the next sheet slides over it
+  deckRecede: true, // FX-81 project cards tip back and recede as they leave the top of the screen
+  draftToInk: true, // FX-82 section-title words are outlined first, then fill with ink as they rise
+  foundationReveal: true, // FX-83 the footer is revealed underneath the page on large screens
+  shutterJump: true, // FX-84 long in-page jumps become one paper flip (View Transitions)
+  portalMorph: true, // FX-85 the simulator button morphs into the simulator screen and back
+  softLanding: true, // FX-86 wheel scrolling settles on section tops when it stops close to one
+  directionalInk: true, // FX-87 header underlines grow from the side the mouse entered
+  cursorGlyphs: true, // FX-88 the cursor ring shows the tool (external link / expand / move / play)
+  gyroLamp: true, // FX-89 tilting an Android phone moves the desk lamp (depth + shadows)
+  podiumGlint: true, // FX-90 featured honours cards catch one glint of light when they appear
+  postageComposer: true, // FX-91 the contact form assembles a Bauhaus stamp as fields are filled in
+  skimLens: true, // FX-92 60-second skim mode (palette + S): body copy steps back, key facts stay bold
 } as const;
 
 export type FxName = keyof typeof FX;

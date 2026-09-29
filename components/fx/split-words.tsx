@@ -35,7 +35,8 @@ export function SplitWords({ text, delay = 0 }: { text: string; delay?: number }
               animate={inView ? { y: '0%' } : undefined}
               transition={{ duration: 0.7, ease: EASE_SNAP, delay: delay + i * 0.045 }}
             >
-              {word}
+              {/* FX-82 draft-to-ink: an inner span so FX-59's hover wave (which animates the word) never resets it */}
+              {FX.draftToInk ? <span className="fx-ink-word">{word}</span> : word}
             </m.span>
           </span>
           {i < words.length - 1 ? ' ' : null}

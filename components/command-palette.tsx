@@ -16,10 +16,14 @@ import {
   ZapOff,
   Keyboard,
   Waypoints,
+  ScanEye,
 } from 'lucide-react';
 import { personalDetails } from '@/lib/site-data';
 import { ShapeBurst } from './fx/shape-burst';
 import { isCalm, setCalm } from '@/lib/motion-pref';
+import { jumpTo } from '@/lib/jump';
+import { isSkim, setSkim } from '@/lib/skim';
+import { FX } from '@/lib/fx';
 
 /** Scroll to a section through Lenis (smooth + header offset) with a native fallback. */
 function goTo(hash: string) {
@@ -30,12 +34,9 @@ function goTo(hash: string) {
     window.location.href = `/${hash}`;
     return;
   }
-  if (window.__lenis) {
-    // Lenis applies the section's CSS scroll-margin-top (header offset) itself
-    window.__lenis.scrollTo(el as HTMLElement);
-  } else {
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
+  // FX-84: a long jump is one paper flip; otherwise the normal Lenis glide (which applies scroll-margin-top itself).
+  // Deferred one frame so the palette's scroll lock is released first.
+  requestAnimationFrame(() => jumpTo(el as HTMLElement));
   history.replaceState(null, '', hash);
 }
 
@@ -175,6 +176,12 @@ export function CommandPalette() {
                   <ZapOff className="w-5 h-5" strokeWidth={2.5} />
                   <span>Calm mode (reduce motion)</span>
                 </Command.Item>
+                {FX.skimLens ? (
+                  <Command.Item onSelect={() => runCommand(() => setSkim(!isSkim()))} className={itemClass}>
+                    <ScanEye className="w-5 h-5" strokeWidth={2.5} />
+                    <span>Skim mode</span>
+                  </Command.Item>
+                ) : null}
                 <Command.Item
                   onSelect={() =>
                     runCommand(async () => {

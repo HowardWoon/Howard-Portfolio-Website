@@ -39,6 +39,42 @@ const quickIntents = [
   },
 ];
 
+// FX-91: the same loose shape check the browser's type="email" uses (x@y.z); the server still validates
+const EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * FX-91 Postage Composer: a small Bauhaus stamp that assembles itself as the form is filled in. Circle = name,
+ * square = email, triangle = message: each stamps in with its pop colour when its field is filled, and the three
+ * lock together (a small turn) when all are. Decorative only (aria-hidden): the form, its labels and its
+ * validation are unchanged. Reduced motion / Calm: the colours change without the stamp.
+ */
+function PostageStamp({ name, email, message }: { name: boolean; email: boolean; message: boolean }) {
+  const all = name && email && message;
+  const shape = 'fx-postage-shape border-2 border-ink';
+  return (
+    <span aria-hidden data-postage={all ? 'sealed' : 'open'} className="fx-postage inline-flex items-center gap-1.5">
+      <span
+        data-on={name || undefined}
+        className={`${shape} w-5 h-5 rounded-full ${name ? 'bg-pop-yellow' : 'bg-white border-dashed'}`}
+      />
+      <span
+        data-on={email || undefined}
+        className={`${shape} w-5 h-5 ${email ? 'bg-pop-blue' : 'bg-white border-dashed'}`}
+      />
+      <svg data-on={message || undefined} className="fx-postage-shape w-6 h-6" viewBox="0 0 100 100">
+        <polygon
+          points="50,8 94,90 6,90"
+          fill={message ? '#FF4B2B' : 'transparent'}
+          stroke="#0A0A0A"
+          strokeWidth="9"
+          strokeLinejoin="round"
+          strokeDasharray={message ? undefined : '14 10'}
+        />
+      </svg>
+    </span>
+  );
+}
+
 export default function ContactSection() {
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
   const [copiedEmail, setCopiedEmail] = useState(false);
@@ -325,7 +361,16 @@ export default function ContactSection() {
           {/* Right Column: Interactive Dispatch Form with Quick-Intent Chips (7 Cols) */}
           <m.div className="fx-rise lg:col-span-7 nb-card-lg p-4 xs:p-6 sm:p-10 space-y-6">
             <div className="space-y-2">
-              <span className="nb-tag bg-pop-lilac">DIRECT TRANSMISSION CONSOLE</span>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <span className="nb-tag bg-pop-lilac">DIRECT TRANSMISSION CONSOLE</span>
+                {FX.postageComposer ? (
+                  <PostageStamp
+                    name={formData.name.trim() !== ''}
+                    email={EMAIL_SHAPE.test(formData.email.trim())}
+                    message={formData.message.trim() !== ''}
+                  />
+                ) : null}
+              </div>
               <h3 className="font-display text-[clamp(1.4rem,7vw,1.875rem)] font-extrabold uppercase text-ink tracking-[-0.02em] pt-2">
                 Send a Direct Message
               </h3>

@@ -272,7 +272,7 @@ export default function AboutSection() {
   return (
     <section
       id="about"
-      className="fx-tide-surface fx-dot-plane relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-28 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-clip border-t-3 border-ink"
+      className="fx-tide-surface fx-dot-plane fx-sheet relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-28 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-clip border-t-3 border-ink"
     >
       {/* Bauhaus accents */}
       <div

@@ -10,6 +10,7 @@ import {
   AmbientFx,
   TideCanvas,
   FrameGovernor,
+  DeskFx,
 } from '@/components/lazy-sections';
 import { SiteFooter } from '@/components/site-footer';
 import { LogoWall } from '@/components/logo-wall';
@@ -70,7 +71,10 @@ export function PortfolioPage() {
           <LogoWall />
           <ContactSection />
         </main>
-        <SiteFooter />
+        {/* FX-83: on large screens the footer is revealed underneath the page (globals.css .fx-foundation) */}
+        <div className="fx-foundation">
+          <SiteFooter />
+        </div>
 
         <ScrollToTop />
         <SectionSpine />
@@ -78,8 +82,9 @@ export function PortfolioPage() {
         <InteractionHud />
         <AmbientFx />
         <FrameGovernor />
+        <DeskFx />
         <OffscreenPause />
-        <RouteWipeClear />
+        <RouteWipeClear home />
         <CommandPalette />
         <PointerField />
         <EasterEgg />
