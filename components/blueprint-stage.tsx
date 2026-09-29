@@ -1,6 +1,9 @@
 'use client';
 
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { useScrollLock } from '@/lib/use-scroll-lock';
+import { useFocusTrap } from '@/lib/use-focus-trap';
 import { ChevronLeft, ChevronRight, Move, Orbit, RotateCcw, Rotate3d, X, ZoomIn, ZoomOut } from 'lucide-react';
 import { isCalm } from '@/lib/motion-pref';
 import { prefersReducedMotion } from '@/lib/fx';
@@ -22,6 +25,19 @@ import { prefersReducedMotion } from '@/lib/fx';
  * Performance contract: no React state per pointer frame. Drag, tween, inertia and auto-rotate write inline
  * styles on 9 elements (fit wrapper, stack, 7 plates) + the gizmo + one readout text node inside rAF.
  */
+
+/** true = the bench opens as a full-screen sheet */
+function useBenchSheet() {
+  const [sheet, setSheet] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 1023px), (pointer: coarse), (max-height: 619px)');
+    const on = () => setSheet(mq.matches);
+    on();
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
+  return sheet;
+}
 
 export const BP_LAYERS = ['INDEX', 'TITLE', 'STORY', 'ARCHITECTURE', 'METRICS', 'STACK', 'ACTIONS'] as const;
 
@@ -125,6 +141,12 @@ export function BlueprintStage({
   const consoleRef = useRef<HTMLDivElement>(null);
   const headRef = useRef<HTMLDivElement>(null);
 
+  const sheet = useBenchSheet();
+  const sheetRef = useRef(sheet);
+  sheetRef.current = sheet;
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const [placeholderH, setPlaceholderH] = useState(0);
+
   // `mounted` = stage is in its open layout (fixed height, absolute model). Stays true during the close tween.
   const [mounted, setMounted] = useState(false);
   const [stageH, setStageH] = useState<number | null>(null);
@@ -139,7 +161,8 @@ export function BlueprintStage({
     setSpin(false);
   }, []);
   const [preset, setPreset] = useState<Preset | null>('iso');
-  const [coarse, setCoarse] = useState(false);
+  useScrollLock(mounted && sheet);
+  useFocusTrap(dialogRef, mounted && sheet);
 
   const view = useRef<View>({ ...CLOSED });
   const geo = useRef<Geo | null>(null);
@@ -184,7 +207,7 @@ export function BlueprintStage({
       const stagger = clamp(v.k * 1.35 - n * 0.05, 0, 1);
       const gn = v.g * stagger;
       const lift = isoN === n ? LIFT * v.l * v.k : 0;
-      el.style.translate = `0px ${(n * sd * gn).toFixed(2)}px ${(n * gn + lift).toFixed(2)}px`;
+      el.style.transform = `translate3d(0px, ${(n * sd * gn).toFixed(2)}px ${(n * gn + lift).toFixed(2)}px)`;
     });
     stack.style.transform = `rotateX(${v.p.toFixed(2)}deg) rotateZ(${v.y.toFixed(2)}deg)`;
     if (gizmoRef.current)
@@ -200,7 +223,7 @@ export function BlueprintStage({
       const b = bbox(g, v.p, yy, v.g, isoN, isoN, v.l);
       sFit = Math.min(sFit, areaW / (b.maxX - b.minX), areaH / (b.maxY - b.minY));
     }
-    sFit = Math.min(sFit, isoN === null ? 1 : 1.15);
+    sFit = Math.min(sFit, isoN === null ? 1 : sheetRef.current ? 1.0 : 1.15);
     const cur = bbox(g, v.p, v.y, v.g, isoN, isoN, v.l);
     const s = 1 + (sFit * v.z - 1) * v.k;
     const cx = g.W / 2 + (cur.minX + cur.maxX) / 2;
@@ -278,14 +301,13 @@ export function BlueprintStage({
     const stage = stageRef.current;
     if (!stage) return;
     if (open && !mounted) {
-      // freeze the stage at (at most) ~78% of the viewport so the whole model is visible at once
-      const natural = stage.offsetHeight;
-      // the console sits BELOW the stage, so the stage itself gets ~60-70% of the viewport
-      const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 80;
-      const avail = window.innerHeight - headerH - 24;
-      const target = Math.round(clamp(avail * 0.72, 320, 680));
-      setStageH(Math.min(natural, target));
-      setCoarse(window.matchMedia('(pointer: coarse)').matches);
+      setPlaceholderH(stage.offsetHeight);
+      if (!sheet) {
+        const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 80;
+        const avail = window.innerHeight - headerH - 24;
+        const target = Math.round(clamp(avail * 0.72, 320, 680));
+        setStageH(target);
+      }
       setMounted(true);
     } else if (open && mounted) {
       // re-opened while the close animation was still running
@@ -298,7 +320,7 @@ export function BlueprintStage({
       isoRef.current = null;
       tween({ ...CLOSED }, 600, () => {
         plates.current.forEach((el) => {
-          el.style.translate = '';
+          el.style.transform = '';
           el.removeAttribute('data-bp-active');
         });
         stackRef.current?.removeAttribute('data-bp-isolating');
@@ -373,10 +395,22 @@ export function BlueprintStage({
     } else {
       v.l = 0;
       setPreset(null);
-      tween({ l: 1, p: Math.min(v.p, 34), y: clamp(v.y, -18, 18), px: 0, py: 0, z: 1 }, 700);
+      tween(
+        sheetRef.current
+          ? { l: 1, p: 8, y: 0, px: 0, py: 0, z: 1 }
+          : { l: 1, p: Math.min(v.p, 34), y: clamp(v.y, -18, 18), px: 0, py: 0, z: 1 },
+        700,
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [iso]);
+
+  // sheet: auto-inspect L1 after the open tween
+  useEffect(() => {
+    if (!mounted || !open || !sheet) return;
+    const t = window.setTimeout(() => setIso((c) => (c === null ? 0 : c)), still() ? 0 : 1200);
+    return () => window.clearTimeout(t);
+  }, [mounted, open, sheet]);
 
   const toggleIso = (n: number) => setIso((cur) => (cur === n ? null : n));
   // walk the plates L1 -> L7 (the camera flies to each one); past either end returns to the whole model
@@ -388,7 +422,22 @@ export function BlueprintStage({
 
   /* ------------------------------------------------------------------ pointer: orbit / pan / pinch */
   const ptrs = useRef(new Map<number, { x: number; y: number }>());
-  const drag = useRef({ active: false, sx: 0, sy: 0, lx: 0, ly: 0, vx: 0, vy: 0, t: 0, pinch: 0, z0: 1, moved: false });
+  const drag = useRef({
+    active: false,
+    sx: 0,
+    sy: 0,
+    lx: 0,
+    ly: 0,
+    vx: 0,
+    vy: 0,
+    t: 0,
+    pinch: 0,
+    z0: 1,
+    moved: false,
+    x0: 0,
+    y0: 0,
+    t0: 0,
+  });
 
   /* ------------------------------------------------------------------ auto-rotate (turntable) */
   useEffect(() => {
@@ -432,6 +481,9 @@ export function BlueprintStage({
       return;
     }
     Object.assign(d, {
+      x0: e.clientX,
+      y0: e.clientY,
+      t0: performance.now(),
       active: false,
       sx: e.clientX,
       sy: e.clientY,
@@ -449,6 +501,10 @@ export function BlueprintStage({
     ptrs.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     const d = drag.current;
     const v = view.current;
+    if (sheetRef.current && isoRef.current !== null && tool === 'orbit') {
+      apply();
+      return;
+    }
     if (ptrs.current.size === 2 && d.pinch > 0) {
       const [a, b] = Array.from(ptrs.current.values());
       v.z = clamp((d.z0 * Math.hypot(a.x - b.x, a.y - b.y)) / d.pinch, Z_MIN, Z_MAX);
@@ -491,6 +547,18 @@ export function BlueprintStage({
   const endPointer = (e: React.PointerEvent) => {
     ptrs.current.delete(e.pointerId);
     const d = drag.current;
+    const dx = e.clientX - d.x0,
+      dy = e.clientY - d.y0;
+    if (
+      sheetRef.current &&
+      isoRef.current !== null &&
+      Math.abs(dx) > 60 &&
+      Math.abs(dx) > 2 * Math.abs(dy) &&
+      performance.now() - d.t0 < 450
+    ) {
+      stepLayer(dx < 0 ? 1 : -1);
+      return;
+    }
     if (ptrs.current.size > 0) return;
     d.pinch = 0;
     stageRef.current?.removeAttribute('data-bp-dragging');
@@ -622,157 +690,220 @@ export function BlueprintStage({
   const on = 'bg-ink text-white';
   const off = 'bg-white text-ink hover:bg-pop-yellow';
 
-  return (
-    <div className="min-w-0">
-      <div
-        ref={stageRef}
-        className="fx-blueprint relative"
-        data-open={mounted ? 'true' : 'false'}
-        data-tool={tool}
-        style={mounted && stageH ? ({ height: stageH, '--bp-h': `${stageH}px` } as React.CSSProperties) : undefined}
-        role={mounted ? 'group' : undefined}
-        aria-roledescription={mounted ? '3D blueprint' : undefined}
-        aria-label={
-          mounted
-            ? `Blueprint of ${title}. Drag or use the arrow keys to orbit, plus and minus to zoom, 1 to 7 to inspect a layer, R to reset, Escape to close.`
-            : undefined
-        }
-        tabIndex={mounted ? 0 : undefined}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={endPointer}
-        onPointerCancel={endPointer}
-        onClickCapture={onClickCapture}
-        onKeyDown={onKeyDown}
-      >
-        <div ref={fitRef} className="bp-fit">
-          <div ref={stackRef} className="fx-stack space-y-6">
-            {children}
-          </div>
+  const [showGap, setShowGap] = useState(false);
+  const stageEl = (
+    <div
+      ref={stageRef}
+      className="fx-blueprint relative"
+      data-open={mounted ? 'true' : 'false'}
+      data-tool={tool}
+      style={
+        mounted && stageH && !sheet ? ({ height: stageH, '--bp-h': `${stageH}px` } as React.CSSProperties) : undefined
+      }
+      role={mounted ? 'group' : undefined}
+      aria-roledescription={mounted ? '3D blueprint' : undefined}
+      aria-label={
+        mounted
+          ? `Blueprint of ${title}. Drag or use the arrow keys to orbit, plus and minus to zoom, 1 to 7 to inspect a layer, R to reset, Escape to close.`
+          : undefined
+      }
+      tabIndex={mounted ? 0 : undefined}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={endPointer}
+      onPointerCancel={endPointer}
+      onClickCapture={onClickCapture}
+      onKeyDown={onKeyDown}
+    >
+      <div ref={fitRef} className="bp-fit">
+        <div ref={stackRef} className="fx-stack space-y-6">
+          {children}
         </div>
-
-        {mounted ? (
-          <>
-            {/* scan line + corner ticks (decorative) */}
-            <span aria-hidden className="bp-scan" />
-            <span aria-hidden className="bp-corner bp-corner-br" />
-
-            {/* head: title + live readout + gizmo + close */}
-            <div
-              ref={headRef}
-              data-bp-ui
-              className="absolute left-3 right-3 top-3 z-20 flex items-start justify-between gap-3 pointer-events-none"
-            >
-              <div className="min-w-0 pointer-events-auto">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="nb-tag bg-pop-blue text-white text-[0.65rem] max-w-full">
-                    <span className="truncate min-w-0">BLUEPRINT // {title}</span>
-                  </span>
-                  <span className="bp-stamp nb-tag bg-pop-mint text-[0.65rem] hidden sm:inline-flex">
-                    INSPECTION READY
-                  </span>
-                </div>
-                <span
-                  ref={readoutRef}
-                  aria-hidden
-                  className="mt-1.5 block font-mono text-[0.65rem] font-bold tracking-[0.06em] text-pop-blue truncate"
-                />
-              </div>
-              <div className="flex items-center gap-2 shrink-0 pointer-events-auto">
-                <div aria-hidden className="bp-gizmo-wrap">
-                  <div ref={gizmoRef} className="bp-gizmo">
-                    <span className="bp-axis bp-axis-x" />
-                    <span className="bp-axis bp-axis-y" />
-                    <span className="bp-axis bp-axis-z" />
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={onRequestClose}
-                  aria-label="Close blueprint"
-                  className={`${btn} ${off} !rounded-full shadow-brutal-xs`}
-                >
-                  <X className="w-4 h-4" strokeWidth={3} aria-hidden />
-                </button>
-              </div>
-            </div>
-
-            {/* first-use hint (fades out on its own) */}
-            <span aria-hidden className="bp-hint nb-tag bg-white text-[0.65rem]">
-              {coarse
-                ? 'SWIPE TO ORBIT · PINCH TO ZOOM · TAP A PLATE'
-                : 'DRAG TO ORBIT · CTRL + SCROLL TO ZOOM · CLICK A PLATE'}
-            </span>
-          </>
-        ) : null}
       </div>
 
       {mounted ? (
-        /* console: below the stage, never on top of the model */
-        <div
-          ref={consoleRef}
-          data-bp-ui
-          className="mt-3 flex flex-col gap-2 p-2 rounded-2xl border-3 border-ink bg-white shadow-brutal-sm"
-        >
-          <div className="flex flex-wrap items-center gap-1.5">
-            <div role="group" aria-label="View presets" className="flex gap-1">
-              {(Object.keys(PRESETS) as Preset[]).map((key) => (
-                <button
-                  key={key}
-                  type="button"
-                  aria-pressed={preset === key}
-                  onClick={() => goPreset(key)}
-                  className={`${btn} ${preset === key ? on : off}`}
-                >
-                  {PRESETS[key].label}
-                </button>
-              ))}
+        <>
+          {/* scan line + corner ticks (decorative) */}
+          <span aria-hidden className="bp-scan" />
+          <span aria-hidden className="bp-corner bp-corner-br" />
+
+          {/* head: title + live readout + gizmo + close */}
+          <div
+            ref={headRef}
+            data-bp-ui
+            className="absolute left-3 right-3 top-3 z-20 flex items-start justify-between gap-3 pointer-events-none"
+          >
+            <div className="min-w-0 pointer-events-auto">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="nb-tag bg-pop-blue text-white text-[0.65rem] max-w-full">
+                  <span className="truncate min-w-0">BLUEPRINT // {title}</span>
+                </span>
+                <span className="bp-stamp nb-tag bg-pop-mint text-[0.65rem] hidden sm:inline-flex">
+                  INSPECTION READY
+                </span>
+              </div>
+              <span
+                ref={readoutRef}
+                aria-live="polite"
+                className="block mt-1.5 font-mono text-[0.65rem] font-extrabold tracking-[0.08em] text-pop-blue"
+              >
+                PITCH 34° · YAW 0°
+              </span>
             </div>
-            <span aria-hidden className="w-px h-6 bg-ink/20 mx-0.5" />
-            <div role="group" aria-label="Drag tool" className="flex gap-1">
+
+            <div className="flex gap-2.5 items-start pointer-events-auto shrink-0">
+              <div
+                ref={gizmoRef}
+                aria-hidden
+                className="w-10 h-10 rounded-full border-2 border-ink bg-white/80 shadow-brutal-sm relative"
+              >
+                <div className="absolute inset-[3px] rounded-full border border-ink/20" />
+                <div className="bp-gizmo-yaw absolute inset-0">
+                  <div className="absolute top-[3px] left-[17px] w-1 h-1 rounded-full bg-pop-blue" />
+                  <div className="absolute bottom-[3px] left-[17px] w-1 h-1 rounded-full bg-ink" />
+                </div>
+              </div>
               <button
                 type="button"
-                aria-pressed={tool === 'orbit'}
-                aria-label="Orbit tool"
-                title="Orbit"
-                onClick={() => setTool('orbit')}
-                className={`${btn} ${tool === 'orbit' ? on : off}`}
+                onClick={onRequestClose}
+                data-autofocus={sheet ? 'true' : undefined}
+                aria-label="Close Blueprint"
+                title="Close"
+                className="flex items-center justify-center w-10 h-10 rounded-full border-3 border-ink bg-white text-ink hover:bg-pop-yellow hover:scale-105 transition-transform shadow-brutal-sm"
               >
-                <Rotate3d className="w-4 h-4" strokeWidth={2.5} aria-hidden />
-              </button>
-              <button
-                type="button"
-                aria-pressed={tool === 'pan'}
-                aria-label="Pan tool"
-                title="Pan"
-                onClick={() => setTool('pan')}
-                className={`${btn} ${tool === 'pan' ? on : off}`}
-              >
-                <Move className="w-4 h-4" strokeWidth={2.5} aria-hidden />
+                <X strokeWidth={3} />
               </button>
             </div>
-            <span aria-hidden className="w-px h-6 bg-ink/20 mx-0.5" />
-            <button type="button" aria-label="Zoom out" onClick={() => zoomBy(1 / 1.25)} className={`${btn} ${off}`}>
-              <ZoomOut className="w-4 h-4" strokeWidth={2.5} aria-hidden />
+          </div>
+        </>
+      ) : null}
+    </div>
+  );
+  const consoleEl = mounted ? (
+    <div
+      ref={consoleRef}
+      data-bp-ui
+      className="mt-3 flex flex-col gap-2 p-2 rounded-2xl border-3 border-ink bg-white shadow-brutal-sm"
+    >
+      <div
+        className={
+          sheet
+            ? 'flex flex-nowrap overflow-x-auto [scrollbar-width:none] gap-1.5'
+            : 'flex flex-wrap items-center gap-1.5'
+        }
+      >
+        <div role="group" aria-label="View presets" className="flex gap-1 shrink-0">
+          {(Object.keys(PRESETS) as Preset[]).map((key) => (
+            <button
+              key={key}
+              type="button"
+              aria-pressed={preset === key}
+              onClick={() => goPreset(key)}
+              className={`${btn} ${preset === key ? on : off}`}
+            >
+              {PRESETS[key].label}
             </button>
-            <button type="button" aria-label="Zoom in" onClick={() => zoomBy(1.25)} className={`${btn} ${off}`}>
-              <ZoomIn className="w-4 h-4" strokeWidth={2.5} aria-hidden />
+          ))}
+        </div>
+        <span aria-hidden className="w-px h-6 bg-ink/20 mx-0.5 shrink-0" />
+        <div role="group" aria-label="Drag tool" className="flex gap-1 shrink-0">
+          <button
+            type="button"
+            aria-pressed={tool === 'orbit'}
+            aria-label="Orbit tool"
+            title="Orbit"
+            onClick={() => setTool('orbit')}
+            className={`${btn} ${tool === 'orbit' ? on : off}`}
+          >
+            <Rotate3d className="w-4 h-4" strokeWidth={2.5} aria-hidden />
+          </button>
+          <button
+            type="button"
+            aria-pressed={tool === 'pan'}
+            aria-label="Pan tool"
+            title="Pan"
+            onClick={() => setTool('pan')}
+            className={`${btn} ${tool === 'pan' ? on : off}`}
+          >
+            <Move className="w-4 h-4" strokeWidth={2.5} aria-hidden />
+          </button>
+        </div>
+        <span aria-hidden className="w-px h-6 bg-ink/20 mx-0.5 shrink-0" />
+        <button
+          type="button"
+          aria-label="Zoom out"
+          onClick={() => zoomBy(1 / 1.25)}
+          className={`${btn} ${off} shrink-0`}
+        >
+          <ZoomOut className="w-4 h-4" strokeWidth={2.5} aria-hidden />
+        </button>
+        <button type="button" aria-label="Zoom in" onClick={() => zoomBy(1.25)} className={`${btn} ${off} shrink-0`}>
+          <ZoomIn className="w-4 h-4" strokeWidth={2.5} aria-hidden />
+        </button>
+        <button
+          type="button"
+          aria-pressed={spin}
+          aria-label="Auto-rotate"
+          title="Auto-rotate"
+          onClick={() => setSpin((s) => !s)}
+          className={`${btn} ${spin ? on : off} shrink-0`}
+        >
+          <Orbit className="w-4 h-4" strokeWidth={2.5} aria-hidden />
+        </button>
+        <button
+          type="button"
+          aria-label="Reset view"
+          title="Reset (R)"
+          onClick={reset}
+          className={`${btn} ${off} shrink-0`}
+        >
+          <RotateCcw className="w-4 h-4" strokeWidth={2.5} aria-hidden />
+        </button>
+      </div>
+
+      {sheet ? (
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center gap-1.5">
+            <button type="button" onClick={() => stepLayer(-1)} aria-label="Previous layer" className={`${btn} ${off}`}>
+              <ChevronLeft className="w-4 h-4" strokeWidth={3} aria-hidden />
+            </button>
+            <span aria-live="polite" className="flex-1 text-center nb-tag bg-pop-yellow justify-center">
+              {iso === null ? 'WHOLE MODEL' : `L${iso + 1} · ${BP_LAYERS[iso]}`}
+            </span>
+            <button type="button" onClick={() => stepLayer(1)} aria-label="Next layer" className={`${btn} ${off}`}>
+              <ChevronRight className="w-4 h-4" strokeWidth={3} aria-hidden />
             </button>
             <button
               type="button"
-              aria-pressed={spin}
-              aria-label="Auto-rotate"
-              title="Auto-rotate"
-              onClick={() => setSpin((s) => !s)}
-              className={`${btn} ${spin ? on : off}`}
+              aria-pressed={showGap}
+              onClick={() => setShowGap(!showGap)}
+              className={`${btn} ${showGap ? on : off}`}
             >
-              <Orbit className="w-4 h-4" strokeWidth={2.5} aria-hidden />
-            </button>
-            <button type="button" aria-label="Reset view" title="Reset (R)" onClick={reset} className={`${btn} ${off}`}>
-              <RotateCcw className="w-4 h-4" strokeWidth={2.5} aria-hidden />
+              GAP
             </button>
           </div>
-
+          {showGap && (
+            <label className="flex items-center gap-2 font-mono text-[0.65rem] font-extrabold tracking-[0.08em] text-ink">
+              <span className="shrink-0">ASSEMBLE</span>
+              <input
+                ref={gapInputRef}
+                type="range"
+                min={0}
+                max={G_MAX}
+                step={1}
+                defaultValue={OPEN_GAP}
+                onInput={onGap}
+                onPointerUp={() => live(false)}
+                onKeyUp={() => live(false)}
+                aria-label="Layer gap"
+                className="bp-range flex-1 min-w-0"
+              />
+              <span className="shrink-0">EXPLODE</span>
+            </label>
+          )}
+        </div>
+      ) : (
+        <>
           <label className="flex items-center gap-2 font-mono text-[0.65rem] font-extrabold tracking-[0.08em] text-ink">
             <span className="shrink-0">ASSEMBLE</span>
             <input
@@ -817,8 +948,46 @@ export function BlueprintStage({
               <ChevronRight className="w-4 h-4" strokeWidth={3} aria-hidden />
             </button>
           </div>
+        </>
+      )}
+    </div>
+  ) : null;
+
+  if (mounted && sheet) {
+    return (
+      <div className="min-w-0">
+        <div
+          aria-hidden
+          style={{ height: placeholderH }}
+          className="rounded-[20px] border-3 border-dashed border-ink/40 grid place-items-center font-mono text-xs font-extrabold tracking-[0.1em] text-ink/60"
+        >
+          BLUEPRINT OPEN
         </div>
-      ) : null}
+        {createPortal(
+          <div
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Blueprint of ${title}`}
+            data-lenis-prevent
+            className="fixed inset-0 z-[10000] flex flex-col gap-2 bg-paper h-screen-safe pt-[max(0.5rem,var(--safe-top))] pb-[max(0.5rem,var(--safe-bottom))] pl-[max(0.5rem,var(--safe-left))] pr-[max(0.5rem,var(--safe-right))]"
+          >
+            {React.cloneElement(stageEl, {
+              className: 'fx-blueprint relative flex-1 min-h-0',
+              style: undefined,
+              'data-sheet': '',
+            })}
+            {consoleEl}
+          </div>,
+          document.body,
+        )}
+      </div>
+    );
+  }
+  return (
+    <div className="min-w-0">
+      {stageEl}
+      {consoleEl}
     </div>
   );
 }
