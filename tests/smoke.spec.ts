@@ -102,3 +102,26 @@ test('no corrupted characters on the page', async ({ page }) => {
   );
   expect(text).not.toMatch(bad);
 });
+
+test('academic distinctions: structured transcript, results and roles', async ({ page, context }) => {
+  await context.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/', { waitUntil: 'networkidle' });
+  const tab = page.locator('#honors button', { hasText: 'ACADEMIC DISTINCTIONS' }).first();
+  await tab.scrollIntoViewIfNeeded();
+  await tab.click();
+  const honors = page.locator('#honors');
+  await expect(honors.getByRole('heading', { name: 'Semester 2 Core' })).toBeVisible();
+  await expect(honors.locator('li', { hasText: 'Machine Learning' })).toContainText('A+');
+  const more = honors.getByRole('button', { name: /SHOW ALL 6/ });
+  await more.click();
+  await expect(honors.getByText('Konvensyen Profesional KMNS 2024')).toBeVisible();
+  await expect(honors.getByText('VICE PRESIDENT')).toBeVisible();
+  // no horizontal overflow (compared with the layout width, which excludes a reserved scrollbar gutter)
+  const [sw, cw] = await page.evaluate(() => [
+    document.documentElement.scrollWidth,
+    document.documentElement.clientWidth,
+  ]);
+  expect(sw).toBeLessThanOrEqual(cw);
+  expect(cw).toBeLessThanOrEqual(390);
+});

@@ -8,6 +8,7 @@ import { BauhausSolid } from './fx/bauhaus-solid';
 import { SplitWords } from './fx/split-words';
 import { FX } from '@/lib/fx';
 import { AnimatedCounter } from './animated-counter';
+import { ResultsBoard, RolesGrid, Transcript } from './honors-academic';
 import { useFocusTrap } from '@/lib/use-focus-trap';
 import { useLatest } from '@/lib/use-latest';
 import { useScrollLock } from '@/lib/use-scroll-lock';
@@ -175,128 +176,11 @@ const honorsList: HonorItem[] = [
     statCallout: { value: 'Top 1%', label: 'Academic Distinction' },
     description: (
       <div className="space-y-4 pt-1">
-        <p className="text-[0.95rem] text-ink-soft font-medium pb-2">
+        <p className="text-[0.95rem] text-ink-soft font-medium">
           Engineered a flawless 4.00 CGPA algorithmic academic record, securing straight-A distinctions across all
           advanced computer science and systems architecture modules.
         </p>
-
-        <div className="bg-white border-2 border-ink rounded-xl overflow-hidden">
-          <div className="bg-pop-mint px-3 py-2 border-b-2 border-ink flex flex-wrap justify-between items-center gap-x-3 gap-y-1">
-            <span className="text-xs font-mono font-extrabold uppercase tracking-[0.08em] text-ink">
-              Semester 2 Core
-            </span>
-            <span className="text-xs font-mono font-bold text-ink">GPA: 4.00</span>
-          </div>
-          <div className="p-3 grid grid-cols-1 gap-2 text-xs font-mono font-medium">
-            <div className="flex justify-between items-start group">
-              <div className="flex gap-1.5 text-ink-soft group-hover:text-ink transition-colors flex-1 min-w-0 pr-2 [overflow-wrap:anywhere]">
-                <span className="shrink-0 w-[4.6em] whitespace-nowrap">WIA1006</span>
-                <span className="shrink-0 text-ink-muted">·</span>
-                <span>Machine Learning</span>
-              </div>
-              <span className="w-6 text-right text-[#0F7A4A] font-extrabold shrink-0">A+</span>
-            </div>
-            <div className="flex justify-between items-start group">
-              <div className="flex gap-1.5 text-ink-soft group-hover:text-ink transition-colors flex-1 min-w-0 pr-2 [overflow-wrap:anywhere]">
-                <span className="shrink-0 w-[4.6em] whitespace-nowrap">WIA1002</span>
-                <span className="shrink-0 text-ink-muted">·</span>
-                <span>Data Structure</span>
-              </div>
-              <span className="w-6 text-right text-[#0F7A4A] font-extrabold shrink-0">A+</span>
-            </div>
-            <div className="flex justify-between items-start group">
-              <div className="flex gap-1.5 text-ink-soft group-hover:text-ink transition-colors flex-1 min-w-0 pr-2 [overflow-wrap:anywhere]">
-                <span className="shrink-0 w-[4.6em] whitespace-nowrap">WIA1003</span>
-                <span className="shrink-0 text-ink-muted">·</span>
-                <span>Computer System Architecture</span>
-              </div>
-              <span className="w-6 text-right text-[#0F7A4A] font-bold shrink-0">A</span>
-            </div>
-            <div className="flex justify-between items-start group">
-              <div className="flex gap-1.5 text-ink-soft group-hover:text-ink transition-colors flex-1 min-w-0 pr-2 [overflow-wrap:anywhere]">
-                <span className="shrink-0 w-[4.6em] whitespace-nowrap">WIA1005</span>
-                <span className="shrink-0 text-ink-muted">·</span>
-                <span>Network Technology Foundation</span>
-              </div>
-              <span className="w-6 text-right text-[#0F7A4A] font-bold shrink-0">A</span>
-            </div>
-            <div className="flex justify-between items-start group">
-              <div className="flex gap-1.5 text-ink-soft group-hover:text-ink transition-colors flex-1 min-w-0 pr-2 [overflow-wrap:anywhere]">
-                <span className="shrink-0 w-[4.6em] whitespace-nowrap">GIG1012</span>
-                <span className="shrink-0 text-ink-muted">·</span>
-                <span>Philosophy and Current Issues</span>
-              </div>
-              <span className="w-6 text-right text-[#0F7A4A] font-extrabold shrink-0">A+</span>
-            </div>
-            <div className="flex justify-between items-start group">
-              <div className="flex gap-1.5 text-ink-soft group-hover:text-ink transition-colors flex-1 min-w-0 pr-2 [overflow-wrap:anywhere]">
-                <span className="shrink-0 w-[4.6em] whitespace-nowrap">GLT1025</span>
-                <span className="shrink-0 text-ink-muted">·</span>
-                <span>Effective Oral Communication</span>
-              </div>
-              <span className="w-6 text-right text-[#0F7A4A] font-extrabold shrink-0">A+</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white border-2 border-ink rounded-xl overflow-hidden">
-          <div className="bg-pop-mint px-3 py-2 border-b-2 border-ink flex flex-wrap justify-between items-center gap-x-3 gap-y-1">
-            <span className="text-xs font-mono font-extrabold uppercase tracking-[0.08em] text-ink">
-              Semester 1 Core
-            </span>
-            <span className="text-xs font-mono font-bold text-ink">GPA: 4.00</span>
-          </div>
-          <div className="p-3 grid grid-cols-1 gap-2 text-xs font-mono font-medium">
-            <div className="flex justify-between items-start group">
-              <div className="flex gap-1.5 text-ink-soft group-hover:text-ink transition-colors flex-1 min-w-0 pr-2 [overflow-wrap:anywhere]">
-                <span className="shrink-0 w-[4.6em] whitespace-nowrap">WIX1002</span>
-                <span className="shrink-0 text-ink-muted">·</span>
-                <span>Fundamentals of Programming</span>
-              </div>
-              <span className="w-6 text-right text-[#0F7A4A] font-extrabold shrink-0">A+</span>
-            </div>
-            <div className="flex justify-between items-start group">
-              <div className="flex gap-1.5 text-ink-soft group-hover:text-ink transition-colors flex-1 min-w-0 pr-2 [overflow-wrap:anywhere]">
-                <span className="shrink-0 w-[4.6em] whitespace-nowrap">WIA2010</span>
-                <span className="shrink-0 text-ink-muted">·</span>
-                <span>Human Computer Interaction</span>
-              </div>
-              <span className="w-6 text-right text-[#0F7A4A] font-bold shrink-0">A</span>
-            </div>
-            <div className="flex justify-between items-start group">
-              <div className="flex gap-1.5 text-ink-soft group-hover:text-ink transition-colors flex-1 min-w-0 pr-2 [overflow-wrap:anywhere]">
-                <span className="shrink-0 w-[4.6em] whitespace-nowrap">WIX1001</span>
-                <span className="shrink-0 text-ink-muted">·</span>
-                <span>Computing Mathematics I</span>
-              </div>
-              <span className="w-6 text-right text-[#0F7A4A] font-bold shrink-0">A</span>
-            </div>
-            <div className="flex justify-between items-start group">
-              <div className="flex gap-1.5 text-ink-soft group-hover:text-ink transition-colors flex-1 min-w-0 pr-2 [overflow-wrap:anywhere]">
-                <span className="shrink-0 w-[4.6em] whitespace-nowrap">WIX1003</span>
-                <span className="shrink-0 text-ink-muted">·</span>
-                <span>Computer Systems and Organization</span>
-              </div>
-              <span className="w-6 text-right text-[#0F7A4A] font-bold shrink-0">A</span>
-            </div>
-            <div className="flex justify-between items-start group">
-              <div className="flex gap-1.5 text-ink-soft group-hover:text-ink transition-colors flex-1 min-w-0 pr-2 [overflow-wrap:anywhere]">
-                <span className="shrink-0 w-[4.6em] whitespace-nowrap">GIG1003</span>
-                <span className="shrink-0 text-ink-muted">·</span>
-                <span>Basic Entrepreneurship Enculturation</span>
-              </div>
-              <span className="w-6 text-right text-[#0F7A4A] font-extrabold shrink-0">A+</span>
-            </div>
-            <div className="flex justify-between items-start group">
-              <div className="flex gap-1.5 text-ink-soft group-hover:text-ink transition-colors flex-1 min-w-0 pr-2 [overflow-wrap:anywhere]">
-                <span className="shrink-0 w-[4.6em] whitespace-nowrap">GLT1024</span>
-                <span className="shrink-0 text-ink-muted">·</span>
-                <span>Proficiency in English III</span>
-              </div>
-              <span className="w-6 text-right text-[#0F7A4A] font-bold shrink-0">A</span>
-            </div>
-          </div>
-        </div>
+        <Transcript />
       </div>
     ),
     highlights: [],
@@ -312,117 +196,13 @@ const honorsList: HonorItem[] = [
     statCallout: { value: '4.00', label: 'Physical Sciences Cohort' },
     description: (
       <div className="space-y-4 pt-1">
-        <p className="text-[0.95rem] text-ink-soft font-medium pb-2">
+        <p className="text-[0.95rem] text-ink-soft font-medium">
           Graduated top of cohort in Physical Sciences & Computer Science with a perfect 4.00 GPA, alongside an
           exceptional track record of national-level technical competitions and extensive leadership in academic
           mentorship programs.
         </p>
-
-        <div className="bg-white border-2 border-ink rounded-xl overflow-hidden">
-          <div className="bg-pop-mint px-3 py-2 border-b-2 border-ink flex flex-wrap justify-between items-center gap-x-3 gap-y-1">
-            <span className="text-xs font-mono font-extrabold uppercase tracking-[0.08em] text-ink">
-              National & State Excellence
-            </span>
-            <span className="text-xs font-mono font-bold text-ink">KMNS 2024/2025</span>
-          </div>
-          <div className="p-3 grid grid-cols-1 gap-2 text-xs font-mono font-medium">
-            <div className="flex justify-between items-center group">
-              <span className="text-ink-soft group-hover:text-ink transition-colors min-w-0 pr-2 [overflow-wrap:anywhere]">
-                SUKED Ping Pong Coach (Negeri)
-              </span>
-              <span className="w-24 text-right text-[#8A5A00] font-extrabold shrink-0">GOLD</span>
-            </div>
-            <div className="flex justify-between items-center group">
-              <span className="text-ink-soft group-hover:text-ink transition-colors min-w-0 pr-2 [overflow-wrap:anywhere]">
-                Matrix eXtra Quiz Challenge (Kebangsaan)
-              </span>
-              <span className="w-24 text-right text-[#B4531A] font-extrabold shrink-0">BRONZE</span>
-            </div>
-            <div className="flex justify-between items-center group">
-              <span className="text-ink-soft group-hover:text-ink transition-colors min-w-0 pr-2 [overflow-wrap:anywhere]">
-                SUKED Tenis Lelaki (Negeri)
-              </span>
-              <span className="w-24 text-right text-[#B4531A] font-extrabold shrink-0">BRONZE</span>
-            </div>
-            <div className="flex justify-between items-center group">
-              <span className="text-ink-soft group-hover:text-ink transition-colors min-w-0 pr-2 [overflow-wrap:anywhere]">
-                IMONST 1 Math Olympiad (Kebangsaan)
-              </span>
-              <span className="w-24 text-right text-ink-muted font-bold shrink-0">FINALIST</span>
-            </div>
-            <div className="flex justify-between items-center group">
-              <span className="text-ink-soft group-hover:text-ink transition-colors min-w-0 pr-2 [overflow-wrap:anywhere]">
-                Kursus Kepimpinan Generasi Madani (Kebangsaan)
-              </span>
-              <span className="w-24 text-right text-ink-muted font-bold shrink-0">MOE</span>
-            </div>
-            <div className="flex justify-between items-center group">
-              <span className="text-ink-soft group-hover:text-ink transition-colors min-w-0 pr-2 [overflow-wrap:anywhere]">
-                Bicara Eksekutif Kenegaraan Madani (Kebangsaan)
-              </span>
-              <span className="w-24 text-right text-ink-muted font-bold shrink-0">MOE</span>
-            </div>
-            <div className="flex justify-between items-center group">
-              <span className="text-ink-soft group-hover:text-ink transition-colors min-w-0 pr-2 [overflow-wrap:anywhere]">
-                Pertandingan Komik STEM 2024 (Negeri)
-              </span>
-              <span className="w-24 text-right text-ink-muted font-bold shrink-0">PARTICIPANT</span>
-            </div>
-            <div className="flex justify-between items-center group">
-              <span className="text-ink-soft group-hover:text-ink transition-colors min-w-0 pr-2 [overflow-wrap:anywhere]">
-                Pertandingan Poster AI (Negeri)
-              </span>
-              <span className="w-24 text-right text-ink-muted font-bold shrink-0">PARTICIPANT</span>
-            </div>
-            <div className="flex justify-between items-center group">
-              <span className="text-ink-soft group-hover:text-ink transition-colors min-w-0 pr-2 [overflow-wrap:anywhere]">
-                Konvensyen Profesional KMNS 2024 (Negeri)
-              </span>
-              <span className="w-24 text-right text-ink-muted font-bold shrink-0">PARTICIPANT</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white border-2 border-ink rounded-xl overflow-hidden">
-          <div className="bg-pop-mint px-3 py-2 border-b-2 border-ink flex flex-wrap justify-between items-center gap-x-3 gap-y-1">
-            <span className="text-xs font-mono font-extrabold uppercase tracking-[0.08em] text-ink">
-              Leadership & Mentorship Roles
-            </span>
-            <span className="text-xs font-mono font-bold text-ink">KEY POSITIONS</span>
-          </div>
-          <div className="p-3 grid grid-cols-1 gap-2 text-xs font-mono font-medium">
-            <div className="flex justify-between items-center group">
-              <span className="text-ink-soft group-hover:text-ink transition-colors min-w-0 pr-2 [overflow-wrap:anywhere]">
-                Sukan Kampung
-              </span>
-              <span className="text-[#0F7A4A] font-extrabold shrink-0">CHAIRMAN</span>
-            </div>
-            <div className="flex justify-between items-center group">
-              <span className="text-ink-soft group-hover:text-ink transition-colors min-w-0 pr-2 [overflow-wrap:anywhere]">
-                Peer Assisted Learning (PAL)
-              </span>
-              <span className="text-[#0F7A4A] font-extrabold shrink-0">VICE PRESIDENT</span>
-            </div>
-            <div className="flex justify-between items-center group">
-              <span className="text-ink-soft group-hover:text-ink transition-colors min-w-0 pr-2 [overflow-wrap:anywhere]">
-                Maths Support System (MSS)
-              </span>
-              <span className="text-[#0F7A4A] font-bold shrink-0">MENTOR</span>
-            </div>
-            <div className="flex justify-between items-center group">
-              <span className="text-ink-soft group-hover:text-ink transition-colors min-w-0 pr-2 [overflow-wrap:anywhere]">
-                Program Chemcare Sem 2
-              </span>
-              <span className="text-[#0F7A4A] font-bold shrink-0">FACILITATOR</span>
-            </div>
-            <div className="flex justify-between items-center group">
-              <span className="text-ink-soft group-hover:text-ink transition-colors min-w-0 pr-2 [overflow-wrap:anywhere]">
-                Gemersik Cakna x Pesta Tanglung
-              </span>
-              <span className="text-[#0F7A4A] font-bold shrink-0">FACILITATOR</span>
-            </div>
-          </div>
-        </div>
+        <ResultsBoard />
+        <RolesGrid />
       </div>
     ),
     highlights: [],
@@ -751,7 +531,7 @@ export default function HonorsSection() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20, position: 'absolute', inset: 0 }}
                 transition={{ duration: 0.4, type: 'spring', bounce: 0.2 }}
-                className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-7"
+                className={`grid grid-cols-1 lg:grid-cols-2 ${activeItems.length > 2 ? 'xl:grid-cols-3' : 'items-start'} gap-7`}
               >
                 {activeItems.map((item, itemIdx) => {
                   const Icon = item.icon;
@@ -768,7 +548,7 @@ export default function HonorsSection() {
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.4, delay: itemIdx * 0.08 }}
-                      className={`relative group rounded-[28px] border-3 border-ink bg-white overflow-hidden flex flex-col h-full transition-[transform,box-shadow] duration-200 hover:-translate-x-1 hover:-translate-y-1 ${
+                      className={`relative group rounded-[28px] border-3 border-ink bg-white overflow-hidden flex flex-col ${activeItems.length > 2 ? 'h-full' : ''} transition-[transform,box-shadow] duration-200 hover:-translate-x-1 hover:-translate-y-1 ${
                         isFeatured ? 'shadow-brutal-lg hover:shadow-brutal-xl' : 'shadow-brutal hover:shadow-brutal-lg'
                       } ${hit ? 'fx-trail-hit' : ''}`}
                     >
