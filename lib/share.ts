@@ -27,6 +27,7 @@ export function toast(text: string) {
   document.querySelector('[data-fx-toast]')?.remove();
   const el = document.createElement('div');
   el.setAttribute('role', 'status');
+  el.setAttribute('aria-live', 'polite');
   el.dataset.fxToast = '';
   el.className = 'fx-toast nb-tag bg-pop-mint shadow-brutal-sm'; // positioned in globals.css (lib/ is not a Tailwind source)
   el.textContent = text;

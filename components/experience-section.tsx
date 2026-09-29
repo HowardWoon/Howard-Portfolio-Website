@@ -6,6 +6,7 @@ import { TraceRail } from './fx/trace-rail';
 import { SplitWords } from './fx/split-words';
 import { m, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { FX, SPRING_STAMP } from '@/lib/fx';
+import { usePrinting } from '@/lib/use-printing';
 import {
   Building2,
   Landmark,
@@ -120,6 +121,7 @@ const experiences: ExperienceItem[] = [
 
 function PekomTreasurerDashboard() {
   const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
+  const printing = usePrinting(); // FX-70: every event prints expanded
 
   const stats = [
     { label: 'Total Funds', value: 'RM 72,880+', icon: Wallet },
@@ -411,11 +413,12 @@ function PekomTreasurerDashboard() {
             so clicking a photo in the Field Archive (or anywhere inside the open panel) collapsed it. */}
         <div className="space-y-3">
           {events.map((event) => {
-            const isExpanded = expandedEvent === event.id;
+            const isExpanded = printing || expandedEvent === event.id;
             const panelId = `pekom-event-${event.id}`;
             return (
               <div
                 key={event.id}
+                data-pekom-event
                 className={`relative rounded-2xl border-3 border-ink transition-[box-shadow,transform,background-color] duration-200 ${
                   isExpanded
                     ? 'bg-white shadow-brutal'
@@ -426,7 +429,7 @@ function PekomTreasurerDashboard() {
                   type="button"
                   aria-expanded={isExpanded}
                   aria-controls={isExpanded ? panelId : undefined}
-                  onClick={() => setExpandedEvent(isExpanded ? null : event.id)}
+                  onClick={() => setExpandedEvent(expandedEvent === event.id ? null : event.id)}
                   className={`w-full text-left p-4 flex items-center justify-between gap-3 rounded-[13px] ${isExpanded ? 'bg-pop-yellow border-b-3 border-ink rounded-b-none' : ''}`}
                 >
                   <span className="font-mono text-xs sm:text-sm font-extrabold tracking-[0.02em] text-ink">
@@ -445,7 +448,7 @@ function PekomTreasurerDashboard() {
                   {isExpanded && (
                     <m.div
                       id={panelId}
-                      initial={{ height: 0, opacity: 0 }}
+                      initial={printing ? false : { height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       className="overflow-hidden"

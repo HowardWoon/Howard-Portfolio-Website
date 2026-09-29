@@ -1385,6 +1385,8 @@ html.fx-off-ambientOrbits .fx-orbit {
   .fx-orbit,
   .fx-stamp,
   .boot-overlay,
+  .fx-cursor,
+  .bp-scan,
   canvas,
   button[aria-label='Scroll to top'],
   button[aria-label^='Current section'] {

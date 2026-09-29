@@ -99,7 +99,7 @@ export function CustomCursor() {
       {/* Dot */}
       <m.div
         aria-hidden
-        className={`fixed top-0 left-0 rounded-full pointer-events-none z-[100000] border-2 border-ink bg-pop-yellow`}
+        className={`fx-cursor fixed top-0 left-0 rounded-full pointer-events-none z-[100000] border-2 border-ink bg-pop-yellow`}
         animate={{ width: isPointer || customText ? 8 : 14, height: isPointer || customText ? 8 : 14 }}
         transition={{ type: 'spring', stiffness: 400, damping: 25 }}
         style={{ x: cursorX, y: cursorY, translateX: '-50%', translateY: '-50%', opacity: isHidden ? 0 : 1 }}
@@ -108,7 +108,7 @@ export function CustomCursor() {
       {/* Ring — follows exactly (no spring lag so text is readable). Hidden over the hero portrait: there the Spider-Man reveal circle follows the pointer exactly. */}
       <m.div
         aria-hidden
-        className={`fixed top-0 left-0 w-11 h-11 rounded-full pointer-events-none z-[99999] border-[3px] flex items-center justify-center ${onDark ? '' : 'mix-blend-multiply'}`}
+        className={`fx-cursor fixed top-0 left-0 w-11 h-11 rounded-full pointer-events-none z-[99999] border-[3px] flex items-center justify-center ${onDark ? '' : 'mix-blend-multiply'}`}
         animate={{
           scale: !FX.cursorMorph ? 1 : customText ? 2.2 : isPointer ? 1.6 : 1,
           borderColor: onDark ? '#FFFFFF' : '#0A0A0A',

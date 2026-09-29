@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { usePrinting } from '@/lib/use-printing';
 import { Award, BookOpen, ChevronDown, Crown, Medal, Users } from 'lucide-react';
 
 /* -------------------------------------------------------------------------------------------------
@@ -178,7 +179,8 @@ export function ResultsBoard({
   const podium = entries.filter((e) => e.result === 'GOLD' || e.result === 'BRONZE');
   const rest = entries.filter((e) => e.result !== 'GOLD' && e.result !== 'BRONZE');
   const [open, setOpen] = useState(false);
-  const shown = open ? rest : rest.slice(0, collapsedCount);
+  const printing = usePrinting(); // FX-70: the full list prints
+  const shown = open || printing ? rest : rest.slice(0, collapsedCount);
 
   return (
     <Panel
@@ -208,7 +210,7 @@ export function ResultsBoard({
       </ul>
 
       {/* everything else */}
-      <ul className="mx-3 divide-y-2 divide-dashed divide-ink/15 border-t-2 border-ink/15">
+      <ul data-results-rest className="mx-3 divide-y-2 divide-dashed divide-ink/15 border-t-2 border-ink/15">
         {shown.map((e) => (
           <li key={e.name} className="grid grid-cols-[1fr_auto] items-center gap-3 py-2">
             <span className="min-w-0">
@@ -226,7 +228,7 @@ export function ResultsBoard({
         ))}
       </ul>
       {rest.length > collapsedCount ? (
-        <div className="p-3 pt-2">
+        <div className="p-3 pt-2 print:hidden">
           <button
             type="button"
             aria-expanded={open}

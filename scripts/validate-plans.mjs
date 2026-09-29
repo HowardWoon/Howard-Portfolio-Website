@@ -1208,6 +1208,25 @@ has(
   'export async function copyLink',
   "toast('Link copied')",
 );
+has('R14', 'FX-70b', 'Accordions print expanded', 'lib/use-printing.ts', 'beforeprint', "matchMedia('print')");
+has(
+  'R14',
+  'FX-70c',
+  'PEKOM events print open',
+  'components/experience-section.tsx',
+  'const isExpanded = printing ||',
+  'initial={printing ? false :',
+);
+has(
+  'R14',
+  'FX-70d',
+  'KMNS list prints in full',
+  'components/honors-academic.tsx',
+  'open || printing ? rest',
+  'print:hidden',
+);
+has('R14', 'FX-70e', 'Cursor and scan hidden in print', 'app/globals.css', '.fx-cursor,', '.bp-scan,');
+has('R14', 'FX-69b', 'Toast is a polite live region', 'lib/share.ts', "setAttribute('aria-live', 'polite')");
 has('R14', 'TEST', 'R14 regression tests', 'tests/r14.spec.ts', '(B-01)', '(B-02)', '(B-04)', '(FX-65)', '(FX-69)');
 
 /* ================================================================================================ run */

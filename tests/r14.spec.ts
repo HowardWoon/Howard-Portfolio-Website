@@ -246,6 +246,7 @@ for (const supported of [true, false]) {
     const calls = await page.evaluate(() => (window as unknown as { __vt: number }).__vt);
     if (supported) expect(calls).toBeGreaterThan(0);
     else expect(calls).toBe(0);
+    await expect(academic).toBeFocused(); // View Transitions do not move focus
   });
 }
 
@@ -280,9 +281,29 @@ test('an unknown or malformed deep link does nothing (FX-69)', async ({ page }) 
   await expect(page.locator('.fx-blueprint[data-open="true"]')).toHaveCount(0);
 });
 
-test('print hides the header and floating UI (FX-70)', async ({ page }) => {
+test('print hides the header and floating UI and expands the accordions (FX-70)', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await home(page);
+  await page.locator('[data-honor-category]', { hasText: 'ACADEMIC DISTINCTIONS' }).press('Enter');
+  const showAll = page.getByRole('button', { name: /^SHOW ALL \d+/ });
+  await expect(showAll).toBeVisible();
+  const total = Number((await showAll.innerText()).match(/\d+/)![0]);
+  const rest = page.locator('[data-results-rest] > li');
+  expect(await rest.count()).toBeLessThan(total);
+  const events = page.locator('[data-pekom-event]');
+  expect(await events.count()).toBeGreaterThan(1);
+
   await page.emulateMedia({ media: 'print' });
   expect(await page.evaluate(() => getComputedStyle(document.querySelector('header')!).display)).toBe('none');
+  for (const sel of ['.fx-cursor', 'button[aria-label="Scroll to top"]', 'nav[aria-label="Section navigation"]'])
+    for (const el of await page.locator(sel).all()) await expect(el).toBeHidden();
+  await expect(rest).toHaveCount(total);
+  await expect(showAll).toBeHidden();
+  await expect(page.locator('[id^="pekom-event-"]')).toHaveCount(await events.count());
+  await expect(events.locator('button[aria-expanded="false"]')).toHaveCount(0);
+
+  // back on screen, the page returns to its collapsed state
+  await page.emulateMedia({ media: 'screen' });
+  await expect(page.locator('[id^="pekom-event-"]')).toHaveCount(0);
+  await expect(rest).not.toHaveCount(total);
 });
