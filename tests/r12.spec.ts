@@ -156,15 +156,16 @@ test.describe('phone polish', () => {
     await home(page);
     const stack = page.locator('#project-zerolag [data-cursor="view"]').first();
     await stack.scrollIntoViewIfNeeded();
-    await page.waitForTimeout(800);
-    const r = await stack.evaluate((s) => {
-      const img = s.querySelector<HTMLImageElement>('img[alt^="Holding the 2nd place trophy"]')!;
-      const print = img.closest<HTMLElement>('[class*="aspect-"]')!;
-      const a = print.getBoundingClientRect();
-      return { ratio: a.width / s.getBoundingClientRect().width, portrait: a.height > a.width };
-    });
-    expect(r.portrait).toBe(true);
-    expect(r.ratio).toBeGreaterThanOrEqual(0.5);
+    // the print switches to portrait once the photo has loaded and reported its size
+    const measure = () =>
+      stack.evaluate((s) => {
+        const img = s.querySelector<HTMLImageElement>('img[alt^="Holding the 2nd place trophy"]')!;
+        const print = img.closest<HTMLElement>('[class*="aspect-"]')!;
+        const a = print.getBoundingClientRect();
+        return { ratio: a.width / s.getBoundingClientRect().width, portrait: a.height > a.width };
+      });
+    await expect.poll(async () => (await measure()).portrait, { timeout: 8000 }).toBe(true);
+    expect((await measure()).ratio).toBeGreaterThanOrEqual(0.5);
   });
 
   test('hero stays opaque while the portrait is on screen (P1-02)', async ({ page }) => {
@@ -224,10 +225,11 @@ test('contact form never sends a message the server would drop (P1-07)', async (
     fillMs = (JSON.parse(route.request().postData()!) as { fillMs: number }).fillMs;
     await route.fulfill({ status: 200, contentType: 'application/json', body: '{"success":true}' });
   });
-  await page
-    .locator('#contact')
-    .getByRole('button', { name: /SWE Role/ })
-    .click();
+  const chip = page.locator('#contact').getByRole('button', { name: /SWE Role/ });
+  await chip.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+  await chip.focus();
+  await page.keyboard.press('Enter'); // keyboard activation: same handler, no pointer hit-testing
+  await expect(page.locator('#contact-message')).not.toHaveValue(''); // the chip filled the message
   await page.fill('#contact-name', 'Fast Visitor');
   await page.fill('#contact-email', 'fast@example.com');
   await page.getByRole('button', { name: /dispatch message/i }).click();

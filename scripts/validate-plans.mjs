@@ -99,7 +99,7 @@ has(
   'Playwright: 1 worker + 1 retry on CI, github reporter',
   'playwright.config.ts',
   'retries: isCI ? 1 : 0',
-  'workers: isCI ? 1 : undefined',
+  'workers: isCI ? 1 :', // CI runs one worker (the local cap is free to change)
   "['github']",
 );
 has(
@@ -377,9 +377,10 @@ has(
 has(
   'R9',
   'R9-06',
-  'ScrollUnfold gate (flat for reduced motion / Calm)',
+  'ScrollUnfold gate (flat for reduced motion / Calm; R14: flat until allowed)',
   'components/fx/scroll-unfold.tsx',
-  'const gate = useMotionValue(1)',
+  'const gate = useMotionValue(',
+  'gate.set(allowed && mq.matches ? 1 : 0)',
 );
 has('R9', 'R9-07', 'Button icons never shrink to 0', 'app/globals.css', '.nb-btn > svg', 'flex-shrink: 0');
 has('R9', 'R9-08', 'Magnetic honours Calm (useMotionAllowed)', 'components/magnetic-button.tsx', 'useMotionAllowed');
@@ -780,7 +781,7 @@ has(
   'Project card uses the bench; 7 labelled plates; tilt frozen',
   'components/stacked-projects.tsx',
   "import { BlueprintStage, BP_LAYERS } from './blueprint-stage'",
-  '<BlueprintStage open={blueprint}',
+  /<BlueprintStage\s+open=\{blueprint\}/,
   'maxTilt={blueprint ? 0 : 2.5}',
   '<span className="hidden sm:inline">BLUEPRINT</span>',
 );
@@ -960,10 +961,11 @@ has(
 has(
   'R12',
   'P1-06',
-  'Telemetry lines wrap on phones',
+  'Telemetry lines wrap (R14 B-02: at every width)',
   'components/about-section.tsx',
-  'min-w-0 [overflow-wrap:anywhere] sm:truncate',
+  '<span className="min-w-0 [overflow-wrap:anywhere]">{pillar.telemetrySnippet}</span>',
 );
+lacks('R12', 'P1-06b', 'Telemetry lines are never truncated', 'components/about-section.tsx', 'sm:truncate');
 has(
   'R12',
   'P1-07',
@@ -1075,8 +1077,141 @@ has(
   'reduced motion',
 );
 
+/* ================================================================================================ R14 */
+has(
+  'R14',
+  'FX',
+  'FX-61 … FX-69 flags',
+  'lib/fx.ts',
+  'heroCssEntrance:',
+  'blueprintFloor:',
+  'progressRing:',
+  'inkWipe:',
+  'viewTransitions:',
+  'cardTurn:',
+  'lampSpot:',
+  'hapticTick:',
+  'deepLinks:',
+);
+has(
+  'R14',
+  'B-01',
+  'Hero entrance is CSS (visible server HTML)',
+  'components/bikebear-hero.tsx',
+  'fx-hero-in',
+  'fx-hero-pop',
+);
+lacks(
+  'R14',
+  'B-01b',
+  'Hero content no longer starts at framer opacity 0',
+  'components/bikebear-hero.tsx',
+  'initial={{ opacity: 0, y: 15 }}',
+  'initial={{ opacity: 0, scale: 0.9 }}',
+);
+has(
+  'R14',
+  'B-01c',
+  'Project cards render flat until the unfold is allowed',
+  'components/fx/scroll-unfold.tsx',
+  'const gate = useMotionValue(0);',
+);
+has(
+  'R14',
+  'B-03',
+  'Header solid on phones / touch',
+  'components/site-header.tsx',
+  'bg-white sm:[@media(pointer:fine)]:bg-white/95',
+);
+has(
+  'R14',
+  'B-04',
+  'Back-to-top steps aside while scrolling down; 44 px on phones',
+  'components/scroll-to-top.tsx',
+  '!f.down',
+  'w-11 h-11 sm:w-14 sm:h-14',
+);
+has(
+  'R14',
+  'B-05',
+  'No mid-word breaks in the academic cards',
+  'components/honors-academic.tsx',
+  '[overflow-wrap:break-word]',
+);
+lacks(
+  'R14',
+  'B-06',
+  'No sub-11px labels in the academic cards',
+  'components/honors-academic.tsx',
+  'text-[0.6rem]',
+  'text-[0.62rem]',
+  'text-[0.65rem]',
+  'text-[0.68rem]',
+);
+has(
+  'R14',
+  'B-07',
+  'Experience filters: 2x2 grid on phones',
+  'components/experience-section.tsx',
+  'grid grid-cols-1 min-[360px]:grid-cols-2 sm:flex',
+);
+exists('R14', 'B-08', 'Manifest + apple icon', 'app/manifest.ts', 'app/apple-icon.tsx');
+has('R14', 'B-09', 'Stamp on intent + category cards', 'components/contact-section.tsx', 'data-fx-stamp-target');
+has(
+  'R14',
+  'B-10',
+  'Hero kicker is not decoded',
+  'components/fx/ambient-fx.tsx',
+  'main section[id]:not(#hero) .nb-kicker',
+);
+custom('R14', 'B-11', 'No explicit any in TypeScript under app/, components/, lib/', () => {
+  const hit = SOURCE.filter((f) => /\.tsx?$/.test(f)).find((f) => /(:\s*any\b|\bas any\b|\bany\[\])/.test(read(f)));
+  return hit ? `${hit} uses an explicit any` : true;
+});
+has(
+  'R14',
+  'B-12',
+  'CSS reveal for section headers',
+  'app/globals.css',
+  '.fx-rise',
+  'animation-range: entry 0% entry 45%',
+);
+has(
+  'R14',
+  'CSS',
+  'FX-61 … FX-67 + FX-70 CSS',
+  'app/globals.css',
+  '@keyframes fx-hero-in',
+  '@keyframes fx-floor',
+  '@keyframes fx-ring',
+  '@keyframes fx-wipe',
+  '@keyframes fx-card-turn',
+  '.fx-lamp::after',
+  '@media print',
+  '::view-transition-new(honors-results)',
+);
+has(
+  'R14',
+  'FX-65',
+  'View transitions fall back cleanly',
+  'lib/view-transition.ts',
+  'startViewTransition',
+  'flushSync',
+  'prefersReducedMotion()',
+);
+has(
+  'R14',
+  'FX-69',
+  'Deep links + copy link',
+  'lib/share.ts',
+  'export function readDeepLink',
+  'export async function copyLink',
+  "toast('Link copied')",
+);
+has('R14', 'TEST', 'R14 regression tests', 'tests/r14.spec.ts', '(B-01)', '(B-02)', '(B-04)', '(FX-65)', '(FX-69)');
+
 /* ================================================================================================ run */
-const rounds = ['R7', 'R8', 'R9', 'R10', 'R11', 'R12', 'R13', 'ALL'];
+const rounds = ['R7', 'R8', 'R9', 'R10', 'R11', 'R12', 'R13', 'R14', 'ALL'];
 let failed = 0;
 let total = 0;
 for (const r of rounds) {

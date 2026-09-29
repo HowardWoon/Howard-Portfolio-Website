@@ -49,6 +49,7 @@ const KICKER = 'ABOUT // SYSTEMS ARCHITECTURE & VISION';
 test('kicker decodes and settles on its exact text (FX-55)', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
+  await expect(page.locator('html[data-fx-ambient="on"]')).toHaveCount(1); // the effects chunk is live
   const kicker = page.locator('#about .nb-kicker span').first();
   // sample every frame while it decodes: same length and the same spaces / separators at every frame
   const frames = await kicker.evaluate(async (e) => {

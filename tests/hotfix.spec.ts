@@ -26,8 +26,11 @@ test('project cards are flat until BLUEPRINT is pressed, and the exploded view s
 
   const card = page.locator('[id^="project-"]').first();
   const btn = card.getByRole('button', { name: /blueprint view of/i });
-  await btn.scrollIntoViewIfNeeded();
-  await btn.click();
+  // keyboard activation (same onClick): a pointer click can land mid-glide while Lenis is still scrolling
+  await page.evaluate(() => (window as unknown as { __lenis?: { stop: () => void } }).__lenis?.stop());
+  await btn.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+  await btn.focus();
+  await page.keyboard.press('Enter');
   await expect(btn).toHaveAttribute('aria-pressed', 'true');
   await page.waitForTimeout(1000);
   const [col, gallery] = await Promise.all([
