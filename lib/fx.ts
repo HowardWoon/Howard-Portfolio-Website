@@ -36,7 +36,7 @@ export const FX = {
   textRoll: true, // FX-28 button labels roll up on hover / focus
   letterpress: true, // FX-29 hero headline casts a lamp shadow
   aberration: true, // FX-30 marquee colour fringes at high scroll speed
-  blueprintView: true, // FX-31 project card explodes into isometric layers
+  blueprintView: true, // FX-31 + FX-45 (R11) 3D Blueprint Inspection Bench: orbit, zoom, pan, explode, inspect layers
   pageLift: true, // FX-32 certificate modal lifts off the desk in 3D
   bootShatter: true, // FX-33 boot gate breaks into Bauhaus tiles
   mercuryField: true, // FX-34 WebGL2 metaball "mercury" behind the contact header

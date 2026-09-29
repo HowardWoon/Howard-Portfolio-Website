@@ -12,6 +12,7 @@ import { exitFocus, markVisited, setFocus, startTrail, useInteractionSelect } fr
 import { projectsWithSkill, scrollToProject, skillKey } from '@/lib/skills';
 import { TiltCard } from './tilt-card';
 import { InteractivePhotoStack } from './interactive-photo-stack';
+import { BlueprintStage, BP_LAYERS } from './blueprint-stage';
 import {
   Award,
   ExternalLink,
@@ -356,7 +357,7 @@ function ProjectCard({ project }: { project: ProjectData }) {
       className="fx-project-shell"
     >
       <ScrollUnfold className="w-full group">
-        <TiltCard maxTilt={2.5}>
+        <TiltCard maxTilt={blueprint ? 0 : 2.5}>
           <Reveal
             delay={0.1}
             y={40}
@@ -380,10 +381,13 @@ function ProjectCard({ project }: { project: ProjectData }) {
                     onClick={() => setBlueprint((v) => !v)}
                     aria-pressed={blueprint}
                     aria-label={`Blueprint view of ${project.title}`}
-                    className="nb-chip nb-press hidden xl:inline-flex min-h-[40px] cursor-pointer"
+                    title="3D blueprint: orbit, zoom, explode"
+                    className={`nb-chip nb-press inline-flex min-h-[40px] min-w-[40px] justify-center cursor-pointer ${
+                      blueprint ? '!bg-pop-blue !text-white' : ''
+                    }`}
                   >
                     <Layers className="w-3.5 h-3.5" strokeWidth={2.75} aria-hidden />
-                    BLUEPRINT
+                    <span className="hidden sm:inline">BLUEPRINT</span>
                   </button>
                 ) : null}
                 {FX.projectFocus ? (
@@ -409,13 +413,10 @@ function ProjectCard({ project }: { project: ProjectData }) {
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start p-4 xs:p-6 sm:p-10 lg:p-12">
               {/* Left Column: Narrative, Architecture & Benchmarks (7 Cols) */}
-              <div className="lg:col-span-7 fx-blueprint" data-open={blueprint ? 'true' : 'false'}>
-                <div className="fx-stack space-y-6">
+              <div className="lg:col-span-7 min-w-0">
+                <BlueprintStage open={blueprint} onRequestClose={() => setBlueprint(false)} title={project.title}>
                   {/* Top Bar: Project Index + Award Badge */}
-                  <div
-                    className="flex flex-wrap items-center gap-3 fx-layer"
-                    style={{ '--layer': 0 } as React.CSSProperties}
-                  >
+                  <div className="flex flex-wrap items-center gap-3 fx-layer" data-bp-label={`L1 · ${BP_LAYERS[0]}`}>
                     <span className="nb-num">{project.number}</span>
                     <div
                       className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-mono font-bold tracking-[0.04em] border-2 border-ink text-ink shadow-brutal-xs ${a.soft}`}
@@ -426,7 +427,7 @@ function ProjectCard({ project }: { project: ProjectData }) {
                   </div>
 
                   {/* Title & Subtitle */}
-                  <div className="space-y-2 fx-layer" style={{ '--layer': 1 } as React.CSSProperties}>
+                  <div className="space-y-2 fx-layer" data-bp-label={`L2 · ${BP_LAYERS[1]}`}>
                     <h3 className="font-display text-[clamp(1.6rem,8.5vw,2.25rem)] sm:text-5xl font-extrabold uppercase tracking-[-0.03em] leading-[0.95] text-ink flex items-center gap-3">
                       {project.title}
                       <ArrowUpRight
@@ -442,16 +443,13 @@ function ProjectCard({ project }: { project: ProjectData }) {
                   {/* Narrative Description */}
                   <p
                     className="text-ink-soft text-base leading-relaxed font-sans font-medium fx-layer"
-                    style={{ '--layer': 2 } as React.CSSProperties}
+                    data-bp-label={`L3 · ${BP_LAYERS[2]}`}
                   >
                     {project.description}
                   </p>
 
                   {/* Key Architectural Highlights */}
-                  <div
-                    className="space-y-3 nb-inset p-4 sm:p-5 fx-layer"
-                    style={{ '--layer': 3 } as React.CSSProperties}
-                  >
+                  <div className="space-y-3 nb-inset p-4 sm:p-5 fx-layer" data-bp-label={`L4 · ${BP_LAYERS[3]}`}>
                     <span className="text-xs font-mono font-extrabold text-ink uppercase tracking-[0.12em] block mb-1">
                       KEY ARCHITECTURAL HIGHLIGHTS:
                     </span>
@@ -469,7 +467,7 @@ function ProjectCard({ project }: { project: ProjectData }) {
                   {/* Live Benchmarks & Metric Chips (bento) */}
                   <div
                     className="grid grid-cols-1 sm:grid-cols-3 gap-3 fx-layer"
-                    style={{ '--layer': 4 } as React.CSSProperties}
+                    data-bp-label={`L5 · ${BP_LAYERS[4]}`}
                   >
                     {project.metrics.map((m, mIdx) => (
                       <div
@@ -487,7 +485,7 @@ function ProjectCard({ project }: { project: ProjectData }) {
                   </div>
 
                   {/* Tech Stack Pills */}
-                  <div className="flex flex-wrap gap-2 pt-1 fx-layer" style={{ '--layer': 5 } as React.CSSProperties}>
+                  <div className="flex flex-wrap gap-2 pt-1 fx-layer" data-bp-label={`L6 · ${BP_LAYERS[5]}`}>
                     {project.tags.map((tag) => {
                       const key = skillKey(tag);
                       if (!FX.evidenceTrail)
@@ -518,7 +516,7 @@ function ProjectCard({ project }: { project: ProjectData }) {
                   {/* Action Buttons */}
                   <div
                     className="flex flex-wrap items-center gap-3 pt-3 fx-layer"
-                    style={{ '--layer': 6 } as React.CSSProperties}
+                    data-bp-label={`L7 · ${BP_LAYERS[6]}`}
                   >
                     {project.prototypeUrl && (
                       <a
@@ -592,7 +590,7 @@ function ProjectCard({ project }: { project: ProjectData }) {
                       </a>
                     )}
                   </div>
-                </div>
+                </BlueprintStage>
               </div>
 
               {/* Right Column: Visual Architecture / Gallery (5 Cols) — a physical "desk" for the polaroids */}

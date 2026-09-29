@@ -32,7 +32,7 @@ test('project cards are flat until BLUEPRINT is pressed, and the exploded view s
   await page.waitForTimeout(1000);
   const [col, gallery] = await Promise.all([
     card.locator('.fx-blueprint').boundingBox(),
-    card.locator('.fx-blueprint + *').boundingBox(),
+    card.locator('.lg\\:col-span-5').first().boundingBox(), // the gallery column (R11: console sits under the stage)
   ]);
   expect(col && gallery && col.x + col.width <= gallery.x + 1).toBe(true);
   await page.keyboard.press('Escape');
