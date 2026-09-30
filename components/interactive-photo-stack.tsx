@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useEffect, useId, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { createPortal, preload } from 'react-dom';
 import { m, AnimatePresence, LayoutGroup } from 'framer-motion';
-import Image from 'next/image';
+import Image, { getImageProps } from 'next/image';
 import { ChevronLeft, ChevronRight, Layers, LayoutGrid, Link2, Maximize2, X } from 'lucide-react';
 import { copyLink, readDeepLink, shareUrl } from '@/lib/share';
 import { useScrollLock } from '@/lib/use-scroll-lock';
@@ -12,7 +12,8 @@ import { useLatest } from '@/lib/use-latest';
 import { FX } from '@/lib/fx';
 import { useBooted } from './boot-sequence';
 
-type Photo = { src: string; alt: string; rotation: number };
+/** w / h = the file's real pixel size (R17 F-02): prints and the lightbox take the photo's shape before it loads */
+type Photo = { src: string; alt: string; rotation: number; w: number; h: number };
 
 const photos: Photo[] = [
   // Supervity Autopilot Asia Hackathon 2026 photos (added at Howard's request)
@@ -20,38 +21,50 @@ const photos: Photo[] = [
     src: '/images/projects/zerolag/supervity_standing.jpg',
     alt: 'Holding the 2nd place trophy and certificate at the felicitation ceremony',
     rotation: -2,
+    w: 960,
+    h: 1280,
   },
   {
     src: '/images/projects/zerolag/supervity_formal.jpg',
     alt: 'Two team members with their certificates at the felicitation ceremony',
     rotation: 1.5,
+    w: 960,
+    h: 1280,
   },
   {
     src: '/images/projects/zerolag/supervity_selfie.jpg',
     alt: 'Selfie with the 2nd place trophy in the ceremony hall',
     rotation: -1,
+    w: 960,
+    h: 1280,
   },
   {
     src: '/images/projects/zerolag/supervity_with_apu.jpg',
     alt: 'Selfie with the 2nd place trophy at the APU sign',
     rotation: 2.5,
+    w: 1280,
+    h: 960,
   },
   {
     src: '/images/projects/zerolag/supervity_souvenir.jpg',
     alt: 'Beside the Autopilot Asia Hackathon banner',
     rotation: -1.5,
+    w: 960,
+    h: 1280,
   },
   {
     src: '/images/projects/zerolag/supervity_present.jpg',
     alt: 'In the hall at the Autopilot Asia Hackathon',
     rotation: 1,
+    w: 960,
+    h: 1280,
   },
   // Original ZeroLag product screenshots
-  { src: '/images/projects/zerolag/dashboard.jpeg', alt: 'Dashboard Console', rotation: -1.5 },
-  { src: '/images/projects/zerolag/agent-flow.png', alt: 'Agent Architecture Flow', rotation: 3 },
-  { src: '/images/projects/zerolag/ai_insight.jpeg', alt: 'AI Insights Module', rotation: 2 },
-  { src: '/images/projects/zerolag/ai_policies.jpeg', alt: 'AI Agent Policies', rotation: -1 },
-  { src: '/images/projects/zerolag/backend.jpeg', alt: 'Backend Telemetry', rotation: 1.5 },
+  { src: '/images/projects/zerolag/dashboard.jpeg', alt: 'Dashboard Console', rotation: -1.5, w: 1004, h: 520 },
+  { src: '/images/projects/zerolag/agent-flow.png', alt: 'Agent Architecture Flow', rotation: 3, w: 689, h: 743 },
+  { src: '/images/projects/zerolag/ai_insight.jpeg', alt: 'AI Insights Module', rotation: 2, w: 1005, h: 515 },
+  { src: '/images/projects/zerolag/ai_policies.jpeg', alt: 'AI Agent Policies', rotation: -1, w: 1002, h: 512 },
+  { src: '/images/projects/zerolag/backend.jpeg', alt: 'Backend Telemetry', rotation: 1.5, w: 1023, h: 639 },
 ];
 
 /**
@@ -88,7 +101,7 @@ function PhotoLightbox({
   useScrollLock();
   useFocusTrap(dialogRef, true);
   const photo = list[index];
-  const [ratio, setRatio] = useState(16 / 9);
+  const ratio = photo.w / photo.h; // R17 P1-05: known size, so the panel never jumps between photos
   const [zoomed, setZoomed] = useState(false);
   const prev = () => onIndex((index - 1 + list.length) % list.length);
   const next = () => onIndex((index + 1) % list.length);
@@ -217,7 +230,15 @@ function PhotoLightbox({
     return () => window.removeEventListener('keydown', onKey);
   }, [keyRef]);
 
-  const neighbours = list.length > 1 ? [(index + 1) % list.length, (index - 1 + list.length) % list.length] : [];
+  // R17 P1-04: preload the neighbours at the SAME srcset / sizes as the viewer, so the next swipe is instant. (They used
+  // to be hidden lazy <Image>s, which a browser never requests.)
+  useEffect(() => {
+    if (list.length < 2) return;
+    for (const n of [(index + 1) % list.length, (index - 1 + list.length) % list.length]) {
+      const { props } = getImageProps({ src: list[n].src, alt: '', fill: true, sizes: LB_SIZES });
+      preload(props.src, { as: 'image', imageSrcSet: props.srcSet, imageSizes: props.sizes, fetchPriority: 'low' });
+    }
+  }, [index, list]);
 
   return createPortal(
     <m.div
@@ -289,16 +310,8 @@ function PhotoLightbox({
               draggable={false}
               className="object-contain p-1.5 sm:p-3 pointer-events-none"
               priority
-              onLoad={(e) => {
-                const img = e.currentTarget;
-                if (img.naturalWidth && img.naturalHeight) setRatio(img.naturalWidth / img.naturalHeight);
-              }}
             />
           </div>
-          {/* neighbours preloaded at the SAME sizes, so the next swipe shows the already-cached file */}
-          {neighbours.map((n) => (
-            <Image key={`pre-${list[n].src}`} src={list[n].src} alt="" fill sizes={LB_SIZES} className="hidden" />
-          ))}
         </m.div>
       </div>
 
@@ -356,19 +369,27 @@ function PhotoLightbox({
 }
 
 /**
- * Skeuomorphic polaroid stack: taped prints on a desk.
- * Mouse/touch: click anywhere on the stack to cycle. Keyboard/screen readers: the (visually hidden)
- * "Next photo" button. The expand button is no longer nested inside another button.
+ * FX-107 Gallery Deck (R17 §7): skeuomorphic polaroid stack, taped prints on a desk.
+ * - Every photo carries its real pixel size, so each print has the photo's own shape from the first paint (the shape
+ *   used to be guessed as landscape until the image loaded, and the stack jumped while cycling).
+ * - The stack's height is computed in CSS from the tallest print it will ever show at this width (--pw / --lw are the
+ *   portrait / landscape print widths per breakpoint), so the page below never moves while cycling.
+ * - Browse: tap the right two-thirds (next) or the left third (previous), swipe, the Previous / Next buttons, or the
+ *   arrow keys while the gallery has focus. The progress dots and the counter on the print show the position.
+ * - Contact sheet: the prints morph into a two / three column sheet in the page flow (no scroll area inside the page).
  */
+const DECK_SIZES = '(max-width: 639px) 78vw, (max-width: 1023px) 60vw, 34vw';
+const isPortrait = (p: Photo) => p.w < p.h;
+
 export function InteractivePhotoStack({ customPhotos, galleryId }: { customPhotos?: Photo[]; galleryId?: string }) {
   const source = customPhotos || photos;
-  const [cards, setCards] = useState(source);
-  const [ratios, setRatios] = useState<Record<string, number>>({});
-  const isPortrait = (src: string) => (ratios[src] ?? 1.6) < 1;
-  const onImgLoad = (src: string) => (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const { naturalWidth: w, naturalHeight: h } = e.currentTarget;
-    if (w && h) setRatios((r) => (r[src] ? r : { ...r, [src]: w / h }));
-  };
+  const n = source.length;
+  const [deck, setDeck] = useState({ top: 0, dir: 1 });
+  const { top, dir } = deck;
+  const go = (delta: number) => setDeck((d) => ({ top: (d.top + delta + n) % n, dir: delta >= 0 ? 1 : -1 }));
+  const next = () => go(1);
+  const prev = () => go(-1);
+
   const dragged = useRef(false);
   const [viewer, setViewer] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -392,184 +413,232 @@ export function InteractivePhotoStack({ customPhotos, galleryId }: { customPhoto
     return () => window.clearTimeout(t);
   }, [booted, galleryId, source.length]);
 
-  const cycle = () => setCards((prev) => [...prev.slice(1), prev[0]]);
-  const openViewer = (src: string) =>
-    setViewer(
-      Math.max(
-        0,
-        source.findIndex((p) => p.src === src),
-      ),
-    );
+  // the tallest print (height / width) of each shape decides the stack height, so cycling never changes it
+  const kp = Math.max(0, ...source.filter(isPortrait).map((p) => p.h / p.w));
+  const kl = Math.max(0, ...source.filter((p) => !isPortrait(p)).map((p) => p.h / p.w));
+  const visible = Array.from({ length: Math.min(4, n) }, (_, i) => source[(top + i) % n]);
+
+  const onDeckKey = (e: React.KeyboardEvent) => {
+    if (sheet || e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.key === 'ArrowRight') next();
+    else if (e.key === 'ArrowLeft') prev();
+    else return;
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const round =
+    'grid place-items-center w-10 h-10 shrink-0 rounded-full bg-white border-3 border-ink shadow-brutal-xs text-ink hover:bg-pop-yellow active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-colors';
 
   return (
     <>
       <LayoutGroup id={uid}>
         <div
-          ref={stackRef}
-          onClick={
-            sheet
-              ? undefined
-              : () => {
-                  if (dragged.current) {
-                    dragged.current = false;
-                    return;
-                  }
-                  cycle();
-                }
-          }
-          data-cursor="view"
-          onPointerEnter={(e) => FX.photoFan && e.pointerType !== 'touch' && setFan(true)}
-          onPointerLeave={() => setFan(false)}
-          className="relative w-full h-[min(460px,118vw)] sm:h-[420px] lg:h-[460px] flex items-center justify-center cursor-pointer group rounded-2xl has-[:focus-visible]:outline has-[:focus-visible]:outline-[3px] has-[:focus-visible]:outline-pop-blue"
+          role="region"
+          aria-roledescription="carousel"
+          aria-label="Project gallery"
+          onKeyDown={onDeckKey}
+          className="fx-deck w-full"
         >
-          {FX.contactSheet && source.length > 1 ? (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setSheet((v) => !v);
-              }}
-              aria-pressed={sheet}
-              aria-label={sheet ? 'Back to photo stack' : `Show all ${source.length} photos as a contact sheet`}
-              title={sheet ? 'Stack view' : 'Contact sheet'}
-              className="absolute top-1.5 left-1.5 sm:top-3 sm:left-3 z-[60] w-10 h-10 grid place-items-center bg-white border-2 border-ink rounded-lg shadow-brutal-xs hover:bg-pop-yellow active:translate-y-0.5 transition-colors text-ink"
-            >
-              {sheet ? (
-                <Layers className="w-4 h-4" strokeWidth={2.5} aria-hidden />
-              ) : (
-                <LayoutGrid className="w-4 h-4" strokeWidth={2.5} aria-hidden />
-              )}
-            </button>
-          ) : null}
-
           {sheet ? (
-            <div
-              data-lenis-prevent
-              className="absolute inset-0 pt-14 sm:pt-16 px-1 pb-2 overflow-y-auto overscroll-contain grid grid-cols-2 xs:grid-cols-3 gap-2 sm:gap-3 content-start"
-            >
+            <div data-contact-sheet data-lenis-prevent className="columns-2 xs:columns-3 gap-2 sm:gap-3">
               {source.map((photo, i) => (
                 <m.button
                   key={photo.src}
                   type="button"
                   layoutId={`${uid}-${photo.src}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setViewer(i);
-                  }}
+                  onClick={() => setViewer(i)}
                   aria-label={`View full resolution: ${photo.alt}`}
                   transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                  className="relative aspect-video bg-white p-1 rounded-md border-2 border-ink shadow-brutal-xs hover:-translate-y-0.5 hover:shadow-brutal-sm transition-shadow"
+                  className="relative mb-2 sm:mb-3 block w-full break-inside-avoid bg-white p-1 rounded-md border-2 border-ink shadow-brutal-xs hover:shadow-brutal-sm transition-shadow"
                 >
-                  <span className="relative block w-full h-full overflow-hidden rounded-sm bg-paper-deep">
+                  <span
+                    className="relative block w-full overflow-hidden rounded-sm bg-paper-deep aspect-[var(--ar)]"
+                    style={{ '--ar': `${photo.w} / ${photo.h}` } as React.CSSProperties}
+                  >
                     <Image
                       src={photo.src}
                       alt=""
                       fill
-                      sizes="(max-width: 640px) 45vw, 14vw"
+                      sizes="(max-width: 374px) 45vw, (max-width: 1023px) 30vw, 14vw"
                       className="fx-wipe object-contain"
                     />
                   </span>
                 </m.button>
               ))}
             </div>
-          ) : null}
-
-          {!sheet ? (
-            <button
-              type="button"
-              className="sr-only"
-              onClick={(e) => {
-                e.stopPropagation();
-                cycle();
+          ) : (
+            <div
+              ref={stackRef}
+              data-cursor="view"
+              className="relative w-full [--pw:0.78] xs:[--pw:0.74] sm:[--pw:0.54] landscape-short:![--pw:0.3] [--lw:1] sm:[--lw:0.94] landscape-short:![--lw:0.55]"
+              style={{
+                paddingBottom: `calc(max(var(--pw) * ${kp.toFixed(3)}, var(--lw) * ${kl.toFixed(3)}) * 100% + 64px)`,
               }}
             >
-              Next photo (showing {cards[0]?.alt})
-            </button>
-          ) : null}
-
-          {!sheet &&
-            cards.slice(0, 4).map((photo, index) => {
-              const isTop = index === 0;
-              return (
-                <m.div
-                  key={photo.src}
-                  layout
-                  drag={isTop ? 'x' : false}
-                  dragSnapToOrigin
-                  dragElastic={0.5}
-                  onDragStart={() => {
-                    dragged.current = true;
-                  }}
-                  onDragEnd={(_, info) => {
-                    if (Math.abs(info.offset.x) > 80 || Math.abs(info.velocity.x) > 500) {
-                      if (info.offset.x < 0) cycle();
-                      else setCards((p) => [p[p.length - 1], ...p.slice(0, -1)]);
-                    }
-                    setTimeout(() => {
-                      dragged.current = false;
-                    }, 0);
-                  }}
-                  style={{ touchAction: 'pan-y' }}
-                  layoutId={FX.lightboxMorph ? `${uid}-${photo.src}` : undefined}
-                  initial={false}
-                  animate={{
-                    scale: isTop ? 1 : 1 - index * 0.04,
-                    x: isTop || !fan ? 0 : (index % 2 ? 1 : -1) * index * 22,
-                    y: isTop ? 0 : fan ? index * 4 : index * 9,
-                    rotate: isTop ? 0 : photo.rotation * 1.4 + (fan ? (index % 2 ? 1 : -1) * index * 4 : 0),
-                    zIndex: cards.length - index,
-                  }}
-                  whileHover={isTop ? { scale: 1.02, rotate: -1.2, y: -5, transition: { duration: 0.2 } } : {}}
-                  transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-                  className={`absolute ${isPortrait(photo.src) ? 'w-[62%] sm:w-[54%] aspect-[3/4]' : 'w-[94%] aspect-video'} bg-white p-2 sm:p-2.5 pb-6 sm:pb-8 rounded-md border-3 border-ink shadow-brutal origin-center max-h-full`}
-                >
-                  {isTop && <span className="tape" aria-hidden />}
-                  {isTop && (
-                    <span
-                      aria-hidden
-                      className="absolute top-[1.75rem] sm:top-[2.25rem] right-[4.1rem] sm:right-[4.6rem] z-[55] px-1.5 py-0.5 rounded-md border-2 border-ink bg-white font-mono text-[0.62rem] font-extrabold tracking-[0.08em] text-ink select-none pointer-events-none"
-                    >{`${String(source.indexOf(photo) + 1).padStart(2, '0')} / ${String(source.length).padStart(2, '0')}`}</span>
-                  )}
-                  <div className="w-full h-full relative overflow-hidden rounded-sm bg-paper-deep border-2 border-ink">
-                    <Image
-                      src={photo.src}
-                      alt={photo.alt}
-                      fill
-                      sizes="(max-width: 1024px) 92vw, 40vw"
-                      className="object-contain pointer-events-none"
-                      onLoad={onImgLoad(photo.src)}
-                    />
-                    {isTop && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openViewer(photo.src);
+              <div
+                onClick={(e) => {
+                  if (dragged.current) {
+                    dragged.current = false;
+                    return;
+                  }
+                  const r = e.currentTarget.getBoundingClientRect();
+                  if (e.clientX - r.left < r.width / 3) prev();
+                  else next();
+                }}
+                onPointerEnter={(e) => FX.photoFan && e.pointerType !== 'touch' && setFan(true)}
+                onPointerLeave={() => setFan(false)}
+                className="absolute inset-0 flex items-center justify-center pb-6 cursor-pointer group rounded-2xl"
+              >
+                <AnimatePresence initial={false} custom={dir}>
+                  {visible.map((photo, index) => {
+                    const isTop = index === 0;
+                    const portrait = isPortrait(photo);
+                    return (
+                      <m.div
+                        key={photo.src}
+                        layout
+                        custom={dir}
+                        drag={isTop ? 'x' : false}
+                        dragSnapToOrigin
+                        dragElastic={0.5}
+                        onDragStart={() => {
+                          dragged.current = true;
                         }}
-                        className="absolute top-1.5 right-1.5 sm:top-3 sm:right-3 z-50 w-10 h-10 grid place-items-center bg-white border-2 border-ink rounded-lg shadow-brutal-xs hover:bg-pop-yellow hover:-translate-y-0.5 active:translate-y-0 transition-all text-ink group/expand"
-                        title="View full resolution"
-                        aria-label={`View full resolution: ${photo.alt}`}
+                        onDragEnd={(_, info) => {
+                          if (Math.abs(info.offset.x) > 60 || Math.abs(info.velocity.x) > 450) {
+                            if (info.offset.x < 0) next();
+                            else prev();
+                          }
+                          setTimeout(() => {
+                            dragged.current = false;
+                          }, 0);
+                        }}
+                        style={{
+                          touchAction: 'pan-y',
+                          width: portrait ? 'calc(var(--pw) * 100%)' : 'calc(var(--lw) * 100%)',
+                        }}
+                        layoutId={FX.lightboxMorph ? `${uid}-${photo.src}` : undefined}
+                        initial={
+                          isTop && dir < 0
+                            ? { opacity: 0, x: -140, rotate: -10 }
+                            : { opacity: 0, scale: 0.9, y: 18, rotate: photo.rotation * 1.4 }
+                        }
+                        animate={{
+                          opacity: 1,
+                          scale: isTop ? 1 : 1 - index * 0.04,
+                          x: isTop || !fan ? 0 : (index % 2 ? 1 : -1) * index * 22,
+                          y: isTop ? 0 : fan ? index * 4 : index * 9,
+                          rotate: isTop ? 0 : photo.rotation * 1.4 + (fan ? (index % 2 ? 1 : -1) * index * 4 : 0),
+                          zIndex: 10 - index,
+                        }}
+                        exit={{
+                          opacity: 0,
+                          x: dir > 0 ? -150 : 150,
+                          rotate: dir > 0 ? -12 : 12,
+                          zIndex: 11,
+                          transition: { duration: 0.26, ease: [0.2, 0.9, 0.1, 1] },
+                        }}
+                        whileHover={isTop ? { scale: 1.02, rotate: -1.2, y: -5, transition: { duration: 0.2 } } : {}}
+                        transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+                        className="absolute bg-white p-2 sm:p-2.5 pb-7 sm:pb-8 rounded-md border-3 border-ink shadow-brutal origin-center"
                       >
-                        <Maximize2
-                          className="w-4 h-4 group-hover/expand:scale-110 transition-transform"
-                          strokeWidth={2.5}
-                        />
-                      </button>
-                    )}
-                  </div>
-                </m.div>
-              );
-            })}
-
-          {!sheet && (
-            <div
-              aria-hidden
-              className="absolute -bottom-3 lg:-bottom-4 left-1/2 -translate-x-1/2 w-max max-w-[92%] whitespace-nowrap flex items-center gap-2 nb-tag bg-white shadow-brutal-xs pointer-events-none z-50"
-            >
-              <span className="w-2 h-2 rounded-full bg-pop-red border border-ink animate-pulse" />
-              CLICK ALBUM TO CYCLE
+                        {isTop && <span className="tape" aria-hidden />}
+                        <div
+                          className="relative w-full overflow-hidden rounded-sm bg-paper-deep border-2 border-ink aspect-[var(--ar)]"
+                          style={{ '--ar': `${photo.w} / ${photo.h}` } as React.CSSProperties}
+                        >
+                          <Image
+                            src={photo.src}
+                            alt={photo.alt}
+                            fill
+                            sizes={DECK_SIZES}
+                            className="object-contain pointer-events-none"
+                          />
+                          {isTop && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setViewer(source.indexOf(photo));
+                              }}
+                              className="absolute top-1.5 right-1.5 sm:top-3 sm:right-3 z-50 w-10 h-10 grid place-items-center bg-white border-2 border-ink rounded-lg shadow-brutal-xs hover:bg-pop-yellow hover:-translate-y-0.5 active:translate-y-0 transition-all text-ink group/expand"
+                              title="View full resolution"
+                              aria-label={`View full resolution: ${photo.alt}`}
+                            >
+                              <Maximize2
+                                className="w-4 h-4 group-hover/expand:scale-110 transition-transform"
+                                strokeWidth={2.5}
+                              />
+                            </button>
+                          )}
+                        </div>
+                        {isTop && (
+                          // counter on the print's white lip (it used to sit on the photo itself on phones)
+                          <span
+                            aria-hidden
+                            className="absolute left-2.5 sm:left-3 bottom-1 sm:bottom-1.5 px-1.5 py-0.5 rounded-md border-2 border-ink bg-white font-mono text-[0.62rem] font-extrabold tracking-[0.08em] text-ink select-none pointer-events-none"
+                          >{`${String(top + 1).padStart(2, '0')} / ${String(n).padStart(2, '0')}`}</span>
+                        )}
+                      </m.div>
+                    );
+                  })}
+                </AnimatePresence>
+              </div>
+              <div
+                aria-hidden
+                className="absolute bottom-0 left-1/2 -translate-x-1/2 w-max max-w-[92%] whitespace-nowrap flex items-center gap-2 nb-tag bg-white shadow-brutal-xs pointer-events-none z-50"
+              >
+                <span className="w-2 h-2 rounded-full bg-pop-red border border-ink animate-pulse" />
+                CLICK ALBUM TO CYCLE
+              </div>
             </div>
           )}
+
+          {/* Controls: contact sheet, previous, progress dots, next (one thumb, every device) */}
+          {n > 1 ? (
+            <div className="mt-5 flex items-center justify-center gap-3">
+              {FX.contactSheet ? (
+                <button
+                  type="button"
+                  onClick={() => setSheet((v) => !v)}
+                  aria-pressed={sheet}
+                  aria-label={sheet ? 'Back to photo stack' : `Show all ${n} photos as a contact sheet`}
+                  title={sheet ? 'Stack view' : 'Contact sheet'}
+                  className="w-10 h-10 shrink-0 grid place-items-center bg-white border-2 border-ink rounded-lg shadow-brutal-xs hover:bg-pop-yellow active:translate-y-0.5 transition-colors text-ink"
+                >
+                  {sheet ? (
+                    <Layers className="w-4 h-4" strokeWidth={2.5} aria-hidden />
+                  ) : (
+                    <LayoutGrid className="w-4 h-4" strokeWidth={2.5} aria-hidden />
+                  )}
+                </button>
+              ) : null}
+              {!sheet ? (
+                <>
+                  <button type="button" onClick={prev} aria-label="Previous photo" className={round}>
+                    <ChevronLeft className="w-4 h-4" strokeWidth={3} aria-hidden />
+                  </button>
+                  <span aria-hidden className="hidden xs:flex items-center gap-1">
+                    {source.map((p, i) => (
+                      <span
+                        key={p.src}
+                        className={`h-1.5 rounded-full border border-ink transition-[width,background-color] duration-300 ${
+                          i === top ? 'w-4 bg-pop-yellow' : 'w-1.5 bg-white'
+                        }`}
+                      />
+                    ))}
+                  </span>
+                  <button type="button" onClick={next} aria-label="Next photo" className={round}>
+                    <ChevronRight className="w-4 h-4" strokeWidth={3} aria-hidden />
+                  </button>
+                  <span className="sr-only" aria-live="polite">
+                    {`Photo ${top + 1} of ${n}: ${source[top]?.alt ?? ''}`}
+                  </span>
+                </>
+              ) : null}
+            </div>
+          ) : null}
         </div>
         {mounted && (
           <AnimatePresence>

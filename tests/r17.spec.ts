@@ -29,6 +29,34 @@ test.describe('phone', () => {
     await context.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
   });
 
+  test('gallery photos are large on a phone and keep their real shape while cycling (FX-107)', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'networkidle' });
+    const deck = page.locator('#project-zerolag .fx-deck').first();
+    await deck.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+    const top = () =>
+      deck.evaluate((d) => {
+        const img = d.querySelector<HTMLImageElement>('[data-cursor="view"] img')!;
+        const r = img.parentElement!.getBoundingClientRect();
+        return { w: r.width, ratio: r.width / r.height, alt: img.alt };
+      });
+    expect((await top()).w).toBeGreaterThanOrEqual(180); // was 129 px before R17
+    const next = deck.getByRole('button', { name: 'Next photo' });
+    const seen = new Set<string>();
+    for (let i = 0; i < 11; i++) {
+      await page.waitForTimeout(450);
+      const t = await top();
+      seen.add(t.alt);
+      const portrait = t.ratio < 1;
+      // every print takes its photo's own shape (3:4 portrait or wider landscape), never a guessed one
+      expect(portrait ? Math.abs(t.ratio - 0.75) < 0.2 || t.ratio > 0.9 : t.ratio >= 1).toBe(true);
+      await next.click();
+    }
+    expect(seen.size).toBe(11);
+    await expect(deck.locator('[aria-live="polite"]')).toContainText('Photo 1 of 11'); // wrapped around
+    await deck.getByRole('button', { name: 'Previous photo' }).click();
+    await expect(deck.locator('[aria-live="polite"]')).toContainText('Photo 11 of 11');
+  });
+
   test('no tall element carries a 3D transform on a phone (P0-02)', async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(800);
@@ -40,4 +68,29 @@ test.describe('phone', () => {
     );
     expect(tall3d).toEqual([]);
   });
+});
+
+test('gallery: arrow keys browse, and the lightbox preloads its neighbours (FX-107, P1-04)', async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto('/', { waitUntil: 'networkidle' });
+  const deck = page.locator('#project-zerolag .fx-deck').first();
+  await deck.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+  await deck.getByRole('button', { name: 'Next photo' }).focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(deck.locator('[aria-live="polite"]')).toContainText('Photo 2 of 11');
+  await page.keyboard.press('ArrowLeft');
+  await expect(deck.locator('[aria-live="polite"]')).toContainText('Photo 1 of 11');
+
+  const requested: string[] = [];
+  page.on('request', (r) => requested.push(decodeURIComponent(r.url())));
+  await deck
+    .getByRole('button', { name: /view full resolution/i })
+    .first()
+    .click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  // photo 2 (the next one) is fetched at viewer size before anyone swipes
+  await expect
+    .poll(() => requested.some((u) => u.includes('supervity_formal.jpg') && /[?&]w=(6|7|8|1)\d{2,3}/.test(u)))
+    .toBe(true);
 });

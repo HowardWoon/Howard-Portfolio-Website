@@ -60,7 +60,8 @@ test('photo stack morphs into a contact sheet and opens the lightbox from it (FX
   await toggle.click();
   const back = page.getByRole('button', { name: 'Back to photo stack' });
   await expect(back).toHaveAttribute('aria-pressed', 'true');
-  const sheet = back.locator('xpath=..');
+  // R17: the sheet is its own block in the page flow (the toggle moved to the gallery's control row)
+  const sheet = page.locator('[data-contact-sheet]').first();
   await sheet
     .getByRole('button', { name: /view full resolution/i })
     .nth(1)

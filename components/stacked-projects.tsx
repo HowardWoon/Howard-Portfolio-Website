@@ -49,7 +49,7 @@ interface ProjectData {
   simulatorId: string;
   githubUrl?: string;
   telemetryType: 'agentic' | 'flood' | 'energy' | 'catfish' | 'slotify' | 'proofpay';
-  galleryPhotos?: { src: string; alt: string; rotation: number }[];
+  galleryPhotos?: { src: string; alt: string; rotation: number; w: number; h: number }[];
 }
 
 const projects: ProjectData[] = [
@@ -103,14 +103,14 @@ const projects: ProjectData[] = [
     prototypeUrl: 'https://proofpay-choong-zhuo-lins-projects.vercel.app/',
     deckUrl: '/proofpay_pitch_deck.pdf',
     galleryPhotos: [
-      { src: '/images/muba/1789408409350.jpg', alt: 'ProofPay Interface 1', rotation: -1.5 },
-      { src: '/images/muba/1789408409711.jpg', alt: 'ProofPay Interface 2', rotation: 2 },
-      { src: '/images/muba/1789408409917.jpg', alt: 'ProofPay Interface 3', rotation: -1 },
-      { src: '/images/muba/1789408410071.jpg', alt: 'ProofPay Interface 4', rotation: 1.5 },
-      { src: '/images/muba/zilian_muba.jpg', alt: 'MUBA Zilian', rotation: -2 },
-      { src: '/images/muba/4ppl_muba.jpg', alt: 'MUBA 4 People', rotation: 3 },
-      { src: '/images/muba/gonka_4ppl_muba.jpg', alt: 'MUBA Gonka', rotation: -1 },
-      { src: '/images/muba/solo_muba.jpg', alt: 'MUBA Solo', rotation: 2 },
+      { src: '/images/muba/1789408409350.jpg', alt: 'ProofPay Interface 1', rotation: -1.5, w: 1280, h: 654 },
+      { src: '/images/muba/1789408409711.jpg', alt: 'ProofPay Interface 2', rotation: 2, w: 1280, h: 704 },
+      { src: '/images/muba/1789408409917.jpg', alt: 'ProofPay Interface 3', rotation: -1, w: 1280, h: 685 },
+      { src: '/images/muba/1789408410071.jpg', alt: 'ProofPay Interface 4', rotation: 1.5, w: 1280, h: 712 },
+      { src: '/images/muba/zilian_muba.jpg', alt: 'MUBA Zilian', rotation: -2, w: 960, h: 1280 },
+      { src: '/images/muba/4ppl_muba.jpg', alt: 'MUBA 4 People', rotation: 3, w: 1280, h: 960 },
+      { src: '/images/muba/gonka_4ppl_muba.jpg', alt: 'MUBA Gonka', rotation: -1, w: 960, h: 472 },
+      { src: '/images/muba/solo_muba.jpg', alt: 'MUBA Solo', rotation: 2, w: 960, h: 1280 },
     ],
     simulatorId: 'proofpay',
     telemetryType: 'proofpay',
@@ -163,12 +163,30 @@ const projects: ProjectData[] = [
     githubUrl: 'https://github.com/HowardWoon/Catfish-Detector-ML-Models',
     colabUrl: 'https://colab.research.google.com/drive/1AR7Mv0Eg1iGw2IWA1pB_Xt9RZHPHeLCx',
     galleryPhotos: [
-      { src: '/images/projects/catfish/dashboard.png', alt: 'Catfish Dashboard', rotation: -1.5 },
-      { src: '/images/projects/catfish/scanner.png', alt: 'Profile Scanner', rotation: 3 },
-      { src: '/images/projects/catfish/Screenshot_2026-08-25_225954.png', alt: 'Detection Report 1', rotation: 2 },
-      { src: '/images/projects/catfish/Screenshot_2026-08-25_230009.png', alt: 'Detection Report 2', rotation: -1 },
-      { src: '/images/projects/catfish/Screenshot_2026-08-25_230023.png', alt: 'Detection Report 3', rotation: 1.5 },
-      { src: '/images/projects/catfish/system.png', alt: 'System Architecture', rotation: -2 },
+      { src: '/images/projects/catfish/dashboard.png', alt: 'Catfish Dashboard', rotation: -1.5, w: 1210, h: 883 },
+      { src: '/images/projects/catfish/scanner.png', alt: 'Profile Scanner', rotation: 3, w: 613, h: 877 },
+      {
+        src: '/images/projects/catfish/Screenshot_2026-08-25_225954.png',
+        alt: 'Detection Report 1',
+        rotation: 2,
+        w: 1337,
+        h: 833,
+      },
+      {
+        src: '/images/projects/catfish/Screenshot_2026-08-25_230009.png',
+        alt: 'Detection Report 2',
+        rotation: -1,
+        w: 1350,
+        h: 826,
+      },
+      {
+        src: '/images/projects/catfish/Screenshot_2026-08-25_230023.png',
+        alt: 'Detection Report 3',
+        rotation: 1.5,
+        w: 1357,
+        h: 820,
+      },
+      { src: '/images/projects/catfish/system.png', alt: 'System Architecture', rotation: -2, w: 882, h: 775 },
     ],
     simulatorId: 'catfish',
     telemetryType: 'catfish',
@@ -195,11 +213,11 @@ const projects: ProjectData[] = [
     tags: ['Java 21', 'Spring Boot', 'Data Structures', 'Dijkstra', 'Min-Heap', 'AVL BST'],
     githubUrl: 'https://github.com/HowardWoon/Slotify',
     galleryPhotos: [
-      { src: '/images/projects/slotify/01.png', alt: 'Slotify Interface', rotation: -4 },
-      { src: '/images/projects/slotify/02.png', alt: 'Slotify Algorithm', rotation: 2 },
-      { src: '/images/projects/slotify/03.png', alt: 'Slotify Diagram', rotation: -2 },
-      { src: '/images/projects/slotify/04.png', alt: 'Slotify Flow', rotation: 4 },
-      { src: '/images/projects/slotify/05.png', alt: 'Slotify Architecture', rotation: -1 },
+      { src: '/images/projects/slotify/01.png', alt: 'Slotify Interface', rotation: -4, w: 862, h: 732 },
+      { src: '/images/projects/slotify/02.png', alt: 'Slotify Algorithm', rotation: 2, w: 861, h: 776 },
+      { src: '/images/projects/slotify/03.png', alt: 'Slotify Diagram', rotation: -2, w: 1636, h: 970 },
+      { src: '/images/projects/slotify/04.png', alt: 'Slotify Flow', rotation: 4, w: 966, h: 762 },
+      { src: '/images/projects/slotify/05.png', alt: 'Slotify Architecture', rotation: -1, w: 655, h: 825 },
     ],
     simulatorId: 'slotify',
     telemetryType: 'slotify',
@@ -624,7 +642,7 @@ function ProjectCard({ project }: { project: ProjectData }) {
               </div>
 
               {/* Right Column: Visual Architecture / Gallery (5 Cols) — a physical "desk" for the polaroids */}
-              <div className="lg:col-span-5 w-full rounded-[26px] border-3 border-ink bg-paper-deep bg-dots p-5 sm:p-6 space-y-4 flex flex-col shadow-[inset_0_3px_0_rgba(0,0,0,0.06)]">
+              <div className="lg:col-span-5 min-w-0 -mx-2 xs:-mx-4 sm:mx-0 rounded-[26px] border-3 border-ink bg-paper-deep bg-dots p-3 sm:p-6 space-y-4 flex flex-col shadow-[inset_0_3px_0_rgba(0,0,0,0.06)]">
                 {/* Visualizer Header */}
                 <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 border-b-2 border-dashed border-ink pb-3">
                   <div className="flex items-center gap-2 text-xs font-mono font-extrabold text-ink">
@@ -642,7 +660,7 @@ function ProjectCard({ project }: { project: ProjectData }) {
 
                 {/* Conditional Graphic Visualizers */}
                 {project.telemetryType === 'agentic' && (
-                  <div className="flex-1 w-full flex items-center justify-center min-h-[300px] sm:min-h-[400px] lg:min-h-[440px] py-4">
+                  <div className="flex-1 w-full flex items-center justify-center py-2 sm:py-4">
                     <InteractivePhotoStack galleryId={project.simulatorId} />
                   </div>
                 )}
@@ -650,7 +668,7 @@ function ProjectCard({ project }: { project: ProjectData }) {
                 {(project.telemetryType === 'catfish' ||
                   project.telemetryType === 'slotify' ||
                   project.telemetryType === 'proofpay') && (
-                  <div className="flex-1 w-full flex items-center justify-center min-h-[300px] sm:min-h-[400px] lg:min-h-[440px] py-4">
+                  <div className="flex-1 w-full flex items-center justify-center py-2 sm:py-4">
                     <InteractivePhotoStack customPhotos={project.galleryPhotos} galleryId={project.simulatorId} />
                   </div>
                 )}

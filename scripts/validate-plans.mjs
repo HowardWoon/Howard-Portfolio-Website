@@ -935,9 +935,10 @@ has(
 has(
   'R12',
   '§8.1',
-  'Portrait prints',
+  'Portrait prints (R17 F-01/F-02: real photo shape, width per breakpoint)',
   'components/interactive-photo-stack.tsx',
-  'w-[62%] sm:w-[54%] aspect-[3/4]',
+  '[--pw:0.78] xs:[--pw:0.74] sm:[--pw:0.54]',
+  'aspect-[var(--ar)]',
   'w-max max-w-[92%] whitespace-nowrap',
 );
 has(
@@ -948,7 +949,7 @@ has(
   'const zoomTo =',
   'Go to photo ${i + 1} of ${list.length}',
   "k === 'Home'",
-  'sizes={LB_SIZES} className="hidden"',
+  'getImageProps({ src: list[n].src',
 );
 has(
   'R12',
