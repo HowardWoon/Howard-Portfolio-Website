@@ -2144,3 +2144,74 @@ html[data-skim='on'] .site-header {
     }
   }
 }
+
+/* ================================================================ Round 18 "Living Engineering Workspace"
+   (docs/R18-LIVING-ENGINEERING-WORKSPACE-PLAN.md). Theme tokens only; every effect is off / final for reduced motion
+   and Calm. Driven by the Section Clock (components/fx/section-clock.tsx), which writes CSS variables on these few
+   elements only. */
+
+/* FX-96 Atmosphere Relay: with the clock on, the active tint switches exactly when the relay layer has fully covered
+   it, so the R16 colour glide would only show the old colour through; the relay layer is the glide now. */
+html[data-fx-clock='on'] .fx-tide-canvas::after {
+  z-index: 0;
+  transition: none;
+}
+.fx-relay-b {
+  position: absolute;
+  inset: -14% -6% 0;
+  z-index: 1;
+  pointer-events: none;
+  /* a soft 72 px lip on the leading edge, then the next section's exact desk colour */
+  background: linear-gradient(to bottom, transparent, var(--tide-b, transparent) 72px);
+  transform: translate3d(0, calc((1 - var(--relay, 0)) * 118%), 0) skewY(-5deg);
+  will-change: transform;
+}
+/* FX-97 Material Handoff: the engineering-files desk (Projects) carries the blueprint grid (same lines as .bg-grid) */
+html:not(.fx-off-materialHandoff) .fx-tide-canvas[data-tide-key='projects']::after,
+html:not(.fx-off-materialHandoff) .fx-tide-canvas[data-relay-b='projects'] .fx-relay-b {
+  background-image:
+    linear-gradient(to right, rgba(10, 10, 10, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(10, 10, 10, 0.05) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+html:not(.fx-off-materialHandoff) .fx-tide-canvas[data-relay-b='projects'] .fx-relay-b {
+  background-image:
+    linear-gradient(to right, rgba(10, 10, 10, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(10, 10, 10, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, transparent, var(--tide-b, transparent) 72px);
+  background-size:
+    48px 48px,
+    48px 48px,
+    100% 100%;
+}
+/* FX-98 Desk Dolly: the arriving desk settles from 104 % (tablet and up) */
+@media (min-width: 768px) {
+  html:not(.fx-off-deskDolly) .fx-relay-b {
+    scale: calc(1.04 - var(--relay, 0) * 0.04);
+  }
+}
+/* reduced motion / Calm: the tint simply switches at the boundary */
+@media (prefers-reduced-motion: reduce) {
+  .fx-relay-b {
+    display: none;
+  }
+}
+html[data-motion='calm'] .fx-relay-b {
+  display: none;
+}
+
+/* FX-99 Instrument Rail & Dock: progress fills (transform only, driven by --sp) */
+.fx-sp-fill {
+  position: absolute;
+  inset: 0;
+  background: var(--pop-blue);
+  transform-origin: 50% 100%;
+  transform: scaleY(var(--sp, 0));
+}
+.fx-sp-bar {
+  display: block;
+  height: 100%;
+  background: var(--pop-blue);
+  transform-origin: 0 50%;
+  transform: scaleX(var(--sp, 0));
+}

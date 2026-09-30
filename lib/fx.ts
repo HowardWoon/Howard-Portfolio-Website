@@ -102,6 +102,21 @@ export const FX = {
   podiumGlint: true, // FX-90 featured honours cards catch one glint of light when they appear
   postageComposer: true, // FX-91 the contact form assembles a Bauhaus stamp as fields are filled in
   skimLens: true, // FX-92 60-second skim mode (palette + S): body copy steps back, key facts stay bold
+  // ---- Round 17 (docs/R17-FULL-DEVICE-AUDIT-AND-VALIDATION-CHECKLIST.md) ----
+  galleryDeck: true, // FX-107 real photo shapes, prev / next, dots, keys, tap zones, sheet in the page flow
+  lightboxPro: true, // FX-108 zoom buttons + readout, full screen, slideshow, swipe follow, share
+  // ---- Round 18 "Living Engineering Workspace" (docs/R18-LIVING-ENGINEERING-WORKSPACE-PLAN.md) ----
+  sectionClock: true, // FX-95 one scroll engine: per-section progress, active section, relay value
+  atmosphereRelay: true, // FX-96 the desk hands its tint to the next section along a sweeping diagonal seam
+  materialHandoff: true, // FX-97 the Projects desk carries the blueprint grid in with the seam
+  deskDolly: true, // FX-98 the arriving desk settles from 104 % to 100 % (tablet and up)
+  instrumentRail: true, // FX-99 section rail / mobile dock fill with the section's progress
+  spatialEcho: true, // FX-100 index tile -> card: shared morph on long jumps, outline pulse on landing
+  evidenceWire: true, // FX-101 an ink wire with a travelling signal joins the index tiles on an evidence trail
+  focusLens: true, // FX-102 focus mode: neighbours step back a little, far cards more
+  contactCalm: true, // FX-103 the page comes to rest in Contact (slower marquee, no scan)
+  documentSettle: true, // FX-104 the certificate sheet lands and leaves with the stamp spring
+  headerInstrument: true, // FX-105 sliding section marker + progress fill + label roll in the header nav
 } as const;
 
 export type FxName = keyof typeof FX;

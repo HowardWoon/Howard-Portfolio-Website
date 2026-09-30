@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { FX } from '@/lib/fx';
 import { SECTION_IDS } from '@/lib/sections';
 import { useActiveSection } from '@/lib/use-active-section';
+import { TIDE } from '@/lib/section-clock';
 
 /**
  * FX-76 Chromatic Tide: one fixed "desk surface" behind the page whose tint glides between the section soft
@@ -15,16 +16,12 @@ import { useActiveSection } from '@/lib/use-active-section';
  * back to cream; back at the top of the page the tint is cleared. Colour is not motion: reduced motion /
  * Calm keep the tint, the global rule just removes the glide.
  */
-const TIDE: Record<string, string> = {
-  about: '#FFF3C4',
-  projects: '#D9FBFF',
-  experience: '#EEE9FF',
-  honors: '#FFF3C4',
-  contact: '#DCFAEC',
-};
+// R18: when the Section Clock (FX-95) runs, it writes --tide / --tide-b / --relay on this element itself, and the
+// second layer (.fx-relay-b) sweeps the next section's desk colour in (FX-96..98). Without it, the R16 path below.
+const CLOCK = FX.sectionClock;
 
 export function TideCanvas() {
-  const active = useActiveSection(SECTION_IDS, FX.chromaticTide);
+  const active = useActiveSection(SECTION_IDS, FX.chromaticTide && !CLOCK);
   const [key, setKey] = useState('');
 
   useEffect(() => {
@@ -37,6 +34,7 @@ export function TideCanvas() {
   }, []);
 
   useEffect(() => {
+    if (CLOCK) return;
     if (active) setKey(active);
     else if (window.scrollY < window.innerHeight * 0.5) setKey('');
   }, [active]);
@@ -46,8 +44,10 @@ export function TideCanvas() {
     <div
       aria-hidden
       className="fx-tide-canvas"
-      data-tide-key={key || undefined}
-      style={key ? ({ '--tide': TIDE[key] } as React.CSSProperties) : undefined}
-    />
+      data-tide-key={CLOCK ? undefined : key || undefined}
+      style={!CLOCK && key ? ({ '--tide': TIDE[key] } as React.CSSProperties) : undefined}
+    >
+      {CLOCK && FX.atmosphereRelay ? <div className="fx-relay-b" /> : null}
+    </div>
   );
 }

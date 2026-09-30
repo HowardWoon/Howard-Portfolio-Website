@@ -68,12 +68,21 @@ export function SectionDock() {
       aria-label={label ? `Current section: ${label}. Open navigation` : 'Open navigation'}
       tabIndex={visible ? 0 : -1}
       aria-hidden={visible ? undefined : true}
-      className={`lg:hidden fixed z-[90] left-[max(1rem,calc(var(--safe-left)+0.5rem))] bottom-[max(1rem,calc(var(--safe-bottom)+0.5rem))] sm:bottom-8 sm:left-8 inline-flex items-center gap-2 min-h-[48px] max-w-[60vw] px-4 rounded-full border-3 border-ink bg-white shadow-brutal-sm font-mono text-xs font-extrabold uppercase tracking-[0.1em] text-ink transition-[opacity,transform] duration-200 active:translate-x-[3px] active:translate-y-[3px] active:shadow-none ${
+      className={`lg:hidden fixed z-[90] left-[max(1rem,calc(var(--safe-left)+0.5rem))] bottom-[max(1rem,calc(var(--safe-bottom)+0.5rem))] sm:bottom-8 sm:left-8 relative inline-flex items-center gap-2 min-h-[48px] max-w-[60vw] px-4 rounded-full border-3 border-ink bg-white shadow-brutal-sm font-mono text-xs font-extrabold uppercase tracking-[0.1em] text-ink transition-[opacity,transform] duration-200 active:translate-x-[3px] active:translate-y-[3px] active:shadow-none ${
         visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
       }`}
     >
       <Compass className="w-4 h-4 shrink-0" strokeWidth={2.75} aria-hidden />
       <span className="truncate">{label ?? ''}</span>
+      {FX.instrumentRail ? (
+        // FX-99: how far through this section you are (Section Clock writes --sp)
+        <span
+          aria-hidden
+          className="absolute left-4 right-4 bottom-[5px] h-[3px] rounded-full bg-ink/15 overflow-hidden"
+        >
+          <span data-sp-for="active" className="fx-sp-bar" />
+        </span>
+      ) : null}
     </button>
   );
 }

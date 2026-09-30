@@ -17,6 +17,7 @@ import {
   OffscreenPause,
   PointerField,
   EasterEgg,
+  SectionClock,
 } from '@/components/lazy-sections';
 import { SiteFooter } from '@/components/site-footer';
 import { LogoWall } from '@/components/logo-wall';
@@ -82,6 +83,7 @@ export function PortfolioPage() {
         <InteractionHud />
         <AmbientFx />
         <FrameGovernor />
+        <SectionClock />
         <DeskFx />
         <OffscreenPause />
         <RouteWipeClear home />

@@ -54,8 +54,11 @@ export function SectionSpine() {
             <span
               aria-hidden
               data-preview={preview ? 'true' : undefined}
-              className={`relative w-[17px] h-[17px] ${on || preview ? 'bg-pop-yellow' : 'bg-white'} ${preview ? 'scale-125' : ''} border-3 border-ink rotate-45 transition-colors duration-200 group-focus-visible:ring-2 group-focus-visible:ring-pop-blue`}
-            />
+              className={`relative overflow-hidden w-[17px] h-[17px] ${on || preview ? 'bg-pop-yellow' : 'bg-white'} ${preview ? 'scale-125' : ''} border-3 border-ink rotate-45 transition-colors duration-200 group-focus-visible:ring-2 group-focus-visible:ring-pop-blue`}
+            >
+              {/* FX-99: the active marker fills with the section's reading progress (Section Clock writes --sp) */}
+              {FX.instrumentRail && on ? <span data-sp-for={s.id} className="fx-sp-fill" /> : null}
+            </span>
           </a>
         );
       })}

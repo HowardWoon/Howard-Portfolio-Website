@@ -55,3 +55,8 @@ export const PointerField = dynamic(() => import('@/components/fx/pointer-field'
 export const EasterEgg = dynamic(() => import('@/components/fx/easter-egg').then((mod) => mod.EasterEgg), {
   ssr: false,
 });
+
+// R18 FX-95: the Section Clock engine (client-only, after first paint)
+export const SectionClock = dynamic(() => import('@/components/fx/section-clock').then((mod) => mod.SectionClock), {
+  ssr: false,
+});
