@@ -18,6 +18,9 @@ import { FX, POP_COLORS, prefersReducedMotion } from '@/lib/fx';
  */
 const GLYPHS = '#%&*+=<>/_01';
 const DECODE_MS = 650;
+// R21: the scramble ticks like a terminal (about 22 steps / s) instead of every frame. Each text write costs a layout
+// pass; per frame that was ~40 layouts per kicker (more on 120-180 Hz screens) and broke the phone fling budget.
+const TICK_MS = 45;
 const STAMP_TARGETS = '.nb-btn, .nb-chip, .nb-press, [data-fx-stamp-target]';
 const SHAPES = ['circle', 'square', 'triangle'] as const;
 
@@ -25,8 +28,14 @@ function decode(text: Text) {
   const final = text.data;
   const t0 = performance.now();
   let raf = 0;
+  let last = -Infinity;
   const step = (now: number) => {
     const p = Math.min(1, (now - t0) / DECODE_MS);
+    if (p < 1 && now - last < TICK_MS) {
+      raf = requestAnimationFrame(step);
+      return;
+    }
+    last = now;
     const settled = Math.floor(p * final.length);
     let out = '';
     for (let i = 0; i < final.length; i++) {
