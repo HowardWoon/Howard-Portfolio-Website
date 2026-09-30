@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { m, useMotionTemplate, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { FX } from '@/lib/fx';
+import { FX, canHover } from '@/lib/fx';
 import { useMotionAllowed } from './fx/use-motion-allowed';
 
 /**
@@ -30,7 +30,10 @@ export function TiltCard({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const allowed = useMotionAllowed();
-  const glareOn = useMotionAllowed(FX.glareTilt && glare);
+  // R17 P0-02: tilt (and its 3D perspective layer) only on a real hovering pointer, decided after mount
+  const [hover, setHover] = useState(false);
+  useEffect(() => setHover(canHover()), []);
+  const glareOn = useMotionAllowed(FX.glareTilt && glare) && hover;
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -61,7 +64,7 @@ export function TiltCard({
       ref={ref}
       onPointerMove={handleMove}
       onPointerLeave={handleLeave}
-      style={allowed ? { rotateX, rotateY, transformPerspective: 1600 } : { rotateX: 0, rotateY: 0 }}
+      style={allowed && hover ? { rotateX, rotateY, transformPerspective: 1600 } : { rotateX: 0, rotateY: 0 }}
       className={`relative ${className || ''}`}
     >
       {children}
