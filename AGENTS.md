@@ -21,7 +21,13 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
 1. **Do not change content.** No wording, numbers, names, dates, awards, links or section meaning may change unless the owner explicitly asks for that exact change in the current request.
 2. **Do not change the design.** Keep colours, fonts, borders, shadows, spacing rhythm, animations, layout concept and visual identity. Fix engineering, not taste.
 3. **Every colour means one thing.** Follow the SIGNAL KEY in `.agents/rules/30-design-system.md` (`lib/signal.ts`). No colour without a meaning; decoration is ink / paper.
-4. **Nothing is "done" until it is verified.** Run the checks in `.agents/rules/40-verification.md` and report real results. Never claim something works because the code "looks right".
+4. **Nothing is "done" until it is verified.** Run the checks in `.agents/rules/40-verification.md` and report real results. Never claim something works because the code "looks right". That includes EVERY device (owner, R24: "no corruptions, lagging,
+   cropped issue" on laptop, PC, phone, Android, iPhone, tablet): `node scripts/device-sweep.mjs` must pass.
+5. **Readable neo-brutalism, always (R24).** No reading text under 0.8rem (`text-xs`), nothing under 13 px lighter
+   than weight 600, only Inter / Bricolage Grotesque / JetBrains Mono; icons are computed, never hand-typed points;
+   no glass, blur panels, soft shadows, glows or soft gradients. Guarded by `tests/r24.spec.ts`
+   (`.agents/rules/30-design-system.md` section H). The hero headline torchlight (dims under the mouse) is the
+   owner's choice: keep it.
 
 ## 3. Start-of-task checklist (every single task)
 
@@ -32,7 +38,7 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
    If anything touches content, design, links, JSON-LD, dependencies or CSP: write "APPROVAL NEEDED:" and stop.
 5. Read every file you will edit in full before editing it.
 6. Make the smallest correct change.
-7. Run `node scripts/verify.mjs` (add `--e2e` for UI changes) and, for any UI change, `node scripts/audit-ui.mjs`. Paste both summary tables.
+7. Run `node scripts/verify.mjs` (add `--e2e` for UI changes) and, for any UI change, `node scripts/audit-ui.mjs` AND `node scripts/device-sweep.mjs`. Paste both summary tables.
 8. Commit (the pre-commit hook re-checks), push (the pre-push hook runs the full suite for ~5 min: do not touch files meanwhile; if `git status` still says "ahead", the push was blocked), confirm GitHub CI is green and Vercel shows `success` for that hash, and report in the format of `00-core.md` section F,
    with evidence per `05-obedience.md` section D and the "SELF-CHECK" line.
 
@@ -47,6 +53,7 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
 | Encoding check                             | `node scripts/check-encoding.mjs`                                                          |
 | Type check / lint / format                 | `npm run typecheck` / `npm run lint` / `npx prettier --write <files you changed>`          |
 | E2E tests                                  | `npm run test:e2e`                                                                         |
+| Every device (16 real profiles, 4 pages)   | server running, then `node scripts/device-sweep.mjs`                                       |
 
 ## 5. Where things live
 

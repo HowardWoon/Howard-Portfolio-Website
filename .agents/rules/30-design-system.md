@@ -116,3 +116,34 @@ circle / square / triangle (FX-91 postage stamp), per-frame background fields / 
 budget, R20), a destructive "load spike" mode, auto-playing audio, stamps with self-praise wording (new content).
 
 Testing notes: an element below the fold cannot be hovered / pressed by `page.mouse` until scrolled into view; measure physics bodies by their translation (`DOMMatrix(transform).m41/m42`), not the rotated bounding box; a flung body's landing spot is physics - assert that it follows the pointer while held and settles inside afterwards.
+
+## H. R24 guardrails - type floor, emblem geometry, torchlight, neo-brutalism only (owner complaints, tested)
+
+Howard: "the font family and font size is too ugly and small, slim, i dont want this font problem happen again" and
+"the star in the medal is misalign ... make sure this type of issue wont happen again". Both are now enforced by
+`tests/r24.spec.ts`; a failing guard is a real defect, never "adjust the test".
+
+1. **Type floor.** Reading text is never below `text-xs` (0.8rem, about 12.8 px). Never write `text-[0.5rem]` ...
+   `text-[0.75rem]`, `text-[7px]` ... `text-[11px]`, or a `clamp()` whose minimum is below 0.8rem, in TSX or CSS.
+   Text under 13 px must be weight 600+ (`font-semibold` or heavier) - small AND thin is the "slim" look Howard hates.
+   `aria-hidden` text is still seen, so it obeys the floor too. The only exemption is picture art built from glyphs
+   (`data-type-exempt`, today only the build-story portrait mosaic).
+2. **Three families only:** Inter (`font-sans`), Bricolage Grotesque (`font-display`), JetBrains Mono (`font-mono`).
+   No other font, no system-ui fallbacks showing, no new webfont.
+3. **Bigger text must not collide.** After any type change, screenshot 390x844, 844x390 and 1440x900 and look. A
+   label that sits on another box must be rendered INSIDE that box (see the build-story project tags: `Dock on=`),
+   never at its own x / y, so no font size can slide it over the box's text. Absolutely positioned boxes near an
+   edge need `width: max-content` + a clamp to the stage (otherwise the browser shrinks them to the space left of
+   their anchor). Header text may wrap on phones; it may never run under the header buttons (375 px is the
+   tightest width: the live dot sits 4 px from Resume, keep `gap-2 min-[400px]:gap-3`; RESUME shows its word only from 440 px, below that it is the icon, because name +
+   dot + three buttons need about 430 px).
+4. **Emblem geometry** (`components/honor-emblem.tsx`): icons are COMPUTED (`starPoints(cx, cy, outer, inner)`),
+   never hand-typed point lists. The medal star sits inside the inner ring, below the ribbon (ribbons end y 50), and
+   above the value; the value text sits inside the emblem body. Check every emblem kind at 390 and 1440 after any
+   change (the test does it too).
+5. **Hero torchlight is the owner's choice (R24):** under the mouse the headline dims to 25% and the lens beam shows
+   it bright. Do not "improve" it back into a no-dim version.
+6. **Neo-brutalism only.** Flat fills, 2-3 px ink borders, hard offset shadows, chunky display type, tracked mono
+   labels. Never add glassmorphism, frosted blur panels, soft drop shadows, soft or neon gradients, glow effects,
+   skeuomorphic textures, 3D renders or AI imagery. New effects must look printed / mechanical (stamps, tape,
+   halftone, hatch, offset registration), in SIGNAL KEY colours only.
