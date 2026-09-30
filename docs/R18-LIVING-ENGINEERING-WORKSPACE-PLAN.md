@@ -1,6 +1,7 @@
 # R18: "Living Engineering Workspace" - Motion, Continuity & Header Instrument Plan
 
-> **Status: APPROVED BY HOWARD, IMPLEMENTATION IN PROGRESS.** Howard's words (this conversation): "proceed, just don't
+> **Status: BUILT (commits 01e1037, 33d639b, 4fac9fb, c549270, 9d8945e).** As-built notes at the end.
+> Approved by Howard. Howard's words (this conversation): "proceed, just don't
 > modify my website theme and content", "proceed to do everything you mention in md file", "add more some ui ux
 > features ... special animations, effects", "enhance the part i circled (header nav) ... too boring, only font, not
 > interactive", and "replace this spiderman photo ... transition ... smoothly and perfect like currently".
@@ -229,3 +230,32 @@ Accessibility
 Robustness
 - [ ] Interrupting any animation (scroll, Esc, resize, back/forward) leaves no stale transform or overlay
 - [ ] `?photo=` / `?bp=` deep links open only after the boot gate; page scroll works after closing
+
+---
+
+## 11. As built
+
+| FX | Result | Commit | Tests |
+|---|---|---|---|
+| FX-95 Section Clock | `lib/section-clock.ts` + `components/fx/section-clock.tsx` (lazy, ssr:false); consumers ask for a rescan on mount (`components/fx/sp-fill.tsx`) | 33d639b, 4fac9fb | r18 |
+| FX-96 Atmosphere Relay | `.fx-relay-b` inside the desk; the layer's colour is the next section's exact desk colour (tint at 55 % over cream, computed in JS), so the swap at the boundary is invisible | 33d639b | r18 (both directions) |
+| FX-97 Material Handoff | Projects desk + incoming layer carry the blueprint grid | 33d639b | r18 |
+| FX-98 Desk Dolly | layer settles 104 -> 100 % (>= 768 px) | 33d639b | - |
+| FX-99 Rail & Dock | rail diamond and dock bar fill with `--sp` | 33d639b | r18 |
+| FX-100 Spatial Echo | tile -> colour band shared view-transition name on long index jumps; outline pulse on landing | c549270 | r18 |
+| FX-101 Evidence Wire | SVG wire behind the index tiles + `offset-path` signal dot | c549270 | r18 |
+| FX-102 Focus Lens 2.0 | `data-lens` near 50 % / far 22 % | c549270 | r18 |
+| FX-103 Contact Deceleration | **differs from §4:** Contact's ambient loops (pulse / ping / spin / wobble) pause while Contact is in hold / exit. Slowing the marquee was dropped: changing an infinite CSS animation's duration mid-run makes it jump. | c549270 | - |
+| FX-104 Document Settle | stamp spring on the certificate sheet, 96 % scale on the way out | c549270 | existing honours tests |
+| FX-105 Header Instrument | as §5 | 4fac9fb | r18, r12 overlap, r16b FX-87 |
+| FX-106 Spider-Man photo | 682 x 1024, 205 -> 102 KB, lens unchanged (screenshot-verified alignment) | 01e1037 | existing hero tests |
+| FX-107 / FX-108 | see R17 as-built | 8f5c497, 060c667 | r17 |
+
+**The friend's brief, mapped:** atmosphere relay / material handoff / proximity preview / bidirectional (§05-09, 36-37)
+= FX-96/97; one scroll signal / spatial clock / state machine (§26-27, 55-56) = FX-95 (enter / hold / exit on each
+section); section spine / dock evolution (§24-25) = FX-99; index -> stack continuity + spatial echo (§14-15, 23) =
+FX-100; evidence flow (§21-22) = FX-101; focus lens (§19-20) = FX-102; contact deceleration (§40) = FX-103; honours
+physical evidence (§39) = FX-104; route transition 2.0 / return journey (§16-17) = existing FX-85 Portal Morph;
+camera dolly (§10-13) = FX-98 on the desk only (text stays flat, §13); adaptive motion / performance rules (§41-49) =
+R17 phone gates + Frame Governor lite list; "no generic wow" (§53) respected (no new canvas, framework or
+dependency).

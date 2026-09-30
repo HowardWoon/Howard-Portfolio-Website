@@ -1,10 +1,58 @@
 # R17: Full Device, Performance & Function Audit + Validation Checklist
 
-> **Status: AUDIT ONLY. Nothing in the site was changed.** This document is the output of a full read of the
+> **Status: BUILT (approved by Howard: "proceed, just don't modify my website theme and content").** As-built notes
+> and measured results are in the next section; the original audit follows unchanged below it.
+>
+> Original status: AUDIT ONLY. This document is the output of a full read of the
 > codebase plus measured runs against a local production build (`npm run build` + `npm run start`) at
 > HEAD `3d8d8cb` on `main`. Every finding has a file:line and/or a measured number. Items that change colours,
 > fonts, spacing, animations, content or dependencies are marked **APPROVAL NEEDED** (rules 05-obedience C).
 > Nothing is "fixed" until the checklist in section 9 passes.
+
+---
+
+## As built (commits dd8d617 ... 3af32d1 on main)
+
+| Item | Result | Commit |
+|---|---|---|
+| P0-02 3D layers on touch | done: perspective only while unfold / tilt run; test r17 "no tall element carries a 3D transform" | dd8d617 |
+| P1-13 unfold squash | done: unfold completes at 80 % of the screen | dd8d617 |
+| P0-05 deep links + scroll lock | done: waits for the gate; gate uses useScrollLock | d5e2dc0 |
+| P0-03, P0-04, P1-03, P1-04, P1-05, F-01, F-02, F-03, F-06 | done as FX-107 Gallery Deck (phone photo 129 -> 195 px at 390) | 8f5c497 |
+| F-04 | done as FX-108 Lightbox Pro | 060c667 |
+| P0-01, P1-01, P1-07 | done; FX-74 retired entirely (not only on phones), see below | bffa0c7 |
+| P1-02, P1-06, P1-08, P1-09, P1-11 | done | a402be3 |
+| P1-12, P2-01, P2-02, P2-03, P2-04, P2-06, P2-07, P2-10 | done; First Load JS for / 189 -> 164 kB | 84c5efe |
+| P2-09 | done: CI runs audit-ui --motion; validate-plans gains R17 / R18 | 9d8945e |
+| F-05 | done: blur-up previews (scripts/gen-photo-blur.mjs) | 3af32d1 |
+
+**Measured after (same probes as section 3.5, local production build):**
+
+| Probe | Before | After |
+|---|---|---|
+| Phone 390x844, 4x CPU: layout time per fling | 445-822 ms | 11-12 ms |
+| Phone: layouts per fling | 68-70 | 14-15 |
+| Phone: janky frames (> 33 ms) | 23-133 | 1-6 |
+| Desktop 1440x900, real speed: layout time / janky frames | 144 ms / 8 | 32 ms / 12 (noise level) |
+| Desktop 1440x900, 4x CPU: layout time | 651-705 ms | 128-132 ms |
+| Tall 3D layers on a phone | 13 | 0 |
+| First Load JS for / | 189 kB | 164 kB |
+| e2e | 156 tests | 176+ tests, all passing |
+
+**Corrections and decisions (honest record):**
+- **P2-12 was wrong.** Three certificates are PNG files, so the `<img>` branch in CertificateModal is live and its
+  lint exception is justified. Nothing was removed.
+- **P1-10** (Calm button under 375 px): there is no room in the 320 px header; Calm Mode stays reachable from the
+  search button -> command palette ("Calm mode (reduce motion)"). Not changed.
+- **P2-05** (PillarCard `div role="button"`): a `<button>` may not contain the card's heading and paragraphs, so the
+  keyboard-operable `role="button"` card stays. axe reports no issue.
+- **FX-74** was retired everywhere (`kineticType: false`): even on desktop it cost ~540 ms of layout per throttled
+  fling. The r15 test now asserts titles never animate their weight and are extra-bold throughout.
+- **Desktop at 4x CPU** still shows many slow frames (style recalculation of the remaining scroll-driven effects);
+  at real speed and at 2x it is smooth. The Frame Governor drops a slow device to the lite tier, which now also
+  stops the header blur, drift, section scan, curtains and wall drift.
+- **Deferred (need Howard):** P2-08 WebKit test project (browser download), P2-11 renames of public files (URLs
+  change), content questions in section 10.
 
 ---
 
