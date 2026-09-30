@@ -8,6 +8,8 @@
  *   R9  docs/R9-FULL-AUDIT-AND-FIX-PLAN.md            (R9-01 … R9-19, D1 … D6)
  *   R10 docs/R10-INTERACTIVE-ENGINEERING-DESK-PLAN.md (FX-38 … FX-44)
  *   R11 docs/R11-BLUEPRINT-INSPECTION-BENCH-PLAN.md   (FX-45 Blueprint Inspection Bench)
+ *   R17 docs/R17-FULL-DEVICE-AUDIT-AND-VALIDATION-CHECKLIST.md (device / performance fixes, FX-107, FX-108)
+ *   R18 docs/R18-LIVING-ENGINEERING-WORKSPACE-PLAN.md (FX-95 ... FX-106)
  *
  * It only READS files. No dependencies. Run from the repo root:
  *   node scripts/validate-plans.mjs              (all rounds)
@@ -1284,8 +1286,157 @@ for (const f of ['about', 'experience', 'honors', 'contact'])
   );
 has('R15', 'TEST', 'R15 regression tests', 'tests/r15.spec.ts', '(FX-72)', '(FX-73)', '(FX-74)', '(FX-75)', 'overflow');
 
+/* ================================================================================================ R17 */
+has(
+  'R17',
+  'P0-02',
+  'No 3D layer on touch: unfold perspective only while it runs',
+  'components/fx/scroll-unfold.tsx',
+  'transformPerspective: on ? 1400 : undefined',
+);
+has('R17', 'P0-02b', 'TiltCard tilts only on a hovering pointer', 'components/tilt-card.tsx', 'allowed && hover ?');
+has('R17', 'P0-05', 'Boot gate uses the shared scroll lock', 'components/boot-sequence.tsx', 'useScrollLock(showBoot)');
+has(
+  'R17',
+  'P0-05b',
+  'Photo deep link waits for the gate',
+  'components/interactive-photo-stack.tsx',
+  'if (!booted || !FX.deepLinks',
+);
+lacks(
+  'R17',
+  'P0-05c',
+  'Gate never writes body overflow itself',
+  'components/boot-sequence.tsx',
+  'document.body.style.overflow =',
+);
+has('R17', 'P0-01', 'Kinetic weight retired', 'lib/fx.ts', 'kineticType: false');
+has(
+  'R17',
+  'P0-01b',
+  'Wipe + floor are desktop / fine pointer / full tier only',
+  'app/globals.css',
+  ":not(.fx-off-inkWipe):not([data-fx-tier='lite']) .fx-wipe",
+  ":not(.fx-off-blueprintFloor):not([data-fx-tier='lite']) .fx-floor-grid",
+);
+has(
+  'R17',
+  'P1-04',
+  'Lightbox neighbour preload uses getImageProps + preload',
+  'components/interactive-photo-stack.tsx',
+  "preload(props.src, { as: 'image'",
+);
+has(
+  'R17',
+  'FX-107',
+  'Gallery Deck: stored photo sizes + controls',
+  'components/interactive-photo-stack.tsx',
+  'w: 960',
+  'aria-label="Previous photo"',
+  'aria-roledescription="carousel"',
+);
+has(
+  'R17',
+  'FX-108',
+  'Lightbox Pro controls',
+  'components/interactive-photo-stack.tsx',
+  "'Play slideshow'",
+  "'Full screen'",
+  'aria-label="Zoom in"',
+);
+has(
+  'R17',
+  'P1-02',
+  'Jumps land on the untransformed shell',
+  'lib/jump.ts',
+  "closest<HTMLElement>('[data-project-shell]')",
+);
+has(
+  'R17',
+  'P1-08',
+  'Single-key shortcuts switch (WCAG 2.1.4)',
+  'components/interaction-hud.tsx',
+  'role="switch"',
+  "KEYS_KEY = 'hw-keys'",
+);
+has(
+  'R17',
+  'P2-07',
+  'Client widgets split out of First Load',
+  'components/lazy-sections.tsx',
+  'export const CommandPalette = dynamic(',
+);
+has('R17', 'P2-10', 'Install icons', 'app/manifest.ts', "'/pwa-icon/512'");
+has(
+  'R17',
+  'TEST',
+  'R17 regression tests',
+  'tests/r17.spec.ts',
+  '(P0-05)',
+  '(P0-02)',
+  '(P0-01)',
+  '(FX-107)',
+  '(FX-108)',
+  '(P1-02)',
+  '(P1-08, WCAG 2.1.4)',
+);
+
+/* ================================================================================================ R18 */
+exists('R18', 'FX-95', 'Section Clock store + engine', 'lib/section-clock.ts', 'components/fx/section-clock.tsx');
+has(
+  'R18',
+  'FX-95b',
+  'Clock mounted after first paint',
+  'components/lazy-sections.tsx',
+  'export const SectionClock = dynamic(',
+);
+has('R18', 'FX-96', 'Atmosphere relay layer', 'components/fx/tide-canvas.tsx', 'fx-relay-b');
+has(
+  'R18',
+  'FX-96b',
+  'Relay CSS (transform only) + reduced motion',
+  'app/globals.css',
+  '.fx-relay-b {',
+  "html[data-motion='calm'] .fx-relay-b",
+);
+has('R18', 'FX-97', 'Projects desk carries the grid', 'app/globals.css', "[data-tide-key='projects']::after");
+has('R18', 'FX-99', 'Rail + dock progress fills', 'components/section-dock.tsx', 'SpFill');
+has('R18', 'FX-100', 'Spatial echo', 'lib/jump.ts', "classList.add('fx-echo')", "'fx-proj-hop'");
+has('R18', 'FX-101', 'Evidence wire', 'components/project-index.tsx', 'fx-wire-path', 'offsetPath');
+has('R18', 'FX-102', 'Focus lens', 'components/stacked-projects.tsx', 'data-lens={lens}');
+has(
+  'R18',
+  'FX-105',
+  'Header instrument',
+  'components/site-header.tsx',
+  'layoutId="fx-hdr-marker"',
+  "aria-current={FX.headerInstrument && on ? 'location'",
+);
+has(
+  'R18',
+  'FLAGS',
+  'R18 flags',
+  'lib/fx.ts',
+  'sectionClock:',
+  'atmosphereRelay:',
+  'headerInstrument:',
+  'evidenceWire:',
+);
+has(
+  'R18',
+  'TEST',
+  'R18 regression tests',
+  'tests/r18.spec.ts',
+  '(FX-96)',
+  '(FX-99)',
+  '(FX-100)',
+  '(FX-101)',
+  '(FX-102)',
+  '(FX-105)',
+);
+
 /* ================================================================================================ run */
-const rounds = ['R7', 'R8', 'R9', 'R10', 'R11', 'R12', 'R13', 'R14', 'R15', 'ALL'];
+const rounds = ['R7', 'R8', 'R9', 'R10', 'R11', 'R12', 'R13', 'R14', 'R15', 'R17', 'R18', 'ALL'];
 let failed = 0;
 let total = 0;
 for (const r of rounds) {

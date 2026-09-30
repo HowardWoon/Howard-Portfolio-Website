@@ -31,7 +31,7 @@ jobs:
       - name: Reject BOM / mojibake
         run: node scripts/check-encoding.mjs
       - run: npm ci
-      - name: Plan checks (static, R7-R12)
+      - name: Plan checks (static, R7-R18)
         run: node scripts/validate-plans.mjs
       - run: npm run typecheck
       - run: npm run lint
@@ -45,10 +45,24 @@ jobs:
           key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+      # R17 P2-09: the default audit runs with reduced motion, which switches every scroll effect off; the lag and
+      # layer problems only exist with motion on, so CI also audits the site the way a normal visitor sees it.
+      - name: Layout + axe audit with motion ON
+        run: |
+          npm run start > /dev/null 2>&1 &
+          for i in $(seq 1 60); do curl -s -o /dev/null http://localhost:3000 && break; sleep 1; done
+          node scripts/audit-ui.mjs --motion
       - name: Upload Playwright report
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
         with:
           name: playwright-report
           path: playwright-report/
+          retention-days: 7
+      - name: Upload motion audit
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: motion-audit
+          path: audit/motion/report.md
           retention-days: 7
