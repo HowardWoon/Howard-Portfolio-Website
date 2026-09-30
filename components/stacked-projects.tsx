@@ -7,6 +7,8 @@ import { TextRoll } from './fx/text-roll';
 import { WipeLink } from './fx/route-wipe';
 import { SplitWords } from './fx/split-words';
 import { FX } from '@/lib/fx';
+import { SIGNAL, type Signal } from '@/lib/signal';
+import { SignalKey } from './signal-key';
 import { exitFocus, markVisited, setFocus, startTrail, useInteractionSelect } from '@/lib/interaction-store';
 import { projectsWithSkill, scrollToProject, skillKey } from '@/lib/skills';
 import { readDeepLink } from '@/lib/share';
@@ -34,7 +36,8 @@ interface ProjectData {
   id: string;
   number: string;
   badge: string;
-  badgeType: 'gold' | 'cyan' | 'emerald';
+  /** SIGNAL KEY meaning of the badge: podium win, qualifier / finalist, or academic coursework */
+  signal: Signal;
   title: string;
   subtitle: string;
   description: string;
@@ -56,7 +59,7 @@ const projects: ProjectData[] = [
     id: 'zerolag',
     number: '01',
     badge: '🏆 2nd Place Winner · Supervity Asia Hackathon 2026',
-    badgeType: 'gold',
+    signal: 'podium',
     title: 'ZeroLag',
     subtitle: 'Governed AI Workforce & Autonomous Sales Pipeline',
     description:
@@ -83,7 +86,7 @@ const projects: ProjectData[] = [
     id: 'proofpay',
     number: '02',
     badge: '🏅 2nd Runner Up (Sui) & Top 6 (Gonka AI) · MUBA 2026',
-    badgeType: 'gold',
+    signal: 'podium',
     title: 'PROOFPAY',
     subtitle: 'Delivery-linked B2B Escrow & Settlement Platform',
     description:
@@ -118,7 +121,7 @@ const projects: ProjectData[] = [
     id: 'bilahujan',
     number: '03',
     badge: '🏅 V HACK 2026 QUALIFIER',
-    badgeType: 'cyan',
+    signal: 'qualifier',
     title: 'BILAHUJAN',
     subtitle: 'Decentralised Swarm Intelligence for Flood First Response',
     description:
@@ -143,7 +146,7 @@ const projects: ProjectData[] = [
     id: 'catfish',
     number: '04',
     badge: 'WIA1006 Machine Learning • Ultimate Pipeline',
-    badgeType: 'cyan',
+    signal: 'academic',
     title: 'CATFISH DETECTOR AI',
     subtitle: 'Detecting Deception Through Mathematical Behavioral Intelligence',
     description:
@@ -194,7 +197,7 @@ const projects: ProjectData[] = [
     id: 'slotify',
     number: '05',
     badge: 'Java Spring Boot • Data Structures',
-    badgeType: 'gold',
+    signal: 'academic',
     title: 'SLOTIFY',
     subtitle: 'Multi-Data Structure Architecture & Algorithmic Router',
     description:
@@ -225,7 +228,7 @@ const projects: ProjectData[] = [
     id: 'sensor-x-sensei',
     number: '06',
     badge: '⚡ UM Technothon 2026 Finalist · IoT Energy Grid',
-    badgeType: 'emerald',
+    signal: 'qualifier',
     title: 'Sensor X Sensei',
     subtitle: 'Automated Energy Management & Micro-Grid Telemetry',
     description:
@@ -253,17 +256,11 @@ const SIMULATOR_ROUTE: Partial<Record<ProjectData['telemetryType'], 'agentic' | 
   energy: 'energy',
 };
 
-const accent = {
-  gold: { fill: 'bg-pop-yellow', soft: 'bg-[#FFF3C4]' },
-  cyan: { fill: 'bg-pop-cyan', soft: 'bg-[#D9FBFF]' },
-  emerald: { fill: 'bg-pop-mint', soft: 'bg-[#DCFAEC]' },
-} as const;
-
 const INDEX_ITEMS: ProjectIndexItem[] = projects.map((p) => ({
   id: p.simulatorId,
   number: String(p.number),
   title: p.title,
-  fill: accent[p.badgeType].fill,
+  fill: SIGNAL[p.signal].fill,
 }));
 
 export default function StackedProjects() {
@@ -331,12 +328,27 @@ export default function StackedProjects() {
           </div>
         </div>
 
+        <SignalKey only={['podium', 'qualifier', 'academic', 'ai', 'live']} className="!-mt-8 sm:!-mt-10" />
+
         <ProjectIndex items={INDEX_ITEMS} />
 
         {/* Project Cards (FX-39: data-focus-active dims every card except the focused one) */}
         <div className="space-y-12 lg:space-y-20" data-focus-active={focus ? '' : undefined}>
           {projects.map((project, i) => (
-            <ProjectCard key={project.id} project={project} index={i} />
+            <React.Fragment key={project.id}>
+              {i > 0 ? (
+                // R21: a stack connector, so the gap between cards says what comes next
+                <div aria-hidden className="flex items-center gap-3 !mt-8 lg:!mt-10 -mb-2 lg:-mb-6">
+                  <span className="h-0 flex-1 border-t-3 border-dashed border-ink/30" />
+                  <span className="flex items-center gap-2 rounded-full border-2 border-ink bg-white px-3 py-1 font-mono text-[0.66rem] font-extrabold tracking-[0.14em] text-ink shadow-brutal-xs">
+                    <span className={`h-2.5 w-2.5 rounded-[2px] border-2 border-ink ${SIGNAL[project.signal].fill}`} />
+                    NEXT · {project.number} / {String(projects.length).padStart(2, '0')} · {project.title.toUpperCase()}
+                  </span>
+                  <span className="h-0 flex-1 border-t-3 border-dashed border-ink/30" />
+                </div>
+              ) : null}
+              <ProjectCard project={project} index={i} />
+            </React.Fragment>
           ))}
         </div>
       </div>
@@ -382,7 +394,7 @@ function ProjectCard({ project, index }: { project: ProjectData; index: number }
   const trailHit = useInteractionSelect((s) => !!s.trail && s.trail.ids.includes(project.simulatorId));
   const trailKey = useInteractionSelect((s) => s.trail?.key ?? null);
   const skillKeys = project.tags.map(skillKey).join(' ');
-  const a = accent[project.badgeType];
+  const a = SIGNAL[project.signal];
   const isGallery =
     project.telemetryType === 'agentic' ||
     project.telemetryType === 'catfish' ||
@@ -406,14 +418,17 @@ function ProjectCard({ project, index }: { project: ProjectData; index: number }
             id={`project-${project.simulatorId}`}
             className="fx-rise-card relative w-full rounded-[32px] border-3 border-ink bg-white shadow-brutal-lg transition-shadow duration-300 group-hover:shadow-brutal-xl overflow-hidden scroll-mt-[calc(var(--header-h,5rem)+1.5rem)]"
           >
-            {/* Colour-block header strip (Bauhaus band) */}
+            {/* R21 spec bar: the strip colour is the project's SIGNAL (podium / qualifier / academic), and says so */}
             <div
-              className={`flex flex-wrap items-center justify-between gap-3 px-4 xs:px-6 sm:px-10 py-3 border-b-3 border-ink max-w-full ${a.fill}`}
+              className={`nb-hatch flex flex-wrap items-center justify-between gap-3 px-4 xs:px-6 sm:px-10 py-3 border-b-3 border-ink max-w-full ${a.fill}`}
             >
-              <div className="flex items-center gap-2" aria-hidden>
-                <span className="w-3.5 h-3.5 rounded-full bg-pop-red border-2 border-ink" />
-                <span className="w-3.5 h-3.5 bg-pop-blue border-2 border-ink" />
-                <span className="w-0 h-0 border-l-[8px] border-r-[8px] border-b-[14px] border-l-transparent border-r-transparent border-b-ink" />
+              <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
+                <span className="shrink-0 rounded-md border-2 border-ink bg-white px-1.5 py-0.5 font-mono text-[0.66rem] font-extrabold tracking-[0.14em] text-ink shadow-brutal-xs">
+                  {a.label}
+                </span>
+                <span className="hidden min-w-0 truncate font-mono text-xs font-extrabold uppercase tracking-[0.12em] text-ink xs:inline">
+                  PROJECT {project.number} · {project.title}
+                </span>
               </div>
               <div className="flex flex-wrap items-center justify-between gap-3 max-w-full">
                 {FX.blueprintView ? (
@@ -522,12 +537,14 @@ function ProjectCard({ project, index }: { project: ProjectData; index: number }
                     {project.metrics.map((m, mIdx) => (
                       <div
                         key={mIdx}
-                        className={`rounded-2xl p-3.5 border-3 border-ink ${mIdx === 0 ? a.fill : 'bg-white'} shadow-brutal-sm`}
+                        className={`rounded-2xl p-3.5 border-3 border-ink ${mIdx === 0 ? 'bg-ink text-white' : 'bg-white text-ink'} shadow-brutal-sm`}
                       >
-                        <div className="text-[0.7rem] font-mono font-bold text-ink/70 uppercase tracking-[0.06em]">
+                        <div
+                          className={`text-[0.7rem] font-mono font-bold uppercase tracking-[0.06em] ${mIdx === 0 ? 'text-white/75' : 'text-ink/70'}`}
+                        >
                           {m.label}
                         </div>
-                        <div className="font-display text-lg font-extrabold text-ink mt-1 leading-tight break-words">
+                        <div className="font-display text-lg font-extrabold mt-1 leading-tight break-words">
                           {m.value}
                         </div>
                       </div>
@@ -540,7 +557,7 @@ function ProjectCard({ project, index }: { project: ProjectData; index: number }
                       const key = skillKey(tag);
                       if (!FX.evidenceTrail)
                         return (
-                          <span key={tag} className="nb-chip hover:bg-pop-yellow transition-colors">
+                          <span key={tag} className="nb-chip">
                             {tag}
                           </span>
                         );
@@ -554,7 +571,7 @@ function ProjectCard({ project, index }: { project: ProjectData; index: number }
                           aria-label={`Trace ${tag} across projects`}
                           onClick={() => startTrail(key, tag, projectsWithSkill(key))}
                           className={`nb-chip nb-press min-h-[32px] [@media(pointer:coarse)]:min-h-[40px] cursor-pointer transition-colors ${
-                            lit ? '!bg-ink !text-white' : 'hover:bg-pop-yellow'
+                            lit ? '!bg-ink !text-white' : 'hover:bg-[#E3E8FF]'
                           }`}
                         >
                           {tag}
@@ -573,7 +590,7 @@ function ProjectCard({ project, index }: { project: ProjectData; index: number }
                         href={project.prototypeUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="group nb-btn nb-btn-yellow px-5 py-3 fx-specular nb-press"
+                        className="group nb-btn bg-pop-mint px-5 py-3 fx-specular nb-press"
                       >
                         <Terminal className="w-4 h-4" strokeWidth={2.75} />
                         LAUNCH LIVE PROTOTYPE
@@ -658,7 +675,9 @@ function ProjectCard({ project, index }: { project: ProjectData; index: number }
                       {isGallery ? 'PROJECT GALLERY' : 'LIVE TELEMETRY WINDOW'}
                     </span>
                   </div>
-                  <span className={`nb-tag ${a.fill}`}>{isGallery ? 'INTERACTIVE' : 'ACTIVE PIPELINE'}</span>
+                  <span className={`nb-tag ${isGallery ? 'bg-[#E3E8FF]' : 'bg-pop-mint'}`}>
+                    {isGallery ? 'INTERACTIVE' : 'ACTIVE PIPELINE'}
+                  </span>
                 </div>
 
                 {/* Conditional Graphic Visualizers */}
@@ -693,12 +712,12 @@ function ProjectCard({ project, index }: { project: ProjectData; index: number }
                         <span className="text-[#0F7A4A] font-extrabold">Path Node #104 ➔ #289</span>
                       </div>
                       <div className="w-full bg-paper-deep h-3 rounded-full overflow-hidden border-2 border-ink">
-                        <div className="bg-pop-yellow h-full w-4/5 border-r-2 border-ink animate-pulse" />
+                        <div className="bg-pop-mint h-full w-4/5 border-r-2 border-ink animate-pulse" />
                       </div>
                     </div>
 
                     <div className="terminal space-y-1">
-                      <div className="text-pop-yellow">&gt;_ graph.nodes_evaluated: 1,024</div>
+                      <div className="text-pop-mint">&gt;_ graph.nodes_evaluated: 1,024</div>
                       <div>&gt;_ priority_queue: &quot;MinHeap_Balanced&quot;</div>
                       <div>&gt;_ route_dispatch_time: 42.8ms</div>
                     </div>

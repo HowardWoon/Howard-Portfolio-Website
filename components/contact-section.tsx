@@ -20,6 +20,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { personalDetails } from '@/lib/site-data';
+import { SloganTape } from '@/components/marquees';
 
 const MercuryField = dynamic(() => import('./fx/mercury-field').then((mod) => mod.MercuryField), { ssr: false });
 
@@ -504,21 +505,17 @@ export default function ContactSection() {
         </div>
       </div>
 
-      {/* Footer Marquee (full-bleed without the 100vw hack, which overflowed by the scrollbar width on Windows) */}
-      <div className="w-full overflow-hidden bg-pop-yellow border-y-3 border-ink py-4 sm:py-5 mt-24 relative z-20 rotate-[0.6deg] scale-[1.02]">
-        <div className="flex whitespace-nowrap animate-[marquee_30s_linear_infinite] hover:[animation-play-state:paused] w-max">
-          {[...Array(8)].map((_, i) => (
-            <div key={i} className="flex items-center" aria-hidden={i > 0}>
-              <span className="font-display text-lg sm:text-2xl md:text-3xl font-extrabold text-ink uppercase tracking-[-0.01em] px-6 sm:px-8">
-                ENGINEERING SYSTEMS TO STAND OUT IN A NOISY WORLD
-              </span>
-              <span
-                aria-hidden
-                className="inline-block w-5 h-5 sm:w-6 sm:h-6 bg-pop-red border-3 border-ink rotate-45 mx-2 sm:mx-4"
-              />
-            </div>
-          ))}
-        </div>
+      {/* Footer tapes (R21): slogan + status crossing in an X, full-bleed without the 100vw hack */}
+      <div className="relative z-20">
+        <SloganTape
+          slogan="ENGINEERING SYSTEMS TO STAND OUT IN A NOISY WORLD"
+          facts={[
+            { label: 'Available for 2026 roles', kind: 'live' },
+            { label: 'Systems & AI Architect', kind: 'ai' },
+            { label: 'Software Engineering @ Universiti Malaya', kind: 'academic' },
+            { label: 'Kajang, Selangor · Kuala Lumpur · GMT+8' },
+          ]}
+        />
       </div>
     </section>
   );

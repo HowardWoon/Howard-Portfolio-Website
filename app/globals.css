@@ -2349,3 +2349,553 @@ html:not(.fx-off-contactCalm)
   :is(.animate-pulse, .animate-ping, .animate-spin-slow, .animate-wobble) {
   animation-play-state: paused;
 }
+
+/* R21: a quiet diagonal hatch over a signal-coloured strip (texture only, keeps the background colour) */
+.nb-hatch {
+  background-image: repeating-linear-gradient(135deg, rgb(10 10 10 / 0.07) 0 2px, transparent 2px 11px);
+}
+
+/* ================================================================ R21 "The Build" (components/build-story.tsx)
+   A scroll-scrubbed storyboard. The stage holds ONE variable, --p (0..1, written by the component). Every layer with
+   .bs-seg derives its own local progress --t (0 before --a, 1 after --b) and an eased copy --e, and animates
+   transform / opacity (plus clip-path on a few small boxes). Scroll down plays, scroll up rewinds.
+   Scene colours follow the SIGNAL KEY: orange academic, cyan parse, blue structure, lilac AI, mint shipped.
+   Reduced motion / Calm Mode: [data-static] shows the finished frame as a still, nothing pinned. */
+.bs-track {
+  height: 520vh;
+}
+.bs-stage {
+  --p: 0;
+  --bs-c1: #ff9f1c;
+  --bs-c2: #00e5ff;
+  --bs-c3: #2b4bff;
+  --bs-c4: #b8a4ff;
+  --bs-c5: #3ddc97;
+  --top: calc(var(--header-h, 72px) + 56px); /* header + HUD */
+  --bottom: 104px; /* captions */
+  --card-w: min(420px, 86vw);
+  --code-w: min(470px, 88vw);
+  --id2x: -22vw;
+  --id2y: 0px;
+  --id3x: -39vw;
+  --id3y: -27vh;
+  --id3s: 0.4;
+  --id3fade: 0;
+  --code-x: 23vw;
+  --code-y: 0px;
+  --diag-w: min(74vw, 900px);
+  --diag-ratio: 16 / 9;
+  --diag-x: 7vw;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  isolation: isolate;
+}
+@media (max-width: 1023px) {
+  .bs-stage {
+    --id2x: 0px;
+    --id2y: -17vh;
+    --id3x: 0px;
+    --id3y: -17vh;
+    --id3s: 0.7;
+    --id3fade: 1; /* no free corner on a narrow screen: the ID hands over to the blueprint */
+    --code-x: 0px;
+    --code-y: 17vh;
+    --diag-w: 94vw;
+    --diag-ratio: 4 / 5;
+    --diag-x: 0px;
+    --bottom: 124px;
+  }
+}
+@media (min-width: 640px) and (max-width: 1023px) {
+  .bs-stage {
+    --card-w: min(440px, 70vw);
+    --diag-w: min(86vw, 640px);
+    --diag-ratio: 1 / 1;
+  }
+}
+/* phones held sideways / short windows: side by side and smaller */
+@media (max-height: 560px) and (orientation: landscape) {
+  .bs-stage {
+    --top: calc(var(--header-h, 56px) + 40px);
+    --bottom: 12px;
+    --card-w: min(330px, 32vw);
+    --code-w: min(420px, 44vw);
+    --id2x: -22vw;
+    --id2y: 0px;
+    --id3x: -22vw;
+    --id3y: 0px;
+    --id3s: 0.8;
+    --id3fade: 1;
+    --code-x: 23vw;
+    --code-y: 0px;
+    --diag-w: min(86vw, 760px);
+    --diag-ratio: 5 / 2;
+    --diag-x: 0px;
+  }
+  /* the scene pills name each scene; the caption bar would cover half the screen */
+  .bs-stage .bs-captions {
+    display: none;
+  }
+  .bs-code .bs-type {
+    font-size: 0.56rem;
+  }
+  .bs-node,
+  .bs-hub-core {
+    padding: 4px 8px;
+  }
+  .bs-node > span,
+  .bs-hub-core > span {
+    font-size: 0.56rem !important;
+  }
+}
+.bs-seg {
+  --t: clamp(0, (var(--p) - var(--a)) / (var(--b) - var(--a)), 1);
+  --e: calc(1 - (1 - var(--t)) * (1 - var(--t)));
+}
+
+/* ---- floor */
+.bs-floor {
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 55%, rgb(255 255 255 / 0.07), transparent 70%),
+    linear-gradient(to right, rgb(255 255 255 / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.05) 1px, transparent 1px), #0a0a0a;
+  background-size:
+    100% 100%,
+    40px 40px,
+    40px 40px,
+    auto;
+}
+.bs-blueprint {
+  opacity: calc(var(--e) * 0.9);
+  transform: scale(calc(0.6 + var(--e) * 0.4));
+  background:
+    linear-gradient(to right, rgb(43 75 255 / 0.55) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(43 75 255 / 0.55) 1px, transparent 1px),
+    linear-gradient(to right, rgb(43 75 255 / 0.25) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(43 75 255 / 0.25) 1px, transparent 1px);
+  background-size:
+    120px 120px,
+    120px 120px,
+    24px 24px,
+    24px 24px;
+  background-position: center;
+  -webkit-mask-image: radial-gradient(ellipse 55% 55% at 50% 55%, #000 30%, transparent 75%);
+  mask-image: radial-gradient(ellipse 55% 55% at 50% 55%, #000 30%, transparent 75%);
+}
+/* the blueprint "lands": one ring pulse from the centre */
+.bs-impact {
+  position: absolute;
+  left: 50%;
+  top: 55%;
+  width: 40vmin;
+  height: 40vmin;
+  margin: -20vmin 0 0 -20vmin;
+  border: 3px solid var(--pop-blue);
+  border-radius: 999px;
+  opacity: calc((1 - var(--t)) * min(1, var(--t) * 12));
+  transform: scale(calc(0.2 + var(--e) * 2.6));
+}
+
+/* ---- layers */
+.bs-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: var(--top) 16px var(--bottom);
+  pointer-events: none;
+}
+.bs-fade-out {
+  opacity: calc(1 - var(--t));
+}
+.bs-fade-dim {
+  opacity: calc(1 - var(--t) * 0.88);
+  transform: scale(calc(1 - var(--e) * 0.06));
+}
+.bs-card {
+  box-shadow: 8px 8px 0 0 var(--shadow, #ffc700);
+}
+
+/* ---- title card (scene 0) */
+.bs-title {
+  top: calc(var(--top) + 3vh);
+  opacity: calc(1 - var(--t));
+  transform: translateY(calc(var(--e) * -40px));
+}
+.bs-underline {
+  background: linear-gradient(transparent 62%, #ff9f1c 62%, #ff9f1c 92%, transparent 92%);
+}
+.bs-scroll-cue {
+  position: relative;
+}
+.bs-scroll-cue::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 7px;
+  width: 4px;
+  height: 8px;
+  margin-left: -2px;
+  border-radius: 2px;
+  background: #fff;
+  animation: bs-cue 1.6s ease-in-out infinite;
+}
+@keyframes bs-cue {
+  50% {
+    transform: translateY(10px);
+    opacity: 0.3;
+  }
+}
+
+/* ---- 01 ENROL / 02 PARSE: the student ID */
+.bs-idcard {
+  --shadow: #ff9f1c;
+  width: var(--card-w);
+  container-type: inline-size;
+}
+.bs-id-drop {
+  position: relative;
+  opacity: min(1, calc(var(--t) * 3));
+  transform: translate3d(0, calc((1 - var(--e)) * -95vh), 0) rotate(calc(-9deg + var(--e) * 7deg));
+}
+.bs-id-shift {
+  transform: translate3d(calc(var(--e) * var(--id2x)), calc(var(--e) * var(--id2y)), 0);
+}
+.bs-id-move {
+  transform: translate3d(calc(var(--e) * (var(--id3x) - var(--id2x))), calc(var(--e) * (var(--id3y) - var(--id2y))), 0)
+    scale(calc(1 - var(--e) * (1 - var(--id3s))));
+  opacity: calc(1 - var(--e) * var(--id3fade));
+}
+.bs-source-tag {
+  position: absolute;
+  left: 50%;
+  bottom: -46px;
+  translate: -50% 0;
+  opacity: var(--t);
+  padding: 4px 10px;
+  border: 2px solid #fff;
+  border-radius: 6px;
+  font:
+    800 0.8rem/1 var(--font-mono),
+    monospace;
+  letter-spacing: 0.14em;
+  white-space: nowrap;
+  color: #fff;
+}
+/* the photo box is its own size container: glyphs, scanner and stamp are sized from it */
+.bs-portrait {
+  container-type: size;
+}
+.bs-glyphs {
+  font-size: 3.4px;
+  line-height: 1.02;
+  letter-spacing: 0;
+}
+@supports (width: 1cqw) {
+  .bs-glyphs {
+    font-size: calc(100cqw / 31.8);
+    line-height: calc(100cqh / 38);
+  }
+}
+/* the scanner wipes a layer away from the top (photo -> mosaic -> glyphs) */
+.bs-wipe {
+  clip-path: inset(calc(var(--t) * 100%) 0 0 0);
+}
+/* ... and SHIP rebuilds it from the top (glyphs -> mosaic -> photo) */
+.bs-wipe-in {
+  clip-path: inset(0 0 calc((1 - var(--t)) * 100%) 0);
+}
+.bs-photo {
+  container-type: size;
+}
+.bs-scan {
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  top: 0;
+  height: 6px;
+  margin-top: -3px;
+  background: #00e5ff;
+  border-block: 2px solid var(--ink);
+  box-shadow: 0 0 18px 4px rgb(0 229 255 / 0.55);
+  opacity: calc(min(1, var(--t) * 20) * min(1, (1 - var(--t)) * 20));
+  transform: translateY(calc(var(--t) * 100cqh));
+}
+.bs-barcode {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--ink) 0 2px,
+    transparent 2px 4px,
+    var(--ink) 4px 5px,
+    transparent 5px 8px,
+    var(--ink) 8px 11px,
+    transparent 11px 12px
+  );
+}
+.bs-stamp {
+  position: absolute;
+  right: 6%;
+  bottom: 10%;
+  padding: 4px 12px;
+  border: 4px solid currentColor;
+  border-radius: 8px;
+  font:
+    800 clamp(0.95rem, 5cqw, 1.5rem) / 1 var(--font-display),
+    sans-serif;
+  letter-spacing: 0.08em;
+  background: rgb(255 255 255 / 0.88);
+  opacity: min(1, calc(var(--t) * 4));
+  transform: rotate(-12deg) scale(calc(2.2 - var(--e) * 1.2));
+  pointer-events: none;
+}
+.bs-stamp-orange {
+  color: #b85e00;
+}
+.bs-stamp-mint {
+  color: #0f7a4a;
+}
+/* SHIP: the stamp lands on the photo, clear of the button */
+.bs-release .bs-stamp {
+  right: auto;
+  left: 4%;
+  bottom: 9%;
+}
+
+/* ---- 02 PARSE: terminal */
+.bs-code {
+  width: var(--code-w);
+  opacity: var(--t);
+  transform: translate3d(calc(var(--code-x) + (1 - var(--e)) * 60px), var(--code-y), 0);
+}
+.bs-code .bs-card {
+  --shadow: #00e5ff;
+}
+.bs-type {
+  opacity: min(1, calc(var(--t) * 6));
+  clip-path: inset(0 calc((1 - var(--t)) * 100%) 0 0);
+}
+
+/* ---- 03 ARCHITECT / 04 ORCHESTRATE: the system diagram */
+.bs-diagram {
+  position: relative;
+  width: var(--diag-w);
+  aspect-ratio: var(--diag-ratio);
+  max-height: calc(100dvh - var(--top) - var(--bottom) - 24px);
+  translate: var(--diag-x) 0;
+  container-type: size;
+}
+.bs-wire {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 0.45;
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - var(--e));
+}
+.bs-hub,
+.bs-node,
+.bs-dock {
+  position: absolute;
+  translate: -50% -50%;
+}
+.bs-hub {
+  left: 50%;
+  top: 50%;
+  opacity: var(--t);
+  transform: scale(calc(0.4 + var(--e) * 0.6));
+}
+.bs-hub-core {
+  position: relative;
+  display: grid;
+  gap: 2px;
+  place-items: center;
+  text-align: center;
+  padding: 12px 16px;
+  border: 3px solid var(--ink);
+  border-radius: 18px;
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 6px 6px 0 0 #b8a4ff;
+  white-space: nowrap;
+}
+/* ORCHESTRATE: the hub fills AI-lilac and sends one ring out */
+.bs-hub-core::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 15px;
+  background: #b8a4ff;
+  opacity: var(--t);
+}
+.bs-hub-core::after {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  border: 3px solid #b8a4ff;
+  border-radius: 24px;
+  opacity: calc(var(--t) * (1 - var(--t)) * 4);
+  transform: scale(calc(1 + var(--t) * 0.35));
+}
+.bs-hub-core > span {
+  position: relative;
+}
+.bs-node {
+  display: grid;
+  gap: 2px;
+  max-width: 30cqw;
+  padding: 8px 12px;
+  border: 3px solid var(--ink);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 5px 5px 0 0 var(--pop-blue);
+  opacity: min(1, calc(var(--t) * 3));
+  transform: translateY(calc((1 - var(--e)) * 38px)) scale(calc(0.55 + var(--e) * 0.45));
+  transform-origin: 50% 100%;
+}
+.bs-packet {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border: 2px solid var(--ink);
+  background: #b8a4ff;
+  opacity: calc(min(1, var(--t) * 10) * min(1, (1 - var(--t)) * 10));
+  transform: translate(calc(var(--dx) * 1cqw * var(--t)), calc(var(--dy) * 1cqh * var(--t))) rotate(45deg);
+}
+.bs-dock {
+  padding: 3px 8px;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  color: var(--ink);
+  font:
+    800 clamp(0.5rem, 1.7cqw, 0.72rem) / 1.1 var(--font-mono),
+    monospace;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  box-shadow: 3px 3px 0 0 #fff;
+  opacity: min(1, calc(var(--t) * 4));
+  transform: translate(calc((1 - var(--e)) * var(--from-x) * 1cqw), calc((1 - var(--e)) * var(--from-y) * 1cqh));
+}
+
+/* ---- 05 SHIP */
+.bs-release-in {
+  z-index: 15;
+  opacity: min(1, calc(var(--t) * 2.5));
+  transform: translateY(calc((1 - var(--e)) * 55vh)) rotate(calc((1 - var(--e)) * 6deg));
+}
+.bs-release {
+  --shadow: #3ddc97;
+  width: min(600px, 92vw);
+  container-type: inline-size;
+}
+.bs-award {
+  opacity: var(--t);
+  transform: translateX(calc((1 - var(--e)) * 24px));
+}
+.bs-cta {
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.bs-stage[data-scene='5'] .bs-cta {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+/* ---- HUD */
+.bs-hud-top {
+  top: calc(var(--header-h, 72px) + 12px);
+}
+.bs-progress {
+  top: calc(var(--header-h, 72px) + 44px);
+}
+.bs-progress-bar {
+  background: linear-gradient(
+    90deg,
+    #ff9f1c 0 20%,
+    #00e5ff 20% 40%,
+    #2b4bff 40% 60%,
+    #b8a4ff 60% 80%,
+    #3ddc97 80% 100%
+  );
+  clip-path: inset(0 calc((1 - var(--p)) * 100%) 0 0);
+}
+.bs-pill {
+  transition:
+    background-color 0.2s,
+    color 0.2s,
+    border-color 0.2s;
+}
+.bs-stage[data-scene='1'] .bs-pill[data-n='1'],
+.bs-stage[data-scene='2'] .bs-pill[data-n='2'],
+.bs-stage[data-scene='3'] .bs-pill[data-n='3'],
+.bs-stage[data-scene='4'] .bs-pill[data-n='4'],
+.bs-stage[data-scene='5'] .bs-pill[data-n='5'] {
+  background: #fff;
+  color: var(--ink);
+  border-color: #fff;
+}
+.bs-captions {
+  bottom: calc(var(--safe-bottom, 0px) + 18px);
+  display: grid;
+}
+.bs-caption {
+  grid-area: 1 / 1;
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 0.3s,
+    transform 0.3s;
+}
+.bs-stage[data-scene='1'] .bs-caption[data-n='1'],
+.bs-stage[data-scene='2'] .bs-caption[data-n='2'],
+.bs-stage[data-scene='3'] .bs-caption[data-n='3'],
+.bs-stage[data-scene='4'] .bs-caption[data-n='4'],
+.bs-stage[data-scene='5'] .bs-caption[data-n='5'] {
+  opacity: 1;
+  transform: none;
+}
+.bs-rec {
+  animation: bs-rec 1.2s steps(2, jump-none) infinite;
+}
+@keyframes bs-rec {
+  50% {
+    opacity: 0.2;
+  }
+}
+
+/* ---- reduced motion / Calm Mode: no pinning, the finished frame as a still */
+.bs-track[data-static] {
+  height: auto;
+}
+.bs-track[data-static] .bs-stage {
+  position: relative;
+  height: auto;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+.bs-track[data-static] .bs-layer:not(.bs-release-in),
+.bs-track[data-static] .bs-title {
+  display: none;
+}
+.bs-track[data-static] .bs-scroll-cue::after,
+.bs-track[data-static] .bs-rec {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .bs-scroll-cue::after,
+  .bs-rec {
+    animation: none;
+  }
+}
+@media print {
+  .bs-section {
+    display: none;
+  }
+}

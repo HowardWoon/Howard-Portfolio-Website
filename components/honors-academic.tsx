@@ -79,7 +79,7 @@ function Panel({
 }) {
   return (
     <section className="rounded-2xl border-3 border-ink bg-white shadow-brutal-sm overflow-hidden">
-      <header className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-4 py-2.5 bg-pop-mint border-b-3 border-ink">
+      <header className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-4 py-2.5 bg-pop-orange border-b-3 border-ink">
         <h4 className="flex items-center gap-2 min-w-0 font-mono text-xs font-extrabold uppercase tracking-[0.1em] text-ink">
           <Icon className="w-4 h-4 shrink-0" strokeWidth={2.75} aria-hidden />
           <span className="[overflow-wrap:anywhere]">{title}</span>
@@ -131,7 +131,7 @@ export function Transcript({ semesters = UM_TRANSCRIPT }: { semesters?: Semester
                     </span>
                     <span
                       className={`grid h-7 w-9 place-items-center rounded-lg border-2 border-ink font-mono text-xs font-extrabold text-ink ${
-                        c.grade === 'A+' ? 'bg-pop-mint shadow-brutal-xs' : 'bg-white'
+                        c.grade === 'A+' ? 'bg-[#FFE8C7] shadow-brutal-xs' : 'bg-white'
                       }`}
                     >
                       <span className="sr-only">Grade </span>
@@ -151,8 +151,8 @@ export function Transcript({ semesters = UM_TRANSCRIPT }: { semesters?: Semester
 /* ---------------------------------------------- 2. results board (podium + list) */
 const RESULT_STYLE: Record<Result, { chip: string; label: string }> = {
   GOLD: { chip: 'bg-pop-yellow', label: 'GOLD' },
-  BRONZE: { chip: 'bg-pop-orange', label: 'BRONZE' },
-  FINALIST: { chip: 'bg-pop-lilac', label: 'FINALIST' },
+  BRONZE: { chip: 'bg-[#E0A86B]', label: 'BRONZE' }, // the metal, not ACADEMIC orange
+  FINALIST: { chip: 'bg-pop-cyan', label: 'FINALIST' }, // QUALIFIER
   MOE: { chip: 'bg-white', label: 'MOE' },
   PARTICIPANT: { chip: 'bg-white border-dashed', label: 'PARTICIPANT' },
 };
@@ -161,7 +161,7 @@ function ScopeTag({ scope }: { scope: Entry['scope'] }) {
   return (
     <span
       className={`inline-flex rounded border-[1.5px] border-ink px-1 font-mono text-[0.7rem] font-extrabold uppercase tracking-[0.06em] ${
-        scope === 'Kebangsaan' ? 'bg-pop-blue text-white' : 'bg-white text-ink'
+        scope === 'Kebangsaan' ? 'bg-ink text-white' : 'bg-white text-ink'
       }`}
     >
       {scope}
@@ -262,7 +262,7 @@ export function RolesGrid({ roles = KMNS_ROLES }: { roles?: typeof KMNS_ROLES })
         {roles.map((r) => (
           <li
             key={r.org}
-            className={`flex flex-col gap-1.5 rounded-xl border-2 border-ink p-2.5 ${r.lead ? 'bg-[#DCFAEC] shadow-brutal-xs' : 'bg-white'}`}
+            className={`flex flex-col gap-1.5 rounded-xl border-2 border-ink p-2.5 ${r.lead ? 'bg-[#FFE3F1] shadow-brutal-xs' : 'bg-white'}`}
           >
             <span className="inline-flex items-center gap-1 self-start rounded-md border-2 border-ink bg-white px-1.5 py-0.5 font-mono text-[0.7rem] font-extrabold tracking-[0.08em] text-ink">
               {r.lead ? <Crown className="w-3 h-3" strokeWidth={3} aria-hidden /> : null}

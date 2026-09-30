@@ -6,6 +6,7 @@ import { TraceRail } from './fx/trace-rail';
 import { SplitWords } from './fx/split-words';
 import { m, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { FX, SPRING_STAMP } from '@/lib/fx';
+import { SIGNAL, type Signal } from '@/lib/signal';
 import { usePrinting } from '@/lib/use-printing';
 import {
   Building2,
@@ -34,7 +35,8 @@ interface ExperienceItem {
   location: string;
   period: string;
   icon: typeof Building2;
-  accentColor: 'amber' | 'cyan' | 'emerald' | 'purple';
+  /** SIGNAL KEY meaning of this track (lib/signal.ts) */
+  signal: Signal;
   headline: string;
   bullets: string[];
   metrics: { label: string; value: string }[];
@@ -52,7 +54,7 @@ const experiences: ExperienceItem[] = [
     location: 'Kuala Lumpur, Malaysia',
     period: 'Nov 2025 - Present',
     icon: Building2,
-    accentColor: 'amber',
+    signal: 'industry',
     headline: 'Enterprise SAP Financial Operations & Statutory Compliance',
     bullets: [
       'Executed full-cycle Accounts Payable (AP) and Accounts Receivable (AR) operations within the SAP ERP environment, managing high-volume invoice clearing and ledger reconciliations.',
@@ -76,7 +78,7 @@ const experiences: ExperienceItem[] = [
     location: 'Universiti Malaya',
     period: '2025 - Present',
     icon: Landmark,
-    accentColor: 'cyan',
+    signal: 'leadership',
     headline:
       "Led the financial architecture and resource management for Universiti Malaya's flagship technology community, driving the annual fiscal strategy to sustain student-led tech initiatives, hackathons, and professional development programs throughout the academic year.",
     bullets: [
@@ -102,7 +104,7 @@ const experiences: ExperienceItem[] = [
     location: 'Kolej Matrikulasi Negeri Sembilan (Negeri Sembilan Matriculation College)',
     period: '2024',
     icon: GraduationCap,
-    accentColor: 'purple',
+    signal: 'academic',
     headline: 'Algorithmic Problem Solving & Object-Oriented Tutoring',
     bullets: [
       'Peer-Assisted Learning (PAL) Facilitation: Conducted interactive, student-led tutorials in Data Structures, Algorithms, and Object-Oriented Programming (Java/Python) to reinforce key concepts for matriculation cohorts.',
@@ -376,7 +378,7 @@ function PekomTreasurerDashboard() {
   return (
     <div className="mt-8 rounded-[22px] sm:rounded-[26px] border-3 border-ink bg-paper-cream shadow-brutal-sm sm:shadow-brutal overflow-hidden">
       {/* Title bar */}
-      <div className="flex items-center gap-2.5 px-5 sm:px-6 py-3 border-b-3 border-ink bg-pop-cyan">
+      <div className="nb-hatch flex items-center gap-2.5 px-5 sm:px-6 py-3 border-b-3 border-ink bg-pop-pink">
         <span className="relative inline-flex w-2.5 h-2.5" aria-hidden>
           <span className="absolute inset-0 rounded-full bg-pop-red animate-ping opacity-60" />
           <span className="relative w-2.5 h-2.5 rounded-full bg-pop-red border border-ink" />
@@ -393,14 +395,14 @@ function PekomTreasurerDashboard() {
             <div
               key={i}
               className={`flex flex-col items-start p-3.5 rounded-2xl border-3 border-ink shadow-brutal-sm min-w-0 ${
-                ['bg-pop-yellow', 'bg-white', 'bg-pop-mint', 'bg-pop-lilac'][i % 4]
+                i === 0 ? 'bg-ink text-white' : 'bg-white text-ink'
               }`}
             >
-              <stat.icon className="w-5 h-5 text-ink mb-2" strokeWidth={2.5} />
-              <div className="text-[0.7rem] font-mono font-bold text-ink/70 uppercase tracking-normal [overflow-wrap:anywhere]">
+              <stat.icon className="w-5 h-5 mb-2" strokeWidth={2.5} />
+              <div className="text-[0.7rem] font-mono font-bold opacity-75 uppercase tracking-normal [overflow-wrap:anywhere]">
                 {stat.label}
               </div>
-              <div className="font-display text-lg sm:text-xl font-extrabold text-ink mt-0.5 leading-tight [overflow-wrap:anywhere]">
+              <div className="font-display text-lg sm:text-xl font-extrabold mt-0.5 leading-tight [overflow-wrap:anywhere]">
                 {stat.value}
               </div>
             </div>
@@ -429,7 +431,7 @@ function PekomTreasurerDashboard() {
                   aria-expanded={isExpanded}
                   aria-controls={isExpanded ? panelId : undefined}
                   onClick={() => setExpandedEvent(expandedEvent === event.id ? null : event.id)}
-                  className={`w-full text-left p-4 flex items-center justify-between gap-3 rounded-[13px] ${isExpanded ? 'bg-pop-yellow border-b-3 border-ink rounded-b-none' : ''}`}
+                  className={`w-full text-left p-4 flex items-center justify-between gap-3 rounded-[13px] ${isExpanded ? 'bg-[#FFE3F1] border-b-3 border-ink rounded-b-none' : ''}`}
                 >
                   <span className="font-mono text-xs sm:text-sm font-extrabold tracking-[0.02em] text-ink">
                     {event.name}
@@ -473,20 +475,13 @@ export default function ExperienceSection() {
 
   const filteredExperiences = experiences.filter((exp) => selectedFilter === 'all' || exp.category === selectedFilter);
 
-  // Filter dot colours now match the card accents (MENTORSHIP was green in the filter but purple on the card)
+  // R21: filter dots are the SIGNAL KEY colours of the cards they filter
   const filters: { id: FilterCategory; label: string; dotClass: string }[] = [
     { id: 'all', label: 'ALL', dotClass: 'bg-white' },
-    { id: 'corporate', label: 'CORPORATE', dotClass: 'bg-pop-yellow' },
-    { id: 'leadership', label: 'LEADERSHIP', dotClass: 'bg-pop-cyan' },
-    { id: 'academic', label: 'MENTORSHIP', dotClass: 'bg-pop-lilac' },
+    { id: 'corporate', label: 'CORPORATE', dotClass: SIGNAL.industry.fill },
+    { id: 'leadership', label: 'LEADERSHIP', dotClass: SIGNAL.leadership.fill },
+    { id: 'academic', label: 'MENTORSHIP', dotClass: SIGNAL.academic.fill },
   ];
-
-  const accentFill: Record<ExperienceItem['accentColor'], { fill: string; soft: string }> = {
-    amber: { fill: 'bg-pop-yellow', soft: 'bg-[#FFF3C4]' },
-    cyan: { fill: 'bg-pop-cyan', soft: 'bg-[#D9FBFF]' },
-    emerald: { fill: 'bg-pop-mint', soft: 'bg-[#DCFAEC]' },
-    purple: { fill: 'bg-pop-lilac', soft: 'bg-[#EEE9FF]' },
-  };
 
   return (
     <section
@@ -496,14 +491,14 @@ export default function ExperienceSection() {
       {/* Bauhaus accents */}
       <div
         aria-hidden
-        className="fx-drift pointer-events-none absolute -left-40 top-[45%] w-72 h-72 rounded-full border-3 border-ink bg-pop-yellow hidden xl:block"
+        className="fx-drift pointer-events-none absolute -left-40 top-[45%] w-72 h-72 rounded-full border-3 border-dashed border-ink/40 hidden xl:block"
       />
       <svg
         aria-hidden
         className="fx-drift-rev pointer-events-none absolute right-10 top-24 w-24 h-24 hidden lg:block"
         viewBox="0 0 100 100"
       >
-        <polygon points="50,6 96,92 4,92" fill="#FF4B2B" stroke="#0A0A0A" strokeWidth="6" strokeLinejoin="round" />
+        <polygon points="50,6 96,92 4,92" fill="#FFFFFF" stroke="#0A0A0A" strokeWidth="6" strokeLinejoin="round" />
       </svg>
 
       <div className="relative max-w-6xl mx-auto space-y-12">
@@ -563,7 +558,8 @@ export default function ExperienceSection() {
           <TraceRail />
           <AnimatePresence mode="popLayout">
             {filteredExperiences.map((item) => {
-              const a = accentFill[item.accentColor];
+              const a = SIGNAL[item.signal];
+              const onFill = a.text ?? 'text-ink';
               const longHeadline = item.headline.length > 90;
 
               return (
@@ -578,14 +574,21 @@ export default function ExperienceSection() {
                 >
                   {/* Top Bar: Number + Category Tag + Period */}
                   <div
-                    className={`flex flex-wrap items-center justify-between gap-3 sm:gap-4 px-4 xs:px-6 sm:px-10 py-3 sm:py-4 border-b-3 border-ink ${a.fill}`}
+                    className={`nb-hatch flex flex-wrap items-center justify-between gap-3 sm:gap-4 px-4 xs:px-6 sm:px-10 py-3 sm:py-4 border-b-3 border-ink ${a.fill}`}
                   >
                     <div className="flex flex-wrap items-center gap-2 xs:gap-3 min-w-0">
                       <span className="nb-num">{item.number}</span>
-                      <span className="nb-tag bg-white">{item.categoryLabel}</span>
+                      <span className="rounded-md border-2 border-ink bg-white px-1.5 py-0.5 font-mono text-[0.66rem] font-extrabold tracking-[0.14em] text-ink shadow-brutal-xs">
+                        {a.label}
+                      </span>
+                      <span className={`font-mono text-xs font-extrabold uppercase tracking-[0.12em] ${onFill}`}>
+                        {item.categoryLabel}
+                      </span>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm font-mono font-extrabold text-ink">
+                    <div
+                      className={`flex flex-wrap items-center gap-x-5 gap-y-1 text-sm font-mono font-extrabold ${onFill}`}
+                    >
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4" strokeWidth={2.5} />
                         <span>{item.period}</span>
@@ -636,7 +639,7 @@ export default function ExperienceSection() {
                           <div
                             className={`w-6 h-6 rounded-full grid place-items-center shrink-0 mt-0.5 border-2 border-ink ${a.fill}`}
                           >
-                            <CheckCircle2 className="w-3.5 h-3.5 text-ink" strokeWidth={3} />
+                            <CheckCircle2 className={`w-3.5 h-3.5 ${onFill}`} strokeWidth={3} />
                           </div>
                           <p>{bullet}</p>
                         </div>
@@ -648,14 +651,14 @@ export default function ExperienceSection() {
                       {item.metrics.map((metric, mIdx) => (
                         <div
                           key={mIdx}
-                          className={`rounded-2xl p-4 border-3 border-ink shadow-brutal-sm flex flex-col justify-center ${mIdx === 1 ? a.fill : 'bg-white'}`}
+                          className={`rounded-2xl p-4 border-3 border-ink shadow-brutal-sm flex flex-col justify-center ${mIdx === 1 ? 'bg-ink text-white' : 'bg-white text-ink'}`}
                         >
-                          <span className="text-[0.7rem] font-mono font-bold text-ink/70 uppercase tracking-[0.08em] mb-1">
+                          <span
+                            className={`text-[0.7rem] font-mono font-bold uppercase tracking-[0.08em] mb-1 ${mIdx === 1 ? 'text-white/75' : 'text-ink/70'}`}
+                          >
                             {metric.label}
                           </span>
-                          <span className="font-display text-xl font-extrabold text-ink tracking-[-0.01em]">
-                            {metric.value}
-                          </span>
+                          <span className="font-display text-xl font-extrabold tracking-[-0.01em]">{metric.value}</span>
                         </div>
                       ))}
                     </div>

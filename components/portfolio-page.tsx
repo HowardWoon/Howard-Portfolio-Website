@@ -2,6 +2,7 @@ import { SkipLink } from '@/components/skip-link';
 import BikebearInspiredHero from '@/components/bikebear-hero';
 import AboutSection from '@/components/about-section';
 import {
+  BuildStory,
   StackedProjects,
   ExperienceSection,
   HonorsSection,
@@ -56,17 +57,35 @@ export function PortfolioPage() {
 
           <VelocitySkew>
             <TechMarquee
-              skills={[
-                'SUPERVITY AUTOPILOT ASIA HACKATHON 2ND PLACE (SALES INTELLIGENCE)',
-                'STRAIGHT 4.00 CGPA COMPUTER SCIENCE (SOFTWARE ENGINEERING) FOR TWO SEMESTERS',
-                'UM GAME JAM 2026 PUBLIC CHOICE AWARD',
-                'PERSATUAN KOMPUTER UNIVERSITI MALAYA (PEKOM) FINANCE LEAD 2026/2027',
-                'USM V HACK PRELIMINARY ROUND QUALIFIER',
+              items={[
+                { label: 'SUPERVITY AUTOPILOT ASIA HACKATHON 2ND PLACE (SALES INTELLIGENCE)', kind: 'podium' },
+                {
+                  label: 'STRAIGHT 4.00 CGPA COMPUTER SCIENCE (SOFTWARE ENGINEERING) FOR TWO SEMESTERS',
+                  kind: 'academic',
+                },
+                { label: 'UM GAME JAM 2026 PUBLIC CHOICE AWARD', kind: 'podium' },
+                { label: 'PERSATUAN KOMPUTER UNIVERSITI MALAYA (PEKOM) FINANCE LEAD 2026/2027', kind: 'leadership' },
+                { label: 'USM V HACK PRELIMINARY ROUND QUALIFIER', kind: 'qualifier' },
+              ]}
+              stack={[
+                'Java 21',
+                'Spring Boot 3',
+                'Python',
+                'FastAPI',
+                'LangGraph',
+                'TypeScript',
+                'Next.js 15',
+                'PostgreSQL',
+                'Sui Move',
+                'ESP32 · MQTT',
+                'Gemini · MCP',
               ]}
             />
           </VelocitySkew>
 
           <AboutSection />
+          {/* R21: scroll-scrubbed storyboard (student ID -> shipped system); owns no section id */}
+          <BuildStory />
           <StackedProjects />
           <ExperienceSection />
           <HonorsSection />

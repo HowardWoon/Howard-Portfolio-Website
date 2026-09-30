@@ -7,6 +7,9 @@ import { useInteractionSelect } from '@/lib/interaction-store';
 import { BauhausSolid } from './fx/bauhaus-solid';
 import { SplitWords } from './fx/split-words';
 import { FX, SPRING_STAMP } from '@/lib/fx';
+import { SIGNAL, type Signal } from '@/lib/signal';
+import { SignalKey } from './signal-key';
+import { HonorEmblem, type EmblemKind } from './honor-emblem';
 import { AnimatedCounter } from './animated-counter';
 import { ResultsBoard, RolesGrid, Transcript } from './honors-academic';
 import { AmbientOrbits } from './fx/ambient-orbits';
@@ -34,6 +37,10 @@ interface HonorItem {
   isFeatured?: boolean;
   badge: string;
   badgeColor: 'gold' | 'cyan' | 'emerald' | 'purple';
+  /** R21: SIGNAL KEY meaning of THIS honour (a finalist inside the placements group is a qualifier); none = neutral */
+  signal?: Signal;
+  /** R21: the emblem form (medal metal, seal, ticket, ...) that says what kind of honour it is */
+  emblem: EmblemKind;
   title: string;
   issuingBody: string;
   period: string;
@@ -47,6 +54,8 @@ interface HonorItem {
 const honorsList: HonorItem[] = [
   {
     id: 'supervity',
+    signal: 'podium',
+    emblem: 'silver',
     isFeatured: true,
     badge: 'REGIONAL APAC HACKATHON WINNER',
     badgeColor: 'gold',
@@ -66,6 +75,8 @@ const honorsList: HonorItem[] = [
   },
   {
     id: 'proofpay',
+    signal: 'podium',
+    emblem: 'bronze',
     isFeatured: true,
     badge: 'GLOBAL BLOCKCHAIN HACKATHON WINNER',
     badgeColor: 'gold',
@@ -83,6 +94,8 @@ const honorsList: HonorItem[] = [
   },
   {
     id: 'game-jam',
+    signal: 'podium',
+    emblem: 'star',
     isFeatured: true,
     badge: 'NATIONAL GAME JAM PUBLIC CHOICE',
     badgeColor: 'gold',
@@ -101,6 +114,8 @@ const honorsList: HonorItem[] = [
   },
   {
     id: 'technothon',
+    signal: 'qualifier',
+    emblem: 'finalist',
     badge: 'INNOVATION FINALIST',
     badgeColor: 'gold',
     title: 'TOP 15 FINALIST (INNOVATION TRACK)',
@@ -118,6 +133,8 @@ const honorsList: HonorItem[] = [
   },
   {
     id: 'hari-inovasi',
+    signal: 'podium',
+    emblem: 'gold',
     badge: 'NATIONAL INNOVATION GOLD',
     badgeColor: 'gold',
     title: 'GOLD MEDALIST (EMAS)',
@@ -135,6 +152,8 @@ const honorsList: HonorItem[] = [
   },
   {
     id: 'chemcreative',
+    signal: 'podium',
+    emblem: 'gold',
     badge: 'STATE DIGITAL INNOVATION',
     badgeColor: 'gold',
     title: 'GOLD MEDALIST (EMAS)',
@@ -152,6 +171,8 @@ const honorsList: HonorItem[] = [
   },
   {
     id: 'simposium-pal',
+    signal: 'podium',
+    emblem: 'silver',
     badge: 'NATIONAL ACADEMIC SYMPOSIUM',
     badgeColor: 'gold',
     title: 'SILVER MEDALIST (PERAK)',
@@ -169,6 +190,8 @@ const honorsList: HonorItem[] = [
   },
   {
     id: 'deans-list',
+    signal: 'academic',
+    emblem: 'seal',
     badge: 'ACADEMIC DISTINCTION',
     badgeColor: 'emerald',
     title: "Dean's Honours List (4.00 CGPA)",
@@ -189,6 +212,8 @@ const honorsList: HonorItem[] = [
   },
   {
     id: 'kmns-distinction',
+    signal: 'academic',
+    emblem: 'seal',
     badge: 'MATRICULATION DISTINCTION',
     badgeColor: 'emerald',
     title: 'Academic Excellence Award (4.00 CGPA)',
@@ -211,6 +236,8 @@ const honorsList: HonorItem[] = [
   },
   {
     id: 'vhack',
+    signal: 'qualifier',
+    emblem: 'ticket',
     badge: 'V HACK 2026 QUALIFIER',
     badgeColor: 'cyan',
     title: 'CASE STUDY 3: FIRST RESPONDER OF THE FUTURE',
@@ -228,6 +255,7 @@ const honorsList: HonorItem[] = [
   },
   {
     id: 'umsic',
+    emblem: 'badge',
     badge: 'COMPETITION PARTICIPANT',
     badgeColor: 'cyan',
     title: 'UMSIC 2025 PARTICIPANT',
@@ -370,8 +398,8 @@ export default function HonorsSection() {
       desc: "4.00 CGPA & Dean's List",
       icon: GraduationCap,
       count: honorsList.filter((i) => i.badgeColor === 'emerald').length,
-      fill: 'bg-pop-mint',
-      soft: 'bg-[#DCFAEC]',
+      fill: SIGNAL.academic.fill,
+      soft: SIGNAL.academic.soft,
     },
     {
       id: 'cyan' as const,
@@ -384,12 +412,11 @@ export default function HonorsSection() {
     },
   ];
 
-  const colorFor: Record<HonorItem['badgeColor'], { fill: string; soft: string }> = {
-    gold: { fill: 'bg-pop-yellow', soft: 'bg-[#FFF3C4]' },
-    emerald: { fill: 'bg-pop-mint', soft: 'bg-[#DCFAEC]' },
-    cyan: { fill: 'bg-pop-cyan', soft: 'bg-[#D9FBFF]' },
-    purple: { fill: 'bg-pop-lilac', soft: 'bg-[#EEE9FF]' },
-  };
+  // R21: a card is coloured by its own signal; a participation with no signal stays neutral
+  const colorFor = (item: HonorItem) =>
+    item.signal
+      ? { fill: SIGNAL[item.signal].fill, soft: SIGNAL[item.signal].soft }
+      : { fill: 'bg-white', soft: 'bg-paper-deep' };
 
   const activeItems = honorsList.filter((i) => i.badgeColor === activeCategory);
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -422,7 +449,7 @@ export default function HonorsSection() {
       className="fx-tide-surface fx-dot-plane fx-sheet relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-clip border-t-3 border-ink flex flex-col"
     >
       {/* Structural grid + Bauhaus accents */}
-      {FX.ambientOrbits ? <AmbientOrbits side="left" square="bg-pop-red" /> : null}
+      {FX.ambientOrbits ? <AmbientOrbits side="left" square="bg-white" /> : null}
 
       <div
         aria-hidden
@@ -430,9 +457,9 @@ export default function HonorsSection() {
         style={{ '--depth': -22 } as React.CSSProperties}
       >
         {FX.solids3d ? (
-          <BauhausSolid kind="coin" size={40} color="#FF4B2B" />
+          <BauhausSolid kind="coin" size={40} color="#FFFFFF" />
         ) : (
-          <div className="w-40 h-40 rounded-full bg-pop-red border-3 border-ink" />
+          <div className="w-40 h-40 rounded-full bg-white border-3 border-ink" />
         )}
       </div>
       <div
@@ -441,9 +468,9 @@ export default function HonorsSection() {
         style={{ '--depth': 18 } as React.CSSProperties}
       >
         {FX.solids3d ? (
-          <BauhausSolid kind="cube" size={12} color="#454AE5" />
+          <BauhausSolid kind="cube" size={12} color="#FFFFFF" />
         ) : (
-          <div className="w-12 h-12 bg-pop-blue border-3 border-ink rotate-12" />
+          <div className="w-12 h-12 bg-white border-3 border-ink rotate-12" />
         )}
       </div>
 
@@ -466,6 +493,8 @@ export default function HonorsSection() {
             </m.p>
           </div>
         </div>
+
+        <SignalKey only={['podium', 'qualifier', 'academic']} className="w-fit max-w-full" />
 
         {/* Interactive Category Keys (clay) */}
         <div className="fx-card-grid grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -533,14 +562,20 @@ export default function HonorsSection() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={vt ? undefined : { opacity: 0, y: -20, position: 'absolute', inset: 0 }}
                 transition={{ duration: 0.4, type: 'spring', bounce: 0.2 }}
-                className={`grid grid-cols-1 lg:grid-cols-2 ${activeItems.length > 2 ? 'xl:grid-cols-3' : 'items-start'} gap-7`}
+                // R21: no orphan card. Many items: featured wins 3 per row, the rest 4 per row (12-col grid); on 2 columns
+                // the first win spans the row so the rest pair up.
+                className={`grid grid-cols-1 lg:grid-cols-2 ${activeItems.length > 2 ? 'xl:grid-cols-12' : 'items-start'} gap-7`}
               >
                 {activeItems.map((item, itemIdx) => {
                   const Icon = item.icon;
                   const isFeatured = item.isFeatured;
-                  const c = colorFor[item.badgeColor];
+                  const c = colorFor(item);
                   const linked = item.id === 'supervity' ? 'zerolag' : item.id === 'proofpay' ? 'proofpay' : undefined;
                   const hit = !!trail && trail.ids.some((id) => linked === id);
+                  const span =
+                    activeItems.length > 2
+                      ? `${isFeatured ? 'xl:col-span-4' : 'xl:col-span-3'} ${itemIdx === 0 && activeItems.length % 2 === 1 ? 'lg:col-span-2 xl:col-span-4' : ''}`
+                      : '';
 
                   return (
                     <m.div
@@ -550,7 +585,7 @@ export default function HonorsSection() {
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.4, delay: itemIdx * 0.08 }}
-                      className={`relative group rounded-[28px] border-3 border-ink bg-white overflow-hidden flex flex-col ${activeItems.length > 2 ? 'h-full' : ''} transition-[transform,box-shadow] duration-200 hover:-translate-x-1 hover:-translate-y-1 ${
+                      className={`relative group rounded-[28px] border-3 border-ink bg-white overflow-hidden flex flex-col ${span} ${activeItems.length > 2 ? 'h-full' : ''} transition-[transform,box-shadow] duration-200 hover:-translate-x-1 hover:-translate-y-1 ${
                         isFeatured
                           ? `shadow-brutal-lg hover:shadow-brutal-xl ${FX.podiumGlint ? 'fx-glint' : ''}`
                           : 'shadow-brutal hover:shadow-brutal-lg'
@@ -558,9 +593,14 @@ export default function HonorsSection() {
                     >
                       {/* Top Bar */}
                       <div
-                        className={`flex flex-wrap items-center justify-between gap-3 px-6 py-3.5 border-b-3 border-ink ${isFeatured ? c.fill : c.soft}`}
+                        className={`nb-hatch flex flex-wrap items-center justify-between gap-3 px-6 py-3.5 border-b-3 border-ink ${isFeatured ? c.fill : c.soft}`}
                       >
-                        <div className="inline-flex items-center gap-1.5 text-xs font-mono font-extrabold tracking-[0.06em] uppercase text-ink">
+                        <div className="inline-flex min-w-0 flex-wrap items-center gap-2 text-xs font-mono font-extrabold tracking-[0.06em] uppercase text-ink">
+                          {item.signal ? (
+                            <span className="shrink-0 rounded-md border-2 border-ink bg-white px-1.5 py-0.5 text-[0.62rem] tracking-[0.14em] shadow-brutal-xs">
+                              {SIGNAL[item.signal].label}
+                            </span>
+                          ) : null}
                           <Icon className="w-4 h-4 shrink-0" strokeWidth={2.5} />
                           <span>{item.badge}</span>
                         </div>
@@ -614,16 +654,11 @@ export default function HonorsSection() {
                         {/* Footer: Stat Callout & Certificate Link */}
                         <div className="mt-auto pt-6 border-t-2 border-dashed border-ink flex flex-col items-start gap-5">
                           {/* Big Stat Callout (sticker) */}
-                          <div className="flex flex-col items-start">
-                            <span
-                              className={`font-display text-3xl font-extrabold text-ink tracking-[-0.03em] leading-none px-3 py-1.5 rounded-xl border-3 border-ink shadow-brutal-sm -rotate-2 ${c.fill}`}
-                            >
-                              <AnimatedCounter value={item.statCallout.value} />
-                            </span>
-                            <span className="text-[0.7rem] font-mono font-bold text-ink-muted uppercase tracking-[0.1em] mt-3">
-                              {item.statCallout.label}
-                            </span>
-                          </div>
+                          <HonorEmblem
+                            kind={item.emblem}
+                            value={<AnimatedCounter value={item.statCallout.value} />}
+                            label={item.statCallout.label}
+                          />
 
                           {/* Certificate Action */}
                           {item.certificateUrl && (
