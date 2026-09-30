@@ -25,6 +25,7 @@ import { useFocusTrap } from '@/lib/use-focus-trap';
 import { useLatest } from '@/lib/use-latest';
 import { FX, canHover } from '@/lib/fx';
 import { useBooted } from './boot-sequence';
+import { PHOTO_BLUR } from './photo-blur';
 
 /** w / h = the file's real pixel size (R17 F-02): prints and the lightbox take the photo's shape before it loads */
 type Photo = { src: string; alt: string; rotation: number; w: number; h: number };
@@ -640,6 +641,8 @@ export function InteractivePhotoStack({ customPhotos, galleryId }: { customPhoto
                       alt=""
                       fill
                       sizes="(max-width: 374px) 45vw, (max-width: 1023px) 30vw, 14vw"
+                      placeholder={PHOTO_BLUR[photo.src] ? 'blur' : 'empty'}
+                      blurDataURL={PHOTO_BLUR[photo.src]}
                       className="fx-wipe object-contain"
                     />
                   </span>
@@ -732,6 +735,9 @@ export function InteractivePhotoStack({ customPhotos, galleryId }: { customPhoto
                             alt={photo.alt}
                             fill
                             sizes={DECK_SIZES}
+                            // R17 F-05: a soft preview of the photo while it loads
+                            placeholder={PHOTO_BLUR[photo.src] ? 'blur' : 'empty'}
+                            blurDataURL={PHOTO_BLUR[photo.src]}
                             className="object-contain pointer-events-none"
                           />
                           {isTop && (
