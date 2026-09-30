@@ -179,7 +179,9 @@ test('the cursor shows the tool: external link (FX-88)', async ({ page }) => {
 test.describe('android', () => {
   test.use((({ defaultBrowserType, ...d }) => d)(devices['Pixel 7']));
   test('tilting the phone moves the desk lamp (FX-89)', async ({ page }) => {
-    await home(page);
+    // full tier: CI runners report <= 4 cores, which starts an emulated phone in lite (no gyro, by design, FX-93)
+    await home(page, '/?fxtier=full');
+    await expect(page.locator('html[data-fx-desk="on"]')).toHaveCount(1); // DeskFx is a lazy chunk: listeners live
     await page.evaluate(() => {
       window.dispatchEvent(new DeviceOrientationEvent('deviceorientation', { beta: 40, gamma: 0 }));
       window.dispatchEvent(new DeviceOrientationEvent('deviceorientation', { beta: 40, gamma: 12 }));
