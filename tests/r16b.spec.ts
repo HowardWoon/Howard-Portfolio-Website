@@ -130,9 +130,24 @@ test('modifier clicks on a simulator link stay native (FX-85)', async ({ page, c
   await home(page);
   const run = page.locator('#projects a[href="/simulators/energy"]');
   await run.scrollIntoViewIfNeeded();
-  const popup = context.waitForEvent('page');
+  // R21: registered after every app listener, so it sees the final verdict of the click. Native = nobody cancelled
+  // it. (The old check waited for the new tab only: in ~1 of 15 headless runs Chromium opened no tab although the
+  // click was NOT cancelled, measured 45 runs, so it failed while the site behaved correctly.)
+  await page.evaluate(() => {
+    const w = window as unknown as { __modClick?: { prevented: boolean; ctrl: boolean } };
+    window.addEventListener('click', (e) => (w.__modClick = { prevented: e.defaultPrevented, ctrl: e.ctrlKey }));
+  });
+  const popup = context.waitForEvent('page', { timeout: 5000 }).catch(() => null);
   await run.click({ modifiers: ['Control'] });
-  await (await popup).close();
+  expect(
+    await page.evaluate(() => (window as unknown as { __modClick?: { prevented: boolean; ctrl: boolean } }).__modClick),
+  ).toEqual({ prevented: false, ctrl: true });
+  const tab = await popup;
+  if (tab) {
+    await tab.waitForLoadState('domcontentloaded');
+    expect(tab.url()).toContain('/simulators/energy'); // when the browser opens the tab, it is the simulator
+    await tab.close();
+  }
   await expect(page).toHaveURL(/\/$/); // this tab did not navigate
   await expect(page.locator('html.fx-portal')).toHaveCount(0);
 });

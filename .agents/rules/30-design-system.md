@@ -75,6 +75,11 @@ Rules:
    Long `node -e` one-liners with nested quotes break: write the script to the scratchpad and run it.
 9. Headless Chromium renders on SwiftShader by default; for real GPU numbers launch with
    `--use-angle=d3d11 --enable-gpu --ignore-gpu-blocklist --enable-gpu-rasterization`.
+10. Headless Chromium sometimes opens NO tab for a Ctrl/Cmd+click although the page did not cancel it (~1 in 15,
+    measured). Never make a test depend only on `context.waitForEvent('page')`: assert the click's final
+    `defaultPrevented === false` (listener added last on window) and treat the tab as optional (tests/r16b FX-85).
+11. Before calling a failure a regression, run the same test 30x on the previous commit (git worktree + junctioned
+    node_modules). A 12-run sample hid a 2/30 flake.
 
 ## F. Definition of done additions
 
