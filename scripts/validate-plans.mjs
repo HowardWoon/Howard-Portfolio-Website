@@ -379,10 +379,10 @@ has(
 has(
   'R9',
   'R9-06',
-  'ScrollUnfold gate (flat for reduced motion / Calm; R14: flat until allowed)',
+  'ScrollUnfold gate (flat for reduced motion / Calm; R14: flat until allowed; R20: CSS view timeline)',
   'components/fx/scroll-unfold.tsx',
-  'const gate = useMotionValue(',
-  'gate.set(allowed && mq.matches ? 1 : 0)',
+  'if (!el || !allowed) return;',
+  "el.dataset.unfold = 'css';",
 );
 has('R9', 'R9-07', 'Button icons never shrink to 0', 'app/globals.css', '.nb-btn > svg', 'flex-shrink: 0');
 has('R9', 'R9-08', 'Magnetic honours Calm (useMotionAllowed)', 'components/magnetic-button.tsx', 'useMotionAllowed');
@@ -1117,7 +1117,7 @@ has(
   'B-01c',
   'Project cards render flat until the unfold is allowed',
   'components/fx/scroll-unfold.tsx',
-  'const gate = useMotionValue(0);',
+  "<div data-fx ref={ref} className={className} style={{ transformOrigin: '50% 100%' }}>",
 );
 has(
   'R14',
@@ -1290,9 +1290,9 @@ has('R15', 'TEST', 'R15 regression tests', 'tests/r15.spec.ts', '(FX-72)', '(FX-
 has(
   'R17',
   'P0-02',
-  'No 3D layer on touch: unfold perspective only while it runs',
-  'components/fx/scroll-unfold.tsx',
-  'transformPerspective: on ? 1400 : undefined',
+  'No 3D layer on touch: unfold perspective only while it runs (R20: desktop-only CSS rule)',
+  'app/globals.css',
+  "@media (min-width: 1024px) and (pointer: fine) and (prefers-reduced-motion: no-preference) {\n    html:not([data-motion='calm']) [data-unfold='css'] {",
 );
 has('R17', 'P0-02b', 'TiltCard tilts only on a hovering pointer', 'components/tilt-card.tsx', 'allowed && hover ?');
 has(

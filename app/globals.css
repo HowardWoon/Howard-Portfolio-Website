@@ -1927,6 +1927,27 @@ html[data-fx-tier='lite'] .fx-aberration {
   }
 }
 
+/* FX-07 Card Unfold (components/fx/scroll-unfold.tsx sets data-unfold="css" after mount): the card rises out of a
+   tilted plane between "top at the screen bottom" and "top at 80 % of the screen". Same pose, range and linear curve
+   as the old per-card framer tracker, but on a view timeline, so scrolling never waits for it. Desktop only. */
+@supports (animation-timeline: view()) {
+  @media (min-width: 1024px) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    html:not([data-motion='calm']) [data-unfold='css'] {
+      animation: fx-unfold linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 20vh;
+    }
+  }
+}
+@keyframes fx-unfold {
+  from {
+    transform: perspective(1400px) translateY(48px) scale(0.93) rotateX(14deg);
+  }
+  to {
+    transform: perspective(1400px) translateY(0px) scale(1) rotateX(0deg);
+  }
+}
+
 /* FX-82 Draft-to-Ink: each section-title word is drawn as a 1.5 px ink outline, then fills with ink from the
    baseline up as it rises into the reading zone, left to right (--i from SplitWords). At every frame the word is
    either a solid ink outline or ink-filled, so it always reads. Plain ink everywhere else. */

@@ -16,8 +16,9 @@ import { restoreSkim } from '@/lib/skim';
  * FX-83 Foundation Reveal: on large screens the footer is fixed under the page inside a clip-path box of its own
  *   height, so the page lifts off it at the end (globals.css). Only when the footer is shorter than 85 % of the screen.
  * FX-84 Shutter Jump: in-page anchor clicks longer than 2.5 screens become one paper flip (lib/jump.ts).
- * FX-86 Soft Landing: a wheel scroll that stops within 6 % of a section top settles onto it (lenis/snap, part of
- *   the installed lenis package). Mouse / trackpad only; keyboard, touch and anchor jumps are never snapped.
+ * FX-86 Soft Landing: a wheel scroll that stops within 6 % of a section top settles onto it (a 0.6 s Lenis glide
+ *   once the native wheel scroll has come to rest). Mouse / trackpad only; keyboard, touch and anchor jumps are never
+ *   snapped.
  * FX-87 Directional Ink: `.fx-dir-ink` underlines grow from the side the mouse entered and leave the way it left.
  * FX-89 Gyro Lamp: on Android phones / tablets (no permission prompt exists there; iOS would prompt, so it is
  *   skipped) a gentle tilt moves the desk lamp, driving the same --px / --py the mouse drives on desktop.
@@ -94,49 +95,64 @@ export function DeskFx() {
     return () => window.removeEventListener('click', onClick, true);
   }, []);
 
-  // FX-86
+  // FX-86 (R20: the wheel scrolls natively now, so the landing waits for the page to come to rest and measures the
+  // real position; lenis/snap added the last wheel delta on top of a scroll that already contained it)
   useEffect(() => {
     if (!FX.softLanding || calm || prefersReducedMotion() || !canHover()) return;
-    let cancelled = false;
-    let destroy = () => {};
-    let tries = 0;
-    const start = async () => {
-      const lenis = window.__lenis;
-      if (!lenis) {
-        if (tries++ < 10) window.setTimeout(start, 400);
-        return;
-      }
-      const { default: Snap } = await import('lenis/snap');
-      if (cancelled) return;
-      const snap = new Snap(lenis, { type: 'proximity', distanceThreshold: '6%', duration: 0.6, debounce: 220 });
-      let removers: (() => void)[] = [];
-      const compute = () => {
-        removers.forEach((r) => r());
-        removers = SECTION_IDS.map((id) => document.getElementById(id))
-          .filter((el): el is HTMLElement => el !== null)
-          .map((el) => {
-            const margin = parseFloat(getComputedStyle(el).scrollMarginTop) || 0;
-            return snap.add(Math.round(el.getBoundingClientRect().top + window.scrollY - margin));
-          });
-      };
-      let t = 0;
-      const soon = () => {
-        window.clearTimeout(t);
-        t = window.setTimeout(compute, 250);
-      };
-      const ro = new ResizeObserver(soon); // lazy sections, images and accordions change the section tops
-      ro.observe(document.body);
-      compute();
-      destroy = () => {
-        window.clearTimeout(t);
-        ro.disconnect();
-        snap.destroy();
-      };
+    let tops: number[] = [];
+    const compute = () => {
+      tops = SECTION_IDS.map((id) => document.getElementById(id))
+        .filter((el): el is HTMLElement => el !== null)
+        .map((el) => {
+          const margin = parseFloat(getComputedStyle(el).scrollMarginTop) || 0;
+          return Math.round(el.getBoundingClientRect().top + window.scrollY - margin);
+        });
     };
-    start();
+    let t = 0;
+    const soon = () => {
+      window.clearTimeout(t);
+      t = window.setTimeout(compute, 250);
+    };
+    const ro = new ResizeObserver(soon); // lazy sections, images and accordions change the section tops
+    ro.observe(document.body);
+    compute();
+
+    let wheeled = false;
+    let settle = 0;
+    const land = () => {
+      wheeled = false;
+      const lenis = window.__lenis;
+      if (!lenis || lenis.isStopped || lenis.isLocked || lenis.isScrolling === 'smooth') return;
+      const y = window.scrollY;
+      const threshold = window.innerHeight * 0.06;
+      let best: number | null = null;
+      for (const top of tops) {
+        const d = Math.abs(top - y);
+        if (d >= 1 && d <= threshold && (best === null || d < Math.abs(best - y))) best = top;
+      }
+      if (best !== null) lenis.scrollTo(best, { duration: 0.6, userData: { initiator: 'snap' } });
+    };
+    const arm = () => {
+      window.clearTimeout(settle);
+      settle = window.setTimeout(land, 220);
+    };
+    // mouse / trackpad only: keyboard, touch and anchor jumps never set `wheeled`
+    const onWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || e.deltaY === 0) return;
+      wheeled = true;
+      arm();
+    };
+    const onScroll = () => {
+      if (wheeled) arm(); // wait until the native wheel animation has come to rest
+    };
+    window.addEventListener('wheel', onWheel, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
     return () => {
-      cancelled = true;
-      destroy();
+      window.clearTimeout(t);
+      window.clearTimeout(settle);
+      ro.disconnect();
+      window.removeEventListener('wheel', onWheel);
+      window.removeEventListener('scroll', onScroll);
     };
   }, [calm]);
 

@@ -24,7 +24,10 @@ export default function SmoothScrollProvider({ children }: { children: React.Rea
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
       gestureOrientation: 'vertical',
-      smoothWheel: true,
+      // Wheel / trackpad scroll natively: the browser scrolls on the compositor thread (and animates wheel steps
+      // itself), so scrolling never waits for JS. With smoothWheel every frame ran on the main thread, which dropped
+      // frames on 120-180 Hz screens. Lenis still drives anchors, scrollTo, jumps, snap (FX-86) and the scroll lock.
+      smoothWheel: false,
       wheelMultiplier: 1.0,
       touchMultiplier: 2.0,
       autoRaf: true, // replaces the manual rAF loop that was never cancelled on unmount
