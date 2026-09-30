@@ -737,7 +737,7 @@ export function BlueprintStage({
 
   /* ------------------------------------------------------------------ render */
   const btn =
-    'inline-flex items-center justify-center gap-1.5 min-h-[36px] min-w-[36px] [@media(pointer:coarse)]:min-h-[40px] [@media(pointer:coarse)]:min-w-[40px] px-2.5 rounded-xl border-2 border-ink font-mono text-[0.68rem] font-extrabold tracking-[0.08em] transition-colors';
+    'inline-flex items-center justify-center gap-1.5 min-h-[36px] min-w-[36px] [@media(pointer:coarse)]:min-h-[40px] [@media(pointer:coarse)]:min-w-[40px] px-2.5 rounded-xl border-2 border-ink font-mono text-xs font-extrabold tracking-[0.08em] transition-colors';
   const on = 'bg-ink text-white';
   const off = 'bg-white text-ink hover:bg-pop-yellow';
 
@@ -781,7 +781,7 @@ export function BlueprintStage({
           {sheet && hint ? (
             <span
               aria-hidden
-              className="absolute left-1/2 bottom-3 -translate-x-1/2 z-20 w-max max-w-[calc(100%-1.5rem)] nb-tag bg-ink text-white text-[0.62rem] pointer-events-none"
+              className="absolute left-1/2 bottom-3 -translate-x-1/2 z-20 w-max max-w-[calc(100%-1.5rem)] nb-tag bg-ink text-white text-xs pointer-events-none"
             >
               SWIPE ← → FOR LAYERS · PINCH TO ZOOM
             </span>
@@ -795,17 +795,15 @@ export function BlueprintStage({
           >
             <div className="min-w-0 pointer-events-auto">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="nb-tag bg-pop-blue text-white text-[0.65rem] max-w-full">
+                <span className="nb-tag bg-pop-blue text-white text-xs max-w-full">
                   <span className="truncate min-w-0">BLUEPRINT // {title}</span>
                 </span>
-                <span className="bp-stamp nb-tag bg-pop-mint text-[0.65rem] hidden sm:inline-flex">
-                  INSPECTION READY
-                </span>
+                <span className="bp-stamp nb-tag bg-pop-mint text-xs hidden sm:inline-flex">INSPECTION READY</span>
               </div>
               <span
                 ref={readoutRef}
                 aria-live="polite"
-                className="block mt-1.5 font-mono text-[0.65rem] font-extrabold tracking-[0.08em] text-pop-blue"
+                className="block mt-1.5 font-mono text-xs font-extrabold tracking-[0.08em] text-pop-blue"
               >
                 PITCH 34° · YAW 0°
               </span>
@@ -954,7 +952,7 @@ export function BlueprintStage({
             </button>
           </div>
           {showGap && (
-            <label className="flex items-center gap-2 font-mono text-[0.65rem] font-extrabold tracking-[0.08em] text-ink">
+            <label className="flex items-center gap-2 font-mono text-xs font-extrabold tracking-[0.08em] text-ink">
               <span className="shrink-0">ASSEMBLE</span>
               <input
                 ref={gapInputRef}
@@ -975,7 +973,7 @@ export function BlueprintStage({
         </div>
       ) : (
         <>
-          <label className="flex items-center gap-2 font-mono text-[0.65rem] font-extrabold tracking-[0.08em] text-ink">
+          <label className="flex items-center gap-2 font-mono text-xs font-extrabold tracking-[0.08em] text-ink">
             <span className="shrink-0">ASSEMBLE</span>
             <input
               ref={gapInputRef}

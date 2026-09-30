@@ -283,7 +283,7 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
   return (
     <div className="nb-card-lg overflow-hidden" data-pill-pit>
       <div className="nb-hatch flex flex-wrap items-center justify-between gap-3 border-b-3 border-ink bg-paper-deep px-4 py-2.5">
-        <span className="font-mono text-[0.7rem] font-extrabold uppercase tracking-[0.16em] text-ink">{title}</span>
+        <span className="font-mono text-xs font-extrabold uppercase tracking-[0.16em] text-ink">{title}</span>
         {live ? (
           <button
             type="button"
@@ -312,7 +312,7 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
               live
                 ? 'absolute left-0 top-0 cursor-grab touch-none will-change-transform data-[held]:cursor-grabbing'
                 : ''
-            } inline-flex items-center whitespace-nowrap rounded-full border-3 border-ink px-2.5 py-1.5 font-mono text-[0.62rem] font-extrabold uppercase tracking-[0.06em] text-ink shadow-brutal-sm sm:px-4 sm:py-2 sm:text-sm sm:tracking-[0.08em] ${b.fill}`}
+            } inline-flex items-center whitespace-nowrap rounded-full border-3 border-ink px-2.5 py-1.5 font-mono text-xs font-extrabold uppercase tracking-[0.06em] text-ink shadow-brutal-sm sm:px-4 sm:py-2 sm:text-sm sm:tracking-[0.08em] ${b.fill}`}
           >
             {b.label}
           </span>

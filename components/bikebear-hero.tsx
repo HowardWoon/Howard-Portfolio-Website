@@ -31,8 +31,8 @@ function MagnifiedHeadline() {
   };
 
   // Mouse / pen only. On phones a tap fires a synthetic mousemove with no mouseleave, which used to
-  // leave a magnifier circle frozen on screen. The headline itself stays solid under the lens (it used to fade
-  // to 25 %, which read as washed-out grey), and the lens has no clip-path transition, so it never trails.
+  // leave a magnifier circle frozen on screen. R24 (owner): the TORCHLIGHT is back - while the mouse is on the headline
+  // the headline dims to 25 % and the lens is the bright beam. The lens still has no clip-path transition (never trails).
   const handlePointerMove = (e: React.PointerEvent) => {
     if (e.pointerType === 'touch' || !containerRef.current) return;
     const { x, y } = toLocal(containerRef.current, e.clientX, e.clientY);
@@ -64,7 +64,9 @@ function MagnifiedHeadline() {
       className="group/headline relative space-y-2"
     >
       {/* Base Normal Text */}
-      <h2 className={`${headlineClass} text-ink fx-letterpress fx-aberration`}>
+      <h2
+        className={`${headlineClass} text-ink transition-opacity duration-300 group-data-[hover=true]/headline:opacity-25 fx-letterpress fx-aberration`}
+      >
         ENGINEERING <br />
         {FX.headlineStamp ? (
           // FX-05 stamp, in CSS since R14 (.fx-stamp-in): the words are in the server HTML from the first paint
@@ -259,14 +261,14 @@ export default function BikebearHero() {
                 <div className="flex whitespace-nowrap animate-[marquee_40s_linear_infinite] w-max">
                   {[...Array(4)].map((_, i) => (
                     <div key={i} className="flex items-center" aria-hidden={i > 0}>
-                      <span className="ml-4 shrink-0 rounded-md border-2 border-ink bg-pop-yellow px-1.5 py-0.5 font-mono text-[0.7rem] font-extrabold uppercase tracking-[0.1em] text-ink">
+                      <span className="ml-4 shrink-0 rounded-md border-2 border-ink bg-pop-yellow px-1.5 py-0.5 font-mono text-xs font-extrabold uppercase tracking-[0.1em] text-ink">
                         LATEST
                       </span>
                       <span className="text-xs sm:text-sm font-mono font-extrabold text-ink uppercase tracking-[0.12em] px-3">
                         2ND RUNNER UP (SUI) + TOP 6 (GONKA AI) @ MUBA BLOCKCHAIN HACKATHON 2026 🏅
                       </span>
                       <span className="text-xl text-pop-red font-black mx-2 translate-y-[2px]">*</span>
-                      <span className="ml-2 shrink-0 rounded-md border-2 border-ink bg-pop-blue px-1.5 py-0.5 font-mono text-[0.7rem] font-extrabold uppercase tracking-[0.1em] text-white">
+                      <span className="ml-2 shrink-0 rounded-md border-2 border-ink bg-pop-blue px-1.5 py-0.5 font-mono text-xs font-extrabold uppercase tracking-[0.1em] text-white">
                         8 AUG 2026
                       </span>
                       <span className="text-xs sm:text-sm font-mono font-bold text-ink-soft uppercase tracking-[0.12em] px-3">

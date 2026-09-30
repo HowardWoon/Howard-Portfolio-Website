@@ -330,7 +330,7 @@ function HudBar({
         <span className="font-display text-sm font-extrabold uppercase truncate text-ink" aria-live="polite">
           {label}
         </span>
-        <span className="font-mono text-[0.7rem] font-bold text-ink-muted">{detail}</span>
+        <span className="font-mono text-xs font-bold text-ink-muted">{detail}</span>
       </span>
       {extra}
       {onPrev ? (

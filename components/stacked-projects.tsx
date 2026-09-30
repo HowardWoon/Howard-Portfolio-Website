@@ -340,7 +340,7 @@ export default function StackedProjects() {
                 // R21: a stack connector, so the gap between cards says what comes next
                 <div aria-hidden className="flex items-center gap-3 !mt-8 lg:!mt-10 -mb-2 lg:-mb-6">
                   <span className="h-0 flex-1 border-t-3 border-dashed border-ink/30" />
-                  <span className="flex items-center gap-2 rounded-full border-2 border-ink bg-white px-3 py-1 font-mono text-[0.66rem] font-extrabold tracking-[0.14em] text-ink shadow-brutal-xs">
+                  <span className="flex items-center gap-2 rounded-full border-2 border-ink bg-white px-3 py-1 font-mono text-xs font-extrabold tracking-[0.14em] text-ink shadow-brutal-xs">
                     <span className={`h-2.5 w-2.5 rounded-[2px] border-2 border-ink ${SIGNAL[project.signal].fill}`} />
                     NEXT · {project.number} / {String(projects.length).padStart(2, '0')} · {project.title.toUpperCase()}
                   </span>
@@ -423,7 +423,7 @@ function ProjectCard({ project, index }: { project: ProjectData; index: number }
               className={`nb-hatch flex flex-wrap items-center justify-between gap-3 px-4 xs:px-6 sm:px-10 py-3 border-b-3 border-ink max-w-full ${a.fill}`}
             >
               <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
-                <span className="shrink-0 rounded-md border-2 border-ink bg-white px-1.5 py-0.5 font-mono text-[0.66rem] font-extrabold tracking-[0.14em] text-ink shadow-brutal-xs">
+                <span className="shrink-0 rounded-md border-2 border-ink bg-white px-1.5 py-0.5 font-mono text-xs font-extrabold tracking-[0.14em] text-ink shadow-brutal-xs">
                   {a.label}
                 </span>
                 <span className="hidden min-w-0 truncate font-mono text-xs font-extrabold uppercase tracking-[0.12em] text-ink xs:inline">
@@ -540,7 +540,7 @@ function ProjectCard({ project, index }: { project: ProjectData; index: number }
                         className={`rounded-2xl p-3.5 border-3 border-ink ${mIdx === 0 ? 'bg-ink text-white' : 'bg-white text-ink'} shadow-brutal-sm`}
                       >
                         <div
-                          className={`text-[0.7rem] font-mono font-bold uppercase tracking-[0.06em] ${mIdx === 0 ? 'text-white/75' : 'text-ink/70'}`}
+                          className={`text-xs font-mono font-bold uppercase tracking-[0.06em] ${mIdx === 0 ? 'text-white/75' : 'text-ink/70'}`}
                         >
                           {m.label}
                         </div>

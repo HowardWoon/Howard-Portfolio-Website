@@ -148,7 +148,7 @@ export function CustomCursor() {
               initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.5 }}
-              className="font-mono text-[7px] font-extrabold uppercase text-ink text-center leading-none"
+              className="font-mono text-xs font-extrabold uppercase text-ink text-center leading-none"
             >
               {customText}
             </m.span>

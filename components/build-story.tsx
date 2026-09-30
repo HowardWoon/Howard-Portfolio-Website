@@ -69,14 +69,28 @@ const NODES = [
 
 // Each project docks onto the part of the system it proves. Colour = the project's signal (see SIGNAL KEY):
 // yellow podium, cyan qualifier / finalist, orange coursework.
+// R24: each tag is rendered INSIDE the box it docks on (`on`), sitting on that box's top edge, so a bigger font can
+// never slide a tag over the box's own label again (it did when tags had their own x / y).
 const DOCKS = [
-  { name: 'PROOFPAY', fill: 'bg-pop-yellow', x: 14, y: 6, fx: -40, fy: -20, a: 0.62 },
-  { name: 'SLOTIFY', fill: 'bg-pop-orange', x: 86, y: 6, fx: 40, fy: -20, a: 0.64 },
-  { name: 'CATFISH DETECTOR AI', fill: 'bg-pop-orange', x: 14, y: 66, fx: -40, fy: 10, a: 0.66 },
-  { name: 'SENSOR X SENSEI', fill: 'bg-pop-cyan', x: 86, y: 66, fx: 40, fy: 10, a: 0.68 },
-  { name: 'BILAHUJAN', fill: 'bg-pop-cyan', x: 50, y: 30, fx: 0, fy: -40, a: 0.7 },
-  { name: 'ZEROLAG', fill: 'bg-pop-yellow', x: 50, y: 78, fx: 0, fy: 30, a: 0.72 },
+  { name: 'PROOFPAY', fill: 'bg-pop-yellow', on: 'client', fx: -40, fy: -20, a: 0.62 },
+  { name: 'SLOTIFY', fill: 'bg-pop-orange', on: 'services', fx: 40, fy: -20, a: 0.64 },
+  { name: 'CATFISH DETECTOR AI', fill: 'bg-pop-orange', on: 'data', fx: -40, fy: 10, a: 0.66 },
+  { name: 'SENSOR X SENSEI', fill: 'bg-pop-cyan', on: 'edge', fx: 40, fy: 10, a: 0.68 },
+  { name: 'BILAHUJAN', fill: 'bg-pop-cyan', on: 'hub', fx: 0, fy: -40, a: 0.7 },
+  { name: 'ZEROLAG', fill: 'bg-pop-yellow', on: 'guard', fx: 0, fy: 30, a: 0.72 },
 ] as const;
+
+function Dock({ on }: { on: string }) {
+  return DOCKS.filter((d) => d.on === on).map((d) => (
+    <div
+      key={d.name}
+      className={`bs-seg bs-dock ${d.fill}`}
+      style={seg(d.a, d.a + 0.05, { '--from-x': d.fx, '--from-y': d.fy })}
+    >
+      {d.name}
+    </div>
+  ));
+}
 
 const CODE = [
   ['$', './compile --student "HOWARD WOON HAO ZHE"'],
@@ -106,7 +120,11 @@ function Portrait({
 }) {
   return (
     <div className="bs-portrait relative h-full w-full overflow-hidden bg-[#F2F5FF]">
-      <pre className="bs-glyphs absolute inset-0 m-0 flex items-start justify-center overflow-hidden font-mono font-bold text-ink">
+      {/* R24: the glyph mosaic is picture art, not reading text, so it is the one exemption from the type floor test */}
+      <pre
+        data-type-exempt
+        className="bs-glyphs absolute inset-0 m-0 flex items-start justify-center overflow-hidden font-mono font-bold text-ink"
+      >
         {PORTRAIT_GLYPHS}
       </pre>
       <div className={`bs-seg ${reverse ? 'bs-wipe-in' : 'bs-wipe'} absolute inset-0`} style={mosaicSeg}>
@@ -216,7 +234,7 @@ export default function BuildStory() {
 
           {/* ---------------------------------------------------------------- title card (fades as the ID drops) */}
           <div className="bs-seg bs-title absolute inset-x-0 z-20 px-5 text-center" style={seg(0.015, 0.07)}>
-            <p className="bs-kicker inline-flex items-center gap-2 rounded-md border-2 border-white bg-pop-orange px-2.5 py-1 font-mono text-[0.7rem] font-extrabold uppercase tracking-[0.14em] text-ink">
+            <p className="bs-kicker inline-flex items-center gap-2 rounded-md border-2 border-white bg-pop-orange px-2.5 py-1 font-mono text-xs font-extrabold uppercase tracking-[0.14em] text-ink">
               THE BUILD // SCROLL TO COMPILE
             </p>
             <h2
@@ -241,20 +259,20 @@ export default function BuildStory() {
                 <div className="bs-seg bs-id-drop" style={seg(0.03, 0.15)}>
                   <div className="bs-card bs-idcard relative overflow-hidden rounded-[22px] border-3 border-ink bg-paper text-ink">
                     <div className="flex items-center justify-between gap-2 border-b-3 border-ink bg-pop-orange px-4 py-2">
-                      <span className="font-display text-[clamp(0.72rem,2.6vw,0.95rem)] font-extrabold tracking-[0.02em]">
+                      <span className="font-display text-[clamp(0.8rem,2.6vw,0.95rem)] font-extrabold tracking-[0.02em]">
                         UNIVERSITI MALAYA
                       </span>
-                      <span className="font-mono text-[0.6rem] font-extrabold tracking-[0.14em]">STUDENT ID</span>
+                      <span className="font-mono text-xs font-extrabold tracking-[0.14em]">STUDENT ID</span>
                     </div>
                     <div className="grid grid-cols-[34%_1fr] gap-3 p-3 sm:gap-4 sm:p-4">
                       <div className="bs-photo relative aspect-[413/591] overflow-hidden rounded-xl border-3 border-ink">
                         <Portrait photoSeg={seg(0.22, 0.32)} mosaicSeg={seg(0.27, 0.37)} />
                         <span className="bs-seg bs-scan" style={seg(0.22, 0.37)} />
                       </div>
-                      <dl className="min-w-0 space-y-1.5 font-mono text-[clamp(0.52rem,1.9vw,0.72rem)] leading-tight">
+                      <dl className="min-w-0 space-y-1.5 font-mono text-[clamp(0.8rem,1.9vw,0.85rem)] leading-tight">
                         <div>
                           <dt className="font-bold text-ink-muted">NAME</dt>
-                          <dd className="font-display text-[clamp(0.7rem,2.6vw,1rem)] font-extrabold">
+                          <dd className="font-display text-[clamp(0.8rem,2.6vw,1rem)] font-extrabold">
                             HOWARD WOON HAO ZHE
                           </dd>
                         </div>
@@ -295,11 +313,9 @@ export default function BuildStory() {
                   <span className="h-3 w-3 rounded-full border-2 border-ink bg-pop-red" />
                   <span className="h-3 w-3 rounded-full border-2 border-ink bg-pop-yellow" />
                   <span className="h-3 w-3 rounded-full border-2 border-ink bg-pop-mint" />
-                  <span className="ml-2 font-mono text-[0.68rem] font-extrabold tracking-[0.08em]">
-                    howard@um:~/build
-                  </span>
+                  <span className="ml-2 font-mono text-xs font-extrabold tracking-[0.08em]">howard@um:~/build</span>
                 </div>
-                <div className="space-y-1 bg-ink p-3 font-mono text-[clamp(0.58rem,1.9vw,0.8rem)] leading-snug text-white sm:p-4">
+                <div className="space-y-1 bg-ink p-3 font-mono text-[clamp(0.8rem,1.9vw,0.9rem)] leading-snug text-white sm:p-4">
                   {CODE.map(([mark, line], i) => (
                     <div
                       key={line}
@@ -357,35 +373,26 @@ export default function BuildStory() {
 
               <div className="bs-seg bs-hub" style={seg(0.44, 0.5)}>
                 <div className="bs-seg bs-hub-core" style={seg(0.6, 0.66)}>
-                  <span className="font-mono text-[0.58rem] font-extrabold tracking-[0.14em]">AI ORCHESTRATOR</span>
-                  <span className="font-display text-[clamp(0.72rem,1.6vw,1rem)] font-extrabold leading-tight">
+                  <span className="font-mono text-xs font-extrabold tracking-[0.14em]">AI ORCHESTRATOR</span>
+                  <span className="font-display text-[clamp(0.8rem,1.6vw,1rem)] font-extrabold leading-tight">
                     LangGraph · Gemini · MCP
                   </span>
                 </div>
+                <Dock on="hub" />
               </div>
 
               {NODES.map((n) => (
                 <div
                   key={n.id}
                   className="bs-seg bs-node"
+                  data-side={n.x < 50 ? 'l' : n.x > 50 ? 'r' : 'c'}
                   style={seg(n.a, n.a + 0.05, { left: `${n.x}%`, top: `${n.y}%` })}
                 >
-                  <span className="font-mono text-[0.58rem] font-extrabold tracking-[0.14em] text-ink-muted">
-                    {n.label}
-                  </span>
-                  <span className="font-display text-[clamp(0.62rem,1.4vw,0.9rem)] font-extrabold leading-tight">
+                  <span className="font-mono text-xs font-extrabold tracking-[0.14em] text-ink-muted">{n.label}</span>
+                  <span className="font-display text-[clamp(0.8rem,1.4vw,0.95rem)] font-extrabold leading-tight">
                     {n.tech}
                   </span>
-                </div>
-              ))}
-
-              {DOCKS.map((d) => (
-                <div
-                  key={d.name}
-                  className={`bs-seg bs-dock ${d.fill}`}
-                  style={seg(d.a, d.a + 0.05, { left: `${d.x}%`, top: `${d.y}%`, '--from-x': d.fx, '--from-y': d.fy })}
-                >
-                  {d.name}
+                  <Dock on={n.id} />
                 </div>
               ))}
             </div>
@@ -395,10 +402,8 @@ export default function BuildStory() {
           <div className="bs-seg bs-release-in bs-layer" style={seg(0.82, 0.9)}>
             <div className="bs-card bs-release relative overflow-hidden rounded-[26px] border-3 border-ink bg-paper text-ink">
               <div className="flex items-center justify-between gap-2 border-b-3 border-ink bg-pop-mint px-4 py-2">
-                <span className="font-mono text-[0.66rem] font-extrabold tracking-[0.14em]">
-                  RELEASE · v2026 · MAIN
-                </span>
-                <span className="font-mono text-[0.66rem] font-extrabold tracking-[0.14em]">✓ DEPLOYED</span>
+                <span className="font-mono text-xs font-extrabold tracking-[0.14em]">RELEASE · v2026 · MAIN</span>
+                <span className="font-mono text-xs font-extrabold tracking-[0.14em]">✓ DEPLOYED</span>
               </div>
               <div className="grid grid-cols-[30%_1fr] items-start gap-3 p-3 sm:grid-cols-[34%_1fr] sm:gap-5 sm:p-5">
                 <div className="relative aspect-[413/591] overflow-hidden rounded-xl border-3 border-ink" aria-hidden>
@@ -408,10 +413,10 @@ export default function BuildStory() {
                   <p className="font-display text-[clamp(1rem,3.6vw,1.9rem)] font-extrabold uppercase leading-[0.95] tracking-[-0.02em]">
                     Howard Woon Hao Zhe
                   </p>
-                  <p className="inline-block rounded-md border-2 border-ink bg-pop-lilac px-2 py-0.5 font-mono text-[clamp(0.58rem,1.8vw,0.75rem)] font-extrabold tracking-[0.1em]">
+                  <p className="inline-block rounded-md border-2 border-ink bg-pop-lilac px-2 py-0.5 font-mono text-[clamp(0.8rem,1.8vw,0.9rem)] font-extrabold tracking-[0.1em]">
                     SYSTEMS & AI ARCHITECT
                   </p>
-                  <p className="font-mono text-[clamp(0.58rem,1.8vw,0.78rem)] font-bold text-ink-soft">
+                  <p className="font-mono text-[clamp(0.8rem,1.8vw,0.9rem)] font-bold text-ink-soft">
                     B.Comp.Sc. (Software Engineering) · Universiti Malaya
                   </p>
                   <ul className="space-y-1.5 pt-1">
@@ -419,7 +424,7 @@ export default function BuildStory() {
                       <li
                         key={w.text}
                         aria-hidden
-                        className={`bs-seg bs-award rounded-lg border-2 border-ink px-2 py-1 font-mono text-[clamp(0.5rem,1.6vw,0.68rem)] font-extrabold leading-tight ${w.fill}`}
+                        className={`bs-seg bs-award rounded-lg border-2 border-ink px-2 py-1 font-mono text-xs font-extrabold leading-tight ${w.fill}`}
                         style={seg(0.9 + i * 0.02, 0.93 + i * 0.02)}
                       >
                         {w.text}
@@ -445,7 +450,7 @@ export default function BuildStory() {
             aria-hidden
             className="bs-hud-top absolute inset-x-0 z-30 flex items-center justify-between gap-3 px-4 sm:px-8"
           >
-            <div className="flex items-center gap-2 font-mono text-[0.62rem] font-extrabold tracking-[0.14em] sm:text-[0.7rem]">
+            <div className="flex shrink-0 items-center gap-2 whitespace-nowrap font-mono text-xs font-extrabold tracking-[0.06em] sm:tracking-[0.14em]">
               <span className="bs-rec h-2.5 w-2.5 rounded-full bg-pop-red" />
               BUILD LOG
               <span className="hidden text-white/60 sm:inline">· FRAME</span>
@@ -459,7 +464,7 @@ export default function BuildStory() {
                 <li
                   key={s.n}
                   data-n={i + 1}
-                  className="bs-pill flex items-center gap-1.5 rounded-md border-2 border-white/40 px-1.5 py-0.5 font-mono text-[0.58rem] font-extrabold tracking-[0.1em] sm:px-2 sm:text-[0.64rem]"
+                  className="bs-pill flex items-center gap-1 sm:gap-1.5 rounded-md border-2 border-white/40 px-1 py-0.5 font-mono text-xs font-extrabold tracking-[0.06em] sm:px-2 sm:tracking-[0.1em]"
                 >
                   <span className={`h-2 w-2 rounded-[2px] border border-ink ${s.swatch}`} />
                   <span>{s.n}</span>
@@ -481,11 +486,11 @@ export default function BuildStory() {
                 style={{ '--bs-c': `var(--bs-c${i + 1})` } as CSSProperties}
               >
                 <span
-                  className={`shrink-0 rounded-md border-2 border-ink px-1.5 font-mono text-[0.66rem] font-extrabold ${s.swatch}`}
+                  className={`shrink-0 rounded-md border-2 border-ink px-1.5 font-mono text-xs font-extrabold ${s.swatch}`}
                 >
                   {s.n} {s.key}
                 </span>
-                <span className="font-mono text-[clamp(0.66rem,2vw,0.85rem)] font-semibold leading-snug">
+                <span className="font-mono text-[clamp(0.8rem,2vw,0.9rem)] font-semibold leading-snug">
                   {s.caption}
                 </span>
               </p>

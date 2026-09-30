@@ -68,7 +68,7 @@ export function RoleProof({ roles, fillFor }: { roles: string[]; fillFor: (role:
       <div id="role-proof" role="region" aria-live="polite" aria-label="Proof of work">
         {proof ? (
           <div className="rounded-2xl border-3 border-ink bg-white p-3 shadow-brutal-sm">
-            <p className="mb-2 font-mono text-[0.66rem] font-extrabold uppercase tracking-[0.14em] text-ink">
+            <p className="mb-2 font-mono text-xs font-extrabold uppercase tracking-[0.14em] text-ink">
               Proof of work // {shown}
             </p>
             <ul className="space-y-1.5">
@@ -86,7 +86,7 @@ export function RoleProof({ roles, fillFor }: { roles: string[]; fillFor: (role:
             </ul>
           </div>
         ) : (
-          <p className="font-mono text-[0.7rem] font-semibold text-ink-muted">
+          <p className="font-mono text-xs font-semibold text-ink-muted">
             Point at or tap a role to see the projects that prove it.
           </p>
         )}

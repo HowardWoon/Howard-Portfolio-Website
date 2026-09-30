@@ -452,7 +452,7 @@ html[data-motion='calm'] .fx-drift-rev {
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
   }
   .terminal {
-    @apply rounded-xl border-2 border-ink bg-ink p-3 font-mono text-xs text-[#E7E7E7];
+    @apply rounded-xl border-2 border-ink bg-ink p-3 font-mono text-xs font-semibold text-[#E7E7E7]; /* R24: no slim small type */
     box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.6);
   }
 
@@ -1069,14 +1069,14 @@ html.hw-booted .boot-overlay {
   .fx-count {
     display: inline-grid;
     place-items: center;
-    min-width: 1.15rem;
-    height: 1.15rem;
-    padding: 0 0.25rem;
+    min-width: 1.4rem;
+    height: 1.4rem;
+    padding: 0 0.3rem;
     margin-left: 0.15rem;
     border-radius: 999px;
     background: #0a0a0a;
     color: #fff;
-    font-size: 0.65rem;
+    font-size: 0.8rem; /* R24 type floor */
     line-height: 1;
   }
   .fx-trail-chip[aria-pressed='true'] .fx-count {
@@ -2435,7 +2435,7 @@ html[data-xray-mode]
   background: #fff;
   color: #1f37c7;
   font:
-    800 0.66rem/1.2 var(--font-mono),
+    800 0.8rem/1.2 var(--font-mono),
     monospace;
   letter-spacing: 0.06em;
   white-space: nowrap;
@@ -2565,15 +2565,16 @@ html[data-xray-mode]
     display: none;
   }
   .bs-code .bs-type {
-    font-size: 0.56rem;
+    font-size: 0.8rem;
   }
+  /* the top padding keeps the label clear of the project tag sitting on the box's top edge */
   .bs-node,
   .bs-hub-core {
-    padding: 4px 8px;
+    padding: 13px 8px 4px;
   }
   .bs-node > span,
   .bs-hub-core > span {
-    font-size: 0.56rem !important;
+    font-size: 0.8rem !important;
   }
 }
 .bs-seg {
@@ -2821,10 +2822,17 @@ html[data-xray-mode]
   stroke-dashoffset: calc(1 - var(--e));
 }
 .bs-hub,
-.bs-node,
-.bs-dock {
+.bs-node {
   position: absolute;
   translate: -50% -50%;
+}
+/* R24: a side node is centred on its anchor but never crosses the diagram edge (4px gutter); max-content stops the
+   browser shrinking it to the 14% left of its anchor, which broke "ESP32 · MQTT" onto three lines */
+.bs-node[data-side='l'] {
+  translate: max(-50%, calc(4px - 14cqw)) -50%;
+}
+.bs-node[data-side='r'] {
+  translate: min(-50%, calc(14cqw - 4px - 100%)) -50%;
 }
 .bs-hub {
   left: 50%;
@@ -2870,8 +2878,9 @@ html[data-xray-mode]
 .bs-node {
   display: grid;
   gap: 2px;
+  width: max-content;
   max-width: 30cqw;
-  padding: 8px 12px;
+  padding: 16px 12px 8px;
   border: 3px solid var(--ink);
   border-radius: 14px;
   background: #fff;
@@ -2893,19 +2902,48 @@ html[data-xray-mode]
   opacity: calc(min(1, var(--t) * 10) * min(1, (1 - var(--t)) * 10));
   transform: translate(calc(var(--dx) * 1cqw * var(--t)), calc(var(--dy) * 1cqh * var(--t))) rotate(45deg);
 }
+/* the project tag sits ON its box's top edge (half above, half on the padding), never over the box's label */
 .bs-dock {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  translate: -50% -50%;
+  z-index: 1;
   padding: 3px 8px;
   border: 2px solid var(--ink);
   border-radius: 8px;
   color: var(--ink);
   font:
-    800 clamp(0.5rem, 1.7cqw, 0.72rem) / 1.1 var(--font-mono),
+    800 clamp(0.8rem, 1.7cqw, 0.85rem) / 1.1 var(--font-mono),
     monospace;
   letter-spacing: 0.08em;
   white-space: nowrap;
   box-shadow: 3px 3px 0 0 #fff;
   opacity: min(1, calc(var(--t) * 4));
   transform: translate(calc((1 - var(--e)) * var(--from-x) * 1cqw), calc((1 - var(--e)) * var(--from-y) * 1cqh));
+}
+/* on a side node the tag lines up with the node's outer edge, so a long name grows inwards, not off the stage */
+.bs-node[data-side='l'] > .bs-dock {
+  left: 8px;
+  translate: 0 -50%;
+}
+.bs-node[data-side='r'] > .bs-dock {
+  left: auto;
+  right: 8px;
+  translate: 0 -50%;
+}
+/* a phone-width diagram: tighter tracking so the two lower tags (same row) keep a clear gap between them */
+@container (max-width: 480px) {
+  .bs-dock {
+    padding: 3px 6px;
+    letter-spacing: 0.02em;
+  }
+  .bs-node[data-side='l'] > .bs-dock {
+    left: 4px;
+  }
+  .bs-node[data-side='r'] > .bs-dock {
+    right: 4px;
+  }
 }
 
 /* ---- 05 SHIP */

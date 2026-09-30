@@ -403,7 +403,7 @@ function PhotoLightbox({
           onPointerCancel={onPointerUp}
           onWheel={onWheel}
           style={{ aspectRatio: ratio, width: `min(100cqw, calc(100cqh * ${ratio}))`, maxHeight: '100%' }}
-          className={`relative w-full bg-paper-deep rounded-2xl overflow-hidden border-4 border-ink shadow-2xl touch-none select-none ${
+          className={`relative w-full bg-paper-deep rounded-2xl overflow-hidden border-4 border-ink shadow-brutal touch-none select-none ${
             zoomed ? 'cursor-grab active:cursor-grabbing' : 'cursor-zoom-in'
           }`}
         >
@@ -762,7 +762,7 @@ export function InteractivePhotoStack({ customPhotos, galleryId }: { customPhoto
                           // counter on the print's white lip (it used to sit on the photo itself on phones)
                           <span
                             aria-hidden
-                            className="absolute left-2.5 sm:left-3 bottom-1 sm:bottom-1.5 px-1.5 py-0.5 rounded-md border-2 border-ink bg-white font-mono text-[0.62rem] font-extrabold tracking-[0.08em] text-ink select-none pointer-events-none"
+                            className="absolute left-2.5 sm:left-3 bottom-1 sm:bottom-1.5 px-1.5 py-0.5 rounded-md border-2 border-ink bg-white font-mono text-xs font-extrabold tracking-[0.08em] text-ink select-none pointer-events-none"
                           >{`${String(top + 1).padStart(2, '0')} / ${String(n).padStart(2, '0')}`}</span>
                         )}
                       </m.div>

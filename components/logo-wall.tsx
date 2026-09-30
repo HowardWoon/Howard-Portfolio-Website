@@ -114,7 +114,7 @@ function SealLink({
         {seal.name}
       </span>
       <span
-        className={`relative font-mono text-[0.7rem] font-bold uppercase tracking-[0.06em] leading-tight transition-colors ${
+        className={`relative font-mono text-xs font-bold uppercase tracking-[0.06em] leading-tight transition-colors ${
           dark && FX.arenaPinboard
             ? 'text-pop-yellow group-hover/seal:text-ink-soft group-focus-visible/seal:text-ink-soft'
             : 'text-ink-soft'

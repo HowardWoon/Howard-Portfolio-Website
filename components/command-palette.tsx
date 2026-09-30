@@ -139,7 +139,7 @@ export function CommandPalette() {
                   placeholder="Type a command or search..."
                   className="flex-1 bg-transparent text-ink placeholder:text-ink-muted outline-none border-none text-base font-semibold"
                 />
-                <kbd className="hidden sm:inline-block nb-tag bg-white text-[0.65rem] py-0.5">ESC</kbd>
+                <kbd className="hidden sm:inline-block nb-tag bg-white text-xs py-0.5">ESC</kbd>
               </div>
 
               <Command.List className="max-h-[min(320px,50dvh)] overflow-y-auto overscroll-contain p-2">

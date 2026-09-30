@@ -128,7 +128,7 @@ export function FieldArchive({ archiveId }: FieldArchiveProps) {
                 <span aria-hidden className="absolute inset-x-0 top-0 h-3 fx-perf" />
                 <span aria-hidden className="absolute inset-x-0 bottom-0 h-3 fx-perf" />
                 <div className="absolute left-3 bottom-5 right-3">
-                  <div className="nb-tag bg-white text-[0.7rem] max-w-full">
+                  <div className="nb-tag bg-white text-xs max-w-full">
                     {record.recordId}
                     {' // '}
                     {record.category}
@@ -181,7 +181,7 @@ export function FieldArchive({ archiveId }: FieldArchiveProps) {
               />
               {/* Hero Label (sticker) */}
               <div className="absolute left-4 bottom-4 right-4 flex flex-col items-start gap-1.5">
-                <div className="nb-tag bg-white text-[0.7rem]">FIELD RECORD // {records[0].recordId}</div>
+                <div className="nb-tag bg-white text-xs">FIELD RECORD // {records[0].recordId}</div>
                 <div className="max-w-full [overflow-wrap:anywhere] font-display text-base sm:text-lg font-extrabold text-ink uppercase bg-pop-yellow border-3 border-ink rounded-xl px-3 py-1 shadow-brutal-xs">
                   {records[0].category}
                 </div>
@@ -206,7 +206,7 @@ export function FieldArchive({ archiveId }: FieldArchiveProps) {
                   className="fx-wipe object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute left-3 bottom-3 right-3">
-                  <div className="nb-tag bg-white text-[0.7rem] max-w-full">
+                  <div className="nb-tag bg-white text-xs max-w-full">
                     {record.recordId}
                     {' // '}
                     {record.category}
@@ -235,12 +235,12 @@ export function FieldArchive({ archiveId }: FieldArchiveProps) {
                   />
                   <div className="absolute left-3 bottom-3 right-3">
                     {/* full caption only where the square tiles are wide enough (it was cropped on phones/tablets) */}
-                    <div className="nb-tag bg-white text-[0.7rem] hidden xl:inline-flex">
+                    <div className="nb-tag bg-white text-xs hidden xl:inline-flex">
                       {record.recordId}
                       {' // '}
                       {record.category}
                     </div>
-                    <div className="nb-tag bg-white text-[0.7rem] xl:hidden">{record.recordId}</div>
+                    <div className="nb-tag bg-white text-xs xl:hidden">{record.recordId}</div>
                   </div>
                 </button>
               ))}

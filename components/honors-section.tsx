@@ -597,7 +597,7 @@ export default function HonorsSection() {
                       >
                         <div className="inline-flex min-w-0 flex-wrap items-center gap-2 text-xs font-mono font-extrabold tracking-[0.06em] uppercase text-ink">
                           {item.signal ? (
-                            <span className="shrink-0 rounded-md border-2 border-ink bg-white px-1.5 py-0.5 text-[0.62rem] tracking-[0.14em] shadow-brutal-xs">
+                            <span className="shrink-0 rounded-md border-2 border-ink bg-white px-1.5 py-0.5 text-xs tracking-[0.14em] shadow-brutal-xs">
                               {SIGNAL[item.signal].label}
                             </span>
                           ) : null}

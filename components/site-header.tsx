@@ -85,13 +85,13 @@ export function SiteHeader() {
     <header
       ref={ref}
       data-condensed={condensed ? '' : undefined}
-      className="site-header fixed top-0 left-0 w-full flex items-center justify-between gap-2 xs:gap-3 z-[9999] bg-white sm:[@media(pointer:fine)]:bg-white/95 sm:[@media(pointer:fine)]:backdrop-blur-md border-b-3 border-ink pb-2.5 sm:pb-3 pt-[max(0.625rem,var(--safe-top))] sm:pt-[max(0.75rem,var(--safe-top))] pl-[max(0.875rem,var(--safe-left))] pr-[max(0.875rem,var(--safe-right))] sm:pl-[max(2.5rem,var(--safe-left))] sm:pr-[max(2.5rem,var(--safe-right))] lg:pl-[max(4rem,var(--safe-left))] lg:pr-[max(4rem,var(--safe-right))]"
+      className="site-header fixed top-0 left-0 w-full flex items-center justify-between gap-2 min-[400px]:gap-3 z-[9999] bg-white sm:[@media(pointer:fine)]:bg-white/95 sm:[@media(pointer:fine)]:backdrop-blur-md border-b-3 border-ink pb-2.5 sm:pb-3 pt-[max(0.625rem,var(--safe-top))] sm:pt-[max(0.75rem,var(--safe-top))] pl-[max(0.875rem,var(--safe-left))] pr-[max(0.875rem,var(--safe-right))] sm:pl-[max(2.5rem,var(--safe-left))] sm:pr-[max(2.5rem,var(--safe-right))] lg:pl-[max(4rem,var(--safe-left))] lg:pr-[max(4rem,var(--safe-right))]"
     >
       <m.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6 }}
-        className="flex items-center gap-2 xs:gap-3 sm:gap-4 min-w-0 xl:shrink-0"
+        className="flex items-center gap-2 min-[400px]:gap-3 sm:gap-4 min-w-0 xl:shrink-0"
       >
         <a href="#" aria-label="Back to top" className="shrink-0 rounded-2xl p-1 -m-1">
           <Image
@@ -111,7 +111,7 @@ export function SiteHeader() {
               <span className="relative w-2.5 h-2.5 rounded-full bg-pop-red border border-ink" />
             </span>
           </h1>
-          <p className="text-[0.6875rem] sm:text-sm font-mono text-ink-muted tracking-[0.02em] sm:tracking-[0.08em] mt-1 sm:mt-1.5 font-bold xs:whitespace-nowrap">
+          <p className="text-xs sm:text-sm font-mono text-ink-muted tracking-[0.02em] sm:tracking-[0.08em] mt-1 sm:mt-1.5 font-bold">
             SYSTEMS & AI ARCHITECT
           </p>
         </div>
@@ -157,7 +157,7 @@ export function SiteHeader() {
                 {/* R21: section index (visual only; the link name stays the section name) */}
                 <span
                   aria-hidden
-                  className="mr-1.5 hidden align-top min-[1440px]:inline font-mono text-[0.62rem] font-extrabold text-ink-muted"
+                  className="mr-1.5 hidden align-top min-[1440px]:inline font-mono text-xs font-extrabold text-ink-muted"
                 >
                   {String(i + 1).padStart(2, '0')}
                 </span>
@@ -186,12 +186,12 @@ export function SiteHeader() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="RESUME"
-            className="group nb-resume nb-btn nb-btn-yellow w-10 h-10 p-0 min-[400px]:w-auto min-[400px]:h-auto min-[400px]:px-4 min-[400px]:py-2.5 sm:px-6 sm:py-3 landscape-short:!py-2 fx-specular nb-press"
+            className="group nb-resume nb-btn nb-btn-yellow w-10 h-10 p-0 min-[440px]:w-auto min-[440px]:h-auto min-[440px]:px-4 min-[440px]:py-2.5 sm:px-6 sm:py-3 landscape-short:!py-2 fx-specular nb-press"
           >
-            <span className="sr-only min-[400px]:not-sr-only">
+            <span className="sr-only min-[440px]:not-sr-only">
               <TextRoll>RESUME</TextRoll>
             </span>
-            <FileText className="w-4 h-4 min-[400px]:hidden" strokeWidth={2.75} aria-hidden />
+            <FileText className="w-4 h-4 min-[440px]:hidden" strokeWidth={2.75} aria-hidden />
             <ExternalLink
               className="hidden sm:block w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
               strokeWidth={2.5}

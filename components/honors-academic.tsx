@@ -99,7 +99,7 @@ export function Transcript({ semesters = UM_TRANSCRIPT }: { semesters?: Semester
       title="Transcript"
       icon={BookOpen}
       meta={
-        <span className="inline-flex items-center rounded-md border-2 border-ink bg-white px-2 py-0.5 font-mono text-[0.7rem] font-extrabold text-ink">
+        <span className="inline-flex items-center rounded-md border-2 border-ink bg-white px-2 py-0.5 font-mono text-xs font-extrabold text-ink">
           CGPA: {cgpa}
         </span>
       }
@@ -110,10 +110,8 @@ export function Transcript({ semesters = UM_TRANSCRIPT }: { semesters?: Semester
           return (
             <div key={sem.id} className="px-3 pb-2 pt-3">
               <div className="flex items-center justify-between gap-2 px-1 pb-1.5">
-                <h5 className="font-mono text-[0.7rem] font-extrabold uppercase tracking-[0.1em] text-ink">
-                  {sem.label}
-                </h5>
-                <span className="font-mono text-[0.7rem] font-bold uppercase tracking-[0.06em] text-ink-muted">
+                <h5 className="font-mono text-xs font-extrabold uppercase tracking-[0.1em] text-ink">{sem.label}</h5>
+                <span className="font-mono text-xs font-bold uppercase tracking-[0.06em] text-ink-muted">
                   GPA: {sem.gpa} · {plus}× A+
                 </span>
               </div>
@@ -123,7 +121,7 @@ export function Transcript({ semesters = UM_TRANSCRIPT }: { semesters?: Semester
                     key={c.code}
                     className="grid grid-cols-[1fr_auto] min-[360px]:grid-cols-[auto_1fr_auto] items-center gap-x-3 gap-y-1.5 py-2"
                   >
-                    <span className="col-span-2 min-[360px]:col-span-1 justify-self-start rounded-md border-2 border-ink bg-paper-deep px-1.5 py-0.5 font-mono text-[0.72rem] font-extrabold tracking-[0.02em] text-ink tabular-nums">
+                    <span className="col-span-2 min-[360px]:col-span-1 justify-self-start rounded-md border-2 border-ink bg-paper-deep px-1.5 py-0.5 font-mono text-xs font-extrabold tracking-[0.02em] text-ink tabular-nums">
                       {c.code}
                     </span>
                     <span className="min-w-0 text-sm font-sans font-semibold leading-snug text-ink-soft [overflow-wrap:break-word]">
@@ -160,7 +158,7 @@ const RESULT_STYLE: Record<Result, { chip: string; label: string }> = {
 function ScopeTag({ scope }: { scope: Entry['scope'] }) {
   return (
     <span
-      className={`inline-flex rounded border-[1.5px] border-ink px-1 font-mono text-[0.7rem] font-extrabold uppercase tracking-[0.06em] ${
+      className={`inline-flex rounded border-[1.5px] border-ink px-1 font-mono text-xs font-extrabold uppercase tracking-[0.06em] ${
         scope === 'Kebangsaan' ? 'bg-ink text-white' : 'bg-white text-ink'
       }`}
     >
@@ -186,7 +184,7 @@ export function ResultsBoard({
     <Panel
       title="National & State Excellence"
       icon={Medal}
-      meta={<span className="font-mono text-[0.7rem] font-extrabold text-ink">KMNS 2024/2025</span>}
+      meta={<span className="font-mono text-xs font-extrabold text-ink">KMNS 2024/2025</span>}
     >
       {/* podium tiles */}
       <ul className="grid grid-cols-1 min-[420px]:grid-cols-3 gap-2 p-3 pb-2">
@@ -195,7 +193,7 @@ export function ResultsBoard({
             key={e.name}
             className={`flex flex-col justify-between gap-2 rounded-xl border-2 border-ink p-2.5 shadow-brutal-xs ${RESULT_STYLE[e.result].chip}`}
           >
-            <span className="inline-flex items-center gap-1 font-mono text-[0.7rem] font-extrabold tracking-[0.1em] text-ink">
+            <span className="inline-flex items-center gap-1 font-mono text-xs font-extrabold tracking-[0.1em] text-ink">
               <Award className="w-3.5 h-3.5" strokeWidth={2.75} aria-hidden />
               {RESULT_STYLE[e.result].label}
             </span>
@@ -220,7 +218,7 @@ export function ResultsBoard({
               <ScopeTag scope={e.scope} />
             </span>
             <span
-              className={`rounded-md border-2 border-ink px-1.5 py-0.5 font-mono text-[0.7rem] font-extrabold tracking-[0.06em] text-ink ${RESULT_STYLE[e.result].chip}`}
+              className={`rounded-md border-2 border-ink px-1.5 py-0.5 font-mono text-xs font-extrabold tracking-[0.06em] text-ink ${RESULT_STYLE[e.result].chip}`}
             >
               {RESULT_STYLE[e.result].label}
             </span>
@@ -256,7 +254,7 @@ export function RolesGrid({ roles = KMNS_ROLES }: { roles?: typeof KMNS_ROLES })
     <Panel
       title="Leadership & Mentorship Roles"
       icon={Users}
-      meta={<span className="font-mono text-[0.7rem] font-extrabold text-ink">KEY POSITIONS</span>}
+      meta={<span className="font-mono text-xs font-extrabold text-ink">KEY POSITIONS</span>}
     >
       <ul className="grid grid-cols-1 min-[420px]:grid-cols-2 gap-2 p-3">
         {roles.map((r) => (
@@ -264,7 +262,7 @@ export function RolesGrid({ roles = KMNS_ROLES }: { roles?: typeof KMNS_ROLES })
             key={r.org}
             className={`flex flex-col gap-1.5 rounded-xl border-2 border-ink p-2.5 ${r.lead ? 'bg-[#FFE3F1] shadow-brutal-xs' : 'bg-white'}`}
           >
-            <span className="inline-flex items-center gap-1 self-start rounded-md border-2 border-ink bg-white px-1.5 py-0.5 font-mono text-[0.7rem] font-extrabold tracking-[0.08em] text-ink">
+            <span className="inline-flex items-center gap-1 self-start rounded-md border-2 border-ink bg-white px-1.5 py-0.5 font-mono text-xs font-extrabold tracking-[0.08em] text-ink">
               {r.lead ? <Crown className="w-3 h-3" strokeWidth={3} aria-hidden /> : null}
               {r.role}
             </span>

@@ -78,7 +78,7 @@ export function FieldRecordViewer({ records, currentIndex, onClose, onNavigate }
           <div className="nb-tag bg-pop-yellow">
             FIELD RECORD // {String(currentIndex + 1).padStart(2, '0')} OF {String(records.length).padStart(2, '0')}
           </div>
-          <div className="nb-tag bg-white text-[0.7rem] max-w-full">STATUS: SECURE // {currentRecord.category}</div>
+          <div className="nb-tag bg-white text-xs max-w-full">STATUS: SECURE // {currentRecord.category}</div>
         </div>
         <button
           onClick={onClose}
@@ -157,7 +157,7 @@ export function FieldRecordViewer({ records, currentIndex, onClose, onNavigate }
 
           <div className="space-y-5 sm:space-y-6">
             <div>
-              <div className="text-[0.7rem] font-mono font-bold text-ink-muted uppercase tracking-[0.12em] mb-1">
+              <div className="text-xs font-mono font-bold text-ink-muted uppercase tracking-[0.12em] mb-1">
                 CATEGORY
               </div>
               <div className="text-sm font-mono font-extrabold text-ink uppercase tracking-[0.04em]">
@@ -166,18 +166,14 @@ export function FieldRecordViewer({ records, currentIndex, onClose, onNavigate }
             </div>
 
             <div>
-              <div className="text-[0.7rem] font-mono font-bold text-ink-muted uppercase tracking-[0.12em] mb-1">
-                ROLE
-              </div>
+              <div className="text-xs font-mono font-bold text-ink-muted uppercase tracking-[0.12em] mb-1">ROLE</div>
               <div className="inline-block text-sm font-mono font-extrabold text-ink uppercase tracking-[0.04em] bg-pop-mint border-2 border-ink rounded-md px-2 py-0.5">
                 {currentRecord.role}
               </div>
             </div>
 
             <div>
-              <div className="text-[0.7rem] font-mono font-bold text-ink-muted uppercase tracking-[0.12em] mb-1">
-                EVENT
-              </div>
+              <div className="text-xs font-mono font-bold text-ink-muted uppercase tracking-[0.12em] mb-1">EVENT</div>
               <div className="text-sm font-mono font-extrabold text-ink uppercase tracking-[0.04em]">
                 {currentRecord.event}
               </div>

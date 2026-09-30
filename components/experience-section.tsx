@@ -400,7 +400,7 @@ function PekomTreasurerDashboard() {
               }`}
             >
               <stat.icon className="w-5 h-5 mb-2" strokeWidth={2.5} />
-              <div className="text-[0.7rem] font-mono font-bold opacity-75 uppercase tracking-normal [overflow-wrap:anywhere]">
+              <div className="text-xs font-mono font-bold opacity-75 uppercase tracking-normal [overflow-wrap:anywhere]">
                 {stat.label}
               </div>
               <div className="font-display text-lg sm:text-xl font-extrabold mt-0.5 leading-tight [overflow-wrap:anywhere]">
@@ -524,7 +524,7 @@ export default function ExperienceSection() {
           >
             <span
               aria-hidden
-              className="col-span-full sm:col-span-1 flex items-center gap-2 self-stretch rounded-2xl bg-ink px-3 py-2 font-mono text-[0.66rem] font-extrabold tracking-[0.16em] text-white"
+              className="col-span-full sm:col-span-1 flex items-center gap-2 self-stretch rounded-2xl bg-ink px-3 py-2 font-mono text-xs font-extrabold tracking-[0.16em] text-white"
             >
               TRACK
             </span>
@@ -559,9 +559,7 @@ export default function ExperienceSection() {
                         className={`h-3.5 w-3.5 shrink-0 rounded-[3px] border-2 ${isActive ? 'border-white' : 'border-ink'} ${f.dotClass}`}
                       />
                       {f.label}
-                      <span className={`text-[0.7rem] ${isActive ? 'text-white/70' : 'text-ink-muted'}`}>
-                        ({count})
-                      </span>
+                      <span className={`text-xs ${isActive ? 'text-white/70' : 'text-ink-muted'}`}>({count})</span>
                     </span>
                   </button>
                 );
@@ -602,7 +600,7 @@ export default function ExperienceSection() {
                     aria-label={only ? 'Show all experience folders' : `Show only the ${item.categoryLabel} folder`}
                     onClick={() => setSelectedFilter(only ? 'all' : item.category)}
                     style={{ left: `min(${slot} * 26%, ${slot} * 15rem)` }}
-                    className={`nb-folder-tab absolute top-0 z-10 flex h-[43px] max-w-[calc(100%-1rem)] items-center gap-2 rounded-t-2xl border-3 border-b-0 border-ink px-4 font-mono text-[0.7rem] font-extrabold uppercase tracking-[0.12em] ${a.fill} ${onFill}`}
+                    className={`nb-folder-tab absolute top-0 z-10 flex h-[43px] max-w-[calc(100%-1rem)] items-center gap-2 rounded-t-2xl border-3 border-b-0 border-ink px-4 font-mono text-xs font-extrabold uppercase tracking-[0.12em] ${a.fill} ${onFill}`}
                   >
                     <span className="truncate">
                       {item.number} {'//'} {item.categoryLabel}
@@ -615,7 +613,7 @@ export default function ExperienceSection() {
                     >
                       <div className="flex flex-wrap items-center gap-2 xs:gap-3 min-w-0">
                         <span className="nb-num">{item.number}</span>
-                        <span className="rounded-md border-2 border-ink bg-white px-1.5 py-0.5 font-mono text-[0.66rem] font-extrabold tracking-[0.14em] text-ink shadow-brutal-xs">
+                        <span className="rounded-md border-2 border-ink bg-white px-1.5 py-0.5 font-mono text-xs font-extrabold tracking-[0.14em] text-ink shadow-brutal-xs">
                           {a.label}
                         </span>
                         <span className={`font-mono text-xs font-extrabold uppercase tracking-[0.12em] ${onFill}`}>
@@ -691,7 +689,7 @@ export default function ExperienceSection() {
                             className={`rounded-2xl p-4 border-3 border-ink shadow-brutal-sm flex flex-col justify-center ${mIdx === 1 ? 'bg-ink text-white' : 'bg-white text-ink'}`}
                           >
                             <span
-                              className={`text-[0.7rem] font-mono font-bold uppercase tracking-[0.08em] mb-1 ${mIdx === 1 ? 'text-white/75' : 'text-ink/70'}`}
+                              className={`text-xs font-mono font-bold uppercase tracking-[0.08em] mb-1 ${mIdx === 1 ? 'text-white/75' : 'text-ink/70'}`}
                             >
                               {metric.label}
                             </span>

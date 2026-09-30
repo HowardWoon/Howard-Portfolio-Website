@@ -205,7 +205,7 @@ function PillarCard({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-5 border-t-2 border-dashed border-ink">
         {pillar.metrics.map((metric, mIdx) => (
           <div key={mIdx} className="bg-white rounded-xl p-3 border-2 border-ink">
-            <div className="text-[0.7rem] font-mono font-bold text-ink-muted uppercase tracking-[0.06em] leading-tight">
+            <div className="text-xs font-mono font-bold text-ink-muted uppercase tracking-[0.06em] leading-tight">
               {metric.label}
             </div>
             <div className="text-sm font-sans font-extrabold text-ink mt-1.5 leading-snug break-words">
@@ -222,7 +222,7 @@ function PillarCard({
         {/* Always rendered so every card keeps the same height; only the active card shows it. */}
         <span
           aria-hidden={!isActive}
-          className={`text-[0.7rem] font-extrabold shrink-0 px-2 py-0.5 rounded border-2 border-ink text-ink ${c.fill} ${isActive ? '' : 'invisible'}`}
+          className={`text-xs font-extrabold shrink-0 px-2 py-0.5 rounded border-2 border-ink text-ink ${c.fill} ${isActive ? '' : 'invisible'}`}
         >
           ACTIVE
         </span>

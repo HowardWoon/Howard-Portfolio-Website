@@ -25,6 +25,17 @@ const FILL: Record<EmblemKind, string> = {
 
 const INK = '#0A0A0A';
 
+/** a regular 5-point star, point up, centred on (cx, cy) */
+function starPoints(cx: number, cy: number, outer: number, inner: number) {
+  const pts: string[] = [];
+  for (let i = 0; i < 10; i++) {
+    const r = i % 2 ? inner : outer;
+    const a = -Math.PI / 2 + (i * Math.PI) / 5;
+    pts.push(`${(cx + r * Math.cos(a)).toFixed(2)},${(cy + r * Math.sin(a)).toFixed(2)}`);
+  }
+  return pts.join(' ');
+}
+
 function Shape({ kind }: { kind: EmblemKind }) {
   const fill = FILL[kind];
   if (kind === 'gold' || kind === 'silver' || kind === 'bronze' || kind === 'star')
@@ -36,10 +47,9 @@ function Shape({ kind }: { kind: EmblemKind }) {
         <circle cx="60" cy="74" r="40" fill={fill} stroke={INK} strokeWidth="4" />
         <circle cx="60" cy="74" r="31" fill="none" stroke={INK} strokeWidth="1.6" strokeDasharray="3 3" />
         {kind === 'star' ? (
-          <polygon
-            points="60,40 63.5,49 73,49 65.5,54.5 68.5,63.5 60,58 51.5,63.5 54.5,54.5 47,49 56.5,49"
-            fill={INK}
-          />
+          // R24: the star is computed, centred INSIDE the inner ring (y 53-71), clear of the ribbon (ends y 50) and of the
+          // value below it (y 77-96). The old hand-typed points ran into the ribbon and over the ring: it looked broken.
+          <polygon points={starPoints(60, 62, 9, 3.8)} fill={INK} />
         ) : null}
       </>
     );
@@ -91,7 +101,7 @@ const VALUE_AT: Record<EmblemKind, { top: string; left: string; w: string }> = {
   gold: { top: '64%', left: '50%', w: '52%' },
   silver: { top: '64%', left: '50%', w: '52%' },
   bronze: { top: '64%', left: '50%', w: '52%' },
-  star: { top: '68%', left: '50%', w: '52%' },
+  star: { top: '72%', left: '50%', w: '46%' },
   seal: { top: '53%', left: '50%', w: '48%' },
   ticket: { top: '53%', left: '50%', w: '70%' },
   finalist: { top: '34%', left: '44%', w: '56%' },
@@ -113,7 +123,7 @@ export function HonorEmblem({ kind, value, label }: { kind: EmblemKind; value: R
           {value}
         </span>
       </div>
-      <span className="max-w-[12rem] font-mono text-[0.7rem] font-bold uppercase tracking-[0.1em] text-ink-muted">
+      <span className="max-w-[12rem] font-mono text-xs font-bold uppercase tracking-[0.1em] text-ink-muted">
         {label}
       </span>
     </div>

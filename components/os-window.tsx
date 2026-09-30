@@ -57,7 +57,7 @@ export function WindowDesk({ children, className = '' }: { children: ReactNode; 
           aria-label="Taskbar: minimised windows"
           className="mt-6 flex flex-wrap items-center gap-2 rounded-2xl border-3 border-ink bg-ink p-2 shadow-brutal-sm"
         >
-          <span aria-hidden className="px-2 font-mono text-[0.66rem] font-extrabold tracking-[0.16em] text-white">
+          <span aria-hidden className="px-2 font-mono text-xs font-extrabold tracking-[0.16em] text-white">
             TASKBAR
           </span>
           {minimized.map((w) => (
@@ -266,9 +266,7 @@ export function OsWindow({
             <GripVertical className="h-4 w-4" strokeWidth={2.75} aria-hidden />
           </button>
         ) : null}
-        <span className="truncate font-mono text-[0.7rem] font-extrabold uppercase tracking-[0.16em] text-ink">
-          {title}
-        </span>
+        <span className="truncate font-mono text-xs font-extrabold uppercase tracking-[0.16em] text-ink">{title}</span>
       </div>
       {controlsNode}
     </div>

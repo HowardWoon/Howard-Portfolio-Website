@@ -256,7 +256,7 @@ export default function SystemStatusBar() {
         aria-label="System status"
         className="mx-auto flex max-w-7xl flex-wrap items-center gap-2.5 rounded-2xl border-3 border-ink bg-white p-2.5 shadow-brutal-sm sm:gap-3"
       >
-        <span className="rounded-xl bg-ink px-3 py-2 font-mono text-[0.66rem] font-extrabold tracking-[0.16em] text-white">
+        <span className="rounded-xl bg-ink px-3 py-2 font-mono text-xs font-extrabold tracking-[0.16em] text-white">
           SYSTEM STATUS
         </span>
         <span className="inline-flex min-h-[40px] items-center gap-2 rounded-xl border-2 border-ink px-3 font-mono text-xs font-extrabold tracking-[0.1em] text-ink">

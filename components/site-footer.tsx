@@ -45,7 +45,7 @@ export function SiteFooter() {
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-xs font-mono font-bold text-white/60 tracking-[0.12em] mb-4 uppercase">
                 Academic Foundation
-                <span className="rounded-md border-2 border-white bg-pop-orange px-1.5 py-px text-[0.6rem] font-extrabold tracking-[0.14em] text-ink">
+                <span className="rounded-md border-2 border-white bg-pop-orange px-1.5 py-px text-xs font-extrabold tracking-[0.14em] text-ink">
                   ACADEMIC
                 </span>
               </div>

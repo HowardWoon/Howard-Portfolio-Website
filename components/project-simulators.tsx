@@ -71,7 +71,7 @@ export function ZeroLagSimulator() {
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
         <div>
-          <div className="flex items-center gap-2 text-xs font-mono text-amber-400 tracking-wider uppercase">
+          <div className="flex items-center gap-2 text-xs font-semibold font-mono text-amber-400 tracking-wider uppercase">
             <Cpu className="w-4 h-4" />
             <span>AGENTIC WORKFLOW · 2ND PLACE SUPERVITY APAC HACKATHON</span>
           </div>
@@ -83,7 +83,7 @@ export function ZeroLagSimulator() {
         <button
           onClick={triggerPipeline}
           disabled={isRunning}
-          className="flex items-center gap-2 px-6 py-3 rounded-full bg-amber-400 hover:bg-amber-300 text-black font-mono font-bold text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 transition-all active:scale-95 disabled:opacity-50"
+          className="flex items-center gap-2 px-6 py-3 rounded-full bg-amber-400 hover:bg-amber-300 text-black font-mono font-bold text-xs uppercase tracking-wider shadow-[3px_3px_0_0_#fff] transition-all active:scale-95 disabled:opacity-50"
         >
           <Play className={`w-3.5 h-3.5 ${isRunning ? 'animate-spin' : ''}`} />
           <span>{isRunning ? 'AGENTS EXECUTING...' : 'DISPATCH AGENT PIPELINE'}</span>
@@ -102,7 +102,7 @@ export function ZeroLagSimulator() {
               key={idx}
               className={`p-4 rounded-2xl border transition-all duration-300 flex flex-col justify-between space-y-3 ${
                 isCurrent
-                  ? 'border-amber-400 bg-amber-400/10 shadow-lg shadow-amber-500/10'
+                  ? 'border-amber-400 bg-amber-400/10 shadow-[3px_3px_0_0_#fbbf24]'
                   : isDone
                     ? 'border-emerald-500/40 bg-emerald-500/5 text-neutral-300'
                     : 'border-white/10 bg-white/[0.02] text-neutral-400'
@@ -122,7 +122,7 @@ export function ZeroLagSimulator() {
                 <div className={`font-mono text-xs font-bold ${isCurrent ? 'text-amber-300' : 'text-white'}`}>
                   {stage.name}
                 </div>
-                <div className="text-xs font-sans text-neutral-400 mt-1 leading-tight">{stage.desc}</div>
+                <div className="text-xs font-semibold font-sans text-neutral-400 mt-1 leading-tight">{stage.desc}</div>
               </div>
             </div>
           );
@@ -130,7 +130,7 @@ export function ZeroLagSimulator() {
       </div>
 
       {/* Output Log Banner */}
-      <div className="bg-black rounded-2xl border border-white/10 p-4 font-mono text-xs flex items-center justify-between">
+      <div className="bg-black rounded-2xl border border-white/10 p-4 font-mono text-xs font-semibold flex items-center justify-between">
         <div className="flex items-center gap-2 text-neutral-300">
           <Terminal className="w-4 h-4 text-amber-400" />
           <span>
@@ -211,7 +211,7 @@ export function BilahujanSimulator() {
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
         <div>
-          <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 tracking-wider uppercase">
+          <div className="flex items-center gap-2 text-xs font-semibold font-mono text-cyan-400 tracking-wider uppercase">
             <Radio className="w-4 h-4" />
             <span>SWARM INTELLIGENCE + MCP TOOLS — V HACK 2026</span>
           </div>
@@ -236,7 +236,7 @@ export function BilahujanSimulator() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
         {/* Left: Swarm Map / Status */}
         <div className="lg:col-span-4 bg-black/60 border border-white/10 rounded-2xl p-6 flex flex-col justify-between">
-          <div className="space-y-2 text-xs font-mono">
+          <div className="space-y-2 text-xs font-semibold font-mono">
             <div className="text-neutral-400">{'// Firebase Node Status'}</div>
             <div className="flex justify-between items-center text-neutral-300">
               <span>Active Citizen Nodes</span>
@@ -258,7 +258,7 @@ export function BilahujanSimulator() {
         </div>
 
         {/* Right: Live Terminal */}
-        <div className="lg:col-span-8 bg-[#0C0E14] rounded-2xl border border-white/10 p-5 font-mono text-[11px] sm:text-xs">
+        <div className="lg:col-span-8 bg-[#0C0E14] rounded-2xl border border-white/10 p-5 font-mono text-xs font-semibold">
           <div className="text-neutral-400 mb-4 flex items-center gap-2">
             <Terminal className="w-4 h-4" />
             <span>Command_Agent_Mission_Log.sh</span>
@@ -312,7 +312,7 @@ export function SensorXSimulator() {
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
         <div>
-          <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 tracking-wider uppercase">
+          <div className="flex items-center gap-2 text-xs font-semibold font-mono text-emerald-400 tracking-wider uppercase">
             <Zap className="w-4 h-4" />
             <span>ESP32 FIRMWARE + MQTT PROTOCOL · UM TECHNOTHON 2026</span>
           </div>
@@ -325,7 +325,7 @@ export function SensorXSimulator() {
           onClick={() => setIsOccupied(!isOccupied)}
           className={`min-h-[40px] px-5 py-2.5 rounded-full font-mono text-xs font-bold uppercase tracking-wider transition-all ${
             isOccupied
-              ? 'bg-emerald-400 text-black shadow-lg shadow-emerald-500/20'
+              ? 'bg-emerald-400 text-black shadow-[3px_3px_0_0_#fff]'
               : 'bg-red-500/20 text-red-300 border border-red-500/40'
           }`}
         >
@@ -335,23 +335,23 @@ export function SensorXSimulator() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="p-5 bg-black/60 border border-white/10 rounded-2xl space-y-1">
-          <span className="text-xs font-mono text-neutral-400">ACTIVE POWER LOAD</span>
+          <span className="text-xs font-semibold font-mono text-neutral-400">ACTIVE POWER LOAD</span>
           <div className="text-3xl font-mono font-bold text-white">{isOccupied ? '1.84 kW' : '0.72 kW'}</div>
-          <span className="text-xs font-mono text-neutral-400">HVAC + Smart Relays</span>
+          <span className="text-xs font-semibold font-mono text-neutral-400">HVAC + Smart Relays</span>
         </div>
 
         <div className="p-5 bg-black/60 border border-white/10 rounded-2xl space-y-1">
-          <span className="text-xs font-mono text-neutral-400">IDLE POWER REDUCTION</span>
+          <span className="text-xs font-semibold font-mono text-neutral-400">IDLE POWER REDUCTION</span>
           <div className="text-3xl font-mono font-bold text-emerald-400">{isOccupied ? '0.0%' : '-60.8%'}</div>
-          <span className="text-xs font-mono text-neutral-400">Auto Load-Shed Activated</span>
+          <span className="text-xs font-semibold font-mono text-neutral-400">Auto Load-Shed Activated</span>
         </div>
 
         <div className="p-5 bg-black/60 border border-white/10 rounded-2xl space-y-1">
-          <span className="text-xs font-mono text-neutral-400">SENSOR FUSION STATUS</span>
+          <span className="text-xs font-semibold font-mono text-neutral-400">SENSOR FUSION STATUS</span>
           <div className="text-lg font-mono font-bold text-amber-300 mt-2">
             {isOccupied ? 'PIR Active · NFC In' : 'PIR Idle · Auto Cutoff'}
           </div>
-          <span className="text-xs font-mono text-neutral-400">MQTT Broker: Connected</span>
+          <span className="text-xs font-semibold font-mono text-neutral-400">MQTT Broker: Connected</span>
         </div>
       </div>
     </m.div>

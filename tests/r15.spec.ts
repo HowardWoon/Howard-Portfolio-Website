@@ -114,7 +114,8 @@ test('reduced motion: no curtains over the Arena Wall title (FX-75)', async ({ p
 });
 
 /* ---------------------------------------------------------------- owner feedback: hero lens + cursor */
-test('hero headline stays solid under the lens, and the lens tracks the mouse with no lag', async ({ page }) => {
+// R24: owner reversed the R15 decision - the torchlight (headline dims to 25 %, the lens is the bright beam) is wanted
+test('hero headline is a torchlight: it dims under the mouse, the lens beam tracks with no lag', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
   const h = page.locator('#hero h2').first();
@@ -122,9 +123,13 @@ test('hero headline stays solid under the lens, and the lens tracks the mouse wi
   await page.mouse.move(box.x + 120, box.y + 40);
   await page.mouse.move(box.x + 200, box.y + 60, { steps: 3 });
   await expect(page.locator('#hero [data-hover="true"]')).toHaveCount(1);
-  expect(await h.evaluate((e) => getComputedStyle(e).opacity)).toBe('1');
+  await expect.poll(() => h.evaluate((e) => getComputedStyle(e).opacity)).toBe('0.25');
   const lens = page.locator('#hero [data-hover="true"] > div[aria-hidden="true"]').first();
   expect(await lens.evaluate((e) => getComputedStyle(e).transitionProperty)).not.toContain('clip-path');
+  await expect.poll(() => lens.evaluate((e) => getComputedStyle(e).opacity)).toBe('1'); // the beam is fully bright
+  // leaving the headline brings it back to full ink
+  await page.mouse.move(box.x + box.width + 300, box.y + box.height + 200);
+  await expect.poll(() => h.evaluate((e) => getComputedStyle(e).opacity)).toBe('1');
 });
 
 test('the cursor dot is a native cursor image (zero lag); only the ring follows in JS', async ({ page }) => {

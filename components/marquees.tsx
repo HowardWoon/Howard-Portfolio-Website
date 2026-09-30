@@ -32,7 +32,7 @@ function Glyph({ i, tone = 'paper' }: { i: number; tone?: 'paper' | 'ink' }) {
 function SignalChip({ kind }: { kind: Signal }) {
   return (
     <span
-      className={`shrink-0 rounded-md border-2 border-ink px-1.5 py-0.5 font-mono text-[0.62rem] font-extrabold tracking-[0.12em] text-ink sm:text-[0.7rem] ${SIGNAL[kind].fill}`}
+      className={`shrink-0 rounded-md border-2 border-ink px-1.5 py-0.5 font-mono text-xs font-extrabold tracking-[0.12em] text-ink ${SIGNAL[kind].fill}`}
     >
       {SIGNAL[kind].label}
     </span>
@@ -44,13 +44,13 @@ function TapeLabel({ children, tone }: { children: React.ReactNode; tone: 'paper
   return (
     <span
       aria-hidden
-      className={`absolute left-0 top-1/2 z-10 hidden -translate-y-1/2 items-center gap-1.5 border-3 px-2.5 py-1 font-mono text-[0.66rem] font-extrabold tracking-[0.16em] sm:flex ${
+      className={`absolute left-0 top-1/2 z-10 hidden -translate-y-1/2 items-center gap-1.5 border-3 px-2.5 py-1 font-mono text-xs font-extrabold tracking-[0.16em] sm:flex ${
         tone === 'paper'
           ? 'border-ink bg-ink text-white shadow-[4px_4px_0_0_#fff]'
           : 'border-white bg-white text-ink shadow-[4px_4px_0_0_#0A0A0A]'
       }`}
     >
-      <span className="text-[0.55rem]">▶</span>
+      <span className="text-xs">▶</span>
       {children}
     </span>
   );
