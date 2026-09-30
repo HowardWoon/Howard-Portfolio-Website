@@ -86,3 +86,17 @@ Rules:
 - Screenshots (not just tests) of every changed area at 390x844 and 1440x900, plus 844x390 for anything pinned.
 - CI green on GitHub for the pushed commit (check `actions/runs` API) AND Vercel status `success` for the same hash.
 - Report the SIGNAL KEY meaning for any new colour you introduce.
+
+## G. Lecturer-recommended interaction patterns (R22) - layers ON TOP, never replacements
+
+AGENTS.md law 0: theme and content are frozen. These patterns were added as layers; extend them the same way.
+
+| Pattern                                         | Where                                     | Rules it must keep                                                                                                                                                                                                                                                                      |
+| ----------------------------------------------- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| OS windows (drag / raise / minimise / maximise) | `components/os-window.tsx`, Contact cards | Drag only on `(min-width:1024px) and (pointer:fine)`; grip button moves with arrow keys; maximise is a portal dialog (10-B: focus trap, scroll lock, Escape) rendering the content ONCE; the `○ □ △` on the console is the FX-91 postage stamp, not window buttons - never repurpose it |
+| Physics badge pit                               | `components/pill-pit.tsx`, Contact        | No new dependency (own AABB solver); rAF only while on screen and moving; transform writes only; badges never above the ceiling / through walls; reduced motion = static pile; empty area keeps touch scrolling; badges are existing facts, colour = SIGNAL meaning                     |
+| Dossier folder tabs                             | `experience-section.tsx` (`data-folder`)  | Added above each card; the FX-23 filter pill stays; a tab filters to its folder and back                                                                                                                                                                                                |
+| Mechanical keys                                 | `.nb-key` in globals.css                  | 4 px shadow pressed to 0 with translate(4px,4px); ONLY on new controls - existing buttons keep their own hover / press                                                                                                                                                                  |
+| System Status Bar + X-ray mode                  | `components/system-status-bar.tsx`        | KL clock (Asia/Kuala_Lumpur), real ping, X-ray overlay in interactive blue; measures on resize, not per scroll frame; Escape exits                                                                                                                                                      |
+
+Testing notes: an element below the fold cannot be hovered / pressed by `page.mouse` until scrolled into view; measure physics bodies by their translation (`DOMMatrix(transform).m41/m42`), not the rotated bounding box; a flung body's landing spot is physics - assert that it follows the pointer while held and settles inside afterwards.

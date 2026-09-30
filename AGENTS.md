@@ -10,6 +10,14 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
 
 ## 2. The laws (never break them)
 
+0. **STRICT - THEME AND CONTENT ARE FROZEN (owner's standing order).** Never modify the website's theme (neo-brutalist
+   ink / paper / pop palette, fonts, 3px borders, hard offset shadows, dot-grid canvas, card shapes) or its content
+   (every text, number, name, date, award, link, image, section and section order). New features are ADDED as
+   interaction layers ON TOP of the existing design, built only from the existing tokens and existing facts
+   (e.g. the lecturer-recommended patterns in `.agents/rules/30-design-system.md` section G: OS windows, physics
+   badge pit, folder tabs, mechanical press, Blueprint X-ray mode, system status bar). If a feature would need new
+   wording, a new colour meaning, a removed section or a replaced component, STOP and ask Howard first.
+
 1. **Do not change content.** No wording, numbers, names, dates, awards, links or section meaning may change unless the owner explicitly asks for that exact change in the current request.
 2. **Do not change the design.** Keep colours, fonts, borders, shadows, spacing rhythm, animations, layout concept and visual identity. Fix engineering, not taste.
 3. **Every colour means one thing.** Follow the SIGNAL KEY in `.agents/rules/30-design-system.md` (`lib/signal.ts`). No colour without a meaning; decoration is ink / paper.
