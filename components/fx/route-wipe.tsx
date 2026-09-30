@@ -91,9 +91,13 @@ function receiveOnHome(done: () => void) {
       return;
     }
     const bring = () => {
-      if (window.__lenis)
-        window.__lenis.scrollTo(btn, { immediate: true, force: true, offset: -window.innerHeight * 0.4 });
-      else btn.scrollIntoView({ block: 'center' });
+      const lenis = window.__lenis;
+      if (lenis) {
+        // Lenis still holds the (short) simulator page's scroll limit right after the route change and clamped the
+        // target to it, so a slow device landed at the top of the page: re-measure first (R17 validation fix)
+        lenis.resize();
+        lenis.scrollTo(btn, { immediate: true, force: true, offset: -window.innerHeight * 0.4 });
+      } else btn.scrollIntoView({ block: 'center' });
     };
     bring();
     // R17: the router's own scroll-to-top for the new route can land after this on a busy device; re-check twice and

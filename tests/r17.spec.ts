@@ -239,3 +239,24 @@ test('manifest lists 192 and 512 px install icons that render (P2-10)', async ({
     expect(r.headers()['content-type']).toContain('image/png');
   }
 });
+
+test('coming back from a simulator on a slow device lands on the same project (FX-85 validation fix)', async ({
+  page,
+  context,
+}) => {
+  await page.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const cdp = await context.newCDPSession(page);
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 }); // Lenis re-measures late on a slow device
+  await page.goto('/', { waitUntil: 'load' });
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.dataset.fxClock ?? ''), { timeout: 20000 })
+    .toBe('on');
+  const run = page.locator('#projects a[href="/simulators/flood"]');
+  await run.scrollIntoViewIfNeeded();
+  await run.click();
+  await expect(page).toHaveURL(/\/simulators\/flood$/, { timeout: 20000 });
+  await page.getByRole('link', { name: /return to portfolio/i }).click();
+  await expect(page).toHaveURL(/\/(#projects)?$/, { timeout: 20000 });
+  await expect(page.locator('#projects a[href="/simulators/flood"]')).toBeInViewport({ timeout: 10000 });
+});
