@@ -299,15 +299,8 @@ export default function BikebearHero() {
                     quality={85}
                   />
 
+                  {/* also renders the ✦ corner sticker, which is the Spider-Sense toggle */}
                   <SpiderReveal />
-
-                  {/* Corner sticker */}
-                  <div
-                    aria-hidden
-                    className="absolute left-4 bottom-4 w-14 h-14 rounded-full bg-white border-3 border-ink grid place-items-center shadow-brutal-sm animate-spin-slow"
-                  >
-                    <span className="font-display font-extrabold text-xl text-ink">✦</span>
-                  </div>
                 </div>
               </TiltCard>
             </div>
