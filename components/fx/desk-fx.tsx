@@ -88,7 +88,7 @@ export function DeskFx() {
         }, 0);
       }
       history.pushState(null, '', `#${id}`);
-      jumpTo(el);
+      jumpTo(el, a as HTMLElement);
     };
     window.addEventListener('click', onClick, true);
     return () => window.removeEventListener('click', onClick, true);

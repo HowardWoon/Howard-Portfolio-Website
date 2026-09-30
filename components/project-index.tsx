@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Check } from 'lucide-react';
 import { FX } from '@/lib/fx';
 import { setFocus, useInteraction } from '@/lib/interaction-store';
@@ -27,10 +27,51 @@ export function ProjectIndex({ items }: { items: readonly ProjectIndexItem[] }) 
     return () => io.disconnect();
   }, [items]);
 
+  // FX-101 Evidence Wire: while a trail is active, an ink wire joins its tiles (behind them, visible in the gaps) and a
+  // signal dot travels along it. Recomputed when the trail or the grid size changes; nothing runs without a trail.
+  const navRef = useRef<HTMLElement>(null);
+  const [wire, setWire] = useState('');
+  const trailKey = trail ? trail.ids.join('|') : '';
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!FX.evidenceWire || !nav || !trailKey) {
+      setWire('');
+      return;
+    }
+    const ids = trailKey.split('|');
+    const draw = () => {
+      const n = nav.getBoundingClientRect();
+      const pts = ids
+        .map((id) => nav.querySelector<HTMLElement>(`a[href="#project-${id}"]`))
+        .filter((a): a is HTMLElement => a !== null)
+        .map((a) => {
+          const r = a.getBoundingClientRect();
+          return [Math.round(r.left - n.left + r.width / 2), Math.round(r.top - n.top + r.height / 2)];
+        });
+      setWire(pts.length > 1 ? pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x} ${y}`).join(' ') : '');
+    };
+    draw();
+    const ro = new ResizeObserver(draw);
+    ro.observe(nav);
+    return () => ro.disconnect();
+  }, [trailKey]);
+
   if (!FX.projectIndex) return null;
 
   return (
-    <nav aria-label="Project index" className="fx-tilt3d-grid grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+    <nav
+      ref={navRef}
+      aria-label="Project index"
+      className="fx-tilt3d-grid relative grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3"
+    >
+      {wire ? (
+        <>
+          <svg aria-hidden className="fx-wire absolute inset-0 w-full h-full overflow-visible pointer-events-none">
+            <path key={wire} d={wire} pathLength={1} className="fx-wire-path" />
+          </svg>
+          <span aria-hidden className="fx-wire-dot" style={{ offsetPath: `path('${wire}')` }} />
+        </>
+      ) : null}
       {items.map((p) => {
         const on = active === p.id;
         const seen = FX.portfolioMemory && visited.includes(p.id);
@@ -55,7 +96,7 @@ export function ProjectIndex({ items }: { items: readonly ProjectIndexItem[] }) 
               // on the card's shell under the header; a second scroll here used to race it
               if (focus) setFocus(p.id); // in Focus Mode, the index moves the spotlight
             }}
-            className={`fx-tilt3d relative flex flex-col gap-1 min-h-[64px] min-w-0 p-3 rounded-2xl border-3 border-ink text-ink transition-opacity duration-300 ${
+            className={`fx-tilt3d relative z-[1] flex flex-col gap-1 min-h-[64px] min-w-0 p-3 rounded-2xl border-3 border-ink text-ink transition-opacity duration-300 ${
               on ? `${p.fill} shadow-none translate-x-[3px] translate-y-[3px]` : 'nb-press bg-white shadow-brutal-sm'
             } ${dim ? 'opacity-40' : ''} ${hit ? 'fx-trail-hit' : ''}`}
           >

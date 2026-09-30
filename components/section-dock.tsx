@@ -69,7 +69,7 @@ export function SectionDock() {
       aria-label={label ? `Current section: ${label}. Open navigation` : 'Open navigation'}
       tabIndex={visible ? 0 : -1}
       aria-hidden={visible ? undefined : true}
-      className={`lg:hidden fixed z-[90] left-[max(1rem,calc(var(--safe-left)+0.5rem))] bottom-[max(1rem,calc(var(--safe-bottom)+0.5rem))] sm:bottom-8 sm:left-8 relative inline-flex items-center gap-2 min-h-[48px] max-w-[60vw] px-4 rounded-full border-3 border-ink bg-white shadow-brutal-sm font-mono text-xs font-extrabold uppercase tracking-[0.1em] text-ink transition-[opacity,transform] duration-200 active:translate-x-[3px] active:translate-y-[3px] active:shadow-none ${
+      className={`lg:hidden fixed z-[90] left-[max(1rem,calc(var(--safe-left)+0.5rem))] bottom-[max(1rem,calc(var(--safe-bottom)+0.5rem))] sm:bottom-8 sm:left-8 inline-flex items-center gap-2 min-h-[48px] max-w-[60vw] px-4 rounded-full border-3 border-ink bg-white shadow-brutal-sm font-mono text-xs font-extrabold uppercase tracking-[0.1em] text-ink transition-[opacity,transform] duration-200 active:translate-x-[3px] active:translate-y-[3px] active:shadow-none ${
         visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
       }`}
     >

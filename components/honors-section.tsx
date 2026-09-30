@@ -6,7 +6,7 @@ import { m, AnimatePresence } from 'framer-motion';
 import { useInteractionSelect } from '@/lib/interaction-store';
 import { BauhausSolid } from './fx/bauhaus-solid';
 import { SplitWords } from './fx/split-words';
-import { FX } from '@/lib/fx';
+import { FX, SPRING_STAMP } from '@/lib/fx';
 import { AnimatedCounter } from './animated-counter';
 import { ResultsBoard, RolesGrid, Transcript } from './honors-academic';
 import { AmbientOrbits } from './fx/ambient-orbits';
@@ -305,7 +305,13 @@ function CertificateModal({ url, onClose }: { url: string; onClose: () => void }
       <m.div
         initial={FX.pageLift ? { y: 40, rotateX: -18, opacity: 0, transformPerspective: 1200 } : { opacity: 0 }}
         animate={{ y: 0, rotateX: 0, opacity: 1 }}
-        exit={FX.pageLift ? { y: 40, rotateX: 12, opacity: 0, transformPerspective: 1200 } : { opacity: 0 }}
+        exit={
+          FX.pageLift
+            ? { y: 40, rotateX: 12, scale: FX.documentSettle ? 0.96 : 1, opacity: 0, transformPerspective: 1200 }
+            : { opacity: 0 }
+        }
+        // FX-104 Document Settle: the sheet lands with the stamp spring (a small overshoot), like paper put down
+        transition={FX.documentSettle ? { ...SPRING_STAMP, opacity: { duration: 0.2 } } : undefined}
         style={{ transformOrigin: '50% 0%' }}
         onClick={(e) => e.stopPropagation()}
         className="relative w-full max-w-5xl mx-auto flex-1 min-h-0 bg-white rounded-[18px] sm:rounded-[22px] border-3 border-ink shadow-brutal-lg sm:shadow-brutal-xl flex items-center justify-center p-2 sm:p-3"

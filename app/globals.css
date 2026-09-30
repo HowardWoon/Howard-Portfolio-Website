@@ -2239,3 +2239,89 @@ html:not(.fx-off-headerInstrument) .site-header[data-condensed] {
     animation: fx-glint 0.9s var(--ease-soft) both;
   }
 }
+
+/* FX-100 Spatial Echo: the landed card's outline closes in once (yellow, the existing focus colour) */
+html:not(.fx-off-spatialEcho) .fx-echo {
+  animation: fx-echo 0.8s var(--ease-soft) both;
+}
+@keyframes fx-echo {
+  0% {
+    outline: 4px solid rgb(255 199 0 / 0);
+    outline-offset: 26px;
+  }
+  35% {
+    outline: 4px solid rgb(255 199 0 / 1);
+  }
+  100% {
+    outline: 4px solid rgb(255 199 0 / 0);
+    outline-offset: 6px;
+  }
+}
+/* the index tile and the card's colour band travel as one object during the FX-84 flip */
+::view-transition-group(fx-proj-hop) {
+  animation-duration: var(--dur-slide);
+  animation-timing-function: var(--ease-soft);
+}
+::view-transition-old(fx-proj-hop),
+::view-transition-new(fx-proj-hop) {
+  height: 100%;
+  object-fit: fill;
+}
+
+/* FX-101 Evidence Wire: ink wire drawn in once, a yellow signal dot travelling along it (off-screen: paused by D5) */
+.fx-wire-path {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion='calm']) .fx-wire-path {
+    animation: fx-wire-draw 0.7s var(--ease-soft) both;
+  }
+  html:not([data-motion='calm']) .fx-wire-dot {
+    animation: fx-wire-run 2.4s linear infinite;
+  }
+}
+.fx-wire-dot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: var(--pop-yellow);
+  border: 3px solid var(--ink);
+  pointer-events: none;
+  offset-rotate: 0deg;
+  offset-distance: 0%;
+}
+[data-offscreen] .fx-wire-dot {
+  animation-play-state: paused;
+}
+@keyframes fx-wire-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+@keyframes fx-wire-run {
+  to {
+    offset-distance: 100%;
+  }
+}
+
+/* FX-102 Focus Lens 2.0: the focused card's neighbours step back less than the far cards */
+html:not(.fx-off-focusLens) [data-focus-active] > .fx-project-shell[data-lens='near']:not([data-focused]) {
+  opacity: 0.5;
+}
+
+/* FX-103 Contact Deceleration: once the visitor is reading Contact, its ambient loops come to rest */
+html:not(.fx-off-contactCalm)
+  #contact:is([data-phase='hold'], [data-phase='exit'])
+  :is(.animate-pulse, .animate-ping, .animate-spin-slow, .animate-wobble) {
+  animation-play-state: paused;
+}

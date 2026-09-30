@@ -104,6 +104,10 @@ test.describe('phone', () => {
     });
     await page.waitForTimeout(300);
     await page.evaluate(() => scrollBy(0, -200)); // the dock appears on scroll up
+    // the dock stays a fixed pill (a stray `relative` once pushed it into the page flow below the footer)
+    expect(
+      await page.locator('button[aria-label^="Current section"]').evaluate((e) => getComputedStyle(e).position),
+    ).toBe('fixed');
     const bar = page.locator('button[aria-label^="Current section"] .fx-sp-bar');
     await expect
       .poll(async () => Number(await bar.evaluate((e) => getComputedStyle(e).getPropertyValue('--sp'))))
@@ -136,4 +140,45 @@ test('header instrument: marker under the current section, previews on hover, fi
   await expect(nav.locator('a[href="#honors"] .fx-hdr-marker')).toHaveCount(1);
   await page.mouse.move(700, 500);
   await expect(nav.locator('a[href="#projects"] .fx-hdr-marker')).toHaveCount(1);
+});
+
+test('spatial echo: the landed card pulses once after an index jump (FX-100)', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await home(page);
+  const index = page.getByRole('navigation', { name: 'Project index' });
+  await index.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(500);
+  await index.getByRole('link', { name: /SLOTIFY/ }).click();
+  await expect(page.locator('#project-slotify.fx-echo')).toHaveCount(1, { timeout: 5000 });
+  await expect(page.locator('#project-slotify.fx-echo')).toHaveCount(0, { timeout: 3000 }); // one pulse, then gone
+});
+
+test('evidence wire joins the trail tiles and disappears with the trail (FX-101)', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await home(page);
+  const python = page.locator('#about').getByRole('button', { name: /^Trace Python 3.12/ });
+  await python.scrollIntoViewIfNeeded();
+  await python.click();
+  const index = page.getByRole('navigation', { name: 'Project index' });
+  await expect(index.locator('.fx-wire-path')).toHaveCount(1);
+  expect(await index.locator('.fx-wire-path').getAttribute('d')).toMatch(/^M\d+ \d+ L\d+ \d+/);
+  await expect(index.locator('.fx-wire-dot')).toHaveCount(1);
+  await page.keyboard.press('Escape');
+  await expect(index.locator('.fx-wire-path')).toHaveCount(0);
+});
+
+test('focus lens: neighbours step back less than far cards (FX-102)', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await home(page);
+  const btn = page.getByRole('button', { name: 'Focus mode: BILAHUJAN' });
+  await btn.scrollIntoViewIfNeeded();
+  await btn.click();
+  const lens = (id: string) => page.locator(`[data-project-shell][data-project-id="${id}"]`).getAttribute('data-lens');
+  await expect.poll(() => lens('proofpay')).toBe('near');
+  expect(await lens('catfish')).toBe('near');
+  expect(await lens('zerolag')).toBe('far');
+  const op = (id: string) =>
+    page.locator(`[data-project-shell][data-project-id="${id}"]`).evaluate((e) => Number(getComputedStyle(e).opacity));
+  await expect.poll(() => op('proofpay')).toBeCloseTo(0.5, 1);
+  await expect.poll(() => op('zerolag')).toBeCloseTo(0.22, 1);
 });

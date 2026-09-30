@@ -335,8 +335,8 @@ export default function StackedProjects() {
 
         {/* Project Cards (FX-39: data-focus-active dims every card except the focused one) */}
         <div className="space-y-12 lg:space-y-20" data-focus-active={focus ? '' : undefined}>
-          {projects.map((project) => (
-            <ProjectCard key={project.id} project={project} />
+          {projects.map((project, i) => (
+            <ProjectCard key={project.id} project={project} index={i} />
           ))}
         </div>
       </div>
@@ -347,7 +347,7 @@ export default function StackedProjects() {
 // GitHub links that are still placeholders ("https://github.com") are hidden instead of shipped as dead links
 const isRealRepo = (url?: string) => !!url && /github\.com\/[^/]+\/[^/]+/.test(url);
 
-function ProjectCard({ project }: { project: ProjectData }) {
+function ProjectCard({ project, index }: { project: ProjectData; index: number }) {
   const [blueprint, setBlueprint] = React.useState(false);
   // FX-69: `?bp=<this project>:L<n>` opens this card's bench on layer n (after the page has settled)
   const [sharedLayer, setSharedLayer] = React.useState<number | null>(null);
@@ -373,6 +373,12 @@ function ProjectCard({ project }: { project: ProjectData }) {
     return () => window.removeEventListener('keydown', onKey);
   }, [blueprint]);
   const focused = useInteractionSelect((s) => s.focus === project.simulatorId);
+  // FX-102 Focus Lens: how far this card is from the focused one (1 = neighbour steps back less than the rest)
+  const lens = useInteractionSelect((s) => {
+    if (!FX.focusLens || !s.focus || s.focus === project.simulatorId) return undefined;
+    const fi = projects.findIndex((p) => p.simulatorId === s.focus);
+    return fi < 0 ? undefined : Math.abs(fi - index) === 1 ? 'near' : 'far';
+  });
   const trailHit = useInteractionSelect((s) => !!s.trail && s.trail.ids.includes(project.simulatorId));
   const trailKey = useInteractionSelect((s) => s.trail?.key ?? null);
   const skillKeys = project.tags.map(skillKey).join(' ');
@@ -389,6 +395,7 @@ function ProjectCard({ project }: { project: ProjectData }) {
       data-project-id={project.simulatorId}
       data-project-skills={skillKeys}
       data-focused={focused ? '' : undefined}
+      data-lens={lens}
       data-trail-hit={trailHit ? '' : undefined}
       data-blueprint-open={blueprint ? '' : undefined}
       className="fx-project-shell scroll-mt-[calc(var(--header-h,5rem)+1.5rem)]"
