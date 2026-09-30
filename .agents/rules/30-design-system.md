@@ -99,4 +99,20 @@ AGENTS.md law 0: theme and content are frozen. These patterns were added as laye
 | Mechanical keys                                 | `.nb-key` in globals.css                  | 4 px shadow pressed to 0 with translate(4px,4px); ONLY on new controls - existing buttons keep their own hover / press                                                                                                                                                                  |
 | System Status Bar + X-ray mode                  | `components/system-status-bar.tsx`        | KL clock (Asia/Kuala_Lumpur), real ping, X-ray overlay in interactive blue; measures on resize, not per scroll frame; Escape exits                                                                                                                                                      |
 
+R23 (lecturer recruiter-UX advice), same rule - layers only:
+
+| Feature              | Where                                        | Rules                                                                                                                                                  |
+| -------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| One-click copy email | contact-section.tsx `[data-copy-email]`      | reveals + copies in one click; success = LIVE mint; clipboard failure falls back to mailto                                                             |
+| Intent auto-drafter  | contact-section.tsx                          | types the EXISTING template; never replaces the visitor's own words; instant for reduced motion; CLEAR DRAFT; armed Dispatch = blue ring               |
+| Skill-to-proof       | components/role-proof.tsx                    | every proof line must be a fact already on the page, and every link must hit an existing anchor (tested)                                               |
+| Resume drawer        | components/resume-drawer.tsx + lib/resume.ts | plain click only (modifier clicks stay native); portal dialog; queued if clicked before mount; touch phones get the actions without an embedded viewer |
+| Time-zone ribbon     | system-status-bar.tsx                        | extends the status bar, the marquee stays; no invented claims (no "online", no response-time promise)                                                  |
+| CAD crosshair        | X-ray mode                                   | mouse / pen only; transform writes in one rAF                                                                                                          |
+
+Declined (and why) - do not add without Howard's explicit request: replacing the marquee (barcode / punch-card / louvre /
+kinetic text / sequencer: law 0), repurposing the lightning button (it is the Reduce-motion accessibility switch) or the
+circle / square / triangle (FX-91 postage stamp), per-frame background fields / PCB router / velocity shadows (scroll
+budget, R20), a destructive "load spike" mode, auto-playing audio, stamps with self-praise wording (new content).
+
 Testing notes: an element below the fold cannot be hovered / pressed by `page.mouse` until scrolled into view; measure physics bodies by their translation (`DOMMatrix(transform).m41/m42`), not the rotated bounding box; a flung body's landing spot is physics - assert that it follows the pointer while held and settles inside afterwards.
