@@ -128,7 +128,7 @@ export function SiteHeader() {
                 key={s.id}
                 href={`#${s.id}`}
                 aria-current={FX.headerInstrument && on ? 'location' : undefined}
-                className={`group fx-dir-ink relative py-0.5 text-sm font-extrabold uppercase tracking-widest hover:text-pop-blue transition-colors after:absolute after:-bottom-0.5 after:left-0 after:w-full after:scale-x-0 hover:after:scale-x-100 focus-visible:after:scale-x-100 after:origin-left after:transition-transform after:h-[3px] after:bg-pop-yellow ${
+                className={`group fx-dir-ink relative py-0.5 text-sm font-extrabold uppercase tracking-widest hover:text-pop-blue transition-colors after:absolute after:-bottom-0.5 after:left-0 after:w-full after:scale-x-0 hover:after:scale-x-100 focus-visible:after:scale-x-100 after:origin-left after:transition-transform after:h-[3px] after:bg-pop-yellow [@media(pointer:coarse)]:before:absolute [@media(pointer:coarse)]:before:inset-x-0 [@media(pointer:coarse)]:before:-inset-y-[6px] [@media(pointer:coarse)]:before:content-[''] ${
                   FX.headerInstrument && on ? 'text-pop-blue' : 'text-ink'
                 }`}
                 onPointerEnter={() => hot(true)}
