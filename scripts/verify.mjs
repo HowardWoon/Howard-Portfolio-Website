@@ -91,7 +91,12 @@ run('format (prettier --check)', 'npx prettier --check app components lib tests 
 if (!args.has('--no-build')) {
   const b = run('build', 'npm run build', { timeoutMin: 15 });
   const m = b.out.match(/^\S+\s+\S+\s+\/\s+[\d.]+\s+k?B\s+([\d.]+\s+k?B)/m);
-  if (m) results.at(-1).tail = `First Load JS for "/": ${m[1]}\n` + results.at(-1).tail;
+  // R17 P2-06: the tail was already printed, so the number never appeared; put it in the summary row instead
+  if (m) {
+    results.at(-1).tail = `First Load JS for "/": ${m[1]}\n` + results.at(-1).tail;
+    results.at(-1).name = `build (First Load JS "/": ${m[1]})`;
+    console.log(`First Load JS for "/": ${m[1]} (budget 190 kB)`);
+  }
 }
 
 // 5. E2E

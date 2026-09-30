@@ -11,23 +11,23 @@ import {
   TideCanvas,
   FrameGovernor,
   DeskFx,
+  SectionSpine,
+  SectionDock,
+  CommandPalette,
+  OffscreenPause,
+  PointerField,
+  EasterEgg,
 } from '@/components/lazy-sections';
 import { SiteFooter } from '@/components/site-footer';
 import { LogoWall } from '@/components/logo-wall';
 import dynamic from 'next/dynamic';
 import { RouteWipeClear } from '@/components/fx/route-wipe';
-const PointerField = dynamic(() => import('@/components/fx/pointer-field').then((mod) => mod.PointerField));
-const EasterEgg = dynamic(() => import('@/components/fx/easter-egg').then((mod) => mod.EasterEgg));
 const VelocitySkew = dynamic(() => import('@/components/fx/velocity-skew').then((mod) => mod.VelocitySkew));
 
 import { BootSequence } from '@/components/boot-sequence';
 import { TechMarquee } from '@/components/marquees';
 import { ScrollToTop } from '@/components/scroll-to-top';
 import { SiteHeader } from '@/components/site-header';
-const CommandPalette = dynamic(() => import('@/components/command-palette').then((mod) => mod.CommandPalette), {});
-const OffscreenPause = dynamic(() => import('@/components/fx/offscreen-pause').then((mod) => mod.OffscreenPause));
-const SectionDock = dynamic(() => import('@/components/section-dock').then((mod) => mod.SectionDock));
-const SectionSpine = dynamic(() => import('@/components/section-spine').then((mod) => mod.SectionSpine));
 
 export function PortfolioPage() {
   return (

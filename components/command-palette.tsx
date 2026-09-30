@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useFocusTrap } from '@/lib/use-focus-trap';
 import { useScrollLock } from '@/lib/use-scroll-lock';
 import { Command } from 'cmdk';
@@ -99,117 +100,119 @@ export function CommandPalette() {
         </div>
       )}
 
-      {open && (
-        <div
-          ref={dialogRef}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Command Palette"
-          className="fixed inset-0 z-[10000] flex items-start justify-center pt-[max(4.5rem,12dvh)] sm:pt-[18vh] px-3 xs:px-4 bg-ink/40 backdrop-blur-[2px]"
-          data-lenis-prevent
-        >
-          <div className="fixed inset-0" onClick={() => setOpen(false)} />
-
-          <Command
-            label="Command Palette"
-            className="relative w-full max-w-[560px] bg-white rounded-[22px] border-3 border-ink shadow-brutal-xl overflow-hidden flex flex-col font-sans"
-            shouldFilter={true}
+      {open &&
+        createPortal(
+          <div
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Command Palette"
+            className="fixed inset-0 z-[10000] flex items-start justify-center pt-[max(4.5rem,12dvh)] sm:pt-[18vh] px-3 xs:px-4 bg-ink/40 backdrop-blur-[2px]"
+            data-lenis-prevent
           >
-            <div className="flex items-center border-b-3 border-ink px-4 py-3.5 bg-paper-cream">
-              <Search className="w-5 h-5 text-ink mr-3" strokeWidth={2.75} />
-              <Command.Input
-                data-autofocus
-                placeholder="Type a command or search..."
-                className="flex-1 bg-transparent text-ink placeholder:text-ink-muted outline-none border-none text-base font-semibold"
-              />
-              <kbd className="hidden sm:inline-block nb-tag bg-white text-[0.65rem] py-0.5">ESC</kbd>
-            </div>
+            <div className="fixed inset-0" onClick={() => setOpen(false)} />
 
-            <Command.List className="max-h-[min(320px,50dvh)] overflow-y-auto overscroll-contain p-2">
-              <Command.Empty className="py-12 text-center relative overflow-hidden">
-                <ShapeBurst />
-                <p className="text-sm font-mono font-bold text-ink relative z-10">NO COMMANDS FOUND.</p>
-                <p className="text-xs font-sans font-medium text-ink-soft mt-1 relative z-10">
-                  Try searching for &quot;contact&quot; or &quot;about&quot;
-                </p>
-              </Command.Empty>
+            <Command
+              label="Command Palette"
+              className="relative w-full max-w-[560px] bg-white rounded-[22px] border-3 border-ink shadow-brutal-xl overflow-hidden flex flex-col font-sans"
+              shouldFilter={true}
+            >
+              <div className="flex items-center border-b-3 border-ink px-4 py-3.5 bg-paper-cream">
+                <Search className="w-5 h-5 text-ink mr-3" strokeWidth={2.75} />
+                <Command.Input
+                  data-autofocus
+                  placeholder="Type a command or search..."
+                  className="flex-1 bg-transparent text-ink placeholder:text-ink-muted outline-none border-none text-base font-semibold"
+                />
+                <kbd className="hidden sm:inline-block nb-tag bg-white text-[0.65rem] py-0.5">ESC</kbd>
+              </div>
 
-              <Command.Group heading="Navigation" className={groupClass}>
-                <Command.Item onSelect={() => runCommand(() => goTo('#about'))} className={itemClass}>
-                  <User className="w-5 h-5" strokeWidth={2.5} />
-                  <span>About</span>
-                </Command.Item>
-                <Command.Item onSelect={() => runCommand(() => goTo('#projects'))} className={itemClass}>
-                  <Code className="w-5 h-5" strokeWidth={2.5} />
-                  <span>Projects</span>
-                </Command.Item>
-                <Command.Item onSelect={() => runCommand(() => goTo('#experience'))} className={itemClass}>
-                  <Briefcase className="w-5 h-5" strokeWidth={2.5} />
-                  <span>Experience</span>
-                </Command.Item>
-                <Command.Item onSelect={() => runCommand(() => goTo('#honors'))} className={itemClass}>
-                  <GraduationCap className="w-5 h-5" strokeWidth={2.5} />
-                  <span>Honors & Awards</span>
-                </Command.Item>
-                <Command.Item onSelect={() => runCommand(() => goTo('#contact'))} className={itemClass}>
-                  <Send className="w-5 h-5" strokeWidth={2.5} />
-                  <span>Contact</span>
-                </Command.Item>
-              </Command.Group>
+              <Command.List className="max-h-[min(320px,50dvh)] overflow-y-auto overscroll-contain p-2">
+                <Command.Empty className="py-12 text-center relative overflow-hidden">
+                  <ShapeBurst />
+                  <p className="text-sm font-mono font-bold text-ink relative z-10">NO COMMANDS FOUND.</p>
+                  <p className="text-xs font-sans font-medium text-ink-soft mt-1 relative z-10">
+                    Try searching for &quot;contact&quot; or &quot;about&quot;
+                  </p>
+                </Command.Empty>
 
-              <Command.Group heading="Actions" className={`${groupClass} border-t-2 border-dashed border-ink mt-1`}>
-                <Command.Item
-                  onSelect={() => runCommand(() => window.dispatchEvent(new Event('start-tour')))}
-                  className={itemClass}
-                >
-                  <Waypoints className="w-5 h-5" strokeWidth={2.5} />
-                  <span>Start guided tour</span>
-                </Command.Item>
-                <Command.Item
-                  onSelect={() => runCommand(() => window.dispatchEvent(new Event('open-shortcuts')))}
-                  className={itemClass}
-                >
-                  <Keyboard className="w-5 h-5" strokeWidth={2.5} />
-                  <span>Keyboard shortcuts</span>
-                </Command.Item>
-                <Command.Item onSelect={() => runCommand(() => setCalm(!isCalm()))} className={itemClass}>
-                  <ZapOff className="w-5 h-5" strokeWidth={2.5} />
-                  <span>Calm mode (reduce motion)</span>
-                </Command.Item>
-                {FX.skimLens ? (
-                  <Command.Item onSelect={() => runCommand(() => setSkim(!isSkim()))} className={itemClass}>
-                    <ScanEye className="w-5 h-5" strokeWidth={2.5} />
-                    <span>Skim mode</span>
+                <Command.Group heading="Navigation" className={groupClass}>
+                  <Command.Item onSelect={() => runCommand(() => goTo('#about'))} className={itemClass}>
+                    <User className="w-5 h-5" strokeWidth={2.5} />
+                    <span>About</span>
                   </Command.Item>
-                ) : null}
-                <Command.Item
-                  onSelect={() =>
-                    runCommand(async () => {
-                      try {
-                        await navigator.clipboard.writeText(personalDetails.email);
-                        setToast('Email copied to clipboard!');
-                      } catch {
-                        window.location.href = `mailto:${personalDetails.email}`;
-                      }
-                    })
-                  }
-                  className={itemClass}
-                >
-                  <Mail className="w-5 h-5" strokeWidth={2.5} />
-                  <span>Copy Email Address</span>
-                </Command.Item>
-                <Command.Item
-                  onSelect={() => runCommand(() => window.open('/resume.pdf', '_blank'))}
-                  className={itemClass}
-                >
-                  <Download className="w-5 h-5" strokeWidth={2.5} />
-                  <span>Download Résumé</span>
-                </Command.Item>
-              </Command.Group>
-            </Command.List>
-          </Command>
-        </div>
-      )}
+                  <Command.Item onSelect={() => runCommand(() => goTo('#projects'))} className={itemClass}>
+                    <Code className="w-5 h-5" strokeWidth={2.5} />
+                    <span>Projects</span>
+                  </Command.Item>
+                  <Command.Item onSelect={() => runCommand(() => goTo('#experience'))} className={itemClass}>
+                    <Briefcase className="w-5 h-5" strokeWidth={2.5} />
+                    <span>Experience</span>
+                  </Command.Item>
+                  <Command.Item onSelect={() => runCommand(() => goTo('#honors'))} className={itemClass}>
+                    <GraduationCap className="w-5 h-5" strokeWidth={2.5} />
+                    <span>Honors & Awards</span>
+                  </Command.Item>
+                  <Command.Item onSelect={() => runCommand(() => goTo('#contact'))} className={itemClass}>
+                    <Send className="w-5 h-5" strokeWidth={2.5} />
+                    <span>Contact</span>
+                  </Command.Item>
+                </Command.Group>
+
+                <Command.Group heading="Actions" className={`${groupClass} border-t-2 border-dashed border-ink mt-1`}>
+                  <Command.Item
+                    onSelect={() => runCommand(() => window.dispatchEvent(new Event('start-tour')))}
+                    className={itemClass}
+                  >
+                    <Waypoints className="w-5 h-5" strokeWidth={2.5} />
+                    <span>Start guided tour</span>
+                  </Command.Item>
+                  <Command.Item
+                    onSelect={() => runCommand(() => window.dispatchEvent(new Event('open-shortcuts')))}
+                    className={itemClass}
+                  >
+                    <Keyboard className="w-5 h-5" strokeWidth={2.5} />
+                    <span>Keyboard shortcuts</span>
+                  </Command.Item>
+                  <Command.Item onSelect={() => runCommand(() => setCalm(!isCalm()))} className={itemClass}>
+                    <ZapOff className="w-5 h-5" strokeWidth={2.5} />
+                    <span>Calm mode (reduce motion)</span>
+                  </Command.Item>
+                  {FX.skimLens ? (
+                    <Command.Item onSelect={() => runCommand(() => setSkim(!isSkim()))} className={itemClass}>
+                      <ScanEye className="w-5 h-5" strokeWidth={2.5} />
+                      <span>Skim mode</span>
+                    </Command.Item>
+                  ) : null}
+                  <Command.Item
+                    onSelect={() =>
+                      runCommand(async () => {
+                        try {
+                          await navigator.clipboard.writeText(personalDetails.email);
+                          setToast('Email copied to clipboard!');
+                        } catch {
+                          window.location.href = `mailto:${personalDetails.email}`;
+                        }
+                      })
+                    }
+                    className={itemClass}
+                  >
+                    <Mail className="w-5 h-5" strokeWidth={2.5} />
+                    <span>Copy Email Address</span>
+                  </Command.Item>
+                  <Command.Item
+                    onSelect={() => runCommand(() => window.open('/resume.pdf', '_blank'))}
+                    className={itemClass}
+                  >
+                    <Download className="w-5 h-5" strokeWidth={2.5} />
+                    <span>Download Résumé</span>
+                  </Command.Item>
+                </Command.Group>
+              </Command.List>
+            </Command>
+          </div>,
+          document.body,
+        )}
     </>
   );
 }

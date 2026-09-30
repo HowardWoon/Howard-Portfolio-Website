@@ -14,6 +14,7 @@ export function EasterEgg() {
   useEffect(() => {
     if (!FX.easterEgg || prefersReducedMotion()) return;
     let buf = '';
+    let timer = 0; // R17 P2-02: cleared on unmount
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement | null;
       if (t?.closest('input, textarea, select, [contenteditable="true"], [cmdk-input]')) return;
@@ -22,11 +23,15 @@ export function EasterEgg() {
       if (buf === WORD) {
         buf = '';
         setOn(true);
-        window.setTimeout(() => setOn(false), 3200);
+        window.clearTimeout(timer);
+        timer = window.setTimeout(() => setOn(false), 3200);
       }
     };
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      window.clearTimeout(timer);
+    };
   }, []);
   return on ? <ShapeRain /> : null;
 }

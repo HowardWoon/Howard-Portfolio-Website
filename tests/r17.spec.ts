@@ -228,3 +228,14 @@ test.describe('phone: experience', () => {
     await expect(page.locator('#experience').getByText('Kuala Lumpur, Malaysia').first()).toBeVisible();
   });
 });
+
+test('manifest lists 192 and 512 px install icons that render (P2-10)', async ({ request }) => {
+  const m = await (await request.get('/manifest.webmanifest')).json();
+  const sizes = (m.icons as { src: string; sizes: string }[]).map((i) => i.sizes);
+  expect(sizes).toEqual(expect.arrayContaining(['192x192', '512x512']));
+  for (const px of [192, 512]) {
+    const r = await request.get(`/pwa-icon/${px}`);
+    expect(r.status()).toBe(200);
+    expect(r.headers()['content-type']).toContain('image/png');
+  }
+});

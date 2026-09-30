@@ -9,10 +9,9 @@ import { useEffect } from 'react';
  */
 export function OffscreenPause() {
   useEffect(() => {
-    const targets = document.querySelectorAll<HTMLElement>(
-      // sections, the hero (ticker, sticker, triangle) and the tech marquee wrapper (P2-12)
-      'main section[id], main > div > section, [data-offscreen-pause], .fx-wall, footer', // .fx-wall: FX-71 Arena Wall
-    );
+    // sections, the hero (ticker, sticker, triangle) and the tech marquee wrapper (P2-12); .fx-wall: FX-71 Arena Wall
+    const SELECTOR = 'main section[id], main > div > section, [data-offscreen-pause], .fx-wall, footer';
+    const watched = new Set<HTMLElement>();
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
@@ -23,10 +22,21 @@ export function OffscreenPause() {
       },
       { rootMargin: '200px 0px' },
     );
-    targets.forEach((t) => io.observe(t));
+    // R17 P2-04: lazy sections can mount or remount later; pick them up (cheap: only reacts to child-list changes)
+    const scan = () =>
+      document.querySelectorAll<HTMLElement>(SELECTOR).forEach((t) => {
+        if (watched.has(t)) return;
+        watched.add(t);
+        io.observe(t);
+      });
+    scan();
+    const main = document.querySelector('main');
+    const mo = new MutationObserver(scan);
+    if (main) mo.observe(main, { childList: true, subtree: false });
     return () => {
+      mo.disconnect();
       io.disconnect();
-      targets.forEach((t) => delete t.dataset.offscreen);
+      watched.forEach((t) => delete t.dataset.offscreen);
     };
   }, []);
   return null;

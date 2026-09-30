@@ -387,6 +387,8 @@ export default function HonorsSection() {
 
   const activeItems = honorsList.filter((i) => i.badgeColor === activeCategory);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const pickTimer = useRef<number | undefined>(undefined); // R17 P2-01: cleared on unmount
+  useEffect(() => () => window.clearTimeout(pickTimer.current), []);
   // FX-65: where the View Transitions API runs, it animates the switch (framer's exit is skipped so the two
   // animations never stack); elsewhere framer's AnimatePresence does it as before.
   const vt = useViewTransitions();
@@ -395,7 +397,8 @@ export default function HonorsSection() {
     else setActiveCategory(id);
     // On phones the 3 category keys stack, so the opened list appears off-screen below them → bring it into view
     if (id && window.innerWidth < 768) {
-      window.setTimeout(() => {
+      window.clearTimeout(pickTimer.current);
+      pickTimer.current = window.setTimeout(() => {
         const el = resultsRef.current;
         if (!el) return;
         if (window.__lenis)

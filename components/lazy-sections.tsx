@@ -31,3 +31,27 @@ export const DeskFx = dynamic(() => import('@/components/fx/desk-fx').then((mod)
 export const InteractionHud = dynamic(() => import('@/components/interaction-hud').then((mod) => mod.InteractionHud), {
   ssr: false,
 });
+
+// R17 P2-07: these were next/dynamic calls inside the server component portfolio-page.tsx, which does not split them
+// (see the note above), so they sat in First Load JS (189 / 190 kB). Client-only, after first paint.
+export const SectionSpine = dynamic(() => import('@/components/section-spine').then((mod) => mod.SectionSpine), {
+  ssr: false,
+});
+export const SectionDock = dynamic(() => import('@/components/section-dock').then((mod) => mod.SectionDock), {
+  ssr: false,
+});
+export const CommandPalette = dynamic(() => import('@/components/command-palette').then((mod) => mod.CommandPalette), {
+  ssr: false,
+});
+export const OffscreenPause = dynamic(
+  () => import('@/components/fx/offscreen-pause').then((mod) => mod.OffscreenPause),
+  {
+    ssr: false,
+  },
+);
+export const PointerField = dynamic(() => import('@/components/fx/pointer-field').then((mod) => mod.PointerField), {
+  ssr: false,
+});
+export const EasterEgg = dynamic(() => import('@/components/fx/easter-egg').then((mod) => mod.EasterEgg), {
+  ssr: false,
+});

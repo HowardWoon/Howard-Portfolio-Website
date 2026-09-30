@@ -73,13 +73,6 @@ export function ScrollToTop() {
     // Use Lenis when active so the two scroll engines don't fight each other
     if (window.__lenis) window.__lenis.scrollTo(0, { duration: 1.2 });
     else window.scrollTo({ top: 0, behavior: 'smooth' });
-    const dot = document.querySelector('.nb-led') as HTMLElement;
-    if (dot) {
-      dot.style.animationIterationCount = '1';
-      setTimeout(() => {
-        dot.style.animationIterationCount = 'infinite';
-      }, 1200);
-    }
   };
 
   return (
