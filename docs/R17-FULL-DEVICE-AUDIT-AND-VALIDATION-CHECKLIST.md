@@ -39,6 +39,19 @@
 | First Load JS for / | 189 kB | 164 kB |
 | e2e | 156 tests | 176+ tests, all passing |
 
+**Validation round (after Howard asked to validate everything again):** fresh build + full suite twice (177 / 177
+both times), both audit-ui passes (40 / 40 rows, 0 axe violations), the original R17 probe re-run (every P0 item
+confirmed fixed) and a scripted functional sweep (boot gate, all palette commands, honours categories + PNG / PDF
+certificates, experience filters / accordion / archive / viewer, contact form, Arena Wall links, back / forward, all
+three simulators, admin redirect, API status codes, SEO / icon endpoints, headers, phone gestures, keyboard walk,
+resize at 6 widths). It found and fixed four real problems:
+- returning from a simulator on a slow device landed at the top of the page (Lenis kept the simulator page's scroll
+  limit; now re-measured before landing) - 5ed68f8
+- the boot gate's scroll lock engaged for one render on client navigation back to / (raced that landing) - f5d8d30
+- --header-h could be re-written on <html> during a scroll with an unchanged value - 052f892
+- 1024-1279 px (iPad landscape, small laptops) had no section navigation; the dock now shows below 1280 px - 052f892
+Plus: the six VIEW CERTIFICATE buttons now have distinct accessible names.
+
 **Corrections and decisions (honest record):**
 - **P2-12 was wrong.** Three certificates are PNG files, so the `<img>` branch in CertificateModal is live and its
   lint exception is justified. Nothing was removed.
