@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Compass } from 'lucide-react';
 import { FX } from '@/lib/fx';
+import { SpFill } from './fx/sp-fill';
 import { SECTIONS, SECTION_IDS } from '@/lib/sections';
 import { useActiveSection } from '@/lib/use-active-section';
 import { useInteractionSelect } from '@/lib/interaction-store';
@@ -80,7 +81,7 @@ export function SectionDock() {
           aria-hidden
           className="absolute left-4 right-4 bottom-[5px] h-[3px] rounded-full bg-ink/15 overflow-hidden"
         >
-          <span data-sp-for="active" className="fx-sp-bar" />
+          <SpFill forId="active" className="fx-sp-bar" />
         </span>
       ) : null}
     </button>

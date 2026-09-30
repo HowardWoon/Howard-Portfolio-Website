@@ -2215,3 +2215,27 @@ html[data-motion='calm'] .fx-relay-b {
   transform-origin: 0 50%;
   transform: scaleX(var(--sp, 0));
 }
+
+/* FX-105 Header Instrument. Condensed after 120 px: the avatar eases to 88 % and the header gets its hard shadow
+   (transform / shadow only: --header-h and anchors never change). The hire pill catches one glint on hover. */
+.fx-hdr-avatar {
+  transition: scale 0.3s var(--ease-snap);
+}
+html:not(.fx-off-headerInstrument) .site-header[data-condensed] .fx-hdr-avatar {
+  scale: 0.88;
+}
+html:not(.fx-off-headerInstrument) .site-header[data-condensed] {
+  box-shadow: 0 3px 0 0 var(--ink);
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  html:not([data-motion='calm']):not(.fx-off-headerInstrument) .fx-hire-pill:hover::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background: linear-gradient(115deg, transparent 35%, rgb(255 255 255 / 0.85) 50%, transparent 65%);
+    translate: -120% 0;
+    animation: fx-glint 0.9s var(--ease-soft) both;
+  }
+}

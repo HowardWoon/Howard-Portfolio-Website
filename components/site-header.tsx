@@ -1,15 +1,47 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { m } from 'framer-motion';
 import { Magnetic } from './magnetic-button';
 import { MotionToggle } from './motion-toggle';
 import { TextRoll } from './fx/text-roll';
 import { ExternalLink, FileText, Search } from 'lucide-react';
+import { FX, SPRING_STAMP } from '@/lib/fx';
+import { useClockActive } from '@/lib/section-clock';
+import { SpFill } from './fx/sp-fill';
+
+const NAV = [
+  { id: 'about', label: 'About' },
+  { id: 'projects', label: 'Projects' },
+  { id: 'experience', label: 'Experience' },
+  { id: 'honors', label: 'Honors' },
+  { id: 'contact', label: 'Contact' },
+] as const;
 
 export function SiteHeader() {
   const ref = useRef<HTMLElement>(null);
+  // FX-105 Header Instrument: the marker lives under the current section (Section Clock) and previews the hovered /
+  // focused link; the clock fills it with that section's progress (--sp on [data-sp-for="active"]).
+  const active = useClockActive();
+  const [preview, setPreview] = useState<string | null>(null);
+  const markerAt = FX.headerInstrument ? (preview ?? active) : '';
+  // condensed after 120 px (transform + shadow only, so --header-h and anchors never change); flips state only on change
+  const [condensed, setCondensed] = useState(false);
+  useEffect(() => {
+    if (!FX.headerInstrument) return;
+    let on = false;
+    const onScroll = () => {
+      const next = window.scrollY > 120;
+      if (next !== on) {
+        on = next;
+        setCondensed(next);
+      }
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   // Publish the real header height as --header-h (used for anchor offsets + the progress bar).
   // Re-measured on resize / rotation / font-scaling so nothing ever hides under the header.
@@ -27,6 +59,7 @@ export function SiteHeader() {
   return (
     <header
       ref={ref}
+      data-condensed={condensed ? '' : undefined}
       className="site-header fixed top-0 left-0 w-full flex items-center justify-between gap-2 xs:gap-3 z-[9999] bg-white sm:[@media(pointer:fine)]:bg-white/95 sm:[@media(pointer:fine)]:backdrop-blur-md border-b-3 border-ink pb-2.5 sm:pb-3 pt-[max(0.625rem,var(--safe-top))] sm:pt-[max(0.75rem,var(--safe-top))] pl-[max(0.875rem,var(--safe-left))] pr-[max(0.875rem,var(--safe-right))] sm:pl-[max(2.5rem,var(--safe-left))] sm:pr-[max(2.5rem,var(--safe-right))] lg:pl-[max(4rem,var(--safe-left))] lg:pr-[max(4rem,var(--safe-right))]"
     >
       <m.div
@@ -41,7 +74,7 @@ export function SiteHeader() {
             alt="Howard Woon"
             width={64}
             height={64}
-            className="w-9 h-9 xs:w-11 xs:h-11 sm:w-14 sm:h-14 landscape-short:!w-10 landscape-short:!h-10 rounded-xl sm:rounded-2xl object-cover border-3 border-ink shadow-brutal-xs sm:shadow-brutal-sm bg-pop-yellow"
+            className="fx-hdr-avatar w-9 h-9 xs:w-11 xs:h-11 sm:w-14 sm:h-14 landscape-short:!w-10 landscape-short:!h-10 rounded-xl sm:rounded-2xl object-cover border-3 border-ink shadow-brutal-xs sm:shadow-brutal-sm bg-pop-yellow"
             priority
           />
         </a>
@@ -65,31 +98,53 @@ export function SiteHeader() {
         transition={{ duration: 0.6 }}
         className="flex items-center gap-2 sm:gap-4 shrink-0"
       >
-        <div className="hidden lg:flex xl:hidden min-[1680px]:flex items-center gap-2.5 bg-white px-4 py-2 rounded-full border-3 border-ink shadow-brutal-sm">
-          <span className="nb-led" aria-hidden />
+        <div className="fx-hire-pill relative overflow-hidden hidden lg:flex xl:hidden min-[1680px]:flex items-center gap-2.5 bg-white px-4 py-2 rounded-full border-3 border-ink shadow-brutal-sm">
+          {/* FX-105: the LED sends a soft ping ring; hovering the pill passes one lamp glint across it */}
+          <span className="relative inline-flex shrink-0" aria-hidden>
+            {FX.headerInstrument ? (
+              <span className="absolute inset-0 rounded-full bg-pop-mint animate-ping opacity-60" />
+            ) : null}
+            <span className="nb-led relative" />
+          </span>
           <span className="text-xs font-mono font-extrabold tracking-[0.08em] text-ink">AVAILABLE FOR HIRE 2026</span>
         </div>
 
         <nav className="hidden xl:flex items-center gap-6 mr-4">
-          {[
-            { id: 'about', label: 'About' },
-            { id: 'projects', label: 'Projects' },
-            { id: 'experience', label: 'Experience' },
-            { id: 'honors', label: 'Honors' },
-            { id: 'contact', label: 'Contact' },
-          ].map((s) => (
-            <a
-              key={s.id}
-              href={`#${s.id}`}
-              className="fx-dir-ink relative py-0.5 text-sm font-extrabold uppercase tracking-widest text-ink hover:text-pop-blue transition-colors after:absolute after:-bottom-0.5 after:left-0 after:w-full after:scale-x-0 hover:after:scale-x-100 focus-visible:after:scale-x-100 after:origin-left after:transition-transform after:h-[3px] after:bg-pop-yellow"
-              onPointerEnter={() => window.dispatchEvent(new CustomEvent('route-preview', { detail: { id: s.id } }))}
-              onPointerLeave={() => window.dispatchEvent(new CustomEvent('route-preview', { detail: { id: null } }))}
-              onFocus={() => window.dispatchEvent(new CustomEvent('route-preview', { detail: { id: s.id } }))}
-              onBlur={() => window.dispatchEvent(new CustomEvent('route-preview', { detail: { id: null } }))}
-            >
-              {s.label}
-            </a>
-          ))}
+          {NAV.map((s) => {
+            const on = active === s.id;
+            const hot = (on: boolean) => {
+              window.dispatchEvent(new CustomEvent('route-preview', { detail: { id: on ? s.id : null } }));
+              setPreview(on ? s.id : null);
+            };
+            return (
+              <a
+                key={s.id}
+                href={`#${s.id}`}
+                aria-current={FX.headerInstrument && on ? 'location' : undefined}
+                className={`group fx-dir-ink relative py-0.5 text-sm font-extrabold uppercase tracking-widest hover:text-pop-blue transition-colors after:absolute after:-bottom-0.5 after:left-0 after:w-full after:scale-x-0 hover:after:scale-x-100 focus-visible:after:scale-x-100 after:origin-left after:transition-transform after:h-[3px] after:bg-pop-yellow ${
+                  FX.headerInstrument && on ? 'text-pop-blue' : 'text-ink'
+                }`}
+                onPointerEnter={() => hot(true)}
+                onPointerLeave={() => hot(false)}
+                onFocus={() => hot(true)}
+                onBlur={() => hot(false)}
+              >
+                {FX.headerInstrument ? <TextRoll>{s.label}</TextRoll> : s.label}
+                {markerAt === s.id ? (
+                  // FX-105: one marker, shared layoutId -> it slides between links with the stamp spring
+                  <m.span
+                    layoutId="fx-hdr-marker"
+                    aria-hidden
+                    transition={SPRING_STAMP}
+                    className="fx-hdr-marker absolute -bottom-[11px] -left-[5px] -right-[5px] h-[7px] rounded-full border-2 border-ink bg-pop-yellow overflow-hidden"
+                  >
+                    {/* filled with the current section's reading progress (Section Clock) */}
+                    {preview === null || preview === active ? <SpFill forId="active" className="fx-sp-bar" /> : null}
+                  </m.span>
+                ) : null}
+              </a>
+            );
+          })}
         </nav>
         <Magnetic strength={0.3} stretch>
           <a

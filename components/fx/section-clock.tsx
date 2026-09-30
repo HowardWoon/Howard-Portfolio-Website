@@ -144,6 +144,12 @@ export function SectionClock() {
     ro.observe(document.body);
     window.addEventListener('scroll', request, { passive: true });
     window.addEventListener('resize', soon);
+    // consumers that mount later (header marker, dock, rail) ask for a rescan, and get their value at once
+    const rescan = () => {
+      scan();
+      request();
+    };
+    window.addEventListener('fx-clock-scan', rescan);
 
     return () => {
       cancelAnimationFrame(raf);
@@ -151,6 +157,7 @@ export function SectionClock() {
       ro.disconnect();
       window.removeEventListener('scroll', request);
       window.removeEventListener('resize', soon);
+      window.removeEventListener('fx-clock-scan', rescan);
       delete root.dataset.fxClock;
       geo.forEach((g) => delete g.el.dataset.phase);
     };

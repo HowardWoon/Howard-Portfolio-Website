@@ -1,6 +1,7 @@
 'use client';
 
 import { FX } from '@/lib/fx';
+import { SpFill } from './fx/sp-fill';
 import { SECTIONS, SECTION_IDS } from '@/lib/sections';
 import React from 'react';
 import { useActiveSection } from '@/lib/use-active-section';
@@ -57,7 +58,7 @@ export function SectionSpine() {
               className={`relative overflow-hidden w-[17px] h-[17px] ${on || preview ? 'bg-pop-yellow' : 'bg-white'} ${preview ? 'scale-125' : ''} border-3 border-ink rotate-45 transition-colors duration-200 group-focus-visible:ring-2 group-focus-visible:ring-pop-blue`}
             >
               {/* FX-99: the active marker fills with the section's reading progress (Section Clock writes --sp) */}
-              {FX.instrumentRail && on ? <span data-sp-for={s.id} className="fx-sp-fill" /> : null}
+              {FX.instrumentRail && on ? <SpFill forId={s.id} className="fx-sp-fill" /> : null}
             </span>
           </a>
         );

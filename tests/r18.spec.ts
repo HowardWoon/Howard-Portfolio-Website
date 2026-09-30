@@ -104,9 +104,36 @@ test.describe('phone', () => {
     });
     await page.waitForTimeout(300);
     await page.evaluate(() => scrollBy(0, -200)); // the dock appears on scroll up
-    const bar = page.locator('.fx-sp-bar');
+    const bar = page.locator('button[aria-label^="Current section"] .fx-sp-bar');
     await expect
       .poll(async () => Number(await bar.evaluate((e) => getComputedStyle(e).getPropertyValue('--sp'))))
       .toBeGreaterThan(0.2);
   });
+});
+
+test('header instrument: marker under the current section, previews on hover, fills with progress (FX-105)', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await home(page);
+  await page.evaluate(() => {
+    const el = document.getElementById('projects')!;
+    scrollTo(0, el.getBoundingClientRect().top + scrollY + el.offsetHeight * 0.4);
+  });
+  const nav = page.locator('.site-header nav');
+  await expect(nav.locator('a[aria-current="location"]')).toHaveAttribute('href', '#projects');
+  await expect(nav.locator('a[href="#projects"] .fx-hdr-marker')).toHaveCount(1);
+  await expect
+    .poll(async () =>
+      Number(
+        await nav.locator('.fx-hdr-marker .fx-sp-bar').evaluate((e) => getComputedStyle(e).getPropertyValue('--sp')),
+      ),
+    )
+    .toBeGreaterThan(0.2);
+  expect(await page.locator('.site-header').getAttribute('data-condensed')).toBe('');
+
+  await nav.locator('a[href="#honors"]').hover();
+  await expect(nav.locator('a[href="#honors"] .fx-hdr-marker')).toHaveCount(1);
+  await page.mouse.move(700, 500);
+  await expect(nav.locator('a[href="#projects"] .fx-hdr-marker')).toHaveCount(1);
 });
