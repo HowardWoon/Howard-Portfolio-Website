@@ -186,3 +186,29 @@ test('header name + subtitle never run under the header buttons (320-1280 px)', 
     expect(gap, `header text vs buttons @${width}`).toBeGreaterThanOrEqual(4);
   }
 });
+
+// A tap on a server-rendered button of a code-split section, before its JS hydrates (0.6 s on a laptop, 5-11 s on a
+// slow phone), used to be dropped silently. It is now replayed once the section hydrates (lib/early-clicks.ts).
+test('an early tap on a not-yet-hydrated honours tab is replayed, not lost (slow phone, 4x CPU)', async ({
+  page,
+  context,
+}) => {
+  test.setTimeout(90_000);
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const cdp = await context.newCDPSession(page);
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+  await page.goto('/#honors', { waitUntil: 'commit' });
+  const tab = page.locator('[data-honor-category]', { hasText: 'ACADEMIC DISTINCTIONS' });
+  await tab.waitFor({ state: 'attached', timeout: 60_000 });
+  // the replay listener ships with the root bundle; the honours chunk hydrates seconds later on a slow phone
+  await page.waitForFunction(() => (window as unknown as { __hwEarlyClicks?: boolean }).__hwEarlyClicks === true);
+  const early = await tab.evaluate((el) => !Object.keys(el).some((k) => k.startsWith('__reactFiber$')));
+  expect(early, 'the tap must land BEFORE the honours section hydrates, or this test proves nothing').toBe(true);
+  await tab.dispatchEvent('click');
+  await expect(tab).toHaveAttribute('aria-expanded', 'true', { timeout: 60_000 });
+  await expect(page.getByRole('button', { name: /^SHOW ALL \d+/ })).toBeVisible({ timeout: 30_000 });
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 1 });
+  // the replay must not double-toggle: one more real click closes it again
+  await tab.click();
+  await expect(tab).toHaveAttribute('aria-expanded', 'false');
+});

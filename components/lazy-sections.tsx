@@ -1,6 +1,11 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { installEarlyClickReplay } from '@/lib/early-clicks';
+
+// R24: this module is in the root bundle, so the replay is listening before the sections below hydrate; a tap on a
+// server-rendered but not yet hydrated button is replayed instead of being dropped (lib/early-clicks.ts)
+installEarlyClickReplay();
 
 // Below-the-fold sections: still server-rendered (same HTML and content), but their JS leaves First Load.
 export const StackedProjects = dynamic(() => import('@/components/stacked-projects'));
