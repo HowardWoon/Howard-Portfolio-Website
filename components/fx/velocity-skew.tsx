@@ -36,7 +36,7 @@ export function VelocitySkew({ children, className = 'relative z-20' }: { childr
   // PERF: write --fx-vel ONLY to the elements that actually use it (the hero headline).
   // Writing it to <html> or the marquee wrapper causes massive style recalculations on every scroll frame.
   useMotionValueEvent(smooth, 'change', (v) => {
-    if (!FX.aberration || !allowed || scrollY.get() > 1200) return;
+    if (!FX.aberration || !allowed || isCoarse || scrollY.get() > 1200) return; // R17 P0-01: not on touch
     const normalized = Math.max(-1, Math.min(1, v / 2500));
     const val = normalized.toFixed(2);
     targetsRef.current.forEach((el) => {

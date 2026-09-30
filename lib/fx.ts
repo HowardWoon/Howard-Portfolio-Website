@@ -78,7 +78,7 @@ export const FX = {
   // ---- Round 15 (lecturer's UI/UX list; CSS only, off for reduced motion / Calm) ----
   iconMorph: true, // FX-72 accordion chevrons turn (spring) instead of swapping icons
   focusLock: true, // FX-73 the keyboard focus ring snaps onto its target like a lock-on
-  kineticType: true, // FX-74 section titles gain weight (variable font) as they scroll in
+  kineticType: false, // FX-74 retired in R17 (P0-01): animating font-weight re-laid out every title per scroll frame
   curtainGate: true, // FX-75 two panels part like stage curtains to reveal the Arena Wall title
   logoWall: true, // FX-71 Arena Wall: rows of round seals rolling past each other (competitions, organisations, stack)
   // ---- Round 16 "Drafting Desk Physics" (docs/R16-DRAFTING-DESK-PHYSICS-PLAN.md), session 1 ----

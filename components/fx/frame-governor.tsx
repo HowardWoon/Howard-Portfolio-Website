@@ -29,7 +29,12 @@ export function FrameGovernor() {
       return;
     }
     const nav = navigator as NavigatorHints;
-    const weak = (nav.deviceMemory ?? 8) <= 4 && (nav.hardwareConcurrency ?? 8) <= 4;
+    // R17 P1-01: a touch phone / tablet with <= 4 GB memory OR <= 4 cores starts in lite (the old AND rule left
+    // almost every 8-core Android phone in "full")
+    const touchSmall = window.matchMedia('(pointer: coarse) and (max-width: 1023px)').matches;
+    const lowMem = (nav.deviceMemory ?? 8) <= 4;
+    const fewCores = (nav.hardwareConcurrency ?? 8) <= 4;
+    const weak = touchSmall ? lowMem || fewCores : lowMem && fewCores;
     if (nav.connection?.saveData || weak) {
       setFxTier('lite');
       return;

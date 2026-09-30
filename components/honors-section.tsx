@@ -276,7 +276,7 @@ function CertificateModal({ url, onClose }: { url: string; onClose: () => void }
       aria-label="Certificate Preview"
       data-lenis-prevent
       data-dark-surface
-      className="fixed inset-0 z-[10000] flex flex-col h-screen-safe bg-ink/85 backdrop-blur-sm pt-[max(0.75rem,var(--safe-top))] pb-[max(0.75rem,var(--safe-bottom))] pl-[max(0.75rem,var(--safe-left))] pr-[max(0.75rem,var(--safe-right))] sm:p-10"
+      className="fixed inset-0 z-[10000] flex flex-col h-screen-safe bg-ink/90 sm:backdrop-blur-sm pt-[max(0.75rem,var(--safe-top))] pb-[max(0.75rem,var(--safe-bottom))] pl-[max(0.75rem,var(--safe-left))] pr-[max(0.75rem,var(--safe-right))] sm:p-10"
       onClick={onClose}
     >
       {/* Toolbar in normal flow → never overlaps the document on phones */}

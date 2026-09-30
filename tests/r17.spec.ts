@@ -57,6 +57,49 @@ test.describe('phone', () => {
     await expect(deck.locator('[aria-live="polite"]')).toContainText('Photo 11 of 11');
   });
 
+  test('phones run no layout / paint-bound scroll animations, and a fling barely lays out (P0-01)', async ({
+    page,
+    context,
+  }) => {
+    await page.goto('/?fxtier=full', { waitUntil: 'networkidle' });
+    const names = await page.evaluate(() =>
+      ['.fx-rise.nb-title', '.fx-ink-word', '.fx-wipe', '.fx-floor-grid'].map((sel) => {
+        const el = document.querySelector(sel);
+        return el ? getComputedStyle(el).animationName : 'none';
+      }),
+    );
+    for (const n of names) {
+      expect(n).not.toContain('fx-weight');
+      expect(n).not.toContain('fx-ink-fill');
+      expect(n).not.toContain('fx-wipe');
+      expect(n).not.toContain('fx-floor');
+    }
+    // settle pass first: lazy sections, images and fonts lay out once while they arrive (not scroll cost)
+    await page.evaluate(async () => {
+      const total = document.documentElement.scrollHeight;
+      for (let y = 0; y < total; y += innerHeight) {
+        scrollTo(0, y);
+        await new Promise((r) => setTimeout(r, 60));
+      }
+      scrollTo(0, 0);
+      await new Promise((r) => setTimeout(r, 400));
+    });
+    const cdp = await context.newCDPSession(page);
+    await cdp.send('Performance.enable');
+    const metric = async (name: string) =>
+      (await cdp.send('Performance.getMetrics')).metrics.find((m) => m.name === name)!.value;
+    const before = await metric('LayoutCount');
+    await page.evaluate(async () => {
+      const total = document.documentElement.scrollHeight - innerHeight;
+      for (let y = 0; y < total; y += 60) {
+        scrollTo(0, y);
+        await new Promise(requestAnimationFrame);
+      }
+    });
+    // R17 baseline: 68-70 layouts per fling with the phone-heavy effects on, 13 in Calm Mode
+    expect((await metric('LayoutCount')) - before).toBeLessThan(45);
+  });
+
   test('no tall element carries a 3D transform on a phone (P0-02)', async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(800);

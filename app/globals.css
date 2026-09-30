@@ -513,7 +513,8 @@ html.hw-booted .boot-overlay {
   .site-header {
     transition: filter 0.35s ease;
   }
-  @media (prefers-reduced-motion: no-preference) {
+  /* R17 P1-07: desktop only; on phones this blurred the whole ~38,000 px page behind every modal */
+  @media (prefers-reduced-motion: no-preference) and (min-width: 1024px) and (pointer: fine) {
     html:not([data-motion='calm'])[data-overlay='open'] #main-content,
     html:not([data-motion='calm'])[data-overlay='open'] .site-header {
       filter: blur(2px) saturate(0.85);
@@ -601,13 +602,13 @@ html.hw-booted .boot-overlay {
   /* FX-13 scroll-driven drift for background geometry: pure CSS, zero JS, progressive enhancement. */
   @supports (animation-timeline: view()) {
     @media (prefers-reduced-motion: no-preference) {
-      html:not(.fx-off-scrollDrift) .fx-drift,
-      html:not(.fx-off-scrollDrift) .fx-drift-rev {
+      html:not(.fx-off-scrollDrift):not([data-fx-tier='lite']) .fx-drift,
+      html:not(.fx-off-scrollDrift):not([data-fx-tier='lite']) .fx-drift-rev {
         animation: fx-drift linear both;
         animation-timeline: view();
         animation-range: cover 0% cover 100%;
       }
-      html:not(.fx-off-scrollDrift) .fx-drift-rev {
+      html:not(.fx-off-scrollDrift):not([data-fx-tier='lite']) .fx-drift-rev {
         animation-name: fx-drift-rev;
       }
     }
@@ -1186,7 +1187,9 @@ html.hw-booted .boot-overlay {
    Scroll-driven (compositor, no JS); browsers without view timelines simply show the plain rule. */
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
-    html:not([data-motion='calm']):not(.fx-off-sectionScan) main section[id]:not(#hero)::after {
+    html:not([data-motion='calm']):not(.fx-off-sectionScan):not([data-fx-tier='lite'])
+      main
+      section[id]:not(#hero)::after {
       content: '';
       position: absolute;
       top: 0;
@@ -1290,8 +1293,9 @@ html.fx-off-ambientOrbits .fx-orbit {
 
 /* FX-62 blueprint floor: as the hero scrolls away, its grid tilts back into a drafting-table floor */
 @supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) and (min-width: 375px) {
-    html:not([data-motion='calm']):not(.fx-off-blueprintFloor) .fx-floor-grid {
+  /* R17 P0-01: desktop only (a 3D-transformed 1,335 px layer on every phone) */
+  @media (prefers-reduced-motion: no-preference) and (min-width: 1024px) and (pointer: fine) {
+    html:not([data-motion='calm']):not(.fx-off-blueprintFloor):not([data-fx-tier='lite']) .fx-floor-grid {
       transform-origin: 50% 100%;
       animation: fx-floor linear both;
       animation-timeline: view();
@@ -1334,8 +1338,9 @@ html.fx-off-ambientOrbits .fx-orbit {
 
 /* FX-64 ink-wipe reveal: archive and contact-sheet images wipe in diagonally as they scroll into view */
 @supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    html:not([data-motion='calm']):not(.fx-off-inkWipe) .fx-wipe {
+  /* R17 P0-01: clip-path repaints every scroll frame; phones and the lite tier show the image directly */
+  @media (prefers-reduced-motion: no-preference) and (min-width: 1024px) and (pointer: fine) {
+    html:not([data-motion='calm']):not(.fx-off-inkWipe):not([data-fx-tier='lite']) .fx-wipe {
       animation: fx-wipe linear both;
       animation-timeline: view();
       animation-range: entry 5% entry 75%;
@@ -1453,12 +1458,12 @@ html.fx-off-ambientOrbits .fx-orbit {
 /* the rows also slide against each other as the band scrolls through the viewport ("cross over") */
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
-    html:not([data-motion='calm']):not(.fx-off-logoWall) .fx-wall-row {
+    html:not([data-motion='calm']):not(.fx-off-logoWall):not([data-fx-tier='lite']) .fx-wall-row {
       animation: fx-wall-drift linear both;
       animation-timeline: view();
       animation-range: cover 0% cover 100%;
     }
-    html:not([data-motion='calm']):not(.fx-off-logoWall) .fx-wall-row[data-dir='r'] {
+    html:not([data-motion='calm']):not(.fx-off-logoWall):not([data-fx-tier='lite']) .fx-wall-row[data-dir='r'] {
       animation-name: fx-wall-drift-r;
     }
   }
@@ -1553,8 +1558,11 @@ html:not(.fx-off-arenaPinboard) :where(.fx-seal:nth-child(even)) {
 /* FX-74 kinetic type: section titles gain weight (Bricolage Grotesque is variable) as they rise into view.
    Runs alongside the FX-B12 rise on the same element; the end state is the designed extra-bold. */
 @supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    html:not([data-motion='calm']):not(.fx-off-cssReveal):not(.fx-off-kineticType) .fx-rise.nb-title {
+  /* R17 P0-01: animating font-weight re-lays out the title every frame (94 % of all scroll layout time on a phone),
+     so it only runs on desktops with a fine pointer while the governor reports the full tier */
+  @media (prefers-reduced-motion: no-preference) and (min-width: 1024px) and (pointer: fine) {
+    html:not([data-motion='calm']):not(.fx-off-cssReveal):not(.fx-off-kineticType):not([data-fx-tier='lite'])
+      .fx-rise.nb-title {
       animation:
         fx-hero-in linear both,
         fx-weight linear both;
@@ -1581,8 +1589,8 @@ html:not(.fx-off-arenaPinboard) :where(.fx-seal:nth-child(even)) {
     html:not([data-motion='calm']):not(.fx-off-curtainGate) .fx-curtain {
       position: relative;
     }
-    html:not([data-motion='calm']):not(.fx-off-curtainGate) .fx-curtain::before,
-    html:not([data-motion='calm']):not(.fx-off-curtainGate) .fx-curtain::after {
+    html:not([data-motion='calm']):not(.fx-off-curtainGate):not([data-fx-tier='lite']) .fx-curtain::before,
+    html:not([data-motion='calm']):not(.fx-off-curtainGate):not([data-fx-tier='lite']) .fx-curtain::after {
       content: '';
       position: absolute;
       top: -6px;
@@ -1595,11 +1603,11 @@ html:not(.fx-off-arenaPinboard) :where(.fx-seal:nth-child(even)) {
       animation-timeline: view();
       animation-range: entry 60% cover 45%;
     }
-    html:not([data-motion='calm']):not(.fx-off-curtainGate) .fx-curtain::before {
+    html:not([data-motion='calm']):not(.fx-off-curtainGate):not([data-fx-tier='lite']) .fx-curtain::before {
       left: -1%;
       background: var(--ink);
     }
-    html:not([data-motion='calm']):not(.fx-off-curtainGate) .fx-curtain::after {
+    html:not([data-motion='calm']):not(.fx-off-curtainGate):not([data-fx-tier='lite']) .fx-curtain::after {
       right: -1%;
       background: var(--pop-blue);
       animation-name: fx-curtain-r;
@@ -1836,6 +1844,12 @@ html[data-fx-tier='lite'] #main-content,
 html[data-fx-tier='lite'] .site-header {
   filter: none !important; /* FX-19 depth-of-field blur */
 }
+/* R17: the header's backdrop blur re-rasterises the page under it every scroll frame; lite devices keep the (95 %
+   white) header without it */
+html[data-fx-tier='lite'] .site-header {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
 html[data-fx-tier='lite'] .fx-aberration {
   --fx-vel: 0 !important; /* FX-30: beats the inline value VelocitySkew writes, so the fringes stay at zero */
 }
@@ -1914,7 +1928,8 @@ html[data-fx-tier='lite'] .fx-aberration {
    baseline up as it rises into the reading zone, left to right (--i from SplitWords). At every frame the word is
    either a solid ink outline or ink-filled, so it always reads. Plain ink everywhere else. */
 @supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
+  /* R17 P0-01: a background-clip text fill repaints every scroll frame; desktop only */
+  @media (prefers-reduced-motion: no-preference) and (min-width: 1024px) and (pointer: fine) {
     html:not([data-motion='calm']):not([data-fx-tier='lite']):not(.fx-off-draftToInk) .fx-ink-word {
       -webkit-text-stroke: 1.5px var(--ink);
       background-image: linear-gradient(to top, var(--ink) 50%, transparent 50%);

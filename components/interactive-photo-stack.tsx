@@ -613,7 +613,7 @@ export function InteractivePhotoStack({ customPhotos, galleryId }: { customPhoto
     <>
       <LayoutGroup id={uid}>
         <div
-          role="region"
+          role="group"
           aria-roledescription="carousel"
           aria-label="Project gallery"
           onKeyDown={onDeckKey}

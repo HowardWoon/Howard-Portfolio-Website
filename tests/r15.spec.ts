@@ -48,19 +48,24 @@ test('keyboard focus ring locks on (FX-73) and stays still for reduced motion', 
 });
 
 /* ---------------------------------------------------------------- FX-74 kinetic type */
-test('section titles gain weight as they scroll in and end extra-bold (FX-74)', async ({ page }) => {
+// R17 P0-01: FX-74 was retired. Animating font-weight re-laid out every title on every scroll frame (94 % of all
+// scroll layout time on a phone, ~540 ms per fling on a throttled desktop). Titles keep their rise and are the
+// designed extra-bold at every scroll position.
+test('section titles rise but never animate their weight, and are extra-bold throughout (FX-74 retired in R17)', async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await home(page);
   const title = page.locator('#experience h2.nb-title');
-  expect(await title.evaluate((e) => getComputedStyle(e).animationName)).toContain('fx-weight');
-  // just entering: lighter than the design weight
+  const anim = await title.evaluate((e) => getComputedStyle(e).animationName);
+  expect(anim).not.toContain('fx-weight');
+  expect(anim).toContain('fx-hero-in'); // the rise (FX-B12) stays
   await page.evaluate(() => {
     const e = document.querySelector('#experience h2.nb-title')!;
     window.scrollTo(0, e.getBoundingClientRect().top + window.scrollY - window.innerHeight + 30);
   });
   await page.waitForTimeout(300);
-  expect(Number(await title.evaluate((e) => getComputedStyle(e).fontWeight))).toBeLessThan(700);
-  // in the middle of the screen: the designed extra-bold
+  expect(Number(await title.evaluate((e) => getComputedStyle(e).fontWeight))).toBe(800);
   await centre(page, '#experience h2.nb-title');
   expect(Number(await title.evaluate((e) => getComputedStyle(e).fontWeight))).toBe(800);
 });
