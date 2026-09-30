@@ -260,3 +260,15 @@ test('coming back from a simulator on a slow device lands on the same project (F
   await expect(page).toHaveURL(/\/(#projects)?$/, { timeout: 20000 });
   await expect(page.locator('#projects a[href="/simulators/flood"]')).toBeInViewport({ timeout: 10000 });
 });
+
+test('iPad landscape / small laptop (1024-1279 px) gets the section dock (validation fix)', async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
+  await page.setViewportSize({ width: 1100, height: 800 });
+  await page.goto('/', { waitUntil: 'networkidle' });
+  await page.locator('#experience').scrollIntoViewIfNeeded();
+  await page.waitForTimeout(300);
+  await page.evaluate(() => window.scrollBy(0, -60)); // the dock shows on scroll up
+  await expect(page.getByRole('button', { name: /current section: experience/i })).toBeVisible({ timeout: 7000 });
+  await page.setViewportSize({ width: 1280, height: 800 }); // the header nav takes over from 1280 px
+  await expect(page.getByRole('button', { name: /current section/i })).toBeHidden();
+});

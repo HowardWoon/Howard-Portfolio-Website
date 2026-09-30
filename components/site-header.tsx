@@ -48,8 +48,15 @@ export function SiteHeader() {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const set = () =>
-      document.documentElement.style.setProperty('--header-h', `${Math.round(el.getBoundingClientRect().height)}px`);
+    // write only when the height really changes: a custom property on <html> restyles the whole page, and the
+    // observer also fires for changes that keep the height (R17 validation: one redundant write during a scroll)
+    let last = -1;
+    const set = () => {
+      const h = Math.round(el.getBoundingClientRect().height);
+      if (h === last) return;
+      last = h;
+      document.documentElement.style.setProperty('--header-h', `${h}px`);
+    };
     set();
     const ro = new ResizeObserver(set);
     ro.observe(el);

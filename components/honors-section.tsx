@@ -628,6 +628,10 @@ export default function HonorsSection() {
                           {/* Certificate Action */}
                           {item.certificateUrl && (
                             <button
+                              type="button"
+                              // each button names its award (six identical "VIEW CERTIFICATE" names were ambiguous for
+                              // screen readers); the visible words stay first (WCAG 2.5.3 label in name)
+                              aria-label={`VIEW CERTIFICATE: ${item.title}`}
                               onClick={() => setSelectedCert(item.certificateUrl!)}
                               className="group/btn nb-btn nb-btn-white px-4 py-2.5 xs:whitespace-nowrap"
                             >
