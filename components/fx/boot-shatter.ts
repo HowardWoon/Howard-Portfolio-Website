@@ -29,7 +29,8 @@ export function bootShatter(base = '#FFC700'): void {
   document.body.appendChild(canvas);
   ctx.scale(dpr, dpr);
 
-  const size = small ? 44 : 40; // ~500 tiles on phones, ~1300 at 1920x1080
+  // R19: ~370 tiles on phones, ~780 at 1920x1080 (was ~1300: the shatter shared its frames with the page reveal)
+  const size = small ? 52 : 54;
   const cols = Math.ceil(w / size);
   const rows = Math.ceil(h / size);
   const cx = w / 2;
@@ -68,6 +69,7 @@ export function bootShatter(base = '#FFC700'): void {
   };
   const frame = (now: number) => {
     const t = (now - start) / DURATION;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
     if (t >= 1) {
       cleanup();
@@ -75,15 +77,20 @@ export function bootShatter(base = '#FFC700'): void {
     }
     const fringe = t < 0.22 ? (0.22 - t) * 26 : 0; // chromatic aberration only while it's fastest
     const s = size * (1 - t * 0.55);
+    // R19: one setTransform per tile instead of save / translate / rotate / restore (the shatter now shares its first
+    // frames with the page reveal, so every millisecond counts)
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#0A0A0A';
+    const alpha = 1 - t * t;
     for (const p of tiles) {
       p.vy += 0.9;
       p.x += p.vx;
       p.y += p.vy;
       p.r += p.vr;
       if (p.y > h + size) continue;
-      ctx.save();
-      ctx.translate(p.x + size / 2, p.y + size / 2);
-      ctx.rotate(p.r);
+      const cos = Math.cos(p.r);
+      const sin = Math.sin(p.r);
+      ctx.setTransform(cos * dpr, sin * dpr, -sin * dpr, cos * dpr, (p.x + size / 2) * dpr, (p.y + size / 2) * dpr);
       if (fringe > 0) {
         ctx.globalAlpha = 0.55;
         ctx.fillStyle = '#FF4B2B';
@@ -93,14 +100,12 @@ export function bootShatter(base = '#FFC700'): void {
           ctx.fillRect(-s / 2 + fringe, -s / 2, s, s);
         }
       }
-      ctx.globalAlpha = 1 - t * t;
+      ctx.globalAlpha = alpha;
       ctx.fillStyle = p.c;
       ctx.fillRect(-s / 2, -s / 2, s, s);
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = '#0A0A0A';
       ctx.strokeRect(-s / 2, -s / 2, s, s);
-      ctx.restore();
     }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     raf = requestAnimationFrame(frame);
   };
   raf = requestAnimationFrame(frame);

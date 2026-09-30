@@ -174,6 +174,8 @@ test('index tiles land the card just under the header (P1-02)', async ({ page })
   await page.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/', { waitUntil: 'networkidle' });
+  await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
+  await expect(page.locator('html[data-after-boot="done"]')).toHaveCount(1);
   const index = page.getByRole('navigation', { name: 'Project index' });
   await index.scrollIntoViewIfNeeded();
   await page.waitForTimeout(600);

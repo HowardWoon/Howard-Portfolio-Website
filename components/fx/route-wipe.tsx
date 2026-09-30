@@ -49,7 +49,7 @@ type VTDocument = Document & {
   startViewTransition?: (cb: () => Promise<void> | void) => { finished: Promise<void> };
 };
 const PORTAL_KEY = 'hw-portal-from';
-const PORTAL_TIMEOUT_MS = 1500;
+const PORTAL_TIMEOUT_MS = 3000;
 let portalDone: (() => void) | null = null;
 
 function portal(src: HTMLElement | null, go: () => void) {

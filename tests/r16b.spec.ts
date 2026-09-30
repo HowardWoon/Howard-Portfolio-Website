@@ -8,8 +8,9 @@ test.beforeEach(async ({ context }) => {
 });
 
 async function home(page: Page, path = '/') {
-  await page.goto(path, { waitUntil: 'load' });
-  await expect(page.locator('html[data-fx-desk="on"]')).toHaveCount(1); // DeskFx chunk mounted
+  await page.goto(path, { waitUntil: 'networkidle' });
+  await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
+  await expect(page.locator('html[data-after-boot="done"]')).toHaveCount(1);
 }
 const animName = (page: Page, sel: string, pseudo?: string) =>
   page

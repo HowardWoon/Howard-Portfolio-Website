@@ -429,7 +429,7 @@ has(
   ':not(.fx-off-letterpress)',
   ':not(.fx-off-shadowFollow)',
 );
-has('R9', 'D3', 'Lighter boot canvas on phones', 'components/fx/boot-shatter.ts', 'small ? 1.5 : 2', 'small ? 44 : 40');
+has('R9', 'D3', 'Lighter boot canvas on phones', 'components/fx/boot-shatter.ts', 'small ? 1.5 : 2', 'small ? 52 : 54');
 has('R9', 'D5', 'Off-screen pause for infinite animations', 'components/fx/offscreen-pause.tsx', 'data-offscreen');
 has(
   'R9',

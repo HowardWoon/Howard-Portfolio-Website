@@ -1750,6 +1750,9 @@ html:not(.fx-off-arenaPinboard) :where(.fx-seal:nth-child(even)) {
 .fx-page-root {
   isolation: isolate;
 }
+html:not(.hw-booted):not(.hw-revealing) .fx-page-root {
+  visibility: hidden;
+}
 .fx-tide-canvas {
   position: fixed;
   inset: 0;

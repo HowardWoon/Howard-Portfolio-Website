@@ -20,6 +20,7 @@ import {
   SectionClock,
 } from '@/components/lazy-sections';
 import { SiteFooter } from '@/components/site-footer';
+import { AfterBoot } from '@/components/after-boot';
 import { LogoWall } from '@/components/logo-wall';
 import dynamic from 'next/dynamic';
 import { RouteWipeClear } from '@/components/fx/route-wipe';
@@ -78,18 +79,22 @@ export function PortfolioPage() {
         </div>
 
         <ScrollToTop />
-        <SectionSpine />
-        <SectionDock />
-        <InteractionHud />
-        <AmbientFx />
         <FrameGovernor />
         <SectionClock />
-        <DeskFx />
         <OffscreenPause />
         <RouteWipeClear home />
-        <CommandPalette />
-        <PointerField />
-        <EasterEgg />
+        {/* R19 FX-109: the heavy client effects start after the boot gate lifts */}
+        {/* mounted one per idle moment, most-used first */}
+        <AfterBoot>
+          <CommandPalette />
+          <InteractionHud />
+          <SectionDock />
+          <SectionSpine />
+          <DeskFx />
+          <AmbientFx />
+          <PointerField />
+          <EasterEgg />
+        </AfterBoot>
       </div>
     </BootSequence>
   );

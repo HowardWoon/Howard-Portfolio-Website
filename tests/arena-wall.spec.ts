@@ -9,7 +9,8 @@ test.beforeEach(async ({ context }) => {
 const WALL = 'section[aria-labelledby="arena-wall-title"]';
 
 async function toWall(page: Page, path = '/') {
-  await page.goto(path, { waitUntil: 'load' });
+  await page.goto(path, { waitUntil: 'networkidle' });
+  await expect(page.locator('html[data-after-boot="done"]')).toHaveCount(1);
   await page.locator(WALL).waitFor();
   await page.evaluate((sel) => {
     (window as unknown as { __lenis?: { stop: () => void } }).__lenis?.stop();

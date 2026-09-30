@@ -10,6 +10,7 @@ test.beforeEach(async ({ context }) => {
 async function home(page: Page) {
   await page.goto('/', { waitUntil: 'networkidle' });
   await expect.poll(() => page.evaluate(() => document.documentElement.dataset.fxClock ?? '')).toBe('on');
+  await expect(page.locator('html[data-after-boot="done"]')).toHaveCount(1);
 }
 /** put the reading line (45 % of the screen) `frac` of the way through the hand-over zone before `id`'s top */
 const intoRelay = (page: Page, prevId: string, id: string, frac: number) =>

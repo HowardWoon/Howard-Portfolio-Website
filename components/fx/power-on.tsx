@@ -12,9 +12,14 @@ import { FX } from '@/lib/fx';
 export function PowerOn({ children, className = '' }: { children: ReactNode; className?: string }) {
   // FX-85: arriving through the portal morph, the screen is the morph target, so it must already be at full size
   // (a CRT line would make the button shrink into a sliver). Only ever true on a client-side navigation.
-  const [arrivedByPortal] = useState(
-    () => typeof document !== 'undefined' && document.documentElement.classList.contains('fx-portal'),
-  );
+  const [arrivedByPortal] = useState(() => {
+    if (typeof document === 'undefined') return false;
+    if (document.documentElement.classList.contains('fx-portal')) return true;
+    try {
+      if (sessionStorage.getItem('hw-portal-from')) return true;
+    } catch {}
+    return false;
+  });
   // Always the same element. With reduced motion, MotionConfig reducedMotion="user" jumps straight to the end state.
   if (!FX.powerOn) {
     return (

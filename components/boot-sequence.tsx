@@ -48,7 +48,12 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
   const [showBoot, setShowBoot] = useState(true);
 
   useLayoutEffect(() => {
-    if (document.documentElement.classList.contains('hw-booted')) setShowBoot(false);
+    try {
+      if (sessionStorage.getItem('hw-booted') === '1') {
+        document.documentElement.classList.add('hw-booted');
+        setShowBoot(false);
+      }
+    } catch {}
   }, []);
   const [bootState, setBootState] = useState<'idle' | 'booting' | 'complete'>('idle');
   const [progress, setProgress] = useState(0);
