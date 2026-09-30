@@ -94,3 +94,35 @@ test('gallery: arrow keys browse, and the lightbox preloads its neighbours (FX-1
     .poll(() => requested.some((u) => u.includes('supervity_formal.jpg') && /[?&]w=(6|7|8|1)\d{2,3}/.test(u)))
     .toBe(true);
 });
+
+test('lightbox: zoom buttons + readout, slideshow advances and pauses, full screen button (FX-108)', async ({
+  page,
+}) => {
+  await page.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto('/', { waitUntil: 'networkidle' });
+  const deck = page.locator('#project-zerolag .fx-deck').first();
+  await deck.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+  await deck
+    .getByRole('button', { name: /view full resolution/i })
+    .first()
+    .click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole('button', { name: 'Zoom in' }).click();
+  await expect(dialog.getByRole('button', { name: 'Reset zoom' })).toHaveText('150%');
+  await dialog.getByRole('button', { name: 'Reset zoom' }).click();
+  await expect(dialog.getByRole('button', { name: 'Reset zoom' })).toHaveText('100%');
+  await expect(dialog.getByRole('button', { name: 'Full screen' })).toBeVisible();
+
+  const play = dialog.getByRole('button', { name: 'Play slideshow' });
+  await play.click();
+  await expect(dialog.locator('.fx-lb-progress')).toHaveCount(1);
+  await expect(dialog.locator('[aria-live="polite"]')).toHaveText(/^02 \//, { timeout: 6000 });
+  await dialog.getByRole('button', { name: 'Pause slideshow' }).click();
+  await expect(dialog.locator('.fx-lb-progress')).toHaveCount(0);
+  await page.waitForTimeout(4500);
+  await expect(dialog.locator('[aria-live="polite"]')).toHaveText(/^02 \//); // paused: stays on photo 2
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+});

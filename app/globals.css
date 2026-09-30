@@ -2102,3 +2102,18 @@ html[data-skim='on'] main h3:not([data-dark-surface] h3) {
 html[data-skim='on'] .site-header {
   box-shadow: 0 6px 0 0 var(--pop-yellow);
 }
+
+/* ================================================================ Round 17 (docs/R17-FULL-DEVICE-AUDIT-AND-VALIDATION-CHECKLIST.md) */
+
+/* FX-108 Lightbox Pro: the slideshow's progress bar fills along the panel's bottom edge (transform only) */
+.fx-lb-progress {
+  animation: fx-lb-progress linear both;
+}
+@keyframes fx-lb-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
