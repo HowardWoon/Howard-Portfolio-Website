@@ -104,7 +104,7 @@ test.describe('phone', () => {
 });
 
 /* ---------------------------------------------------------------- B-05 / B-06 / B-08 / B-09 */
-for (const width of [320, 360])
+for (const width of [320, 360, 400, 412])
   test(`academic cards: no mid-word breaks and no text under 11 px at ${width} (B-05, B-06)`, async ({ page }) => {
     await page.setViewportSize({ width, height: 640 });
     await home(page);

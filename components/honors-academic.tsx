@@ -119,9 +119,9 @@ export function Transcript({ semesters = UM_TRANSCRIPT }: { semesters?: Semester
                 {sem.courses.map((c) => (
                   <li
                     key={c.code}
-                    className="grid grid-cols-[1fr_auto] min-[360px]:grid-cols-[auto_1fr_auto] items-center gap-x-3 gap-y-1.5 py-2"
+                    className="grid grid-cols-[1fr_auto] min-[400px]:grid-cols-[auto_1fr_auto] items-center gap-x-3 gap-y-1.5 py-2"
                   >
-                    <span className="col-span-2 min-[360px]:col-span-1 justify-self-start rounded-md border-2 border-ink bg-paper-deep px-1.5 py-0.5 font-mono text-xs font-extrabold tracking-[0.02em] text-ink tabular-nums">
+                    <span className="col-span-2 min-[400px]:col-span-1 justify-self-start rounded-md border-2 border-ink bg-paper-deep px-1.5 py-0.5 font-mono text-xs font-extrabold tracking-[0.02em] text-ink tabular-nums">
                       {c.code}
                     </span>
                     <span className="min-w-0 text-sm font-sans font-semibold leading-snug text-ink-soft [overflow-wrap:break-word]">

@@ -104,7 +104,7 @@ export function SiteHeader() {
           />
         </a>
         <div className="min-w-0">
-          <h1 className="font-display font-extrabold text-[0.95rem] xs:text-base sm:text-2xl landscape-short:!text-lg tracking-tight uppercase leading-none text-ink flex flex-wrap items-center gap-x-2 gap-y-0.5 xs:flex-nowrap xs:whitespace-nowrap">
+          <h1 className="font-display font-extrabold text-[0.95rem] min-[400px]:text-base sm:text-2xl landscape-short:!text-lg tracking-tight uppercase leading-none text-ink flex flex-wrap items-center gap-x-2 gap-y-0.5 xs:flex-nowrap xs:whitespace-nowrap">
             HOWARD WOON
             <span aria-hidden className="relative inline-flex w-2.5 h-2.5">
               <span className="absolute inset-0 rounded-full bg-pop-red animate-ping opacity-60" />
