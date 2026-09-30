@@ -590,7 +590,7 @@ export default function ExperienceSection() {
                         <Calendar className="w-4 h-4" strokeWidth={2.5} />
                         <span>{item.period}</span>
                       </div>
-                      <div className="hidden sm:flex items-start gap-2 max-w-[26rem]">
+                      <div className="flex basis-full sm:basis-auto items-start gap-2 max-w-[26rem]">
                         <MapPin className="w-4 h-4 shrink-0 mt-0.5" strokeWidth={2.5} />
                         <span>{item.location}</span>
                       </div>

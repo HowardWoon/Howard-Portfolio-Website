@@ -169,3 +169,62 @@ test('lightbox: zoom buttons + readout, slideshow advances and pauses, full scre
   await page.keyboard.press('Escape');
   await expect(dialog).toHaveCount(0);
 });
+
+test('index tiles land the card just under the header (P1-02)', async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/', { waitUntil: 'networkidle' });
+  const index = page.getByRole('navigation', { name: 'Project index' });
+  await index.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(600);
+  await index.getByRole('link', { name: /CATFISH/ }).click();
+  const gap = async () =>
+    page.evaluate(() => {
+      const shell = document.querySelector('[data-project-shell][data-project-id="catfish"]')!;
+      const h = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h'));
+      return shell.getBoundingClientRect().top - h;
+    });
+  // settles below the header (never under it), with the 1.5 rem scroll margin
+  await expect.poll(gap, { timeout: 6000 }).toBeGreaterThan(8);
+  await page.waitForTimeout(1500);
+  const g = await gap();
+  expect(g).toBeGreaterThan(8);
+  expect(g).toBeLessThan(48);
+});
+
+test('single-key shortcuts can be switched off and stay off (P1-08, WCAG 2.1.4)', async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
+  await page.goto('/', { waitUntil: 'networkidle' });
+  await page.waitForTimeout(1500);
+  await page.keyboard.press('?');
+  const sheet = page.getByRole('dialog', { name: 'Keyboard shortcuts' });
+  await expect(sheet).toBeVisible();
+  const sw = sheet.getByRole('switch', { name: 'Single-key shortcuts' });
+  await expect(sw).toHaveAttribute('aria-checked', 'true');
+  await sw.click();
+  await expect(sw).toHaveAttribute('aria-checked', 'false');
+  await page.keyboard.press('Escape');
+  await expect(sheet).toHaveCount(0);
+  await page.keyboard.press('c'); // would toggle Calm Mode
+  expect(await page.evaluate(() => document.documentElement.dataset.motion ?? '')).toBe('');
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(1500);
+  await page.keyboard.press('c');
+  expect(await page.evaluate(() => document.documentElement.dataset.motion ?? '')).toBe('');
+});
+
+test('cards and section titles are visible in the server HTML (P1-06)', async ({ request }) => {
+  const html = await (await request.get('/')).text();
+  const card = html.match(/<div id="project-zerolag"[^>]*>/)![0];
+  expect(card).not.toContain('opacity:0');
+  expect(html).not.toContain('translateY(105%)');
+});
+
+test.describe('phone: experience', () => {
+  test.use(phone);
+  test('experience cards show their location on phones (P1-09)', async ({ page }) => {
+    await page.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
+    await page.goto('/', { waitUntil: 'networkidle' });
+    await expect(page.locator('#experience').getByText('Kuala Lumpur, Malaysia').first()).toBeVisible();
+  });
+});

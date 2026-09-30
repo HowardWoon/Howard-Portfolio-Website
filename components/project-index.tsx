@@ -50,13 +50,9 @@ export function ProjectIndex({ items }: { items: readonly ProjectIndexItem[] }) 
               document.querySelector(`[data-project-id="${p.id}"]`)?.removeAttribute('data-preview')
             }
             aria-current={on ? 'true' : undefined}
-            onClick={(e) => {
-              const el = document.getElementById(`project-${p.id}`);
-              if (!el || !window.__lenis) return;
-              e.preventDefault();
-              const h = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 80;
-              window.__lenis.scrollTo(el, { offset: -(h + 24) });
-              history.replaceState(null, '', `#project-${p.id}`);
+            onClick={() => {
+              // R17 P1-02: the scroll itself is the shared anchor jump (fx/desk-fx.tsx -> lib/jump.ts), which lands
+              // on the card's shell under the header; a second scroll here used to race it
               if (focus) setFocus(p.id); // in Focus Mode, the index moves the spotlight
             }}
             className={`fx-tilt3d relative flex flex-col gap-1 min-h-[64px] min-w-0 p-3 rounded-2xl border-3 border-ink text-ink transition-opacity duration-300 ${

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight, Focus, Keyboard, Pause, Play, Route, Waypoints, X } from 'lucide-react';
 import { FX } from '@/lib/fx';
@@ -30,6 +30,16 @@ import { useFocusTrap } from '@/lib/use-focus-trap';
  */
 
 const TOUR_MS = 6500;
+
+/** R17 P1-08 (WCAG 2.1.4): single-key shortcuts can be switched off; the choice is remembered on this device */
+const KEYS_KEY = 'hw-keys';
+function keysOn(): boolean {
+  try {
+    return localStorage.getItem(KEYS_KEY) !== 'off';
+  } catch {
+    return true;
+  }
+}
 
 /** Project ids in page order, read from the cards themselves (single source of truth). */
 function projectOrder(): string[] {
@@ -112,6 +122,7 @@ export function InteractionHud() {
     if (!FX.shortcuts) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey || isTypingTarget(e.target)) return;
+      if (!keysOn() && e.key !== 'Escape') return; // switched off in the shortcut sheet
       // never act behind the boot gate or another dialog (palette, lightbox, certificate)
       const s = getInteraction();
       if (document.querySelector('.boot-overlay') && !document.documentElement.classList.contains('hw-booted')) return;
@@ -358,6 +369,18 @@ function ShortcutSheet() {
   const ref = useRef<HTMLDivElement>(null);
   useScrollLock();
   useFocusTrap(ref, true);
+  const [on, setOn] = useState(true);
+  useEffect(() => setOn(keysOn()), []);
+  const toggle = () => {
+    const next = !on;
+    setOn(next);
+    try {
+      if (next) localStorage.removeItem(KEYS_KEY);
+      else localStorage.setItem(KEYS_KEY, 'off');
+    } catch {
+      /* storage blocked: lasts for this page view only */
+    }
+  };
   return createPortal(
     <div
       className="fixed inset-0 z-[10000] grid place-items-center p-4 bg-ink/60 h-screen-safe"
@@ -398,6 +421,29 @@ function ShortcutSheet() {
             </div>
           ))}
         </dl>
+        <div className="px-5 pb-5">
+          <button
+            type="button"
+            role="switch"
+            aria-checked={on}
+            onClick={toggle}
+            className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-2xl border-3 border-ink bg-paper-cream shadow-brutal-xs text-left"
+          >
+            <span className="font-mono text-xs font-extrabold uppercase tracking-[0.1em] text-ink">
+              Single-key shortcuts
+            </span>
+            <span
+              aria-hidden
+              className={`relative inline-flex w-12 h-7 shrink-0 rounded-full border-3 border-ink transition-colors ${
+                on ? 'bg-pop-mint' : 'bg-white'
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 w-4 h-4 rounded-full bg-ink transition-[left] ${on ? 'left-6' : 'left-0.5'}`}
+              />
+            </span>
+          </button>
+        </div>
       </div>
     </div>,
     document.body,

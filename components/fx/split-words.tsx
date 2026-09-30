@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Fragment, useRef } from 'react';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { m, useInView } from 'framer-motion';
 import { FX, EASE_SNAP } from '@/lib/fx';
 
@@ -20,7 +20,16 @@ import { FX, EASE_SNAP } from '@/lib/fx';
 export function SplitWords({ text, delay = 0 }: { text: string; delay?: number }) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, amount: 0.3 });
+  // R17 P1-06: the words are visible in the server HTML (they used to start at translateY(105%), so a slow phone showed
+  // empty titles until hydration). After mount, a title that is still below the fold is tucked into its mask and
+  // rises when it scrolls in; a title already on screen simply stays.
+  const [tucked, setTucked] = useState(false);
+  useEffect(() => {
+    const r = ref.current?.getBoundingClientRect();
+    if (r && r.top > window.innerHeight) setTucked(true);
+  }, []);
   if (!FX.titleWipe) return <>{text}</>;
+  const shown = !tucked || inView;
   const words = text.split(' ');
   return (
     <span ref={ref}>
@@ -31,9 +40,9 @@ export function SplitWords({ text, delay = 0 }: { text: string; delay?: number }
               data-fx="word"
               className="inline-block"
               style={{ '--i': i } as React.CSSProperties} // FX-59 title-wave stagger
-              initial={{ y: '105%' }}
-              animate={inView ? { y: '0%' } : undefined}
-              transition={{ duration: 0.7, ease: EASE_SNAP, delay: delay + i * 0.045 }}
+              initial={false}
+              animate={{ y: shown ? '0%' : '105%' }}
+              transition={shown ? { duration: 0.7, ease: EASE_SNAP, delay: delay + i * 0.045 } : { duration: 0 }}
             >
               {/* FX-82 draft-to-ink: an inner span so FX-59's hover wave (which animates the word) never resets it */}
               {FX.draftToInk ? <span className="fx-ink-word">{word}</span> : word}

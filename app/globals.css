@@ -2132,3 +2132,15 @@ html[data-skim='on'] .site-header {
     transform: scaleX(1);
   }
 }
+
+/* R17 P1-06: project cards are visible in the server HTML and rise on the compositor as they scroll in, over a fixed
+   280 px (a percentage range left 2,000 px tall phone cards half-faded while being read). Firefox: shown as-is. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-motion='calm']):not(.fx-off-cssReveal) .fx-rise-card {
+      animation: fx-hero-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0px entry 280px;
+    }
+  }
+}

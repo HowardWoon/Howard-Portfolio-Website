@@ -20,11 +20,14 @@ export function projectsWithSkill(key: string): string[] {
     .filter(Boolean);
 }
 
-/** Smooth-scroll to a project card, leaving room for the fixed header. */
+/**
+ * Smooth-scroll to a project card. R17 P1-02: targets the card's untransformed shell, whose CSS scroll-margin-top
+ * leaves room for the fixed header (Lenis and scrollIntoView both honour it; a JS offset on top doubled it).
+ */
 export function scrollToProject(id: string) {
-  const el = document.getElementById(`project-${id}`);
-  if (!el) return;
-  const h = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 80;
-  if (window.__lenis) window.__lenis.scrollTo(el, { offset: -(h + 24) });
-  else window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - (h + 24) });
+  const card = document.getElementById(`project-${id}`);
+  if (!card) return;
+  const el = card.closest<HTMLElement>('[data-project-shell]') ?? card;
+  if (window.__lenis) window.__lenis.scrollTo(el);
+  else el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }

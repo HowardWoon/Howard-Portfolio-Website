@@ -6,7 +6,6 @@ import { ScrollUnfold } from './fx/scroll-unfold';
 import { TextRoll } from './fx/text-roll';
 import { WipeLink } from './fx/route-wipe';
 import { SplitWords } from './fx/split-words';
-import { Reveal } from './reveal';
 import { FX } from '@/lib/fx';
 import { exitFocus, markVisited, setFocus, startTrail, useInteractionSelect } from '@/lib/interaction-store';
 import { projectsWithSkill, scrollToProject, skillKey } from '@/lib/skills';
@@ -392,16 +391,13 @@ function ProjectCard({ project }: { project: ProjectData }) {
       data-focused={focused ? '' : undefined}
       data-trail-hit={trailHit ? '' : undefined}
       data-blueprint-open={blueprint ? '' : undefined}
-      className="fx-project-shell"
+      className="fx-project-shell scroll-mt-[calc(var(--header-h,5rem)+1.5rem)]"
     >
       <ScrollUnfold className="w-full group">
         <TiltCard maxTilt={blueprint ? 0 : 2.5}>
-          <Reveal
-            delay={0.1}
-            y={40}
-            transition={{ duration: 0.6 }}
+          <div
             id={`project-${project.simulatorId}`}
-            className="relative w-full rounded-[32px] border-3 border-ink bg-white shadow-brutal-lg transition-shadow duration-300 group-hover:shadow-brutal-xl overflow-hidden scroll-mt-[calc(var(--header-h,5rem)+1.5rem)]"
+            className="fx-rise-card relative w-full rounded-[32px] border-3 border-ink bg-white shadow-brutal-lg transition-shadow duration-300 group-hover:shadow-brutal-xl overflow-hidden scroll-mt-[calc(var(--header-h,5rem)+1.5rem)]"
           >
             {/* Colour-block header strip (Bauhaus band) */}
             <div
@@ -733,7 +729,7 @@ function ProjectCard({ project }: { project: ProjectData }) {
                 )}
               </div>
             </div>
-          </Reveal>
+          </div>
         </TiltCard>
       </ScrollUnfold>
     </div>

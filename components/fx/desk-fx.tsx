@@ -75,7 +75,9 @@ export function DeskFx() {
       const a = (e.target as Element | null)?.closest?.('a[href^="#"]');
       const id = a ? decodeURIComponent(a.getAttribute('href')!.slice(1)) : '';
       const el = id ? document.getElementById(id) : null;
-      if (!el || !willFlip(el)) return;
+      // R17 P1-02: project anchors (index tiles, Arena Wall seals) always go through jumpTo, which lands on the card's
+      // untransformed shell; other anchors only when the jump is long enough for the flip
+      if (!el || (!willFlip(el) && !el.closest('[data-project-shell]'))) return;
       e.preventDefault();
       const lenis = window.__lenis;
       if (lenis) {

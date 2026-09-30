@@ -177,10 +177,10 @@ function PillarCard({
       tabIndex={0}
       role="button"
       aria-pressed={isActive}
-      className={`fx-rise relative group cursor-pointer rounded-[26px] p-4 xs:p-6 sm:p-8 border-3 border-ink flex flex-col justify-between gap-6 transition-[transform,box-shadow,background-color] duration-200 focus-visible:outline focus-visible:outline-4 focus-visible:outline-pop-blue ${
+      className={`fx-rise relative group cursor-pointer rounded-[26px] p-4 xs:p-6 sm:p-8 border-3 border-ink flex flex-col justify-between gap-6 transition-[translate,box-shadow,background-color] duration-200 focus-visible:outline focus-visible:outline-4 focus-visible:outline-pop-blue ${
         isActive
-          ? `${c.soft} shadow-brutal-lg -translate-x-1 -translate-y-1`
-          : 'bg-white shadow-brutal hover:-translate-y-1 hover:shadow-brutal-lg'
+          ? `${c.soft} shadow-brutal-lg [translate:-4px_-4px]`
+          : 'bg-white shadow-brutal hover:[translate:0_-4px] hover:shadow-brutal-lg'
       }`}
     >
       <div className="flex items-center justify-between gap-4">

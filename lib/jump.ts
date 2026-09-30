@@ -12,8 +12,16 @@ type VTDocument = Document & { startViewTransition?: (cb: () => void) => { finis
 
 const FAR_SCREENS = 2.5;
 
+/**
+ * R17 P1-02: a project card moves with scroll-linked transforms (FX-07 unfold, FX-81 recede), so a jump computed from
+ * its box landed under the header. Jumps target the card's untransformed shell, which carries the scroll margin.
+ */
+export function jumpTarget(el: HTMLElement): HTMLElement {
+  return el.closest<HTMLElement>('[data-project-shell]') ?? el;
+}
+
 export function isFarJump(el: HTMLElement): boolean {
-  return Math.abs(el.getBoundingClientRect().top) > window.innerHeight * FAR_SCREENS;
+  return Math.abs(jumpTarget(el).getBoundingClientRect().top) > window.innerHeight * FAR_SCREENS;
 }
 
 function land(el: HTMLElement, immediate: boolean) {
@@ -32,7 +40,8 @@ export function willFlip(el: HTMLElement): boolean {
   return FX.shutterJump && canViewTransition() && isFarJump(el);
 }
 
-export function jumpTo(el: HTMLElement): void {
+export function jumpTo(target: HTMLElement): void {
+  const el = jumpTarget(target);
   if (!willFlip(el)) {
     land(el, false);
     return;
