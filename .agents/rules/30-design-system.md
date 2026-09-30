@@ -80,6 +80,12 @@ Rules:
     `defaultPrevented === false` (listener added last on window) and treat the tab as optional (tests/r16b FX-85).
 11. Before calling a failure a regression, run the same test 30x on the previous commit (git worktree + junctioned
     node_modules). A 12-run sample hid a 2/30 flake.
+12. In a Node edit script, `String.replace(a, b)` treats `$'`, `` $` ``, `$&` in `b` as patterns: a replacement
+    containing `'__reactFiber$'` duplicated half a file (R24). Use `s.split(a).join(b)` or the editor's Edit tool.
+13. Linux CI renders fonts ~2 px wider per line than Windows: keep >= 8 px of clearance in tight rows (header,
+    transcript rows) or CI fails where the laptop passes (R24: 2.4 px on CI vs 4.1 px locally).
+14. A test that fails only under load may be a REAL race, not a flake: R24's "flaky" FX-70 print test was a tap
+    lost before hydration. Reproduce with CPU throttling (`Emulation.setCPUThrottlingRate` 4-6x) before shrugging.
 
 ## F. Definition of done additions
 

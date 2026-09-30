@@ -70,3 +70,8 @@ trigger: always_on
 - No new `@supports`-free CSS that only Chromium understands (e.g. `field-sizing`, anchor positioning, scroll-driven
   `animation-timeline` without a fallback). Container queries, `:has()`, `dvh`, `clamp()` and `cq*` units are fine.
 - Custom cursor, magnetic and tilt effects never run for `pointerType === 'touch'` or pens that report coarse pointers.
+- Taps before hydration must never be lost. Code-split sections (`components/lazy-sections.tsx`) are server-rendered, so
+  their buttons are visible 0.6 s (laptop) to 5-11 s (slow phone) before React owns them, and React itself DROPS a
+  click in that window. `lib/early-clicks.ts` (installed by lazy-sections) holds such a click and replays it once the
+  button is live. Keep it installed; new interactive controls must be `<button>` / `[role=button]` rendered by React
+  (a button React never hydrates would have its clicks held). Guarded by the r24 "early tap" test (4x CPU).
