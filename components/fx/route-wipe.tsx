@@ -90,9 +90,20 @@ function receiveOnHome(done: () => void) {
       else done();
       return;
     }
-    if (window.__lenis)
-      window.__lenis.scrollTo(btn, { immediate: true, force: true, offset: -window.innerHeight * 0.4 });
-    else btn.scrollIntoView({ block: 'center' });
+    const bring = () => {
+      if (window.__lenis)
+        window.__lenis.scrollTo(btn, { immediate: true, force: true, offset: -window.innerHeight * 0.4 });
+      else btn.scrollIntoView({ block: 'center' });
+    };
+    bring();
+    // R17: the router's own scroll-to-top for the new route can land after this on a busy device; re-check twice and
+    // bring the card back if it was scrolled away (no-op when it is already on screen)
+    const recheck = () => {
+      const r = btn.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > window.innerHeight) bring();
+    };
+    window.setTimeout(recheck, 150);
+    window.setTimeout(recheck, 500);
     btn.style.viewTransitionName = 'sim-screen';
     const shell = btn.closest<HTMLElement>('[data-project-shell]');
     shell?.classList.add('fx-portal-home');

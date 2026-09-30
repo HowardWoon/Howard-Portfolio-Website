@@ -1295,7 +1295,13 @@ has(
   'transformPerspective: on ? 1400 : undefined',
 );
 has('R17', 'P0-02b', 'TiltCard tilts only on a hovering pointer', 'components/tilt-card.tsx', 'allowed && hover ?');
-has('R17', 'P0-05', 'Boot gate uses the shared scroll lock', 'components/boot-sequence.tsx', 'useScrollLock(showBoot)');
+has(
+  'R17',
+  'P0-05',
+  'Boot gate uses the shared scroll lock',
+  'components/boot-sequence.tsx',
+  'useScrollLock(mounted && showBoot)',
+);
 has(
   'R17',
   'P0-05b',

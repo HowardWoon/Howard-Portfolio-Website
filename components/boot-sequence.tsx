@@ -73,7 +73,9 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
   // old scroll position behind the gate on refresh.
   // R17 P0-05: the gate takes part in the shared, ref-counted lock. It used to write body.style.overflow directly, so a
   // lightbox opened behind the gate saved "hidden" as the value to restore and left the page locked after closing.
-  useScrollLock(showBoot);
+  // Only once mounted: the server render (and a client navigation back to "/") starts with showBoot=true for one
+  // render, and locking there stopped Lenis for a frame and raced the simulator return landing (FX-85).
+  useScrollLock(mounted && showBoot);
   useEffect(() => {
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     // Lenis is created in a parent effect (runs after this one) → defer one tick
