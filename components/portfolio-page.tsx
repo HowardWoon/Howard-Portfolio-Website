@@ -4,6 +4,7 @@ import AboutSection from '@/components/about-section';
 import {
   BuildStory,
   SystemStatusBar,
+  ResumeDrawer,
   StackedProjects,
   ExperienceSection,
   HonorsSection,
@@ -102,6 +103,7 @@ export function PortfolioPage() {
         </div>
 
         <ScrollToTop />
+        <ResumeDrawer />
         <FrameGovernor />
         <SectionClock />
         <OffscreenPause />

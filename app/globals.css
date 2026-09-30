@@ -2395,6 +2395,21 @@ html:not(.fx-off-contactCalm)
   }
 }
 
+/* R23 resume drawer: slides in from the right edge (off for reduced motion) */
+.resume-drawer {
+  animation: resume-in 0.28s cubic-bezier(0.2, 0.9, 0.1, 1) both;
+}
+@keyframes resume-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .resume-drawer {
+    animation: none;
+  }
+}
+
 /* R22 X-ray mode (components/system-status-bar.tsx): blueprint grid, dashed outlines, size labels. Overlay only. */
 .xray-grid {
   background-image:
@@ -2425,8 +2440,36 @@ html[data-xray-mode]
   letter-spacing: 0.06em;
   white-space: nowrap;
 }
+/* #20 CAD crosshair (X-ray mode, mouse / pen only) */
+.xray-cross-h,
+.xray-cross-v,
+.xray-cross-tag {
+  position: absolute;
+  left: 0;
+  top: 0;
+  will-change: transform;
+}
+.xray-cross-h {
+  width: 100%;
+  border-top: 1px dashed #2b4bff;
+  transform: translate3d(0, -100px, 0);
+}
+.xray-cross-v {
+  height: 100%;
+  border-left: 1px dashed #2b4bff;
+  transform: translate3d(-100px, 0, 0);
+}
+.xray-cross-tag {
+  transform: translate3d(-400px, -400px, 0);
+}
+@media (hover: none) {
+  .xray-cross {
+    display: none;
+  }
+}
 @media print {
   .xray-grid,
+  .xray-cross,
   .xray-label {
     display: none;
   }

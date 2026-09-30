@@ -11,6 +11,7 @@ import { FX, SPRING_STAMP } from '@/lib/fx';
 import { useClockActive } from '@/lib/section-clock';
 import { SpFill } from './fx/sp-fill';
 import type { PaletteWindow } from './command-palette';
+import { openResume } from '@/lib/resume';
 
 const NAV = [
   { id: 'about', label: 'About' },
@@ -181,6 +182,7 @@ export function SiteHeader() {
         <Magnetic strength={0.3} stretch>
           <a
             href="/resume.pdf"
+            onClick={openResume}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="RESUME"

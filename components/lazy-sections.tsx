@@ -8,6 +8,8 @@ export const StackedProjects = dynamic(() => import('@/components/stacked-projec
 export const BuildStory = dynamic(() => import('@/components/build-story'));
 // R22: System Status Bar (KL clock, ping, X-ray mode) under the hero tape
 export const SystemStatusBar = dynamic(() => import('@/components/system-status-bar'));
+// R23: the resume drawer (client only; mounted right away so RESUME works before the idle mounts)
+export const ResumeDrawer = dynamic(() => import('@/components/resume-drawer'), { ssr: false });
 export const ExperienceSection = dynamic(() => import('@/components/experience-section'));
 export const HonorsSection = dynamic(() => import('@/components/honors-section'));
 export const ContactSection = dynamic(() => import('@/components/contact-section'));

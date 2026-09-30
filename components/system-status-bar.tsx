@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Activity, Clock3, ScanLine } from 'lucide-react';
+import { Activity, Check, Clock3, Copy, FileText, Moon, ScanLine, Sun, UserRound } from 'lucide-react';
+import { personalDetails } from '@/lib/site-data';
+import { openResume } from '@/lib/resume';
 
 /**
  * R22 System Status Bar (lecturer pattern 4 + "quick recommendation"): a hardware-style control strip under the
@@ -23,6 +25,17 @@ const KL = new Intl.DateTimeFormat('en-GB', {
   hour12: false,
 });
 
+const LOCAL = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+const KL_HOUR = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kuala_Lumpur', hour: 'numeric', hour12: false });
+const KL_OFFSET_MIN = 8 * 60;
+
+/** "same time zone" / "KL +8h" / "KL -2.5h" from the visitor's own offset (lecturer advice #3) */
+function klDifference(date = new Date()) {
+  const diff = (KL_OFFSET_MIN - -date.getTimezoneOffset()) / 60;
+  if (diff === 0) return 'same time zone';
+  return `KL ${diff > 0 ? '+' : '-'}${Math.abs(diff)}h`;
+}
+
 const XRAY_TARGETS =
   '.site-header, main section[id], .bs-section, [data-project-shell], .nb-card-lg, [data-pill-pit], footer';
 
@@ -40,6 +53,9 @@ function labelFor(el: HTMLElement) {
 function XrayOverlay({ ping, onClose }: { ping: number | null; onClose: () => void }) {
   const [boxes, setBoxes] = useState<{ key: string; x: number; y: number; w: number; h: number; label: string }[]>([]);
   const fpsRef = useRef<HTMLSpanElement>(null);
+  const crossX = useRef<HTMLDivElement>(null);
+  const crossY = useRef<HTMLDivElement>(null);
+  const crossTag = useRef<HTMLDivElement>(null);
   const [nav, setNav] = useState({ ttfb: 0, dcl: 0, load: 0, nodes: 0 });
 
   useEffect(() => {
@@ -94,6 +110,30 @@ function XrayOverlay({ ping, onClose }: { ping: number | null; onClose: () => vo
       raf = requestAnimationFrame(count);
     };
     raf = requestAnimationFrame(count);
+    // #20 CAD crosshair: dashed full-screen lines + a tag with X / Y and the component under the mouse.
+    // One rAF per pointer move, transform / text writes only; mouse and pen only (touch has no hover).
+    let cr = 0;
+    let px = -100;
+    let py = -100;
+    let target: EventTarget | null = null;
+    const drawCross = () => {
+      cr = 0;
+      if (crossX.current) crossX.current.style.transform = `translate3d(0, ${py}px, 0)`;
+      if (crossY.current) crossY.current.style.transform = `translate3d(${px}px, 0, 0)`;
+      if (crossTag.current) {
+        const el = (target as Element | null)?.closest?.<HTMLElement>(XRAY_TARGETS);
+        crossTag.current.textContent = `X ${Math.round(px)} · Y ${Math.round(py)}${el ? ` · HOVER // ${labelFor(el)}` : ''}`;
+        crossTag.current.style.transform = `translate3d(${Math.min(px + 14, window.innerWidth - 260)}px, ${py + 14}px, 0)`;
+      }
+    };
+    const onPointer = (e: PointerEvent) => {
+      if (e.pointerType === 'touch') return;
+      px = e.clientX;
+      py = e.clientY;
+      target = e.target;
+      if (!cr) cr = requestAnimationFrame(drawCross);
+    };
+    window.addEventListener('pointermove', onPointer, { passive: true });
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', onKey);
     return () => {
@@ -103,12 +143,19 @@ function XrayOverlay({ ping, onClose }: { ping: number | null; onClose: () => vo
       window.removeEventListener('resize', soon);
       window.removeEventListener('keydown', onKey);
       cancelAnimationFrame(raf);
+      cancelAnimationFrame(cr);
+      window.removeEventListener('pointermove', onPointer);
     };
   }, [onClose]);
 
   return createPortal(
     <>
       <div aria-hidden className="xray-grid pointer-events-none fixed inset-0 z-[9400]" />
+      <div aria-hidden className="xray-cross pointer-events-none fixed inset-0 z-[9460] overflow-hidden">
+        <div ref={crossX} className="xray-cross-h" />
+        <div ref={crossY} className="xray-cross-v" />
+        <div ref={crossTag} className="xray-label xray-cross-tag" />
+      </div>
       <div aria-hidden className="pointer-events-none absolute left-0 top-0 z-[9450] w-full">
         {boxes.map((b) => (
           <span key={b.key} className="xray-label absolute" style={{ left: Math.max(4, b.x + 6), top: b.y + 6 }}>
@@ -151,6 +198,10 @@ function XrayOverlay({ ping, onClose }: { ping: number | null; onClose: () => vo
 
 export default function SystemStatusBar() {
   const clockRef = useRef<HTMLSpanElement>(null);
+  const localRef = useRef<HTMLSpanElement>(null);
+  const [diff, setDiff] = useState<string | null>(null);
+  const [day, setDay] = useState<boolean | null>(null);
+  const [copied, setCopied] = useState(false);
   const [ping, setPing] = useState<number | null>(null);
   const [pinging, setPinging] = useState(false);
   const [xray, setXray] = useState(false);
@@ -158,12 +209,31 @@ export default function SystemStatusBar() {
 
   useEffect(() => {
     const tick = () => {
-      if (clockRef.current) clockRef.current.textContent = KL.format(new Date());
+      const now = new Date();
+      if (clockRef.current) clockRef.current.textContent = KL.format(now);
+      if (localRef.current) localRef.current.textContent = LOCAL.format(now);
+      const h = Number(KL_HOUR.format(now));
+      setDay((d) => (d === (h >= 7 && h < 19) ? d : h >= 7 && h < 19)); // state only changes twice a day
+      setDiff((d) => (d === klDifference(now) ? d : klDifference(now)));
     };
     tick();
     const id = window.setInterval(tick, 1000);
     return () => window.clearInterval(id);
   }, []);
+
+  useEffect(() => {
+    if (!copied) return;
+    const t = window.setTimeout(() => setCopied(false), 2200);
+    return () => window.clearTimeout(t);
+  }, [copied]);
+  const copyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText(personalDetails.email);
+      setCopied(true);
+    } catch {
+      window.location.href = `mailto:${personalDetails.email}`;
+    }
+  };
 
   const doPing = async () => {
     if (pinging) return;
@@ -196,7 +266,44 @@ export default function SystemStatusBar() {
             --:--:--
           </span>{' '}
           <span className="text-ink-muted">GMT+8</span>
+          {day == null ? null : day ? (
+            <Sun className="h-4 w-4 text-ink" strokeWidth={2.75} aria-label="daytime in Kuala Lumpur" />
+          ) : (
+            <Moon className="h-4 w-4 text-ink" strokeWidth={2.75} aria-label="night-time in Kuala Lumpur" />
+          )}
         </span>
+        {/* lecturer advice #3: the visitor's own time and the gap to Kuala Lumpur */}
+        <span className="inline-flex min-h-[40px] items-center gap-2 rounded-xl border-2 border-ink px-3 font-mono text-xs font-extrabold tracking-[0.1em] text-ink">
+          <UserRound className="h-4 w-4" strokeWidth={2.75} aria-hidden />
+          YOUR TIME{' '}
+          <span ref={localRef} className="tabular-nums" suppressHydrationWarning>
+            --:--
+          </span>{' '}
+          <span className="text-ink-muted" suppressHydrationWarning>
+            {diff ?? ''}
+          </span>
+        </span>
+        <button
+          type="button"
+          onClick={copyEmail}
+          aria-live="polite"
+          className={`nb-key inline-flex min-h-[40px] items-center gap-2 rounded-xl border-2 border-ink px-3 font-mono text-xs font-extrabold tracking-[0.12em] text-ink ${copied ? 'bg-pop-mint' : 'bg-white'}`}
+        >
+          {copied ? (
+            <Check className="h-4 w-4" strokeWidth={3} aria-hidden />
+          ) : (
+            <Copy className="h-4 w-4" strokeWidth={2.75} aria-hidden />
+          )}
+          {copied ? 'EMAIL COPIED' : 'COPY EMAIL'}
+        </button>
+        <button
+          type="button"
+          onClick={() => openResume()}
+          className="nb-key inline-flex min-h-[40px] items-center gap-2 rounded-xl border-2 border-ink bg-white px-3 font-mono text-xs font-extrabold tracking-[0.12em] text-ink"
+        >
+          <FileText className="h-4 w-4" strokeWidth={2.75} aria-hidden />
+          CV PREVIEW
+        </button>
         <button
           type="button"
           onClick={doPing}

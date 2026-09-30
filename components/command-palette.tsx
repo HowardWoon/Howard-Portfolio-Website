@@ -1,5 +1,6 @@
 'use client';
 
+import { openResume } from '@/lib/resume';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useFocusTrap } from '@/lib/use-focus-trap';
@@ -214,10 +215,7 @@ export function CommandPalette() {
                     <Mail className="w-5 h-5" strokeWidth={2.5} />
                     <span>Copy Email Address</span>
                   </Command.Item>
-                  <Command.Item
-                    onSelect={() => runCommand(() => window.open('/resume.pdf', '_blank'))}
-                    className={itemClass}
-                  >
+                  <Command.Item onSelect={() => runCommand(() => openResume())} className={itemClass}>
                     <Download className="w-5 h-5" strokeWidth={2.5} />
                     <span>Download Résumé</span>
                   </Command.Item>

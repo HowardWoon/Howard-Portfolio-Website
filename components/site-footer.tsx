@@ -2,6 +2,7 @@
 
 import { Github, Linkedin, FileText } from 'lucide-react';
 import { SignalKey } from './signal-key';
+import { openResume } from '@/lib/resume';
 
 export function SiteFooter() {
   const linkedInUrl = 'https://www.linkedin.com/in/howard-woon-hao-zhe-730b9337a/';
@@ -102,6 +103,7 @@ export function SiteFooter() {
               </a>
               <a
                 href="/resume.pdf"
+                onClick={openResume}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm font-mono font-extrabold text-white hover:bg-white hover:text-ink active:bg-white active:text-ink rounded-md px-2 -mx-2 transition-colors uppercase tracking-[0.1em] flex items-center gap-2.5 min-h-[44px]"

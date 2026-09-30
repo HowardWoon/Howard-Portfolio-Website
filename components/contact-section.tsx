@@ -21,6 +21,9 @@ import {
 } from 'lucide-react';
 import { personalDetails } from '@/lib/site-data';
 import { SloganTape } from '@/components/marquees';
+import { ShapeBurst } from '@/components/fx/shape-burst';
+import { RoleProof } from '@/components/role-proof';
+import { openResume } from '@/lib/resume';
 import { OsWindow, WindowDesk } from '@/components/os-window';
 import { PillPit, type PitBadge } from '@/components/pill-pit';
 import { SIGNAL, type Signal } from '@/lib/signal';
@@ -151,17 +154,39 @@ export default function ContactSection() {
     firstInteraction.current ??= performance.now();
   };
 
+  // R23: the chosen intent types its draft into the message box (typewriter; instant for reduced motion / Calm).
+  // Only an untouched box (empty, or all / part of an intent draft) is drafted into: the visitor's words are never replaced.
+  const typing = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearInterval(typing.current), []);
+  const [drafted, setDrafted] = useState(false);
   const handleSelectIntent = (intent: (typeof quickIntents)[0]) => {
     markStart();
     setActiveIntent(intent.label);
-    setFormData((prev) => {
-      const isUntouched = prev.message === '' || quickIntents.some((qi) => qi.text === prev.message);
-      return {
-        ...prev,
-        subject: intent.label.replace(/^[^\s]+\s/, ''),
-        message: isUntouched ? intent.text : prev.message,
-      };
-    });
+    window.clearInterval(typing.current);
+    const untouched = formData.message === '' || quickIntents.some((qi) => qi.text.startsWith(formData.message));
+    setFormData((prev) => ({ ...prev, subject: intent.label.replace(/^[^\s]+\s/, '') }));
+    if (!untouched) return;
+    setDrafted(true);
+    const instant =
+      document.documentElement.dataset.motion === 'calm' ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (instant) {
+      setFormData((prev) => ({ ...prev, message: intent.text }));
+      return;
+    }
+    let n = 0;
+    setFormData((prev) => ({ ...prev, message: '' }));
+    typing.current = window.setInterval(() => {
+      n = Math.min(intent.text.length, n + 3);
+      setFormData((prev) => ({ ...prev, message: intent.text.slice(0, n) }));
+      if (n >= intent.text.length) window.clearInterval(typing.current);
+    }, 16);
+  };
+  const clearDraft = () => {
+    window.clearInterval(typing.current);
+    setActiveIntent(null);
+    setDrafted(false);
+    setFormData((prev) => ({ ...prev, subject: '', message: '' }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -305,9 +330,14 @@ export default function ContactSection() {
               {/* 1-Click Email Clipboard Button */}
               <div className="pt-1">
                 <button
-                  onClick={emailRevealed ? handleCopyEmail : () => setEmailRevealed(true)}
+                  data-copy-email
+                  onClick={() => {
+                    // R23: one click reveals and copies (it used to take a click to reveal and another to copy)
+                    setEmailRevealed(true);
+                    handleCopyEmail();
+                  }}
                   aria-live="polite"
-                  className="w-full flex flex-wrap items-center justify-between gap-2 px-4 xs:px-5 py-3.5 rounded-2xl bg-white border-3 border-ink shadow-brutal-sm hover:-translate-y-0.5 hover:shadow-brutal active:translate-x-[2px] active:translate-y-[2px] active:shadow-none text-xs font-mono font-bold text-ink transition-all group"
+                  className={`relative w-full flex flex-wrap items-center justify-between gap-2 px-4 xs:px-5 py-3.5 rounded-2xl ${copiedEmail ? 'bg-[#DCFAEC]' : 'bg-white'} border-3 border-ink shadow-brutal-sm hover:-translate-y-0.5 hover:shadow-brutal active:translate-x-[2px] active:translate-y-[2px] active:shadow-none text-xs font-mono font-bold text-ink transition-all group`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <Mail className="w-4 h-4 shrink-0" strokeWidth={2.5} />
@@ -315,7 +345,11 @@ export default function ContactSection() {
                       {emailRevealed ? emailAddress : 'REVEAL EMAIL ADDRESS'}
                     </span>
                   </div>
-                  <div className="flex items-center gap-1.5 font-extrabold shrink-0 ml-auto px-2 py-1 rounded-lg border-2 border-ink bg-pop-yellow">
+                  {/* success = LIVE mint (the same green as OPERATIONAL), with a small burst */}
+                  <ShapeBurst fire={copiedEmail} count={10} spread={70} />
+                  <div
+                    className={`flex items-center gap-1.5 font-extrabold shrink-0 ml-auto px-2 py-1 rounded-lg border-2 border-ink ${copiedEmail ? 'bg-pop-mint' : 'bg-pop-yellow'}`}
+                  >
                     {copiedEmail ? (
                       <>
                         <Check className="w-3.5 h-3.5" strokeWidth={3} />
@@ -353,6 +387,7 @@ export default function ContactSection() {
                 </a>
                 <a
                   href="/resume.pdf"
+                  onClick={openResume}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="nb-btn nb-btn-yellow px-3 py-3 text-xs"
@@ -367,23 +402,17 @@ export default function ContactSection() {
                 <span className="text-xs font-mono font-extrabold text-ink uppercase tracking-[0.1em] block">
                   TARGET ROLES & SPECIALIZATIONS:
                 </span>
-                <div className="flex flex-wrap gap-2">
-                  {[
+                {/* R23 skill-to-proof: each role opens the projects that prove it (components/role-proof.tsx) */}
+                <RoleProof
+                  roles={[
                     'Distributed Backends',
                     'Java 21 / Spring Boot',
                     'Agentic AI Pipelines',
                     'High-Throughput APIs',
                     'Fiscal Governance',
-                  ].map((role) => (
-                    <span
-                      key={role}
-                      // R22: SIGNAL KEY (the old colours cycled by position and meant nothing)
-                      className={`nb-chip ${ROLE_SIGNAL[role] ? SIGNAL[ROLE_SIGNAL[role]!].soft : 'bg-white'}`}
-                    >
-                      {role}
-                    </span>
-                  ))}
-                </div>
+                  ]}
+                  fillFor={(role) => (ROLE_SIGNAL[role] ? SIGNAL[ROLE_SIGNAL[role]!].soft : 'bg-white')}
+                />
               </div>
             </OsWindow>
           </m.div>
@@ -494,15 +523,30 @@ export default function ContactSection() {
                     maxLength={5000}
                     placeholder="Hi Howard, let's connect regarding a software engineering role..."
                     value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    onChange={(e) => {
+                      window.clearInterval(typing.current); // the visitor's typing always wins over the drafter
+                      setFormData({ ...formData, message: e.target.value });
+                    }}
                     className="nb-field resize-y min-h-[140px]"
                   />
+                  {activeIntent && formData.message ? (
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        onClick={clearDraft}
+                        className="nb-key inline-flex min-h-[40px] items-center gap-2 rounded-xl border-2 border-ink bg-white px-3 font-mono text-xs font-extrabold tracking-[0.12em] text-ink"
+                      >
+                        ↺ CLEAR DRAFT
+                      </button>
+                    </div>
+                  ) : null}
                 </div>
 
                 <button
                   type="submit"
                   disabled={formStatus === 'sending'}
-                  className={`nb-btn w-full py-4 text-sm fx-specular nb-press ${submitColor}`}
+                  data-armed={drafted && formStatus === 'idle' ? '' : undefined}
+                  className={`nb-btn w-full py-4 text-sm fx-specular nb-press ${submitColor} data-[armed]:ring-4 data-[armed]:ring-pop-blue data-[armed]:ring-offset-2`}
                 >
                   {formStatus === 'sending' ? (
                     <>
