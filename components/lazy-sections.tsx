@@ -6,6 +6,8 @@ import dynamic from 'next/dynamic';
 export const StackedProjects = dynamic(() => import('@/components/stacked-projects'));
 // R21 "The Build": scroll-scrubbed storyboard between About and Projects (self-contained, no section id)
 export const BuildStory = dynamic(() => import('@/components/build-story'));
+// R22: System Status Bar (KL clock, ping, X-ray mode) under the hero tape
+export const SystemStatusBar = dynamic(() => import('@/components/system-status-bar'));
 export const ExperienceSection = dynamic(() => import('@/components/experience-section'));
 export const HonorsSection = dynamic(() => import('@/components/honors-section'));
 export const ContactSection = dynamic(() => import('@/components/contact-section'));

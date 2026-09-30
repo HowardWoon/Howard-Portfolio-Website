@@ -21,6 +21,33 @@ import {
 } from 'lucide-react';
 import { personalDetails } from '@/lib/site-data';
 import { SloganTape } from '@/components/marquees';
+import { OsWindow, WindowDesk } from '@/components/os-window';
+import { PillPit, type PitBadge } from '@/components/pill-pit';
+import { SIGNAL, type Signal } from '@/lib/signal';
+
+const ROLE_SIGNAL: Record<string, Signal | undefined> = {
+  'Agentic AI Pipelines': 'ai',
+  'Fiscal Governance': 'leadership',
+  LangGraph: 'ai',
+  'Gemini · MCP': 'ai',
+};
+// the Target Roles below + the stack from the hero tape (facts already on the page); colour = SIGNAL meaning only
+const PIT_BADGES: PitBadge[] = [
+  'Distributed Backends',
+  'Java 21 / Spring Boot',
+  'Agentic AI Pipelines',
+  'High-Throughput APIs',
+  'Fiscal Governance',
+  'Python',
+  'FastAPI',
+  'LangGraph',
+  'TypeScript',
+  'Next.js 15',
+  'PostgreSQL',
+  'Sui Move',
+  'ESP32 · MQTT',
+  'Gemini · MCP',
+].map((label) => ({ label, fill: ROLE_SIGNAL[label] ? SIGNAL[ROLE_SIGNAL[label]!].soft : 'bg-white' }));
 
 const MercuryField = dynamic(() => import('./fx/mercury-field').then((mod) => mod.MercuryField), { ssr: false });
 
@@ -238,10 +265,11 @@ export default function ContactSection() {
         </div>
 
         {/* Main 2-Column Recruiter Hub (bento) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+        {/* R22: the two cards are OS windows on a desk (drag / raise / minimise / maximise, components/os-window.tsx) */}
+        <WindowDesk className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
           {/* Left Column: Identity, Availability & 1-Click Recruiter Pack (5 Cols) */}
           <m.div className="fx-rise lg:col-span-5 space-y-6">
-            <div className="nb-card-lg p-4 xs:p-6 sm:p-8 space-y-6">
+            <OsWindow id="profile" title="Profile" className="nb-card-lg" bodyClassName="p-4 xs:p-6 sm:p-8 space-y-6">
               {/* Recruiter Live Status Pill */}
               <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#DCFAEC] border-2 border-ink text-ink text-xs font-mono font-extrabold tracking-[0.06em]">
                 <span className="nb-led" aria-hidden />
@@ -346,163 +374,169 @@ export default function ContactSection() {
                     'Agentic AI Pipelines',
                     'High-Throughput APIs',
                     'Fiscal Governance',
-                  ].map((role, i) => (
+                  ].map((role) => (
                     <span
                       key={role}
-                      className={`nb-chip ${['bg-[#FFF3C4]', 'bg-[#D9FBFF]', 'bg-[#EEE9FF]', 'bg-[#DCFAEC]', 'bg-[#FFE1EF]'][i % 5]}`}
+                      // R22: SIGNAL KEY (the old colours cycled by position and meant nothing)
+                      className={`nb-chip ${ROLE_SIGNAL[role] ? SIGNAL[ROLE_SIGNAL[role]!].soft : 'bg-white'}`}
                     >
                       {role}
                     </span>
                   ))}
                 </div>
               </div>
-            </div>
+            </OsWindow>
           </m.div>
 
           {/* Right Column: Interactive Dispatch Form with Quick-Intent Chips (7 Cols) */}
-          <m.div className="fx-rise lg:col-span-7 nb-card-lg p-4 xs:p-6 sm:p-10 space-y-6">
-            <div className="space-y-2">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <span className="nb-tag bg-pop-lilac">DIRECT TRANSMISSION CONSOLE</span>
-                {FX.postageComposer ? (
-                  <PostageStamp
-                    name={formData.name.trim() !== ''}
-                    email={EMAIL_SHAPE.test(formData.email.trim())}
-                    message={formData.message.trim() !== ''}
-                  />
-                ) : null}
+          <m.div className="fx-rise lg:col-span-7">
+            <OsWindow id="console" title="Console" className="nb-card-lg" bodyClassName="p-4 xs:p-6 sm:p-10 space-y-6">
+              <div className="space-y-2">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <span className="nb-tag bg-pop-lilac">DIRECT TRANSMISSION CONSOLE</span>
+                  {FX.postageComposer ? (
+                    <PostageStamp
+                      name={formData.name.trim() !== ''}
+                      email={EMAIL_SHAPE.test(formData.email.trim())}
+                      message={formData.message.trim() !== ''}
+                    />
+                  ) : null}
+                </div>
+                <h3 className="font-display text-[clamp(1.4rem,7vw,1.875rem)] font-extrabold uppercase text-ink tracking-[-0.02em] pt-2">
+                  Send a Direct Message
+                </h3>
               </div>
-              <h3 className="font-display text-[clamp(1.4rem,7vw,1.875rem)] font-extrabold uppercase text-ink tracking-[-0.02em] pt-2">
-                Send a Direct Message
-              </h3>
-            </div>
 
-            {/* Quick Intent Pre-Fill Chips */}
-            <div className="space-y-2.5">
-              <span className="text-xs font-mono font-bold text-pop-blue">{'// Select a conversation intent:'}</span>
-              <div className="flex flex-wrap gap-2">
-                {quickIntents.map((intent) => (
-                  <button
-                    key={intent.label}
-                    type="button"
-                    aria-pressed={activeIntent === intent.label}
-                    data-fx-stamp-target
-                    onClick={() => handleSelectIntent(intent)}
-                    className={`min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-mono font-bold border-2 border-ink transition-all ${
-                      activeIntent === intent.label
-                        ? 'bg-pop-yellow text-ink shadow-clay-pressed translate-x-[2px] translate-y-[2px]'
-                        : 'bg-white text-ink shadow-brutal-xs hover:-translate-y-0.5 hover:shadow-brutal-sm'
-                    }`}
-                  >
-                    {intent.label}
-                  </button>
-                ))}
+              {/* Quick Intent Pre-Fill Chips */}
+              <div className="space-y-2.5">
+                <span className="text-xs font-mono font-bold text-pop-blue">{'// Select a conversation intent:'}</span>
+                <div className="flex flex-wrap gap-2">
+                  {quickIntents.map((intent) => (
+                    <button
+                      key={intent.label}
+                      type="button"
+                      aria-pressed={activeIntent === intent.label}
+                      data-fx-stamp-target
+                      onClick={() => handleSelectIntent(intent)}
+                      className={`min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-mono font-bold border-2 border-ink transition-all ${
+                        activeIntent === intent.label
+                          ? 'bg-pop-yellow text-ink shadow-clay-pressed translate-x-[2px] translate-y-[2px]'
+                          : 'bg-white text-ink shadow-brutal-xs hover:-translate-y-0.5 hover:shadow-brutal-sm'
+                      }`}
+                    >
+                      {intent.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Dispatch Form */}
-            <form onSubmit={handleSubmit} onFocusCapture={markStart} className="space-y-5 pt-2">
-              {/* Honeypot: filled in by spam bots only. `display:none` (not an off-screen position)
+              {/* Dispatch Form */}
+              <form onSubmit={handleSubmit} onFocusCapture={markStart} className="space-y-5 pt-2">
+                {/* Honeypot: filled in by spam bots only. `display:none` (not an off-screen position)
                   because Chrome/Edge autofill can fill off-screen fields named like "website",
                   which silently discarded real visitors' messages. */}
-              <div aria-hidden="true" style={{ display: 'none' }}>
-                <label htmlFor="hw_hp_field">Leave this field empty</label>
-                <input
-                  id="hw_hp_field"
-                  name="hw_hp_field"
-                  type="text"
-                  tabIndex={-1}
-                  autoComplete="off"
-                  value={honeypot}
-                  onChange={(e) => setHoneypot(e.target.value)}
-                />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div className="space-y-2">
-                  <label htmlFor="contact-name" className="nb-label">
-                    YOUR NAME *
-                  </label>
+                <div aria-hidden="true" style={{ display: 'none' }}>
+                  <label htmlFor="hw_hp_field">Leave this field empty</label>
                   <input
-                    id="contact-name"
+                    id="hw_hp_field"
+                    name="hw_hp_field"
                     type="text"
-                    required
-                    autoComplete="name"
-                    maxLength={120}
-                    placeholder="Alex Mercer"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="nb-field"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
                   />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div className="space-y-2">
+                    <label htmlFor="contact-name" className="nb-label">
+                      YOUR NAME *
+                    </label>
+                    <input
+                      id="contact-name"
+                      type="text"
+                      required
+                      autoComplete="name"
+                      maxLength={120}
+                      placeholder="Alex Mercer"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="nb-field"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="contact-email" className="nb-label">
+                      EMAIL ADDRESS *
+                    </label>
+                    <input
+                      id="contact-email"
+                      type="email"
+                      required
+                      autoComplete="email"
+                      maxLength={200}
+                      placeholder="alex@company.com"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="nb-field"
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="contact-email" className="nb-label">
-                    EMAIL ADDRESS *
+                  <label htmlFor="contact-message" className="nb-label">
+                    MESSAGE / PROPOSAL *
                   </label>
-                  <input
-                    id="contact-email"
-                    type="email"
+                  <textarea
+                    id="contact-message"
                     required
-                    autoComplete="email"
-                    maxLength={200}
-                    placeholder="alex@company.com"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="nb-field"
+                    rows={5}
+                    maxLength={5000}
+                    placeholder="Hi Howard, let's connect regarding a software engineering role..."
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    className="nb-field resize-y min-h-[140px]"
                   />
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <label htmlFor="contact-message" className="nb-label">
-                  MESSAGE / PROPOSAL *
-                </label>
-                <textarea
-                  id="contact-message"
-                  required
-                  rows={5}
-                  maxLength={5000}
-                  placeholder="Hi Howard, let's connect regarding a software engineering role..."
-                  value={formData.message}
-                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  className="nb-field resize-y min-h-[140px]"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={formStatus === 'sending'}
-                className={`nb-btn w-full py-4 text-sm fx-specular nb-press ${submitColor}`}
-              >
-                {formStatus === 'sending' ? (
-                  <>
-                    <span className="w-4 h-4 border-[3px] border-ink border-t-transparent rounded-full animate-spin" />
-                    <span>DISPATCHING MESSAGE...</span>
-                  </>
-                ) : formStatus === 'success' ? (
-                  <>
-                    <CheckCircle2 className="w-4 h-4" strokeWidth={3} />
-                    <span>TRANSMISSION RECEIVED — I WILL REPLY SHORTLY!</span>
-                  </>
-                ) : formStatus === 'error' ? (
-                  <>
-                    <span>TRANSMISSION FAILED - TRY AGAIN</span>
-                  </>
-                ) : (
-                  <>
-                    <Send className="w-4 h-4" strokeWidth={2.75} />
-                    <span>DISPATCH MESSAGE</span>
-                  </>
+                <button
+                  type="submit"
+                  disabled={formStatus === 'sending'}
+                  className={`nb-btn w-full py-4 text-sm fx-specular nb-press ${submitColor}`}
+                >
+                  {formStatus === 'sending' ? (
+                    <>
+                      <span className="w-4 h-4 border-[3px] border-ink border-t-transparent rounded-full animate-spin" />
+                      <span>DISPATCHING MESSAGE...</span>
+                    </>
+                  ) : formStatus === 'success' ? (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" strokeWidth={3} />
+                      <span>TRANSMISSION RECEIVED — I WILL REPLY SHORTLY!</span>
+                    </>
+                  ) : formStatus === 'error' ? (
+                    <>
+                      <span>TRANSMISSION FAILED - TRY AGAIN</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" strokeWidth={2.75} />
+                      <span>DISPATCH MESSAGE</span>
+                    </>
+                  )}
+                </button>
+                {formStatus === 'error' && errorText && (
+                  <p role="alert" className="text-sm font-mono font-bold text-pop-redInk text-center">
+                    {errorText}
+                  </p>
                 )}
-              </button>
-              {formStatus === 'error' && errorText && (
-                <p role="alert" className="text-sm font-mono font-bold text-pop-redInk text-center">
-                  {errorText}
-                </p>
-              )}
-            </form>
+              </form>
+            </OsWindow>
           </m.div>
-        </div>
+        </WindowDesk>
+
+        {/* R22 physics badge pit: the same roles and stack as facts, dropped with gravity (components/pill-pit.tsx) */}
+        <PillPit title="Specializations & stack · drag & fling" badges={PIT_BADGES} />
       </div>
 
       {/* Footer tapes (R21): slogan + status crossing in an X, full-bleed without the 100vw hack */}

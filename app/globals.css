@@ -1129,7 +1129,7 @@ html.hw-booted .boot-overlay {
     z-index: -1;
   }
   .fx-case-folder:hover::before {
-    transform: translateY(-4px);
+    transform: translateY(-2px);
   }
 }
 
@@ -2348,6 +2348,88 @@ html:not(.fx-off-contactCalm)
   #contact:is([data-phase='hold'], [data-phase='exit'])
   :is(.animate-pulse, .animate-ping, .animate-spin-slow, .animate-wobble) {
   animation-play-state: paused;
+}
+
+/* R22 mechanical key (lecturer pattern 4, new controls only): a 4 px hard shadow that is pressed INTO the page.
+   Hover = half-way down, press / on = fully down (translate 4px, shadow 0). Existing buttons keep their own press. */
+.nb-key {
+  box-shadow: 4px 4px 0 0 var(--ink);
+  transition:
+    transform 0.12s cubic-bezier(0.2, 0.9, 0.1, 1),
+    box-shadow 0.12s cubic-bezier(0.2, 0.9, 0.1, 1),
+    background-color 0.15s;
+}
+@media (hover: hover) {
+  .nb-key:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 0 var(--ink);
+  }
+}
+.nb-key:active,
+.nb-key[aria-pressed='true'],
+.nb-key[aria-checked='true'] {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 0 var(--ink);
+}
+@media (prefers-reduced-motion: reduce) {
+  .nb-key {
+    transition: none;
+  }
+}
+
+/* R22 dossier folder tab (experience-section.tsx): the tab lifts when pointed at, drops when pressed */
+.nb-folder-tab {
+  transition: transform 0.18s cubic-bezier(0.2, 0.9, 0.1, 1);
+}
+@media (hover: hover) {
+  .nb-folder-tab:hover {
+    transform: translateY(-2px);
+  }
+}
+.nb-folder-tab:active {
+  transform: translateY(2px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .nb-folder-tab {
+    transition: none;
+  }
+}
+
+/* R22 X-ray mode (components/system-status-bar.tsx): blueprint grid, dashed outlines, size labels. Overlay only. */
+.xray-grid {
+  background-image:
+    linear-gradient(to right, rgb(43 75 255 / 0.18) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(43 75 255 / 0.18) 1px, transparent 1px),
+    linear-gradient(to right, rgb(43 75 255 / 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(43 75 255 / 0.07) 1px, transparent 1px);
+  background-size:
+    96px 96px,
+    96px 96px,
+    12px 12px,
+    12px 12px;
+}
+html[data-xray-mode]
+  :is(.site-header, main section[id], .bs-section, [data-project-shell], .nb-card-lg, [data-pill-pit], footer) {
+  outline: 2px dashed #2b4bff;
+  outline-offset: -2px;
+}
+.xray-label {
+  padding: 2px 6px;
+  border: 2px solid #2b4bff;
+  border-radius: 6px;
+  background: #fff;
+  color: #1f37c7;
+  font:
+    800 0.66rem/1.2 var(--font-mono),
+    monospace;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+@media print {
+  .xray-grid,
+  .xray-label {
+    display: none;
+  }
 }
 
 /* R21: a quiet diagonal hatch over a signal-coloured strip (texture only, keeps the background colour) */

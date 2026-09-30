@@ -577,6 +577,9 @@ export default function ExperienceSection() {
           <AnimatePresence mode="popLayout">
             {filteredExperiences.map((item) => {
               const a = SIGNAL[item.signal];
+              // R22 dossier tabs: each folder's tab sits at its own place along the cabinet (by its number)
+              const slot = experiences.findIndex((e) => e.id === item.id);
+              const only = selectedFilter === item.category;
               const onFill = a.text ?? 'text-ink';
               const longHeadline = item.headline.length > 90;
 
@@ -588,110 +591,129 @@ export default function ExperienceSection() {
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.97, y: -20 }}
                   transition={{ duration: 0.4, type: 'spring', bounce: 0.2 }}
-                  className="relative group rounded-[30px] border-3 border-ink bg-white shadow-brutal-lg overflow-hidden"
+                  data-folder={item.id}
+                  className="relative pt-[40px]"
                 >
-                  {/* Top Bar: Number + Category Tag + Period */}
-                  <div
-                    className={`nb-hatch flex flex-wrap items-center justify-between gap-3 sm:gap-4 px-4 xs:px-6 sm:px-10 py-3 sm:py-4 border-b-3 border-ink ${a.fill}`}
+                  {/* R22 folder tab (lecturer pattern 3): pressing it slides this folder to the front (filters to its
+                      track); pressing it again brings every folder back */}
+                  <button
+                    type="button"
+                    aria-pressed={only}
+                    aria-label={only ? 'Show all experience folders' : `Show only the ${item.categoryLabel} folder`}
+                    onClick={() => setSelectedFilter(only ? 'all' : item.category)}
+                    style={{ left: `min(${slot} * 26%, ${slot} * 15rem)` }}
+                    className={`nb-folder-tab absolute top-0 z-10 flex h-[43px] max-w-[calc(100%-1rem)] items-center gap-2 rounded-t-2xl border-3 border-b-0 border-ink px-4 font-mono text-[0.7rem] font-extrabold uppercase tracking-[0.12em] ${a.fill} ${onFill}`}
                   >
-                    <div className="flex flex-wrap items-center gap-2 xs:gap-3 min-w-0">
-                      <span className="nb-num">{item.number}</span>
-                      <span className="rounded-md border-2 border-ink bg-white px-1.5 py-0.5 font-mono text-[0.66rem] font-extrabold tracking-[0.14em] text-ink shadow-brutal-xs">
-                        {a.label}
-                      </span>
-                      <span className={`font-mono text-xs font-extrabold uppercase tracking-[0.12em] ${onFill}`}>
-                        {item.categoryLabel}
-                      </span>
-                    </div>
-
+                    <span className="truncate">
+                      {item.number} {'//'} {item.categoryLabel}
+                    </span>
+                  </button>
+                  <div className="relative group rounded-[30px] border-3 border-ink bg-white shadow-brutal-lg overflow-hidden">
+                    {/* Top Bar: Number + Category Tag + Period */}
                     <div
-                      className={`flex flex-wrap items-center gap-x-5 gap-y-1 text-sm font-mono font-extrabold ${onFill}`}
+                      className={`nb-hatch flex flex-wrap items-center justify-between gap-3 sm:gap-4 px-4 xs:px-6 sm:px-10 py-3 sm:py-4 border-b-3 border-ink ${a.fill}`}
                     >
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4" strokeWidth={2.5} />
-                        <span>{item.period}</span>
-                      </div>
-                      <div className="flex basis-full sm:basis-auto items-start gap-2 max-w-[26rem]">
-                        <MapPin className="w-4 h-4 shrink-0 mt-0.5" strokeWidth={2.5} />
-                        <span>{item.location}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-4 xs:p-6 sm:p-10">
-                    {/* Main Role & Org */}
-                    <div className="pb-7">
-                      <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-5">
-                        <div className="space-y-3 max-w-3xl">
-                          <h3 className="font-display text-[clamp(1.45rem,7.4vw,1.875rem)] sm:text-4xl font-extrabold uppercase tracking-[-0.03em] leading-[1] text-ink">
-                            {item.role}
-                          </h3>
-                          {/* Long narrative headlines are set in sentence-case sans (uppercase mono paragraphs were unreadable) */}
-                          <p
-                            className={
-                              longHeadline
-                                ? 'text-base font-sans font-semibold text-ink-soft leading-relaxed border-l-4 border-pop-blue pl-4'
-                                : 'text-sm font-mono font-extrabold text-pop-blue uppercase tracking-[0.06em]'
-                            }
-                          >
-                            {'// '}
-                            {item.headline}
-                          </p>
-                        </div>
-                        <div
-                          className={`flex items-center gap-2.5 px-4 py-2.5 rounded-2xl border-3 border-ink shadow-brutal-sm shrink-0 self-start ${a.soft}`}
-                        >
-                          <item.icon className="w-5 h-5 text-ink" strokeWidth={2.5} />
-                          <span className="text-sm font-extrabold font-sans text-ink">{item.organization}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Description Bullets */}
-                    <div className="space-y-3.5 mb-8">
-                      {item.bullets.map((bullet, bIdx) => (
-                        <div
-                          key={bIdx}
-                          className="flex items-start gap-3 text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium max-w-4xl"
-                        >
-                          <div
-                            className={`w-6 h-6 rounded-full grid place-items-center shrink-0 mt-0.5 border-2 border-ink ${a.fill}`}
-                          >
-                            <CheckCircle2 className={`w-3.5 h-3.5 ${onFill}`} strokeWidth={3} />
-                          </div>
-                          <p>{bullet}</p>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Metrics & Impact Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
-                      {item.metrics.map((metric, mIdx) => (
-                        <div
-                          key={mIdx}
-                          className={`rounded-2xl p-4 border-3 border-ink shadow-brutal-sm flex flex-col justify-center ${mIdx === 1 ? 'bg-ink text-white' : 'bg-white text-ink'}`}
-                        >
-                          <span
-                            className={`text-[0.7rem] font-mono font-bold uppercase tracking-[0.08em] mb-1 ${mIdx === 1 ? 'text-white/75' : 'text-ink/70'}`}
-                          >
-                            {metric.label}
-                          </span>
-                          <span className="font-display text-xl font-extrabold tracking-[-0.01em]">{metric.value}</span>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Skills/Tags */}
-                    <div className="flex flex-wrap gap-2">
-                      {item.tags.map((tag, tIdx) => (
-                        <span key={tIdx} className="nb-tag bg-paper-deep">
-                          {tag}
+                      <div className="flex flex-wrap items-center gap-2 xs:gap-3 min-w-0">
+                        <span className="nb-num">{item.number}</span>
+                        <span className="rounded-md border-2 border-ink bg-white px-1.5 py-0.5 font-mono text-[0.66rem] font-extrabold tracking-[0.14em] text-ink shadow-brutal-xs">
+                          {a.label}
                         </span>
-                      ))}
+                        <span className={`font-mono text-xs font-extrabold uppercase tracking-[0.12em] ${onFill}`}>
+                          {item.categoryLabel}
+                        </span>
+                      </div>
+
+                      <div
+                        className={`flex flex-wrap items-center gap-x-5 gap-y-1 text-sm font-mono font-extrabold ${onFill}`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4" strokeWidth={2.5} />
+                          <span>{item.period}</span>
+                        </div>
+                        <div className="flex basis-full sm:basis-auto items-start gap-2 max-w-[26rem]">
+                          <MapPin className="w-4 h-4 shrink-0 mt-0.5" strokeWidth={2.5} />
+                          <span>{item.location}</span>
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Specialized Dashboards */}
-                    {item.id === 'pekom' && <PekomTreasurerDashboard />}
+                    <div className="p-4 xs:p-6 sm:p-10">
+                      {/* Main Role & Org */}
+                      <div className="pb-7">
+                        <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-5">
+                          <div className="space-y-3 max-w-3xl">
+                            <h3 className="font-display text-[clamp(1.45rem,7.4vw,1.875rem)] sm:text-4xl font-extrabold uppercase tracking-[-0.03em] leading-[1] text-ink">
+                              {item.role}
+                            </h3>
+                            {/* Long narrative headlines are set in sentence-case sans (uppercase mono paragraphs were unreadable) */}
+                            <p
+                              className={
+                                longHeadline
+                                  ? 'text-base font-sans font-semibold text-ink-soft leading-relaxed border-l-4 border-pop-blue pl-4'
+                                  : 'text-sm font-mono font-extrabold text-pop-blue uppercase tracking-[0.06em]'
+                              }
+                            >
+                              {'// '}
+                              {item.headline}
+                            </p>
+                          </div>
+                          <div
+                            className={`flex items-center gap-2.5 px-4 py-2.5 rounded-2xl border-3 border-ink shadow-brutal-sm shrink-0 self-start ${a.soft}`}
+                          >
+                            <item.icon className="w-5 h-5 text-ink" strokeWidth={2.5} />
+                            <span className="text-sm font-extrabold font-sans text-ink">{item.organization}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Description Bullets */}
+                      <div className="space-y-3.5 mb-8">
+                        {item.bullets.map((bullet, bIdx) => (
+                          <div
+                            key={bIdx}
+                            className="flex items-start gap-3 text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium max-w-4xl"
+                          >
+                            <div
+                              className={`w-6 h-6 rounded-full grid place-items-center shrink-0 mt-0.5 border-2 border-ink ${a.fill}`}
+                            >
+                              <CheckCircle2 className={`w-3.5 h-3.5 ${onFill}`} strokeWidth={3} />
+                            </div>
+                            <p>{bullet}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Metrics & Impact Grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
+                        {item.metrics.map((metric, mIdx) => (
+                          <div
+                            key={mIdx}
+                            className={`rounded-2xl p-4 border-3 border-ink shadow-brutal-sm flex flex-col justify-center ${mIdx === 1 ? 'bg-ink text-white' : 'bg-white text-ink'}`}
+                          >
+                            <span
+                              className={`text-[0.7rem] font-mono font-bold uppercase tracking-[0.08em] mb-1 ${mIdx === 1 ? 'text-white/75' : 'text-ink/70'}`}
+                            >
+                              {metric.label}
+                            </span>
+                            <span className="font-display text-xl font-extrabold tracking-[-0.01em]">
+                              {metric.value}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Skills/Tags */}
+                      <div className="flex flex-wrap gap-2">
+                        {item.tags.map((tag, tIdx) => (
+                          <span key={tIdx} className="nb-tag bg-paper-deep">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* Specialized Dashboards */}
+                      {item.id === 'pekom' && <PekomTreasurerDashboard />}
+                    </div>
                   </div>
                 </m.div>
               );

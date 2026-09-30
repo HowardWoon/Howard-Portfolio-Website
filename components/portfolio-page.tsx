@@ -3,6 +3,7 @@ import BikebearInspiredHero from '@/components/bikebear-hero';
 import AboutSection from '@/components/about-section';
 import {
   BuildStory,
+  SystemStatusBar,
   StackedProjects,
   ExperienceSection,
   HonorsSection,
@@ -82,6 +83,9 @@ export function PortfolioPage() {
               ]}
             />
           </VelocitySkew>
+
+          {/* R22: hardware-style status strip (clock, ping, X-ray mode); adds controls, changes no content */}
+          <SystemStatusBar />
 
           <AboutSection />
           {/* R21: scroll-scrubbed storyboard (student ID -> shipped system); owns no section id */}

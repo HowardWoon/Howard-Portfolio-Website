@@ -328,7 +328,7 @@ export default function StackedProjects() {
           </div>
         </div>
 
-        <SignalKey only={['podium', 'qualifier', 'academic', 'ai', 'live']} className="!-mt-8 sm:!-mt-10" />
+        <SignalKey only={['podium', 'qualifier', 'academic', 'ai', 'live']} className="w-fit max-w-full" />
 
         <ProjectIndex items={INDEX_ITEMS} />
 
