@@ -158,3 +158,53 @@ test('honours: every card has an emblem that says what it is, and no card is lef
   expect([...rows.values()].every((n) => n > 1)).toBe(true); // no orphan (offsetTop = layout row, unaffected by the entrance scale)
   expect(await grid.locator('svg[viewBox="0 0 120 120"]').count()).toBe(7);
 });
+
+/* ---------------------------------------------------------------- round 4: nav, spine, filter, footer */
+test('header: the nav fits at 1280 px (search stays on screen) and the marker is not podium yellow', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await home(page);
+  await expect(page.getByRole('button', { name: /open command palette/i })).toBeInViewport({ ratio: 1 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(
+    true,
+  );
+  // nav link names are unchanged by the visual index numbers
+  await expect(page.locator('.site-header nav').getByRole('link', { name: 'Projects', exact: true })).toHaveCount(1);
+});
+
+test('section spine: a compact panel beside the content, and it steps aside at the footer', async ({ page }) => {
+  await page.setViewportSize({ width: 1536, height: 864 });
+  await home(page);
+  const spine = page.locator('nav[aria-label="Section navigation"]');
+  await page.evaluate(() => document.getElementById('projects')!.scrollIntoView());
+  await expect(spine).toBeVisible();
+  expect((await spine.boundingBox())!.width).toBeLessThan(70); // the hidden labels no longer widen it
+  await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+  await expect.poll(() => spine.evaluate((e) => getComputedStyle(e).opacity)).toBe('0');
+});
+
+test('footer: colours carry meaning and the site-wide signal key is the colophon', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await home(page);
+  const footer = page.locator('footer');
+  await expect(footer.getByText('Signal key', { exact: true })).toHaveCount(1);
+  await expect(footer.getByRole('link', { name: /05 \/\/ contact/i })).toHaveCount(1);
+  const back = footer.getByRole('button', { name: /back to top/i });
+  expect(await back.evaluate((e) => getComputedStyle(e).backgroundColor)).not.toBe('rgb(255, 199, 0)');
+  // FX-83 still reveals the footer on a 900 px screen (it needs the footer under 85 % of the screen)
+  expect(await footer.evaluate((e) => (e as HTMLElement).offsetHeight)).toBeLessThan(900 * 0.85);
+});
+
+test.describe('phone filter', () => {
+  test.use((({ defaultBrowserType, ...d }) => d)(devices['Pixel 7']));
+  test('experience filter swatches keep their size on a phone', async ({ page }) => {
+    await home(page);
+    const sizes = await page
+      .getByRole('group', { name: 'Filter experience' })
+      .locator('button > span > span[aria-hidden]')
+      .evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().width)));
+    expect(sizes.length).toBe(4);
+    for (const w of sizes) expect(w).toBeGreaterThanOrEqual(12);
+  });
+});

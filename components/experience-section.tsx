@@ -7,6 +7,7 @@ import { SplitWords } from './fx/split-words';
 import { m, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { FX, SPRING_STAMP } from '@/lib/fx';
 import { SIGNAL, type Signal } from '@/lib/signal';
+import { SignalKey } from './signal-key';
 import { usePrinting } from '@/lib/use-printing';
 import {
   Building2,
@@ -514,44 +515,61 @@ export default function ExperienceSection() {
           </m.h2>
         </div>
 
-        {/* Segmented Filter Control — physical key row */}
-        <m.div
-          role="group"
-          aria-label="Filter experience"
-          className="fx-rise grid grid-cols-1 min-[360px]:grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 p-2 bg-white border-3 border-ink rounded-[22px] shadow-brutal-sm w-full sm:w-fit max-w-full"
-        >
-          <LayoutGroup id="exp-filter">
-            {filters.map((f) => {
-              const count = f.id === 'all' ? experiences.length : experiences.filter((e) => e.category === f.id).length;
-              const isActive = selectedFilter === f.id;
+        {/* Segmented Filter Control — physical key row. R21: labelled "TRACK", swatches = SIGNAL KEY, key beside it */}
+        <div className="fx-rise flex flex-col items-start gap-3">
+          <m.div
+            role="group"
+            aria-label="Filter experience"
+            className="grid grid-cols-1 min-[360px]:grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 p-2 bg-white border-3 border-ink rounded-[22px] shadow-brutal-sm w-full sm:w-fit max-w-full"
+          >
+            <span
+              aria-hidden
+              className="col-span-full sm:col-span-1 flex items-center gap-2 self-stretch rounded-2xl bg-ink px-3 py-2 font-mono text-[0.66rem] font-extrabold tracking-[0.16em] text-white"
+            >
+              TRACK
+            </span>
+            <LayoutGroup id="exp-filter">
+              {filters.map((f) => {
+                const count =
+                  f.id === 'all' ? experiences.length : experiences.filter((e) => e.category === f.id).length;
+                const isActive = selectedFilter === f.id;
 
-              return (
-                <button
-                  key={f.id}
-                  aria-pressed={isActive}
-                  onClick={() => setSelectedFilter(f.id)}
-                  className={`relative px-3 sm:px-4 py-2.5 rounded-2xl text-xs font-mono font-extrabold uppercase tracking-[0.08em] border-2 transition-all duration-150 ${
-                    isActive ? 'text-white border-ink' : 'bg-white text-ink border-transparent hover:border-ink'
-                  }`}
-                >
-                  {isActive ? (
-                    <m.span
-                      layoutId="exp-filter-pill"
-                      aria-hidden
-                      className="absolute inset-0 rounded-2xl bg-ink shadow-clay-pressed"
-                      transition={FX.jellyTabs ? SPRING_STAMP : { duration: 0 }}
-                    />
-                  ) : null}
-                  <span className="relative z-10 flex items-center justify-center gap-2.5">
-                    <span className={`nb-dot ${f.dotClass}`} />
-                    {f.label}
-                    <span className={`text-[0.7rem] ${isActive ? 'text-white/70' : 'text-ink-muted'}`}>({count})</span>
-                  </span>
-                </button>
-              );
-            })}
-          </LayoutGroup>
-        </m.div>
+                return (
+                  <button
+                    key={f.id}
+                    aria-pressed={isActive}
+                    onClick={() => setSelectedFilter(f.id)}
+                    className={`relative min-h-[44px] px-3 sm:px-4 py-2.5 rounded-2xl text-xs font-mono font-extrabold uppercase tracking-[0.08em] border-2 transition-all duration-150 ${
+                      isActive
+                        ? 'text-white border-ink'
+                        : 'bg-white text-ink border-transparent hover:border-ink hover:bg-[#E3E8FF]'
+                    }`}
+                  >
+                    {isActive ? (
+                      <m.span
+                        layoutId="exp-filter-pill"
+                        aria-hidden
+                        className="absolute inset-0 rounded-2xl bg-ink shadow-clay-pressed"
+                        transition={FX.jellyTabs ? SPRING_STAMP : { duration: 0 }}
+                      />
+                    ) : null}
+                    <span className="relative z-10 flex items-center justify-center gap-2.5">
+                      <span
+                        aria-hidden
+                        className={`h-3.5 w-3.5 shrink-0 rounded-[3px] border-2 ${isActive ? 'border-white' : 'border-ink'} ${f.dotClass}`}
+                      />
+                      {f.label}
+                      <span className={`text-[0.7rem] ${isActive ? 'text-white/70' : 'text-ink-muted'}`}>
+                        ({count})
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
+            </LayoutGroup>
+          </m.div>
+          <SignalKey only={['industry', 'leadership', 'academic']} className="w-fit max-w-full" />
+        </div>
 
         {/* Experience Cards */}
         <div className="relative space-y-10 min-h-[500px]">

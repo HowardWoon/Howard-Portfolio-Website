@@ -11,7 +11,7 @@ export function SignalKey({ only, className = '' }: { only?: Signal[]; className
       <ul className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
         {keys.map((k) => (
           <li key={k} className="flex items-center gap-1.5">
-            <span aria-hidden className={`h-3.5 w-3.5 rounded-[3px] border-2 border-ink ${SIGNAL[k].fill}`} />
+            <span aria-hidden className={`h-3.5 w-3.5 shrink-0 rounded-[3px] border-2 border-ink ${SIGNAL[k].fill}`} />
             <span className="font-mono text-[0.68rem] font-extrabold tracking-[0.08em] text-ink">
               {SIGNAL[k].label}
             </span>

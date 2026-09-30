@@ -117,7 +117,7 @@ export function SiteHeader() {
         </div>
 
         <nav className="hidden xl:flex items-center gap-6 mr-4">
-          {NAV.map((s) => {
+          {NAV.map((s, i) => {
             const on = active === s.id;
             const hot = (on: boolean) => {
               window.dispatchEvent(new CustomEvent('route-preview', { detail: { id: on ? s.id : null } }));
@@ -128,7 +128,7 @@ export function SiteHeader() {
                 key={s.id}
                 href={`#${s.id}`}
                 aria-current={FX.headerInstrument && on ? 'location' : undefined}
-                className={`group fx-dir-ink relative py-0.5 text-sm font-extrabold uppercase tracking-widest hover:text-pop-blue transition-colors after:absolute after:-bottom-0.5 after:left-0 after:w-full after:scale-x-0 hover:after:scale-x-100 focus-visible:after:scale-x-100 after:origin-left after:transition-transform after:h-[3px] after:bg-pop-yellow [@media(pointer:coarse)]:before:absolute [@media(pointer:coarse)]:before:inset-x-0 [@media(pointer:coarse)]:before:-inset-y-[6px] [@media(pointer:coarse)]:before:content-[''] ${
+                className={`group fx-dir-ink relative py-0.5 text-sm font-extrabold uppercase tracking-widest hover:text-pop-blue transition-colors after:absolute after:-bottom-0.5 after:left-0 after:w-full after:scale-x-0 hover:after:scale-x-100 focus-visible:after:scale-x-100 after:origin-left after:transition-transform after:h-[3px] after:bg-pop-blue [@media(pointer:coarse)]:before:absolute [@media(pointer:coarse)]:before:inset-x-0 [@media(pointer:coarse)]:before:-inset-y-[6px] [@media(pointer:coarse)]:before:content-[''] ${
                   FX.headerInstrument && on ? 'text-pop-blue' : 'text-ink'
                 }`}
                 onPointerEnter={() => hot(true)}
@@ -136,6 +136,13 @@ export function SiteHeader() {
                 onFocus={() => hot(true)}
                 onBlur={() => hot(false)}
               >
+                {/* R21: section index (visual only; the link name stays the section name) */}
+                <span
+                  aria-hidden
+                  className="mr-1.5 hidden align-top min-[1440px]:inline font-mono text-[0.62rem] font-extrabold text-ink-muted"
+                >
+                  {String(i + 1).padStart(2, '0')}
+                </span>
                 {FX.headerInstrument ? <TextRoll>{s.label}</TextRoll> : s.label}
                 {markerAt === s.id ? (
                   // FX-105: one marker, shared layoutId -> it slides between links with the stamp spring
@@ -143,7 +150,8 @@ export function SiteHeader() {
                     layoutId="fx-hdr-marker"
                     aria-hidden
                     transition={SPRING_STAMP}
-                    className="fx-hdr-marker absolute -bottom-[11px] -left-[5px] -right-[5px] h-[7px] rounded-full border-2 border-ink bg-pop-yellow overflow-hidden"
+                    // R21: white track, blue fill = how far you have read this section (blue = interactive / where you are)
+                    className="fx-hdr-marker absolute -bottom-[11px] -left-[5px] -right-[5px] h-[7px] rounded-full border-2 border-ink bg-white overflow-hidden"
                   >
                     {/* filled with the current section's reading progress (Section Clock) */}
                     {preview === null || preview === active ? <SpFill forId="active" className="fx-sp-bar" /> : null}
