@@ -10,6 +10,7 @@ import { useScrollLock } from '@/lib/use-scroll-lock';
 import { useFocusTrap } from '@/lib/use-focus-trap';
 import { useLatest } from '@/lib/use-latest';
 import { FX } from '@/lib/fx';
+import { useBooted } from './boot-sequence';
 
 type Photo = { src: string; alt: string; rotation: number };
 
@@ -378,8 +379,10 @@ export function InteractivePhotoStack({ customPhotos, galleryId }: { customPhoto
   useEffect(() => setMounted(true), []);
   // FX-69: `?photo=<this gallery>:<n>` opens the lightbox on photo n
   const stackRef = useRef<HTMLDivElement>(null);
+  // R17 P0-05: wait for the boot gate (a lightbox opened behind it trapped focus in an invisible dialog)
+  const booted = useBooted();
   useEffect(() => {
-    if (!FX.deepLinks || !galleryId) return;
+    if (!booted || !FX.deepLinks || !galleryId) return;
     const link = readDeepLink('photo');
     if (!link || link.id !== galleryId || link.n > source.length) return;
     const t = window.setTimeout(() => {
@@ -387,7 +390,7 @@ export function InteractivePhotoStack({ customPhotos, galleryId }: { customPhoto
       setViewer(link.n - 1);
     }, 400);
     return () => window.clearTimeout(t);
-  }, [galleryId, source.length]);
+  }, [booted, galleryId, source.length]);
 
   const cycle = () => setCards((prev) => [...prev.slice(1), prev[0]]);
   const openViewer = (src: string) =>

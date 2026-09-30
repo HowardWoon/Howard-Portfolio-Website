@@ -12,6 +12,7 @@ import { exitFocus, markVisited, setFocus, startTrail, useInteractionSelect } fr
 import { projectsWithSkill, scrollToProject, skillKey } from '@/lib/skills';
 import { readDeepLink } from '@/lib/share';
 import { TiltCard } from './tilt-card';
+import { useBooted } from './boot-sequence';
 import { AmbientOrbits } from './fx/ambient-orbits';
 import { InteractivePhotoStack } from './interactive-photo-stack';
 import { BlueprintStage, BP_LAYERS } from './blueprint-stage';
@@ -333,8 +334,9 @@ function ProjectCard({ project }: { project: ProjectData }) {
   const [blueprint, setBlueprint] = React.useState(false);
   // FX-69: `?bp=<this project>:L<n>` opens this card's bench on layer n (after the page has settled)
   const [sharedLayer, setSharedLayer] = React.useState<number | null>(null);
+  const booted = useBooted(); // R17 P0-05: never open the bench behind the boot gate
   React.useEffect(() => {
-    if (!FX.deepLinks || !FX.blueprintView) return;
+    if (!booted || !FX.deepLinks || !FX.blueprintView) return;
     const link = readDeepLink('bp');
     if (!link || link.id !== project.simulatorId || link.n > BP_LAYERS.length) return;
     const t = window.setTimeout(() => {
@@ -343,7 +345,7 @@ function ProjectCard({ project }: { project: ProjectData }) {
       setBlueprint(true);
     }, 400);
     return () => window.clearTimeout(t);
-  }, [project.simulatorId]);
+  }, [booted, project.simulatorId]);
   React.useEffect(() => {
     if (!blueprint) return;
     const onKey = (e: KeyboardEvent) => {

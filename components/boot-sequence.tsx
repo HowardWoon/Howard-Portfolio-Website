@@ -7,6 +7,7 @@ import { m, AnimatePresence } from 'framer-motion';
 import { useLatest } from '@/lib/use-latest';
 import { FX, prefersReducedMotion } from '@/lib/fx';
 import { bootShatter } from './fx/boot-shatter';
+import { useScrollLock } from '@/lib/use-scroll-lock';
 
 declare global {
   interface Window {
@@ -70,9 +71,11 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
 
   // Lock page scroll while the gate is up (and pause Lenis); stop the browser from restoring an
   // old scroll position behind the gate on refresh.
+  // R17 P0-05: the gate takes part in the shared, ref-counted lock. It used to write body.style.overflow directly, so a
+  // lightbox opened behind the gate saved "hidden" as the value to restore and left the page locked after closing.
+  useScrollLock(showBoot);
   useEffect(() => {
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-    document.body.style.overflow = showBoot ? 'hidden' : '';
     // Lenis is created in a parent effect (runs after this one) → defer one tick
     const t = window.setTimeout(() => {
       if (showBoot) window.__lenis?.stop();
