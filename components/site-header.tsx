@@ -10,6 +10,7 @@ import { ExternalLink, FileText, Search } from 'lucide-react';
 import { FX, SPRING_STAMP } from '@/lib/fx';
 import { useClockActive } from '@/lib/section-clock';
 import { SpFill } from './fx/sp-fill';
+import type { PaletteWindow } from './command-palette';
 
 const NAV = [
   { id: 'about', label: 'About' },
@@ -28,6 +29,22 @@ export function SiteHeader() {
   const markerAt = FX.headerInstrument ? (preview ?? active) : '';
   // condensed after 120 px (transform + shadow only, so --header-h and anchors never change); flips state only on change
   const [condensed, setCondensed] = useState(false);
+  // R22: a Search click or Ctrl/⌘+K before the (idle-mounted) palette is ready is queued, not lost
+  const askPalette = () => {
+    (window as PaletteWindow).__hwPaletteWanted = true;
+    window.dispatchEvent(new Event('open-command-palette'));
+  };
+  useEffect(() => {
+    const early = (e: KeyboardEvent) => {
+      const w = window as PaletteWindow;
+      if (w.__hwPaletteReady || e.key.toLowerCase() !== 'k' || !(e.metaKey || e.ctrlKey)) return;
+      if (document.querySelector('.boot-overlay')) return;
+      e.preventDefault();
+      w.__hwPaletteWanted = true;
+    };
+    document.addEventListener('keydown', early);
+    return () => document.removeEventListener('keydown', early);
+  }, []);
   useEffect(() => {
     if (!FX.headerInstrument) return;
     let on = false;
@@ -181,7 +198,7 @@ export function SiteHeader() {
         </Magnetic>
         <MotionToggle className="hidden xs:grid w-10 h-10 md:w-12 md:h-12 landscape-short:!w-10 landscape-short:!h-10" />
         <button
-          onClick={() => window.dispatchEvent(new Event('open-command-palette'))}
+          onClick={askPalette}
           className="hidden min-[320px]:grid place-items-center w-10 h-10 md:w-12 md:h-12 landscape-short:!w-10 landscape-short:!h-10 rounded-full bg-white border-3 border-ink shadow-brutal-sm hover:bg-pop-lilac hover:-translate-y-0.5 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all text-ink"
           aria-label="Open Command Palette"
           title="Search (Ctrl/⌘ + K)"

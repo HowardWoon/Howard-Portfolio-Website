@@ -41,6 +41,9 @@ function goTo(hash: string) {
   history.replaceState(null, '', hash);
 }
 
+/** set by the header when the visitor asks for the palette before it has mounted (see the open effect below) */
+export type PaletteWindow = Window & { __hwPaletteWanted?: boolean; __hwPaletteReady?: boolean };
+
 export function CommandPalette() {
   const [open, setOpen] = useState(false);
   useScrollLock(open); // the wheel outside the list must not scroll the page behind the palette
@@ -67,9 +70,20 @@ export function CommandPalette() {
 
   // Listen for custom event to open from button
   useEffect(() => {
-    const handleOpen = () => setOpen(true);
+    const w = window as PaletteWindow;
+    const handleOpen = () => {
+      w.__hwPaletteWanted = false;
+      setOpen(true);
+    };
     window.addEventListener('open-command-palette', handleOpen);
-    return () => window.removeEventListener('open-command-palette', handleOpen);
+    // R22: the palette mounts on an idle moment after boot; a Search click or Ctrl/⌘+K that came earlier was lost.
+    // The header queues it (__hwPaletteWanted) and the palette opens as soon as it is ready.
+    w.__hwPaletteReady = true;
+    if (w.__hwPaletteWanted) handleOpen();
+    return () => {
+      w.__hwPaletteReady = false;
+      window.removeEventListener('open-command-palette', handleOpen);
+    };
   }, []);
 
   useEffect(() => {

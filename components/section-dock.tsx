@@ -6,6 +6,7 @@ import { FX } from '@/lib/fx';
 import { SpFill } from './fx/sp-fill';
 import { SECTIONS, SECTION_IDS } from '@/lib/sections';
 import { useActiveSection } from '@/lib/use-active-section';
+import type { PaletteWindow } from './command-palette';
 import { useInteractionSelect } from '@/lib/interaction-store';
 
 /**
@@ -66,7 +67,10 @@ export function SectionDock() {
   return (
     <button
       type="button"
-      onClick={() => window.dispatchEvent(new Event('open-command-palette'))}
+      onClick={() => {
+        (window as PaletteWindow).__hwPaletteWanted = true; // queued if the palette is not mounted yet (R22)
+        window.dispatchEvent(new Event('open-command-palette'));
+      }}
       aria-label={label ? `Current section: ${label}. Open navigation` : 'Open navigation'}
       tabIndex={visible ? 0 : -1}
       aria-hidden={visible ? undefined : true}
