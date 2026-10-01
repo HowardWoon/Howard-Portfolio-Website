@@ -83,6 +83,8 @@ test.describe('phone', () => {
 test('a long header jump flips the page and lands focus on the section (FX-84)', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
+  // DeskFx (the flip + focus) is a lazy chunk; before it mounts an anchor is a plain native jump (lesson 30-E1)
+  await expect(page.locator('html[data-fx-desk="on"]')).toHaveCount(1);
   await page.locator('.site-header nav a[href="#contact"]').click();
   await expect(page).toHaveURL(/#contact$/);
   await expect.poll(() => page.evaluate(() => document.activeElement?.id)).toBe('contact');

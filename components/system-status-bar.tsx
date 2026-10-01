@@ -199,6 +199,7 @@ function XrayOverlay({ ping, onClose }: { ping: number | null; onClose: () => vo
 export default function SystemStatusBar() {
   const clockRef = useRef<HTMLSpanElement>(null);
   const localRef = useRef<HTMLSpanElement>(null);
+  const barRef = useRef<HTMLDivElement>(null);
   const [diff, setDiff] = useState<string | null>(null);
   const [day, setDay] = useState<boolean | null>(null);
   const [copied, setCopied] = useState(false);
@@ -208,17 +209,41 @@ export default function SystemStatusBar() {
   const closeXray = useCallback(() => setXray(false), []);
 
   useEffect(() => {
+    // R24: a text write invalidates layout, so the clock writes only when the text really changes and does not tick
+    // at all while the bar is off screen (it used to rewrite both clocks every second during every scroll: CI P0-01)
+    const write = (el: HTMLSpanElement | null, text: string) => {
+      if (el && el.textContent !== text) el.textContent = text;
+    };
     const tick = () => {
       const now = new Date();
-      if (clockRef.current) clockRef.current.textContent = KL.format(now);
-      if (localRef.current) localRef.current.textContent = LOCAL.format(now);
+      write(clockRef.current, KL.format(now));
+      write(localRef.current, LOCAL.format(now));
       const h = Number(KL_HOUR.format(now));
       setDay((d) => (d === (h >= 7 && h < 19) ? d : h >= 7 && h < 19)); // state only changes twice a day
       setDiff((d) => (d === klDifference(now) ? d : klDifference(now)));
     };
     tick();
-    const id = window.setInterval(tick, 1000);
-    return () => window.clearInterval(id);
+    let id = 0;
+    const start = () => {
+      if (id) return;
+      tick();
+      id = window.setInterval(tick, 1000);
+    };
+    const stop = () => {
+      window.clearInterval(id);
+      id = 0;
+    };
+    const bar = barRef.current;
+    if (!bar || typeof IntersectionObserver === 'undefined') {
+      start();
+      return stop;
+    }
+    const io = new IntersectionObserver(([e]) => (e.isIntersecting ? start() : stop()));
+    io.observe(bar);
+    return () => {
+      io.disconnect();
+      stop();
+    };
   }, []);
 
   useEffect(() => {
@@ -252,6 +277,7 @@ export default function SystemStatusBar() {
   return (
     <div className="relative z-10 w-full px-4 xs:px-5 sm:px-10 lg:px-16 pt-8">
       <div
+        ref={barRef}
         role="group"
         aria-label="System status"
         className="mx-auto flex max-w-7xl flex-wrap items-center gap-2.5 rounded-2xl border-3 border-ink bg-white p-2.5 shadow-brutal-sm sm:gap-3"
