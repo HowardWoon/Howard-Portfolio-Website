@@ -48,3 +48,20 @@ Every text in the scenes is already on the site (hero, about, projects, honours,
 | Visual frames                                          | screenshots 1440x900 (10 frames), 390x844, 844x390, 820x1180  | reviewed                             |
 | No console / page errors                               | Playwright page errors during all frame captures              | 0 (only local Vercel-analytics 404s) |
 | First Load JS                                          | `npm run build`                                               | 165 kB (budget 190)                  |
+
+## R24 addition: Field Reels (scenes 03-04)
+
+Owner feedback: the system-diagram scene was "not very interesting, boring - maybe compile all my photo gallery
+showing my journey". The diagram says WHAT Howard builds; two film strips beside it now show WHERE he built it.
+
+- Left reel (desktop >= 1024 px): his real event photos in time order - MYTECH Career Fair 2026 (Finance Lead,
+  pink LEADERSHIP slate), Supervity AutoPilot Asia Hackathon 2026 (2nd place, yellow PODIUM slate), MUBA Blockchain
+  Hackathon 2026 (yellow PODIUM slate). Right reel (>= 1720 px): the product screens of ZeroLag, ProofPay, Slotify
+  and Catfish Detector AI, slates in the same colours as their diagram tags.
+- Paper film with ink sprocket holes that travel with the frames, numbered frames, hard white offset shadow.
+  Scrubbed by the same playhead (CSS translate only): the left reel runs up, the right reel runs down; scrolling up
+  rewinds both. No new wording: slates are names already on the site.
+- The UM student ID now parks as the left reel's label (scale 0.34, under the HUD). Before, the parked card overlapped
+  the CLIENT box and the PROOFPAY tag on 1024-1440 px laptops.
+- Phones and tablets keep the diagram alone: it fills the screen there and there is no free margin (measured).
+- Guarded by tests/r24 "field reels + parked ID card never collide" (5 desktop sizes + phone).

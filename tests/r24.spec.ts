@@ -212,3 +212,69 @@ test('an early tap on a not-yet-hydrated honours tab is replayed, not lost (slow
   await tab.click();
   await expect(tab).toHaveAttribute('aria-expanded', 'false');
 });
+
+// R24 Field Reels + the parked ID card: at the ORCHESTRATE frame the reels (desktop only) show real, loaded photos and
+// neither they nor the parked UM card touch any diagram box, tag or each other, or leave the screen. The parked card
+// used to overlap the CLIENT box and the PROOFPAY tag on 1024-1440 px laptops.
+for (const [width, height, reels] of [
+  [1024, 768, 1],
+  [1280, 720, 1],
+  [1366, 768, 1],
+  [1440, 900, 1],
+  [1920, 1080, 2],
+  [390, 844, 0],
+] as const) {
+  test(`field reels + parked ID card never collide @${width}x${height}`, async ({ page }) => {
+    await page.setViewportSize({ width, height });
+    await page.goto('/?fxtier=full', { waitUntil: 'networkidle' });
+    const at = await page.evaluate(() => {
+      const s = document.querySelector<HTMLElement>('.bs-section')!;
+      return { top: s.getBoundingClientRect().top + scrollY, len: s.offsetHeight };
+    });
+    await page.evaluate((y) => window.scrollTo(0, y), at.top + (at.len - height) * 0.78);
+    await expect(page.locator('.bs-dock').first()).toHaveCSS('opacity', '1', { timeout: 5000 });
+    const shown = page.locator('.bs-reel:visible');
+    await expect(shown).toHaveCount(reels);
+    // the frames in the reel window are real photos that loaded
+    for (let i = 0; i < reels; i++)
+      await expect
+        .poll(() =>
+          shown.nth(i).evaluate((reel) => {
+            const win = reel.getBoundingClientRect();
+            return [...reel.querySelectorAll('img')].filter((img) => {
+              const r = img.getBoundingClientRect();
+              return r.bottom > win.top && r.top < win.bottom && img.complete && img.naturalWidth > 0;
+            }).length;
+          }),
+        )
+        .toBeGreaterThan(0);
+    const problems = await page.evaluate((vw) => {
+      const out: string[] = [];
+      const hit = (a: DOMRect, b: DOMRect) =>
+        a.left < b.right - 1 && a.right > b.left + 1 && a.top < b.bottom - 1 && a.bottom > b.top + 1;
+      const name = (e: Element) => `${e.className.split(' ').find((c) => /^bs-(node|dock|hub-core|reel)$/.test(c))}`;
+      const boxes = [...document.querySelectorAll('.bs-node, .bs-hub-core, .bs-dock')].map((e) => ({
+        n: `${name(e)} "${(e.textContent ?? '').trim().slice(0, 14)}"`,
+        r: e.getBoundingClientRect(),
+      }));
+      const reels = [...document.querySelectorAll<HTMLElement>('.bs-reel')]
+        .filter((e) => getComputedStyle(e).display !== 'none')
+        .map((e) => ({ n: `reel ${e.dataset.side}`, r: e.getBoundingClientRect() }));
+      const move = document.querySelector<HTMLElement>('.bs-id-move')!;
+      const card = parseFloat(getComputedStyle(move).opacity) > 0.05;
+      const ids = card
+        ? [
+            { n: 'parked ID card', r: document.querySelector('.bs-idcard')!.getBoundingClientRect() },
+            { n: 'ID SOURCE tag', r: document.querySelector('.bs-source-tag')!.getBoundingClientRect() },
+          ]
+        : [];
+      for (const a of [...reels, ...ids]) {
+        if (a.r.left < 0 || a.r.right > vw) out.push(`${a.n} leaves the screen`);
+        for (const b of boxes) if (hit(a.r, b.r)) out.push(`${a.n} hits ${b.n}`);
+      }
+      for (const r of reels) for (const i of ids) if (hit(r.r, i.r)) out.push(`${r.n} hits ${i.n}`);
+      return out;
+    }, width);
+    expect(problems).toEqual([]);
+  });
+}

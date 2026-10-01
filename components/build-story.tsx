@@ -92,6 +92,71 @@ function Dock({ on }: { on: string }) {
   ));
 }
 
+// R24 Field Reels (owner: "compile my photo gallery showing my journey"): two film strips run past the diagram in
+// scenes 03-04. Left = the field (event photos, in time order), right = the builds (product screens). Every photo and
+// name is already on the site (Experience field archive, project galleries, honours); slates use the SIGNAL colours
+// (pink leadership, yellow podium, orange coursework). Decorative duplicates: aria-hidden, alt="".
+type ReelItem = { slate: string; fill: string } | { src: string; w: number; h: number };
+const FIELD_REEL: ReelItem[] = [
+  { slate: 'MYTECH CAREER FAIR 2026', fill: 'bg-pop-pink' },
+  { src: '/images/experience/mytech/01.jpg', w: 1280, h: 853 },
+  { src: '/images/experience/mytech/02.jpg', w: 1280, h: 853 },
+  { src: '/images/experience/mytech/03.jpg', w: 1280, h: 853 },
+  { src: '/images/experience/mytech/04.jpg', w: 1280, h: 853 },
+  { src: '/images/experience/mytech/05.jpg', w: 720, h: 1280 },
+  { slate: 'Supervity AutoPilot Asia Hackathon 2026', fill: 'bg-pop-yellow' },
+  { src: '/images/projects/zerolag/supervity_standing.jpg', w: 960, h: 1280 },
+  { src: '/images/projects/zerolag/supervity_formal.jpg', w: 960, h: 1280 },
+  { src: '/images/projects/zerolag/supervity_selfie.jpg', w: 960, h: 1280 },
+  { src: '/images/projects/zerolag/supervity_with_apu.jpg', w: 1280, h: 960 },
+  { src: '/images/projects/zerolag/supervity_souvenir.jpg', w: 960, h: 1280 },
+  { src: '/images/projects/zerolag/supervity_present.jpg', w: 960, h: 1280 },
+  { slate: 'MUBA Blockchain Hackathon 2026', fill: 'bg-pop-yellow' },
+  { src: '/images/muba/zilian_muba.jpg', w: 960, h: 1280 },
+  { src: '/images/muba/4ppl_muba.jpg', w: 1280, h: 960 },
+  { src: '/images/muba/gonka_4ppl_muba.jpg', w: 960, h: 472 },
+  { src: '/images/muba/solo_muba.jpg', w: 960, h: 1280 },
+];
+const BUILD_REEL: ReelItem[] = [
+  { slate: 'ZEROLAG', fill: 'bg-pop-yellow' },
+  { src: '/images/projects/zerolag/dashboard.jpeg', w: 1004, h: 520 },
+  { src: '/images/projects/zerolag/agent-flow.png', w: 689, h: 743 },
+  { src: '/images/projects/zerolag/ai_insight.jpeg', w: 1005, h: 515 },
+  { slate: 'PROOFPAY', fill: 'bg-pop-yellow' },
+  { src: '/images/muba/1789408409350.jpg', w: 1280, h: 654 },
+  { src: '/images/muba/1789408409711.jpg', w: 1280, h: 704 },
+  { slate: 'SLOTIFY', fill: 'bg-pop-orange' },
+  { src: '/images/projects/slotify/01.png', w: 862, h: 732 },
+  { src: '/images/projects/slotify/02.png', w: 861, h: 776 },
+  { slate: 'CATFISH DETECTOR AI', fill: 'bg-pop-orange' },
+  { src: '/images/projects/catfish/dashboard.png', w: 1210, h: 883 },
+  { src: '/images/projects/catfish/scanner.png', w: 613, h: 877 },
+];
+
+/** one film strip; it slides in once the ID card has parked (0.5), then the track scrolls with the playhead (CSS
+ * only, .bs-reel-track) and the sprocket holes move with it */
+function Reel({ items, side }: { items: ReelItem[]; side: 'l' | 'r' }) {
+  let frame = 0;
+  return (
+    <div className="bs-seg bs-reel" data-side={side} style={seg(0.49, 0.56)}>
+      <div className="bs-seg bs-reel-track" style={seg(0.49, 0.86)}>
+        {items.map((it) =>
+          'slate' in it ? (
+            <div key={it.slate} className={`bs-reel-slate ${it.fill}`}>
+              {it.slate}
+            </div>
+          ) : (
+            <div key={it.src} className="bs-reel-frame">
+              <Image src={it.src} alt="" width={it.w} height={it.h} sizes="120px" loading="lazy" />
+              <span className="bs-reel-no">{String(++frame).padStart(2, '0')}</span>
+            </div>
+          ),
+        )}
+      </div>
+    </div>
+  );
+}
+
 const CODE = [
   ['$', './compile --student "HOWARD WOON HAO ZHE"'],
   ['›', 'institution   Universiti Malaya'],
@@ -337,6 +402,8 @@ export default function BuildStory() {
 
           {/* ---------------------------------------------------------------- 03 ARCHITECT + 04 ORCHESTRATE */}
           <div aria-hidden className="bs-seg bs-fade-dim bs-layer" style={seg(0.8, 0.86)}>
+            <Reel items={FIELD_REEL} side="l" />
+            <Reel items={BUILD_REEL} side="r" />
             <div className="bs-diagram">
               <svg
                 className="absolute inset-0 h-full w-full overflow-visible"
