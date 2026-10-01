@@ -630,28 +630,41 @@ export default function HonorsSection() {
                           <Calendar className="w-3.5 h-3.5" strokeWidth={2.5} />
                           <span>{item.period}</span>
                         </div>
-
-                        {/* Hanging KMNS Badge (straddling the border as circled) */}
-                        {item.id === 'kmns-distinction' && (
-                          <div className="absolute right-[10%] sm:right-16 -bottom-7 z-20 w-14 h-14 bg-paper border-[3px] border-ink shadow-[2px_2px_0_0_#0A0A0A] rounded-full flex items-center justify-center p-1.5 rotate-[8deg]">
-                            <Image
-                              src="/images/logos/kmns_logo.png"
-                              alt="KMNS Logo"
-                              width={48}
-                              height={48}
-                              className="object-contain w-full h-full"
-                            />
-                          </div>
-                        )}
                       </div>
 
-                      {/* Featured Watermark */}
-                      {isFeatured && (
+                      {/* Featured Watermarks (Trophy or Institution Logos) */}
+                      {isFeatured && item.id !== 'deans-list' && item.id !== 'kmns-distinction' && (
                         <div
                           aria-hidden
                           className="absolute -right-10 top-10 opacity-[0.06] pointer-events-none rotate-12 group-hover:rotate-6 transition-transform duration-700"
                         >
                           <Trophy className="w-60 h-60" />
+                        </div>
+                      )}
+                      {item.id === 'deans-list' && (
+                        <div
+                          aria-hidden
+                          className="absolute right-[-10%] top-[10%] opacity-[0.08] pointer-events-none rotate-[-5deg] group-hover:rotate-0 transition-transform duration-700 w-64 h-64 sm:w-80 sm:h-80"
+                        >
+                          <Image
+                            src="/images/logos/um_logo.png"
+                            alt="UM Watermark"
+                            fill
+                            className="object-contain drop-shadow-sm"
+                          />
+                        </div>
+                      )}
+                      {item.id === 'kmns-distinction' && (
+                        <div
+                          aria-hidden
+                          className="absolute right-[-5%] top-[15%] opacity-[0.08] pointer-events-none rotate-[-5deg] group-hover:rotate-0 transition-transform duration-700 w-64 h-64 sm:w-80 sm:h-80"
+                        >
+                          <Image
+                            src="/images/logos/kmns_logo.png"
+                            alt="KMNS Watermark"
+                            fill
+                            className="object-contain drop-shadow-sm"
+                          />
                         </div>
                       )}
 
@@ -664,17 +677,6 @@ export default function HonorsSection() {
                             </h3>
                             <p className="text-sm font-mono font-bold text-pop-blue">{item.issuingBody}</p>
                           </div>
-                          {item.id === 'deans-list' && (
-                            <div className="w-14 h-14 bg-paper border-3 border-ink shadow-[2px_2px_0_0_#0A0A0A] rounded-full overflow-hidden shrink-0 flex items-center justify-center p-2 mt-1 -mr-1">
-                              <Image
-                                src="/images/logos/um_logo.png"
-                                alt="UM Logo"
-                                width={48}
-                                height={48}
-                                className="object-contain w-full h-full"
-                              />
-                            </div>
-                          )}
                         </div>
 
                         <div className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium mb-6">

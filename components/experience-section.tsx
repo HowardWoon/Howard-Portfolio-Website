@@ -634,22 +634,21 @@ export default function ExperienceSection() {
                           <span>{item.location}</span>
                         </div>
                       </div>
-
-                      {/* Hanging KMNS Badge (straddling the border as circled) */}
+                    </div>
+                    <div className="p-4 xs:p-6 sm:p-10 pt-8 sm:pt-12 relative z-0">
                       {item.id === 'kmns' && (
-                        <div className="absolute right-[10%] sm:right-[15%] -bottom-7 z-20 w-14 h-14 bg-paper border-[3px] border-ink shadow-[2px_2px_0_0_#0A0A0A] rounded-full flex items-center justify-center p-1.5 rotate-[8deg]">
+                        <div
+                          aria-hidden
+                          className="absolute right-[-5%] top-[10%] opacity-[0.08] pointer-events-none rotate-[-5deg] group-hover:rotate-0 transition-transform duration-700 w-[80%] max-w-[400px] aspect-square"
+                        >
                           <Image
                             src="/images/logos/kmns_logo.png"
-                            alt="KMNS Logo"
-                            width={48}
-                            height={48}
-                            className="object-contain w-full h-full"
+                            alt="KMNS Watermark"
+                            fill
+                            className="object-contain drop-shadow-sm"
                           />
                         </div>
                       )}
-                    </div>
-
-                    <div className="p-4 xs:p-6 sm:p-10 pt-8 sm:pt-12 relative z-0">
                       {/* Main Role & Org */}
                       <div className="pb-7">
                         <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-5">
