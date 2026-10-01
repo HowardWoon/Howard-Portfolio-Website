@@ -66,7 +66,7 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setMounted(true);
     // H1: a click on the gate that happened BEFORE hydration was captured by the inline script in
-    // app/layout.tsx. Replay it now, so the button never feels dead on a slow phone (or a CI runner).
+    // app/layout.tsx (an early Skip has already lifted the gate there). Replay it now, so nothing feels dead on a slow phone.
     window.__hwHydrated = true;
     const early = window.__hwBoot;
     window.__hwBoot = null;
@@ -111,8 +111,11 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
   );
 
   function finish() {
+    // R26: a Skip pressed before hydration already lifted the gate in the inline script (app/layout.tsx), so the page is
+    // showing: replaying the shatter now would flash a full-screen canvas over it
+    const lifted = document.documentElement.classList.contains('hw-booted');
     try {
-      if (FX.bootShatter && !prefersReducedMotion()) bootShatter();
+      if (!lifted && FX.bootShatter && !prefersReducedMotion()) bootShatter();
     } catch (e) {
       console.error(e);
     }
