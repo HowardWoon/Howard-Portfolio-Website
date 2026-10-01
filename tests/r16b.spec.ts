@@ -161,6 +161,8 @@ test('a wheel scroll that stops just short of a section settles onto it (FX-86)'
     const el = document.getElementById('experience')!;
     return Math.round(el.getBoundingClientRect().top + scrollY - parseFloat(getComputedStyle(el).scrollMarginTop));
   });
+  // the soft landing lives in the lazy DeskFx chunk: before it mounts a wheel is a plain scroll (lesson 30-E1)
+  await expect(page.locator('html[data-fx-desk="on"]')).toHaveCount(1);
   await page.evaluate((y) => window.__lenis?.scrollTo(y - 60, { immediate: true, force: true }), target);
   await page.mouse.move(700, 450);
   await page.mouse.wheel(0, 30);
