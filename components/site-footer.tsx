@@ -149,7 +149,7 @@ export function SiteFooter() {
 
       {/* R21 colophon: every colour on this site means one thing (lib/signal.ts) */}
       <div className="max-w-7xl mx-auto mt-6">
-        <SignalKey className="w-full" />
+        <SignalKey className="w-full" compact />
       </div>
     </footer>
   );

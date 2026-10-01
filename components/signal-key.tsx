@@ -8,7 +8,16 @@ import { SIGNAL, type Signal } from '@/lib/signal';
  * what it means, and the swatch's hex. Every coloured tag in the section means exactly what this key says
  * (lib/signal.ts). Columns: phones 1 (up to 3 keys) or 2, tablets up to 4, desktop one row (6-7 keys: from 1280 px).
  */
-export function SignalKey({ only, className = '' }: { only?: Signal[]; className?: string }) {
+/** `compact` (the footer colophon): no hex line, so the footer stays under 85 % of a 900 px screen (FX-83 reveal) */
+export function SignalKey({
+  only,
+  className = '',
+  compact = false,
+}: {
+  only?: Signal[];
+  className?: string;
+  compact?: boolean;
+}) {
   const keys = only ?? (Object.keys(SIGNAL) as Signal[]);
   const n = keys.length;
   const c1 = n <= 3 ? 1 : 2;
@@ -32,7 +41,7 @@ export function SignalKey({ only, className = '' }: { only?: Signal[]; className
       aria-label="Signal key: what each colour means"
       className={`signal-key overflow-hidden rounded-2xl border-3 border-ink bg-white shadow-brutal-sm ${className}`}
     >
-      <div className="flex items-center justify-between gap-3 bg-ink px-3 py-2 text-white">
+      <div className={`flex items-center justify-between gap-3 bg-ink px-3 text-white ${compact ? 'py-1.5' : 'py-2'}`}>
         <span className="font-mono text-xs font-extrabold uppercase tracking-[0.18em]">Signal key</span>
         {/* the bar in miniature: every colour of this key, in order */}
         <span aria-hidden className="flex overflow-hidden rounded-[3px] border-2 border-white">
@@ -45,7 +54,7 @@ export function SignalKey({ only, className = '' }: { only?: Signal[]; className
         {keys.map((k, i) => (
           <li key={k} className="signal-key-cell">
             <span aria-hidden className={`signal-key-band ${SIGNAL[k].fill}`} />
-            <span className="flex items-baseline gap-2 px-3 pt-2.5">
+            <span className={`flex items-baseline gap-2 px-3 ${compact ? 'pt-2' : 'pt-2.5'}`}>
               <span aria-hidden className="font-mono text-xs font-bold tabular-nums text-ink-muted">
                 {String(i + 1).padStart(2, '0')}
               </span>
@@ -54,9 +63,13 @@ export function SignalKey({ only, className = '' }: { only?: Signal[]; className
             <span className="block px-3 pt-1 font-mono text-xs font-semibold leading-snug text-ink-soft">
               {SIGNAL[k].meaning}
             </span>
-            <span aria-hidden className="mt-auto block px-3 pb-2.5 pt-2 font-mono text-xs font-bold text-ink-muted">
-              {SIGNAL[k].hex}
-            </span>
+            {compact ? (
+              <span aria-hidden className="block pb-2" />
+            ) : (
+              <span aria-hidden className="mt-auto block px-3 pb-2.5 pt-2 font-mono text-xs font-bold text-ink-muted">
+                {SIGNAL[k].hex}
+              </span>
+            )}
           </li>
         ))}
       </ul>
