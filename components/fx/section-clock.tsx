@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { FX } from '@/lib/fx';
 import { CLOCK_IDS, TIDE, deskColour, publishClock } from '@/lib/section-clock';
+import { rereadScroll, scrollFrame } from '@/lib/scroll-frame';
 
 /**
  * FX-95 Section Clock engine + FX-96..99 writers (docs/R18-LIVING-ENGINEERING-WORKSPACE-PLAN.md).
@@ -46,8 +47,9 @@ export function SectionClock() {
 
     const frame = () => {
       raf = 0;
-      const y = window.scrollY;
-      const V = window.innerHeight;
+      // R28: cached in the scroll event (lib/scroll-frame.ts) - reading scrollY here, after the Build Story wrote
+      // --p this frame, forced a style + layout of ~970 elements (40-51 ms a frame on a phone)
+      const { y, vh: V } = scrollFrame();
       const line = y + V * READING_LINE;
 
       let ai = -1;
@@ -122,7 +124,8 @@ export function SectionClock() {
     };
 
     const measure = () => {
-      const y = window.scrollY;
+      rereadScroll(); // measure runs from a timeout / observer, where layout is clean
+      const { y } = scrollFrame();
       geo = CLOCK_IDS.map((id) => document.getElementById(id))
         .filter((el): el is HTMLElement => el !== null)
         .map((el) => {

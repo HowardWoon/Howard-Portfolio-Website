@@ -18,6 +18,13 @@ export default function SmoothScrollProvider({ children }: { children: React.Rea
     if (calm || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       return;
     }
+    // R28 B7: touch-primary devices (phones, tablets) scroll natively. Lenis registers touchstart / touchmove /
+    // wheel on window with { passive: false }, which makes every touch wait for the main thread (measured on a
+    // Pixel 7 profile). Native touch scrolling already has momentum, and every window.__lenis call site has a
+    // native fallback (lib/jump.ts, scroll-to-top, skip-link, honors, build-story playTo, route-wipe, ...).
+    if (window.matchMedia('(hover: none) and (pointer: coarse)').matches) {
+      return;
+    }
 
     const lenis = new Lenis({
       duration: 1.2,
