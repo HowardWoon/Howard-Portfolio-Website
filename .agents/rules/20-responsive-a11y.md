@@ -63,7 +63,8 @@ trigger: always_on
 
 - iOS Safari zooms the page when a focused input's font is under 16 px: every `input`, `textarea`, `select` and the
   palette input stay at 16 px on phones (checked R24: all are).
-- Use `dvh` / the `*-screen-safe` utilities, never raw `100vh` (iOS toolbars). Respect `env(safe-area-inset-*)`.
+- Use `dvh` / the `*-screen-safe` utilities, never raw `100vh` (iOS toolbars). Exception (R28 B5): a **pinned / sticky
+  stage** uses `svh`, because `dvh` changes while the URL bar moves during a scroll and re-lays out the whole stage. Respect `env(safe-area-inset-*)`.
 - Hover-only UI is gated with `(hover: hover) and (pointer: fine)`; touch gets the same information by tap.
 - `backdrop-filter`, big `filter: blur`, and per-frame JS are the usual causes of phone lag: never add them to
   anything that scrolls (R17, R20). Lite tier (`html[data-fx-tier='lite']`) must keep working on low-end Android.
@@ -77,3 +78,23 @@ trigger: always_on
   HostRoot), NOT "has a fiber" (that is the render phase: React ignores the click; R25 header Search bug). Expires
   after 30 s (a code-split section hydrates in ~25 s at 6x CPU). The boot gate keeps its own capture. Keep it installed; new interactive controls must be `<button>` / `[role=button]` rendered by React
   (a button React never hydrates would have its clicks held). Guarded by the r24 "early tap" test (4x CPU).
+
+## H. R28 - real phone heights, native touch scrolling, read phase
+
+- **Test real browser viewports, not device screens.** A phone browser shows far less than the screen: iPhone 13 is
+  390x**664**, iPhone SE 320x568, iPhone 13 landscape 750x**342** (Playwright's device profiles). The old 390x844 /
+  844x390 checks hid the R28 "so bad on mobile" Build Story overflow.
+- **Pinned stages fit the height, not only the width.** Anything inside a sticky stage is scaled to the band between
+  its HUD and its caption bar, measured from the REAL HUD bottom and caption-bar top (layer padding under-counted the
+  caption bar on a 360x780 Galaxy S24). Landscape phones under 480 px tall get the readable still.
+  `scripts/device-sweep.mjs` checks this on all 16 profiles (`storyfit=0`); `tests/r28.spec.ts` on 5.
+- **No non-passive touch / wheel listeners on touch devices.** Lenis is NOT created when
+  `(hover: none) and (pointer: coarse)` (it registers touchstart / touchmove / wheel with `passive: false`, which
+  makes every touch wait for the main thread). Every `window.__lenis` call must keep a native fallback.
+- **Frame loops are write-only.** Read `scrollY` / `innerHeight` from `lib/scroll-frame.ts` (read once in the
+  scroll event); never call `scrollY`, `innerHeight` or `getBoundingClientRect` inside a requestAnimationFrame
+  callback that runs after another component wrote styles (guarded by a source test in r28).
+- **Per-frame custom properties must not inherit into big subtrees.** Register them with
+  `@property { inherits: false }` and write them only on the elements that use them (Build Story: only the
+  `.bs-seg` whose window was entered or crossed). Measure style recalc (`UpdateLayoutTree` element counts) with a
+  CDP trace before and after.

@@ -45,7 +45,8 @@ Rules:
 ## C. Scroll storytelling pattern (`components/build-story.tsx`, docs/R21-BUILD-STORY.md)
 
 - Sticky stage inside a tall track. ONE JS scroll listener (IntersectionObserver-gated) writes ONE custom property
-  `--p` on the stage. Layers derive `--t` / `--e` in CSS (`.bs-seg`) and animate transform / opacity only.
+  `--p` on the stage and on the `.bs-seg` elements whose `[a, b]` window it entered or crossed (R28 B6: `--p / --t /
+--e` are `@property { inherits: false }`, so a frame restyles a handful of nodes instead of ~1000). Layers derive `--t` / `--e` in CSS (`.bs-seg`) and animate transform / opacity only.
 - Never write custom properties on `<html>` per frame (R9-02). Never use framer `useScroll` for new scroll effects.
 - Must be reversible (scroll up = rewind), have a reduced-motion / Calm still (`[data-static]`), an sr-only text
   version, and no section id unless it should appear in the dock / spine / snap.
@@ -55,6 +56,7 @@ Rules:
 ## D. Performance
 
 - Lenis `smoothWheel` is OFF on purpose (R20): the wheel scrolls natively on the compositor. Do not turn it on.
+- Lenis is not created on touch-primary devices (R28 B7, see 20-responsive-a11y H). Keep native fallbacks.
 - Budget: main-thread work per scroll frame must stay well under 5.5 ms on Howard's 180 Hz laptop. New per-frame JS
   needs a measurement (see R20 commit message for the method).
 - First Load JS for `/` <= 190 kB. Below-the-fold sections go through `components/lazy-sections.tsx`.
@@ -91,6 +93,13 @@ Rules:
     and group `LayoutInvalidationTracking` by stack; the first reader (`scrollY`) is only the messenger.
 16. A test that fails only under load may be a REAL race, not a flake: R24's "flaky" FX-70 print test was a tap
     lost before hydration. Reproduce with CPU throttling (`Emulation.setCPUThrottlingRate` 4-6x) before shrugging.
+17. A faded overlay still catches the pointer: anything at `opacity: 0` that sits on top (the Build Story title card in
+    scenes 01-05) must also get `pointer-events: none`, or the controls under it never receive a hover / click (R28 B8:
+    the reel loupe could never open). Check with `document.elementFromPoint`.
+18. "Lag" in a scroll story is usually style recalc, not JS: R28 moved the reads out of the frame first and saw no
+    gain; the trace showed ~1000 elements restyled per frame by an inherited custom property (lesson 20-H).
+19. Synthetic CDP touch gestures (`Input.synthesizeScrollGesture`, touch) do not scroll in this headless setup (a plain
+    control page scrolls 0 px too). Verify touch scrolling by listener audit, not by a frame count.
 
 ## F. Definition of done additions
 
@@ -202,3 +211,14 @@ Howard: "the font family and font size is too ugly and small, slim, i dont want 
    labels. Never add glassmorphism, frosted blur panels, soft drop shadows, soft or neon gradients, glow effects,
    skeuomorphic textures, 3D renders or AI imagery. New effects must look printed / mechanical (stamps, tape,
    halftone, hatch, offset registration), in SIGNAL KEY colours only.
+
+## I. R28 Field Reels (the Build Story "photo part", desktop only)
+
+- Two reels (`components/field-reel.tsx`): plate ("REEL 0n" / frame count) on top, a film window with a fixed
+  **projector gate** in the middle, the frame in the gate is the current one (3 px ink border, hard shadow in its
+  chapter's SIGNAL colour), the board under the reel flaps to "NN/NN" and names the chapter (words already on the site).
+- Edge print carries `HWZ-2026` + frame number (footer document code). Mouse hover opens the loupe (image, chapter,
+  "FRAME NN / NN"); no loupe on touch, none under reduced motion lift.
+- The reels slide out in scene 05 (exit seg 0.80-0.86); they never sit dimmed behind the release card.
+- Phones / tablets: no reels (no free margin); the photos stay in the project galleries and the Field Archive.
+- Guarded by `tests/r28.spec.ts` "desktop field reels".
