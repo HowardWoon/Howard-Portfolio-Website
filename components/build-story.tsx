@@ -5,6 +5,9 @@ import { useEffect, useRef, type CSSProperties } from 'react';
 import { PORTRAIT_GLYPHS } from '@/lib/story-glyphs';
 import { useCalm } from '@/lib/motion-pref';
 import { ContourField } from './fx/contour-field';
+import { FieldReel, type ReelItem } from './field-reel';
+import { publishStoryProgress } from '@/lib/story-progress';
+import { rereadScroll, scrollFrame } from '@/lib/scroll-frame';
 
 /**
  * R21 "The Build": a scroll-scrubbed storyboard between About and Projects. A Universiti Malaya student ID compiles
@@ -105,7 +108,6 @@ function Dock({ on }: { on: string }) {
 // scenes 03-04. Left = the field (event photos, in time order), right = the builds (product screens). Every photo and
 // name is already on the site (Experience field archive, project galleries, honours); slates use the SIGNAL colours
 // (pink leadership, yellow podium, orange coursework). Decorative duplicates: aria-hidden, alt="".
-type ReelItem = { slate: string; fill: string } | { src: string; w: number; h: number };
 const FIELD_REEL: ReelItem[] = [
   { slate: 'MYTECH CAREER FAIR 2026', fill: 'bg-pop-pink' },
   { src: '/images/experience/mytech/01.jpg', w: 1280, h: 853 },
@@ -141,30 +143,6 @@ const BUILD_REEL: ReelItem[] = [
   { src: '/images/projects/catfish/dashboard.png', w: 1210, h: 883 },
   { src: '/images/projects/catfish/scanner.png', w: 613, h: 877 },
 ];
-
-/** one film strip; it slides in once the ID card has parked (0.5), then the track scrolls with the playhead (CSS
- * only, .bs-reel-track) and the sprocket holes move with it */
-function Reel({ items, side }: { items: ReelItem[]; side: 'l' | 'r' }) {
-  let frame = 0;
-  return (
-    <div className="bs-seg bs-reel" data-side={side} style={seg(0.49, 0.56)}>
-      <div className="bs-seg bs-reel-track" style={seg(0.49, 0.86)}>
-        {items.map((it) =>
-          'slate' in it ? (
-            <div key={it.slate} className={`bs-reel-slate ${it.fill}`}>
-              {it.slate}
-            </div>
-          ) : (
-            <div key={it.src} className="bs-reel-frame">
-              <Image src={it.src} alt="" width={it.w} height={it.h} sizes="120px" loading="lazy" />
-              <span className="bs-reel-no">{String(++frame).padStart(2, '0')}</span>
-            </div>
-          ),
-        )}
-      </div>
-    </div>
-  );
-}
 
 const CODE = [
   ['$', './compile --student "HOWARD WOON HAO ZHE"'],
@@ -242,11 +220,27 @@ export default function BuildStory() {
     let raf = 0;
     let last = -1;
     let near = false;
+    // every element that reads the playhead (static markup: collected once after mount), with its [a, b] range
+    const segs = Array.from(stage.querySelectorAll<HTMLElement>('.bs-seg, .bs-progress-bar'), (el) => ({
+      el,
+      a: parseFloat(el.style.getPropertyValue('--a')) || 0,
+      b: parseFloat(el.style.getPropertyValue('--b')) || 1,
+    }));
 
     const set = (p: number) => {
       if (Math.abs(p - last) < 0.0004) return;
+      const prev = last < 0 ? -1 : last; // -1 on the first call: every layer gets its starting value
       last = p;
-      stage.style.setProperty('--p', p.toFixed(4));
+      const v = p.toFixed(4);
+      stage.style.setProperty('--p', v); // the public playhead (tests, devtools)
+      // R28 B6: --p does not inherit (globals.css @property), so it goes straight to the elements that read it - and
+      // only to those whose range [a, b] the playhead moved inside or crossed: a layer that has not started (or has
+      // finished) on both sides of the step cannot change, so it is not restyled (a few writes a frame, not ~100)
+      for (const s of segs) {
+        if ((p <= s.a && prev <= s.a) || (p >= s.b && prev >= s.b)) continue;
+        s.el.style.setProperty('--p', v);
+      }
+      publishStoryProgress(p); // R28: the Field Reels' projector gate
       // scene 0 = the title card, before the ID has landed
       const scene = p < 0.06 ? '0' : String(BOUNDS.filter((b) => p >= b).length + 1);
       if (stage.dataset.scene !== scene) {
@@ -256,7 +250,78 @@ export default function BuildStory() {
       }
       if (showFrame.matches) frame.textContent = String(Math.round(p * FRAMES)).padStart(4, '0');
     };
-    const still = () => calm || reduce.matches;
+    // R28 P2: a landscape phone (<= 480 px tall) cannot hold a pinned five-scene stage: it gets the finished still
+    const shortLandscape = window.matchMedia('(orientation: landscape) and (max-height: 480px)');
+    const narrow = window.matchMedia('(max-width: 1023px)');
+    const still = () => calm || reduce.matches || shortLandscape.matches;
+
+    // R28 P5 read phase: the track's page position is measured when layout changes (observers, resize), and the
+    // scroll position comes from the scroll event (lib/scroll-frame.ts), so update() writes without reading layout.
+    let trackTop = 0;
+    let trackH = 0;
+    const measureTrack = () => {
+      rereadScroll();
+      const r = track.getBoundingClientRect();
+      trackTop = r.top + scrollFrame().y;
+      trackH = r.height;
+    };
+
+    // R28 P1 height fit (phones / tablets): the ID + code stack and the release card are scaled to the band between
+    // the HUD and the caption bar, and the stack is laid out from the cards' real heights (it used to be +-17vh, which
+    // put the ID under the HUD on a 664 px tall phone). When even that is too tight, the caption bar steps aside
+    // (data-tight; the HUD pills still name the scene). Measured on resize only, never per frame.
+    const fitMeasure = () => {
+      const id = stage.querySelector<HTMLElement>('.bs-idcard');
+      const code = stage.querySelector<HTMLElement>('.bs-code .bs-card');
+      const rel = stage.querySelector<HTMLElement>('.bs-release');
+      const layer = stage.querySelector<HTMLElement>('.bs-layer');
+      const props = ['--fit', '--fit-rel', '--id2y', '--id3y', '--code-y'];
+      if (!narrow.matches || still() || !id || !code || !rel || !layer) {
+        props.forEach((p) => stage.style.removeProperty(p));
+        delete stage.dataset.tight;
+        return;
+      }
+      delete stage.dataset.tight;
+      const cs = getComputedStyle(layer);
+      const H = stage.clientHeight;
+      const padT = parseFloat(cs.paddingTop);
+      const padB = parseFloat(cs.paddingBottom);
+      const idH = id.offsetHeight;
+      const codeH = code.offsetHeight;
+      const relH = rel.offsetHeight;
+      const GAP = 18;
+      const total = idH + GAP + codeH;
+      const need = Math.max(total, relH);
+      // the band is measured from the real HUD bottom and caption-bar top: the layer padding alone under-counts the
+      // caption bar on tall narrow phones (Galaxy S24 360x780: padding 124 px, caption bar 150 px -> code card cut)
+      const s0 = stage.getBoundingClientRect().top;
+      const hud = stage.querySelector<HTMLElement>('.bs-progress');
+      const cap = stage.querySelector<HTMLElement>('.bs-captions');
+      const top = Math.max(padT, hud ? hud.getBoundingClientRect().bottom - s0 : 0) + 8;
+      const capTop = cap ? cap.getBoundingClientRect().top - s0 : H;
+      const bandCap = Math.min(H - padB, capTop) - 8 - top;
+      const tight = need * 0.88 > bandCap;
+      const bottom = tight ? H - 12 - 8 : top + bandCap;
+      const band = bottom - top;
+      if (tight) stage.dataset.tight = 'on';
+      const clampFit = (v: number) => Math.max(0.72, Math.min(1, v));
+      const fit = clampFit(band / total);
+      stage.style.setProperty('--fit', fit.toFixed(3));
+      stage.style.setProperty('--fit-rel', clampFit(band / relH).toFixed(3));
+      // the stack around the band's centre, in unscaled px (the scale shrinks them with the cards). If even the
+      // smallest readable scale (0.72) is too tall, the code card slides up over the ID card's barcode instead of
+      // pushing the ID under the HUD (a dealt card on a stack).
+      // The stack is centred on the layer; the band's centre can sit a little higher or lower, so shift by the
+      // difference (divided by the scale, because the translate is applied inside it).
+      const span = Math.min(total, band / fit);
+      // (re-read the padding: data-tight shrinks the layer's bottom padding, which moves the layer's centre)
+      const padB2 = parseFloat(getComputedStyle(layer).paddingBottom);
+      const shift = ((top + bottom) / 2 - (padT + H - padB2) / 2) / fit;
+      stage.style.setProperty('--id2y', `${Math.round(-span / 2 + idH / 2 + shift)}px`);
+      stage.style.setProperty('--id3y', `${Math.round(-span / 2 + idH / 2 + shift)}px`);
+      stage.style.setProperty('--code-y', `${Math.round(span / 2 - codeH / 2 + shift)}px`);
+    };
+
     const update = () => {
       raf = 0;
       if (still()) {
@@ -265,31 +330,53 @@ export default function BuildStory() {
         return;
       }
       delete track.dataset.static;
-      const r = track.getBoundingClientRect();
-      const span = r.height - window.innerHeight;
-      set(span > 0 ? Math.min(1, Math.max(0, -r.top / span)) : 1);
+      const { y, vh } = scrollFrame();
+      const span = trackH - vh;
+      set(span > 0 ? Math.min(1, Math.max(0, (y - trackTop) / span)) : 1);
     };
     const schedule = () => {
       if (!raf && (near || still())) raf = requestAnimationFrame(update);
     };
+    const relayout = () => {
+      measureTrack();
+      fitMeasure();
+      schedule();
+    };
     const io = new IntersectionObserver(
       ([e]) => {
         near = e.isIntersecting;
+        if (near) measureTrack();
         schedule();
       },
       { rootMargin: '100% 0px 100% 0px' },
     );
     io.observe(track);
+    // anything above the story that changes height (images, lazy sections, accordions) moves the track
+    let roT = 0;
+    const ro = new ResizeObserver(() => {
+      window.clearTimeout(roT);
+      roT = window.setTimeout(relayout, 60);
+    });
+    ro.observe(document.body);
+    ro.observe(stage);
     window.addEventListener('scroll', schedule, { passive: true });
-    window.addEventListener('resize', schedule);
-    reduce.addEventListener('change', schedule);
+    window.addEventListener('resize', relayout);
+    reduce.addEventListener('change', relayout);
+    shortLandscape.addEventListener('change', relayout);
+    narrow.addEventListener('change', relayout);
+    measureTrack();
+    fitMeasure();
     update();
     return () => {
       cancelAnimationFrame(raf);
+      window.clearTimeout(roT);
       io.disconnect();
+      ro.disconnect();
       window.removeEventListener('scroll', schedule);
-      window.removeEventListener('resize', schedule);
-      reduce.removeEventListener('change', schedule);
+      window.removeEventListener('resize', relayout);
+      reduce.removeEventListener('change', relayout);
+      shortLandscape.removeEventListener('change', relayout);
+      narrow.removeEventListener('change', relayout);
     };
   }, [calm]);
 
@@ -459,8 +546,8 @@ export default function BuildStory() {
 
           {/* ---------------------------------------------------------------- 03 ARCHITECT + 04 ORCHESTRATE */}
           <div aria-hidden className="bs-seg bs-fade-dim bs-layer" style={seg(0.8, 0.86)}>
-            <Reel items={FIELD_REEL} side="l" />
-            <Reel items={BUILD_REEL} side="r" />
+            <FieldReel items={FIELD_REEL} side="l" no={1} seg={seg} />
+            <FieldReel items={BUILD_REEL} side="r" no={2} seg={seg} />
             <div className="bs-diagram">
               <svg
                 className="absolute inset-0 h-full w-full overflow-visible"

@@ -457,8 +457,9 @@ html[data-motion='calm'] .fx-drift-rev {
   }
 
   /* ===== ADMIN AREA (dark, scoped to /admin) ===== */
+  /* R28: neo-brutalist like the rest of the site (it was a soft dark panel with a 1 px translucent border) */
   .admin-theme .glass-panel {
-    @apply bg-[#121620] text-white border border-white/10 shadow-none;
+    @apply bg-ink text-white border-3 border-white rounded-2xl shadow-[6px_6px_0_0_#FFFFFF];
   }
   .admin-theme .muted-label {
     @apply text-fog-500;
@@ -2513,8 +2514,10 @@ html[data-xray-mode]
   --diag-x: 7vw;
   position: sticky;
   top: 0;
+  /* R28 B5: svh, not dvh - dvh changes on every frame while a phone's browser bars collapse during a scroll, which
+     re-laid out the whole pinned stage each frame (felt as glitching). svh is stable. */
   height: 100vh;
-  height: 100dvh;
+  height: 100svh;
   overflow: hidden;
   isolation: isolate;
 }
@@ -2576,6 +2579,30 @@ html[data-xray-mode]
   .bs-hub-core > span {
     font-size: 0.8rem !important;
   }
+}
+/* R28 B6: the playhead variables do NOT inherit. With inheritance every one of the ~1,000 elements under the stage was
+   restyled on each scroll step (measured: ~32 ms of style recalc per frame on a phone at 4x CPU). build-story.tsx now
+   writes --p to the ~100 .bs-seg elements (and the progress bar) that read it; nothing else is touched. */
+@property --p {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+@property --t {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+@property --e {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+/* pseudo-elements read their element's progress explicitly */
+.bs-hub-core::before,
+.bs-hub-core::after {
+  --t: inherit;
+  --e: inherit;
 }
 .bs-seg {
   --t: clamp(0, (var(--p) - var(--a)) / (var(--b) - var(--a)), 1);
@@ -3003,7 +3030,7 @@ html[data-xray-mode]
   position: relative;
   width: var(--diag-w);
   aspect-ratio: var(--diag-ratio);
-  max-height: calc(100dvh - var(--top) - var(--bottom) - 24px);
+  max-height: calc(100svh - var(--top) - var(--bottom) - 24px);
   translate: var(--diag-x) 0;
   container-type: size;
 }
@@ -3147,6 +3174,17 @@ html[data-xray-mode]
 .bs-reel {
   display: none;
 }
+/* R28: the reel slides out to its side in scene 05 instead of lingering dimmed behind the release card */
+.bs-reel-exit {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: calc(1 - var(--t));
+  transform: translateX(calc(var(--e) * -260px));
+}
+.bs-reel-exit[data-side='r'] {
+  transform: translateX(calc(var(--e) * 260px));
+}
 @media (min-width: 1024px) and (min-height: 640px) {
   .bs-stage {
     /* the parked ID card becomes the reel's label: 148 px wide (scale 0.34), centred over the left reel, 14 px under
@@ -3155,22 +3193,25 @@ html[data-xray-mode]
        parked card overlapped the CLIENT box and the PROOFPAY tag on 1024-1440 px laptops. */
     --id3s: 0.34;
     --id3x: calc(clamp(16px, 3vw, 56px) + 81px - 64.52vw);
-    --id3y: calc(var(--top) / 2 + var(--bottom) / 2 + 58px - 50dvh);
-    /* the reel window: from under the card's SOURCE tag to above the captions */
-    --reel-h: calc(100dvh - var(--top) - var(--bottom) - 152px);
+    --id3y: calc(var(--top) / 2 + var(--bottom) / 2 + 58px - 50svh);
+    /* the reel: from under the card's SOURCE tag to above the captions; the film window is what the plate (28 px)
+       and the gate tab (100 px) leave */
+    --reel-h: calc(100svh - var(--top) - var(--bottom) - 152px);
+    --win-h: calc(var(--reel-h) - 134px);
   }
   .bs-reel {
-    display: block;
+    display: flex;
+    flex-direction: column;
     position: absolute;
     left: clamp(16px, 3vw, 56px);
     bottom: calc(var(--bottom) + 12px);
     width: 148px;
     height: var(--reel-h);
-    overflow: hidden;
     border: 3px solid var(--ink);
     border-radius: 12px;
     background: var(--paper-cream);
     box-shadow: 6px 6px 0 0 #fff;
+    pointer-events: auto;
     opacity: min(1, calc(var(--t) * 2));
     transform: translateX(calc((1 - var(--e)) * -150%));
   }
@@ -3180,48 +3221,89 @@ html[data-xray-mode]
     right: 96px;
     transform: translateX(calc((1 - var(--e)) * 150%));
   }
-  .bs-reel-track {
+  /* plate: reel number + frame count, ink on top, the same on both reels so both columns read alike */
+  .bs-reel-plate {
     display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 12px 19px;
-    background:
-      repeating-linear-gradient(to bottom, var(--ink) 0 9px, transparent 9px 21px) left 5px top 6px / 9px 100% no-repeat,
-      repeating-linear-gradient(to bottom, var(--ink) 0 9px, transparent 9px 21px) right 5px top 6px / 9px 100%
-        no-repeat;
-    /* the field reel runs up, the build reel runs down: two directions, one playhead */
-    translate: 0 calc(var(--t) * (var(--reel-h) - 100%));
-  }
-  .bs-reel[data-side='r'] .bs-reel-track {
-    translate: 0 calc((1 - var(--t)) * (var(--reel-h) - 100%));
-  }
-  .bs-reel-frame {
-    position: relative;
     flex: none;
-    border: 2px solid var(--ink);
-    background: #fff;
-  }
-  .bs-reel-frame img {
-    display: block;
-    width: 100%;
-    height: 118px;
-    object-fit: cover;
-  }
-  .bs-reel-no {
-    position: absolute;
-    left: 4px;
-    bottom: 4px;
-    padding: 2px 5px;
-    border-radius: 4px;
+    align-items: center;
+    justify-content: space-between;
+    height: 28px;
+    padding: 0 8px;
+    border-radius: 8px 8px 0 0;
     background: var(--ink);
     color: #fff;
     font:
       800 0.8rem/1 var(--font-mono),
       monospace;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
+  }
+  .bs-reel-window {
+    position: relative;
+    flex: none;
+    height: var(--win-h);
+    overflow: hidden;
+    border-bottom: 3px solid var(--ink);
+  }
+  .bs-reel-track {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 14px 19px;
+    background:
+      repeating-linear-gradient(to bottom, var(--ink) 0 9px, transparent 9px 21px) left 5px top 6px / 9px 100% no-repeat,
+      repeating-linear-gradient(to bottom, var(--ink) 0 9px, transparent 9px 21px) right 5px top 6px / 9px 100%
+        no-repeat;
+    /* the field reel runs up, the build reel runs down: two directions, one playhead */
+    translate: 0 calc(var(--t) * (var(--win-h) - 100%));
+  }
+  .bs-reel[data-side='r'] .bs-reel-track {
+    translate: 0 calc((1 - var(--t)) * (var(--win-h) - 100%));
+  }
+  /* frames step back; the one in the projector gate is the hero (its chapter's SIGNAL colour as a hard shadow) */
+  .bs-reel-frame,
+  .bs-reel-slate {
+    position: relative;
+    flex: none;
+    opacity: 0.55;
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+  .bs-reel-frame {
+    border: 2px solid var(--ink);
+    background: #fff;
+  }
+  .bs-reel-frame.is-gate,
+  .bs-reel-slate.is-gate {
+    z-index: 1;
+    opacity: 1;
+    transform: scale(1.05);
+    box-shadow: 4px 4px 0 0 var(--chapter, var(--ink));
+  }
+  .bs-reel-slate.is-gate {
+    box-shadow: 4px 4px 0 0 var(--ink);
+  }
+  .bs-reel-frame img {
+    display: block;
+    width: 100%;
+    height: 98px;
+    object-fit: cover;
+    -webkit-user-drag: none;
+  }
+  /* edge print: the document code + frame number, like the edge of 35 mm stock */
+  .bs-reel-edge {
+    display: block;
+    padding: 3px 4px;
+    background: var(--ink);
+    color: #fff;
+    font:
+      800 0.8rem/1 var(--font-mono),
+      monospace;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
   }
   .bs-reel-slate {
-    flex: none;
     padding: 9px 6px;
     border: 2px solid var(--ink);
     border-radius: 6px;
@@ -3231,6 +3313,119 @@ html[data-xray-mode]
       monospace;
     letter-spacing: 0.02em;
     text-transform: uppercase;
+  }
+  /* the projector gate: ink corner brackets across the middle of the window */
+  .bs-reel-gate {
+    --g: linear-gradient(var(--ink), var(--ink));
+    position: absolute;
+    left: 4px;
+    right: 4px;
+    top: 50%;
+    height: 136px;
+    translate: 0 -50%;
+    pointer-events: none;
+    background:
+      var(--g) top left / 18px 4px no-repeat,
+      var(--g) top left / 4px 18px no-repeat,
+      var(--g) top right / 18px 4px no-repeat,
+      var(--g) top right / 4px 18px no-repeat,
+      var(--g) bottom left / 18px 4px no-repeat,
+      var(--g) bottom left / 4px 18px no-repeat,
+      var(--g) bottom right / 18px 4px no-repeat,
+      var(--g) bottom right / 4px 18px no-repeat;
+  }
+  /* the gate tab: split-flap frame counter + the chapter in the gate */
+  .bs-reel-tab {
+    display: grid;
+    flex: none;
+    grid-template-columns: auto 14px;
+    align-content: start;
+    gap: 6px 8px;
+    height: 100px;
+    padding: 8px;
+    border-radius: 0 0 8px 8px;
+    background: #fff;
+    overflow: hidden;
+  }
+  .bs-reel-count {
+    font:
+      800 0.8rem/1 var(--font-mono),
+      monospace;
+  }
+  .bs-reel-chip {
+    align-self: center;
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--ink);
+    border-radius: 3px;
+  }
+  .bs-reel-chapter {
+    grid-column: 1 / -1;
+    color: var(--ink);
+    font:
+      800 0.8rem/1.2 var(--font-mono),
+      monospace;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  /* loupe: the pointed-at frame, enlarged beside the reel (outside the clipped window) */
+  .bs-reel-loupe {
+    position: absolute;
+    z-index: 30;
+    top: clamp(130px, calc(28px + var(--y)), calc(100% - 130px));
+    left: calc(100% + 16px);
+    width: 300px;
+    overflow: hidden;
+    border: 3px solid var(--ink);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 6px 6px 0 0 var(--chapter, var(--ink));
+    pointer-events: none;
+    translate: 0 -50%;
+    animation: bs-loupe-in 0.14s ease-out both;
+  }
+  .bs-reel[data-side='r'] .bs-reel-loupe {
+    left: auto;
+    right: calc(100% + 16px);
+  }
+  .bs-reel-loupe-band {
+    display: block;
+    height: 10px;
+    border-bottom: 2px solid var(--ink);
+  }
+  .bs-reel-loupe img {
+    display: block;
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-bottom: 2px solid var(--ink);
+  }
+  .bs-reel-loupe-cap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 10px 10px;
+    color: var(--ink);
+    font:
+      800 0.8rem/1.25 var(--font-mono),
+      monospace;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  @keyframes bs-loupe-in {
+    from {
+      opacity: 0;
+      scale: 0.92;
+    }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bs-reel-loupe {
+    animation: none;
+  }
+  .bs-reel-frame,
+  .bs-reel-slate {
+    transition: none;
   }
 }
 @media (min-width: 1720px) and (min-height: 640px) {
@@ -3515,6 +3710,11 @@ html[data-xray-mode]
 .cert-deck-stack {
   position: relative;
   aspect-ratio: 4 / 3.5;
+  touch-action: pan-y;
+  /* a swipe must not start a native image drag (it cancelled the gesture) or select text */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 .cert-card {
   position: absolute;
@@ -3736,4 +3936,125 @@ html[data-xray-mode]
 }
 .bs-track[data-static] .bs-contour-layer {
   display: none;
+}
+
+/* R27 print grain (after ShaderGradient's `grain`): a static, tiled film grain on the dark surfaces - a printed
+   texture, not a glow. One SVG noise tile, no animation, no per-frame cost. */
+.fx-grain {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.07 0'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>");
+  background-size: 160px 160px;
+}
+.bs-floor::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.07 0'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>");
+  background-size: 160px 160px;
+}
+
+/* R27 dock magnification on the section rail (after React Bits Dock): markers near the pointer grow, neighbours
+   follow; scale only (the rail never changes size). */
+.sp-mag {
+  scale: var(--mag, 1);
+  transition: scale 0.12s ease-out;
+}
+
+/* R27 ScrollInk (components/fx/scroll-ink.tsx): each word inks in on its own scroll timeline; only where the browser
+   has scroll-driven animations (else the text is simply inked), never for reduced motion / Calm */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-motion='calm']) .si-w {
+      animation: si-ink linear both;
+      animation-timeline: view();
+      animation-range: entry calc(55% + var(--i) * 0.9%) cover calc(38% + var(--i) * 0.9%);
+    }
+  }
+}
+@keyframes si-ink {
+  from {
+    opacity: 0.18;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* R27 PixelCard (components/project-index.tsx): the tile's own signal colour fills in pixel by pixel on hover */
+.px-card {
+  position: absolute;
+  inset: 0;
+  display: none;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html:not([data-motion='calm']) .px-card {
+    display: grid;
+  }
+}
+.px-card > span {
+  background: var(--px);
+  opacity: 0;
+  transition: opacity 0.05s calc((1 - var(--d)) * 220ms) step-end;
+}
+a:hover > .px-card > span,
+a:focus-visible > .px-card > span {
+  opacity: 1;
+  transition-delay: calc(var(--d) * 260ms);
+}
+
+/* R28 P1 height fit (components/build-story.tsx fitMeasure): phones / tablets scale the ID + code stack and the release
+   card to the band between the HUD and the caption bar (individual scale property: composes with the story's own
+   transforms; the variables are only set below 1024 px). */
+.bs-stage .bs-id-move,
+.bs-stage .bs-code {
+  scale: var(--fit, 1);
+}
+.bs-stage .bs-release {
+  scale: var(--fit-rel, 1);
+}
+/* too tight even when scaled: the caption bar steps aside (the HUD pills still name the scene) */
+.bs-stage[data-tight] {
+  --bottom: 12px;
+}
+.bs-stage[data-tight] .bs-captions {
+  display: none;
+}
+/* R28 P3: on phones the terminal lines wrap instead of being cut at the card edge */
+@media (max-width: 639px) {
+  .bs-code .bs-type {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
+/* R28 P4: below 1024 px the project tags fly in from close by, so mid-flight they never leave the stage or cross a
+   label (they used to start up to 40 % of the stage away) */
+@media (max-width: 1023px) {
+  .bs-dock {
+    transform: translate(calc((1 - var(--e)) * var(--from-x) * 0.3cqw), calc((1 - var(--e)) * var(--from-y) * 0.3cqh));
+  }
+}
+
+/* R28 hidden bug: the faded title card (z 20) kept catching the pointer over the top of the stage in scenes 01-05 */
+.bs-stage:not([data-scene='0']) .bs-title {
+  pointer-events: none;
+}
+
+/* R28 P2: the finished still (Calm, reduced motion, and now landscape phones <= 480 px tall) is laid out in normal
+   flow: the HUD sits at the top of the section and the release card below it, so nothing can overlap at any height
+   (in landscape the absolute HUD used to sit on the card's name). */
+.bs-track[data-static] .bs-hud-top {
+  top: 16px;
+}
+.bs-track[data-static] .bs-progress {
+  top: 48px;
+}
+.bs-track[data-static] .bs-release-in {
+  position: relative;
+  inset: auto;
+  padding: 76px 16px 40px;
 }
