@@ -84,7 +84,12 @@ Rules:
     containing `'__reactFiber$'` duplicated half a file (R24). Use `s.split(a).join(b)` or the editor's Edit tool.
 13. Linux CI renders fonts ~2 px wider per line than Windows: keep >= 8 px of clearance in tight rows (header,
     transcript rows) or CI fails where the laptop passes (R24: 2.4 px on CI vs 4.1 px locally).
-14. A test that fails only under load may be a REAL race, not a flake: R24's "flaky" FX-70 print test was a tap
+14. Anything that ticks (clocks, counters) must write only when its text changes and stop while off screen: the
+    status-bar clock rewrote two text nodes every second during every scroll and pushed the CI phone-fling layout
+    count (r17 P0-01) over budget (R24: 40 -> 28 layouts per fling after the fix).
+15. To find what forces layout during scroll: trace with CDP (`devtools.timeline` + `...timeline.invalidationTracking`)
+    and group `LayoutInvalidationTracking` by stack; the first reader (`scrollY`) is only the messenger.
+16. A test that fails only under load may be a REAL race, not a flake: R24's "flaky" FX-70 print test was a tap
     lost before hydration. Reproduce with CPU throttling (`Emulation.setCPUThrottlingRate` 4-6x) before shrugging.
 
 ## F. Definition of done additions
@@ -115,6 +120,17 @@ R23 (lecturer recruiter-UX advice), same rule - layers only:
 | Resume drawer        | components/resume-drawer.tsx + lib/resume.ts | plain click only (modifier clicks stay native); portal dialog; queued if clicked before mount; touch phones get the actions without an embedded viewer |
 | Time-zone ribbon     | system-status-bar.tsx                        | extends the status bar, the marquee stays; no invented claims (no "online", no response-time promise)                                                  |
 | CAD crosshair        | X-ray mode                                   | mouse / pen only; transform writes in one rAF                                                                                                          |
+
+R24 (owner: "compile my photo gallery showing my journey" for the system-diagram scene), same rule - a layer:
+
+| Feature         | Where                                                   | Rules                                                                                                                                                                                                                                                                                                                           |
+| --------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Field Reels     | build-story.tsx `FIELD_REEL` / `BUILD_REEL`, `.bs-reel` | Left = event photos in time order (MYTECH -> Supervity -> MUBA), right = product screens; only photos and names already on the site; slates in SIGNAL colours; `w`/`h` = the file's real pixels; CSS-only scrub (translate), reversible; desktop only (>= 1024 left, >= 1720 right, min-height 640); hidden in the static still |
+| Parked ID label | `.bs-stage` `--id3x/--id3y/--id3s` (desktop block)      | The UM card parks as the left reel's label (scale 0.34, 14 px under the HUD); formulas are measured, see the comment; the reel enters only after it parks (0.49)                                                                                                                                                                |
+
+Guards: tests/r24.spec.ts "field reels + parked ID card never collide" at 1024x768, 1280x720, 1366x768, 1440x900,
+1920x1080 and 390x844 (no reel on phones). To add a photo: put it in the gallery it belongs to first, then add the same
+file with its real pixel size to a reel (in time order). Never add a photo that is not already on the site.
 
 Declined (and why) - do not add without Howard's explicit request: replacing the marquee (barcode / punch-card / louvre /
 kinetic text / sequencer: law 0), repurposing the lightning button (it is the Reduce-motion accessibility switch) or the
