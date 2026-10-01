@@ -28,6 +28,7 @@ export default async function MessagesPage() {
         .select('*')
         .order('is_read', { ascending: true })
         .order('created_at', { ascending: false })
+        .limit(500) // R28: bounded (it loaded every message ever sent)
     : { data: null, error: { message: 'not configured' } };
 
   const messages = (data ?? []) as ContactMessage[];

@@ -37,6 +37,8 @@ const oneLine = (s: string) => clean(s).replace(/[\r\n]+/g, ' ');
 const ipRequestMap = new Map<string, { count: number; lastReset: number }>();
 const RATE_LIMIT = 5;
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+// a full message is at most ~5.5 KB of JSON; 16 KB leaves room for UTF-8 and the other fields
+const MAX_BODY_BYTES = 16 * 1024;
 
 export async function POST(request: NextRequest) {
   try {
@@ -69,8 +71,28 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 3. Validate
-    const parsed = ContactSchema.safeParse(await request.json().catch(() => null));
+    // 3. R28: refuse oversize bodies BEFORE parsing them (the 5,000-character limit used to apply only after a
+    //    full JSON parse), and accept JSON only (a cross-site form post then needs a CORS preflight, which fails).
+    const length = Number(request.headers.get('content-length') ?? '0');
+    if (length > MAX_BODY_BYTES) {
+      return NextResponse.json({ error: 'Message is too long.' }, { status: 413 });
+    }
+    if (!(request.headers.get('content-type') ?? '').toLowerCase().includes('application/json')) {
+      return NextResponse.json({ error: 'Unsupported content type.' }, { status: 415 });
+    }
+    const raw = await request.text();
+    if (raw.length > MAX_BODY_BYTES) {
+      return NextResponse.json({ error: 'Message is too long.' }, { status: 413 });
+    }
+    let body: unknown = null;
+    try {
+      body = JSON.parse(raw);
+    } catch {
+      body = null;
+    }
+
+    // 4. Validate
+    const parsed = ContactSchema.safeParse(body);
     if (!parsed.success) {
       const first = parsed.error.issues[0];
       const status = first?.code === 'too_big' ? 413 : 400;
