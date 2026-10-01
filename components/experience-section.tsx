@@ -5,6 +5,7 @@ import { FieldArchive } from './field-archive';
 import { TraceRail } from './fx/trace-rail';
 import { SplitWords } from './fx/split-words';
 import { m, AnimatePresence, LayoutGroup } from 'framer-motion';
+import Image from 'next/image';
 import { FX, SPRING_STAMP } from '@/lib/fx';
 import { SIGNAL, type Signal } from '@/lib/signal';
 import { SignalKey } from './signal-key';
@@ -609,7 +610,7 @@ export default function ExperienceSection() {
                   <div className="relative group rounded-[30px] border-3 border-ink bg-white shadow-brutal-lg overflow-hidden">
                     {/* Top Bar: Number + Category Tag + Period */}
                     <div
-                      className={`nb-hatch flex flex-wrap items-center justify-between gap-3 sm:gap-4 px-4 xs:px-6 sm:px-10 py-3 sm:py-4 border-b-3 border-ink ${a.fill}`}
+                      className={`nb-hatch flex flex-wrap items-center justify-between gap-3 sm:gap-4 px-4 xs:px-6 sm:px-10 py-3 sm:py-4 border-b-3 border-ink relative z-10 ${a.fill}`}
                     >
                       <div className="flex flex-wrap items-center gap-2 xs:gap-3 min-w-0">
                         <span className="nb-num">{item.number}</span>
@@ -633,9 +634,22 @@ export default function ExperienceSection() {
                           <span>{item.location}</span>
                         </div>
                       </div>
+
+                      {/* Hanging KMNS Badge (straddling the border as circled) */}
+                      {item.id === 'kmns' && (
+                        <div className="absolute right-[10%] sm:right-[15%] -bottom-7 z-20 w-14 h-14 bg-paper border-[3px] border-ink shadow-[2px_2px_0_0_#0A0A0A] rounded-full flex items-center justify-center p-1.5 rotate-[8deg]">
+                          <Image
+                            src="/images/logos/kmns_logo.png"
+                            alt="KMNS Logo"
+                            width={48}
+                            height={48}
+                            className="object-contain w-full h-full"
+                          />
+                        </div>
+                      )}
                     </div>
 
-                    <div className="p-4 xs:p-6 sm:p-10">
+                    <div className="p-4 xs:p-6 sm:p-10 pt-8 sm:pt-12 relative z-0">
                       {/* Main Role & Org */}
                       <div className="pb-7">
                         <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-5">

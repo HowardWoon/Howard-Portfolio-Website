@@ -615,7 +615,7 @@ export default function HonorsSection() {
                     >
                       {/* Top Bar */}
                       <div
-                        className={`nb-hatch flex flex-wrap items-center justify-between gap-3 px-6 py-3.5 border-b-3 border-ink ${isFeatured ? c.fill : c.soft}`}
+                        className={`nb-hatch flex flex-wrap items-center justify-between gap-3 px-6 py-3.5 border-b-3 border-ink relative z-10 ${isFeatured ? c.fill : c.soft}`}
                       >
                         <div className="inline-flex min-w-0 flex-wrap items-center gap-2 text-xs font-mono font-extrabold tracking-[0.06em] uppercase text-ink">
                           {item.signal ? (
@@ -630,6 +630,19 @@ export default function HonorsSection() {
                           <Calendar className="w-3.5 h-3.5" strokeWidth={2.5} />
                           <span>{item.period}</span>
                         </div>
+
+                        {/* Hanging KMNS Badge (straddling the border as circled) */}
+                        {item.id === 'kmns-distinction' && (
+                          <div className="absolute right-[10%] sm:right-16 -bottom-7 z-20 w-14 h-14 bg-paper border-[3px] border-ink shadow-[2px_2px_0_0_#0A0A0A] rounded-full flex items-center justify-center p-1.5 rotate-[8deg]">
+                            <Image
+                              src="/images/logos/kmns_logo.png"
+                              alt="KMNS Logo"
+                              width={48}
+                              height={48}
+                              className="object-contain w-full h-full"
+                            />
+                          </div>
+                        )}
                       </div>
 
                       {/* Featured Watermark */}
@@ -642,7 +655,7 @@ export default function HonorsSection() {
                         </div>
                       )}
 
-                      <div className="relative z-10 flex flex-col flex-1 p-4 xs:p-6 sm:p-7">
+                      <div className="relative z-0 flex flex-col flex-1 p-4 xs:p-6 sm:p-7 pt-7 sm:pt-8">
                         {/* Title & Body */}
                         <div className="flex gap-4 justify-between items-start mb-4">
                           <div className="space-y-2">
@@ -651,13 +664,11 @@ export default function HonorsSection() {
                             </h3>
                             <p className="text-sm font-mono font-bold text-pop-blue">{item.issuingBody}</p>
                           </div>
-                          {(item.id === 'deans-list' || item.id === 'kmns-distinction') && (
+                          {item.id === 'deans-list' && (
                             <div className="w-14 h-14 bg-paper border-3 border-ink shadow-[2px_2px_0_0_#0A0A0A] rounded-full overflow-hidden shrink-0 flex items-center justify-center p-2 mt-1 -mr-1">
                               <Image
-                                src={
-                                  item.id === 'deans-list' ? '/images/logos/um_logo.png' : '/images/logos/kmns_logo.png'
-                                }
-                                alt={item.id === 'deans-list' ? 'UM Logo' : 'KMNS Logo'}
+                                src="/images/logos/um_logo.png"
+                                alt="UM Logo"
                                 width={48}
                                 height={48}
                                 className="object-contain w-full h-full"

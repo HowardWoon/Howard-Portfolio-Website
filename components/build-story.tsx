@@ -468,9 +468,20 @@ export default function BuildStory() {
                 <div className="bs-seg bs-id-drop" style={seg(0.03, 0.15)}>
                   <div className="bs-card bs-idcard relative overflow-hidden rounded-[22px] border-3 border-ink bg-paper text-ink">
                     <div className="flex items-center justify-between gap-2 border-b-3 border-ink bg-pop-orange px-4 py-2">
-                      <span className="font-display text-[clamp(0.8rem,2.6vw,0.95rem)] font-extrabold tracking-[0.02em]">
-                        UNIVERSITI MALAYA
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <div className="flex shrink-0 items-center justify-center rounded-full bg-paper border-2 border-ink shadow-[2px_2px_0_0_#0A0A0A] w-7 h-7 p-[2px]">
+                          <Image
+                            src="/images/logos/um_logo.png"
+                            alt="Universiti Malaya"
+                            width={24}
+                            height={24}
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                        <span className="font-display text-[clamp(0.8rem,2.6vw,0.95rem)] font-extrabold tracking-[0.02em]">
+                          UNIVERSITI MALAYA
+                        </span>
+                      </div>
                       <span className="font-mono text-xs font-extrabold tracking-[0.14em]">STUDENT ID</span>
                     </div>
                     <div className="grid grid-cols-[34%_1fr] gap-3 p-3 sm:gap-4 sm:p-4">
@@ -549,8 +560,24 @@ export default function BuildStory() {
             <FieldReel items={FIELD_REEL} side="l" no={1} seg={seg} />
             <FieldReel items={BUILD_REEL} side="r" no={2} seg={seg} />
             <div className="bs-diagram">
+              {/* R28 Centerpiece Watermark: Massive UM logo floating in the blueprint background */}
+              <div
+                className="bs-seg absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[240px] h-[240px] sm:w-[380px] sm:h-[380px] pointer-events-none z-0"
+                style={seg(0.4, 0.5, { opacity: 'calc(var(--t) * 0.15)' })}
+              >
+                <div className="w-full h-full animate-[spin_60s_linear_infinite]">
+                  <Image
+                    src="/images/logos/um_logo.png"
+                    alt="Universiti Malaya Watermark"
+                    width={400}
+                    height={400}
+                    className="w-full h-full object-contain drop-shadow-[0_0_12px_rgba(255,255,255,0.4)]"
+                  />
+                </div>
+              </div>
+
               <svg
-                className="absolute inset-0 h-full w-full overflow-visible"
+                className="absolute inset-0 h-full w-full overflow-visible z-10"
                 viewBox="0 0 100 100"
                 preserveAspectRatio="none"
               >

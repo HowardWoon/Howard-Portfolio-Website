@@ -106,7 +106,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body className="font-sans font-medium antialiased bg-paper text-ink">
+      <body className="font-sans font-medium bg-paper text-ink">
         {/* If JavaScript is off or fails to load, the "Initialize System" gate could never be dismissed
             and the whole portfolio stayed hidden behind it. */}
         <noscript>

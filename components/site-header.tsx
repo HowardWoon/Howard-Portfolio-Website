@@ -135,7 +135,7 @@ export function SiteHeader() {
         </div>
 
         <nav className="hidden xl:flex items-center gap-6 mr-4">
-          {NAV.map((s, i) => {
+          {NAV.map((s) => {
             const on = active === s.id;
             const hot = (on: boolean) => {
               window.dispatchEvent(new CustomEvent('route-preview', { detail: { id: on ? s.id : null } }));
@@ -154,13 +154,6 @@ export function SiteHeader() {
                 onFocus={() => hot(true)}
                 onBlur={() => hot(false)}
               >
-                {/* R21: section index (visual only; the link name stays the section name) */}
-                <span
-                  aria-hidden
-                  className="mr-1.5 hidden align-top min-[1440px]:inline font-mono text-xs font-extrabold text-ink-muted"
-                >
-                  {String(i + 1).padStart(2, '0')}
-                </span>
                 {FX.headerInstrument ? <TextRoll>{s.label}</TextRoll> : s.label}
                 {markerAt === s.id ? (
                   // FX-105: one marker, shared layoutId -> it slides between links with the stamp spring
