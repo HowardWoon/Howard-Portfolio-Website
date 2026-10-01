@@ -34,10 +34,48 @@ export function SectionSpine() {
     return () => io.disconnect();
   }, []);
 
+  // R27 dock magnification (after React Bits Dock): markers near the mouse grow (scale only, one rAF per move)
+  const navRef = React.useRef<HTMLElement>(null);
+  React.useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    let raf = 0;
+    let y = 0;
+    const still = () =>
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+      document.documentElement.dataset.motion === 'calm';
+    const paint = () => {
+      raf = 0;
+      for (const d of nav.querySelectorAll<HTMLElement>('.sp-mag')) {
+        const r = d.getBoundingClientRect();
+        const dist = Math.abs(r.top + r.height / 2 - y);
+        d.style.setProperty('--mag', (1 + 0.55 * Math.max(0, 1 - dist / 80)).toFixed(3));
+      }
+    };
+    const move = (e: PointerEvent) => {
+      if (e.pointerType === 'touch' || still()) return;
+      y = e.clientY;
+      if (!raf) raf = requestAnimationFrame(paint);
+    };
+    const leave = () => {
+      cancelAnimationFrame(raf);
+      raf = 0;
+      for (const d of nav.querySelectorAll<HTMLElement>('.sp-mag')) d.style.removeProperty('--mag');
+    };
+    nav.addEventListener('pointermove', move);
+    nav.addEventListener('pointerleave', leave);
+    return () => {
+      cancelAnimationFrame(raf);
+      nav.removeEventListener('pointermove', move);
+      nav.removeEventListener('pointerleave', leave);
+    };
+  }, []);
+
   if (!FX.sectionSpine) return null;
 
   return (
     <nav
+      ref={navRef}
       aria-label="Section navigation"
       data-at-footer={atFooter ? '' : undefined}
       className={`fixed right-[max(1rem,var(--safe-right))] top-1/2 -translate-y-1/2 z-[9000] hidden min-[1400px]:flex flex-col items-center gap-1 rounded-full border-3 border-ink bg-white px-1 py-2.5 shadow-brutal-sm transition-[opacity,translate] duration-300 ${
@@ -72,7 +110,7 @@ export function SectionSpine() {
               aria-hidden
               data-preview={preview ? 'true' : undefined}
               // R21: white marker, the current one fills blue with reading progress (blue = where you are); hover = blue tint
-              className={`relative overflow-hidden w-[17px] h-[17px] ${on ? 'bg-white shadow-[2px_2px_0_0_#2B4BFF]' : preview ? 'bg-[#E3E8FF]' : 'bg-white'} ${preview ? 'scale-125' : ''} border-3 border-ink rotate-45 transition-colors duration-200 group-hover:bg-[#E3E8FF] group-focus-visible:ring-2 group-focus-visible:ring-pop-blue`}
+              className={`sp-mag relative overflow-hidden w-[17px] h-[17px] ${on ? 'bg-white shadow-[2px_2px_0_0_#2B4BFF]' : preview ? 'bg-[#E3E8FF]' : 'bg-white'} ${preview ? 'scale-125' : ''} border-3 border-ink rotate-45 transition-colors duration-200 group-hover:bg-[#E3E8FF] group-focus-visible:ring-2 group-focus-visible:ring-pop-blue`}
             >
               {/* FX-99: the active marker fills with the section's reading progress (Section Clock writes --sp) */}
               {FX.instrumentRail && on ? <SpFill forId={s.id} className="fx-sp-fill" /> : null}

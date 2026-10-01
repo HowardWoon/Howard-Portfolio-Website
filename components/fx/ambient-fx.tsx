@@ -24,8 +24,12 @@ const TICK_MS = 45;
 const STAMP_TARGETS = '.nb-btn, .nb-chip, .nb-press, [data-fx-stamp-target]';
 const SHAPES = ['circle', 'square', 'triangle'] as const;
 
+// R27: the real text is captured once per node, so a decode started mid-scramble (hover Shuffle during the first-view
+// decode) still lands on the true words, never on a half-scrambled frame
+const TRUE_TEXT = new WeakMap<Text, string>();
 function decode(text: Text) {
-  const final = text.data;
+  if (!TRUE_TEXT.has(text)) TRUE_TEXT.set(text, text.data);
+  const final = TRUE_TEXT.get(text)!;
   const t0 = performance.now();
   let raf = 0;
   let last = -Infinity;
@@ -72,9 +76,29 @@ export function AmbientFx() {
       { rootMargin: '0px 0px -10% 0px' },
     );
     // R14 B-10: section kickers only; the hero kicker (hero <section> has id="hero") is part of the first paint
-    document.querySelectorAll('main section[id]:not(#hero) .nb-kicker').forEach((k) => io.observe(k));
+    const kickers = document.querySelectorAll<HTMLElement>('main section[id]:not(#hero) .nb-kicker');
+    kickers.forEach((k) => {
+      const t = Array.from(k.children).find((c) => c.tagName === 'SPAN')?.firstChild;
+      if (t && t.nodeType === Node.TEXT_NODE && !TRUE_TEXT.has(t as Text)) TRUE_TEXT.set(t as Text, (t as Text).data);
+      io.observe(k);
+    });
+    // R27 Shuffle (after React Bits Shuffle / GSAP ScrambleText): pointing at a kicker re-scrambles it and it settles
+    // again. Mouse only, at most once per 1.2 s per kicker, same terminal-rate decode as above.
+    const last = new WeakMap<Element, number>();
+    const shuffle = (e: PointerEvent) => {
+      if (e.pointerType !== 'mouse' || prefersReducedMotion()) return;
+      const k = e.currentTarget as HTMLElement;
+      const now = performance.now();
+      if (now - (last.get(k) ?? -1e9) < 1200) return;
+      last.set(k, now);
+      const node = Array.from(k.children).find((c) => c.tagName === 'SPAN')?.firstChild;
+      if (node && node.nodeType === Node.TEXT_NODE && (node as Text).data.trim().length > 3)
+        cancels.push(decode(node as Text));
+    };
+    kickers.forEach((k) => k.addEventListener('pointerenter', shuffle));
     return () => {
       io.disconnect();
+      kickers.forEach((k) => k.removeEventListener('pointerenter', shuffle));
       cancels.forEach((c) => c());
     };
   }, []);

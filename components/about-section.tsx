@@ -7,6 +7,7 @@ import { SplitWords } from './fx/split-words';
 import { FX, SPRING_SOFT } from '@/lib/fx';
 import { startTrail, useInteractionSelect } from '@/lib/interaction-store';
 import { projectsWithSkill, skillKey } from '@/lib/skills';
+import { ScrollInk } from './fx/scroll-ink';
 
 const architecturePillars = [
   {
@@ -297,13 +298,16 @@ export default function AboutSection() {
           </h2>
 
           <p className="fx-rise text-ink-soft text-lg sm:text-xl max-w-3xl leading-relaxed font-sans font-medium">
-            Software Engineering undergraduate at <strong className="text-ink font-extrabold">Universiti Malaya</strong>{' '}
-            (
-            <span className="inline-block bg-pop-yellow border-2 border-ink rounded-md px-1.5 text-ink font-mono font-extrabold text-[0.95em] leading-snug">
-              4.00 CGPA
-            </span>
-            ). Bridging low-latency algorithmic backend performance and AI orchestration with strong technical
-            leadership and fiscal governance to deliver scalable, cost-effective solutions.
+            {/* R27: the words ink in as they scroll up (ScrollReveal / SplitText scrub, CSS scroll timeline) */}
+            <ScrollInk>
+              Software Engineering undergraduate at{' '}
+              <strong className="text-ink font-extrabold">Universiti Malaya</strong> (
+              <span className="inline-block bg-pop-yellow border-2 border-ink rounded-md px-1.5 text-ink font-mono font-extrabold text-[0.95em] leading-snug">
+                4.00 CGPA
+              </span>
+              ). Bridging low-latency algorithmic backend performance and AI orchestration with strong technical
+              leadership and fiscal governance to deliver scalable, cost-effective solutions.
+            </ScrollInk>
           </p>
         </div>
 

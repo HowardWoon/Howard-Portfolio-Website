@@ -4,6 +4,12 @@ import { useEffect, useRef, useState } from 'react';
 import { Check } from 'lucide-react';
 import { FX } from '@/lib/fx';
 import { setFocus, useInteraction } from '@/lib/interaction-store';
+import { SIGNAL } from '@/lib/signal';
+
+// R27 PixelCard (after React Bits PixelCard): a hover fills the tile with its own signal colour pixel by pixel, on a
+// diagonal wave (12 x 4 cells, CSS only, `.px-card` in globals.css). Mouse only; never on the active tile.
+const PX = Array.from({ length: 48 }, (_, k) => ((k % 12) + Math.floor(k / 12) * 2) / 18);
+const hexFor = (fill: string) => Object.values(SIGNAL).find((s) => s.fill === fill)?.hex ?? '#FFFFFF';
 
 export type ProjectIndexItem = { id: string; number: string; title: string; fill: string };
 
@@ -109,8 +115,15 @@ export function ProjectIndex({ items }: { items: readonly ProjectIndexItem[] }) 
                 <span className="sr-only">(viewed)</span>
               </span>
             ) : null}
-            <span className="font-mono text-xs font-extrabold">{p.number}</span>
-            <span className="font-display text-sm font-extrabold uppercase leading-tight [overflow-wrap:anywhere]">
+            {on ? null : (
+              <span aria-hidden className="px-card" style={{ '--px': hexFor(p.fill) } as React.CSSProperties}>
+                {PX.map((d, k) => (
+                  <span key={k} style={{ '--d': d } as React.CSSProperties} />
+                ))}
+              </span>
+            )}
+            <span className="relative font-mono text-xs font-extrabold">{p.number}</span>
+            <span className="relative font-display text-sm font-extrabold uppercase leading-tight [overflow-wrap:anywhere]">
               {p.title}
             </span>
           </a>

@@ -47,6 +47,24 @@ export function CertificateDeck({ certs, onOpen }: { certs: DeckCert[]; onOpen: 
       }, DISSOLVE_MS + 80);
     }, DISSOLVE_MS + 80);
   };
+  // R27 swipe (after GSAP Observer): a horizontal flick on the stack deals the next card; the click that ends a
+  // swipe does not open the viewer. touch-action: pan-y keeps vertical page scrolling native.
+  const swipe = useRef<{ x: number; y: number } | null>(null);
+  const swiped = useRef(false);
+  const onDown = (e: React.PointerEvent) => {
+    swipe.current = { x: e.clientX, y: e.clientY };
+    swiped.current = false;
+  };
+  const onUp = (e: React.PointerEvent) => {
+    const s0 = swipe.current;
+    swipe.current = null;
+    if (!s0) return;
+    const dx = e.clientX - s0.x;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(e.clientY - s0.y) * 1.5) {
+      swiped.current = true;
+      next();
+    }
+  };
   const nextRef = useRef(next);
   nextRef.current = next;
 
@@ -80,7 +98,12 @@ export function CertificateDeck({ certs, onOpen }: { certs: DeckCert[]; onOpen: 
 
   return (
     <div ref={box} className="cert-deck" data-phase={phase}>
-      <div className="cert-deck-stack">
+      <div
+        className="cert-deck-stack"
+        onPointerDown={onDown}
+        onPointerUp={onUp}
+        onPointerCancel={() => (swipe.current = null)}
+      >
         {certs.map((c, i) => {
           const depth = order.indexOf(i);
           const front = depth === 0;
@@ -91,13 +114,14 @@ export function CertificateDeck({ certs, onOpen }: { certs: DeckCert[]; onOpen: 
               tabIndex={front ? 0 : -1}
               aria-hidden={!front}
               aria-label={`VIEW CERTIFICATE: ${c.title}`}
-              onClick={() => onOpen(c.src)}
+              onClick={() => (swiped.current ? (swiped.current = false) : onOpen(c.src))}
               className="cert-card"
               style={{ '--depth': depth } as React.CSSProperties}
             >
               <span aria-hidden className="cert-card-band" />
               <span className="cert-card-photo">
                 <Image
+                  draggable={false}
                   src={c.src}
                   alt=""
                   width={c.w}

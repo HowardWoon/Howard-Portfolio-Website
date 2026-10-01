@@ -31,7 +31,7 @@ export function SiteFooter() {
   return (
     <footer
       data-dark-surface
-      className="fx-lamp relative z-10 bg-ink text-white mt-0 pt-16 sm:pt-20 pb-[max(3.5rem,calc(var(--safe-bottom)+2rem))] px-4 xs:px-5 sm:px-10 lg:px-16"
+      className="fx-lamp fx-grain relative z-10 bg-ink text-white mt-0 pt-16 sm:pt-20 pb-[max(3.5rem,calc(var(--safe-bottom)+2rem))] px-4 xs:px-5 sm:px-10 lg:px-16"
     >
       {/* R26: a field of white squares the mouse pushes aside (DotGrid / Vanta Dots, brutalist remix) */}
       <DotField />
