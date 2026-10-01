@@ -10,6 +10,7 @@ import { FX, SPRING_STAMP } from '@/lib/fx';
 import { SIGNAL, type Signal } from '@/lib/signal';
 import { SignalKey } from './signal-key';
 import { usePrinting } from '@/lib/use-printing';
+import { InteractivePhotoStack } from './interactive-photo-stack';
 import {
   Building2,
   Landmark,
@@ -43,6 +44,7 @@ interface ExperienceItem {
   bullets: string[];
   metrics: { label: string; value: string }[];
   tags: string[];
+  galleryPhotos?: { src: string; alt: string; rotation: number; w: number; h: number }[];
 }
 
 const experiences: ExperienceItem[] = [
@@ -119,6 +121,14 @@ const experiences: ExperienceItem[] = [
       { label: 'Curriculum', value: 'Java & Python OOP' },
     ],
     tags: ['DSA Coaching', 'OOP Paradigms', 'Python / Java', 'Academic Mentorship'],
+    galleryPhotos: [
+      { src: '/images/experiences/kmns/kmns_01.jpg', alt: 'KMNS Mentorship 1', rotation: -2, w: 1280, h: 960 },
+      { src: '/images/experiences/kmns/kmns_02.jpg', alt: 'KMNS Mentorship 2', rotation: 3, w: 960, h: 1280 },
+      { src: '/images/experiences/kmns/kmns_03.jpg', alt: 'KMNS Mentorship 3', rotation: -1, w: 1280, h: 960 },
+      { src: '/images/experiences/kmns/kmns_04.jpg', alt: 'KMNS Mentorship 4', rotation: 1.5, w: 960, h: 1280 },
+      { src: '/images/experiences/kmns/kmns_05.jpg', alt: 'KMNS Mentorship 5', rotation: -3, w: 1280, h: 960 },
+      { src: '/images/experiences/kmns/kmns_06.jpg', alt: 'KMNS Mentorship 6', rotation: 2, w: 1280, h: 960 },
+    ],
   },
 ];
 
@@ -721,6 +731,13 @@ export default function ExperienceSection() {
                           </span>
                         ))}
                       </div>
+
+                      {/* Interactive Gallery */}
+                      {item.galleryPhotos && (
+                        <div className="mt-10 mb-2 w-full flex items-center justify-center">
+                          <InteractivePhotoStack customPhotos={item.galleryPhotos} galleryId={item.id} />
+                        </div>
+                      )}
 
                       {/* Specialized Dashboards */}
                       {item.id === 'pekom' && <PekomTreasurerDashboard />}
