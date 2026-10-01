@@ -30,6 +30,10 @@ test.describe('phone', () => {
 
 test('scrolling never writes custom properties on <html> (R9-02 scroll lag)', async ({ page }) => {
   await page.goto('/', { waitUntil: 'networkidle' });
+  // the header publishes --header-h ONCE when it mounts (hydration); under load that can land inside the loop below,
+  // so measure scrolling only once the page is hydrated - any write after that is a real per-scroll write
+  await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
+  await page.waitForTimeout(300);
   const writes = await page.evaluate(async () => {
     let n = 0;
     const mo = new MutationObserver((ms) => {
