@@ -72,6 +72,6 @@ showing my journey". The diagram says WHAT Howard builds; two film strips beside
   playhead, the scene's own caption). A click plays the story to that scene; the list is `inert` once the title fades.
   Captions show on desktops >= 800 px tall and tablets >= 900 px tall; phones >= 760 px tall get a compact grid;
   smaller phones keep the HUD pills only.
-- Desktop smoothness: every moving `.bs-seg` is its own compositor layer (`will-change`), so a scroll step moves
-  layers instead of repainting the 1920 px stage. Measured with real wheel input and GPU: slow frames 24 -> 13 per
-  pass, worst frame 83 -> 33-50 ms; 1440 x 900 p95 16.8 ms.
+- Desktop smoothness: the five big moving layers are compositor layers (`will-change`), so a scroll step moves them
+  instead of repainting the 1920 px stage. A/B with real wheel input in one session: GPU slow frames 39-42 -> 27-28
+  per pass. Promoting every `.bs-seg` was worse with software rendering (62-65 vs 47-49), so it is not done.

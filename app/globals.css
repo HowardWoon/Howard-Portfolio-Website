@@ -2837,10 +2837,13 @@ html[data-xray-mode]
     display: block;
   }
 }
-/* R24 smoothness: on desktop every moving story layer gets its own compositor layer, so a scroll step moves layers
-   instead of repainting the 1920 px stage (measured: slow frames 24 -> 13 per pass, worst 83 -> 67 ms incl. Projects) */
+/* R25 smoothness: on desktop the five big moving story layers (scene layers, title, blueprint, the parked ID card,
+   the reel tracks) get their own compositor layers, so a scroll step moves them instead of repainting the 1920 px
+   stage. Measured A/B, same conditions: GPU slow frames 39-42 -> 27-28 per pass. Promoting EVERY .bs-seg was no
+   better on a GPU and worse with software rendering (62-65 vs 47-49): many layers cost CPU when there is no GPU
+   raster, so keep this list short. */
 @media (min-width: 1024px) {
-  .bs-track:not([data-static]) .bs-stage .bs-seg:not(line) {
+  .bs-track:not([data-static]) .bs-stage :is(.bs-layer, .bs-title, .bs-blueprint, .bs-id-move, .bs-reel-track) {
     will-change: transform, opacity;
   }
 }

@@ -125,9 +125,16 @@ test('desktop story layers are compositor layers (scroll steps move layers, not 
 }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/', { waitUntil: 'networkidle' });
-  const wc = await page.evaluate(() =>
-    [...document.querySelectorAll('.bs-stage .bs-seg:not(line)')].map((e) => getComputedStyle(e).willChange),
-  );
-  expect(wc.length).toBeGreaterThan(20);
-  expect(new Set(wc)).toEqual(new Set(['transform, opacity']));
+  // exactly the five big layers: more layers cost CPU with software rendering (measured in R25)
+  const wc = await page.evaluate(() => {
+    const big = '.bs-layer, .bs-title, .bs-blueprint, .bs-id-move, .bs-reel-track';
+    const all = [...document.querySelectorAll<HTMLElement>('.bs-stage .bs-seg')];
+    return {
+      big: all.filter((e) => e.matches(big)).map((e) => getComputedStyle(e).willChange),
+      rest: all.filter((e) => !e.matches(big)).map((e) => getComputedStyle(e).willChange),
+    };
+  });
+  expect(wc.big.length).toBeGreaterThanOrEqual(5);
+  expect(new Set(wc.big)).toEqual(new Set(['transform, opacity']));
+  expect(new Set(wc.rest)).toEqual(new Set(['auto']));
 });

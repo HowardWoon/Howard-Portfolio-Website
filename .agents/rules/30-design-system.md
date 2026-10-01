@@ -139,11 +139,12 @@ transition "always smooth"):
 | ------------------------------ | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Signal Key as a colour bar     | components/signal-key.tsx, `.signal-key-*` in globals.css | Ink header + mini bar, then ruled cells on a strict grid (band, index, label, meaning, hex). Columns 1-2 / up to 4 / one row (6-7 keys only from 1280 px). The last cell spans what its row leaves, so there is never a hole. Never go back to a wrapping flex row |
 | Build Manifest                 | build-story.tsx `bs-manifest`                             | Five storyboard cells on the title card: scene colour, number, name, frame range, the scene's own caption; a click plays the story to that scene (Lenis glide, instant for reduced motion / Calm); `inert` once the title is gone                                  |
-| Compositor layers in the story | globals.css (desktop block)                               | Every moving `.bs-seg` gets `will-change: transform, opacity` on >= 1024 px (not phones: GPU memory). New story layers must be `.bs-seg` so they get it                                                                                                            |
+| Compositor layers in the story | globals.css (desktop block)                               | Only the five big moving layers (`.bs-layer`, `.bs-title`, `.bs-blueprint`, `.bs-id-move`, `.bs-reel-track`) get `will-change` on >= 1024 px. Promoting every `.bs-seg` was worse with software rendering (A/B measured): keep the list short                      |
 
 Guards: tests/r25.spec.ts (keys at 320-1920 px: aligned rows, no overflow, no hole; manifest fits at five sizes; play-to;
 compositor layers). Smoothness is measured, not assumed: wheel-scroll the story at 1920 x 875 with real GPU flags and
-read frame times + Long Animation Frames (R25: slow frames 24 -> 13, worst 83 -> 33-50 ms).
+read frame times + Long Animation Frames, and A/B every change in the SAME session (background load moves the numbers;
+also test without GPU flags = software rendering). R25: GPU slow frames 39-42 -> 27-28 per pass.
 
 Declined (and why) - do not add without Howard's explicit request: replacing the marquee (barcode / punch-card / louvre /
 kinetic text / sequencer: law 0), repurposing the lightning button (it is the Reduce-motion accessibility switch) or the
