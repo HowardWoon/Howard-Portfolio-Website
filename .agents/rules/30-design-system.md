@@ -132,6 +132,19 @@ Guards: tests/r24.spec.ts "field reels + parked ID card never collide" at 1024x7
 1920x1080 and 390x844 (no reel on phones). To add a photo: put it in the gallery it belongs to first, then add the same
 file with its real pixel size to a reel (in time order). Never add a photo that is not already on the site.
 
+R25 (owner: the Signal Key was "messy, unorganised, misaligned"; the story title must be "fantastic, many details" and the
+transition "always smooth"):
+
+| Feature                        | Where                                                     | Rules                                                                                                                                                                                                                                                              |
+| ------------------------------ | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Signal Key as a colour bar     | components/signal-key.tsx, `.signal-key-*` in globals.css | Ink header + mini bar, then ruled cells on a strict grid (band, index, label, meaning, hex). Columns 1-2 / up to 4 / one row (6-7 keys only from 1280 px). The last cell spans what its row leaves, so there is never a hole. Never go back to a wrapping flex row |
+| Build Manifest                 | build-story.tsx `bs-manifest`                             | Five storyboard cells on the title card: scene colour, number, name, frame range, the scene's own caption; a click plays the story to that scene (Lenis glide, instant for reduced motion / Calm); `inert` once the title is gone                                  |
+| Compositor layers in the story | globals.css (desktop block)                               | Every moving `.bs-seg` gets `will-change: transform, opacity` on >= 1024 px (not phones: GPU memory). New story layers must be `.bs-seg` so they get it                                                                                                            |
+
+Guards: tests/r25.spec.ts (keys at 320-1920 px: aligned rows, no overflow, no hole; manifest fits at five sizes; play-to;
+compositor layers). Smoothness is measured, not assumed: wheel-scroll the story at 1920 x 875 with real GPU flags and
+read frame times + Long Animation Frames (R25: slow frames 24 -> 13, worst 83 -> 33-50 ms).
+
 Declined (and why) - do not add without Howard's explicit request: replacing the marquee (barcode / punch-card / louvre /
 kinetic text / sequencer: law 0), repurposing the lightning button (it is the Reduce-motion accessibility switch) or the
 circle / square / triangle (FX-91 postage stamp), per-frame background fields / PCB router / velocity shadows (scroll
