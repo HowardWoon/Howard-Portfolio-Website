@@ -10,9 +10,35 @@
  * appears in the RENDER phase of hydration, before commit, and React itself stops (drops) a click that arrives in that
  * gap. So a replay only counts once it actually reaches the button; until then it is retried every 100 ms.
  */
-const EXPIRE_MS = 20000;
+// 30 s: at 6x CPU a code-split section takes ~25 s to hydrate (measured); a late answer beats a dead tap
+const EXPIRE_MS = 30000;
 
-const hydrated = (el: Element) => Object.keys(el).some((k) => k.startsWith('__reactFiber$'));
+type Fiber = { tag: number; flags: number; return: Fiber | null; alternate: Fiber | null };
+
+/**
+ * R25: "has a fiber" is not "React will take the click". A fiber is attached in the RENDER phase of hydration; until
+ * the commit, React ignores (root page) or drops (code-split sections) a click on it. The header Search button never
+ * opened the palette when clicked in that window (4/4 at 6x CPU). So this mirrors React's own test,
+ * getNearestMountedFiber (react-dom 19.2): the node is live when no ancestor without an alternate still carries
+ * Placement | Hydrating (4098) and the chain ends at the HostRoot (tag 3). Same values in React 18 and 19.
+ */
+function live(el: Element): boolean {
+  const key = Object.keys(el).find((k) => k.startsWith('__reactFiber$'));
+  if (!key) return false;
+  const fiber = (el as unknown as Record<string, Fiber>)[key];
+  let node = fiber;
+  let nearest: Fiber | null = fiber;
+  if (fiber.alternate) while (node.return) node = node.return;
+  else {
+    let f: Fiber | null = fiber;
+    do {
+      node = f;
+      if (node.flags & 4098) nearest = node.return;
+      f = node.return;
+    } while (f);
+  }
+  return node.tag === 3 && nearest === fiber;
+}
 
 let pending: { el: HTMLElement; at: number; state: string | null } | null = null;
 let timer = 0;
@@ -28,7 +54,7 @@ function flush() {
     pending = null;
     return;
   }
-  if (!hydrated(el)) {
+  if (!live(el)) {
     timer = window.setTimeout(flush, 60);
     return;
   }
@@ -53,7 +79,8 @@ export function installEarlyClickReplay() {
     'click',
     (e) => {
       const t = e.target instanceof Element ? e.target.closest<HTMLElement>('button, [role="button"]') : null;
-      if (!t || hydrated(t) || t.closest('a[href]') || (t as HTMLButtonElement).disabled) return;
+      // the boot gate has its own pre-hydration capture (inline script in app/layout.tsx): leave it to that
+      if (!t || live(t) || t.closest('a[href], [data-boot-action]') || (t as HTMLButtonElement).disabled) return;
       // window capture runs before React's listener on the document, so React never sees the dropped original
       e.preventDefault();
       e.stopImmediatePropagation();

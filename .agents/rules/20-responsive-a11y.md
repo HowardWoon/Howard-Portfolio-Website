@@ -73,5 +73,7 @@ trigger: always_on
 - Taps before hydration must never be lost. Code-split sections (`components/lazy-sections.tsx`) are server-rendered, so
   their buttons are visible 0.6 s (laptop) to 5-11 s (slow phone) before React owns them, and React itself DROPS a
   click in that window. `lib/early-clicks.ts` (installed by lazy-sections) holds such a click and replays it once the
-  button is live. Keep it installed; new interactive controls must be `<button>` / `[role=button]` rendered by React
+  button is live - "live" = React's own getNearestMountedFiber test (no Placement | Hydrating on the way to the
+  HostRoot), NOT "has a fiber" (that is the render phase: React ignores the click; R25 header Search bug). Expires
+  after 30 s (a code-split section hydrates in ~25 s at 6x CPU). The boot gate keeps its own capture. Keep it installed; new interactive controls must be `<button>` / `[role=button]` rendered by React
   (a button React never hydrates would have its clicks held). Guarded by the r24 "early tap" test (4x CPU).

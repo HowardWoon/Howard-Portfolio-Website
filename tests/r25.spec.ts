@@ -138,3 +138,19 @@ test('desktop story layers are compositor layers (scroll steps move layers, not 
   expect(new Set(wc.big)).toEqual(new Set(['transform, opacity']));
   expect(new Set(wc.rest)).toEqual(new Set(['auto']));
 });
+
+// The early-click replay once treated "has a fiber" as ready; on the root page that is the render phase, React ignored
+// the replayed click and the header Search button never opened the palette. It now uses React's own mounted check.
+test('header Search clicked before hydration still opens the palette (4x CPU)', async ({ page, context }) => {
+  test.setTimeout(90_000);
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const cdp = await context.newCDPSession(page);
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+  await page.goto('/', { waitUntil: 'commit' });
+  const search = page.getByRole('button', { name: 'Open Command Palette' });
+  await search.waitFor({ state: 'visible', timeout: 60_000 });
+  // the replay listener is live, the header is not hydrated yet: exactly the window that used to fail
+  await page.waitForFunction(() => (window as unknown as { __hwEarlyClicks?: boolean }).__hwEarlyClicks === true);
+  await search.click();
+  await expect(page.getByRole('dialog', { name: /command palette/i })).toBeVisible({ timeout: 45_000 });
+});
