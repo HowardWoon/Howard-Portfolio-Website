@@ -146,6 +146,25 @@ compositor layers). Smoothness is measured, not assumed: wheel-scroll the story 
 read frame times + Long Animation Frames, and A/B every change in the SAME session (background load moves the numbers;
 also test without GPU flags = software rendering). R25: GPU slow frames 39-42 -> 27-28 per pass.
 
+R26 (owner: "refer to lenis, GSAP, vanta, shadergradient, react-bits and implement"; decisions by Howard: NO new
+dependencies - everything native; Vanta / ShaderGradient as a BRUTALIST REMIX, never soft glowing gradients):
+
+| From                                    | Feature                      | Where                                                           | Rules                                                                                                                                                         |
+| --------------------------------------- | ---------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| React Bits SplitFlapText                | Split-flap boards            | lib/split-flap.ts; status-bar clocks, footer metadata           | Glyphs drawn from `data-c` via CSS (no text of their own: page text / screen readers read one plain copy); boards never wrap; raised tiles on dark surfaces   |
+| React Bits StickerPeel + GSAP Draggable | Sticker peel                 | components/sticker-peel.tsx; honour emblems                     | Mouse / pen drag on a rubber band, elastic return; touch = tap lift only (never blocks scroll); same box element as before                                    |
+| React Bits CardSwap + PixelTransition   | Certificate deck             | components/certificate-deck.tsx; Honours, beside the Signal Key | Only the three image certificates; real pixel sizes; pauses on hover / focus / off screen; no auto-cycle for reduced motion / Calm; fans LEFT (dock is right) |
+| React Bits Stepper                      | Dispatch rail                | components/dispatch-rail.tsx; Contact, above Dispatch           | Steps = the form's own fields; email completes only when valid; phones show numbers + one caption line                                                        |
+| React Bits DotGrid + Vanta Dots         | Dot field                    | components/fx/dot-field.tsx; ink footer                         | White squares only (decoration = ink / paper); mouse / pen; idles when settled                                                                                |
+| ShaderGradient + Vanta Topology         | Contour field                | components/fx/contour-field.tsx; The Build title card           | Four flat tone bands + pixel contours at 1/8 resolution, pixelated; only during scene 0                                                                       |
+| Lenis                                   | (already the scroll engine)  | smooth-scroll-provider.tsx                                      | smoothWheel stays OFF (R20); data-lenis-prevent on every scrollable overlay                                                                                   |
+| GSAP (ScrollTrigger / Flip / SplitText) | (already native equivalents) | build story playhead, FLIP pills, title wipe, kicker decode     | Do not add the gsap package for effects the site already has                                                                                                  |
+
+All living canvases go through lib/living-canvas.ts (on screen + visible tab only, <= 30 fps, DPR cap, OFF for reduced motion /
+Calm / lite tier). Guards: tests/r26.spec.ts. Declined in R26: Vanta / ShaderGradient as shipped (three.js + soft glowing
+gradients: breaks the theme and the 190 kB budget), React Bits glass / glow / chrome components (FluidGlass, GlassSurface,
+BorderGlow, ElectricBorder, LiquidChrome, Aurora...: off-theme).
+
 Declined (and why) - do not add without Howard's explicit request: replacing the marquee (barcode / punch-card / louvre /
 kinetic text / sequencer: law 0), repurposing the lightning button (it is the Reduce-motion accessibility switch) or the
 circle / square / triangle (FX-91 postage stamp), per-frame background fields / PCB router / velocity shadows (scroll
