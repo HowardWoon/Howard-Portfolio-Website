@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
  * R21: every honour gets an emblem whose FORM says what it is, so no two kinds of honour look alike:
  *   gold / silver / bronze  a ribboned medal in the real metal colour (placements and medals)
  *   star                    a gold medal with a star (#1 public choice)
- *   finalist                a pennant (finalist, cyan = QUALIFIER)
+ *   finalist                a swallow-tail banner flag (finalist, cyan = QUALIFIER)
  *   seal                    a scalloped seal (academic distinction, orange = ACADEMIC)
  *   ticket                  a ticket stub (qualified, cyan = QUALIFIER)
  *   badge                   a plain shield (participation, neutral white)
@@ -82,7 +82,15 @@ function Shape({ kind }: { kind: EmblemKind }) {
     return (
       <>
         <line x1="16" y1="10" x2="16" y2="116" stroke={INK} strokeWidth="5" strokeLinecap="round" />
-        <polygon points="18,14 112,40 18,68" fill={fill} stroke={INK} strokeWidth="4" strokeLinejoin="round" />
+        {/* R25: a swallow-tail banner, not a triangle. A triangle narrows to a point, so "Top 15" ran into its tip;
+            the banner keeps a full-height body (x 18-92) for the value and the V-notch only cuts the tail. */}
+        <polygon
+          points="18,16 108,16 92,39 108,62 18,62"
+          fill={fill}
+          stroke={INK}
+          strokeWidth="4"
+          strokeLinejoin="round"
+        />
       </>
     );
   return (
@@ -104,7 +112,7 @@ const VALUE_AT: Record<EmblemKind, { top: string; left: string; w: string }> = {
   star: { top: '72%', left: '50%', w: '46%' },
   seal: { top: '53%', left: '50%', w: '48%' },
   ticket: { top: '53%', left: '50%', w: '70%' },
-  finalist: { top: '34%', left: '44%', w: '56%' },
+  finalist: { top: '32.5%', left: '45.8%', w: '58%' },
   badge: { top: '52%', left: '50%', w: '62%' },
 };
 

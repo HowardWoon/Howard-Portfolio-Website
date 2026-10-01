@@ -89,6 +89,27 @@ test('honour emblems: value inside the shape, the medal star clear of the ribbon
         const shapes = [...svg.querySelectorAll('circle, path, polygon')].map((s) => s.getBoundingClientRect());
         const body = shapes.reduce((a, b) => (b.width * b.height > a.width * a.height ? b : a));
         if (!inside(v, body, 2)) out.push(`value "${value.textContent}" spills out of its emblem`);
+        // R25: the bounding box is not enough (a triangle's box has empty corners: "Top 15" ran into the pennant's
+        // tip and still passed). Every corner of the real glyphs, pushed 2 px outwards, must lie on the filled shape.
+        const range = document.createRange();
+        range.selectNodeContents(value);
+        const g = range.getBoundingClientRect();
+        const ctm = svg.getScreenCTM()!.inverse();
+        const filled = [...svg.querySelectorAll<SVGGeometryElement>('circle, path, polygon')].filter(
+          (s) => s.getAttribute('fill') && s.getAttribute('fill') !== 'none',
+        );
+        for (const [x, y] of [
+          [g.left - 2, g.top - 2],
+          [g.right + 2, g.top - 2],
+          [g.left - 2, g.bottom + 2],
+          [g.right + 2, g.bottom + 2],
+        ]) {
+          const p = new DOMPoint(x, y).matrixTransform(ctm);
+          if (!filled.some((s) => s.isPointInFill(p)))
+            out.push(
+              `value "${value.textContent}" touches the edge of its ${svg.querySelector('polygon,path,circle')?.tagName}`,
+            );
+        }
         // the star is the only 10-point polygon (5 tips + 5 inner corners)
         const polys = [...svg.querySelectorAll('polygon')];
         const starPoly = polys.find((p) => (p.getAttribute('points') ?? '').split(' ').length === 10);
