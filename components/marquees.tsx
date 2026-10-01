@@ -63,7 +63,7 @@ export function TechMarquee({ items, stack }: { items: MarqueeItem[]; stack: str
   const loop = [...items, ...items, ...items, ...items];
   const stackLoop = [...stack, ...stack, ...stack, ...stack];
   return (
-    <div className="relative z-20 w-full -rotate-[0.6deg] scale-[1.02] backface-hidden">
+    <div className="relative z-20 w-full -rotate-[0.6deg] scale-[1.02]">
       {/* deck 1: highlights, each tagged with its signal */}
       <div className="relative overflow-hidden border-y-3 border-ink bg-paper py-3 shadow-[0_6px_0_0_#0A0A0A] sm:py-4">
         <TapeLabel tone="paper">HIGHLIGHTS</TapeLabel>
@@ -107,7 +107,7 @@ export function SloganTape({ slogan, facts }: { slogan: string; facts: MarqueeIt
   return (
     <div className="relative mt-24 h-[128px] w-full overflow-x-clip sm:h-[156px]">
       {/* tape B (behind): status, ink */}
-      <div className="absolute inset-x-[-4%] top-[36%] -translate-y-1/2 -rotate-[2.4deg] overflow-hidden border-y-3 border-ink bg-ink py-2.5 sm:py-3 backface-hidden">
+      <div className="absolute inset-x-[-4%] top-[36%] -translate-y-1/2 -rotate-[2.4deg] overflow-hidden border-y-3 border-ink bg-ink py-2.5 sm:py-3">
         <div className="flex w-max items-center whitespace-nowrap animate-[marquee_38s_linear_infinite_reverse] hover:[animation-play-state:paused]">
           {factLoop.map((f, idx) => (
             <div key={idx} className="flex items-center" aria-hidden={idx >= facts.length}>
@@ -123,7 +123,7 @@ export function SloganTape({ slogan, facts }: { slogan: string; facts: MarqueeIt
         </div>
       </div>
       {/* tape A (front): the slogan, paper */}
-      <div className="absolute inset-x-[-4%] top-[62%] -translate-y-1/2 rotate-[1.6deg] overflow-hidden border-y-3 border-ink bg-paper py-3 shadow-[0_6px_0_0_#0A0A0A] sm:py-4 backface-hidden">
+      <div className="absolute inset-x-[-4%] top-[62%] -translate-y-1/2 rotate-[1.6deg] overflow-hidden border-y-3 border-ink bg-paper py-3 shadow-[0_6px_0_0_#0A0A0A] sm:py-4">
         <div className="flex w-max items-center whitespace-nowrap animate-[marquee_34s_linear_infinite] hover:[animation-play-state:paused]">
           {[...Array(8)].map((_, i) => (
             <div key={i} className="flex items-center" aria-hidden={i > 0}>

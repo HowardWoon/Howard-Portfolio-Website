@@ -653,6 +653,21 @@ export default function BuildStory() {
               <span aria-hidden className="bs-seg bs-stamp bs-stamp-mint" style={seg(0.93, 0.98)}>
                 SHIPPED
               </span>
+
+              {/* UM Logo Sticker */}
+              <div
+                className="absolute bottom-4 right-4 w-[56px] h-[56px] sm:w-[72px] sm:h-[72px] bg-paper border-[2px] sm:border-3 border-ink shadow-[2px_2px_0_0_#0A0A0A] sm:shadow-[4px_4px_0_0_#0A0A0A] rounded-full flex items-center justify-center p-2 rotate-[-12deg] z-20 pointer-events-none bs-seg bs-fade-in"
+                style={seg(0.88, 0.94)}
+                aria-hidden
+              >
+                <Image
+                  src="/images/logos/um_logo.png"
+                  alt="Universiti Malaya"
+                  width={64}
+                  height={64}
+                  className="object-contain w-full h-full"
+                />
+              </div>
             </div>
           </div>
 

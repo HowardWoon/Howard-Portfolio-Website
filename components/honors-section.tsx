@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import Image from 'next/image';
 import { m, AnimatePresence } from 'framer-motion';
 import { useInteractionSelect } from '@/lib/interaction-store';
 import { BauhausSolid } from './fx/bauhaus-solid';
@@ -643,11 +644,26 @@ export default function HonorsSection() {
 
                       <div className="relative z-10 flex flex-col flex-1 p-4 xs:p-6 sm:p-7">
                         {/* Title & Body */}
-                        <div className="space-y-2 mb-4">
-                          <h3 className="font-display text-2xl font-extrabold uppercase tracking-[-0.02em] leading-[1.05] text-ink">
-                            {item.title}
-                          </h3>
-                          <p className="text-sm font-mono font-bold text-pop-blue">{item.issuingBody}</p>
+                        <div className="flex gap-4 justify-between items-start mb-4">
+                          <div className="space-y-2">
+                            <h3 className="font-display text-2xl font-extrabold uppercase tracking-[-0.02em] leading-[1.05] text-ink">
+                              {item.title}
+                            </h3>
+                            <p className="text-sm font-mono font-bold text-pop-blue">{item.issuingBody}</p>
+                          </div>
+                          {(item.id === 'deans-list' || item.id === 'kmns-distinction') && (
+                            <div className="w-14 h-14 bg-paper border-3 border-ink shadow-[2px_2px_0_0_#0A0A0A] rounded-full overflow-hidden shrink-0 flex items-center justify-center p-2 mt-1 -mr-1">
+                              <Image
+                                src={
+                                  item.id === 'deans-list' ? '/images/logos/um_logo.png' : '/images/logos/kmns_logo.png'
+                                }
+                                alt={item.id === 'deans-list' ? 'UM Logo' : 'KMNS Logo'}
+                                width={48}
+                                height={48}
+                                className="object-contain w-full h-full"
+                              />
+                            </div>
+                          )}
                         </div>
 
                         <div className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium mb-6">
