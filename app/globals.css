@@ -2655,6 +2655,196 @@ html[data-xray-mode]
 .bs-underline {
   background: linear-gradient(transparent 62%, #ff9f1c 62%, #ff9f1c 92%, transparent 92%);
 }
+/* R24 Signal Key as a printer's colour bar (components/signal-key.tsx): ruled cells on a strict grid. The grid is
+   2px wider and taller than its box so the last column's and row's rules fall under the card's own 3px border. */
+.signal-key-grid {
+  display: grid;
+  /* a white rule under the ink header, so the ink (INDUSTRY) band reads as a bar, not a hole */
+  border-top: 3px solid #fff;
+  grid-template-columns: repeat(var(--sk-c1), minmax(0, 1fr));
+  margin: 0 -2px -2px 0;
+}
+.signal-key-cell {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-right: 2px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
+}
+.signal-key-cell:last-child {
+  grid-column: span var(--sk-s1);
+}
+.signal-key-band {
+  display: block;
+  height: 10px;
+  border-bottom: 2px solid var(--ink);
+}
+@media (min-width: 640px) {
+  .signal-key-grid {
+    grid-template-columns: repeat(var(--sk-c2), minmax(0, 1fr));
+  }
+  .signal-key-cell:last-child {
+    grid-column: span var(--sk-s2);
+  }
+}
+@media (min-width: 1024px) {
+  .signal-key-grid {
+    grid-template-columns: repeat(var(--sk-c3), minmax(0, 1fr));
+  }
+  .signal-key-cell:last-child {
+    grid-column: span var(--sk-s3);
+  }
+}
+@media (min-width: 1280px) {
+  .signal-key-grid {
+    grid-template-columns: repeat(var(--sk-c4), minmax(0, 1fr));
+  }
+  .signal-key-cell:last-child {
+    grid-column: auto;
+  }
+}
+
+/* R24 Build Manifest: the five scenes as a storyboard under the title (film-frame cells like the Field Reels).
+   Flat ink cells, white 2px rules, scene colour band, hard offset on hover; blue only for the interactive cue. */
+.bs-manifest {
+  display: none;
+  margin: 28px auto 0;
+  width: min(1120px, 100%);
+  text-align: left;
+}
+.bs-manifest-cell {
+  display: flex;
+  text-align: left;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: 2px solid #fff;
+  border-radius: 10px;
+  background: #121212;
+  color: #fff;
+  cursor: pointer;
+  transition:
+    translate 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.bs-manifest-cell:hover {
+  translate: -2px -2px;
+  box-shadow: 4px 4px 0 0 #fff;
+}
+.bs-manifest-cell:focus-visible {
+  outline: 3px solid var(--pop-blue, #2b4bff);
+  outline-offset: 3px;
+}
+.bs-manifest-band {
+  display: block;
+  height: 8px;
+  flex: none;
+  border-bottom: 2px solid #fff;
+}
+.bs-manifest-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 9px 10px 0;
+  font:
+    800 0.8rem/1.2 var(--font-mono),
+    monospace;
+  letter-spacing: 0.1em;
+}
+.bs-manifest-n {
+  color: rgb(255 255 255 / 0.62);
+}
+.bs-manifest-go {
+  margin-left: auto;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--pop-blue);
+  color: #fff;
+  transition: translate 0.15s ease;
+}
+.bs-manifest-cell:hover .bs-manifest-go {
+  translate: 3px 0;
+}
+.bs-manifest-frames {
+  padding: 4px 10px 0;
+  font:
+    700 0.8rem/1.2 var(--font-mono),
+    monospace;
+  letter-spacing: 0.06em;
+  color: rgb(255 255 255 / 0.62);
+  font-variant-numeric: tabular-nums;
+}
+.bs-manifest-caption {
+  display: none;
+  padding: 8px 10px 10px;
+  font:
+    600 0.8rem/1.45 var(--font-mono),
+    monospace;
+  color: rgb(255 255 255 / 0.82);
+}
+/* phones with room: a compact 2-column grid of scene names */
+@media (max-width: 639px) and (min-height: 760px) {
+  .bs-manifest {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 22px;
+  }
+  .bs-manifest li:last-child {
+    grid-column: span 2;
+  }
+  .bs-manifest-head {
+    gap: 6px;
+    padding: 9px 8px;
+    letter-spacing: 0.04em;
+  }
+  .bs-manifest-go {
+    padding: 1px 4px;
+  }
+  .bs-manifest-frames {
+    display: none;
+  }
+}
+/* tablets and desktops: one row of five frames */
+@media (min-width: 640px) and (min-height: 600px) {
+  .bs-manifest {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .bs-manifest-frames {
+    padding-bottom: 10px;
+  }
+}
+/* tablets: five cells are ~140 px wide, so the scene name gets its own line under the number and the play chip */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .bs-manifest-head {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+  .bs-manifest-key {
+    order: 3;
+    flex-basis: 100%;
+  }
+}
+/* tall desktops and tall tablets: each frame also carries its scene caption */
+@media (min-width: 1024px) and (min-height: 800px), (min-width: 640px) and (min-height: 900px) {
+  .bs-manifest-frames {
+    padding-bottom: 0;
+  }
+  .bs-manifest-caption {
+    display: block;
+  }
+}
+/* R24 smoothness: on desktop every moving story layer gets its own compositor layer, so a scroll step moves layers
+   instead of repainting the 1920 px stage (measured: slow frames 24 -> 13 per pass, worst 83 -> 67 ms incl. Projects) */
+@media (min-width: 1024px) {
+  .bs-track:not([data-static]) .bs-stage .bs-seg:not(line) {
+    will-change: transform, opacity;
+  }
+}
+
 .bs-scroll-cue {
   position: relative;
 }

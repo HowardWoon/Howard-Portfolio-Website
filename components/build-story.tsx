@@ -54,6 +54,14 @@ const SCENES = [
 
 const FRAMES = 1200;
 const BOUNDS = [0.2, 0.4, 0.6, 0.8];
+/** R24 Build Manifest: the frame where each scene has settled (a jump lands here, the story plays on from it) */
+const LAND = [0.16, 0.34, 0.55, 0.76, 1];
+const frameRange = (i: number) => {
+  const from = i === 0 ? 0 : BOUNDS[i - 1];
+  const to = BOUNDS[i] ?? 1;
+  const f = (p: number) => String(Math.round(p * FRAMES)).padStart(4, '0');
+  return `${f(from)}-${f(to)}`;
+};
 
 /** a layer's local timeline: 0 before `a`, 1 after `b` (consumed by .bs-seg in globals.css) */
 const seg = (a: number, b: number, extra?: Record<string, string | number>) =>
@@ -219,6 +227,7 @@ export default function BuildStory() {
   const trackRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<HTMLSpanElement>(null);
+  const manifestRef = useRef<HTMLOListElement>(null);
   const calm = useCalm();
 
   useEffect(() => {
@@ -239,7 +248,11 @@ export default function BuildStory() {
       stage.style.setProperty('--p', p.toFixed(4));
       // scene 0 = the title card, before the ID has landed
       const scene = p < 0.06 ? '0' : String(BOUNDS.filter((b) => p >= b).length + 1);
-      if (stage.dataset.scene !== scene) stage.dataset.scene = scene;
+      if (stage.dataset.scene !== scene) {
+        stage.dataset.scene = scene;
+        // the manifest only takes clicks / focus while the title card is up
+        if (manifestRef.current) manifestRef.current.inert = scene !== '0';
+      }
       if (showFrame.matches) frame.textContent = String(Math.round(p * FRAMES)).padStart(4, '0');
     };
     const still = () => calm || reduce.matches;
@@ -279,6 +292,17 @@ export default function BuildStory() {
     };
   }, [calm]);
 
+  /** R24 Build Manifest: fast-forward (or rewind) the playhead to a scene; the story plays through on the way */
+  const playTo = (i: number) => {
+    const track = trackRef.current;
+    if (!track) return;
+    const top = track.getBoundingClientRect().top + window.scrollY;
+    const y = Math.round(top + (track.offsetHeight - window.innerHeight) * LAND[i]);
+    const still = calm || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (window.__lenis) window.__lenis.scrollTo(y, { duration: still ? 0 : 1.6, immediate: still, force: true });
+    else window.scrollTo({ top: y, behavior: still ? 'instant' : 'smooth' });
+  };
+
   return (
     <section aria-labelledby="build-story-title" className="bs-section relative w-full bg-ink text-white">
       {/* Screen readers get the story as text; the stage below is visual only */}
@@ -315,6 +339,34 @@ export default function BuildStory() {
               aria-hidden
               className="bs-scroll-cue mx-auto mt-6 block h-10 w-6 rounded-full border-2 border-white"
             />
+            {/* R24 Build Manifest: the five scenes as a storyboard (owner: "fantastic, many details and info"). Each
+                cell = scene colour, number, name, its frame range on the 1200-frame playhead and its caption (the same
+                words the caption bar shows). A click plays the story to that scene. */}
+            <ol ref={manifestRef} aria-label="Build manifest" className="bs-manifest">
+              {SCENES.map((s, i) => (
+                <li key={s.n}>
+                  <button
+                    type="button"
+                    onClick={() => playTo(i)}
+                    aria-label={`Play to scene ${s.n}, ${s.key}`}
+                    className="bs-manifest-cell"
+                  >
+                    <span aria-hidden className={`bs-manifest-band ${s.swatch}`} />
+                    <span className="bs-manifest-head">
+                      <span className="bs-manifest-n">{s.n}</span>
+                      <span className="bs-manifest-key">{s.key}</span>
+                      <span aria-hidden className="bs-manifest-go">
+                        ▸
+                      </span>
+                    </span>
+                    <span className="bs-manifest-frames">
+                      FRAME <span className="whitespace-nowrap">{frameRange(i)}</span>
+                    </span>
+                    <span className="bs-manifest-caption">{s.caption}</span>
+                  </button>
+                </li>
+              ))}
+            </ol>
           </div>
 
           {/* ---------------------------------------------------------------- 01 ENROL + 02 PARSE: the student ID */}
