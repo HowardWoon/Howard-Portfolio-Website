@@ -560,10 +560,13 @@ export default function BuildStory() {
             <FieldReel items={FIELD_REEL} side="l" no={1} seg={seg} />
             <FieldReel items={BUILD_REEL} side="r" no={2} seg={seg} />
             <div className="bs-diagram">
-              {/* R28 Centerpiece Watermark: Massive UM logo floating in the blueprint background */}
+              {/* R28 Centerpiece Watermark: Massive UM logo expands identically to the impact ring */}
               <div
-                className="bs-seg absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[240px] h-[240px] sm:w-[380px] sm:h-[380px] pointer-events-none z-0"
-                style={seg(0.4, 0.5, { opacity: 'calc(var(--t) * 0.15)' })}
+                className="bs-seg absolute top-[55%] left-[50%] w-[40vmin] h-[40vmin] -ml-[20vmin] -mt-[20vmin] pointer-events-none z-0"
+                style={seg(0.4, 0.47, {
+                  opacity: 'calc(var(--t) * 0.15)',
+                  transform: 'scale(calc(0.2 + var(--e) * 2.6))',
+                })}
               >
                 <div className="w-full h-full animate-[spin_60s_linear_infinite]">
                   <Image
