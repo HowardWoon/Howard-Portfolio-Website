@@ -179,11 +179,9 @@ html.lenis body {
 /* ---------- Marquee ---------- */
 @keyframes marquee {
   0% {
-    will-change: transform;
     transform: translateX(0%);
   }
   100% {
-    will-change: transform;
     transform: translateX(-50%);
   }
 }
