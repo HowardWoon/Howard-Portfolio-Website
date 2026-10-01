@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { StickerPeel } from './sticker-peel';
 
 /**
  * R21: every honour gets an emblem whose FORM says what it is, so no two kinds of honour look alike:
@@ -120,7 +121,8 @@ export function HonorEmblem({ kind, value, label }: { kind: EmblemKind; value: R
   const at = VALUE_AT[kind];
   return (
     <div className="flex items-center gap-4">
-      <div className="relative h-[104px] w-[104px] shrink-0 -rotate-3 drop-shadow-[3px_3px_0_#0A0A0A]">
+      {/* R26: the emblem is a sticker you can lift and peel (StickerPeel, after React Bits) */}
+      <StickerPeel className="relative h-[104px] w-[104px] shrink-0 -rotate-3 drop-shadow-[3px_3px_0_#0A0A0A]">
         <svg aria-hidden viewBox="0 0 120 120" className="absolute inset-0 h-full w-full overflow-visible">
           <Shape kind={kind} />
         </svg>
@@ -130,7 +132,7 @@ export function HonorEmblem({ kind, value, label }: { kind: EmblemKind; value: R
         >
           {value}
         </span>
-      </div>
+      </StickerPeel>
       <span className="max-w-[12rem] font-mono text-xs font-bold uppercase tracking-[0.1em] text-ink-muted">
         {label}
       </span>

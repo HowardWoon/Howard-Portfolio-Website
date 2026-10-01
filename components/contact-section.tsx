@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { m } from 'framer-motion';
 import { SplitWords } from './fx/split-words';
+import { DispatchRail } from './dispatch-rail';
 import { BauhausSolid } from './fx/bauhaus-solid';
 import dynamic from 'next/dynamic';
 import { FX } from '@/lib/fx';
@@ -541,6 +542,16 @@ export default function ContactSection() {
                     </div>
                   ) : null}
                 </div>
+
+                {/* R26: the form's fields as numbered steps (after React Bits Stepper) */}
+                <DispatchRail
+                  done={[
+                    formData.name.trim() !== '',
+                    EMAIL_SHAPE.test(formData.email.trim()),
+                    formData.message.trim() !== '',
+                    formStatus === 'success',
+                  ]}
+                />
 
                 <button
                   type="submit"

@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { Activity, Check, Clock3, Copy, FileText, Moon, ScanLine, Sun, UserRound } from 'lucide-react';
 import { personalDetails } from '@/lib/site-data';
 import { openResume } from '@/lib/resume';
+import { flapTo } from '@/lib/split-flap';
 
 /**
  * R22 System Status Bar (lecturer pattern 4 + "quick recommendation"): a hardware-style control strip under the
@@ -211,8 +212,9 @@ export default function SystemStatusBar() {
   useEffect(() => {
     // R24: a text write invalidates layout, so the clock writes only when the text really changes and does not tick
     // at all while the bar is off screen (it used to rewrite both clocks every second during every scroll: CI P0-01)
+    // R26: the clocks are split-flap boards (lib/split-flap.ts): only the digits that change flip
     const write = (el: HTMLSpanElement | null, text: string) => {
-      if (el && el.textContent !== text) el.textContent = text;
+      if (el && el.dataset.text !== text) flapTo(el, text);
     };
     const tick = () => {
       const now = new Date();

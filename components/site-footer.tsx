@@ -1,20 +1,43 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { Github, Linkedin, FileText } from 'lucide-react';
 import { SignalKey } from './signal-key';
 import { openResume } from '@/lib/resume';
+import { flapIn } from '@/lib/split-flap';
+import { DotField } from './fx/dot-field';
 
 export function SiteFooter() {
   const linkedInUrl = 'https://www.linkedin.com/in/howard-woon-hao-zhe-730b9337a/';
+  const metaRef = useRef<HTMLDivElement>(null);
+
+  // R26: the document metadata arrives like a split-flap departure board the first time the footer is seen
+  // (lib/split-flap.ts; the server HTML and screen readers keep the plain text; instant for reduced motion / Calm)
+  useEffect(() => {
+    const box = metaRef.current;
+    if (!box) return;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) return;
+        io.disconnect();
+        for (const el of box.querySelectorAll<HTMLElement>('[data-flap]')) flapIn(el, el.dataset.flap!);
+      },
+      { threshold: 0.6 },
+    );
+    io.observe(box);
+    return () => io.disconnect();
+  }, []);
 
   return (
     <footer
       data-dark-surface
       className="fx-lamp relative z-10 bg-ink text-white mt-0 pt-16 sm:pt-20 pb-[max(3.5rem,calc(var(--safe-bottom)+2rem))] px-4 xs:px-5 sm:px-10 lg:px-16"
     >
-      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-start gap-14 lg:gap-10">
-        {/* Left: System of Record / Title Block (blueprint-style drawing frame) */}
-        <div className="flex-1 w-full border-3 border-white rounded-[22px] overflow-hidden flex flex-col relative shadow-[5px_5px_0_0_#FFFFFF] sm:shadow-[8px_8px_0_0_#FFFFFF]">
+      {/* R26: a field of white squares the mouse pushes aside (DotGrid / Vanta Dots, brutalist remix) */}
+      <DotField />
+      <div className="relative z-[1] max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-start gap-14 lg:gap-10">
+        {/* Left: System of Record / Title Block (blueprint-style drawing frame); bg-ink keeps the dots out of it */}
+        <div className="flex-1 w-full border-3 border-white rounded-[22px] overflow-hidden flex flex-col relative bg-ink shadow-[5px_5px_0_0_#FFFFFF] sm:shadow-[8px_8px_0_0_#FFFFFF]">
           {/* Header Bar */}
           <div className="flex flex-wrap items-center justify-between border-b-3 border-white bg-white/[0.04] px-6 py-5 gap-4">
             <span className="text-sm font-mono font-extrabold text-white tracking-[0.12em] uppercase">
@@ -58,13 +81,22 @@ export function SiteFooter() {
               <div className="text-xs font-mono font-bold text-white/60 tracking-[0.12em] mb-4 uppercase">
                 Document Metadata
               </div>
-              <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 xs:gap-x-6 gap-y-3 text-sm font-mono font-semibold [overflow-wrap:anywhere]">
+              <div
+                ref={metaRef}
+                className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-4 xs:gap-x-6 gap-y-3 text-sm font-mono font-semibold [overflow-wrap:anywhere]"
+              >
                 <span className="text-white/60">DOCUMENT</span>
-                <span className="text-white">HWZ-2026</span>
+                <span data-flap="HWZ-2026" className="text-white">
+                  HWZ-2026
+                </span>
                 <span className="text-white/60">REVISION</span>
-                <span className="text-white">01.04</span>
+                <span data-flap="01.04" className="text-white">
+                  01.04
+                </span>
                 <span className="text-white/60">NODE</span>
-                <span className="text-white">KUL-MY-01</span>
+                <span data-flap="KUL-MY-01" className="text-white">
+                  KUL-MY-01
+                </span>
               </div>
             </div>
           </div>
@@ -148,7 +180,7 @@ export function SiteFooter() {
       </div>
 
       {/* R21 colophon: every colour on this site means one thing (lib/signal.ts) */}
-      <div className="max-w-7xl mx-auto mt-6">
+      <div className="relative z-[1] max-w-7xl mx-auto mt-6">
         <SignalKey className="w-full" compact />
       </div>
     </footer>

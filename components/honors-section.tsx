@@ -10,6 +10,7 @@ import { FX, SPRING_STAMP } from '@/lib/fx';
 import { SIGNAL, type Signal } from '@/lib/signal';
 import { SignalKey } from './signal-key';
 import { HonorEmblem, type EmblemKind } from './honor-emblem';
+import { CertificateDeck, type DeckCert } from './certificate-deck';
 import { AnimatedCounter } from './animated-counter';
 import { ResultsBoard, RolesGrid, Transcript } from './honors-academic';
 import { AmbientOrbits } from './fx/ambient-orbits';
@@ -50,6 +51,13 @@ interface HonorItem {
   certificateUrl?: string;
   icon: LucideIcon;
 }
+
+/** R26: the image certificates (real pixel sizes), shown as the certificate deck; titles come from honorsList */
+const CERT_SIZE: Record<string, [number, number]> = {
+  '/certificates/Sales_Intelligence_Winner_-_2nd_Place.png': [2000, 1414],
+  '/certificates/UM_GAME_JAM_2026_HOWARD_WOON_HAO_ZHE.png': [1450, 1011],
+  '/certificates/chem_creative.png': [729, 1032],
+};
 
 const honorsList: HonorItem[] = [
   {
@@ -269,6 +277,15 @@ const honorsList: HonorItem[] = [
     icon: Shield,
   },
 ];
+
+const DECK: DeckCert[] = honorsList
+  .filter((h) => h.certificateUrl && CERT_SIZE[h.certificateUrl])
+  .map((h) => ({
+    title: h.title,
+    src: h.certificateUrl!,
+    w: CERT_SIZE[h.certificateUrl!][0],
+    h: CERT_SIZE[h.certificateUrl!][1],
+  }));
 
 /**
  * Certificate lightbox — a skeuomorphic "taped paper" on a dark desk.
@@ -494,7 +511,11 @@ export default function HonorsSection() {
           </div>
         </div>
 
-        <SignalKey only={['podium', 'qualifier', 'academic']} className="w-fit max-w-full" />
+        {/* R26: the colour key and the certificate deck (CardSwap + PixelTransition, after React Bits) side by side */}
+        <div className="flex flex-col items-start gap-8 lg:flex-row lg:justify-between">
+          <SignalKey only={['podium', 'qualifier', 'academic']} className="w-fit max-w-full" />
+          <CertificateDeck certs={DECK} onOpen={setSelectedCert} />
+        </div>
 
         {/* Interactive Category Keys (clay) */}
         <div className="fx-card-grid grid grid-cols-1 md:grid-cols-3 gap-5">

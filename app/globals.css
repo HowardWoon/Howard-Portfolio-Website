@@ -3355,3 +3355,385 @@ html[data-xray-mode]
     display: none;
   }
 }
+
+/* R26 split-flap board (lib/split-flap.ts, after React Bits SplitFlapText): ink cells, white glyphs, a hinge line,
+   two half-flaps that fold on a change (transform only). */
+.sf-board {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-variant-numeric: tabular-nums;
+}
+.sf-cell {
+  position: relative;
+  display: inline-block;
+  width: 1.2em;
+  height: 1.6em;
+  font-size: 1.08em;
+  border-radius: 3px;
+  perspective: 140px;
+  color: #fff;
+}
+.sf-half {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 3px;
+  background: var(--sf-bg, var(--ink));
+  line-height: 1;
+  backface-visibility: hidden;
+  transform-origin: 50% 50%;
+}
+.sf-sep::before,
+.sf-half::before {
+  content: attr(data-c);
+}
+.sf-top {
+  clip-path: inset(0 0 50% 0);
+}
+.sf-bot {
+  clip-path: inset(50% 0 0 0);
+}
+.sf-fold,
+.sf-drop {
+  z-index: 2;
+  visibility: hidden;
+}
+.sf-cell::after {
+  content: '';
+  position: absolute;
+  inset: 50% 0 auto;
+  z-index: 3;
+  height: 1px;
+  background: #3a3a3a;
+}
+.sf-go .sf-fold {
+  visibility: visible;
+  animation: sf-fold 0.16s ease-in forwards;
+}
+.sf-go .sf-drop {
+  visibility: visible;
+  transform: rotateX(90deg);
+  animation: sf-drop 0.16s 0.15s ease-out forwards;
+}
+@keyframes sf-fold {
+  to {
+    transform: rotateX(-90deg);
+  }
+}
+@keyframes sf-drop {
+  from {
+    transform: rotateX(90deg);
+  }
+  to {
+    transform: rotateX(0deg);
+  }
+}
+.sf-sep {
+  padding: 0 1px;
+}
+/* on an ink surface the tiles are raised a step (and carry a white rim) so the board still reads */
+[data-dark-surface] .sf-cell {
+  --sf-bg: #262626;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.35);
+}
+@media (prefers-reduced-motion: reduce) {
+  .sf-go .sf-fold,
+  .sf-go .sf-drop {
+    animation: none;
+    visibility: hidden;
+  }
+}
+
+/* a board never breaks mid-word / mid-time: the label beside it wraps instead */
+.sf-board {
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+/* R26 StickerPeel (components/sticker-peel.tsx): the honour emblems lift off the page, peel up under a drag and spring
+   back. Individual translate / rotate / scale properties compose with the emblem's own -3deg tilt. The white die-cut
+   edge + longer hard shadow only show while a sticker is lifted. */
+.sticker {
+  -webkit-user-select: none;
+  user-select: none;
+  transition:
+    translate 0.25s ease,
+    rotate 0.25s ease,
+    scale 0.25s ease,
+    filter 0.2s ease;
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html:not([data-motion='calm']) .sticker {
+    cursor: grab;
+  }
+  html:not([data-motion='calm']) .sticker:hover {
+    translate: -2px -3px;
+    rotate: -3deg;
+    scale: 1.05;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion='calm']) .sticker:hover,
+  html:not([data-motion='calm']) .sticker[data-sticker] {
+    filter: drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff)
+      drop-shadow(0 -1.5px 0 #fff) drop-shadow(7px 7px 0 #0a0a0a);
+  }
+  html:not([data-motion='calm']) .sticker[data-sticker='lift'] {
+    translate: -2px -4px;
+    rotate: -4deg;
+    scale: 1.06;
+  }
+  html:not([data-motion='calm']) .sticker[data-sticker='drag'] {
+    z-index: 5;
+    cursor: grabbing;
+    translate: var(--sx, 0) var(--sy, 0);
+    rotate: var(--sr, 0deg);
+    scale: 1.1;
+    transition:
+      scale 0.2s ease,
+      filter 0.2s ease;
+  }
+  html:not([data-motion='calm']) .sticker[data-sticker='return'] {
+    transition:
+      translate 0.6s cubic-bezier(0.34, 1.8, 0.64, 1),
+      rotate 0.6s cubic-bezier(0.34, 1.8, 0.64, 1),
+      scale 0.3s ease,
+      filter 0.3s ease;
+  }
+}
+
+/* R26 certificate deck (components/certificate-deck.tsx, after React Bits CardSwap + PixelTransition): a fanned stack
+   of real certificates; the front card pops into paper pixels (step-end, no fade), drops to the back, the next is
+   revealed pixel by pixel. */
+.cert-deck {
+  position: relative;
+  width: min(380px, 100%);
+  padding: 22px 0 0 30px;
+}
+.cert-deck-stack {
+  position: relative;
+  aspect-ratio: 4 / 3.5;
+}
+.cert-card {
+  position: absolute;
+  inset: 0;
+  z-index: calc(10 - var(--depth));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 3px solid var(--ink);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 5px 5px 0 0 var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transform: translate(calc(var(--depth) * -14px), calc(var(--depth) * -11px)) rotate(calc(var(--depth) * -2.2deg));
+  transition: transform 0.55s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+.cert-card[aria-hidden='true'] {
+  pointer-events: none;
+}
+.cert-card:focus-visible {
+  outline: 3px solid var(--pop-blue);
+  outline-offset: 3px;
+}
+.cert-card-band {
+  flex: none;
+  height: 10px;
+  border-bottom: 2px solid var(--ink);
+  background: var(--pop-yellow);
+}
+.cert-card-photo {
+  flex: 1;
+  min-height: 0;
+  padding: 8px;
+  background: var(--paper-cream);
+}
+.cert-card-title {
+  flex: none;
+  padding: 7px 10px;
+  border-top: 2px solid var(--ink);
+  color: var(--ink);
+  font:
+    800 0.8rem/1.25 var(--font-mono),
+    monospace;
+  letter-spacing: 0.04em;
+}
+.cert-card-pixels {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(7, 1fr);
+  pointer-events: none;
+}
+.cert-card-pixels > span {
+  opacity: 0;
+  background: var(--paper-cream);
+  box-shadow: inset 0 0 0 1px rgb(10 10 10 / 0.12);
+}
+.cert-deck[data-phase='cover'] .cert-card-pixels > span {
+  opacity: 1;
+  transition: opacity 0.06s calc(var(--d) * 360ms) step-end;
+}
+.cert-deck[data-phase='reveal'] .cert-card-pixels > span {
+  animation: cert-px-out 0.06s calc(var(--d) * 360ms) step-end both;
+}
+@keyframes cert-px-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+.cert-deck-next {
+  position: relative;
+  z-index: 12;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  margin-top: 14px;
+  padding: 0 12px;
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 3px 3px 0 0 var(--ink);
+  transition:
+    translate 0.12s ease,
+    box-shadow 0.12s ease;
+}
+.cert-deck-next svg {
+  color: var(--pop-blue);
+}
+.cert-deck-next:active {
+  translate: 3px 3px;
+  box-shadow: 0 0 0 0 var(--ink);
+}
+.cert-deck-next:focus-visible {
+  outline: 3px solid var(--pop-blue);
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cert-card {
+    transition: none;
+  }
+}
+
+/* R26 dispatch rail (components/dispatch-rail.tsx, after React Bits Stepper) */
+.dispatch-rail {
+  display: flex;
+  align-items: center;
+}
+.dispatch-rail > li {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  min-width: 0;
+}
+.dispatch-rail > li:first-child {
+  flex: none;
+}
+.dispatch-rail-bar {
+  position: relative;
+  flex: 1;
+  min-width: 10px;
+  height: 8px;
+  margin: 0 8px;
+  overflow: hidden;
+  border: 2px solid var(--ink);
+  border-radius: 3px;
+  background: #fff;
+}
+.dispatch-rail-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s ease;
+}
+.dispatch-rail-bar[data-on]::after {
+  transform: scaleX(1);
+}
+.dispatch-rail-step {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+}
+.dispatch-rail-dot {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font:
+    800 0.8rem/1 var(--font-mono),
+    monospace;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+.dispatch-rail [data-state='done'] .dispatch-rail-dot {
+  background: var(--ink);
+  color: #fff;
+}
+.dispatch-rail [data-state='current'] .dispatch-rail-dot {
+  background: var(--pop-blue);
+  color: #fff;
+  box-shadow: 2px 2px 0 0 var(--ink);
+}
+.dispatch-rail-label {
+  color: var(--ink);
+  font:
+    800 0.8rem/1 var(--font-mono),
+    monospace;
+  letter-spacing: 0.08em;
+}
+.dispatch-rail [data-state='todo'] .dispatch-rail-label {
+  color: #555;
+}
+.dispatch-rail-now {
+  display: none;
+}
+/* phones: the rail shows the numbered steps only; the current step is named in one line under it */
+@media (max-width: 479px) {
+  .dispatch-rail-label {
+    display: none;
+  }
+  .dispatch-rail-now {
+    display: block;
+    margin-top: 8px;
+    color: var(--ink);
+    font:
+      800 0.8rem/1 var(--font-mono),
+      monospace;
+    letter-spacing: 0.08em;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dispatch-rail-bar::after {
+    transition: none;
+  }
+}
+
+/* R26 contour field (components/fx/contour-field.tsx): rendered at 1/8 resolution, scaled up as hard pixels */
+.bs-contour-layer {
+  opacity: calc(1 - var(--t));
+}
+.bs-contour {
+  image-rendering: pixelated;
+}
+.bs-track[data-static] .bs-contour-layer {
+  display: none;
+}
