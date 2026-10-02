@@ -20,7 +20,7 @@ import { useCalm } from '@/lib/motion-pref';
  */
 const CRESTS = {
   um: { src: '/images/logos/um_logo.png', name: 'UNIVERSITI MALAYA' },
-  kmns: { src: '/images/logos/kmns_logo.png', name: 'KOLEJ MATRIKULASI NEGERI SEMBILAN' },
+  kmns: { src: '/images/logos/kmns_logo_clear.png', name: 'KOLEJ MATRIKULASI NEGERI SEMBILAN' },
 } as const;
 
 const SIZES = {
