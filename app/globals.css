@@ -3633,11 +3633,6 @@ html[data-motion='calm'] .honors-tally .tally-trophy g:first-child {
    A paper lid closes in a wave of columns, the UM crest is read as pixel art and decoded by a scan bar into the real
    crest, then it expands and the lid lifts in the same wave. All scroll-scrubbed (rewinds), transform / opacity /
    clip-path only. */
-@property --scan {
-  syntax: '<integer>';
-  inherits: false;
-  initial-value: 0;
-}
 .bs-scan-layer {
   z-index: 12;
 }
@@ -3721,6 +3716,7 @@ html[data-motion='calm'] .honors-tally .tally-trophy g:first-child {
   position: relative;
   width: 100%;
   height: 100%;
+  container-type: size; /* the scan bar travels in cqh: transform, never top (top re-laid out every frame) */
 }
 /* the raw read: the 32 px crest blown up with hard pixels */
 .bs-scan-pixel {
@@ -3738,9 +3734,10 @@ html[data-motion='calm'] .honors-tally .tally-trophy g:first-child {
   position: absolute;
   left: -6%;
   right: -6%;
-  top: calc(var(--t) * 100%);
+  top: 0;
   height: 6px;
   margin-top: -3px;
+  transform: translate3d(0, calc(var(--t) * 100cqh), 0);
   background: var(--pop-blue);
   border-block: 2px solid var(--ink);
   opacity: calc(min(1, var(--t) * 30) * min(1, (1 - var(--t)) * 30));
@@ -3756,8 +3753,6 @@ html[data-motion='calm'] .honors-tally .tally-trophy g:first-child {
   color: var(--ink);
   box-shadow: 4px 4px 0 0 var(--pop-blue);
   white-space: nowrap;
-  --scan: calc(var(--t) * 100);
-  counter-reset: scan var(--scan);
 }
 .bs-scan-chip {
   padding: 1px 6px;
@@ -3769,12 +3764,23 @@ html[data-motion='calm'] .honors-tally .tally-trophy g:first-child {
     monospace;
   letter-spacing: 0.14em;
 }
-.bs-scan-pct {
-  min-width: 4ch;
-  text-align: right;
+.bs-scan-meter {
+  --t: inherit;
+  position: relative;
+  width: 64px;
+  height: 12px;
+  border: 2px solid var(--ink);
+  border-radius: 3px;
+  overflow: hidden;
+  background: repeating-linear-gradient(90deg, #fff 0 6px, #e8e8e8 6px 8px);
 }
-.bs-scan-pct::after {
-  content: counter(scan) '%';
+.bs-scan-meter-fill {
+  --t: inherit;
+  position: absolute;
+  inset: 0;
+  background: var(--pop-blue);
+  transform-origin: left;
+  transform: scaleX(var(--t));
 }
 
 /* R30 Registrar Seal (components/institution-seal.tsx): the face presses onto its hard shadow under a mouse, like a

@@ -108,6 +108,16 @@ for (const [name, size] of [
   });
 }
 
+test('source: nothing in the crest scan / HUD lays out per scroll frame', () => {
+  const css = readFileSync('app/globals.css', 'utf8');
+  const scan = css.slice(css.indexOf('R31 CREST SCAN'), css.indexOf('R30 Registrar Seal'));
+  const hud = css.slice(css.indexOf('R31 HUD on the 03 / 04 diagram'), css.indexOf('R31 Honours Tally'));
+  // a scroll-driven top / left / counter re-lays out the page every frame (+layouts per phone fling, r17 P0-01)
+  expect(scan).not.toMatch(/top:\s*calc\(var\(--t\)/);
+  expect(scan).not.toMatch(/counter-reset/);
+  expect(hud).not.toMatch(/\.bs-hud-rings g\b/); // rotate the ring <svg> boxes, never an SVG <g>
+});
+
 test('source: the pit sleeps settled badges and never kicks them at random', () => {
   const src = readFileSync('components/pill-pit.tsx', 'utf8');
   expect(src).toMatch(/asleep/);
@@ -132,8 +142,9 @@ for (const [name, size] of [
           const inStage = cols.filter((c) => c.bottom > hud + 20).length;
           const op = parseFloat(getComputedStyle(document.querySelector('.bs-scan-in')!).opacity);
           const grow = parseFloat(getComputedStyle(document.querySelector('.bs-scan-grow')!).opacity);
-          // the readout's ::after prints counter(scan); the integer behind it is the registered --scan
-          const pct = Number(getComputedStyle(document.querySelector('.bs-scan-readout')!).getPropertyValue('--scan'));
+          // the readout's meter fills with the scan (a transform, never a changing number: no layout per frame)
+          const fill = getComputedStyle(document.querySelector('.bs-scan-meter-fill')!).transform;
+          const pct = fill === 'none' ? 100 : new DOMMatrix(fill).a * 100;
           const colsTop = document.querySelector('.bs-scan-cols')!.getBoundingClientRect().top;
           return {
             visible: op * grow,

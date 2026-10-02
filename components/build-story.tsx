@@ -616,7 +616,11 @@ export default function BuildStory() {
                 <div className="bs-seg bs-scan-readout" style={gapSeg(0.34, 0.62)}>
                   <span className="bs-scan-chip">SCAN</span>
                   <span className="font-mono text-xs font-extrabold tracking-[0.14em]">UNIVERSITI MALAYA</span>
-                  <span className="bs-scan-pct font-mono text-xs font-extrabold tabular-nums" />
+                  {/* a mechanical meter, not a counting number: a number that changes text every frame forces a
+                      layout per scroll frame (tests/r17 P0-01 phone budget) */}
+                  <span className="bs-scan-meter">
+                    <span className="bs-scan-meter-fill" />
+                  </span>
                 </div>
               </div>
             </div>
