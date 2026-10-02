@@ -61,9 +61,10 @@ const CERT_SIZE: Record<string, [number, number]> = {
 };
 
 /** R29: awards issued by an institution whose crest is on the site carry its Issuer Seal beside the title */
-const SEAL: Record<string, 'um' | 'kmns' | undefined> = {
-  'deans-list': 'um',
-  'kmns-distinction': 'kmns',
+const SEAL: Record<string, { crest: 'um' | 'kmns'; legend?: string } | undefined> = {
+  // the ring certifies the card's own result (both facts are on the card)
+  'deans-list': { crest: 'um', legend: 'UNIVERSITI MALAYA · 4.00 CGPA' },
+  'kmns-distinction': { crest: 'kmns' },
 };
 
 const honorsList: HonorItem[] = [
@@ -649,15 +650,25 @@ export default function HonorsSection() {
                       )}
 
                       <div className="relative z-10 flex flex-col flex-1 p-4 xs:p-6 sm:p-7">
-                        {/* Title & Body. R29: an institution's own award carries its Issuer Seal beside the title */}
-                        <div className="flex gap-4 justify-between items-start mb-4">
+                        {/* Title & Body. R30: an institution's own award carries its Registrar Seal beside the title
+                            (above it on phones, where the title needs the full width) */}
+                        <div
+                          className={`flex gap-4 justify-between items-start mb-4 ${SEAL[item.id] ? 'flex-col-reverse sm:flex-row' : ''}`}
+                        >
                           <div className="min-w-0 space-y-2">
                             <h3 className="font-display text-2xl font-extrabold uppercase tracking-[-0.02em] leading-[1.05] text-ink">
                               {item.title}
                             </h3>
                             <p className="text-sm font-mono font-bold text-pop-blue">{item.issuingBody}</p>
                           </div>
-                          {SEAL[item.id] ? <InstitutionSeal crest={SEAL[item.id]!} size="md" /> : null}
+                          {SEAL[item.id] ? (
+                            <InstitutionSeal
+                              crest={SEAL[item.id]!.crest}
+                              legend={SEAL[item.id]!.legend}
+                              size="ring"
+                              className="sm:-mt-1"
+                            />
+                          ) : null}
                         </div>
 
                         <div className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium mb-6">

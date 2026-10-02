@@ -3140,7 +3140,15 @@ html[data-xray-mode]
   white-space: nowrap;
   box-shadow: 3px 3px 0 0 #fff;
   opacity: min(1, calc(var(--t) * 4));
-  transform: translate(calc((1 - var(--e)) * var(--from-x) * 1cqw), calc((1 - var(--e)) * var(--from-y) * 1cqh));
+  /* R30: drops onto its box like a stamp (no cross-stage flight) */
+  transform: translateY(calc((1 - var(--e)) * -16px)) scale(calc(1.25 - var(--e) * 0.25));
+}
+/* R30: a box that carries a tag keeps its label clear of the tag's lower half */
+.bs-node:has(> .bs-dock) {
+  padding-top: 20px;
+}
+.bs-hub:has(> .bs-dock) .bs-hub-core {
+  padding-top: 18px;
 }
 /* on a side node the tag lines up with the node's outer edge, so a long name grows inwards, not off the stage */
 .bs-node[data-side='l'] > .bs-dock {
@@ -3163,6 +3171,10 @@ html[data-xray-mode]
   }
   .bs-node[data-side='r'] > .bs-dock {
     right: 4px;
+  }
+  /* R30: the tracked label ("GUARDRAILS") ran past its box on a 390 px phone */
+  .bs-node > .bs-node-label {
+    letter-spacing: 0.06em;
   }
 }
 
@@ -3448,6 +3460,16 @@ html[data-xray-mode]
 .bs-award {
   opacity: var(--t);
   transform: translateX(calc((1 - var(--e)) * 24px));
+}
+/* R30 Registrar Seal (components/institution-seal.tsx): the face presses onto its hard shadow under a mouse, like a
+   mechanical key (transform only; touch and reduced motion keep it still) */
+.registrar-seal .seal-face {
+  transition: transform 0.14s cubic-bezier(0.2, 0.9, 0.1, 1);
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .registrar-seal:hover .seal-face {
+    transform: translate(3%, 3%);
+  }
 }
 /* R29 Issuer Seal: the UM crest is stamped upright on the ID photo corner (scale + opacity only, no rotation) */
 .bs-crest {
@@ -4036,13 +4058,6 @@ a:focus-visible > .px-card > span {
   .bs-code .bs-type {
     white-space: normal;
     overflow-wrap: anywhere;
-  }
-}
-/* R28 P4: below 1024 px the project tags fly in from close by, so mid-flight they never leave the stage or cross a
-   label (they used to start up to 40 % of the stage away) */
-@media (max-width: 1023px) {
-  .bs-dock {
-    transform: translate(calc((1 - var(--e)) * var(--from-x) * 0.3cqw), calc((1 - var(--e)) * var(--from-y) * 0.3cqh));
   }
 }
 

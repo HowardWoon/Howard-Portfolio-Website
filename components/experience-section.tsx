@@ -712,7 +712,7 @@ export default function ExperienceSection() {
                             className={`flex items-center gap-2.5 px-4 py-2.5 rounded-2xl border-3 border-ink shadow-brutal-sm shrink-0 self-start ${a.soft}`}
                           >
                             {item.crest ? (
-                              <InstitutionSeal crest={item.crest} size="xs" />
+                              <InstitutionSeal crest={item.crest} size="pill" />
                             ) : (
                               <item.icon className="w-5 h-5 text-ink" strokeWidth={2.5} />
                             )}

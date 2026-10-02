@@ -84,22 +84,20 @@ const NODES = [
 // yellow podium, cyan qualifier / finalist, orange coursework.
 // R24: each tag is rendered INSIDE the box it docks on (`on`), sitting on that box's top edge, so a bigger font can
 // never slide a tag over the box's own label again (it did when tags had their own x / y).
+// R30: a tag drops straight onto its own box (it used to fly in from up to 40 % of the stage away and crossed the
+// film reels, the wires and other boxes' labels on the way)
 const DOCKS = [
-  { name: 'PROOFPAY', fill: 'bg-pop-yellow', on: 'client', fx: -40, fy: -20, a: 0.62 },
-  { name: 'SLOTIFY', fill: 'bg-pop-orange', on: 'services', fx: 40, fy: -20, a: 0.64 },
-  { name: 'CATFISH DETECTOR AI', fill: 'bg-pop-orange', on: 'data', fx: -40, fy: 10, a: 0.66 },
-  { name: 'SENSOR X SENSEI', fill: 'bg-pop-cyan', on: 'edge', fx: 40, fy: 10, a: 0.68 },
-  { name: 'BILAHUJAN', fill: 'bg-pop-cyan', on: 'hub', fx: 0, fy: -40, a: 0.7 },
-  { name: 'ZEROLAG', fill: 'bg-pop-yellow', on: 'guard', fx: 0, fy: 30, a: 0.72 },
+  { name: 'PROOFPAY', fill: 'bg-pop-yellow', on: 'client', a: 0.62 },
+  { name: 'SLOTIFY', fill: 'bg-pop-orange', on: 'services', a: 0.64 },
+  { name: 'CATFISH DETECTOR AI', fill: 'bg-pop-orange', on: 'data', a: 0.66 },
+  { name: 'SENSOR X SENSEI', fill: 'bg-pop-cyan', on: 'edge', a: 0.68 },
+  { name: 'BILAHUJAN', fill: 'bg-pop-cyan', on: 'hub', a: 0.7 },
+  { name: 'ZEROLAG', fill: 'bg-pop-yellow', on: 'guard', a: 0.72 },
 ] as const;
 
 function Dock({ on }: { on: string }) {
   return DOCKS.filter((d) => d.on === on).map((d) => (
-    <div
-      key={d.name}
-      className={`bs-seg bs-dock ${d.fill}`}
-      style={seg(d.a, d.a + 0.05, { '--from-x': d.fx, '--from-y': d.fy })}
-    >
+    <div key={d.name} className={`bs-seg bs-dock ${d.fill}`} style={seg(d.a, d.a + 0.05)}>
       {d.name}
     </div>
   ));
@@ -470,7 +468,7 @@ export default function BuildStory() {
                   <div className="bs-card bs-idcard relative overflow-hidden rounded-[22px] border-3 border-ink bg-paper text-ink">
                     <div className="flex items-center justify-between gap-2 border-b-3 border-ink bg-pop-orange px-4 py-2">
                       <div className="flex min-w-0 items-center gap-2">
-                        <InstitutionSeal crest="um" size="xs" />
+                        <InstitutionSeal crest="um" size="badge" stampIn={false} />
                         <span className="font-display text-[clamp(0.8rem,2.6vw,0.95rem)] font-extrabold tracking-[0.02em]">
                           UNIVERSITI MALAYA
                         </span>
@@ -572,19 +570,18 @@ export default function BuildStory() {
                 ))}
               </svg>
 
-              {/* data packets run hub -> node while ORCHESTRATE plays (three per wire, staggered) */}
-              {NODES.flatMap((n) =>
-                [0, 1, 2].map((k) => (
-                  <span
-                    key={`${n.id}-${k}`}
-                    className="bs-seg bs-packet"
-                    style={seg(0.6 + k * 0.05 + n.a * 0.02, 0.66 + k * 0.05 + n.a * 0.02, {
-                      '--dx': n.x - 50,
-                      '--dy': n.y - 50,
-                    })}
-                  />
-                )),
-              )}
+              {/* R30: ONE data packet runs hub -> node per wire while ORCHESTRATE plays (three per wire read as a
+                  cluttered, duplicated line; it also cuts the per-frame segment writes by 10) */}
+              {NODES.map((n) => (
+                <span
+                  key={n.id}
+                  className="bs-seg bs-packet"
+                  style={seg(0.6 + n.a * 0.02, 0.7 + n.a * 0.02, {
+                    '--dx': n.x - 50,
+                    '--dy': n.y - 50,
+                  })}
+                />
+              ))}
 
               <div className="bs-seg bs-hub" style={seg(0.44, 0.5)}>
                 <div className="bs-seg bs-hub-core" style={seg(0.6, 0.66)}>
@@ -603,7 +600,9 @@ export default function BuildStory() {
                   data-side={n.x < 50 ? 'l' : n.x > 50 ? 'r' : 'c'}
                   style={seg(n.a, n.a + 0.05, { left: `${n.x}%`, top: `${n.y}%` })}
                 >
-                  <span className="font-mono text-xs font-extrabold tracking-[0.14em] text-ink-muted">{n.label}</span>
+                  <span className="bs-node-label font-mono text-xs font-extrabold tracking-[0.14em] text-ink-muted">
+                    {n.label}
+                  </span>
                   <span className="font-display text-[clamp(0.8rem,1.4vw,0.95rem)] font-extrabold leading-tight">
                     {n.tech}
                   </span>
@@ -621,12 +620,17 @@ export default function BuildStory() {
                 <span className="font-mono text-xs font-extrabold tracking-[0.14em]">✓ DEPLOYED</span>
               </div>
               <div className="grid grid-cols-[30%_1fr] items-start gap-3 p-3 sm:grid-cols-[34%_1fr] sm:gap-5 sm:p-5">
-                <div className="relative aspect-[413/591] overflow-hidden rounded-xl border-3 border-ink" aria-hidden>
-                  <Portrait photoSeg={seg(0.86, 0.93)} mosaicSeg={seg(0.83, 0.9)} reverse />
-                  {/* R29: the UM seal is embossed on the ID photo's corner like an official photo seal - upright, it
-                      takes no width from the text column, and stays clear of the CTA and the SHIPPED stamp */}
-                  <span className="bs-seg bs-crest absolute right-1.5 top-1.5 z-10" style={seg(0.88, 0.93)}>
-                    <InstitutionSeal crest="um" size="xs" className="sm:h-9 sm:w-9" />
+                <div className="relative" aria-hidden>
+                  <div className="relative aspect-[413/591] overflow-hidden rounded-xl border-3 border-ink">
+                    <Portrait photoSeg={seg(0.86, 0.93)} mosaicSeg={seg(0.83, 0.9)} reverse />
+                  </div>
+                  {/* R30: the UM Registrar Seal is pressed over the ID photo's top-left corner like an embossed certificate seal
+                      - upright, it takes no width from the text column, and stays clear of the CTA and SHIPPED */}
+                  <span
+                    className="bs-seg bs-crest absolute -left-2 -top-2 z-10 sm:-left-4 sm:-top-4"
+                    style={seg(0.88, 0.93)}
+                  >
+                    <InstitutionSeal crest="um" size="stamp" stampIn={false} />
                   </span>
                 </div>
                 <div className="min-w-0 space-y-2">
