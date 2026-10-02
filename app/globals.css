@@ -3653,6 +3653,9 @@ html[data-motion='calm'] .honors-tally .tally-trophy g:first-child {
   --in: clamp(0, (var(--t) - var(--i) * 0.012) / 0.13, 1);
   --out: clamp(0, (var(--t) - 0.72 - var(--i) * 0.014) / 0.13, 1);
   transform: translate3d(0, calc((1 - var(--in) + var(--out)) * -101%), 0);
+  /* outside its window a column waits above the stage, behind the HUD band: fully transparent there, so nothing
+     paper-coloured ever sits behind the white HUD text (axe colour contrast, motion-on audit) */
+  opacity: min(1, calc((var(--in) - var(--out)) * 40));
 }
 .bs-scan-col:nth-child(even) {
   background: #f5ecd7;

@@ -438,7 +438,7 @@ function ProjectCard({ project, index }: { project: ProjectData; index: number }
                     aria-pressed={blueprint}
                     aria-label={`Blueprint view of ${project.title}`}
                     title="3D blueprint: orbit, zoom, explode"
-                    className={`nb-chip nb-press inline-flex min-h-[40px] min-w-[40px] justify-center cursor-pointer ${
+                    className={`nb-chip nb-press inline-flex min-h-[44px] min-w-[44px] justify-center cursor-pointer ${
                       blueprint ? '!bg-pop-blue !text-white' : ''
                     }`}
                   >
@@ -456,7 +456,7 @@ function ProjectCard({ project, index }: { project: ProjectData; index: number }
                     aria-pressed={focused}
                     aria-label={`Focus mode: ${project.title}`}
                     title="Focus mode (F)"
-                    className="nb-chip nb-press min-h-[40px] min-w-[40px] justify-center cursor-pointer"
+                    className="nb-chip nb-press min-h-[44px] min-w-[44px] justify-center cursor-pointer"
                   >
                     <Focus className="w-4 h-4" strokeWidth={2.75} aria-hidden />
                   </button>
