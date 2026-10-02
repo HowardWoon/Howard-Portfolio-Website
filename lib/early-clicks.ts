@@ -79,6 +79,18 @@ export function installEarlyClickReplay() {
     'click',
     (e) => {
       const t = e.target instanceof Element ? e.target.closest<HTMLElement>('button, [role="button"]') : null;
+      // R30: a button whose whole job is to raise a window event (`data-early-event`, the header Search) is handled
+      // natively, hydrated or not. A replayed click can reach the button and still be ignored by React mid-hydration
+      // (the "reached" check below cannot tell), which lost the Search click 9-17 times in 30 at 4x CPU. The palette
+      // reads the queue flag when it mounts and listens for the event once it has.
+      const ev = t?.dataset.earlyEvent;
+      if (ev === 'open-command-palette') {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        (window as { __hwPaletteWanted?: boolean }).__hwPaletteWanted = true;
+        window.dispatchEvent(new Event(ev));
+        return;
+      }
       // the boot gate has its own pre-hydration capture (inline script in app/layout.tsx): leave it to that
       if (!t || live(t) || t.closest('a[href], [data-boot-action]') || (t as HTMLButtonElement).disabled) return;
       // window capture runs before React's listener on the document, so React never sees the dropped original
