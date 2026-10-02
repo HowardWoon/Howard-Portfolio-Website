@@ -13,6 +13,7 @@ import { HonorEmblem, type EmblemKind } from './honor-emblem';
 import { CertificateDeck, type DeckCert } from './certificate-deck';
 import { AnimatedCounter } from './animated-counter';
 import { InstitutionSeal } from './institution-seal';
+import { HonorsTally } from './honors-tally';
 import { ResultsBoard, RolesGrid, Transcript } from './honors-academic';
 import { AmbientOrbits } from './fx/ambient-orbits';
 import { useFocusTrap } from '@/lib/use-focus-trap';
@@ -450,11 +451,12 @@ export default function HonorsSection() {
   // FX-65: where the View Transitions API runs, it animates the switch (framer's exit is skipped so the two
   // animations never stack); elsewhere framer's AnimatePresence does it as before.
   const vt = useViewTransitions();
-  const pick = (id: typeof activeCategory) => {
+  const pick = (id: typeof activeCategory, reveal = false) => {
     if (vt) withViewTransition(() => setActiveCategory(id));
     else setActiveCategory(id);
-    // On phones the 3 category keys stack, so the opened list appears off-screen below them → bring it into view
-    if (id && window.innerWidth < 768) {
+    // On phones the 3 category keys stack, so the opened list appears off-screen below them → bring it into view.
+    // R31: the Honours Tally sits above the keys, so a pick from it always brings the list into view.
+    if (id && (reveal || window.innerWidth < 768)) {
       window.clearTimeout(pickTimer.current);
       pickTimer.current = window.setTimeout(() => {
         const el = resultsRef.current;
@@ -521,7 +523,15 @@ export default function HonorsSection() {
 
         {/* R26: the colour key and the certificate deck (CardSwap + PixelTransition, after React Bits) side by side */}
         <div className="flex flex-col items-start gap-8 lg:flex-row lg:justify-between">
-          <SignalKey only={['podium', 'qualifier', 'academic']} className="w-fit max-w-full" />
+          <div className="flex w-full flex-col gap-6 lg:w-fit">
+            <SignalKey only={['podium', 'qualifier', 'academic']} className="w-fit max-w-full" />
+            {/* R31: the pixel trophy + one block per honour, per category (counts already on the keys below) */}
+            <HonorsTally
+              rows={categories.map((c) => ({ id: c.id, label: c.label, count: c.count, fill: c.fill }))}
+              active={activeCategory}
+              onPick={(id) => pick(id as typeof activeCategory, true)}
+            />
+          </div>
           <CertificateDeck certs={DECK} onOpen={setSelectedCert} />
         </div>
 

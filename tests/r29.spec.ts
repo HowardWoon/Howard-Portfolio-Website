@@ -33,7 +33,14 @@ test('source: no crest is rotated, spun, glowing or a faint watermark', () => {
     'components/experience-section.tsx',
   ]) {
     const src = readFileSync(f, 'utf8');
-    expect(src, f).not.toMatch(/(um|kmns)_logo\.png/); // crests only through components/institution-seal.tsx
+    // crests only through components/institution-seal.tsx - except R31's dedicated Crest Scan beat, the owner's own
+    // request: the raw crest may appear in build-story ONLY inside that block (never behind the diagram again)
+    const scan = f.endsWith('build-story.tsx')
+      ? src.slice(src.indexOf('R31 CREST SCAN'), src.indexOf('03 ARCHITECT + 04 ORCHESTRATE */'))
+      : '';
+    const outside = scan ? src.split(scan).join('') : src;
+    expect(outside, f).not.toMatch(/(um|kmns)_logo\.png/);
+    if (scan) expect(scan.match(/um_logo\.png/g)?.length, 'the scan reads the crest twice (pixel + decoded)').toBe(2);
     expect(src, f).not.toMatch(/animate-\[spin/);
     expect(src, f).not.toMatch(/drop-shadow-\[0_0_/);
   }

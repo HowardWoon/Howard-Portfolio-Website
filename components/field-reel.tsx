@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
-import { onStoryProgress } from '@/lib/story-progress';
+import { onStoryProgress, storyTime } from '@/lib/story-progress';
 import { flapTo } from '@/lib/split-flap';
 import { SIGNAL } from '@/lib/signal';
 
@@ -95,7 +95,7 @@ export function FieldReel({
     const onP = (p: number) => {
       lastP = p;
       if (!geo.length) return;
-      const t = clamp((p - A) / (B - A));
+      const t = clamp((p - storyTime(A)) / (storyTime(B) - storyTime(A))); // R31: A / B are story time
       const shift = side === 'l' ? t * (winH - trackH) : (1 - t) * (winH - trackH);
       const line = winH / 2 - shift; // the gate line in track coordinates
       let idx = geo.findIndex((g) => line >= g.top - 7 && line < g.bottom + 7);

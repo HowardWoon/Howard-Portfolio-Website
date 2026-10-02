@@ -51,7 +51,7 @@ function MagnifiedHeadline() {
   }, []);
 
   const headlineClass =
-    'font-display text-[clamp(1.85rem,10.8vw,2.6rem)] leading-[0.95] sm:text-6xl md:text-7xl xl:text-[5.6rem] landscape-short:!text-5xl font-extrabold uppercase tracking-[-0.035em]';
+    'hero-title font-display text-[clamp(1.85rem,10.8vw,2.6rem)] leading-[0.95] sm:text-6xl md:text-7xl xl:text-[5.6rem] landscape-short:!text-5xl font-extrabold uppercase tracking-[-0.035em]';
   const chipClass = 'inline-block my-1 px-2 xs:px-3 border-3 rounded-xl xs:rounded-2xl -rotate-1';
 
   return (
@@ -143,7 +143,7 @@ export default function BikebearHero() {
       id="hero"
       ref={containerRef}
       style={{ opacity, scale, y: yTranslate }}
-      className="relative min-h-screen-safe bg-paper text-ink flex flex-col justify-between overflow-hidden"
+      className="hero-fit relative min-h-screen-safe bg-paper text-ink flex flex-col justify-between overflow-hidden"
     >
       {/* Structural grid + dot texture */}
       <div
@@ -181,10 +181,10 @@ export default function BikebearHero() {
       </div>
 
       {/* Main Hero Body */}
-      <div className="relative flex-1 flex items-center w-full max-w-[1440px] mx-auto px-4 xs:px-5 sm:px-10 lg:px-16 pt-[calc(var(--header-h)+1.75rem)] sm:pt-[calc(var(--header-h)+3rem)] pb-14 z-10">
+      <div className="relative flex-1 flex items-center w-full max-w-[1440px] mx-auto px-4 xs:px-5 sm:px-10 lg:px-16 pt-[calc(var(--header-h)+1.75rem)] sm:pt-[calc(var(--header-h)+3rem)] pb-14 lg:pt-[calc(var(--header-h)+clamp(1rem,3.6svh,2.75rem))] lg:pb-[clamp(1.25rem,5svh,3.5rem)] z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center w-full">
           {/* Left Column: Vision & Narrative (7 cols) */}
-          <div className="lg:col-span-7 flex flex-col items-start space-y-7 relative z-30 pointer-events-auto">
+          <div className="lg:col-span-7 flex flex-col items-start space-y-7 lg:space-y-[clamp(0.9rem,3.2svh,1.75rem)] relative z-30 pointer-events-auto">
             {/* Brand Pill Badge. FX-61: the hero entrance is CSS (.fx-hero-in, keyed off html.hw-booted), so the
                 server HTML is visible and the entrance starts at first paint instead of after hydration. */}
             <div className="nb-kicker fx-hero-in" style={{ '--d': 1 } as React.CSSProperties}>
@@ -200,7 +200,7 @@ export default function BikebearHero() {
             {/* Sub-narrative Bio Copy */}
             <p
               style={{ '--d': 3 } as React.CSSProperties}
-              className="fx-hero-in text-ink-soft text-lg sm:text-xl max-w-xl leading-relaxed font-sans font-medium [overflow-wrap:anywhere]"
+              className="fx-hero-in text-ink-soft text-lg sm:text-xl lg:text-[clamp(1.0625rem,2.6svh,1.25rem)] max-w-xl leading-relaxed font-sans font-medium [overflow-wrap:anywhere]"
             >
               Architecting robust,{' '}
               <span className="nb-marker font-bold text-ink">low-latency distributed backends</span> and{' '}
@@ -254,7 +254,7 @@ export default function BikebearHero() {
             >
               {/* News Ticker (Above Photo) */}
               <div
-                className="fx-depth w-full max-w-[350px] sm:max-w-none sm:w-[460px] lg:w-[460px] xl:w-[520px] mb-5 overflow-hidden bg-white rounded-2xl border-3 border-ink py-2.5 relative z-20 shadow-brutal pointer-events-auto"
+                className="hero-ticker fx-depth w-full max-w-[350px] sm:max-w-none sm:w-[460px] lg:w-[460px] xl:w-[520px] mb-5 overflow-hidden bg-white rounded-2xl border-3 border-ink py-2.5 relative z-20 shadow-brutal pointer-events-auto"
                 style={{ '--depth': 18 } as React.CSSProperties}
               >
                 {/* Two items, told apart by their tag: the newest (MUBA) in yellow, the dated one (Supervity) in blue */}
@@ -289,7 +289,7 @@ export default function BikebearHero() {
               >
                 <div
                   data-xray
-                  className="relative w-full max-w-[350px] sm:max-w-none sm:w-[460px] lg:w-[460px] xl:w-[520px] aspect-[5/6] xs:aspect-[6/7] sm:aspect-auto sm:h-[560px] lg:h-[600px] xl:h-[660px] rounded-[28px] xs:rounded-[36px] sm:rounded-[44px] border-3 border-ink bg-pop-yellow overflow-hidden shadow-brutal-lg sm:shadow-brutal-xl fx-shadow-follow transition-colors duration-300 hover:border-pop-red pointer-events-auto cursor-crosshair"
+                  className="hero-photo relative w-full max-w-[350px] sm:max-w-none sm:w-[460px] lg:w-[460px] xl:w-[520px] aspect-[5/6] xs:aspect-[6/7] sm:aspect-auto sm:h-[560px] lg:h-[600px] xl:h-[660px] rounded-[28px] xs:rounded-[36px] sm:rounded-[44px] border-3 border-ink bg-pop-yellow overflow-hidden shadow-brutal-lg sm:shadow-brutal-xl fx-shadow-follow transition-colors duration-300 hover:border-pop-red pointer-events-auto cursor-crosshair"
                 >
                   <Image
                     src="/images/howard-solid.jpeg"

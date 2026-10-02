@@ -7,7 +7,7 @@ import { useCalm } from '@/lib/motion-pref';
 import { ContourField } from './fx/contour-field';
 import { FieldReel, type ReelItem } from './field-reel';
 import { InstitutionSeal } from './institution-seal';
-import { publishStoryProgress } from '@/lib/story-progress';
+import { gapTime, publishStoryProgress, storyTime } from '@/lib/story-progress';
 import { rereadScroll, scrollFrame } from '@/lib/scroll-frame';
 
 /**
@@ -58,9 +58,10 @@ const SCENES = [
 ] as const;
 
 const FRAMES = 1200;
-const BOUNDS = [0.2, 0.4, 0.6, 0.8];
+// R31: authored in story time, mapped to the playhead (the crest-scan gap sits inside scene 02 -> 03)
+const BOUNDS = [0.2, 0.4, 0.6, 0.8].map(storyTime);
 /** R24 Build Manifest: the frame where each scene has settled (a jump lands here, the story plays on from it) */
-const LAND = [0.16, 0.34, 0.55, 0.76, 1];
+const LAND = [0.16, 0.34, 0.55, 0.76, 1].map(storyTime);
 const frameRange = (i: number) => {
   const from = i === 0 ? 0 : BOUNDS[i - 1];
   const to = BOUNDS[i] ?? 1;
@@ -70,7 +71,12 @@ const frameRange = (i: number) => {
 
 /** a layer's local timeline: 0 before `a`, 1 after `b` (consumed by .bs-seg in globals.css) */
 const seg = (a: number, b: number, extra?: Record<string, string | number>) =>
-  ({ '--a': a, '--b': b, ...extra }) as CSSProperties;
+  ({ '--a': storyTime(a), '--b': storyTime(b), ...extra }) as CSSProperties;
+/** R31: the paper lid of the crest scan is this many columns (each one CSS-derived from the same window) */
+const SCAN_COLS = 10;
+/** R31: a window inside the crest-scan gap, as fractions (0..1) of the gap */
+const gapSeg = (a: number, b: number, extra?: Record<string, string | number>) =>
+  ({ '--a': gapTime(a), '--b': gapTime(b), ...extra }) as CSSProperties;
 
 const NODES = [
   { id: 'client', x: 14, y: 20, label: 'CLIENT', tech: 'Next.js 15 · React', a: 0.47 },
@@ -94,6 +100,33 @@ const DOCKS = [
   { name: 'BILAHUJAN', fill: 'bg-pop-cyan', on: 'hub', a: 0.7 },
   { name: 'ZEROLAG', fill: 'bg-pop-yellow', on: 'guard', a: 0.72 },
 ] as const;
+
+// R31 HUD range rings, computed (never hand-typed points): 72 ticks every 5 deg on the outer ring (long + lilac every
+// 30 deg), and four lilac arcs on the inner ring (AI = lilac, the hub's own colour)
+const HUD_TICKS = Array.from({ length: 72 }, (_, i) => {
+  const deg = i * 5;
+  const a = (deg * Math.PI) / 180;
+  const major = deg % 30 === 0;
+  const r1 = 96;
+  const r2 = major ? 86 : 91;
+  const r = (v: number) => Number(v.toFixed(2));
+  return {
+    deg,
+    major,
+    x1: r(r1 * Math.cos(a)),
+    y1: r(r1 * Math.sin(a)),
+    x2: r(r2 * Math.cos(a)),
+    y2: r(r2 * Math.sin(a)),
+  };
+});
+const HUD_ARCS = [0, 90, 180, 270].map((start) => {
+  const R = 74;
+  const p = (deg: number) => {
+    const a = (deg * Math.PI) / 180;
+    return `${(R * Math.cos(a)).toFixed(2)} ${(R * Math.sin(a)).toFixed(2)}`;
+  };
+  return `M ${p(start + 12)} A ${R} ${R} 0 0 1 ${p(start + 58)}`;
+});
 
 function Dock({ on }: { on: string }) {
   return DOCKS.filter((d) => d.on === on).map((d) => (
@@ -546,11 +579,89 @@ export default function BuildStory() {
             </div>
           </div>
 
+          {/* ---------------------------------------------------------------- R31 CREST SCAN (02 -> 03)
+              A paper lid closes over the stage in a wave of columns, the UM crest lands on the scanner bed as pixel
+              art, the scan bar decodes it into the real crest (with a live percentage), then it expands and the lid
+              lifts away in the same wave, straight into the blueprint landing. Scroll-scrubbed (reversible), transform
+              / opacity / clip only, hidden in the still (Calm / reduced motion). */}
+          <div aria-hidden className="bs-layer bs-scan-layer">
+            <div className="bs-scan-cols">
+              {Array.from({ length: SCAN_COLS }, (_, i) => (
+                <span key={i} className="bs-seg bs-scan-col" style={gapSeg(0, 1, { '--i': i })} />
+              ))}
+            </div>
+            <div className="bs-seg bs-scan-in" style={gapSeg(0.2, 0.34)}>
+              <div className="bs-seg bs-scan-grow" style={gapSeg(0.64, 0.84)}>
+                <div className="bs-scan-bed">
+                  <span className="bs-scan-corner" data-c="tl" />
+                  <span className="bs-scan-corner" data-c="tr" />
+                  <span className="bs-scan-corner" data-c="bl" />
+                  <span className="bs-scan-corner" data-c="br" />
+                  <div className="bs-scan-crest">
+                    {/* the crest at 32 px, shown big and pixelated: the "raw" image the scanner reads */}
+                    <Image
+                      src="/images/logos/um_logo.png"
+                      alt=""
+                      width={32}
+                      height={32}
+                      sizes="32px"
+                      className="bs-scan-pixel h-full w-full"
+                    />
+                    <span className="bs-seg bs-scan-sharp" style={gapSeg(0.34, 0.62)}>
+                      <Image src="/images/logos/um_logo.png" alt="" fill sizes="340px" className="object-contain" />
+                    </span>
+                    <span className="bs-seg bs-scan-bar" style={gapSeg(0.34, 0.62)} />
+                  </div>
+                </div>
+                <div className="bs-seg bs-scan-readout" style={gapSeg(0.34, 0.62)}>
+                  <span className="bs-scan-chip">SCAN</span>
+                  <span className="font-mono text-xs font-extrabold tracking-[0.14em]">UNIVERSITI MALAYA</span>
+                  <span className="bs-scan-pct font-mono text-xs font-extrabold tabular-nums" />
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* ---------------------------------------------------------------- 03 ARCHITECT + 04 ORCHESTRATE */}
           <div aria-hidden className="bs-seg bs-fade-dim bs-layer" style={seg(0.8, 0.86)}>
             <FieldReel items={FIELD_REEL} side="l" no={1} seg={seg} />
             <FieldReel items={BUILD_REEL} side="r" no={2} seg={seg} />
             <div className="bs-diagram">
+              {/* R31 HUD (owner: "more professional, a Tony Stark feeling"), printed not glowing: a pixel radar sweep
+                  and two range rings with computed ticks around the AI hub, both turned by the scroll (transform only,
+                  reversible), plus a system readout; behind the wires and boxes */}
+              <div className="bs-seg bs-hud-radar" style={seg(0.44, 0.8)}>
+                <span className="bs-hud-radar-arm" />
+              </div>
+              {/* each ring is its own <svg> box turned by a CSS transform (compositor only): rotating an SVG <g> made
+                  Chrome re-lay out the SVG on every scroll frame (+20 layouts per phone fling, tests/r17 P0-01) */}
+              <div className="bs-seg bs-hud-rings" style={seg(0.44, 0.8)}>
+                <svg className="bs-hud-ring bs-hud-ring-out" viewBox="-100 -100 200 200">
+                  <circle r={96} fill="none" stroke="rgb(255 255 255 / 0.35)" strokeWidth={0.8} />
+                  {HUD_TICKS.map((t) => (
+                    <line
+                      key={t.deg}
+                      x1={t.x1}
+                      y1={t.y1}
+                      x2={t.x2}
+                      y2={t.y2}
+                      stroke={t.major ? '#B8A4FF' : 'rgb(255 255 255 / 0.45)'}
+                      strokeWidth={t.major ? 1.6 : 0.8}
+                    />
+                  ))}
+                </svg>
+                <svg className="bs-hud-ring bs-hud-ring-in" viewBox="-100 -100 200 200">
+                  <circle r={74} fill="none" stroke="rgb(255 255 255 / 0.25)" strokeWidth={0.8} strokeDasharray="2 3" />
+                  {HUD_ARCS.map((d) => (
+                    <path key={d} d={d} fill="none" stroke="#B8A4FF" strokeWidth={2.4} />
+                  ))}
+                </svg>
+              </div>
+              <div className="bs-seg bs-hud-readout" style={seg(0.47, 0.52)}>
+                <span className="bs-hud-dot" />
+                SYS MAP · {String(NODES.length).padStart(2, '0')} NODES · {String(DOCKS.length).padStart(2, '0')} BUILDS
+              </div>
+
               <svg
                 className="absolute inset-0 h-full w-full overflow-visible"
                 viewBox="0 0 100 100"
