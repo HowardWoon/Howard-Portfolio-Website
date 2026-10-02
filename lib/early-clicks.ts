@@ -72,9 +72,30 @@ function flush() {
   else timer = window.setTimeout(flush, 100); // React is still committing this section and stopped it: try again
 }
 
+type EarlyWindow = Window & {
+  __hwEarlyClicks?: boolean;
+  __hwShortcutsReady?: boolean;
+  __hwShortcutsWanted?: boolean;
+};
+
 export function installEarlyClickReplay() {
-  if (typeof window === 'undefined' || (window as { __hwEarlyClicks?: boolean }).__hwEarlyClicks) return;
-  (window as { __hwEarlyClicks?: boolean }).__hwEarlyClicks = true;
+  const w = typeof window === 'undefined' ? null : (window as EarlyWindow);
+  if (!w || w.__hwEarlyClicks) return;
+  w.__hwEarlyClicks = true;
+  // R31: "?" pressed before the code-split shortcut layer (interaction-hud) has mounted its listener used to do
+  // nothing (tests/r10 FX-43 failed under load). It is remembered here and the sheet opens as soon as the layer is
+  // ready (it reads __hwShortcutsWanted when it mounts).
+  w.addEventListener(
+    'keydown',
+    (e) => {
+      if (e.key !== '?' || e.metaKey || e.ctrlKey || e.altKey || w.__hwShortcutsReady) return;
+      const t = e.target instanceof Element ? e.target : null;
+      if (t?.closest('input, textarea, select, [contenteditable="true"]')) return;
+      if (document.querySelector('.boot-overlay') && !document.documentElement.classList.contains('hw-booted')) return;
+      w.__hwShortcutsWanted = true;
+    },
+    true,
+  );
   window.addEventListener(
     'click',
     (e) => {

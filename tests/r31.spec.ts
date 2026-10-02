@@ -218,3 +218,20 @@ test.describe('orchestrate HUD (1920)', () => {
     expect(r.ringOp).toBeGreaterThan(0.9);
   });
 });
+
+test('"?" pressed before the shortcut layer loads still opens the sheet (4x CPU)', async ({ page, context }) => {
+  test.setTimeout(90_000);
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await context.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
+  const cdp = await context.newCDPSession(page);
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+  await page.goto('/', { waitUntil: 'commit' });
+  // the early queue is live (root bundle) while the code-split shortcut layer is not: the window that lost the key
+  await page.waitForFunction(() => (window as unknown as { __hwEarlyClicks?: boolean }).__hwEarlyClicks === true);
+  const ready = await page.evaluate(
+    () => (window as unknown as { __hwShortcutsReady?: boolean }).__hwShortcutsReady === true,
+  );
+  await page.keyboard.press('?');
+  await expect(page.getByRole('dialog', { name: 'Keyboard shortcuts' })).toBeVisible({ timeout: 45_000 });
+  test.info().annotations.push({ type: 'layer ready at keypress', description: String(ready) });
+});

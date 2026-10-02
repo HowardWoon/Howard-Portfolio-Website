@@ -194,7 +194,17 @@ export function InteractionHud() {
       }
     };
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    // R31: a "?" pressed before this layer loaded was queued by lib/early-clicks.ts: open the sheet now
+    const w = window as Window & { __hwShortcutsReady?: boolean; __hwShortcutsWanted?: boolean };
+    w.__hwShortcutsReady = true;
+    if (w.__hwShortcutsWanted) {
+      w.__hwShortcutsWanted = false;
+      if (keysOn() && !document.querySelector('[aria-modal="true"]')) setHelp(true);
+    }
+    return () => {
+      w.__hwShortcutsReady = false;
+      window.removeEventListener('keydown', onKey);
+    };
   }, []);
 
   // Palette / other components can open the sheet or the tour through window events.

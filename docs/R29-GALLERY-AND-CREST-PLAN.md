@@ -191,3 +191,12 @@ A CDP layout-invalidation trace showed the cost was TIME-based, so the slower ru
 split-flap arrival (every hop = a layout) played during the fling, and the status-bar clock flipped once a second.
 Both now wait for the page to stop scrolling (the footer also only plays while it is on screen). Phone fling: 14-17
 layouts (21 at 6x CPU throttling), was 25-36 locally.
+
+### R31 follow-up: motion-on audit and the "?" race
+
+- CI's "Layout + axe audit with motion ON" failed (e2e all green): the ZeroLag card's Blueprint / Focus buttons
+  project to 23.7 px in the folded scroll-unfold state (now 44 px, ~26 px folded), and idle crest-scan columns sat
+  behind the HUD band (now transparent outside their window). Both audits print ALL PASS.
+- tests/r10 FX-43 ("?" opens the shortcut sheet) failed twice in full local runs: a "?" pressed before the code-split
+  shortcut layer mounted was dropped. lib/early-clicks.ts now queues it and the layer opens the sheet when it mounts;
+  a new r31 test presses "?" at 4x CPU while the layer is provably not ready (annotation `false`) and gets the sheet.
