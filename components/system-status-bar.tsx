@@ -216,7 +216,16 @@ export default function SystemStatusBar() {
     const write = (el: HTMLSpanElement | null, text: string) => {
       if (el && el.dataset.text !== text) flapTo(el, text);
     };
+    // R31: a flip forces a layout (the flap animation restarts), so the clocks hold still WHILE the page scrolls
+    // and catch up on the next tick once it rests: a long fling on a slow phone used to flip ~once per second all
+    // the way down (CI P0-01 rose to 48-58 layouts per fling on the slower runner)
+    let lastScroll = 0;
+    const onScroll = () => {
+      lastScroll = performance.now();
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
     const tick = () => {
+      if (performance.now() - lastScroll < 300) return;
       const now = new Date();
       write(clockRef.current, KL.format(now));
       write(localRef.current, LOCAL.format(now));
@@ -238,11 +247,15 @@ export default function SystemStatusBar() {
     const bar = barRef.current;
     if (!bar || typeof IntersectionObserver === 'undefined') {
       start();
-      return stop;
+      return () => {
+        window.removeEventListener('scroll', onScroll);
+        stop();
+      };
     }
     const io = new IntersectionObserver(([e]) => (e.isIntersecting ? start() : stop()));
     io.observe(bar);
     return () => {
+      window.removeEventListener('scroll', onScroll);
       io.disconnect();
       stop();
     };

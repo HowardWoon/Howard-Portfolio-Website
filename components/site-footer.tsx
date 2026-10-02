@@ -16,16 +16,41 @@ export function SiteFooter() {
   useEffect(() => {
     const box = metaRef.current;
     if (!box) return;
+    // R31: every hop of the arrival is a layout, so it waits until the page stops scrolling (a fling that ran into
+    // the footer used to pay ~30 layouts mid-scroll: CI P0-01); the visitor who stops here still sees it play
+    // and only while the board is still on screen (otherwise it waits for the next time it is seen)
+    let lastScroll = 0;
+    let wait = 0;
+    let seen = false;
+    const onScroll = () => {
+      lastScroll = performance.now();
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    const play = () => {
+      window.clearTimeout(wait);
+      if (!seen) return;
+      if (performance.now() - lastScroll < 250) {
+        wait = window.setTimeout(play, 120);
+        return;
+      }
+      io.disconnect();
+      window.removeEventListener('scroll', onScroll);
+      for (const el of box.querySelectorAll<HTMLElement>('[data-flap]')) flapIn(el, el.dataset.flap!);
+    };
     const io = new IntersectionObserver(
       ([e]) => {
-        if (!e.isIntersecting) return;
-        io.disconnect();
-        for (const el of box.querySelectorAll<HTMLElement>('[data-flap]')) flapIn(el, el.dataset.flap!);
+        seen = e.isIntersecting;
+        if (seen) play();
+        else window.clearTimeout(wait);
       },
       { threshold: 0.6 },
     );
     io.observe(box);
-    return () => io.disconnect();
+    return () => {
+      io.disconnect();
+      window.clearTimeout(wait);
+      window.removeEventListener('scroll', onScroll);
+    };
   }, []);
 
   return (
