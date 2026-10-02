@@ -561,7 +561,22 @@ function PhotoLightbox({
 const DECK_SIZES = '(max-width: 639px) 78vw, (max-width: 1023px) 60vw, 34vw';
 const isPortrait = (p: Photo) => p.w < p.h;
 
-export function InteractivePhotoStack({ customPhotos, galleryId }: { customPhotos?: Photo[]; galleryId?: string }) {
+export function InteractivePhotoStack({
+  customPhotos,
+  galleryId,
+  label = 'Project gallery',
+  captions = false,
+  filmstrip = false,
+}: {
+  customPhotos?: Photo[];
+  galleryId?: string;
+  /** R29: the carousel's accessible name (the Experience gallery is not a project gallery) */
+  label?: string;
+  /** R29: a one-line caption strip under the stack with the current photo's description */
+  captions?: boolean;
+  /** R29: thumbnail buttons that jump straight to a photo (replace the progress dots) */
+  filmstrip?: boolean;
+}) {
   const source = customPhotos || photos;
   const n = source.length;
   const [deck, setDeck] = useState({ top: 0, dir: 1 });
@@ -569,6 +584,7 @@ export function InteractivePhotoStack({ customPhotos, galleryId }: { customPhoto
   const go = (delta: number) => setDeck((d) => ({ top: (d.top + delta + n) % n, dir: delta >= 0 ? 1 : -1 }));
   const next = () => go(1);
   const prev = () => go(-1);
+  const jump = (i: number) => setDeck((d) => (i === d.top ? d : { top: i, dir: i > d.top ? 1 : -1 }));
 
   const dragged = useRef(false);
   const [viewer, setViewer] = useState<number | null>(null);
@@ -616,7 +632,7 @@ export function InteractivePhotoStack({ customPhotos, galleryId }: { customPhoto
         <div
           role="group"
           aria-roledescription="carousel"
-          aria-label="Project gallery"
+          aria-label={label}
           onKeyDown={onDeckKey}
           className="fx-deck w-full"
         >
@@ -772,13 +788,23 @@ export function InteractivePhotoStack({ customPhotos, galleryId }: { customPhoto
               </div>
               <div
                 aria-hidden
-                className="absolute bottom-0 left-1/2 -translate-x-1/2 w-max max-w-[92%] whitespace-nowrap flex items-center gap-2 nb-tag bg-white shadow-brutal-xs pointer-events-none z-50"
+                className="absolute bottom-0 left-1/2 -translate-x-1/2 w-max max-w-[92%] whitespace-nowrap max-[359px]:hidden flex items-center gap-2 nb-tag bg-white shadow-brutal-xs pointer-events-none z-50"
               >
                 <span className="w-2 h-2 rounded-full bg-pop-red border border-ink animate-pulse" />
                 CLICK ALBUM TO CYCLE
               </div>
             </div>
           )}
+
+          {captions && !sheet ? (
+            <p
+              aria-hidden
+              data-photo-caption
+              className="mt-4 truncate rounded-lg border-2 border-ink bg-white px-3 py-1.5 text-center font-mono text-xs font-bold text-ink-soft"
+            >
+              {source[top]?.alt}
+            </p>
+          ) : null}
 
           {/* Controls: contact sheet, previous, progress dots, next (one thumb, every device) */}
           {n > 1 ? (
@@ -804,7 +830,7 @@ export function InteractivePhotoStack({ customPhotos, galleryId }: { customPhoto
                   <button type="button" onClick={prev} aria-label="Previous photo" className={round}>
                     <ChevronLeft className="w-4 h-4" strokeWidth={3} aria-hidden />
                   </button>
-                  <span aria-hidden className="hidden xs:flex items-center gap-1">
+                  <span aria-hidden className={filmstrip ? 'hidden' : 'hidden xs:flex items-center gap-1'}>
                     {source.map((p, i) => (
                       <span
                         key={p.src}
@@ -822,6 +848,27 @@ export function InteractivePhotoStack({ customPhotos, galleryId }: { customPhoto
                   </span>
                 </>
               ) : null}
+            </div>
+          ) : null}
+
+          {filmstrip && !sheet && n > 1 ? (
+            <div data-filmstrip className="mt-3 overflow-x-auto overscroll-x-contain [scrollbar-width:none]">
+              <div className="mx-auto flex w-max gap-2 px-1 py-1.5">
+                {source.map((p, i) => (
+                  <button
+                    key={p.src}
+                    type="button"
+                    onClick={() => jump(i)}
+                    aria-label={`Go to photo ${i + 1} of ${n}`}
+                    aria-current={i === top ? 'true' : undefined}
+                    className={`relative h-11 w-11 shrink-0 overflow-hidden rounded-lg border-ink bg-paper-deep transition-[transform,opacity] duration-200 ${
+                      i === top ? 'border-3 -translate-y-0.5 shadow-brutal-xs' : 'border-2 opacity-60 hover:opacity-100'
+                    }`}
+                  >
+                    <Image src={p.src} alt="" fill sizes="44px" className="object-cover" />
+                  </button>
+                ))}
+              </div>
             </div>
           ) : null}
         </div>

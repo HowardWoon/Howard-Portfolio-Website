@@ -6,6 +6,7 @@ import { PORTRAIT_GLYPHS } from '@/lib/story-glyphs';
 import { useCalm } from '@/lib/motion-pref';
 import { ContourField } from './fx/contour-field';
 import { FieldReel, type ReelItem } from './field-reel';
+import { InstitutionSeal } from './institution-seal';
 import { publishStoryProgress } from '@/lib/story-progress';
 import { rereadScroll, scrollFrame } from '@/lib/scroll-frame';
 
@@ -468,16 +469,8 @@ export default function BuildStory() {
                 <div className="bs-seg bs-id-drop" style={seg(0.03, 0.15)}>
                   <div className="bs-card bs-idcard relative overflow-hidden rounded-[22px] border-3 border-ink bg-paper text-ink">
                     <div className="flex items-center justify-between gap-2 border-b-3 border-ink bg-pop-orange px-4 py-2">
-                      <div className="flex items-center gap-2">
-                        <div className="flex shrink-0 items-center justify-center rounded-full bg-paper border-2 border-ink shadow-[2px_2px_0_0_#0A0A0A] w-7 h-7 p-[2px]">
-                          <Image
-                            src="/images/logos/um_logo.png"
-                            alt="Universiti Malaya"
-                            width={24}
-                            height={24}
-                            className="w-full h-full object-contain"
-                          />
-                        </div>
+                      <div className="flex min-w-0 items-center gap-2">
+                        <InstitutionSeal crest="um" size="xs" />
                         <span className="font-display text-[clamp(0.8rem,2.6vw,0.95rem)] font-extrabold tracking-[0.02em]">
                           UNIVERSITI MALAYA
                         </span>
@@ -560,27 +553,8 @@ export default function BuildStory() {
             <FieldReel items={FIELD_REEL} side="l" no={1} seg={seg} />
             <FieldReel items={BUILD_REEL} side="r" no={2} seg={seg} />
             <div className="bs-diagram">
-              {/* R28 Centerpiece Watermark: Massive UM logo expands identically to the impact ring */}
-              <div
-                className="bs-seg absolute top-[55%] left-[50%] w-[40vmin] h-[40vmin] -ml-[20vmin] -mt-[20vmin] pointer-events-none z-0"
-                style={seg(0.4, 0.47, {
-                  opacity: 'calc(var(--t) * 0.15)',
-                  transform: 'scale(calc(0.2 + var(--e) * 2.6))',
-                })}
-              >
-                <div className="w-full h-full animate-[spin_60s_linear_infinite]">
-                  <Image
-                    src="/images/logos/um_logo.png"
-                    alt="Universiti Malaya Watermark"
-                    width={400}
-                    height={400}
-                    className="w-full h-full object-contain drop-shadow-[0_0_12px_rgba(255,255,255,0.4)]"
-                  />
-                </div>
-              </div>
-
               <svg
-                className="absolute inset-0 h-full w-full overflow-visible z-10"
+                className="absolute inset-0 h-full w-full overflow-visible"
                 viewBox="0 0 100 100"
                 preserveAspectRatio="none"
               >
@@ -649,6 +623,11 @@ export default function BuildStory() {
               <div className="grid grid-cols-[30%_1fr] items-start gap-3 p-3 sm:grid-cols-[34%_1fr] sm:gap-5 sm:p-5">
                 <div className="relative aspect-[413/591] overflow-hidden rounded-xl border-3 border-ink" aria-hidden>
                   <Portrait photoSeg={seg(0.86, 0.93)} mosaicSeg={seg(0.83, 0.9)} reverse />
+                  {/* R29: the UM seal is embossed on the ID photo's corner like an official photo seal - upright, it
+                      takes no width from the text column, and stays clear of the CTA and the SHIPPED stamp */}
+                  <span className="bs-seg bs-crest absolute right-1.5 top-1.5 z-10" style={seg(0.88, 0.93)}>
+                    <InstitutionSeal crest="um" size="xs" className="sm:h-9 sm:w-9" />
+                  </span>
                 </div>
                 <div className="min-w-0 space-y-2">
                   <p className="font-display text-[clamp(1rem,3.6vw,1.9rem)] font-extrabold uppercase leading-[0.95] tracking-[-0.02em]">
@@ -683,21 +662,6 @@ export default function BuildStory() {
               <span aria-hidden className="bs-seg bs-stamp bs-stamp-mint" style={seg(0.93, 0.98)}>
                 SHIPPED
               </span>
-
-              {/* UM Logo Sticker */}
-              <div
-                className="absolute bottom-4 right-4 w-[56px] h-[56px] sm:w-[72px] sm:h-[72px] bg-paper border-[2px] sm:border-3 border-ink shadow-[2px_2px_0_0_#0A0A0A] sm:shadow-[4px_4px_0_0_#0A0A0A] rounded-full flex items-center justify-center p-2 rotate-[-12deg] z-20 pointer-events-none bs-seg bs-fade-in"
-                style={seg(0.88, 0.94)}
-                aria-hidden
-              >
-                <Image
-                  src="/images/logos/um_logo.png"
-                  alt="Universiti Malaya"
-                  width={64}
-                  height={64}
-                  className="object-contain w-full h-full"
-                />
-              </div>
             </div>
           </div>
 

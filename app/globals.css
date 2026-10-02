@@ -3449,6 +3449,13 @@ html[data-xray-mode]
   opacity: var(--t);
   transform: translateX(calc((1 - var(--e)) * 24px));
 }
+/* R29 Issuer Seal: the UM crest is stamped upright on the ID photo corner (scale + opacity only, no rotation) */
+.bs-crest {
+  display: inline-flex;
+  flex-shrink: 0;
+  opacity: min(1, calc(var(--t) * 4));
+  transform: scale(calc(1.8 - var(--e) * 0.8));
+}
 .bs-cta {
   pointer-events: none;
   opacity: 0;

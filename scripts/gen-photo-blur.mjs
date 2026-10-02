@@ -4,7 +4,7 @@
  * WebP data URL used as next/image `blurDataURL`, so a print shows a soft preview of its photo instead of an empty
  * cream box while the real image loads. Re-run after adding or replacing a gallery photo:
  *   node scripts/gen-photo-blur.mjs
- * Uses `sharp`, which ships with Next.js (no new dependency). Reads the photo lists from the two gallery sources.
+ * Uses `sharp`, which ships with Next.js (no new dependency). Reads the photo lists from the three gallery sources.
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -12,7 +12,12 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const sharp = require('sharp');
 
-const sources = ['components/interactive-photo-stack.tsx', 'components/stacked-projects.tsx'];
+// R29: the Experience section has a gallery too (KMNS)
+const sources = [
+  'components/interactive-photo-stack.tsx',
+  'components/stacked-projects.tsx',
+  'components/experience-section.tsx',
+];
 const srcs = [
   ...new Set(
     sources.flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/src: '(\/images\/[^']+)'/g)].map((m) => m[1])),

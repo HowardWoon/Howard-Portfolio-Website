@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import Image from 'next/image';
 import { m, AnimatePresence } from 'framer-motion';
 import { useInteractionSelect } from '@/lib/interaction-store';
 import { BauhausSolid } from './fx/bauhaus-solid';
@@ -13,6 +12,7 @@ import { SignalKey } from './signal-key';
 import { HonorEmblem, type EmblemKind } from './honor-emblem';
 import { CertificateDeck, type DeckCert } from './certificate-deck';
 import { AnimatedCounter } from './animated-counter';
+import { InstitutionSeal } from './institution-seal';
 import { ResultsBoard, RolesGrid, Transcript } from './honors-academic';
 import { AmbientOrbits } from './fx/ambient-orbits';
 import { useFocusTrap } from '@/lib/use-focus-trap';
@@ -58,6 +58,12 @@ const CERT_SIZE: Record<string, [number, number]> = {
   '/certificates/Sales_Intelligence_Winner_-_2nd_Place.png': [2000, 1414],
   '/certificates/UM_GAME_JAM_2026_HOWARD_WOON_HAO_ZHE.png': [1450, 1011],
   '/certificates/chem_creative.png': [729, 1032],
+};
+
+/** R29: awards issued by an institution whose crest is on the site carry its Issuer Seal beside the title */
+const SEAL: Record<string, 'um' | 'kmns' | undefined> = {
+  'deans-list': 'um',
+  'kmns-distinction': 'kmns',
 };
 
 const honorsList: HonorItem[] = [
@@ -615,7 +621,7 @@ export default function HonorsSection() {
                     >
                       {/* Top Bar */}
                       <div
-                        className={`nb-hatch flex flex-wrap items-center justify-between gap-3 px-6 py-3.5 border-b-3 border-ink relative z-10 ${isFeatured ? c.fill : c.soft}`}
+                        className={`nb-hatch flex flex-wrap items-center justify-between gap-3 px-6 py-3.5 border-b-3 border-ink ${isFeatured ? c.fill : c.soft}`}
                       >
                         <div className="inline-flex min-w-0 flex-wrap items-center gap-2 text-xs font-mono font-extrabold tracking-[0.06em] uppercase text-ink">
                           {item.signal ? (
@@ -632,8 +638,8 @@ export default function HonorsSection() {
                         </div>
                       </div>
 
-                      {/* Featured Watermarks (Trophy or Institution Logos) */}
-                      {isFeatured && item.id !== 'deans-list' && item.id !== 'kmns-distinction' && (
+                      {/* Featured Watermark */}
+                      {isFeatured && (
                         <div
                           aria-hidden
                           className="absolute -right-10 top-10 opacity-[0.06] pointer-events-none rotate-12 group-hover:rotate-6 transition-transform duration-700"
@@ -641,42 +647,17 @@ export default function HonorsSection() {
                           <Trophy className="w-60 h-60" />
                         </div>
                       )}
-                      {item.id === 'deans-list' && (
-                        <div
-                          aria-hidden
-                          className="absolute right-[-10%] top-[10%] opacity-[0.08] pointer-events-none rotate-[-5deg] group-hover:rotate-0 transition-transform duration-700 w-64 h-64 sm:w-80 sm:h-80"
-                        >
-                          <Image
-                            src="/images/logos/um_logo.png"
-                            alt="UM Watermark"
-                            fill
-                            className="object-contain drop-shadow-sm"
-                          />
-                        </div>
-                      )}
-                      {item.id === 'kmns-distinction' && (
-                        <div
-                          aria-hidden
-                          className="absolute right-[-5%] top-[15%] opacity-[0.08] pointer-events-none rotate-[-5deg] group-hover:rotate-0 transition-transform duration-700 w-64 h-64 sm:w-80 sm:h-80"
-                        >
-                          <Image
-                            src="/images/logos/kmns_logo.png"
-                            alt="KMNS Watermark"
-                            fill
-                            className="object-contain drop-shadow-sm"
-                          />
-                        </div>
-                      )}
 
-                      <div className="relative z-0 flex flex-col flex-1 p-4 xs:p-6 sm:p-7 pt-7 sm:pt-8">
-                        {/* Title & Body */}
+                      <div className="relative z-10 flex flex-col flex-1 p-4 xs:p-6 sm:p-7">
+                        {/* Title & Body. R29: an institution's own award carries its Issuer Seal beside the title */}
                         <div className="flex gap-4 justify-between items-start mb-4">
-                          <div className="space-y-2">
+                          <div className="min-w-0 space-y-2">
                             <h3 className="font-display text-2xl font-extrabold uppercase tracking-[-0.02em] leading-[1.05] text-ink">
                               {item.title}
                             </h3>
                             <p className="text-sm font-mono font-bold text-pop-blue">{item.issuingBody}</p>
                           </div>
+                          {SEAL[item.id] ? <InstitutionSeal crest={SEAL[item.id]!} size="md" /> : null}
                         </div>
 
                         <div className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium mb-6">

@@ -5,12 +5,12 @@ import { FieldArchive } from './field-archive';
 import { TraceRail } from './fx/trace-rail';
 import { SplitWords } from './fx/split-words';
 import { m, AnimatePresence, LayoutGroup } from 'framer-motion';
-import Image from 'next/image';
 import { FX, SPRING_STAMP } from '@/lib/fx';
 import { SIGNAL, type Signal } from '@/lib/signal';
 import { SignalKey } from './signal-key';
 import { usePrinting } from '@/lib/use-printing';
 import { InteractivePhotoStack } from './interactive-photo-stack';
+import { InstitutionSeal } from './institution-seal';
 import {
   Building2,
   Landmark,
@@ -24,6 +24,7 @@ import {
   BarChart3,
   Receipt,
   ChevronDown,
+  Camera,
 } from 'lucide-react';
 
 type FilterCategory = 'all' | 'corporate' | 'leadership' | 'academic';
@@ -45,6 +46,8 @@ interface ExperienceItem {
   metrics: { label: string; value: string }[];
   tags: string[];
   galleryPhotos?: { src: string; alt: string; rotation: number; w: number; h: number }[];
+  /** R29: the issuing institution's crest, printed as an Issuer Seal in the organisation pill */
+  crest?: 'kmns';
 }
 
 const experiences: ExperienceItem[] = [
@@ -108,6 +111,7 @@ const experiences: ExperienceItem[] = [
     location: 'Kolej Matrikulasi Negeri Sembilan (Negeri Sembilan Matriculation College)',
     period: '2024',
     icon: GraduationCap,
+    crest: 'kmns',
     signal: 'academic',
     headline: 'Algorithmic Problem Solving & Object-Oriented Tutoring',
     bullets: [
@@ -122,12 +126,49 @@ const experiences: ExperienceItem[] = [
     ],
     tags: ['DSA Coaching', 'OOP Paradigms', 'Python / Java', 'Academic Mentorship'],
     galleryPhotos: [
-      { src: '/images/experiences/kmns/kmns_01.jpg', alt: 'KMNS Mentorship 1', rotation: -2, w: 1280, h: 960 },
-      { src: '/images/experiences/kmns/kmns_02.jpg', alt: 'KMNS Mentorship 2', rotation: 3, w: 960, h: 1280 },
-      { src: '/images/experiences/kmns/kmns_03.jpg', alt: 'KMNS Mentorship 3', rotation: -1, w: 1280, h: 960 },
-      { src: '/images/experiences/kmns/kmns_04.jpg', alt: 'KMNS Mentorship 4', rotation: 1.5, w: 960, h: 1280 },
-      { src: '/images/experiences/kmns/kmns_05.jpg', alt: 'KMNS Mentorship 5', rotation: -3, w: 1280, h: 960 },
-      { src: '/images/experiences/kmns/kmns_06.jpg', alt: 'KMNS Mentorship 6', rotation: 2, w: 1280, h: 960 },
+      // R29: w / h = the files' real pixel sizes (four were declared with the wrong shape)
+      {
+        src: '/images/experiences/kmns/kmns_01.jpg',
+        alt: 'Group photo of the PAL leaders at the Simposium Peer Assisted Learning (PAL)',
+        rotation: -2,
+        w: 1280,
+        h: 960,
+      },
+      {
+        src: '/images/experiences/kmns/kmns_02.jpg',
+        alt: 'PAL leaders with the KMNS flag in the college hall',
+        rotation: 3,
+        w: 1280,
+        h: 960,
+      },
+      {
+        src: '/images/experiences/kmns/kmns_03.jpg',
+        alt: 'On stage with medals at the Simposium Peer Assisted Learning (PAL)',
+        rotation: -1,
+        w: 960,
+        h: 1280,
+      },
+      {
+        src: '/images/experiences/kmns/kmns_04.jpg',
+        alt: 'Holding the KMNS flag outside the college',
+        rotation: 1.5,
+        w: 1280,
+        h: 960,
+      },
+      {
+        src: '/images/experiences/kmns/kmns_05.jpg',
+        alt: 'On stage with gift hampers at the Simposium Peer Assisted Learning (PAL)',
+        rotation: -3,
+        w: 1280,
+        h: 718,
+      },
+      {
+        src: '/images/experiences/kmns/kmns_06.jpg',
+        alt: 'KMNS PAL leaders with their medals and team banner at the symposium',
+        rotation: 2,
+        w: 1280,
+        h: 960,
+      },
     ],
   },
 ];
@@ -591,6 +632,7 @@ export default function ExperienceSection() {
               const only = selectedFilter === item.category;
               const onFill = a.text ?? 'text-ink';
               const longHeadline = item.headline.length > 90;
+              const g = item.galleryPhotos;
 
               return (
                 <m.div
@@ -620,7 +662,7 @@ export default function ExperienceSection() {
                   <div className="relative group rounded-[30px] border-3 border-ink bg-white shadow-brutal-lg overflow-hidden">
                     {/* Top Bar: Number + Category Tag + Period */}
                     <div
-                      className={`nb-hatch flex flex-wrap items-center justify-between gap-3 sm:gap-4 px-4 xs:px-6 sm:px-10 py-3 sm:py-4 border-b-3 border-ink relative z-10 ${a.fill}`}
+                      className={`nb-hatch flex flex-wrap items-center justify-between gap-3 sm:gap-4 px-4 xs:px-6 sm:px-10 py-3 sm:py-4 border-b-3 border-ink ${a.fill}`}
                     >
                       <div className="flex flex-wrap items-center gap-2 xs:gap-3 min-w-0">
                         <span className="nb-num">{item.number}</span>
@@ -645,20 +687,8 @@ export default function ExperienceSection() {
                         </div>
                       </div>
                     </div>
-                    <div className="p-4 xs:p-6 sm:p-10 pt-8 sm:pt-12 relative z-0">
-                      {item.id === 'kmns' && (
-                        <div
-                          aria-hidden
-                          className="absolute right-[-5%] top-[10%] opacity-[0.08] pointer-events-none rotate-[-5deg] group-hover:rotate-0 transition-transform duration-700 w-[80%] max-w-[400px] aspect-square"
-                        >
-                          <Image
-                            src="/images/logos/kmns_logo.png"
-                            alt="KMNS Watermark"
-                            fill
-                            className="object-contain drop-shadow-sm"
-                          />
-                        </div>
-                      )}
+
+                    <div className="p-4 xs:p-6 sm:p-10">
                       {/* Main Role & Org */}
                       <div className="pb-7">
                         <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-5">
@@ -681,63 +711,91 @@ export default function ExperienceSection() {
                           <div
                             className={`flex items-center gap-2.5 px-4 py-2.5 rounded-2xl border-3 border-ink shadow-brutal-sm shrink-0 self-start ${a.soft}`}
                           >
-                            <item.icon className="w-5 h-5 text-ink" strokeWidth={2.5} />
+                            {item.crest ? (
+                              <InstitutionSeal crest={item.crest} size="xs" />
+                            ) : (
+                              <item.icon className="w-5 h-5 text-ink" strokeWidth={2.5} />
+                            )}
                             <span className="text-sm font-extrabold font-sans text-ink">{item.organization}</span>
                           </div>
                         </div>
                       </div>
 
-                      {/* Description Bullets */}
-                      <div className="space-y-3.5 mb-8">
-                        {item.bullets.map((bullet, bIdx) => (
-                          <div
-                            key={bIdx}
-                            className="flex items-start gap-3 text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium max-w-4xl"
-                          >
-                            <div
-                              className={`w-6 h-6 rounded-full grid place-items-center shrink-0 mt-0.5 border-2 border-ink ${a.fill}`}
-                            >
-                              <CheckCircle2 className={`w-3.5 h-3.5 ${onFill}`} strokeWidth={3} />
-                            </div>
-                            <p>{bullet}</p>
+                      {/* R29: with a gallery the card is two columns on >= 1024 px, like the project cards - the
+                          story (bullets, metrics, tags) on the left, the gallery desk on the right. Without one, the
+                          wrappers are `display: contents` and the card is exactly as before. */}
+                      <div className={g ? 'grid gap-8 lg:grid-cols-12 lg:items-start' : 'contents'}>
+                        <div className={g ? 'lg:col-span-7 min-w-0' : 'contents'}>
+                          {/* Description Bullets */}
+                          <div className="space-y-3.5 mb-8">
+                            {item.bullets.map((bullet, bIdx) => (
+                              <div
+                                key={bIdx}
+                                className="flex items-start gap-3 text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium max-w-4xl"
+                              >
+                                <div
+                                  className={`w-6 h-6 rounded-full grid place-items-center shrink-0 mt-0.5 border-2 border-ink ${a.fill}`}
+                                >
+                                  <CheckCircle2 className={`w-3.5 h-3.5 ${onFill}`} strokeWidth={3} />
+                                </div>
+                                <p>{bullet}</p>
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
 
-                      {/* Metrics & Impact Grid */}
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
-                        {item.metrics.map((metric, mIdx) => (
-                          <div
-                            key={mIdx}
-                            className={`rounded-2xl p-4 border-3 border-ink shadow-brutal-sm flex flex-col justify-center ${mIdx === 1 ? 'bg-ink text-white' : 'bg-white text-ink'}`}
-                          >
-                            <span
-                              className={`text-xs font-mono font-bold uppercase tracking-[0.08em] mb-1 ${mIdx === 1 ? 'text-white/75' : 'text-ink/70'}`}
-                            >
-                              {metric.label}
-                            </span>
-                            <span className="font-display text-xl font-extrabold tracking-[-0.01em]">
-                              {metric.value}
-                            </span>
+                          {/* Metrics & Impact Grid (beside a gallery the column is too narrow for three: they stack) */}
+                          <div className={`grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8 ${g ? 'lg:grid-cols-1' : ''}`}>
+                            {item.metrics.map((metric, mIdx) => (
+                              <div
+                                key={mIdx}
+                                className={`rounded-2xl p-4 border-3 border-ink shadow-brutal-sm flex flex-col justify-center ${mIdx === 1 ? 'bg-ink text-white' : 'bg-white text-ink'}`}
+                              >
+                                <span
+                                  className={`text-xs font-mono font-bold uppercase tracking-[0.08em] mb-1 ${mIdx === 1 ? 'text-white/75' : 'text-ink/70'}`}
+                                >
+                                  {metric.label}
+                                </span>
+                                <span className="font-display text-xl font-extrabold tracking-[-0.01em]">
+                                  {metric.value}
+                                </span>
+                              </div>
+                            ))}
                           </div>
-                        ))}
-                      </div>
 
-                      {/* Skills/Tags */}
-                      <div className="flex flex-wrap gap-2">
-                        {item.tags.map((tag, tIdx) => (
-                          <span key={tIdx} className="nb-tag bg-paper-deep">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-
-                      {/* Interactive Gallery */}
-                      {item.galleryPhotos && (
-                        <div className="mt-10 mb-2 w-full flex items-center justify-center">
-                          <InteractivePhotoStack customPhotos={item.galleryPhotos} galleryId={item.id} />
+                          {/* Skills/Tags */}
+                          <div className="flex flex-wrap gap-2">
+                            {item.tags.map((tag, tIdx) => (
+                              <span key={tIdx} className="nb-tag bg-paper-deep">
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
                         </div>
-                      )}
+
+                        {/* R29 gallery desk: a compact 5-column desk like the project galleries (capped and centred
+                            below 1024 px, so tablets and phones get a desk, not a poster) */}
+                        {g && (
+                          <div
+                            data-gallery-desk
+                            className="lg:col-span-5 min-w-0 w-full max-w-md mx-auto lg:max-w-none rounded-[26px] border-3 border-ink bg-paper-deep bg-dots p-3 sm:p-5 space-y-4 shadow-[inset_0_3px_0_rgba(0,0,0,0.06)]"
+                          >
+                            <div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-dashed border-ink pb-3">
+                              <div className="flex items-center gap-2 text-xs font-mono font-extrabold text-ink">
+                                <Camera className="w-4 h-4" strokeWidth={2.5} aria-hidden />
+                                <span className="uppercase tracking-[0.1em]">MENTORSHIP GALLERY</span>
+                              </div>
+                              <span className="nb-tag bg-[#E3E8FF]">INTERACTIVE</span>
+                            </div>
+                            <InteractivePhotoStack
+                              customPhotos={g}
+                              galleryId={item.id}
+                              label="Mentorship gallery"
+                              captions
+                              filmstrip
+                            />
+                          </div>
+                        )}
+                      </div>
 
                       {/* Specialized Dashboards */}
                       {item.id === 'pekom' && <PekomTreasurerDashboard />}
