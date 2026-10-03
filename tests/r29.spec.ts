@@ -40,7 +40,8 @@ test('source: no crest is rotated, spun, glowing or a faint watermark', () => {
       : '';
     const outside = scan ? src.split(scan).join('') : src;
     expect(outside, f).not.toMatch(/(um|kmns)_logo\.png/);
-    if (scan) expect(scan.match(/um_logo\.png/g)?.length, 'the scan reads the crest twice (pixel + decoded)').toBe(2);
+    // R32: the scan reads the trimmed, centred HD crest twice (pixel + decoded)
+    if (scan) expect(scan.match(/um_crest\.png/g)?.length, 'the scan reads the crest twice (pixel + decoded)').toBe(2);
     expect(src, f).not.toMatch(/animate-\[spin/);
     expect(src, f).not.toMatch(/drop-shadow-\[0_0_/);
   }

@@ -116,6 +116,8 @@ test('source: nothing in the crest scan / HUD lays out per scroll frame', () => 
   expect(scan).not.toMatch(/top:\s*calc\(var\(--t\)/);
   expect(scan).not.toMatch(/counter-reset/);
   expect(hud).not.toMatch(/\.bs-hud-rings g\b/); // rotate the ring <svg> boxes, never an SVG <g>
+  // R32: per-frame SVG stroke offsets re-lay out the SVG: below 1024 px the circuit is printed whole, no pulses
+  expect(hud).toMatch(/@media \(max-width: 1023px\) \{\s*\.bs-trace \{\s*stroke-dashoffset: 0;/);
 });
 
 test('source: the pit sleeps settled badges and never kicks them at random', () => {

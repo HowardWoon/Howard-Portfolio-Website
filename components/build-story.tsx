@@ -128,6 +128,45 @@ const HUD_ARCS = [0, 90, 180, 270].map((start) => {
   return `M ${p(start + 12)} A ${R} ${R} 0 0 1 ${p(start + 58)}`;
 });
 
+// R32 circuit traces behind the diagram (owner: "the background is empty, add effects"): a printed-circuit layer,
+// COMPUTED from the node positions plus a seeded generator (same layout every load, never hand-typed): every side
+// node runs an orthogonal trace with one jog to its own edge, the bottom node to the floor, and short stubs with
+// pads run in from the top and bottom edges. viewBox 160 x 90 = the diagram's 16:9.
+const TRACES = (() => {
+  let seed = 20260;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const r1 = (v: number) => Math.round(v * 10) / 10;
+  const out: { d: string; end: [number, number] }[] = [];
+  for (const n of NODES) {
+    const x = n.x * 1.6;
+    const y = n.y * 0.9;
+    const dir = n.x < 50 ? -1 : n.x > 50 ? 1 : 0;
+    if (!dir) {
+      out.push({ d: `M${r1(x)} ${r1(y)} V90`, end: [x, 90] });
+      continue;
+    }
+    for (const lane of [-1, 1]) {
+      const k = x + dir * (12 + rnd() * 10);
+      const y2 = y + lane * (4 + rnd() * 7);
+      const edge = dir < 0 ? 0 : 160;
+      out.push({ d: `M${r1(x)} ${r1(y + lane * 2)} H${r1(k)} V${r1(y2)} H${edge}`, end: [k, y2] });
+    }
+  }
+  for (let i = 0; i < 12; i++) {
+    const x0 = 6 + i * 13 + rnd() * 5;
+    const top = i % 2 === 0;
+    const len = 6 + rnd() * 12;
+    const jog = (rnd() < 0.5 ? -1 : 1) * (3 + rnd() * 5);
+    const y1 = top ? len : 90 - len;
+    const y2 = top ? y1 + 3 + rnd() * 5 : y1 - 3 - rnd() * 5;
+    out.push({
+      d: `M${r1(x0)} ${top ? 0 : 90} V${r1(y1)} H${r1(x0 + jog)} V${r1(y2)}`,
+      end: [x0 + jog, y2],
+    });
+  }
+  return out;
+})();
+
 function Dock({ on }: { on: string }) {
   return DOCKS.filter((d) => d.on === on).map((d) => (
     <div key={d.name} className={`bs-seg bs-dock ${d.fill}`} style={seg(d.a, d.a + 0.05)}>
@@ -141,6 +180,13 @@ function Dock({ on }: { on: string }) {
 // name is already on the site (Experience field archive, project galleries, honours); slates use the SIGNAL colours
 // (pink leadership, yellow podium, orange coursework). Decorative duplicates: aria-hidden, alt="".
 const FIELD_REEL: ReelItem[] = [
+  // R32: every uploaded event photo set joins the reel in time order (AGENTS.md photo checklist); KMNS 2024 first,
+  // orange = ACADEMIC (the PAL mentorship), Howard's own moments first inside each chapter
+  { slate: 'KMNS PAL Leader Club 2024', fill: 'bg-pop-orange' },
+  { src: '/images/experiences/kmns/kmns_03.jpg', w: 960, h: 1280 },
+  { src: '/images/experiences/kmns/kmns_05.jpg', w: 1280, h: 718 },
+  { src: '/images/experiences/kmns/kmns_01.jpg', w: 1280, h: 960 },
+  { src: '/images/experiences/kmns/kmns_06.jpg', w: 1280, h: 960 },
   { slate: 'MYTECH CAREER FAIR 2026', fill: 'bg-pop-pink' },
   { src: '/images/experience/mytech/01.jpg', w: 1280, h: 853 },
   { src: '/images/experience/mytech/02.jpg', w: 1280, h: 853 },
@@ -155,10 +201,10 @@ const FIELD_REEL: ReelItem[] = [
   { src: '/images/projects/zerolag/supervity_souvenir.jpg', w: 960, h: 1280 },
   { src: '/images/projects/zerolag/supervity_present.jpg', w: 960, h: 1280 },
   { slate: 'MUBA Blockchain Hackathon 2026', fill: 'bg-pop-yellow' },
-  { src: '/images/muba/zilian_muba.jpg', w: 960, h: 1280 },
   { src: '/images/muba/4ppl_muba.jpg', w: 1280, h: 960 },
-  { src: '/images/muba/gonka_4ppl_muba.jpg', w: 960, h: 472 },
   { src: '/images/muba/solo_muba.jpg', w: 960, h: 1280 },
+  { src: '/images/muba/gonka_4ppl_muba.jpg', w: 960, h: 472 },
+  { src: '/images/muba/zilian_muba.jpg', w: 960, h: 1280 },
 ];
 const BUILD_REEL: ReelItem[] = [
   { slate: 'ZEROLAG', fill: 'bg-pop-yellow' },
@@ -600,7 +646,7 @@ export default function BuildStory() {
                   <div className="bs-scan-crest">
                     {/* the crest at 32 px, shown big and pixelated: the "raw" image the scanner reads */}
                     <Image
-                      src="/images/logos/um_logo.png"
+                      src="/images/logos/um_crest.png"
                       alt=""
                       width={32}
                       height={32}
@@ -608,7 +654,14 @@ export default function BuildStory() {
                       className="bs-scan-pixel h-full w-full"
                     />
                     <span className="bs-seg bs-scan-sharp" style={gapSeg(0.34, 0.62)}>
-                      <Image src="/images/logos/um_logo.png" alt="" fill sizes="340px" className="object-contain" />
+                      <Image
+                        src="/images/logos/um_crest.png"
+                        alt=""
+                        fill
+                        sizes="340px"
+                        quality={90}
+                        className="object-contain"
+                      />
                     </span>
                     <span className="bs-seg bs-scan-bar" style={gapSeg(0.34, 0.62)} />
                   </div>
@@ -634,6 +687,44 @@ export default function BuildStory() {
               {/* R31 HUD (owner: "more professional, a Tony Stark feeling"), printed not glowing: a pixel radar sweep
                   and two range rings with computed ticks around the AI hub, both turned by the scroll (transform only,
                   reversible), plus a system readout; behind the wires and boxes */}
+              {/* R32 circuit layer: the traces print in during 03 ARCHITECT, then lilac data pulses run along them
+                  while 04 ORCHESTRATE plays (AI = lilac). Stroke offsets only: paint, never layout. */}
+              <svg
+                className="bs-seg bs-hud-traces"
+                style={seg(0.42, 0.6)}
+                viewBox="0 0 160 90"
+                preserveAspectRatio="none"
+              >
+                {TRACES.map((t) => (
+                  <path key={t.d} className="bs-trace" d={t.d} pathLength={1} />
+                ))}
+                {TRACES.map((t) => (
+                  <rect
+                    key={`p${t.d}`}
+                    className="bs-pad"
+                    x={t.end[0] - 0.8}
+                    y={t.end[1] - 0.8}
+                    width={1.6}
+                    height={1.6}
+                  />
+                ))}
+              </svg>
+              <svg
+                className="bs-seg bs-hud-pulses"
+                style={seg(0.58, 0.8)}
+                viewBox="0 0 160 90"
+                preserveAspectRatio="none"
+              >
+                {TRACES.map((t, i) => (
+                  <path
+                    key={t.d}
+                    className="bs-pulse"
+                    d={t.d}
+                    pathLength={1}
+                    style={{ '--k': (i % 4) * 0.25 } as CSSProperties}
+                  />
+                ))}
+              </svg>
               <div className="bs-seg bs-hud-radar" style={seg(0.44, 0.8)}>
                 <span className="bs-hud-radar-arm" />
               </div>
@@ -739,10 +830,10 @@ export default function BuildStory() {
                   <div className="relative aspect-[413/591] overflow-hidden rounded-xl border-3 border-ink">
                     <Portrait photoSeg={seg(0.86, 0.93)} mosaicSeg={seg(0.83, 0.9)} reverse />
                   </div>
-                  {/* R30: the UM Registrar Seal is pressed over the ID photo's top-left corner like an embossed certificate seal
+                  {/* R32: the UM Registrar Seal is pressed on the ID photo's top edge, centred, like an embossed certificate seal
                       - upright, it takes no width from the text column, and stays clear of the CTA and SHIPPED */}
                   <span
-                    className="bs-seg bs-crest absolute -left-2 -top-2 z-10 sm:-left-4 sm:-top-4"
+                    className="bs-seg bs-crest absolute left-1/2 -top-5 z-10 -ml-7 sm:-top-7 sm:-ml-[38px]"
                     style={seg(0.88, 0.93)}
                   >
                     <InstitutionSeal crest="um" size="stamp" stampIn={false} />

@@ -3465,6 +3465,60 @@ html[data-xray-mode]
 /* ---- R31 HUD on the 03 / 04 diagram (build-story.tsx): pixel radar + range rings around the AI hub + a system
    readout + targeting corners on the boxes. Printed, not glowing: hard checker pixels, hairlines, lilac = AI. The
    scroll turns the radar arm and the rings (transform only, reversible); nothing moves on its own. */
+/* R32 circuit layer: hairline traces + square pads (printed, white on ink), drawn in by stroke offset; then short lilac
+   pulses travel along them, offset per trace (--k) so the board reads busy, never in lock-step */
+.bs-hud-traces,
+.bs-hud-pulses {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.bs-hud-traces {
+  opacity: min(1, calc(var(--t) * 6));
+}
+.bs-trace,
+.bs-pad,
+.bs-pulse {
+  --t: inherit;
+  --e: inherit;
+}
+.bs-trace {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.24);
+  stroke-width: 0.32;
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - var(--e));
+}
+.bs-pad {
+  fill: rgb(255 255 255 / 0.4);
+  opacity: min(1, calc(var(--t) * 3 - 1.5));
+}
+.bs-hud-pulses {
+  opacity: calc(min(1, var(--t) * 12) * min(1, (1 - var(--t)) * 6));
+}
+.bs-pulse {
+  fill: none;
+  stroke: #b8a4ff;
+  stroke-width: 0.7;
+  stroke-dasharray: 0.07 0.93;
+  stroke-dashoffset: calc(var(--k) - var(--t) * 3);
+}
+html[data-fx-tier='lite'] .bs-hud-pulses {
+  display: none;
+}
+/* below 1024 px the board is printed whole and only fades in (opacity on the <svg>): a per-frame stroke offset made
+   Chrome re-lay out the SVG every frame (+15 layouts per phone fling at 6x CPU, tests/r17 P0-01) */
+@media (max-width: 1023px) {
+  .bs-trace {
+    stroke-dashoffset: 0;
+  }
+  .bs-hud-pulses {
+    display: none;
+  }
+}
 .bs-hud-radar {
   position: absolute;
   left: 50%;
@@ -3939,23 +3993,32 @@ html[data-motion='calm'] .honors-tally .tally-trophy g:first-child {
   content: attr(data-c);
 }
 .sf-top {
-  clip-path: inset(0 0 50% 0);
+  /* the halves overlap by 1 px, so no anti-aliased hairline is left across the glyph */
+  clip-path: inset(0 0 calc(50% - 0.5px) 0);
 }
 .sf-bot {
-  clip-path: inset(50% 0 0 0);
+  clip-path: inset(calc(50% - 0.5px) 0 0 0);
 }
 .sf-fold,
 .sf-drop {
   z-index: 2;
   visibility: hidden;
 }
+/* R32 hinge (owner: "the seam through the middle makes 0 read as 8"): only two short notches cut into the tile
+   EDGES, the glyph itself is never crossed */
 .sf-cell::after {
   content: '';
   position: absolute;
   inset: 50% 0 auto;
   z-index: 3;
-  height: 1px;
-  background: #3a3a3a;
+  height: 2px;
+  margin-top: -1px;
+  background: linear-gradient(
+    90deg,
+    var(--sf-notch, #fff) 0 2px,
+    transparent 2px calc(100% - 2px),
+    var(--sf-notch, #fff) calc(100% - 2px)
+  );
 }
 .sf-go .sf-fold {
   visibility: visible;
@@ -3985,6 +4048,7 @@ html[data-motion='calm'] .honors-tally .tally-trophy g:first-child {
 /* on an ink surface the tiles are raised a step (and carry a white rim) so the board still reads */
 [data-dark-surface] .sf-cell {
   --sf-bg: #262626;
+  --sf-notch: var(--ink);
   box-shadow: 0 0 0 1px rgb(255 255 255 / 0.35);
 }
 @media (prefers-reduced-motion: reduce) {

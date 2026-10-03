@@ -101,6 +101,16 @@ Rules:
 19. Synthetic CDP touch gestures (`Input.synthesizeScrollGesture`, touch) do not scroll in this headless setup (a plain
     control page scrolls 0 px too). Verify touch scrolling by listener audit, not by a frame count.
 
+20. An SVG `<g>` turned by a CSS transform re-lays out its SVG every frame in Chrome (+20 layouts per phone fling):
+    rotate the `<svg>` element (an HTML box) instead. A scroll-driven `top` or a counter / text that changes every frame
+    is a layout per frame too (R31: CI fling 48-58 vs budget 45).
+21. CI is slower, so TIME-based work (a split-flap arrival, a ticking clock) lands inside a fling far more often than on
+    the laptop: defer it until the page has stopped scrolling and is still on screen (R31 footer + status bar).
+22. A logo PNG with uneven transparent margins renders off-centre and small (blurry) in a round seal: trim + centre it
+    with sharp first (R32 `um_crest.png`).
+23. A control that can be shown inside a folded / tilted scroll effect needs >= 44 px, so its projection stays >= 24 px
+    (motion-on audit, R31).
+
 ## F. Definition of done additions
 
 - Screenshots (not just tests) of every changed area at 390x844 and 1440x900, plus 844x390 for anything pinned.

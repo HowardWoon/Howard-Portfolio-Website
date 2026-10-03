@@ -16,20 +16,23 @@ import { useCalm } from '@/lib/motion-pref';
  * - Mechanical press on mouse hover (the face drops onto its shadow, like `.nb-key`); stamps in once when it first
  *   scrolls into view; both off for reduced motion / Calm.
  * - Decorative (`aria-hidden`): it is only ever placed beside the institution's written name.
- * - Type floor: the ring is drawn 1:1 (132 px box = 132 viewBox units), so its 13 px / 800 letters render at 13 px.
+ * - Type floor: the ring box is 156 px for a 132-unit viewBox, so its 13-unit / 800 letters render at ~15.4 px.
  */
 const CRESTS = {
-  um: { src: '/images/logos/um_logo.png', name: 'UNIVERSITI MALAYA' },
+  // R32: um_crest.png = um_logo.png trimmed to the shield and centred on a square canvas (the original sat 29 px
+  // left of centre inside transparent margins, so the crest looked off-centre and small, i.e. blurry, in every seal)
+  um: { src: '/images/logos/um_crest.png', name: 'UNIVERSITI MALAYA' },
   kmns: { src: '/images/logos/kmns_logo_clear.png', name: 'KOLEJ MATRIKULASI NEGERI SEMBILAN' },
 } as const;
 
 const SIZES = {
   pill: 'h-8 w-8',
   badge: 'h-10 w-10',
-  stamp: 'h-12 w-12 sm:h-16 sm:w-16',
-  ring: 'h-[132px] w-[132px]',
+  stamp: 'h-14 w-14 sm:h-[76px] sm:w-[76px]',
+  // R32: bigger, so the crest itself reads at a glance; the letterpress scales with it (13 units -> ~15.4 px)
+  ring: 'h-[156px] w-[156px]',
 } as const;
-const PX = { pill: 32, badge: 40, stamp: 64, ring: 132 } as const;
+const PX = { pill: 32, badge: 40, stamp: 76, ring: 156 } as const;
 
 const V = 132; // viewBox
 const C = 64; // centre (4 units of the box are the shadow offset)
@@ -67,10 +70,11 @@ export function InstitutionSeal({
   const animate = stampIn && !calm;
 
   // radii (viewBox units): the ring size keeps room for the letterpress, the small sizes give the crest the space
-  const band = ring ? 36 : 50;
-  const disc = ring ? 29.5 : 43;
+  // R32: the crest is the point of the seal, so it takes most of the disc (its shield corners may rest on the band)
+  const band = ring ? 37 : 53;
+  const disc = ring ? 31 : 46;
   const textR = 46;
-  const crestD = ring ? 46 : 70;
+  const crestD = ring ? 56 : 84;
   const pos = (d: number) => ({
     left: `${((C - d / 2) / V) * 100}%`,
     top: `${((C - d / 2) / V) * 100}%`,
@@ -139,6 +143,7 @@ export function InstitutionSeal({
             alt=""
             fill
             sizes={`${Math.ceil((PX[size] * crestD) / V)}px`}
+            quality={90}
             draggable={false}
             className="object-contain"
           />

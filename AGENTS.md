@@ -63,3 +63,29 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
 - `lib/` hooks and helpers: `use-scroll-lock`, `use-focus-trap`, `use-latest`, `to-local`, `use-active-section`, `sections`, Supabase clients, `signal.ts` (SIGNAL KEY colours, the only place colour meanings are defined), `story-glyphs.ts`, `site-data.ts` (mostly legacy - content is inside the section components).
 - `public/` assets. File names use `snake_case` / `kebab-case`, **never spaces**.
 - `tests/smoke.spec.ts` Playwright tests. `.github/workflows/ci.yml` CI. `scripts/` verify.mjs, audit-ui.mjs, check-encoding.mjs. `audit/` is output only and is git-ignored.
+
+## 6. Owner standing rules added R29-R32 (read before touching photos, crests or The Build)
+
+1. **Gallery order (every gallery, every time):** photos of Howard first - him holding the award / on stage /
+   with the team at the result - then other event photos, then product screens (website, dashboards, backend,
+   diagrams). The first print a visitor sees must be the podium moment, like a LinkedIn post. Example:
+   ProofPay starts with the Sui "Team Chain Reaction" stage photo, the four interface screens come last.
+2. **New photos checklist (do ALL of it in the same change):** copy into `public/images/...` (lowercase, no
+   spaces), read the REAL pixel size with `sharp().metadata()` (never guess `w` / `h`), add to the right gallery in
+   the order of rule 1 with a factual alt, add the event photos to the Build Story Field Reel in time order
+   (`FIELD_REEL` in `build-story.tsx`, slate in the SIGNAL colour of the chapter), run
+   `node scripts/gen-photo-blur.mjs` (its sources list must include every file that holds photos), and never
+   leave the original upload folder in the repo root.
+3. **Crests:** institution logos only through `components/institution-seal.tsx` (Registrar Seal). Use the
+   trimmed, centred HD asset (`public/images/logos/um_crest.png`, `kmns_logo_clear.png`); a logo with uneven
+   transparent margins looks off-centre and blurry. Never rotate, glow, spin or put a faint logo behind text.
+   The raw crest appears in The Build only inside the Crest Scan beat.
+4. **Neo-brutalism, never "vibe coded":** hard ink borders, hard offset shadows, flat SIGNAL colours, mono labels,
+   printed / mechanical effects (stamps, scan bars, split-flap, circuit traces, pixel art). No glow, blur, glass,
+   soft gradients, AI imagery or stock 3D.
+5. **Scroll effects must not lay out per frame:** animate transform / opacity / stroke offsets only. Never a
+   scroll-driven `top` / `left`, a counter or text that changes every frame, or a transform on an SVG `<g>`
+   (rotate the `<svg>` box instead). Time-based effects (clocks, flap arrivals) wait until scrolling stops. Check
+   with `tests/r17` P0-01 (phone fling < 45 layouts) and a CDP layout-invalidation trace (30-design-system E15).
+6. **Physics (badge pit):** settled bodies sleep (exactly still); no random kicks; velocity changes only on an
+   approach; a body rests only with its centre over the one below. Guard: `tests/r31` "badge pit settles".

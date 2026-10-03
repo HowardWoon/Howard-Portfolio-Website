@@ -291,94 +291,107 @@ export default function SystemStatusBar() {
 
   return (
     <div className="relative z-10 w-full px-4 xs:px-5 sm:px-10 lg:px-16 pt-8">
+      {/* R32 (owner: "messy, a big blank space bottom-right"): an instrument panel on a strict grid - the readouts
+          share row one edge to edge, the four actions share row two in equal cells (2 x 2 on phones), so no width
+          leaves a lone button or a hole */}
       <div
         ref={barRef}
         role="group"
         aria-label="System status"
-        className="mx-auto flex max-w-7xl flex-wrap items-center gap-2.5 rounded-2xl border-3 border-ink bg-white p-2.5 shadow-brutal-sm sm:gap-3"
+        className="mx-auto max-w-7xl overflow-hidden rounded-2xl border-3 border-ink bg-white shadow-brutal-sm"
       >
-        <span className="rounded-xl bg-ink px-3 py-2 font-mono text-xs font-extrabold tracking-[0.16em] text-white">
-          SYSTEM STATUS
-        </span>
-        <span className="inline-flex min-h-[40px] items-center gap-2 rounded-xl border-2 border-ink px-3 font-mono text-xs font-extrabold tracking-[0.1em] text-ink">
-          <Clock3 className="h-4 w-4" strokeWidth={2.75} aria-hidden />
-          KUALA LUMPUR{' '}
-          <span ref={clockRef} className="tabular-nums" suppressHydrationWarning>
-            --:--:--
-          </span>{' '}
-          <span className="text-ink-muted">GMT+8</span>
-          {day == null ? null : day ? (
-            <Sun className="h-4 w-4 text-ink" strokeWidth={2.75} aria-label="daytime in Kuala Lumpur" />
-          ) : (
-            <Moon className="h-4 w-4 text-ink" strokeWidth={2.75} aria-label="night-time in Kuala Lumpur" />
-          )}
-        </span>
-        {/* lecturer advice #3: the visitor's own time and the gap to Kuala Lumpur */}
-        <span className="inline-flex min-h-[40px] items-center gap-2 rounded-xl border-2 border-ink px-3 font-mono text-xs font-extrabold tracking-[0.1em] text-ink">
-          <UserRound className="h-4 w-4" strokeWidth={2.75} aria-hidden />
-          YOUR TIME{' '}
-          <span ref={localRef} className="tabular-nums" suppressHydrationWarning>
-            --:--
-          </span>{' '}
-          <span className="text-ink-muted" suppressHydrationWarning>
-            {diff ?? ''}
+        <div className="grid gap-2.5 p-2.5 lg:grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)]">
+          <span className="flex min-h-[44px] items-center justify-center rounded-xl bg-ink px-4 font-mono text-xs font-extrabold tracking-[0.16em] text-white">
+            SYSTEM STATUS
           </span>
-        </span>
-        <button
-          type="button"
-          onClick={copyEmail}
-          aria-live="polite"
-          className={`nb-key inline-flex min-h-[40px] items-center gap-2 rounded-xl border-2 border-ink px-3 font-mono text-xs font-extrabold tracking-[0.12em] text-ink ${copied ? 'bg-pop-mint' : 'bg-white'}`}
-        >
-          {copied ? (
-            <Check className="h-4 w-4" strokeWidth={3} aria-hidden />
-          ) : (
-            <Copy className="h-4 w-4" strokeWidth={2.75} aria-hidden />
-          )}
-          {copied ? 'EMAIL COPIED' : 'COPY EMAIL'}
-        </button>
-        <button
-          type="button"
-          onClick={() => openResume()}
-          className="nb-key inline-flex min-h-[40px] items-center gap-2 rounded-xl border-2 border-ink bg-white px-3 font-mono text-xs font-extrabold tracking-[0.12em] text-ink"
-        >
-          <FileText className="h-4 w-4" strokeWidth={2.75} aria-hidden />
-          CV PREVIEW
-        </button>
-        <button
-          type="button"
-          onClick={doPing}
-          aria-busy={pinging}
-          className="nb-key inline-flex min-h-[40px] items-center gap-2 rounded-xl border-2 border-ink bg-white px-3 font-mono text-xs font-extrabold tracking-[0.12em] text-ink"
-        >
-          <Activity className="h-4 w-4" strokeWidth={2.75} aria-hidden />
-          PING{' '}
-          <span aria-live="polite" className="tabular-nums text-ink-muted">
-            {pinging ? '…' : ping == null ? '— ms' : `${ping} ms`}
+          <span className="flex min-h-[44px] w-full min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-xl border-2 border-ink bg-white px-3 py-1.5 font-mono text-xs font-extrabold tracking-[0.1em] text-ink">
+            <span className="inline-flex items-center gap-2">
+              <Clock3 className="h-4 w-4" strokeWidth={2.75} aria-hidden />
+              KUALA LUMPUR
+            </span>{' '}
+            <span className="inline-flex items-center gap-2">
+              <span ref={clockRef} className="tabular-nums" suppressHydrationWarning>
+                --:--:--
+              </span>{' '}
+              <span className="text-ink-muted">GMT+8</span>
+              {day == null ? null : day ? (
+                <Sun className="h-4 w-4 text-ink" strokeWidth={2.75} aria-label="daytime in Kuala Lumpur" />
+              ) : (
+                <Moon className="h-4 w-4 text-ink" strokeWidth={2.75} aria-label="night-time in Kuala Lumpur" />
+              )}
+            </span>
           </span>
-        </button>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={xray}
-          onClick={() => setXray((v) => !v)}
-          className={`nb-key ml-auto inline-flex min-h-[40px] items-center gap-2.5 rounded-xl border-2 border-ink px-3 font-mono text-xs font-extrabold tracking-[0.12em] ${
-            xray ? 'bg-pop-blue text-white' : 'bg-white text-ink'
-          }`}
-        >
-          <ScanLine className="h-4 w-4" strokeWidth={2.75} aria-hidden />
-          X-RAY MODE
-          <span
-            aria-hidden
-            className={`relative h-5 w-9 rounded-full border-2 ${xray ? 'border-white bg-white/25' : 'border-ink bg-paper-deep'}`}
+          {/* lecturer advice #3: the visitor's own time and the gap to Kuala Lumpur */}
+          <span className="flex min-h-[44px] w-full min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-xl border-2 border-ink bg-white px-3 py-1.5 font-mono text-xs font-extrabold tracking-[0.1em] text-ink">
+            <span className="inline-flex items-center gap-2">
+              <UserRound className="h-4 w-4" strokeWidth={2.75} aria-hidden />
+              YOUR TIME
+            </span>{' '}
+            <span className="inline-flex items-center gap-2">
+              <span ref={localRef} className="tabular-nums" suppressHydrationWarning>
+                --:--
+              </span>{' '}
+              <span className="text-ink-muted" suppressHydrationWarning>
+                {diff ?? ''}
+              </span>
+            </span>
+          </span>
+        </div>
+        <div className="grid grid-cols-2 gap-2.5 border-t-2 border-dashed border-ink bg-paper-deep/60 p-2.5 sm:grid-cols-4">
+          <button
+            type="button"
+            onClick={copyEmail}
+            aria-live="polite"
+            className={`nb-key inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border-2 border-ink px-3 font-mono text-xs font-extrabold tracking-[0.12em] text-ink ${copied ? 'bg-pop-mint' : 'bg-white'}`}
           >
+            {copied ? (
+              <Check className="h-4 w-4" strokeWidth={3} aria-hidden />
+            ) : (
+              <Copy className="h-4 w-4" strokeWidth={2.75} aria-hidden />
+            )}
+            {copied ? 'EMAIL COPIED' : 'COPY EMAIL'}
+          </button>
+          <button
+            type="button"
+            onClick={() => openResume()}
+            className="nb-key inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border-2 border-ink px-3 font-mono text-xs font-extrabold tracking-[0.12em] bg-white text-ink"
+          >
+            <FileText className="h-4 w-4" strokeWidth={2.75} aria-hidden />
+            CV PREVIEW
+          </button>
+          <button
+            type="button"
+            onClick={doPing}
+            aria-busy={pinging}
+            className="nb-key inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border-2 border-ink px-3 font-mono text-xs font-extrabold tracking-[0.12em] bg-white text-ink"
+          >
+            <Activity className="h-4 w-4" strokeWidth={2.75} aria-hidden />
+            PING{' '}
+            <span aria-live="polite" className="tabular-nums text-ink-muted">
+              {pinging ? '…' : ping == null ? '— ms' : `${ping} ms`}
+            </span>
+          </button>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={xray}
+            onClick={() => setXray((v) => !v)}
+            className={`nb-key inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border-2 border-ink px-3 font-mono text-xs font-extrabold tracking-[0.12em] gap-2.5 ${xray ? 'bg-pop-blue text-white' : 'bg-white text-ink'}`}
+          >
+            <ScanLine className="h-4 w-4" strokeWidth={2.75} aria-hidden />
+            X-RAY MODE
             <span
-              className={`absolute top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full border-2 transition-[left] duration-150 ${
-                xray ? 'left-[18px] border-white bg-white' : 'left-0.5 border-ink bg-ink'
-              }`}
-            />
-          </span>
-        </button>
+              aria-hidden
+              className={`relative h-5 w-9 rounded-full border-2 ${xray ? 'border-white bg-white/25' : 'border-ink bg-paper-deep'}`}
+            >
+              <span
+                className={`absolute top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full border-2 transition-[left] duration-150 ${
+                  xray ? 'left-[18px] border-white bg-white' : 'left-0.5 border-ink bg-ink'
+                }`}
+              />
+            </span>
+          </button>
+        </div>
       </div>
       {xray ? <XrayOverlay ping={ping} onClose={closeXray} /> : null}
     </div>

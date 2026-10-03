@@ -26,11 +26,12 @@ async function storyAt(page: Page, f: number) {
   await page.waitForTimeout(900);
 }
 
-test('source: the seal rosette is computed and the ring is drawn 1:1', () => {
+test('source: the seal rosette is computed and the ring is never drawn below 1:1', () => {
   const src = readFileSync('components/institution-seal.tsx', 'utf8');
   expect(src).toMatch(/export function rosettePoints/);
   expect(src).not.toMatch(/points="[\d. ,]+"/); // never a hand-typed point list
-  expect(src).toMatch(/ring: 'h-\[132px\] w-\[132px\]'/);
+  // R32: 156 px box for the 132-unit viewBox (>= 1:1, so the 13-unit letterpress never renders under 13 px)
+  expect(src).toMatch(/ring: 'h-\[156px\] w-\[156px\]'/);
   expect(src).toMatch(/const V = 132;/);
   expect(src).toMatch(/fontSize=\{13\}/);
 });
@@ -65,7 +66,7 @@ test.describe('registrar seals in Honours (1440)', () => {
           scale: m.a,
         };
       });
-      expect(r.w).toBe(132); // 1:1 with the viewBox, so 13 px letters render at 13 px
+      expect(r.w).toBe(156); // 156 px for a 132-unit viewBox: the 13-unit letters render at ~15.4 px (>= type floor)
       expect(r.size).toBe(13);
       expect(r.weight).toBe(800);
       expect(r.family).toMatch(/JetBrains Mono/i);
