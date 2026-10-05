@@ -1,11 +1,34 @@
 import { test, expect, devices } from '@playwright/test';
 
-test('gate can be dismissed and is skipped on reload in same session', async ({ page }) => {
+// R34 (owner): the gate shows on EVERY full load (first visit, refresh, opened link) and the page then starts at the
+// top (hero), never where the last visit was scrolled to, and never at a #section from the URL
+test('gate shows again on every refresh and the page then starts at the hero', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: /initialize system/i }).click();
   await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 10000 });
+  // (the post-gate jump to the top runs right after the gate lifts: scroll until the visit is really down the page)
+  await expect(async () => {
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight / 2));
+    await page.waitForTimeout(300);
+    expect(await page.evaluate(() => scrollY)).toBeGreaterThan(500);
+  }).toPass({ timeout: 10000 });
   await page.reload();
-  await expect(page.locator('.boot-overlay')).toBeHidden();
+  await expect(page.locator('.boot-overlay')).toBeVisible();
+  await page.getByRole('button', { name: /initialize system/i }).click();
+  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 10000 });
+  await page.waitForTimeout(400);
+  expect(await page.evaluate(() => scrollY)).toBe(0);
+  await expect(page.locator('#hero h1, #hero h2').first()).toBeInViewport();
+});
+
+test('a /#contact link still shows the gate first, then the hero at the top', async ({ page }) => {
+  await page.goto('/#contact');
+  await expect(page.locator('.boot-overlay')).toBeVisible();
+  await page.getByRole('button', { name: /skip intro/i }).click();
+  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 10000 });
+  await page.waitForTimeout(400);
+  expect(await page.evaluate(() => scrollY)).toBe(0);
+  expect(await page.evaluate(() => location.hash)).toBe('');
 });
 
 test('honor counters never show ordinal garbage', async ({ page }) => {

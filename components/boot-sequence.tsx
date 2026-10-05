@@ -14,34 +14,46 @@ declare global {
     /** Set by the inline script in app/layout.tsx when a gate button is clicked before React hydrated. */
     __hwBoot?: 'init' | 'skip' | null;
     __hwHydrated?: boolean;
+    /** R34: the gate was passed in THIS page load (memory only: a refresh / new tab / reopened link starts over). */
+    __hwBootDone?: boolean;
   }
 }
 
 /**
  * "Initialize System" gate.
  *
- * Once per session works (your smoke test passes, reload skips the gate).
+ * R34 (owner: "whenever i refresh or first click the link ... must show the loading page first, then the top page"):
+ * the gate shows on EVERY full page load (first visit, refresh, new tab, reopened link, back from another site), and
+ * after it the page always starts at the top (hero). Only a client-side navigation inside the site (e.g. "Return to
+ * Portfolio" from a simulator) skips it, because the flag lives in memory (window.__hwBootDone), not in storage.
+ * Test hook: automated browsers (navigator.webdriver) may pre-set sessionStorage 'hw-booted' to skip the gate; real
+ * visitors never are, so a stale flag from an older build has no effect.
  */
 
-function scrollAfterBoot() {
-  // Honour deep links like /#projects (the command palette and "Return to Portfolio" use them);
-  // previously the gate always scrolled back to the top.
-  // getElementById (not querySelector): hashes like "#1st" or "#a=b" from shared/tracking links are
-  // not valid CSS selectors and made querySelector throw, which aborted the post-boot scroll.
-  let id = '';
+/** the gate was already passed: earlier in this page load (client navigation), or an automated test pre-set it */
+function gatePassed() {
+  if (window.__hwBootDone) return true;
   try {
-    id = decodeURIComponent(window.location.hash.slice(1));
+    return navigator.webdriver && sessionStorage.getItem('hw-booted') === '1';
   } catch {
-    /* malformed %-encoding */
+    return false;
   }
-  const target = id ? document.getElementById(id) : null;
-  if (target) {
-    if (window.__lenis) window.__lenis.scrollTo(target as HTMLElement, { immediate: true });
-    else (target as HTMLElement).scrollIntoView();
-  } else {
-    if (window.__lenis) window.__lenis.scrollTo(0, { immediate: true });
-    else window.scrollTo(0, 0);
+}
+
+function scrollAfterBoot() {
+  // R34 (owner): after the gate the visitor always lands on the hero at the top, also when the URL carries a #section
+  // (the hash is dropped so the address bar matches what is shown; ?query deep links such as ?photo= are kept).
+  // In-site links to a section (/#projects from a simulator) are client navigations: they skip the gate and keep
+  // their anchor.
+  if (window.location.hash) {
+    try {
+      history.replaceState(history.state, '', window.location.pathname + window.location.search);
+    } catch {
+      /* ignore */
+    }
   }
+  if (window.__lenis) window.__lenis.scrollTo(0, { immediate: true });
+  window.scrollTo(0, 0);
 }
 
 export function BootSequence({ children }: { children: React.ReactNode }) {
@@ -49,7 +61,7 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
 
   useLayoutEffect(() => {
     try {
-      if (sessionStorage.getItem('hw-booted') === '1') {
+      if (gatePassed()) {
         document.documentElement.classList.add('hw-booted');
         setShowBoot(false);
       }
@@ -119,9 +131,7 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
     } catch (e) {
       console.error(e);
     }
-    try {
-      sessionStorage.setItem('hw-booted', '1');
-    } catch {}
+    window.__hwBootDone = true;
     document.documentElement.classList.add('hw-booted');
     justBooted.current = true;
     setShowBoot(false);

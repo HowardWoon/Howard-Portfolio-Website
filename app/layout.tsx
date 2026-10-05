@@ -85,7 +85,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{if(sessionStorage.getItem('hw-booted')==='1')document.documentElement.classList.add('hw-booted')}catch(e){}try{if(localStorage.getItem('hw-motion')==='calm')document.documentElement.dataset.motion='calm'}catch(e){}document.addEventListener('click',function(e){var t=e.target,b=t&&t.closest?t.closest('[data-boot-action]'):null;if(b&&!window.__hwHydrated){var a=b.getAttribute('data-boot-action');window.__hwBoot=a;if(a==='skip'){document.documentElement.classList.add('hw-booted');try{sessionStorage.setItem('hw-booted','1')}catch(e){}}}},true);`,
+            __html: `try{if('scrollRestoration' in history)history.scrollRestoration='manual'}catch(e){}try{if(navigator.webdriver&&sessionStorage.getItem('hw-booted')==='1')document.documentElement.classList.add('hw-booted')}catch(e){}try{if(localStorage.getItem('hw-motion')==='calm')document.documentElement.dataset.motion='calm'}catch(e){}window.addEventListener('pageshow',function(e){if(e.persisted)location.reload()});document.addEventListener('click',function(e){var t=e.target,b=t&&t.closest?t.closest('[data-boot-action]'):null;if(b&&!window.__hwHydrated){var a=b.getAttribute('data-boot-action');window.__hwBoot=a;if(a==='skip'){document.documentElement.classList.add('hw-booted');window.__hwBootDone=true}}},true);`,
           }}
         />
         <script
