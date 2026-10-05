@@ -191,6 +191,16 @@ budget, R20), a destructive "load spike" mode, auto-playing audio, stamps with s
 
 Testing notes: an element below the fold cannot be hovered / pressed by `page.mouse` until scrolled into view; measure physics bodies by their translation (`DOMMatrix(transform).m41/m42`), not the rotated bounding box; a flung body's landing spot is physics - assert that it follows the pointer while held and settles inside afterwards.
 
+R33 (owner: "像素变身", photo supplied by Howard), same rule - a layer:
+
+| Feature     | Where                                                          | Rules                                                                                                                                                                                                                                                                                                                                             |
+| ----------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pixel Morph | build-story.tsx `MorphPortrait` / `PixelBurst`, `.bs-px` (css) | 05 SHIP: ID photo scanned into 7 x 10 blocks (the 28 x 40 mosaics, x10 nearest = `howard-id-px` / `howard-ship-px`), blocks lift in a wave, flip edge-on, land as `howard-ship.jpg`, which develops, then the UM seal; flight paths computed (seeded); transform / opacity only; burst layer only visible inside its window; still = new portrait |
+
+`howard-ship.jpg` is an owner-supplied, AI-styled portrait used by Howard's explicit R33 request: it is cropped to Howard
+only (no hologram text), lives only in the release card, and is not a precedent for other AI imagery (B still applies).
+Guard: tests/r33.spec.ts.
+
 ## H. R24 guardrails - type floor, emblem geometry, torchlight, neo-brutalism only (owner complaints, tested)
 
 Howard: "the font family and font size is too ugly and small, slim, i dont want this font problem happen again" and

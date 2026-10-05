@@ -3857,6 +3857,64 @@ html[data-motion='calm'] .honors-tally .tally-trophy g:first-child {
   opacity: min(1, calc(var(--t) * 4));
   transform: scale(calc(1.8 - var(--e) * 0.8));
 }
+/* R33 Pixel Morph (build-story.tsx MorphPortrait + PixelBurst): the ID photo is scanned into 7 x 10 pixel blocks, the
+   blocks lift off in a wave (--d = each block's delay), flip edge-on at the top of their flight (the face swaps from the
+   ID pixels to the new portrait's pixels at that instant) and land in their own socket. Printed, not glowing: hard ink
+   outlines and a hard offset shadow that grows with the lift. Transform / opacity only (plus the shadow's paint). */
+.bs-morph-tray {
+  background:
+    linear-gradient(to right, rgb(255 255 255 / 0.22) 1px, transparent 1px) 0 0 / calc(100% / 7) calc(100% / 10),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.22) 1px, transparent 1px) 0 0 / calc(100% / 7) calc(100% / 10);
+}
+/* the whole-picture mosaics stand in for the blocks before and after the burst (exact same pixels) */
+.bs-morph-before {
+  opacity: calc(1 - min(1, var(--t) * 1000));
+}
+.bs-morph-after {
+  opacity: calc(1 - min(1, (1 - var(--t)) * 1000));
+}
+.bs-morph {
+  position: absolute;
+  inset: 3px; /* the photo box's border */
+  z-index: 5;
+  pointer-events: none;
+  opacity: calc(min(1, var(--t) * 1000) * min(1, (1 - var(--t)) * 1000));
+}
+.bs-px {
+  --k: clamp(0, (var(--t) - var(--d) * 0.45) / 0.55, 1);
+  --lift: calc(4 * var(--k) * (1 - var(--k)));
+  --flip: clamp(0, (var(--k) - 0.5) * 1000, 1);
+  /* edge-on only around the face swap (k 0.3 - 0.7), square for the rest of the flight */
+  --edge: min(1, calc(0.08 + (2 * var(--k) - 1) * (2 * var(--k) - 1) * 6));
+  position: absolute;
+  left: calc(var(--c) * 100% / 7);
+  top: calc(var(--r) * 100% / 10);
+  width: calc(100% / 7);
+  height: calc(100% / 10);
+  outline: 1.5px solid var(--ink);
+  box-shadow: calc(var(--lift) * 5px) calc(var(--lift) * 5px) 0 0 var(--ink);
+  transform: translate(calc(var(--dx) * var(--lift) * 1%), calc(var(--dy) * var(--lift) * 1%))
+    rotate(calc(var(--rot) * var(--lift) * 1deg))
+    scale(calc((1 + var(--lift) * 0.35) * var(--edge)), calc(1 + var(--lift) * 0.35));
+}
+.bs-px::before,
+.bs-px::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-size: 700% 1000%;
+  background-position: calc(var(--c) * 100% / 6) calc(var(--r) * 100% / 9);
+  image-rendering: pixelated;
+}
+.bs-px::before {
+  background-image: var(--px-a);
+  opacity: calc(1 - var(--flip));
+}
+.bs-px::after {
+  background-image: var(--px-b);
+  opacity: var(--flip);
+}
 .bs-cta {
   pointer-events: none;
   opacity: 0;

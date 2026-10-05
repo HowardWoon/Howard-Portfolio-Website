@@ -239,15 +239,7 @@ const AWARDS = [
 ] as const;
 
 /** photo -> pixel mosaic -> glyph portrait, stacked; `photoSeg` / `mosaicSeg` wipe the top two layers away */
-function Portrait({
-  photoSeg,
-  mosaicSeg,
-  reverse = false,
-}: {
-  photoSeg: CSSProperties;
-  mosaicSeg: CSSProperties;
-  reverse?: boolean;
-}) {
+function Portrait({ photoSeg, mosaicSeg }: { photoSeg: CSSProperties; mosaicSeg: CSSProperties }) {
   return (
     <div className="bs-portrait relative h-full w-full overflow-hidden bg-[#F2F5FF]">
       {/* R24: the glyph mosaic is picture art, not reading text, so it is the one exemption from the type floor test */}
@@ -257,7 +249,7 @@ function Portrait({
       >
         {PORTRAIT_GLYPHS}
       </pre>
-      <div className={`bs-seg ${reverse ? 'bs-wipe-in' : 'bs-wipe'} absolute inset-0`} style={mosaicSeg}>
+      <div className="bs-seg bs-wipe absolute inset-0" style={mosaicSeg}>
         <Image
           src="/images/story/howard-id-mosaic.png"
           alt=""
@@ -267,7 +259,7 @@ function Portrait({
           className="object-cover [image-rendering:pixelated]"
         />
       </div>
-      <div className={`bs-seg ${reverse ? 'bs-wipe-in' : 'bs-wipe'} absolute inset-0`} style={photoSeg}>
+      <div className="bs-seg bs-wipe absolute inset-0" style={photoSeg}>
         <Image
           src="/images/story/howard-id.jpg"
           alt=""
@@ -276,6 +268,125 @@ function Portrait({
           className="object-cover"
         />
       </div>
+    </div>
+  );
+}
+
+// R33 Pixel Morph (owner: "像素变身"): in 05 SHIP the student-ID photo is scanned into pixel blocks, the blocks lift off
+// in a wave, flip over in the air and land as the new portrait, which then develops sharp and gets the UM seal.
+// The grid is 7 x 10 blocks of 4 x 4 art pixels = the two 28 x 40 mosaics (howard-id-px / howard-ship-px, upscaled
+// x10 with nearest-neighbour, so the pixels stay hard on every browser). Flight paths are COMPUTED (seeded, same every
+// load): out from the photo's centre, biased upwards, in % of the block's own size so every screen gets the same
+// choreography. Story time windows below; scroll-scrubbed and reversible, transform / opacity only.
+const MORPH_COLS = 7;
+const MORPH_ROWS = 10;
+const MORPH_ID_WIPE = [0.835, 0.86] as const; // the sharp ID photo is scanned away: its pixel blocks remain
+const MORPH_BURST = [0.86, 0.92] as const; // the blocks lift, flip and land
+const MORPH_DEVELOP = [0.92, 0.945] as const; // the new portrait develops sharp over its blocks
+const MORPH = (() => {
+  let seed = 33033;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const r1 = (v: number) => Math.round(v * 10) / 10;
+  return Array.from({ length: MORPH_COLS * MORPH_ROWS }, (_, n) => {
+    const c = n % MORPH_COLS;
+    const r = Math.floor(n / MORPH_COLS);
+    const ox = c - (MORPH_COLS - 1) / 2;
+    const oy = r - (MORPH_ROWS - 1) / 2;
+    const len = Math.hypot(ox, oy) || 1;
+    const dist = 70 + rnd() * 90;
+    return {
+      c,
+      r,
+      dx: r1((ox / len) * dist + (rnd() - 0.5) * 50),
+      dy: r1((oy / len) * dist * 0.6 - 40 - rnd() * 50),
+      rot: r1((rnd() - 0.5) * 60),
+      // the wave runs top to bottom like the scanner, with a little seeded jitter
+      d: r1(((r / (MORPH_ROWS - 1)) * 0.75 + rnd() * 0.25) * 100) / 100,
+      // the four corner blocks follow the photo box's rounded corners (rounded-xl inside a 3 px border)
+      radius:
+        c === 0 && r === 0
+          ? '9px 0 0 0'
+          : c === MORPH_COLS - 1 && r === 0
+            ? '0 9px 0 0'
+            : c === 0 && r === MORPH_ROWS - 1
+              ? '0 0 0 9px'
+              : c === MORPH_COLS - 1 && r === MORPH_ROWS - 1
+                ? '0 0 9px 0'
+                : undefined,
+    };
+  });
+})();
+
+/** R33: what the release photo box shows outside the burst (ID photo -> its blocks ... new blocks -> new photo) */
+function MorphPortrait() {
+  return (
+    <div className="bs-portrait relative h-full w-full overflow-hidden bg-ink">
+      {/* the empty block tray, seen while the blocks are in the air */}
+      <span className="bs-morph-tray absolute inset-0" />
+      <span className="bs-seg bs-morph-before absolute inset-0" style={seg(...MORPH_BURST)}>
+        <Image
+          src="/images/story/howard-id-px.png"
+          alt=""
+          fill
+          sizes="160px"
+          unoptimized
+          className="object-cover [image-rendering:pixelated]"
+        />
+      </span>
+      <span className="bs-seg bs-morph-after absolute inset-0" style={seg(...MORPH_BURST)}>
+        <Image
+          src="/images/story/howard-ship-px.png"
+          alt=""
+          fill
+          sizes="160px"
+          unoptimized
+          className="object-cover [image-rendering:pixelated]"
+        />
+      </span>
+      <div className="bs-seg bs-wipe-in absolute inset-0" style={seg(...MORPH_DEVELOP)}>
+        <Image
+          src="/images/story/howard-ship.jpg"
+          alt=""
+          fill
+          sizes="(max-width: 767px) 30vw, 200px"
+          className="object-cover"
+        />
+      </div>
+      <div className="bs-seg bs-wipe absolute inset-0" style={seg(...MORPH_ID_WIPE)}>
+        <Image
+          src="/images/story/howard-id.jpg"
+          alt=""
+          fill
+          sizes="(max-width: 767px) 30vw, 200px"
+          className="object-cover"
+        />
+      </div>
+      <span className="bs-seg bs-scan" style={seg(...MORPH_ID_WIPE)} />
+      <span className="bs-seg bs-scan" style={seg(...MORPH_DEVELOP)} />
+    </div>
+  );
+}
+
+/** R33: the 70 flying blocks, laid over the photo box; visible only while the burst plays */
+function PixelBurst() {
+  return (
+    <div
+      className="bs-seg bs-morph"
+      style={seg(...MORPH_BURST, {
+        '--px-a': 'url(/images/story/howard-id-px.png)',
+        '--px-b': 'url(/images/story/howard-ship-px.png)',
+      })}
+    >
+      {MORPH.map((b) => (
+        <span
+          key={`${b.c}-${b.r}`}
+          className="bs-seg bs-px"
+          style={{
+            ...seg(...MORPH_BURST, { '--c': b.c, '--r': b.r, '--dx': b.dx, '--dy': b.dy, '--rot': b.rot, '--d': b.d }),
+            borderRadius: b.radius,
+          }}
+        />
+      ))}
     </div>
   );
 }
@@ -828,13 +939,15 @@ export default function BuildStory() {
               <div className="grid grid-cols-[30%_1fr] items-start gap-3 p-3 sm:grid-cols-[34%_1fr] sm:gap-5 sm:p-5">
                 <div className="relative" aria-hidden>
                   <div className="relative aspect-[413/591] overflow-hidden rounded-xl border-3 border-ink">
-                    <Portrait photoSeg={seg(0.86, 0.93)} mosaicSeg={seg(0.83, 0.9)} reverse />
+                    <MorphPortrait />
                   </div>
+                  <PixelBurst />
                   {/* R32: the UM Registrar Seal is pressed on the ID photo's top edge, centred, like an embossed certificate seal
-                      - upright, it takes no width from the text column, and stays clear of the CTA and SHIPPED */}
+                      - upright, it takes no width from the text column, and stays clear of the CTA and SHIPPED.
+                      R33: it is pressed once the new portrait has developed (the "stamp" of the pixel morph) */}
                   <span
                     className="bs-seg bs-crest absolute left-1/2 -top-5 z-10 -ml-7 sm:-top-7 sm:-ml-[38px]"
-                    style={seg(0.88, 0.93)}
+                    style={seg(0.93, 0.96)}
                   >
                     <InstitutionSeal crest="um" size="stamp" stampIn={false} />
                   </span>
