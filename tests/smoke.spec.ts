@@ -1,4 +1,5 @@
 import { test, expect, devices } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 
 // R34 (owner): the gate shows on EVERY full load (first visit, refresh, opened link) and the page then starts at the
 // top (hero), never where the last visit was scrolled to, and never at a #section from the URL
@@ -21,12 +22,22 @@ test('gate shows again on every refresh and the page then starts at the hero', a
   await expect(page.locator('#hero h1, #hero h2').first()).toBeInViewport();
 });
 
-test('a /#contact link still shows the gate first, then the hero at the top', async ({ page }) => {
-  await page.goto('/#contact');
+// R35: at 4x CPU the tap lands before hydration and the browser's own jump to #contact used to arrive after the jump
+// to the top (the page ended at Contact); the head script now drops the hash before the browser can scroll to it
+test('a /#contact link still shows the gate first, then the hero at the top (slow phone, 4x CPU)', async ({
+  page,
+  context,
+}) => {
+  test.setTimeout(90_000);
+  const cdp = await context.newCDPSession(page);
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+  await page.goto('/#contact', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('.boot-overlay')).toBeVisible();
   await page.getByRole('button', { name: /skip intro/i }).click();
-  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 10000 });
-  await page.waitForTimeout(400);
+  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 30000 });
+  await page.waitForLoadState('load');
+  await page.waitForTimeout(2000);
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 1 });
   expect(await page.evaluate(() => scrollY)).toBe(0);
   expect(await page.evaluate(() => location.hash)).toBe('');
 });
@@ -147,4 +158,50 @@ test('academic distinctions: structured transcript, results and roles', async ({
   ]);
   expect(sw).toBeLessThanOrEqual(cw);
   expect(cw).toBeLessThanOrEqual(390);
+});
+
+// R35 (owner "yes do all"): "Return to Portfolio" from a simulator also opens the home page behind the gate, then the
+// hero at the top (no test hook here: this is what a real visitor gets)
+test('Return to Portfolio shows the gate again, then the hero at the top', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+  await page.getByRole('button', { name: /skip intro/i }).click();
+  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 10000 });
+  const run = page.locator('#projects a[href="/simulators/flood"]');
+  await run.scrollIntoViewIfNeeded();
+  await run.click();
+  await expect(page).toHaveURL(/\/simulators\/flood$/);
+  await page.getByRole('link', { name: /return to portfolio/i }).click();
+  await expect(page).toHaveURL(/\/(#projects)?$/);
+  await expect(page.locator('.boot-overlay')).toBeVisible({ timeout: 10000 });
+  await page.getByRole('button', { name: /initialize system/i }).click();
+  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 10000 });
+  await page.waitForTimeout(800);
+  expect(await page.evaluate(() => scrollY)).toBe(0);
+  await expect(page.locator('html')).toHaveClass(/hw-booted/);
+  expect(await page.evaluate(() => document.body.style.overflow)).toBe('');
+});
+
+// R35 crash guard: a mistyped link gets the site's own 404 (a way home, no sideways scroll), and every route has an
+// error boundary so a crash shows a recoverable screen instead of a blank page
+for (const width of [320, 390, 1440]) {
+  test(`404 page is styled, readable and leads home (${width}px)`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 800 });
+    const res = await page.goto('/no-such-page');
+    expect(res?.status()).toBe(404);
+    await expect(page.getByRole('heading', { level: 1, name: /this page does not exist/i })).toBeVisible();
+    const home = page.getByRole('link', { name: /reload the portfolio/i });
+    await expect(home).toHaveAttribute('href', '/');
+    const box = (await home.boundingBox())!;
+    expect(box.height).toBeGreaterThanOrEqual(40);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  });
+}
+
+test('every route has an error boundary (no blank "Application error" page)', () => {
+  for (const f of ['app/error.tsx', 'app/global-error.tsx', 'app/not-found.tsx']) {
+    const src = readFileSync(f, 'utf8');
+    expect(src, f).toMatch(/ErrorScreen/);
+  }
+  expect(readFileSync('app/global-error.tsx', 'utf8')).toMatch(/<html[\s\S]*<body/);
 });

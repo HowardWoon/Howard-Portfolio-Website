@@ -81,6 +81,9 @@ function receiveOnHome(done: () => void) {
     /* storage blocked: plain landing */
   }
   if (!from || !/^(agentic|flood|energy)$/.test(from)) return done();
+  // R35 (owner): the home page always opens behind the INITIALIZE SYSTEM gate and starts at the top after it, so there
+  // is no project to land on (scrolling to it behind the gate, and re-checking it, would fight the jump to the top)
+  if (!document.documentElement.classList.contains('hw-booted')) return done();
   const t0 = performance.now();
   const find = () => {
     // the project stack is a lazy section: wait (briefly) for it to mount

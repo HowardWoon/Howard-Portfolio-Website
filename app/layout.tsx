@@ -83,9 +83,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       suppressHydrationWarning
     >
       <head>
+        {/* R34 / R35 (owner): every load of the home page shows the gate, then the hero at the top - so no restored
+            scroll position, no #section jump (the hash is dropped before the browser can scroll to it), no gate skip
+            from storage (only automated tests may pre-pass it), and a back-forward cache restore reloads. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{if('scrollRestoration' in history)history.scrollRestoration='manual'}catch(e){}try{if(navigator.webdriver&&sessionStorage.getItem('hw-booted')==='1')document.documentElement.classList.add('hw-booted')}catch(e){}try{if(localStorage.getItem('hw-motion')==='calm')document.documentElement.dataset.motion='calm'}catch(e){}window.addEventListener('pageshow',function(e){if(e.persisted)location.reload()});document.addEventListener('click',function(e){var t=e.target,b=t&&t.closest?t.closest('[data-boot-action]'):null;if(b&&!window.__hwHydrated){var a=b.getAttribute('data-boot-action');window.__hwBoot=a;if(a==='skip'){document.documentElement.classList.add('hw-booted');window.__hwBootDone=true}}},true);`,
+            __html: `try{if('scrollRestoration' in history)history.scrollRestoration='manual'}catch(e){}try{if(location.pathname==='/'&&location.hash)history.replaceState(history.state,'',location.pathname+location.search)}catch(e){}try{if(navigator.webdriver&&sessionStorage.getItem('hw-booted')==='1')document.documentElement.classList.add('hw-booted')}catch(e){}try{if(localStorage.getItem('hw-motion')==='calm')document.documentElement.dataset.motion='calm'}catch(e){}window.addEventListener('pageshow',function(e){if(e.persisted)location.reload()});document.addEventListener('click',function(e){var t=e.target,b=t&&t.closest?t.closest('[data-boot-action]'):null;if(b&&!window.__hwHydrated){var a=b.getAttribute('data-boot-action');window.__hwBoot=a;if(a==='skip'){document.documentElement.classList.add('hw-booted')}}},true);`,
           }}
         />
         <script

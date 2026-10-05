@@ -14,8 +14,6 @@ declare global {
     /** Set by the inline script in app/layout.tsx when a gate button is clicked before React hydrated. */
     __hwBoot?: 'init' | 'skip' | null;
     __hwHydrated?: boolean;
-    /** R34: the gate was passed in THIS page load (memory only: a refresh / new tab / reopened link starts over). */
-    __hwBootDone?: boolean;
   }
 }
 
@@ -23,16 +21,15 @@ declare global {
  * "Initialize System" gate.
  *
  * R34 (owner: "whenever i refresh or first click the link ... must show the loading page first, then the top page"):
- * the gate shows on EVERY full page load (first visit, refresh, new tab, reopened link, back from another site), and
- * after it the page always starts at the top (hero). Only a client-side navigation inside the site (e.g. "Return to
- * Portfolio" from a simulator) skips it, because the flag lives in memory (window.__hwBootDone), not in storage.
+ * the gate shows EVERY time the home page opens (first visit, refresh, new tab, reopened link, back from another site,
+ * and - R35, owner "yes do all" - also "Return to Portfolio" / any in-site link back to the home page), and after it
+ * the page always starts at the top (hero). Nothing about a passed gate is stored.
  * Test hook: automated browsers (navigator.webdriver) may pre-set sessionStorage 'hw-booted' to skip the gate; real
  * visitors never are, so a stale flag from an older build has no effect.
  */
 
-/** the gate was already passed: earlier in this page load (client navigation), or an automated test pre-set it */
+/** only an automated test may pre-pass the gate */
 function gatePassed() {
-  if (window.__hwBootDone) return true;
   try {
     return navigator.webdriver && sessionStorage.getItem('hw-booted') === '1';
   } catch {
@@ -43,8 +40,7 @@ function gatePassed() {
 function scrollAfterBoot() {
   // R34 (owner): after the gate the visitor always lands on the hero at the top, also when the URL carries a #section
   // (the hash is dropped so the address bar matches what is shown; ?query deep links such as ?photo= are kept).
-  // In-site links to a section (/#projects from a simulator) are client navigations: they skip the gate and keep
-  // their anchor.
+  // R35: in-site links to a section (/#projects from a simulator) get the gate and the top too.
   if (window.location.hash) {
     try {
       history.replaceState(history.state, '', window.location.pathname + window.location.search);
@@ -64,6 +60,10 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
       if (gatePassed()) {
         document.documentElement.classList.add('hw-booted');
         setShowBoot(false);
+      } else {
+        // R35: an in-site navigation back to the home page keeps <html> (and its hw-booted class from the last gate),
+        // which would hide this new gate (html.hw-booted .boot-overlay { display: none }): the gate is up again
+        document.documentElement.classList.remove('hw-booted');
       }
     } catch {}
   }, []);
@@ -100,9 +100,8 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
       if (showBoot) window.__lenis?.stop();
       else {
         window.__lenis?.start();
-        // Only after a real click. On in-site navigation (e.g. browser Back from /simulators) the
-        // gate is skipped and Next.js restores the previous scroll position — we must not force
-        // the page back to the top there.
+        // Only after the gate was really passed (R35: every arrival on the home page, also in-site ones such as
+        // browser Back from /simulators). A test that pre-passed the gate keeps the browser's own scroll position.
         if (justBooted.current) {
           justBooted.current = false;
           scrollAfterBoot();
@@ -131,7 +130,6 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
     } catch (e) {
       console.error(e);
     }
-    window.__hwBootDone = true;
     document.documentElement.classList.add('hw-booted');
     justBooted.current = true;
     setShowBoot(false);
