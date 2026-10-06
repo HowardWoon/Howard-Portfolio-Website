@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { m, useMotionValue, AnimatePresence } from 'framer-motion';
+import { m, useMotionValue, useSpring, useTransform, useVelocity, AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 import { ArrowUpRight, Maximize2, Move, Play } from 'lucide-react';
 import { FX } from '@/lib/fx';
@@ -63,6 +63,14 @@ export function CustomCursor() {
 
   const cursorX = useMotionValue(-100);
   const cursorY = useMotionValue(-100);
+  // R37 cursor tag (data-cursor, e.g. the gallery's "view"): it hangs from the pointer like a shipping tag and swings
+  // with the mouse's horizontal speed (a spring on the velocity: transform only), and presses flat on a click
+  const swing = useSpring(useTransform(useVelocity(cursorX), [-1800, 0, 1800], [16, 0, -16]), {
+    stiffness: 380,
+    damping: 16,
+    mass: 0.6,
+  });
+  const [pressed, setPressed] = useState(false);
 
   useEffect(() => {
     const fine = window.matchMedia('(pointer: fine)').matches;
@@ -102,9 +110,19 @@ export function CustomCursor() {
 
     const handleMouseLeave = () => patch({ isHidden: true });
     const handleMouseEnter = () => patch({ isHidden: false });
+    // capture phase: a component that stops the press cannot leave the tag stuck pressed or never pressed
+    const press = (e: PointerEvent) => {
+      if (e.pointerType !== 'touch' && e.button === 0) setPressed(true);
+    };
+    const release = () => setPressed(false);
+    const cap = { capture: true, passive: true } as const;
 
     window.addEventListener('mousemove', moveCursor, { passive: true });
     window.addEventListener('mouseover', handleMouseOver, { passive: true });
+    window.addEventListener('pointerdown', press, cap);
+    window.addEventListener('pointerup', release, cap);
+    window.addEventListener('pointercancel', release, cap);
+    window.addEventListener('blur', release);
     document.documentElement.addEventListener('mouseleave', handleMouseLeave);
     document.documentElement.addEventListener('mouseenter', handleMouseEnter);
 
@@ -112,6 +130,10 @@ export function CustomCursor() {
       document.documentElement.classList.remove('has-custom-cursor');
       window.removeEventListener('mousemove', moveCursor);
       window.removeEventListener('mouseover', handleMouseOver);
+      window.removeEventListener('pointerdown', press, cap);
+      window.removeEventListener('pointerup', release, cap);
+      window.removeEventListener('pointercancel', release, cap);
+      window.removeEventListener('blur', release);
       document.documentElement.removeEventListener('mouseleave', handleMouseLeave);
       document.documentElement.removeEventListener('mouseenter', handleMouseEnter);
     };
@@ -125,13 +147,20 @@ export function CustomCursor() {
           exactly where the mouse is with zero lag. A JS-driven dot is always at least one frame behind. */}
 
       {/* Ring — follows exactly (no spring lag so text is readable). Hidden over the hero portrait: there the Spider-Man reveal circle follows the pointer exactly. */}
+      {/* R37: over a [data-cursor] area the ring shrinks to a solid aiming ring on the exact point (no blend: the old
+          2.2x multiply-blended yellow disc read as a muddy, transparent smear over the photos) and the tag below
+          carries the word */}
       <m.div
         aria-hidden
-        className={`fx-cursor fixed top-0 left-0 w-11 h-11 rounded-full pointer-events-none z-[99999] border-[3px] flex items-center justify-center ${onDark ? '' : 'mix-blend-multiply'}`}
+        className={`fx-cursor fixed top-0 left-0 w-11 h-11 rounded-full pointer-events-none z-[99999] border-[3px] flex items-center justify-center ${onDark || customText ? '' : 'mix-blend-multiply'}`}
         animate={{
-          scale: !FX.cursorMorph ? 1 : customText ? 2.2 : isPointer ? 1.6 : 1,
+          scale: !FX.cursorMorph ? 1 : customText ? (pressed ? 0.4 : 0.55) : isPointer ? 1.6 : 1,
           borderColor: onDark ? '#FFFFFF' : '#0A0A0A',
-          backgroundColor: customText ? '#FFC700' : isPointer ? 'rgba(255,199,0,0.45)' : 'rgba(255,199,0,0)',
+          backgroundColor: customText
+            ? 'rgba(255,255,255,1)'
+            : isPointer
+              ? 'rgba(255,199,0,0.45)'
+              : 'rgba(255,199,0,0)',
         }}
         transition={{ type: 'spring', stiffness: 300, damping: 20 }}
         style={{
@@ -143,16 +172,6 @@ export function CustomCursor() {
         }}
       >
         <AnimatePresence>
-          {customText && (
-            <m.span
-              initial={{ opacity: 0, scale: 0.5 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.5 }}
-              className="font-mono text-xs font-extrabold uppercase text-ink text-center leading-none"
-            >
-              {customText}
-            </m.span>
-          )}
           {GlyphIcon && (
             <m.span
               key={glyph}
@@ -168,6 +187,50 @@ export function CustomCursor() {
           )}
         </AnimatePresence>
       </m.div>
+
+      {/* R37 cursor tag (owner: the "VIEW" cursor was "ugly, boring, transparent ... more neo-brutal"). A printed
+          shipping tag hanging just below-right of the pointer, so the photo under the click point stays visible:
+          paper, 3 px ink border, hard ink offset shadow, an eyelet where the string would go, and the action as an
+          interactive-blue icon chip + the area's own word (data-cursor, no new copy). It stamps in, swings with the
+          mouse's speed, and presses flat (shadow 5 -> 0, like .nb-key) while the button is down. Mouse / pen only,
+          off for reduced motion (the whole custom cursor is). */}
+      <AnimatePresence>
+        {customText && (
+          <m.div
+            key="tag"
+            aria-hidden
+            data-cursor-tag={customText}
+            className="fx-cursor-tag fixed top-0 left-0 z-[99999] pointer-events-none"
+            style={{ x: cursorX, y: cursorY, opacity: isHidden || onXray ? 0 : 1 }}
+          >
+            <m.div className="ml-4 mt-4" style={{ rotate: swing, transformOrigin: '0% 0%' }}>
+              <m.div
+                initial={{ scale: 0.3, rotate: -20, opacity: 0 }}
+                animate={{
+                  scale: 1,
+                  rotate: -4,
+                  opacity: 1,
+                  x: pressed ? 5 : 0,
+                  y: pressed ? 5 : 0,
+                  boxShadow: pressed ? '0px 0px 0px 0px #0A0A0A' : '5px 5px 0px 0px #0A0A0A',
+                }}
+                exit={{ scale: 0.3, rotate: 12, opacity: 0 }}
+                transition={{ type: 'spring', stiffness: 560, damping: 24 }}
+                style={{ transformOrigin: '0% 0%' }}
+                className="relative flex items-center gap-2 rounded-lg border-[3px] border-ink bg-white py-1 pl-1 pr-3 text-ink"
+              >
+                <span className="absolute -left-2 -top-2 h-3.5 w-3.5 rounded-full border-[3px] border-ink bg-paper" />
+                <span className="grid h-7 w-7 place-items-center rounded-md border-2 border-ink bg-pop-blue text-white">
+                  <Maximize2 className="h-4 w-4" strokeWidth={3} />
+                </span>
+                <span className="font-mono text-sm font-extrabold uppercase leading-none tracking-[0.16em]">
+                  {customText}
+                </span>
+              </m.div>
+            </m.div>
+          </m.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

@@ -313,3 +313,69 @@ test.describe('press stamp everywhere (touch phone 390x664)', () => {
     expect((await stamps(page)).length).toBe(1);
   });
 });
+
+// R37 (owner: the gallery's "VIEW" cursor was "ugly, boring, transparent ... more neo-brutal"): over a [data-cursor]
+// area a solid printed tag hangs beside the pointer (no blend mode, no translucent fill), and it presses on a click.
+test.describe('cursor tag (desktop 1440x900)', () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  test('a solid neo-brutal VIEW tag hangs beside the pointer, presses flat on a click, leaves with the pointer', async ({
+    page,
+  }) => {
+    await home(page);
+    await page.mouse.move(400, 400);
+    await expect(page.locator('html.has-custom-cursor')).toHaveCount(1);
+    const stack = page.locator('#projects [data-cursor="view"]').first();
+    await stack.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+    await page.waitForTimeout(600);
+    const b = (await stack.boundingBox())!;
+    const x = Math.round(b.x + b.width * 0.45);
+    const y = Math.round(b.y + b.height * 0.4);
+    await page.mouse.move(x, y, { steps: 4 });
+    const tag = page.locator('[data-cursor-tag="view"]');
+    await expect(tag).toHaveCount(1);
+    await expect(tag).toContainText(/view/i);
+    await page.waitForTimeout(700); // the stamp-in spring settles
+    const look = await page.evaluate(() => {
+      const card = document.querySelector('[data-cursor-tag] .border-ink.bg-white')!;
+      const cs = getComputedStyle(card);
+      const ring = getComputedStyle(document.querySelector('.fx-cursor')!);
+      const r = card.getBoundingClientRect();
+      return {
+        bg: cs.backgroundColor,
+        border: cs.borderTopWidth,
+        shadow: cs.boxShadow,
+        blend: ring.mixBlendMode,
+        tagOpacity: Number(getComputedStyle(document.querySelector('[data-cursor-tag]')!).opacity),
+        left: r.left,
+        top: r.top,
+        text: getComputedStyle(card.querySelector('span:last-child')!).fontSize,
+      };
+    });
+    expect(look.bg).toBe('rgb(255, 255, 255)'); // solid paper, not a translucent fill
+    expect(look.border).toBe('3px');
+    expect(look.shadow).toMatch(/rgb\(10, 10, 10\) 5px 5px 0px 0px/); // hard ink offset, no blur
+    expect(look.blend).toBe('normal'); // no multiply smear over the photo
+    expect(look.tagOpacity).toBe(1);
+    // beside the pointer (below-right), so the photo under the click point stays visible
+    expect(look.left).toBeGreaterThan(x);
+    expect(look.top).toBeGreaterThan(y);
+    expect(parseFloat(look.text)).toBeGreaterThanOrEqual(13); // R24 type floor
+    // mechanical press while the button is down, back up after
+    await page.mouse.down();
+    await expect
+      .poll(() =>
+        page.evaluate(() => getComputedStyle(document.querySelector('[data-cursor-tag] .bg-white')!).boxShadow),
+      )
+      .toMatch(/0px 0px 0px 0px/);
+    await page.mouse.up();
+    await expect
+      .poll(() =>
+        page.evaluate(() => getComputedStyle(document.querySelector('[data-cursor-tag] .bg-white')!).boxShadow),
+      )
+      .toMatch(/5px 5px 0px 0px/);
+    // leaving the gallery takes the tag away
+    await page.mouse.move(20, 450, { steps: 3 });
+    await expect(tag).toHaveCount(0);
+  });
+});
