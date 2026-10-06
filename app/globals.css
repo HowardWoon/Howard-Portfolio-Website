@@ -1143,7 +1143,8 @@ html.hw-booted .boot-overlay {
 /* FX-56 press stamp: a Bauhaus shape that pops at the pointer (created by components/fx/ambient-fx.tsx) */
 .fx-stamp {
   position: fixed;
-  z-index: 10001;
+  /* R37: above every layer (boot gate 99999, dialogs 10000, toasts 10001); pointer-events none, so never in the way */
+  z-index: 100000;
   width: 26px;
   height: 26px;
   margin: -13px 0 0 -13px;

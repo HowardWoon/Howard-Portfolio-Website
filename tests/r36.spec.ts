@@ -168,3 +168,148 @@ for (const [name, size, touch] of [
     });
   });
 }
+
+// R37 (owner: "sometimes the place I click shows a triangle, rectangle ... but sometimes no ... on every device"):
+// the FX-56 press stamp fires for EVERY press, wherever it lands, from the first click on every page. It only stayed
+// silent for four button classes before, could be swallowed by a stopPropagation, and mounted late.
+
+/** records each stamp added to <body> with where it was put (a stamp only lives 0.5 s, a live count can miss it) */
+async function recordStamps(page: Page) {
+  await expect(page.locator('html[data-fx-press="on"]')).toHaveCount(1, { timeout: 20000 });
+  await page.evaluate(() => {
+    const w = window as unknown as { __stamps: { x: number; y: number; shape: string }[] };
+    w.__stamps = [];
+    new MutationObserver((list) =>
+      list.forEach((m) =>
+        m.addedNodes.forEach((n) => {
+          const e = n as HTMLElement;
+          if (e.classList?.contains('fx-stamp'))
+            w.__stamps.push({ x: parseFloat(e.style.left), y: parseFloat(e.style.top), shape: e.dataset.fxStamp! });
+        }),
+      ),
+    ).observe(document.body, { childList: true });
+  });
+}
+const stamps = (page: Page) =>
+  page.evaluate(() => (window as unknown as { __stamps: { x: number; y: number; shape: string }[] }).__stamps);
+
+/** a point on the element (its centre), scrolled into view first */
+async function pointOn(page: Page, sel: string) {
+  const loc = page.locator(sel).first();
+  await loc.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+  await page.waitForTimeout(400);
+  const b = (await loc.boundingBox())!;
+  return { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + Math.min(b.height / 2, 12)) };
+}
+
+test.describe('press stamp everywhere (desktop 1440x900)', () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  test('plain text, a nav link, a gallery arrow and a press a component stops all stamp at the pointer', async ({
+    page,
+  }) => {
+    test.setTimeout(90000);
+    await home(page);
+    await recordStamps(page);
+    let want = 0;
+    const pressAt = async (p: { x: number; y: number }, what: string) => {
+      await page.mouse.move(p.x, p.y);
+      await page.mouse.down();
+      await page.mouse.up();
+      want++;
+      await expect.poll(() => stamps(page).then((s) => s.length), { message: what }).toBe(want);
+      const s = (await stamps(page)).at(-1)!;
+      expect(Math.abs(s.x - p.x), `${what}: x`).toBeLessThanOrEqual(1);
+      expect(Math.abs(s.y - p.y), `${what}: y`).toBeLessThanOrEqual(1);
+      await page.waitForTimeout(120); // past the double-press guard
+    };
+    await pressAt(await pointOn(page, '#about p.fx-rise'), 'plain body text');
+    await pressAt(await pointOn(page, '#projects button[aria-label="Next photo"]'), 'gallery arrow');
+    // a component that stops the press on its way up (drag / tilt handlers do) can no longer swallow the stamp
+    await page
+      .locator('#about p.fx-rise')
+      .evaluate((e) => e.addEventListener('pointerdown', (ev) => ev.stopPropagation()));
+    await pressAt(await pointOn(page, '#about p.fx-rise'), 'a press a component stopped');
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await pressAt(await pointOn(page, 'header a[href="#about"], header a[href="/#about"]'), 'header nav link');
+    // the shapes cycle: circle, square, triangle
+    expect(new Set((await stamps(page)).map((s) => s.shape))).toEqual(new Set(['circle', 'square', 'triangle']));
+  });
+
+  test('typing in a field never stamps; Enter on a control stamps at its centre', async ({ page }) => {
+    await home(page);
+    await recordStamps(page);
+    const p = await pointOn(page, '#contact-name');
+    expect(await page.evaluate(({ x, y }) => document.elementFromPoint(x, y)?.tagName, p)).toBe('INPUT');
+    await page.mouse.click(p.x, p.y);
+    await page.waitForTimeout(300);
+    expect((await stamps(page)).length).toBe(0);
+    const btn = page.locator('#projects button[aria-label="Next photo"]').first();
+    await btn.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+    await btn.focus();
+    await page.keyboard.press('Enter');
+    await expect.poll(() => stamps(page).then((s) => s.length)).toBe(1);
+    const b = (await btn.boundingBox())!;
+    const s = (await stamps(page))[0];
+    expect(Math.abs(s.x - (b.x + b.width / 2))).toBeLessThanOrEqual(1);
+    expect(Math.abs(s.y - (b.y + b.height / 2))).toBeLessThanOrEqual(1);
+  });
+
+  test('live from the first click: the boot gate and a simulator page stamp too', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' }); // no hw-booted: the gate is up
+    await expect(page.locator('.boot-overlay')).toBeVisible();
+    await recordStamps(page);
+    await page.mouse.click(200, 200);
+    await expect.poll(() => stamps(page).then((s) => s.length)).toBe(1);
+    const z = await page.evaluate(() => {
+      const s = document.createElement('span');
+      s.className = 'fx-stamp';
+      document.body.appendChild(s);
+      const v = Number(getComputedStyle(s).zIndex);
+      s.remove();
+      return v;
+    });
+    expect(z).toBeGreaterThan(99999); // above the boot gate, so the shape is actually seen
+
+    await page.goto('/simulators/flood', { waitUntil: 'domcontentloaded' });
+    await recordStamps(page);
+    await page.mouse.click(300, 400);
+    await expect.poll(() => stamps(page).then((s) => s.length)).toBe(1);
+  });
+});
+
+test.describe('press stamp everywhere (touch phone 390x664)', () => {
+  test.use(strip(devices['iPhone 13']));
+
+  test('a tap anywhere stamps; a touch that turns into a scroll or a drag does not', async ({ page }) => {
+    await home(page);
+    await recordStamps(page);
+    const p = await pointOn(page, '#about p.fx-rise');
+    await page.touchscreen.tap(p.x, p.y);
+    await expect.poll(() => stamps(page).then((s) => s.length)).toBe(1);
+    await page.waitForTimeout(150);
+    // the browser takes the touch for a scroll (pointercancel), and a finger that travelled 40 px: no stamp
+    await page.evaluate(
+      ({ x, y }) => {
+        const t = document.elementFromPoint(x, y)!;
+        const ev = (type: string, id: number, dy = 0) =>
+          new PointerEvent(type, {
+            bubbles: true,
+            pointerId: id,
+            pointerType: 'touch',
+            isPrimary: true,
+            button: 0,
+            clientX: x,
+            clientY: y + dy,
+          });
+        t.dispatchEvent(ev('pointerdown', 7));
+        t.dispatchEvent(ev('pointercancel', 7));
+        t.dispatchEvent(ev('pointerdown', 8));
+        t.dispatchEvent(ev('pointerup', 8, 40));
+      },
+      { x: p.x, y: p.y },
+    );
+    await page.waitForTimeout(300);
+    expect((await stamps(page)).length).toBe(1);
+  });
+});

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { FX, POP_COLORS, prefersReducedMotion } from '@/lib/fx';
+import { FX, prefersReducedMotion } from '@/lib/fx';
 
 /**
  * Round 13 "Motion Studio", the two effects that need JavaScript (the rest are CSS in globals.css).
@@ -10,10 +10,9 @@ import { FX, POP_COLORS, prefersReducedMotion } from '@/lib/fx';
  *   glyphs and settles, left to right, into its real text the first time it scrolls into view. Only the text
  *   node's characters change; spaces and punctuation stay put (the kicker is mono, so the width never jumps),
  *   and the final text is the original string, restored exactly.
- * FX-56 Press stamp: pressing a button (mouse, pen or touch) stamps a small Bauhaus shape at the pointer that
- *   pops and fades in 0.5 s. One delegated listener; the node is appended to <body> and removed when done.
+ * (FX-56 Press stamp lives in components/fx/press-stamp.tsx since R37: it is mounted from the root layout.)
  *
- * Both do nothing for reduced motion / Calm Mode, and nothing runs per scroll or pointer-move frame.
+ * The decode does nothing for reduced motion / Calm Mode, and nothing runs per scroll or pointer-move frame.
  * FX-71: keeps a keyboard-focused Arena Wall seal in view (see the last effect).
  */
 const GLYPHS = '#%&*+=<>/_01';
@@ -21,8 +20,6 @@ const DECODE_MS = 650;
 // R21: the scramble ticks like a terminal (about 22 steps / s) instead of every frame. Each text write costs a layout
 // pass; per frame that was ~40 layouts per kicker (more on 120-180 Hz screens) and broke the phone fling budget.
 const TICK_MS = 45;
-const STAMP_TARGETS = '.nb-btn, .nb-chip, .nb-press, [data-fx-stamp-target]';
-const SHAPES = ['circle', 'square', 'triangle'] as const;
 
 // R27: the real text is captured once per node, so a decode started mid-scramble (hover Shuffle during the first-view
 // decode) still lands on the true words, never on a half-scrambled frame
@@ -103,38 +100,10 @@ export function AmbientFx() {
     };
   }, []);
 
-  // FX-56
+  // FX-56 press stamp moved to components/fx/press-stamp.tsx (R37: root layout, every press on every page)
   useEffect(() => {
-    if (!FX.pressStamp) return;
-    let last = 0;
-    let n = 0;
-    const onDown = (e: PointerEvent) => {
-      if (e.button !== 0 || prefersReducedMotion()) return;
-      const target = (e.target as Element | null)?.closest?.(STAMP_TARGETS);
-      if (!target || target.closest('[aria-disabled="true"], :disabled')) return;
-      const now = performance.now();
-      if (now - last < 90) return; // a fast double-tap stamps once
-      last = now;
-      const el = document.createElement('span');
-      el.className = 'fx-stamp';
-      el.dataset.fxStamp = SHAPES[n % SHAPES.length];
-      el.setAttribute('aria-hidden', 'true');
-      el.style.left = `${e.clientX}px`;
-      el.style.top = `${e.clientY}px`;
-      el.style.setProperty('--stamp-c', POP_COLORS[n % 4]);
-      el.style.setProperty('--stamp-r', `${(n % 2 ? 1 : -1) * (10 + (n % 3) * 8)}deg`);
-      n++;
-      const done = () => el.remove();
-      el.addEventListener('animationend', done, { once: true });
-      window.setTimeout(done, 900); // safety net if the animation never runs
-      document.body.appendChild(el);
-      // FX-68 haptic tick on touch (Android; iOS ignores vibrate)
-      if (FX.hapticTick && e.pointerType === 'touch') navigator.vibrate?.(8);
-    };
-    document.addEventListener('pointerdown', onDown, { passive: true });
-    document.documentElement.dataset.fxAmbient = 'on'; // listeners are live (tests wait for this)
+    document.documentElement.dataset.fxAmbient = 'on'; // this chunk is live (tests wait for this)
     return () => {
-      document.removeEventListener('pointerdown', onDown);
       delete document.documentElement.dataset.fxAmbient;
     };
   }, []);

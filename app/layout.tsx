@@ -4,6 +4,7 @@ import './globals.css';
 import { FX, type FxName } from '@/lib/fx';
 import SmoothScrollProvider from '@/components/smooth-scroll-provider';
 import { CustomCursor } from '@/components/custom-cursor';
+import { PressStamp } from '@/components/fx/press-stamp';
 import { MotionProvider } from '@/components/motion-provider';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
@@ -118,6 +119,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <MotionProvider>
           <SmoothScrollProvider>{children}</SmoothScrollProvider>
           <CustomCursor />
+          <PressStamp />
         </MotionProvider>
         <Analytics />
         <SpeedInsights />

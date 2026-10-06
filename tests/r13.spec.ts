@@ -78,10 +78,10 @@ test('pressing a button stamps a shape that cleans itself up (FX-56)', async ({ 
   await pressOnly(chip);
   await expect.poll(() => stampsSeen(page)).toBe(1);
   await expect(page.locator('.fx-stamp')).toHaveCount(0, { timeout: 2000 }); // removed after its animation
-  // a plain div is not a stamp target
+  // R37 (owner): every press stamps, a plain title too (it used to be buttons only, which read as "sometimes")
+  await page.waitForTimeout(120); // past the double-press guard
   await pressOnly(page.locator('#projects .nb-title'));
-  await page.waitForTimeout(100);
-  expect(await stampsSeen(page)).toBe(1);
+  await expect.poll(() => stampsSeen(page)).toBe(2);
 });
 
 test('section scan and 3D tiles run with motion (FX-57, FX-58, FX-59)', async ({ page }) => {

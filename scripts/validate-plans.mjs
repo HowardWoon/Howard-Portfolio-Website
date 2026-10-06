@@ -1040,9 +1040,10 @@ has(
 has(
   'R13',
   'FX-56',
-  'Press stamp: delegated, aria-hidden, self-removing',
-  'components/fx/ambient-fx.tsx',
+  'Press stamp: delegated, aria-hidden, self-removing (R37: own file, capture phase, every press)',
+  'components/fx/press-stamp.tsx',
   "addEventListener('pointerdown'",
+  'capture: true',
   "setAttribute('aria-hidden', 'true')",
   'el.remove()',
 );
