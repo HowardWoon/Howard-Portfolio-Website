@@ -142,7 +142,9 @@ export function CommandPalette() {
                 <kbd className="hidden sm:inline-block nb-tag bg-white text-xs py-0.5">ESC</kbd>
               </div>
 
-              <Command.List className="max-h-[min(320px,50dvh)] overflow-y-auto overscroll-contain p-2">
+              {/* R37: cmdk scrolls the selected item (and a group's heading) in with block: 'nearest'; the scroll padding
+                  keeps it clear of the search bar's border and the card's rounded corner instead of flush against them */}
+              <Command.List className="max-h-[min(320px,50dvh)] overflow-y-auto overscroll-contain p-2 scroll-py-4">
                 <Command.Empty className="py-12 text-center relative overflow-hidden">
                   <ShapeBurst />
                   <p className="text-sm font-mono font-bold text-ink relative z-10">NO COMMANDS FOUND.</p>
