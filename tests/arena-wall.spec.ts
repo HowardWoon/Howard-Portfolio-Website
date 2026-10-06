@@ -68,6 +68,14 @@ test('hovering a seal floods it with the row colour and tilts it', async ({ page
   const row = page.locator('.fx-wall-row').nth(0);
   const box = (await row.boundingBox())!;
   await page.mouse.move(720, box.y + box.height / 2, { steps: 4 });
+  // R36: hovering pauses the row wherever it is, so x 720 can be the gap between two seals (failed ~1 in 10 on
+  // 9bee860, twice in a row under full-suite load): move onto the nearest seal's centre, same assertions
+  const [sx, sy] = await row.evaluate((r) => {
+    const seals = [...r.querySelectorAll('.fx-seal')].map((s) => s.getBoundingClientRect());
+    const near = seals.sort((a, b) => Math.abs(a.x + a.width / 2 - 720) - Math.abs(b.x + b.width / 2 - 720))[0];
+    return [near.x + near.width / 2, near.y + near.height / 2];
+  });
+  await page.mouse.move(sx, sy, { steps: 4 });
   await page.waitForTimeout(700);
   const state = await page.evaluate(
     ([x, y]) => {
@@ -79,7 +87,7 @@ test('hovering a seal floods it with the row colour and tilts it', async ({ page
         colour: getComputedStyle(s.querySelector('.fx-seal-fill')!).backgroundColor,
       };
     },
-    [720, box.y + box.height / 2],
+    [sx, sy],
   );
   expect(state).not.toBeNull();
   expect(state!.rotate).toBe('-8deg');
