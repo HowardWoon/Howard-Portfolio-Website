@@ -110,6 +110,11 @@ Rules:
     with sharp first (R32 `um_crest.png`).
 23. A control that can be shown inside a folded / tilted scroll effect needs >= 44 px, so its projection stays >= 24 px
     (motion-on audit, R31).
+24. Stop the local `npm run start` server (port 3000) before `git push`: the pre-push hook rebuilds `.next` under it and
+    Playwright reuses that half-replaced server, which fails random tests (R37: 4 false failures, all green on a fresh
+    server). If a push is blocked, rerun the failed tests alone on a fresh build before calling them regressions.
+25. A page-wide effect that reacts to presses listens on `window` in the CAPTURE phase: a `document` bubble listener
+    is silently swallowed by any component that calls `stopPropagation()` (R37 press stamp was "sometimes no").
 
 ## F. Definition of done additions
 
@@ -200,6 +205,17 @@ R33 (owner: "像素变身", photo supplied by Howard), same rule - a layer:
 `howard-ship.jpg` is an owner-supplied, AI-styled portrait used by Howard's explicit R33 request: it is cropped to Howard
 only (no hologram text), lives only in the release card, and is not a precedent for other AI imagery (B still applies).
 Guard: tests/r33.spec.ts.
+
+R37 (owner: the click shapes showed "sometimes no"; the gallery "VIEW" cursor was "ugly, boring, transparent"), same
+rule - layers:
+
+| Feature     | Where                                               | Rules                                                                                                                                                                                                                                                                   |
+| ----------- | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Press stamp | `components/fx/press-stamp.tsx` (root layout)       | EVERY press stamps: mouse / pen on the press anywhere, touch on a real tap only (10 px / 600 ms, no pointercancel), Enter / Space at the control's centre; never in a text field or on the scrollbar; window capture listeners; z 100000; off for Calm / reduced motion |
+| Cursor tag  | `components/custom-cursor.tsx`, any `[data-cursor]` | A solid printed tag below-right of the pointer (paper, 3 px ink, hard ink shadow, blue icon chip, the area's own word); swings with mouse speed, presses flat on click; never blended or translucent; mouse / pen only                                                  |
+
+Guards: tests/r36.spec.ts ("press stamp everywhere", "cursor tag", plus every Command Palette command on desktop and a
+touch phone).
 
 ## H. R24 guardrails - type floor, emblem geometry, torchlight, neo-brutalism only (owner complaints, tested)
 
