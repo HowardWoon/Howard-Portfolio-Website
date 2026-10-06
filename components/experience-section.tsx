@@ -618,7 +618,7 @@ export default function ExperienceSection() {
               })}
             </LayoutGroup>
           </m.div>
-          <SignalKey only={['industry', 'leadership', 'academic']} className="w-fit max-w-full" />
+          <SignalKey only={['industry', 'leadership', 'academic']} className="w-full sm:w-fit max-w-full" />
         </div>
 
         {/* Experience Cards */}
@@ -643,22 +643,33 @@ export default function ExperienceSection() {
                   exit={{ opacity: 0, scale: 0.97, y: -20 }}
                   transition={{ duration: 0.4, type: 'spring', bounce: 0.2 }}
                   data-folder={item.id}
-                  className="relative pt-[40px]"
+                  className="relative"
                 >
                   {/* R22 folder tab (lecturer pattern 3): pressing it slides this folder to the front (filters to its
-                      track); pressing it again brings every folder back */}
-                  <button
-                    type="button"
-                    aria-pressed={only}
-                    aria-label={only ? 'Show all experience folders' : `Show only the ${item.categoryLabel} folder`}
-                    onClick={() => setSelectedFilter(only ? 'all' : item.category)}
-                    style={{ left: `min(${slot} * 26%, ${slot} * 15rem)` }}
-                    className={`nb-folder-tab absolute top-0 z-10 flex h-[43px] max-w-[calc(100%-1rem)] items-center gap-2 rounded-t-2xl border-3 border-b-0 border-ink px-4 font-mono text-xs font-extrabold uppercase tracking-[0.12em] ${a.fill} ${onFill}`}
-                  >
-                    <span className="truncate">
-                      {item.number} {'//'} {item.categoryLabel}
-                    </span>
-                  </button>
+                      track); pressing it again brings every folder back.
+                      R36 (owner: tabs "cropped" on phones): the offset is a spacer that shrinks when the tab would
+                      pass the card's right edge (an absolute `left` pushed tabs 02 / 03 off a 360 px screen); the
+                      28 px end spacer keeps the tab off the card's rounded corner; the 3 px overlap opens the tab
+                      into the card; the 280 px Fold wraps the label instead of cutting it */}
+                  <div data-folder-tabrow className="pointer-events-none relative z-10 -mb-[3px] flex">
+                    <span
+                      aria-hidden
+                      className="min-w-0 shrink"
+                      style={{ flexBasis: `min(${slot} * 26%, ${slot} * 15rem)` }}
+                    />
+                    <button
+                      type="button"
+                      aria-pressed={only}
+                      aria-label={only ? 'Show all experience folders' : `Show only the ${item.categoryLabel} folder`}
+                      onClick={() => setSelectedFilter(only ? 'all' : item.category)}
+                      className={`nb-folder-tab pointer-events-auto flex min-h-[43px] max-w-[calc(100%-28px)] shrink-0 items-center gap-2 rounded-t-2xl border-3 border-b-0 border-ink px-4 py-2 text-left font-mono text-xs font-extrabold uppercase leading-snug tracking-[0.12em] ${a.fill} ${onFill}`}
+                    >
+                      <span className="min-w-0">
+                        {item.number} {'//'} {item.categoryLabel}
+                      </span>
+                    </button>
+                    <span aria-hidden className="w-7 shrink-0" />
+                  </div>
                   <div className="relative group rounded-[30px] border-3 border-ink bg-white shadow-brutal-lg overflow-hidden">
                     {/* Top Bar: Number + Category Tag + Period */}
                     <div

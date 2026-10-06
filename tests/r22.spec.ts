@@ -185,6 +185,37 @@ test('dossier folder tabs slide one folder to the front, and back', async ({ pag
   await expect(folders).toHaveCount(3);
 });
 
+// R36 (owner phone screenshots: "02 // INSTITUTIONAL LEADER" and "03 // ACADEMIC ME" cut off at the screen edge)
+test('folder tabs stay whole inside their card on every width (280-1920 px)', async ({ page }) => {
+  for (const w of [280, 320, 360, 375, 390, 412, 430, 600, 768, 1024, 1440, 1920]) {
+    await page.setViewportSize({ width: w, height: 800 });
+    await home(page);
+    const tabs = await page.locator('[data-folder]').evaluateAll((folders) =>
+      folders.map((f) => {
+        const tab = f.querySelector('button.nb-folder-tab') as HTMLElement;
+        const label = tab.firstElementChild as HTMLElement;
+        const t = tab.getBoundingClientRect();
+        const c = f.querySelector(':scope > div.group')!.getBoundingClientRect();
+        return {
+          id: (f as HTMLElement).dataset.folder,
+          left: t.left - c.left,
+          rightGap: c.right - t.right,
+          cut: label.scrollWidth - label.clientWidth,
+          vw: document.documentElement.clientWidth,
+          right: t.right,
+        };
+      }),
+    );
+    expect(tabs).toHaveLength(3);
+    for (const t of tabs) {
+      expect(t.left, `${w}px ${t.id}`).toBeGreaterThanOrEqual(0);
+      expect(t.rightGap, `${w}px ${t.id} clear of the rounded corner`).toBeGreaterThanOrEqual(27);
+      expect(t.right, `${w}px ${t.id} on screen`).toBeLessThanOrEqual(t.vw);
+      expect(t.cut, `${w}px ${t.id} label not truncated`).toBeLessThanOrEqual(0);
+    }
+  }
+});
+
 test('target roles carry SIGNAL meaning only (AI lilac, the rest neutral)', async ({ page }) => {
   await home(page);
   const role = (t: string) =>

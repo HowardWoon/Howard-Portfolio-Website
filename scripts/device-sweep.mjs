@@ -129,13 +129,23 @@ for (const [name, profile] of PROFILES) {
         if (!el.textContent.trim() || el.children.length > 3) continue;
         const b = el.getBoundingClientRect();
         if (b.width < 2) continue;
-        // inside a scroller / clipper (carousel, marquee, folder-tab strip) = intentional, not a crop
+        // inside a scroller (carousel) or a moving clipped track (marquee) = intentional, not a crop. R36: a plain
+        // clipper no longer excuses text - the section's `overflow-clip` hid folder tabs pushed off a 360 px phone
+        // ("02 // INSTITUTIONAL LEADER...")
         let a = el.parentElement;
         let contained = false;
         while (a && a !== document.body) {
-          if (getComputedStyle(a).overflowX !== 'visible') {
-            contained = true;
-            break;
+          const ox = getComputedStyle(a).overflowX;
+          if (ox !== 'visible') {
+            // a scroller, or a clipper whose content rides a moving track (marquee tape): intentional
+            let moving = false;
+            for (let t = el; t && t !== a; t = t.parentElement) {
+              if (getComputedStyle(t).animationName !== 'none') moving = true;
+            }
+            if (ox === 'auto' || ox === 'scroll' || moving) {
+              contained = true;
+              break;
+            }
           }
           a = a.parentElement;
         }
