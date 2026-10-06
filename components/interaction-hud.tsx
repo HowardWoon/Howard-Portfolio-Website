@@ -195,11 +195,20 @@ export function InteractionHud() {
     };
     window.addEventListener('keydown', onKey);
     // R31: a "?" pressed before this layer loaded was queued by lib/early-clicks.ts: open the sheet now
-    const w = window as Window & { __hwShortcutsReady?: boolean; __hwShortcutsWanted?: boolean };
+    const w = window as Window & {
+      __hwShortcutsReady?: boolean;
+      __hwShortcutsWanted?: boolean;
+      __hwTourWanted?: boolean;
+    };
     w.__hwShortcutsReady = true;
     if (w.__hwShortcutsWanted) {
       w.__hwShortcutsWanted = false;
       if (keysOn() && !document.querySelector('[aria-modal="true"]')) setHelp(true);
+    }
+    // R36: a "g" pressed before this layer loaded starts the tour now (same queue as "?")
+    if (w.__hwTourWanted) {
+      w.__hwTourWanted = false;
+      if (FX.guidedTour && keysOn() && !document.querySelector('[aria-modal="true"]')) startTour();
     }
     return () => {
       w.__hwShortcutsReady = false;

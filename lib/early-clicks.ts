@@ -76,6 +76,7 @@ type EarlyWindow = Window & {
   __hwEarlyClicks?: boolean;
   __hwShortcutsReady?: boolean;
   __hwShortcutsWanted?: boolean;
+  __hwTourWanted?: boolean;
 };
 
 export function installEarlyClickReplay() {
@@ -84,15 +85,18 @@ export function installEarlyClickReplay() {
   w.__hwEarlyClicks = true;
   // R31: "?" pressed before the code-split shortcut layer (interaction-hud) has mounted its listener used to do
   // nothing (tests/r10 FX-43 failed under load). It is remembered here and the sheet opens as soon as the layer is
-  // ready (it reads __hwShortcutsWanted when it mounts).
+  // ready (it reads __hwShortcutsWanted when it mounts). R36: the same for "g" (guided tour), which was lost 9 times
+  // in 10 when pressed soon after load (tests/r10 FX-44); the layer reads __hwTourWanted.
   w.addEventListener(
     'keydown',
     (e) => {
-      if (e.key !== '?' || e.metaKey || e.ctrlKey || e.altKey || w.__hwShortcutsReady) return;
+      const tour = e.key === 'g' || e.key === 'G';
+      if ((e.key !== '?' && !tour) || e.metaKey || e.ctrlKey || e.altKey || w.__hwShortcutsReady) return;
       const t = e.target instanceof Element ? e.target : null;
       if (t?.closest('input, textarea, select, [contenteditable="true"]')) return;
       if (document.querySelector('.boot-overlay') && !document.documentElement.classList.contains('hw-booted')) return;
-      w.__hwShortcutsWanted = true;
+      if (tour) w.__hwTourWanted = true;
+      else w.__hwShortcutsWanted = true;
     },
     true,
   );
