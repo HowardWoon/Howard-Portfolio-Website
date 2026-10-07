@@ -48,12 +48,27 @@ export function scrollToEvidence(id: string) {
   if (!el) return;
   // the LAYOUT position (offsetTop chain), not the box on screen: a stop that is still mid scroll-reveal (translated
   // 85-160 px down) used to be targeted where it was drawn, then slid up under the header once it settled
-  let y = 0;
-  for (let n: HTMLElement | null = el; n; n = n.offsetParent as HTMLElement | null) y += n.offsetTop;
-  const top = Math.max(0, y - (parseFloat(getComputedStyle(el).scrollMarginTop) || 0));
+  const target = el;
+  const layoutTop = () => {
+    let y = 0;
+    for (let n: HTMLElement | null = target; n; n = n.offsetParent as HTMLElement | null) y += n.offsetTop;
+    return Math.max(0, y - (parseFloat(getComputedStyle(target).scrollMarginTop) || 0));
+  };
+  const top = layoutTop();
   // reduced motion / Calm: land at once, no glide
   const still =
     document.documentElement.dataset.motion === 'calm' || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (window.__lenis) window.__lenis.scrollTo(top, { force: true, immediate: still });
-  else window.scrollTo({ top, behavior: still ? 'instant' : 'smooth' });
+  const lenis = window.__lenis;
+  if (lenis) {
+    // R40: the page above can still change height during the glide (lazy images, settling sections): a stop landed
+    // 6-13 px short and its folder tab sat under the header (r36). Re-measure on arrival and correct the drift.
+    lenis.scrollTo(top, {
+      force: true,
+      immediate: still,
+      onComplete: () => {
+        const again = layoutTop();
+        if (Math.abs(again - window.scrollY) > 2) lenis.scrollTo(again, { force: true, immediate: true });
+      },
+    });
+  } else window.scrollTo({ top, behavior: still ? 'instant' : 'smooth' });
 }
