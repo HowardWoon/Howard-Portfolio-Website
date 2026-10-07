@@ -19,7 +19,9 @@ jobs:
     # Pinned: ubuntu-latest moves to Ubuntu 26 on 2026-10-19; `playwright install --with-deps`
     # installs apt packages by name. Move to the next LTS only after Playwright lists it as supported.
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    # R39: e2e alone is ~21 min on the runner (354 tests); with build + the motion audit the job passed 25 min and was
+    # cancelled after every test had passed (run #108). Headroom, not a skipped check.
+    timeout-minutes: 35
     env:
       NEXT_TELEMETRY_DISABLED: 1
     steps:
