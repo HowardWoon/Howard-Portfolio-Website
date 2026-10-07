@@ -46,6 +46,8 @@ interface ExperienceItem {
   metrics: { label: string; value: string }[];
   tags: string[];
   galleryPhotos?: { src: string; alt: string; rotation: number; w: number; h: number }[];
+  /** R37: the gallery desk's heading (each card names its own gallery; default "Mentorship gallery") */
+  galleryLabel?: string;
   /** R29: the issuing institution's crest, printed as an Issuer Seal in the organisation pill */
   crest?: 'kmns';
 }
@@ -74,6 +76,67 @@ const experiences: ExperienceItem[] = [
       { label: 'Ledger Accuracy', value: 'Zero Discrepancies' },
     ],
     tags: ['SAP ERP Operations', 'E-Invoice Compliance', 'Ledger Reconciliation', 'Statutory Auditing'],
+    // R37 (owner upload "kraiburg finance"): photos with colleagues first, then Howard on his own (AGENTS.md 6.1);
+    // w / h = the files' real pixel sizes (sharp)
+    galleryLabel: 'Corporate finance gallery',
+    galleryPhotos: [
+      {
+        src: '/images/experiences/kraiburg/kraiburg_01.jpg',
+        alt: 'With a KRAIBURG TPE colleague in front of the KRAIBURG TPE office glass',
+        rotation: -2,
+        w: 1280,
+        h: 960,
+      },
+      {
+        src: '/images/experiences/kraiburg/kraiburg_02.jpg',
+        alt: 'With the KRAIBURG TPE team outside the Block-B building under the KRAIBURG TPE sign',
+        rotation: 2.5,
+        w: 960,
+        h: 1280,
+      },
+      {
+        src: '/images/experiences/kraiburg/kraiburg_03.jpg',
+        alt: 'Team photo with KRAIBURG TPE colleagues in the office',
+        rotation: -1,
+        w: 960,
+        h: 1280,
+      },
+      {
+        src: '/images/experiences/kraiburg/kraiburg_04.jpg',
+        alt: 'Selfie with two KRAIBURG TPE colleagues holding a cake in the office',
+        rotation: 1.5,
+        w: 1280,
+        h: 960,
+      },
+      {
+        src: '/images/experiences/kraiburg/kraiburg_05.jpg',
+        alt: 'Standing beside the KRAIBURG TPE office glass',
+        rotation: -3,
+        w: 960,
+        h: 1280,
+      },
+      {
+        src: '/images/experiences/kraiburg/kraiburg_06.jpg',
+        alt: 'Seated in front of the KRAIBURG TPE office glass',
+        rotation: 2,
+        w: 960,
+        h: 1280,
+      },
+      {
+        src: '/images/experiences/kraiburg/kraiburg_07.jpg',
+        alt: 'At the finance department file shelves',
+        rotation: -1.5,
+        w: 960,
+        h: 1280,
+      },
+      {
+        src: '/images/experiences/kraiburg/kraiburg_08.jpg',
+        alt: 'In the KRAIBURG TPE office by the window',
+        rotation: 1,
+        w: 960,
+        h: 1280,
+      },
+    ],
   },
   {
     id: 'pekom',
@@ -793,14 +856,16 @@ export default function ExperienceSection() {
                             <div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-dashed border-ink pb-3">
                               <div className="flex items-center gap-2 text-xs font-mono font-extrabold text-ink">
                                 <Camera className="w-4 h-4" strokeWidth={2.5} aria-hidden />
-                                <span className="uppercase tracking-[0.1em]">MENTORSHIP GALLERY</span>
+                                <span className="uppercase tracking-[0.1em]">
+                                  {item.galleryLabel ?? 'Mentorship gallery'}
+                                </span>
                               </div>
                               <span className="nb-tag bg-[#E3E8FF]">INTERACTIVE</span>
                             </div>
                             <InteractivePhotoStack
                               customPhotos={g}
                               galleryId={item.id}
-                              label="Mentorship gallery"
+                              label={item.galleryLabel ?? 'Mentorship gallery'}
                               captions
                               filmstrip
                             />

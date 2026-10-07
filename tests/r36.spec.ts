@@ -505,3 +505,35 @@ for (const [w, h] of [
     }
   });
 }
+
+// R37 (owner upload): the KRAIBURG card has its own gallery, the photos with colleagues first (AGENTS.md 6.1)
+test('the KRAIBURG gallery: 8 photos, colleagues first, its own label, real files', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await home(page);
+  const desk = page.locator('#experience [data-gallery-desk]').filter({ hasText: /corporate finance gallery/i });
+  await expect(desk).toHaveCount(1);
+  await desk.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+  await expect(desk).toContainText('01 / 08');
+  // the strip lists the 8 files in gallery order: kraiburg_01-04 are the photos with colleagues, 05-08 Howard alone
+  const srcs = await desk
+    .locator('[data-filmstrip] img')
+    .evaluateAll((imgs) =>
+      imgs.map((i) => decodeURIComponent((i as HTMLImageElement).currentSrc || (i as HTMLImageElement).src)),
+    );
+  expect(srcs.length).toBe(8);
+  srcs.forEach((src, i) => expect(src).toContain(`kraiburg_0${i + 1}.jpg`));
+  // the caption names who is in the photo: a colleague on the first, Howard alone on the fifth
+  await desk.getByRole('button', { name: 'Go to photo 1 of 8' }).click();
+  await expect(desk).toContainText(/KRAIBURG TPE colleague/);
+  await desk.getByRole('button', { name: 'Go to photo 5 of 8' }).click();
+  await expect(desk).toContainText('05 / 08');
+  await expect(desk).toContainText(/Standing beside the KRAIBURG TPE office glass/);
+  for (let i = 1; i <= 8; i++) {
+    const res = await page.request.get(`/images/experiences/kraiburg/kraiburg_0${i}.jpg`);
+    expect(res.status()).toBe(200);
+  }
+  // the KMNS gallery keeps its own heading
+  await expect(page.locator('#experience [data-gallery-desk]').filter({ hasText: /mentorship gallery/i })).toHaveCount(
+    1,
+  );
+});

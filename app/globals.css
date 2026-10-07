@@ -3329,6 +3329,10 @@ html[data-xray-mode]
     letter-spacing: 0.02em;
     text-transform: uppercase;
   }
+  /* R37: an INDUSTRY (ink) slate carries white text, like every ink surface (lib/signal.ts) */
+  .bs-reel-slate.bg-ink {
+    color: #fff;
+  }
   /* the projector gate: ink corner brackets across the middle of the window */
   .bs-reel-gate {
     --g: linear-gradient(var(--ink), var(--ink));

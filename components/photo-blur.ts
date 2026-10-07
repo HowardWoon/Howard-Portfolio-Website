@@ -12,6 +12,22 @@ export const PHOTO_BLUR: Record<string, string> = {
     'data:image/webp;base64,UklGRkoAAABXRUJQVlA4ID4AAADwAQCdASoQAAkAA4BaJQBOmT+AsaGDkIAA/ryH8gz5i3Ai+8dJKk8mA4TZ9Y7mzEM1wVA+zE01wgL1cmEAAA==',
   '/images/experiences/kmns/kmns_06.jpg':
     'data:image/webp;base64,UklGRlYAAABXRUJQVlA4IEoAAAAQAgCdASoQAAwAA4BaJQBOgCHiFMUOWqQAAPZGsiSZ+AXqmZHelzVDpPXQWccdNHFVu0IoSV0vVn7KncdNDNOtRxghRFG6xHEoAA==',
+  '/images/experiences/kraiburg/kraiburg_01.jpg':
+    'data:image/webp;base64,UklGRk4AAABXRUJQVlA4IEIAAACwAQCdASoQAAwAA4BaJQBWABQYCTW4APyxvZLWF7TkvA4HNRCi9QMRAGiuPQVa3+0hCxBWPkFwGhcm+KpOyTgAAAA=',
+  '/images/experiences/kraiburg/kraiburg_02.jpg':
+    'data:image/webp;base64,UklGRoIAAABXRUJQVlA4IHYAAAAQBACdASoQABUAPu1iqU2ppaOiMAgBMB2JYwCdABak3aSPfUSbN4/1QAD+w3TiSfH4NQUj985TUAyQ6hkxUuqb3QKkPsLKlbQE2iHmTnpA+BCC0YmK/YyxA2iYSR/Hz+Gykcx5nsavW4VwRtXDCPoZITz7aIAA',
+  '/images/experiences/kraiburg/kraiburg_03.jpg':
+    'data:image/webp;base64,UklGRoAAAABXRUJQVlA4IHQAAADQAwCdASoQABUAPu1iqU2ppaOiMAgBMB2JQBdgA4Sac36AQIyfRTQA+w9dJ/pU/+FiyfCXJxdNlOrPeizv0oXlJJjCg1DcnWvVQ549nV6swtwyeC0lB4kXxxIBmLdPlAsBetHO88gFAgQ9Ew7FkSCDycAAAA==',
+  '/images/experiences/kraiburg/kraiburg_04.jpg':
+    'data:image/webp;base64,UklGRl4AAABXRUJQVlA4IFIAAAAQAgCdASoQAAwAA4BaJQBOj+ACF4Fzq3IAAP658GmbbEokeMBqAjcce0LZ0T64HoCCqtMUZngUots8YljHvg1Es/JMHA7bHxMSK+5koFog4AAA',
+  '/images/experiences/kraiburg/kraiburg_05.jpg':
+    'data:image/webp;base64,UklGRm4AAABXRUJQVlA4IGIAAADwAwCdASoQABUAPu1iqU2ppaQiMAgBMB2JZQCdACK/2cqoZnSoJC5wAP6O+jpOFv3TPgPUsSvFFrz1BCbce/0W2M9kUhwr5CB5ToupVGUgNu+H3whmP+WP73Hez3atcQAAAA==',
+  '/images/experiences/kraiburg/kraiburg_06.jpg':
+    'data:image/webp;base64,UklGRmwAAABXRUJQVlA4IGAAAACwAwCdASoQABUAPu1iqU2ppaQiMAgBMB2JZQDE2BKH6cFMGUZSgAD+2VbenXOC3hI2JPghdsb17+TtXBKJazf99TwcWJ210ygE5OWV1C4FddZ4aDDOLh0SAP9szAiH3AA=',
+  '/images/experiences/kraiburg/kraiburg_07.jpg':
+    'data:image/webp;base64,UklGRnQAAABXRUJQVlA4IGgAAADwAwCdASoQABUAPu1iqU2ppaOiMAgBMB2JZwDKACFqmFA9Q2mq29KIAMsAxugszXLu/R2ayUKFHYbxCjxg+4rs183P5v37CtwzqgeSF6WnZYC3e9z6Jd6zs1w3iSYY/+DkyCoZRT3AAA==',
+  '/images/experiences/kraiburg/kraiburg_08.jpg':
+    'data:image/webp;base64,UklGRnwAAABXRUJQVlA4IHAAAADwAwCdASoQABUAPu1iqU2ppaOiMAgBMB2JQBgbhHq3b+fi83zbNLVgAP7Oi0i5tDSDNL4OTFunByCrEXJee1NEgKmnjD/1V9T9NiValqprBamVWiuBhJpTp5WRTWxQNmAfMUhYr7oFDxiaIrDPAAAA',
   '/images/muba/1789408409350.jpg':
     'data:image/webp;base64,UklGRkIAAABXRUJQVlA4IDYAAADQAQCdASoQAAgAA4BaJZACw7EJZkbvAAD7I8smdK7f6QesXv22/cG+Up72y9uHrtgK+XRAAAA=',
   '/images/muba/1789408409711.jpg':
