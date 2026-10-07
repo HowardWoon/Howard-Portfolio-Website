@@ -195,8 +195,16 @@ function PillarCard({
       <div className="space-y-3">
         <h3 className="font-display text-[clamp(1.25rem,6.4vw,1.5rem)] sm:text-[1.7rem] font-extrabold uppercase tracking-[-0.02em] leading-tight text-ink flex items-center gap-2">
           {pillar.title}
+          {/* R38: the "this card opens" cue was hover-only (opacity 0 on every phone / tablet and for keyboard users):
+              now always shown on the active card, on keyboard focus and on touch screens; mouse keeps the hover reveal */}
           <ArrowUpRight
-            className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity text-pop-blue"
+            aria-hidden
+            data-pillar-cue
+            className={`w-5 h-5 shrink-0 transition-opacity text-pop-blue ${
+              isActive
+                ? 'opacity-100'
+                : 'opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 [@media(hover:none)]:opacity-100'
+            }`}
             strokeWidth={3}
           />
         </h3>

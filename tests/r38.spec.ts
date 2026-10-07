@@ -114,3 +114,35 @@ test.describe('role proof by keyboard (1440x900)', () => {
     await expect(page.getByRole('button', { name: 'Trace Fiscal Governance' })).toHaveCount(0);
   });
 });
+
+/* ---------------------------------------------------------------- F-06 pillar cue visible without hover */
+test.describe('about pillar cue on touch', () => {
+  test.use(strip(devices['iPhone 13']));
+  test('the arrow cue is visible on a touch phone (it was opacity 0 everywhere without a mouse)', async ({ page }) => {
+    await home(page);
+    const cues = page.locator('#about [data-pillar-cue]');
+    await cues.first().evaluate((e) => e.scrollIntoView({ block: 'center' }));
+    const ops = await cues.evaluateAll((els) =>
+      els.filter((e) => e.getBoundingClientRect().width > 0).map((e) => getComputedStyle(e).opacity),
+    );
+    expect(ops.length).toBeGreaterThanOrEqual(4);
+    for (const o of ops) expect(o).toBe('1');
+  });
+});
+test.describe('about pillar cue by keyboard (1440)', () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+  test('the active pillar shows its cue, and a focused pillar shows it too', async ({ page }) => {
+    await home(page);
+    const pillars = page.locator('#about [role="button"][aria-pressed]');
+    await pillars.first().evaluate((e) => e.scrollIntoView({ block: 'center' }));
+    const active = pillars
+      .filter({ has: page.locator('[data-pillar-cue]') })
+      .and(page.locator('[aria-pressed="true"]'));
+    await expect(active.locator('[data-pillar-cue]')).toHaveCSS('opacity', '1');
+    const other = page.locator('#about [role="button"][aria-pressed="false"]').first();
+    await other.focus();
+    await page.keyboard.press('Shift+Tab');
+    await page.keyboard.press('Tab'); // keyboard focus => :focus-visible
+    await expect(other.locator('[data-pillar-cue]')).toHaveCSS('opacity', '1');
+  });
+});
