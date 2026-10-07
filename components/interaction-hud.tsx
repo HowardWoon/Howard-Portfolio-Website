@@ -16,7 +16,7 @@ import {
   stepTrail,
   useInteraction,
 } from '@/lib/interaction-store';
-import { scrollToProject } from '@/lib/skills';
+import { scrollToEvidence, scrollToProject } from '@/lib/skills';
 import { SECTIONS } from '@/lib/sections';
 import { useScrollLock } from '@/lib/use-scroll-lock';
 import { useFocusTrap } from '@/lib/use-focus-trap';
@@ -93,7 +93,8 @@ export function InteractionHud() {
 
   // Evidence Trail: follow the trail to the current project.
   useEffect(() => {
-    if (trail) scrollToProject(trail.ids[trail.i]);
+    // R37: a stop is a project card or an Experience card (Role-to-Proof Circuit)
+    if (trail) scrollToEvidence(trail.ids[trail.i]);
   }, [trail]);
 
   // Guided tour: scroll to the step, and auto-advance until the last step or until the viewer takes over.

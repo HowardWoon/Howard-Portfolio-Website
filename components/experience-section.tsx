@@ -9,6 +9,7 @@ import { FX, SPRING_STAMP } from '@/lib/fx';
 import { SIGNAL, type Signal } from '@/lib/signal';
 import { SignalKey } from './signal-key';
 import { usePrinting } from '@/lib/use-printing';
+import { useInteractionSelect } from '@/lib/interaction-store';
 import { InteractivePhotoStack } from './interactive-photo-stack';
 import { InstitutionSeal } from './institution-seal';
 import {
@@ -588,6 +589,8 @@ function PekomTreasurerDashboard() {
 
 export default function ExperienceSection() {
   const [selectedFilter, setSelectedFilter] = useState<FilterCategory>('all');
+  // R37 Role-to-Proof Circuit: an Experience card on the active trail gets the Evidence Trail outline
+  const trailIds = useInteractionSelect((s) => s.trail?.ids ?? null);
 
   const filteredExperiences = experiences.filter((exp) => selectedFilter === 'all' || exp.category === selectedFilter);
 
@@ -706,7 +709,8 @@ export default function ExperienceSection() {
                   exit={{ opacity: 0, scale: 0.97, y: -20 }}
                   transition={{ duration: 0.4, type: 'spring', bounce: 0.2 }}
                   data-folder={item.id}
-                  className="relative"
+                  data-trail-stop={trailIds?.includes(`exp:${item.id}`) ? '' : undefined}
+                  className={`relative ${trailIds?.includes(`exp:${item.id}`) ? 'fx-trail-hit rounded-[28px]' : ''}`}
                 >
                   {/* R22 folder tab (lecturer pattern 3): pressing it slides this folder to the front (filters to its
                       track); pressing it again brings every folder back.

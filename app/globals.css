@@ -136,6 +136,11 @@
   section[id] {
     scroll-margin-top: calc(var(--header-h) + 16px);
   }
+  /* R37 Role-to-Proof Circuit: an Experience card is a trail stop too (lib/skills.ts scrollToEvidence); its folder
+     tab sits above the card, so it gets a little more room */
+  [data-folder] {
+    scroll-margin-top: calc(var(--header-h) + 24px);
+  }
 
   ::selection {
     background: var(--pop-yellow);

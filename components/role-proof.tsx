@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, Route } from 'lucide-react';
+import { startTrail } from '@/lib/interaction-store';
 
 /**
  * R23 Skill-to-proof (lecturer advice #2): each Target Role pill opens a "proof of work" card listing the projects
@@ -9,7 +10,14 @@ import { ArrowUpRight } from 'lucide-react';
  * click / tap pins it (touch). Shown under the pills (the Profile window clips overflow, and an inline panel works
  * on every device and for screen readers). Every line below is a fact that already appears on the page.
  */
-type Proof = { text: string; href: string };
+/**
+ * R37 Role-to-Proof Circuit (lecturer): the Trace key on a role's proof card starts the existing Evidence Trail over
+ * exactly these proof items, in this order, and the shared HUD steps through them (prev / next / clear, J / K, Esc).
+ * `stop` = the trail stop: a project card ("#project-x" -> "x") or, where the line names an Experience role, that
+ * card ("exp:<id>", experience-section data-folder). Only relationships the proof text itself states.
+ */
+type Proof = { text: string; href: string; stop?: string };
+const stopOf = (p: Proof) => p.stop ?? p.href.replace('#project-', '');
 
 const PROOF: Record<string, Proof[]> = {
   'Distributed Backends': [
@@ -18,7 +26,7 @@ const PROOF: Record<string, Proof[]> = {
   ],
   'Java 21 / Spring Boot': [
     { text: 'SLOTIFY · Java 21 · Spring Boot · Dijkstra routing', href: '#project-slotify' },
-    { text: 'KMNS PAL · Java & Python OOP tutoring, 100+ students', href: '#experience' },
+    { text: 'KMNS PAL · Java & Python OOP tutoring, 100+ students', href: '#experience', stop: 'exp:kmns' },
   ],
   'Agentic AI Pipelines': [
     { text: 'ZEROLAG · 2nd Place, Supervity Asia Hackathon · 5 agent operators', href: '#project-zerolag' },
@@ -30,8 +38,12 @@ const PROOF: Record<string, Proof[]> = {
     { text: 'SENSOR X SENSEI · live MQTT / WebSockets telemetry', href: '#project-sensor-x' },
   ],
   'Fiscal Governance': [
-    { text: 'PEKOM · Finance Lead · RM 50,000+ budget · 100% audit cleared', href: '#experience' },
-    { text: 'KRAIBURG · SAP ERP · 100% SST cleared', href: '#experience' },
+    {
+      text: 'PEKOM · Finance Lead · RM 50,000+ budget · 100% audit cleared',
+      href: '#experience',
+      stop: 'exp:pekom',
+    },
+    { text: 'KRAIBURG · SAP ERP · 100% SST cleared', href: '#experience', stop: 'exp:kraiburg' },
   ],
 };
 
@@ -42,8 +54,9 @@ export function RoleProof({ roles, fillFor }: { roles: string[]; fillFor: (role:
   const proof = shown ? PROOF[shown] : undefined;
 
   return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap gap-2" onMouseLeave={() => setHover(null)}>
+    // R37: the mouse may travel from a role chip into its proof card (to the Trace key) without the card closing
+    <div className="space-y-3" onMouseLeave={() => setHover(null)}>
+      <div className="flex flex-wrap gap-2">
         {roles.map((role) => {
           const on = shown === role;
           return (
@@ -68,9 +81,25 @@ export function RoleProof({ roles, fillFor }: { roles: string[]; fillFor: (role:
       <div id="role-proof" role="region" aria-live="polite" aria-label="Proof of work">
         {proof ? (
           <div className="rounded-2xl border-3 border-ink bg-white p-3 shadow-brutal-sm">
-            <p className="mb-2 font-mono text-xs font-extrabold uppercase tracking-[0.14em] text-ink">
-              Proof of work // {shown}
-            </p>
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <p className="font-mono text-xs font-extrabold uppercase tracking-[0.14em] text-ink">
+                Proof of work // {shown}
+              </p>
+              {/* R37 Trace key: icon only (the HUD's Evidence Trail icon), named like the About "Trace <skill>" keys */}
+              <button
+                type="button"
+                data-trace-role={shown}
+                aria-label={`Trace ${shown}`}
+                title={`Trace ${shown}`}
+                onClick={() => {
+                  const stops = [...new Set(proof.map(stopOf))];
+                  startTrail(`role:${shown}`, shown!, stops);
+                }}
+                className="nb-key grid h-10 w-10 shrink-0 place-items-center rounded-lg border-2 border-ink bg-white text-pop-blue"
+              >
+                <Route className="h-4 w-4" strokeWidth={2.75} aria-hidden />
+              </button>
+            </div>
             <ul className="space-y-1.5">
               {proof.map((p) => (
                 <li key={p.text}>

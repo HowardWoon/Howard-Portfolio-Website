@@ -537,3 +537,109 @@ test('the KRAIBURG gallery: 8 photos, colleagues first, its own label, real file
     1,
   );
 });
+
+// R37 Role-to-Proof Circuit (lecturer): a Target Role's proof card has a Trace key that starts the existing Evidence
+// Trail over exactly that role's proof items (projects, and the Experience card a line names); the shared HUD steps
+// and clears it. Nothing changes until the visitor asks for it.
+async function landedOn(page: Page, sel: string) {
+  await expect
+    .poll(
+      () =>
+        page.evaluate((sel) => {
+          const el = document.querySelector<HTMLElement>(sel);
+          if (!el) return 9999;
+          return Math.abs(el.getBoundingClientRect().top - parseFloat(getComputedStyle(el).scrollMarginTop));
+        }, sel),
+      { timeout: 15_000, message: `${sel} under the header` },
+    )
+    .toBeLessThan(40);
+}
+
+async function traceRole(page: Page, touch: boolean, role: string) {
+  const chip = page.locator('#contact').getByRole('button', { name: role, exact: true });
+  await chip.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+  await page.waitForTimeout(300);
+  if (touch) await chip.tap();
+  else await chip.click(); // pins the proof card
+  const trace = page.getByRole('button', { name: `Trace ${role}` });
+  await expect(trace).toBeVisible();
+  if (touch) await trace.tap();
+  else await trace.click();
+}
+
+test.describe('role-to-proof circuit (desktop 1440x900)', () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+
+  test('a role traces its projects in order; Next / Previous step, Close (Esc) clears', async ({ page }) => {
+    test.setTimeout(90_000);
+    await home(page);
+    await expect(page.getByRole('region', { name: /^Evidence trail for/ })).toHaveCount(0); // idle: nothing changed
+    await traceRole(page, false, 'Distributed Backends');
+    const hud = page.getByRole('region', { name: 'Evidence trail for Distributed Backends' });
+    await expect(hud).toBeVisible();
+    await expect(hud).toContainText('1 / 2');
+    await landedOn(page, '[data-project-shell]:has(#project-slotify)');
+    await expect(page.locator('[data-project-shell][data-trail-hit]')).toHaveCount(2); // both proofs are lit
+    await hud.getByRole('button', { name: 'Next (J)' }).click();
+    await expect(hud).toContainText('2 / 2');
+    await landedOn(page, '[data-project-shell]:has(#project-zerolag)');
+    await hud.getByRole('button', { name: 'Previous (K)' }).click();
+    await expect(hud).toContainText('1 / 2');
+    await page.keyboard.press('Escape');
+    await expect(hud).toHaveCount(0);
+    await expect(page.locator('[data-project-shell][data-trail-hit]')).toHaveCount(0);
+  });
+
+  test('a role whose proof is a job lands on that Experience card and outlines it', async ({ page }) => {
+    test.setTimeout(90_000);
+    await home(page);
+    await traceRole(page, false, 'Fiscal Governance');
+    const hud = page.getByRole('region', { name: 'Evidence trail for Fiscal Governance' });
+    await expect(hud).toContainText('1 / 2');
+    await landedOn(page, '[data-folder="pekom"]');
+    await expect(page.locator('[data-folder="pekom"][data-trail-stop]')).toHaveCount(1);
+    await expect(page.locator('[data-folder="kraiburg"][data-trail-stop]')).toHaveCount(1);
+    await hud.getByRole('button', { name: 'Next (J)' }).click();
+    await expect(hud).toContainText('2 / 2');
+    await landedOn(page, '[data-folder="kraiburg"]');
+    // the card is not hidden under the header: its folder tab is below the header's bottom edge
+    const clear = await page.evaluate(() => {
+      const hdr = document.querySelector('header.site-header')!.getBoundingClientRect().bottom;
+      return document.querySelector('[data-folder="kraiburg"]')!.getBoundingClientRect().top - hdr;
+    });
+    expect(clear).toBeGreaterThanOrEqual(0);
+    await hud.getByRole('button', { name: 'Close (Esc)' }).click();
+    await expect(page.locator('[data-trail-stop]')).toHaveCount(0);
+  });
+});
+
+test.describe('role-to-proof circuit (touch phone 390x664)', () => {
+  test.use(strip(devices['iPhone 13']));
+
+  test('tap a role, tap Trace: the trail starts and steps on a phone', async ({ page }) => {
+    test.setTimeout(90_000);
+    await home(page);
+    await traceRole(page, true, 'Agentic AI Pipelines');
+    const hud = page.getByRole('region', { name: 'Evidence trail for Agentic AI Pipelines' });
+    await expect(hud).toBeVisible();
+    await expect(hud).toContainText('1 / 3');
+    await landedOn(page, '[data-project-shell]:has(#project-zerolag)');
+    await hud.getByRole('button', { name: 'Next (J)' }).tap();
+    await expect(hud).toContainText('2 / 3');
+    await landedOn(page, '[data-project-shell]:has(#project-bilahujan)');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
+  });
+});
+
+test.describe('role-to-proof circuit (reduced motion)', () => {
+  test.use({ viewport: { width: 1280, height: 800 }, reducedMotion: 'reduce' });
+  test('with reduced motion the route lands at once, under the header', async ({ page }) => {
+    await home(page);
+    await traceRole(page, false, 'Java 21 / Spring Boot');
+    const hud = page.getByRole('region', { name: 'Evidence trail for Java 21 / Spring Boot' });
+    await expect(hud).toContainText('1 / 2');
+    await landedOn(page, '[data-project-shell]:has(#project-slotify)');
+    await hud.getByRole('button', { name: 'Next (J)' }).click();
+    await landedOn(page, '[data-folder="kmns"]');
+  });
+});
