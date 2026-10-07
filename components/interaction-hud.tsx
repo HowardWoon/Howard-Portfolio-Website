@@ -195,20 +195,25 @@ export function InteractionHud() {
     };
     window.addEventListener('keydown', onKey);
     // R31: a "?" pressed before this layer loaded was queued by lib/early-clicks.ts: open the sheet now
+    // R37: the Command Palette queues its "Keyboard shortcuts" / "Start guided tour" clicks here too, marked 'palette':
+    // a click, not a key, so it is honoured even with keyboard shortcuts switched off
     const w = window as Window & {
       __hwShortcutsReady?: boolean;
-      __hwShortcutsWanted?: boolean;
-      __hwTourWanted?: boolean;
+      __hwShortcutsWanted?: boolean | 'palette';
+      __hwTourWanted?: boolean | 'palette';
     };
     w.__hwShortcutsReady = true;
     if (w.__hwShortcutsWanted) {
+      const asked = w.__hwShortcutsWanted;
       w.__hwShortcutsWanted = false;
-      if (keysOn() && !document.querySelector('[aria-modal="true"]')) setHelp(true);
+      if ((asked === 'palette' || keysOn()) && !document.querySelector('[aria-modal="true"]')) setHelp(true);
     }
     // R36: a "g" pressed before this layer loaded starts the tour now (same queue as "?")
     if (w.__hwTourWanted) {
+      const asked = w.__hwTourWanted;
       w.__hwTourWanted = false;
-      if (FX.guidedTour && keysOn() && !document.querySelector('[aria-modal="true"]')) startTour();
+      if (FX.guidedTour && (asked === 'palette' || keysOn()) && !document.querySelector('[aria-modal="true"]'))
+        startTour();
     }
     return () => {
       w.__hwShortcutsReady = false;

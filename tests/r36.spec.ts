@@ -379,3 +379,52 @@ test.describe('cursor tag (desktop 1440x900)', () => {
     await expect(tag).toHaveCount(0);
   });
 });
+
+// R37 race (found by the pre-push suite): the palette mounts one idle moment before the shortcut / tour layer, so
+// "Keyboard shortcuts" or "Start guided tour" picked in that window fired an event nobody listened to yet. The
+// palette now leaves the request queued too, and the layer opens it when it mounts. The layer's own chunk (the only
+// one with "Evidence trail for") is held back until the command is picked, so the race is hit every time.
+for (const [label, check] of [
+  ['Keyboard shortcuts', (p: Page) => p.getByRole('dialog', { name: 'Keyboard shortcuts' })],
+  ['Start guided tour', (p: Page) => p.getByRole('region', { name: /^Guided tour, step 1 of \d+/ })],
+] as const) {
+  test(`"${label}" picked before the shortcut layer has mounted still opens`, async ({ page, context }) => {
+    test.setTimeout(90_000);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await context.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
+    let release!: () => void;
+    const held = new Promise<void>((r) => (release = r));
+    let heldBack = false;
+    await page.route('**/_next/static/chunks/**/*.js', async (route) => {
+      const res = await route.fetch();
+      const body = await res.text();
+      if (body.includes('Evidence trail for')) {
+        heldBack = true;
+        await held;
+      }
+      await route.fulfill({ response: res, body });
+    });
+    await page.goto('/', { waitUntil: 'domcontentloaded' }); // not networkidle: one chunk is held on purpose
+    await page.waitForFunction(() => (window as unknown as { __hwPaletteReady?: boolean }).__hwPaletteReady === true, {
+      timeout: 60_000,
+    });
+    // the layer has asked for its chunk and is being held: it cannot be listening yet
+    await expect.poll(() => heldBack, { timeout: 30_000, message: 'the shortcut layer chunk is held' }).toBe(true);
+    expect(
+      await page.evaluate(() => (window as unknown as { __hwShortcutsReady?: boolean }).__hwShortcutsReady),
+    ).not.toBe(true);
+    await page.evaluate(() => window.dispatchEvent(new Event('open-command-palette')));
+    const dialog = page.getByRole('dialog', { name: 'Command Palette' });
+    await expect(dialog).toBeVisible({ timeout: 20_000 });
+    await dialog.getByRole('option', { name: label }).click();
+    await expect(dialog).toHaveCount(0);
+    expect(
+      await page.evaluate(() => {
+        const w = window as unknown as { __hwShortcutsWanted?: unknown; __hwTourWanted?: unknown };
+        return w.__hwShortcutsWanted || w.__hwTourWanted;
+      }),
+    ).toBe('palette'); // queued, not lost
+    release(); // the layer loads, mounts and reads the queue
+    await expect(check(page)).toBeVisible({ timeout: 30_000 });
+  });
+}

@@ -42,6 +42,26 @@ function goTo(hash: string) {
   history.replaceState(null, '', hash);
 }
 
+/**
+ * R37: "Keyboard shortcuts" / "Start guided tour" ask the interaction HUD, which mounts one idle moment AFTER the
+ * palette (portfolio-page AfterBoot). A request in that window was lost (the event had no listener yet). Like a
+ * queued "?" / "g" key (lib/early-clicks.ts), it is also left as a flag the HUD reads when it mounts; 'palette' marks
+ * it as a click, so it is honoured even with keyboard shortcuts switched off.
+ */
+type HudWindow = Window & {
+  __hwShortcutsReady?: boolean;
+  __hwShortcutsWanted?: boolean | 'palette';
+  __hwTourWanted?: boolean | 'palette';
+};
+function askHud(what: 'shortcuts' | 'tour') {
+  const w = window as HudWindow;
+  if (!w.__hwShortcutsReady) {
+    if (what === 'tour') w.__hwTourWanted = 'palette';
+    else w.__hwShortcutsWanted = 'palette';
+  }
+  window.dispatchEvent(new Event(what === 'tour' ? 'start-tour' : 'open-shortcuts'));
+}
+
 /** set by the header when the visitor asks for the palette before it has mounted (see the open effect below) */
 export type PaletteWindow = Window & { __hwPaletteWanted?: boolean; __hwPaletteReady?: boolean };
 
@@ -177,17 +197,11 @@ export function CommandPalette() {
                 </Command.Group>
 
                 <Command.Group heading="Actions" className={`${groupClass} border-t-2 border-dashed border-ink mt-1`}>
-                  <Command.Item
-                    onSelect={() => runCommand(() => window.dispatchEvent(new Event('start-tour')))}
-                    className={itemClass}
-                  >
+                  <Command.Item onSelect={() => runCommand(() => askHud('tour'))} className={itemClass}>
                     <Waypoints className="w-5 h-5" strokeWidth={2.5} />
                     <span>Start guided tour</span>
                   </Command.Item>
-                  <Command.Item
-                    onSelect={() => runCommand(() => window.dispatchEvent(new Event('open-shortcuts')))}
-                    className={itemClass}
-                  >
+                  <Command.Item onSelect={() => runCommand(() => askHud('shortcuts'))} className={itemClass}>
                     <Keyboard className="w-5 h-5" strokeWidth={2.5} />
                     <span>Keyboard shortcuts</span>
                   </Command.Item>
