@@ -6,6 +6,8 @@ import { Activity, Check, Clock3, Copy, FileText, Moon, ScanLine, Sun, UserRound
 import { personalDetails } from '@/lib/site-data';
 import { openResume } from '@/lib/resume';
 import { flapTo } from '@/lib/split-flap';
+import { useCalm } from '@/lib/motion-pref';
+import { useInteractionSelect } from '@/lib/interaction-store';
 
 /**
  * R22 System Status Bar (lecturer pattern 4 + "quick recommendation"): a hardware-style control strip under the
@@ -58,6 +60,17 @@ function XrayOverlay({ ping, onClose }: { ping: number | null; onClose: () => vo
   const crossY = useRef<HTMLDivElement>(null);
   const crossTag = useRef<HTMLDivElement>(null);
   const [nav, setNav] = useState({ ttfb: 0, dcl: 0, load: 0, nodes: 0 });
+  // R39 lecturer brief: the panel also reads out the motion setting and the active viewer mode (existing state only)
+  const calm = useCalm();
+  const [osReduce, setOsReduce] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const mode = useInteractionSelect((s) => (s.tour ? 'TOUR' : s.trail ? 'TRAIL' : s.focus ? 'FOCUS' : 'IDLE'));
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const on = () => setOsReduce(mq.matches);
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -167,13 +180,13 @@ function XrayOverlay({ ping, onClose }: { ping: number | null; onClose: () => vo
       <div
         role="status"
         aria-label="X-ray mode metrics"
-        className="fixed bottom-[max(1rem,var(--safe-bottom))] left-[max(1rem,var(--safe-left))] z-[9500] w-[min(20rem,calc(100vw-2rem))] rounded-2xl border-3 border-ink bg-white p-3 font-mono text-xs font-extrabold text-ink shadow-[5px_5px_0_0_#2B4BFF]"
+        className="fixed bottom-[max(1rem,var(--safe-bottom))] left-[max(1rem,var(--safe-left))] z-[9500] w-[min(20rem,calc(100vw-2rem))] landscape-short:w-[min(34rem,calc(100vw-2rem))] rounded-2xl border-3 border-ink bg-white p-3 font-mono text-xs font-extrabold text-ink shadow-[5px_5px_0_0_#2B4BFF]"
       >
         <div className="mb-2 flex items-center justify-between gap-2 tracking-[0.14em]">
           <span>X-RAY · SYSTEM METRICS</span>
           <span className="rounded-md border-2 border-ink bg-[#E3E8FF] px-1.5">LIVE</span>
         </div>
-        <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 tabular-nums">
+        <dl className="grid grid-cols-[auto_1fr] landscape-short:grid-cols-[auto_1fr_auto_1fr] gap-x-3 gap-y-1 tabular-nums">
           <dt className="text-ink-muted">FPS</dt>
           <dd>
             <span ref={fpsRef}>--</span>
@@ -190,6 +203,10 @@ function XrayOverlay({ ping, onClose }: { ping: number | null; onClose: () => vo
           <dd>{ping == null ? '— (press PING)' : `${ping} ms`}</dd>
           <dt className="text-ink-muted">BOXES</dt>
           <dd>{boxes.length} outlined</dd>
+          <dt className="text-ink-muted">MOTION</dt>
+          <dd data-xray-motion>{calm ? 'CALM' : osReduce ? 'REDUCED' : 'FULL'}</dd>
+          <dt className="text-ink-muted">MODE</dt>
+          <dd data-xray-mode-state>{mode}</dd>
         </dl>
       </div>
     </>,

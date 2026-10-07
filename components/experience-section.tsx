@@ -599,6 +599,22 @@ export default function ExperienceSection() {
 
   const filteredExperiences = experiences.filter((exp) => selectedFilter === 'all' || exp.category === selectedFilter);
 
+  // R39 lecturer brief (dossier tabs): Left / Right / Home / End move between the folder tabs that are on the page
+  // (wrapping round), Enter / Space still press the focused one. Up / Down stay with the page scroll.
+  const onFolderTabKey = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    const keys: Record<string, number> = { ArrowRight: 1, ArrowLeft: -1, Home: 0, End: 0 };
+    if (!(e.key in keys) || e.altKey || e.ctrlKey || e.metaKey) return;
+    const tabs = Array.from(
+      e.currentTarget.closest('section')?.querySelectorAll<HTMLButtonElement>('button.nb-folder-tab') ?? [],
+    );
+    const i = tabs.indexOf(e.currentTarget);
+    if (i < 0 || tabs.length < 2) return;
+    e.preventDefault();
+    const n = tabs.length;
+    const next = e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : (i + keys[e.key] + n) % n;
+    tabs[next].focus();
+  };
+
   // R21: filter dots are the SIGNAL KEY colours of the cards they filter
   const filters: { id: FilterCategory; label: string; dotClass: string }[] = [
     { id: 'all', label: 'ALL', dotClass: 'bg-white' },
@@ -734,6 +750,7 @@ export default function ExperienceSection() {
                       aria-pressed={only}
                       aria-label={only ? 'Show all experience folders' : `Show only the ${item.categoryLabel} folder`}
                       onClick={() => setSelectedFilter(only ? 'all' : item.category)}
+                      onKeyDown={onFolderTabKey}
                       className={`nb-folder-tab pointer-events-auto flex min-h-[43px] max-w-[calc(100%-28px)] shrink-0 items-center gap-2 rounded-t-2xl border-3 border-b-0 border-ink px-4 py-2 text-left font-mono text-xs font-extrabold uppercase leading-snug tracking-[0.12em] ${a.fill} ${onFill}`}
                     >
                       <span className="min-w-0">

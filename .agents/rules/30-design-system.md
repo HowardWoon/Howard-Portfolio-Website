@@ -231,6 +231,20 @@ Not done from the lecturer plans (owner approval or rule conflict): shareable ro
 with `?photo=` / `?bp=`); honours stops (no proof line names an honour yet); glow / blur / soft gradient / light-ray /
 particle effects (AGENTS.md law 5).
 
+R39 lecturer brief "Additive Enhancement Ideas" (`docs/PORTFOLIO-ENHANCEMENT-IDEAS.md`, branch
+`v0/portfolio-enhancement-ideas`). Items already shipped as layers: 1 Evidence Trail Trace (R37 Role-to-Proof Circuit +
+FX-38 skill / project Trace keys, one HUD), 2 Blueprint Inspection (FX-45 `blueprint-stage.tsx`), 3 Mechanical press
+(R37 press stamp + `.nb-key`), 4 Dossier tabs (R22), 5 Field Reel loupe (R28), 6 Status Bar + X-ray (R22 / R23). Gaps
+added, same rule - layers:
+
+| Feature             | Where                                       | Rules                                                                                                                                                                                                                          |
+| ------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Folder-tab keys     | experience-section.tsx `onFolderTabKey`     | Left / Right (wrap) / Home / End move focus between the `button.nb-folder-tab` on the page; Enter / Space still press; Up / Down stay with the page scroll                                                                     |
+| X-ray MOTION / MODE | system-status-bar.tsx `XrayOverlay` metrics | Owner-approved wording: MOTION `FULL / CALM / REDUCED` (Calm switch first, OS setting live), MODE `IDLE / TRAIL / FOCUS / TOUR` (interaction store); landscape phones read the panel in two pairs so it stays under the header |
+
+Declined by Howard (R39): keyboard focus on Field Reel frames (the loupe stays mouse-only, 30-I; the photos are
+keyboard-reachable in the galleries and the Field Archive). Guard: tests/r39.spec.ts.
+
 ## H. R24 guardrails - type floor, emblem geometry, torchlight, neo-brutalism only (owner complaints, tested)
 
 Howard: "the font family and font size is too ugly and small, slim, i dont want this font problem happen again" and
