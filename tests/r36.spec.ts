@@ -440,3 +440,31 @@ for (const [label, check] of [
     await expect(check(page)).toBeVisible({ timeout: 30_000 });
   });
 }
+
+// R37 (owner screenshot): on a desktop the Experience Signal Key bar and the chip row ghosted through the header
+// (95 % white + backdrop blur, FX-24). The header is now solid on every device: no content can show through it.
+for (const [w, h] of [
+  [1440, 900],
+  [1280, 720],
+  [1024, 768],
+  [820, 1180],
+] as const) {
+  test(`the header is solid: nothing shows through it while the page scrolls under it @${w}x${h}`, async ({ page }) => {
+    await page.setViewportSize({ width: w, height: h });
+    await home(page);
+    // park the Experience Signal Key (an ink bar) right under the header, as in the owner's screenshot
+    await page.evaluate(() => {
+      const key = document.querySelector('#experience .signal-key')!;
+      const y = key.getBoundingClientRect().top + scrollY - 40;
+      window.scrollTo(0, y);
+    });
+    await page.waitForTimeout(800);
+    const s = await page.evaluate(() => {
+      const cs = getComputedStyle(document.querySelector('header.site-header')!);
+      return { bg: cs.backgroundColor, blur: cs.backdropFilter, op: cs.opacity };
+    });
+    expect(s.bg).toBe('rgb(255, 255, 255)');
+    expect(s.blur).toBe('none');
+    expect(s.op).toBe('1');
+  });
+}

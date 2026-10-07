@@ -1123,9 +1123,17 @@ has(
 has(
   'R14',
   'B-03',
-  'Header solid on phones / touch',
+  'Header solid on phones / touch (R37: and on every other device)',
   'components/site-header.tsx',
-  'bg-white sm:[@media(pointer:fine)]:bg-white/95',
+  'z-[9999] bg-white border-b-3 border-ink',
+);
+lacks(
+  'R14',
+  'B-03b',
+  'Header never translucent or blurred: content cannot ghost through it (AGENTS.md law 5)',
+  'components/site-header.tsx',
+  'bg-white/95',
+  'backdrop-blur',
 );
 has(
   'R14',

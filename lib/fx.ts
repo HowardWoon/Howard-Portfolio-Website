@@ -29,7 +29,9 @@ export const FX = {
   projectIndex: true, // FX-21 bento index of all projects above the project stack
   bentoReflow: true, // FX-22 About pillars slide into place when one expands
   jellyTabs: true, // FX-23 Experience filter pill travels between tabs (FLIP + spring)
-  glassHeader: true, // FX-24 header turns into brutal frosted glass once you scroll
+  // FX-24 frosted header: OFF since R37 (owner screenshot: the Signal Key bar and chips ghosted through the 95 % white,
+  // blurred header). Glass / blur panels break AGENTS.md law 5; the header is solid white on every device.
+  glassHeader: false,
   specular: true, // FX-25 lamp-light sheen on primary buttons
   glareTilt: true, // FX-26 glare highlight on tilt cards
   magneticStretch: true, // FX-27 magnetic buttons stretch toward the cursor, then snap
