@@ -740,16 +740,19 @@ export default function BuildStory() {
               A paper lid closes over the stage in a wave of columns, the UM crest lands on the scanner bed as pixel
               art, the scan bar decodes it into the real crest (with a live percentage), then it expands and the lid
               lifts away in the same wave, straight into the blueprint landing. Scroll-scrubbed (reversible), transform
-              / opacity / clip only, hidden in the still (Calm / reduced motion). */}
+              / opacity / clip only, hidden in the still (Calm / reduced motion).
+              R37 timeline (fractions of the gap): lid 0-0.24, crest lands 0.16-0.28, decode 0.28-0.52, HOLD 0.52-0.66
+              (the decoded crest rests; the scanner's corner brackets snap out to frame it), grow 0.66-0.84, lid lifts
+              from 0.72. */}
           <div aria-hidden className="bs-layer bs-scan-layer">
             <div className="bs-scan-cols">
               {Array.from({ length: SCAN_COLS }, (_, i) => (
                 <span key={i} className="bs-seg bs-scan-col" style={gapSeg(0, 1, { '--i': i })} />
               ))}
             </div>
-            <div className="bs-seg bs-scan-in" style={gapSeg(0.2, 0.34)}>
-              <div className="bs-seg bs-scan-grow" style={gapSeg(0.64, 0.84)}>
-                <div className="bs-scan-bed">
+            <div className="bs-seg bs-scan-in" style={gapSeg(0.16, 0.28)}>
+              <div className="bs-seg bs-scan-grow" style={gapSeg(0.66, 0.84)}>
+                <div className="bs-seg bs-scan-bed" style={gapSeg(0.52, 0.58)}>
                   <span className="bs-scan-corner" data-c="tl" />
                   <span className="bs-scan-corner" data-c="tr" />
                   <span className="bs-scan-corner" data-c="bl" />
@@ -764,7 +767,7 @@ export default function BuildStory() {
                       sizes="32px"
                       className="bs-scan-pixel h-full w-full"
                     />
-                    <span className="bs-seg bs-scan-sharp" style={gapSeg(0.34, 0.62)}>
+                    <span className="bs-seg bs-scan-sharp" style={gapSeg(0.28, 0.52)}>
                       <Image
                         src="/images/logos/um_crest.png"
                         alt=""
@@ -774,10 +777,10 @@ export default function BuildStory() {
                         className="object-contain"
                       />
                     </span>
-                    <span className="bs-seg bs-scan-bar" style={gapSeg(0.34, 0.62)} />
+                    <span className="bs-seg bs-scan-bar" style={gapSeg(0.28, 0.52)} />
                   </div>
                 </div>
-                <div className="bs-seg bs-scan-readout" style={gapSeg(0.34, 0.62)}>
+                <div className="bs-seg bs-scan-readout" style={gapSeg(0.28, 0.52)}>
                   <span className="bs-scan-chip">SCAN</span>
                   <span className="font-mono text-xs font-extrabold tracking-[0.14em]">UNIVERSITI MALAYA</span>
                   {/* a mechanical meter, not a counting number: a number that changes text every frame forces a

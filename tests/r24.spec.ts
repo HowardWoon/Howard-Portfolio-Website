@@ -148,7 +148,8 @@ for (const [width, height] of [
       const s = document.querySelector<HTMLElement>('.bs-section')!;
       return { top: s.getBoundingClientRect().top + scrollY, len: s.offsetHeight };
     });
-    await page.evaluate((y) => window.scrollTo(0, y), at.top + (at.len - height) * 0.8);
+    // story time 0.776 (R37: playhead = (s + 0.30) / 1.30)
+    await page.evaluate((y) => window.scrollTo(0, y), at.top + (at.len - height) * 0.83);
     await expect(page.locator('.bs-dock').first()).toHaveCSS('opacity', '1', { timeout: 5000 });
     await page.waitForTimeout(600);
     const problems = await page.evaluate((vw) => {
@@ -252,7 +253,8 @@ for (const [width, height, reels] of [
       const s = document.querySelector<HTMLElement>('.bs-section')!;
       return { top: s.getBoundingClientRect().top + scrollY, len: s.offsetHeight };
     });
-    await page.evaluate((y) => window.scrollTo(0, y), at.top + (at.len - height) * 0.78);
+    // story time 0.754 (R37: playhead = (s + 0.30) / 1.30)
+    await page.evaluate((y) => window.scrollTo(0, y), at.top + (at.len - height) * 0.81);
     await expect(page.locator('.bs-dock').first()).toHaveCSS('opacity', '1', { timeout: 5000 });
     const shown = page.locator('.bs-reel:visible');
     await expect(shown).toHaveCount(reels);

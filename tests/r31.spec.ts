@@ -26,8 +26,8 @@ async function playhead(page: Page, p: number) {
   await page.waitForTimeout(900);
 }
 
-// gap in story time = [0.36, 0.48] of 1.12 -> playhead [0.3214, 0.4286] (lib/story-progress.ts)
-const gap = (f: number) => (0.36 + f * 0.12) / 1.12;
+// R37: gap in story time = [0.36, 0.66] of 1.30 -> playhead [0.2769, 0.5077] (lib/story-progress.ts STORY_GAP 0.30)
+const gap = (f: number) => (0.36 + f * 0.3) / 1.3;
 
 for (const [w, h] of [
   [1536, 730],
@@ -148,7 +148,9 @@ for (const [name, size] of [
           const fill = getComputedStyle(document.querySelector('.bs-scan-meter-fill')!).transform;
           const pct = fill === 'none' ? 100 : new DOMMatrix(fill).a * 100;
           const colsTop = document.querySelector('.bs-scan-cols')!.getBoundingClientRect().top;
+          const g = getComputedStyle(document.querySelector('.bs-scan-grow')!).transform;
           return {
+            growScale: g === 'none' ? 1 : new DOMMatrix(g).a,
             visible: op * grow,
             cover: inStage,
             n: cols.length,
@@ -169,6 +171,15 @@ for (const [name, size] of [
       expect(s.underHud).toBe(true);
       expect(s.pct).toBeGreaterThan(0); // a live percentage, part-way
       expect(s.pct).toBeLessThan(100);
+      // R37 hold: the decoded crest rests in the bed before it grows (it used to grow 0.02 of the gap after decoding)
+      for (const f of [0.55, 0.62]) {
+        await playhead(page, gap(f));
+        s = await state();
+        expect(s.pct, `decoded at ${f}`).toBe(100);
+        expect(s.growScale, `not growing yet at ${f}`).toBe(1);
+        expect(s.visible, `crest shown at ${f}`).toBeGreaterThan(0.95);
+        expect(s.cover, `lid still closed at ${f}`).toBe(s.n);
+      }
       await playhead(page, gap(1.25)); // after: blueprint scene, the lid has lifted
       s = await state();
       expect(s.visible).toBeLessThan(0.05);
@@ -207,7 +218,7 @@ test.describe('orchestrate HUD (1920)', () => {
   test.use({ viewport: { width: 1920, height: 900 } });
   test('rings with computed ticks, the radar and the system readout are on the diagram', async ({ page }) => {
     await open(page, '/?fxtier=full');
-    await playhead(page, (0.72 + 0.12) / 1.12);
+    await playhead(page, (0.72 + 0.3) / 1.3); // story time 0.72 (lib/story-progress.ts storyTime)
     const r = await page.evaluate(() => ({
       ticks: document.querySelectorAll('.bs-hud-ring-out line').length,
       radar: getComputedStyle(document.querySelector('.bs-hud-radar')!).display,

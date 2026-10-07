@@ -24,8 +24,10 @@ export function onStoryProgress(l: Listener): () => void {
  * STORY_GAP_AT, after the terminal has finished typing and before the blueprint lands. storyTime() maps story time to
  * the playhead; gapTime(f) gives the playhead at fraction f (0..1) of the gap. The track grows by the same factor
  * (globals.css .bs-track), so every old scene keeps its scroll length.
+ * R37 (owner: the crest scan "feels like a flash"): the gap grew from 0.12 to 0.30 (track 584vh -> 676vh = 520 x 1.30),
+ * so the lid, the decode, a hold on the decoded crest and the expansion each get a real stretch of scroll.
  */
 export const STORY_GAP_AT = 0.36;
-export const STORY_GAP = 0.12;
+export const STORY_GAP = 0.3;
 export const storyTime = (x: number) => (x <= STORY_GAP_AT ? x : x + STORY_GAP) / (1 + STORY_GAP);
 export const gapTime = (f: number) => (STORY_GAP_AT + f * STORY_GAP) / (1 + STORY_GAP);

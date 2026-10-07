@@ -2489,8 +2489,9 @@ html[data-xray-mode]
    Scene colours follow the SIGNAL KEY: orange academic, cyan parse, blue structure, lilac AI, mint shipped.
    Reduced motion / Calm Mode: [data-static] shows the finished frame as a still, nothing pinned. */
 .bs-track {
-  /* R31: 520vh + the crest-scan gap (x 1.12), so every old scene keeps its scroll length */
-  height: 584vh;
+  /* R31 / R37: 520vh + the crest-scan gap (x 1.30, lib/story-progress.ts STORY_GAP), so every old scene keeps its
+     scroll length */
+  height: 676vh;
 }
 .bs-stage {
   --p: 0;
@@ -3741,6 +3742,10 @@ html[data-motion='calm'] .honors-tally .tally-trophy g:first-child {
   box-shadow: 8px 8px 0 0 var(--ink);
 }
 .bs-scan-corner {
+  /* R37 hold: the bed's window (gap 0.52-0.58) is read here; the brackets snap out to frame the decoded crest */
+  --t: inherit;
+  --e: inherit;
+  --snap: calc(var(--e) * 14%);
   position: absolute;
   width: 18%;
   height: 18%;
@@ -3751,24 +3756,28 @@ html[data-motion='calm'] .honors-tally .tally-trophy g:first-child {
   top: 4%;
   border-left-width: 4px;
   border-top-width: 4px;
+  transform: translate(calc(var(--snap) * -1), calc(var(--snap) * -1));
 }
 .bs-scan-corner[data-c='tr'] {
   right: 4%;
   top: 4%;
   border-right-width: 4px;
   border-top-width: 4px;
+  transform: translate(var(--snap), calc(var(--snap) * -1));
 }
 .bs-scan-corner[data-c='bl'] {
   left: 4%;
   bottom: 4%;
   border-left-width: 4px;
   border-bottom-width: 4px;
+  transform: translate(calc(var(--snap) * -1), var(--snap));
 }
 .bs-scan-corner[data-c='br'] {
   right: 4%;
   bottom: 4%;
   border-right-width: 4px;
   border-bottom-width: 4px;
+  transform: translate(var(--snap), var(--snap));
 }
 .bs-scan-crest {
   position: relative;

@@ -15,8 +15,8 @@ async function open(page: Page, path = '/') {
   await page.goto(path, { waitUntil: 'networkidle' });
 }
 
-/** story time -> playhead (lib/story-progress.ts: the crest-scan gap of 0.12 sits at 0.36) */
-const st = (x: number) => (x <= 0.36 ? x : x + 0.12) / 1.12;
+/** story time -> playhead (lib/story-progress.ts: the crest-scan gap of 0.30 sits at 0.36, R37) */
+const st = (x: number) => (x <= 0.36 ? x : x + 0.3) / 1.3;
 
 async function playhead(page: Page, p: number) {
   await page.evaluate((p) => {

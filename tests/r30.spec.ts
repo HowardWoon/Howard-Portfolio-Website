@@ -88,7 +88,8 @@ for (const [name, size] of [
     }) => {
       await open(page);
       expect(await page.locator('.bs-packet').count()).toBe(5);
-      for (const f of [0.66, 0.69, 0.72, 0.78]) {
+      // story times 0.62 / 0.65 / 0.69 / 0.75 (R37: playhead = (s + 0.30) / 1.30)
+      for (const f of [0.71, 0.73, 0.76, 0.81]) {
         await storyAt(page, f);
         const bad = await page.evaluate(() => {
           const out: string[] = [];

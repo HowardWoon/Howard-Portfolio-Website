@@ -34,7 +34,8 @@ test('The Build scrubs with the scroll: five scenes forward, and the same frames
   await home(page);
   await expect(page.getByRole('heading', { name: /from student id to shipped system/i })).toHaveCount(1);
   const seen: string[] = [];
-  for (const p of [0, 0.1, 0.3, 0.5, 0.7, 0.9, 1]) {
+  // R37: scene bounds on the playhead are 0.154 / 0.538 / 0.692 / 0.846 (the crest-scan gap of 0.30 lies in scene 02)
+  for (const p of [0, 0.1, 0.3, 0.6, 0.77, 0.9, 1]) {
     const r = await playhead(page, p);
     expect(Math.abs(r.p - p)).toBeLessThan(0.01);
     seen.push(r.scene!);
@@ -99,7 +100,7 @@ test.describe('phone', () => {
   test.use((({ defaultBrowserType, ...d }) => d)(devices['Pixel 7']));
   test('The Build fits a phone: no overflow, ID and terminal do not overlap in PARSE', async ({ page }) => {
     await home(page);
-    await playhead(page, 0.36);
+    await playhead(page, 0.27); // story time 0.35: PARSE, just before the crest-scan gap (R37: gap starts at 0.277)
     const [a, b] = await Promise.all([
       page.locator('.bs-idcard').boundingBox(),
       page.locator('.bs-code .bs-card').boundingBox(),

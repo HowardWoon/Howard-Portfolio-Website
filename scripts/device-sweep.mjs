@@ -75,7 +75,8 @@ async function storyFit(page) {
     });
   }
   const out = [];
-  for (const f of [0.3, 0.78, 0.97]) {
+  // PARSE, ORCHESTRATE, SHIP (R37: story times 0.34 / 0.75 / 0.96 on the longer crest-scan track)
+  for (const f of [0.26, 0.81, 0.97]) {
     await page.evaluate((y) => window.scrollTo(0, y), at.top + (at.len - vh) * f + 2);
     await page.waitForTimeout(900);
     out.push(

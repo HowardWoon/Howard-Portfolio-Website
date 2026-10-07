@@ -53,7 +53,8 @@ for (const name of ['iPhone SE', 'iPhone 13', 'Pixel 7', 'iPad Mini'] as const) 
     test(`settled scenes stay between the HUD and the captions (${name})`, async ({ page, context }) => {
       await context.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
       await page.goto('/', { waitUntil: 'networkidle' });
-      for (const f of [0.3, 0.78, 0.97]) expect(await fitProblems(page, f), `at ${f}`).toEqual([]);
+      // PARSE, ORCHESTRATE, SHIP (R37: story times 0.34 / 0.75 / 0.96 on the longer track)
+      for (const f of [0.26, 0.81, 0.97]) expect(await fitProblems(page, f), `at ${f}`).toEqual([]);
     });
   });
 }
@@ -96,7 +97,7 @@ test.describe('desktop field reels', () => {
   test('projector gate, counter, chapter and loupe; the reels leave in scene 05', async ({ page, context }) => {
     await context.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
     await page.goto('/?fxtier=full', { waitUntil: 'networkidle' });
-    await storyAt(page, 0.74);
+    await storyAt(page, 0.78); // story time 0.71 (R37: playhead = (s + 0.30) / 1.30)
     const reels = page.locator('.bs-reel:visible');
     await expect(reels).toHaveCount(2);
     for (let i = 0; i < 2; i++) {
@@ -107,7 +108,7 @@ test.describe('desktop field reels', () => {
     }
     // the gate follows the playhead
     const before = await reels.first().locator('.bs-reel-count').getAttribute('data-text');
-    await storyAt(page, 0.6);
+    await storyAt(page, 0.66); // story time 0.55
     await expect.poll(() => reels.first().locator('.bs-reel-count').getAttribute('data-text')).not.toBe(before);
     // loupe on the gated frame, gone when the pointer leaves
     const gated = reels.first().locator('.bs-reel-frame.is-gate');
