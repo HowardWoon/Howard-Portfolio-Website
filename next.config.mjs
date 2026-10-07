@@ -20,7 +20,7 @@ const nextConfig = {
           {
             key: 'Content-Security-Policy-Report-Only',
             value:
-              "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co; frame-src 'self'; report-uri /api/csp-report;",
+              "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co; frame-src 'self' https://www.google.com; report-uri /api/csp-report;",
           },
         ],
       },

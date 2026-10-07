@@ -188,7 +188,7 @@ const FIELD_REEL: ReelItem[] = [
   { src: '/images/experiences/kmns/kmns_01.jpg', w: 1280, h: 960 },
   { src: '/images/experiences/kmns/kmns_06.jpg', w: 1280, h: 960 },
   // R37: KRAIBURG TPE (Nov 2025 -), ink = INDUSTRY; the photos with colleagues (the gallery's first four)
-  { slate: 'KRAIBURG TPE Technology (M) Sdn. Bhd.', fill: 'bg-ink' },
+  { slate: 'KRAIBURG TPE Technology (M) Sdn Bhd', fill: 'bg-ink' },
   { src: '/images/experiences/kraiburg/kraiburg_01.jpg', w: 1280, h: 960 },
   { src: '/images/experiences/kraiburg/kraiburg_02.jpg', w: 960, h: 1280 },
   { src: '/images/experiences/kraiburg/kraiburg_03.jpg', w: 960, h: 1280 },

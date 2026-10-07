@@ -176,7 +176,7 @@ export const experiences: ExperienceItem[] = [
     id: 'exp-kraiburg',
     index: '01',
     role: 'Assistant Finance Executive & Intern',
-    organization: 'KRAIBURG TPE Technology (M) Sdn. Bhd.',
+    organization: 'KRAIBURG TPE Technology (M) Sdn Bhd',
     location: 'Kuala Lumpur, Malaysia',
     period: 'Nov 2025 – Present',
     category: 'Corporate Experience',

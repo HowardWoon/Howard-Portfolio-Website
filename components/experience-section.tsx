@@ -12,6 +12,7 @@ import { usePrinting } from '@/lib/use-printing';
 import { useInteractionSelect } from '@/lib/interaction-store';
 import { InteractivePhotoStack } from './interactive-photo-stack';
 import { InstitutionSeal } from './institution-seal';
+import { LocationMap } from './location-map';
 import {
   Building2,
   Landmark,
@@ -47,6 +48,8 @@ interface ExperienceItem {
   metrics: { label: string; value: string }[];
   tags: string[];
   galleryPhotos?: { src: string; alt: string; rotation: number; w: number; h: number }[];
+  /** R38: a VIEW ON MAP key for this organisation (Google Maps search text) */
+  map?: string;
   /** R37: the gallery desk's heading (each card names its own gallery; default "Mentorship gallery") */
   galleryLabel?: string;
   /** R29: the issuing institution's crest, printed as an Issuer Seal in the organisation pill */
@@ -60,7 +63,9 @@ const experiences: ExperienceItem[] = [
     category: 'corporate',
     categoryLabel: 'CORPORATE FINANCE',
     role: 'Assistant Finance Executive & Intern',
-    organization: 'KRAIBURG TPE Technology (M) Sdn. Bhd.',
+    organization: 'KRAIBURG TPE Technology (M) Sdn Bhd',
+    // R38 (owner): VIEW ON MAP opens Google Maps for this place (searched by the owner-supplied full name)
+    map: 'KRAIBURG TPE Technology (M) Sdn Bhd',
     location: 'Kuala Lumpur, Malaysia',
     period: 'Nov 2025 - Present',
     icon: Building2,
@@ -786,15 +791,19 @@ export default function ExperienceSection() {
                               {item.headline}
                             </p>
                           </div>
-                          <div
-                            className={`flex items-center gap-2.5 px-4 py-2.5 rounded-2xl border-3 border-ink shadow-brutal-sm shrink-0 self-start ${a.soft}`}
-                          >
-                            {item.crest ? (
-                              <InstitutionSeal crest={item.crest} size="pill" />
-                            ) : (
-                              <item.icon className="w-5 h-5 text-ink" strokeWidth={2.5} />
-                            )}
-                            <span className="text-sm font-extrabold font-sans text-ink">{item.organization}</span>
+                          {/* R38: the organisation pill, with its VIEW ON MAP key under it when the card has a map */}
+                          <div className="flex shrink-0 flex-col gap-3 self-start">
+                            <div
+                              className={`flex items-center gap-2.5 px-4 py-2.5 rounded-2xl border-3 border-ink shadow-brutal-sm ${a.soft}`}
+                            >
+                              {item.crest ? (
+                                <InstitutionSeal crest={item.crest} size="pill" />
+                              ) : (
+                                <item.icon className="w-5 h-5 text-ink" strokeWidth={2.5} />
+                              )}
+                              <span className="text-sm font-extrabold font-sans text-ink">{item.organization}</span>
+                            </div>
+                            {item.map ? <LocationMap place={item.map} /> : null}
                           </div>
                         </div>
                       </div>
