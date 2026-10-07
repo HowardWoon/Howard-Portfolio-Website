@@ -117,3 +117,133 @@ for (const [w, h] of [
     expect(box.x + box.width).toBeLessThanOrEqual(w);
   });
 }
+
+/* ------------------------------------------------------------ brief v2 (c9416af): items 9 and 10 */
+
+// item 9: the FX-84 paper flip follows the direction of travel (down = the original cut, up = the mirrored cut)
+test('a long jump DOWN uses the original cut, a long jump UP the mirrored one (FX-84 direction)', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await home(page);
+  await expect(page.locator('html[data-fx-desk="on"]')).toHaveCount(1);
+  // records the cut each flip used (installed after load: an init script runs before <html> exists)
+  await page.evaluate(() => {
+    const w = window as unknown as { __jumpLog: string[] };
+    w.__jumpLog = [];
+    new MutationObserver(() => {
+      const c = document.documentElement.classList;
+      if (c.contains('fx-jumping')) w.__jumpLog.push(c.contains('fx-jump-up') ? 'up' : 'down');
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  });
+  const log = () => page.evaluate(() => (window as unknown as { __jumpLog: string[] }).__jumpLog);
+
+  await page.locator('.site-header nav a[href="#contact"]').click();
+  await expect.poll(() => page.evaluate(() => document.activeElement?.id)).toBe('contact');
+  await expect(page.locator('html.fx-jumping')).toHaveCount(0);
+  expect(await log()).toContain('down');
+  expect(await log()).not.toContain('up');
+
+  await page.locator('.site-header nav a[href="#about"]').click();
+  await expect.poll(() => page.evaluate(() => document.activeElement?.id)).toBe('about');
+  await expect(page.locator('html.fx-jumping')).toHaveCount(0);
+  await expect(page.locator('html.fx-jump-up')).toHaveCount(0); // cleaned up with the transition
+  expect((await log()).at(-1)).toBe('up');
+});
+
+async function openDeck(page: Page) {
+  const bar = page.getByRole('group', { name: 'System status' });
+  await bar.scrollIntoViewIfNeeded();
+  const key = bar.getByRole('button', { name: 'CONTROLS' });
+  await key.click();
+  const deck = page.getByRole('dialog', { name: 'Control deck' });
+  await expect(deck).toBeVisible();
+  return { key, deck };
+}
+
+// item 10: one deck for the existing additive modes; Escape closes it (not X-ray); focus returns; reset
+test('control deck: switches the existing modes, Escape closes it and focus returns to CONTROLS', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await home(page);
+  const { key, deck } = await openDeck(page);
+  await expect(page.getByRole('button', { name: 'Close control deck' }).last()).toBeFocused();
+  await expect(key).toHaveAttribute('aria-expanded', 'true');
+
+  const motion = deck.getByRole('switch', { name: 'REDUCE MOTION' });
+  const xray = deck.getByRole('switch', { name: 'X-RAY MODE' });
+  const stamp = deck.getByRole('switch', { name: 'PRESS STAMP' });
+  const reset = deck.getByRole('button', { name: 'RESET TO DEFAULT' });
+  await expect(motion).toHaveAttribute('aria-checked', 'false');
+  await expect(xray).toHaveAttribute('aria-checked', 'false');
+  await expect(stamp).toHaveAttribute('aria-checked', 'true');
+  await expect(reset).toBeDisabled();
+
+  await motion.click();
+  await expect(page.locator('html[data-motion="calm"]')).toHaveCount(1);
+  await xray.click();
+  await expect(page.locator('html[data-xray-mode]')).toHaveCount(1);
+  await stamp.click();
+  await expect(page.locator('html[data-press-stamp="off"]')).toHaveCount(1);
+  await expect(reset).toBeEnabled();
+
+  // Escape closes the deck only: X-ray stays on, focus is back on the CONTROLS key, the page scrolls again
+  await page.keyboard.press('Escape');
+  await expect(deck).toHaveCount(0);
+  await expect(page.locator('html[data-xray-mode]')).toHaveCount(1);
+  await expect(key).toBeFocused();
+  await expect(key).toHaveAttribute('aria-expanded', 'false');
+  const y0 = await page.evaluate(() => scrollY);
+  await page.mouse.wheel(0, 400);
+  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(y0);
+
+  // the reset key brings every mode back to the default page
+  await page.keyboard.press('Escape'); // X-ray off by its own Escape (no deck open)
+  await expect(page.locator('html[data-xray-mode]')).toHaveCount(0);
+  const again = await openDeck(page);
+  await again.deck.getByRole('button', { name: 'RESET TO DEFAULT' }).click();
+  await expect(page.locator('html[data-motion]')).toHaveCount(0);
+  await expect(page.locator('html[data-press-stamp]')).toHaveCount(0);
+  await expect(page.locator('html[data-xray-mode]')).toHaveCount(0);
+  await expect(again.deck.getByRole('button', { name: 'RESET TO DEFAULT' })).toBeDisabled();
+});
+
+test('control deck: with the press stamp off, a click stamps nothing; on again, it stamps', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await home(page);
+  await expect(page.locator('html[data-fx-press="on"]')).toHaveCount(1);
+  const { deck } = await openDeck(page);
+  await deck.getByRole('switch', { name: 'PRESS STAMP' }).click();
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(150);
+  await page.mouse.click(700, 120);
+  await page.waitForTimeout(150);
+  await expect(page.locator('.fx-stamp')).toHaveCount(0);
+  const again = await openDeck(page);
+  await again.deck.getByRole('switch', { name: 'PRESS STAMP' }).click();
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(150);
+  await page.mouse.click(700, 120);
+  await expect(page.locator('.fx-stamp')).not.toHaveCount(0);
+});
+
+// a bottom sheet on phones: inside the screen, large targets, no sideways scroll
+for (const [w, h] of [
+  [280, 653],
+  [390, 664],
+  [750, 342],
+  [768, 1024],
+] as const) {
+  test(`control deck is a whole bottom sheet with large switches at ${w} x ${h}`, async ({ page }) => {
+    await page.setViewportSize({ width: w, height: h });
+    await home(page);
+    const { deck } = await openDeck(page);
+    const box = (await deck.boundingBox())!;
+    expect(box.x).toBeGreaterThanOrEqual(0);
+    expect(box.x + box.width).toBeLessThanOrEqual(w + 0.5);
+    expect(box.y).toBeGreaterThanOrEqual(0);
+    expect(box.y + box.height).toBeLessThanOrEqual(h + 0.5);
+    for (const s of await deck.getByRole('switch').all()) {
+      const b = (await s.boundingBox())!;
+      expect(b.height).toBeGreaterThanOrEqual(44);
+    }
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(w);
+  });
+}

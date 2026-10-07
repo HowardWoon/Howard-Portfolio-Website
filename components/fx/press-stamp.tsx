@@ -40,6 +40,8 @@ export function PressStamp() {
 
     const stamp = (x: number, y: number, touch: boolean) => {
       if (prefersReducedMotion()) return;
+      // R39 Control Deck: the visitor switched the stamp off for this page view (in memory, never stored)
+      if (document.documentElement.dataset.pressStamp === 'off') return;
       const now = performance.now();
       if (now - last < 90) return; // a fast double press stamps once
       last = now;

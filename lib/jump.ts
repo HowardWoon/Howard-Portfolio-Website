@@ -71,6 +71,8 @@ export function jumpTo(target: HTMLElement, source?: HTMLElement | null): void {
   const band = hop
     ? (el.querySelector<HTMLElement>('[id^="project-"]')?.firstElementChild as HTMLElement | null)
     : null;
+  // R39: the cut follows the direction of travel (globals.css `fx-jump-up` mirrors it for a jump up the page)
+  root.classList.toggle('fx-jump-up', el.getBoundingClientRect().top < 0);
   root.classList.add('fx-jumping');
   if (hop && band) hop.style.viewTransitionName = 'fx-proj-hop';
   const vt = (document as VTDocument).startViewTransition!(() => {
@@ -81,7 +83,7 @@ export function jumpTo(target: HTMLElement, source?: HTMLElement | null): void {
     land(el, true);
   });
   vt.finished.finally(() => {
-    root.classList.remove('fx-jumping');
+    root.classList.remove('fx-jumping', 'fx-jump-up');
     if (band) band.style.viewTransitionName = '';
     if (hop) hop.style.viewTransitionName = '';
     focusTarget(el);

@@ -2033,6 +2033,28 @@ html.fx-jumping::view-transition-new(root) {
     clip-path: polygon(0 -12%, 100% 0, 100% 100%, 0 100%);
   }
 }
+/* R39 lecturer brief (direction matches navigation): a jump UP the page is the same cut mirrored - the old view drops
+   down and the destination is revealed from the top edge */
+html.fx-jumping.fx-jump-up::view-transition-old(root) {
+  animation-name: fx-flip-out-up;
+}
+html.fx-jumping.fx-jump-up::view-transition-new(root) {
+  animation-name: fx-flip-in-up;
+}
+@keyframes fx-flip-out-up {
+  to {
+    transform: translateY(6%) scale(0.96);
+    opacity: 0;
+  }
+}
+@keyframes fx-flip-in-up {
+  from {
+    clip-path: polygon(0 0, 100% -12%, 100% 0, 0 0);
+  }
+  to {
+    clip-path: polygon(0 112%, 100% 100%, 100% 0, 0 0);
+  }
+}
 /* a jump moves focus to the section (keyboard / screen readers); sections are landmarks, not controls, so no ring
    (same as #main-content) */
 main section[id][tabindex='-1']:focus {

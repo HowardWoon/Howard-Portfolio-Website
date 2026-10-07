@@ -2,12 +2,24 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Activity, Check, Clock3, Copy, FileText, Moon, ScanLine, Sun, UserRound } from 'lucide-react';
+import {
+  Activity,
+  Check,
+  Clock3,
+  Copy,
+  FileText,
+  Moon,
+  ScanLine,
+  SlidersHorizontal,
+  Sun,
+  UserRound,
+} from 'lucide-react';
 import { personalDetails } from '@/lib/site-data';
 import { openResume } from '@/lib/resume';
 import { flapTo } from '@/lib/split-flap';
 import { useCalm } from '@/lib/motion-pref';
 import { useInteractionSelect } from '@/lib/interaction-store';
+import { ControlDeck } from './control-deck';
 
 /**
  * R22 System Status Bar (lecturer pattern 4 + "quick recommendation"): a hardware-style control strip under the
@@ -148,7 +160,8 @@ function XrayOverlay({ ping, onClose }: { ping: number | null; onClose: () => vo
       if (!cr) cr = requestAnimationFrame(drawCross);
     };
     window.addEventListener('pointermove', onPointer, { passive: true });
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    // R39: an Escape the Control Deck already used (it closes the deck) leaves X-ray on
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && !e.defaultPrevented && onClose();
     window.addEventListener('keydown', onKey);
     return () => {
       delete root.dataset.xrayMode;
@@ -225,6 +238,8 @@ export default function SystemStatusBar() {
   const [pinging, setPinging] = useState(false);
   const [xray, setXray] = useState(false);
   const closeXray = useCallback(() => setXray(false), []);
+  const [deck, setDeck] = useState(false);
+  const closeDeck = useCallback(() => setDeck(false), []);
 
   useEffect(() => {
     // R24: a text write invalidates layout, so the clock writes only when the text really changes and does not tick
@@ -409,8 +424,22 @@ export default function SystemStatusBar() {
             </span>
           </button>
         </div>
+        {/* R39 Control Deck (lecturer brief item 10): one key, full width, so the strict grid above keeps no hole */}
+        <div className="border-t-2 border-dashed border-ink p-2.5">
+          <button
+            type="button"
+            aria-haspopup="dialog"
+            aria-expanded={deck}
+            onClick={() => setDeck(true)}
+            className="nb-key inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border-2 border-ink bg-white px-3 font-mono text-xs font-extrabold tracking-[0.12em] text-ink"
+          >
+            <SlidersHorizontal className="h-4 w-4" strokeWidth={2.75} aria-hidden />
+            CONTROLS
+          </button>
+        </div>
       </div>
       {xray ? <XrayOverlay ping={ping} onClose={closeXray} /> : null}
+      {deck ? <ControlDeck xray={xray} setXray={setXray} onClose={closeDeck} /> : null}
     </div>
   );
 }
