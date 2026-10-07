@@ -396,7 +396,15 @@ nowhere(
 has(
   'R9',
   'R9-09',
-  'Search/palette button visible from 320 px',
+  'Search/palette button visible at every width (R38: it replaces Resume below 320 px)',
+  'components/site-header.tsx',
+  'className="grid place-items-center w-10 h-10',
+  'nb-btn-yellow hidden min-[320px]:inline-flex',
+);
+lacks(
+  'R9',
+  'R9-09b',
+  'The palette key is never hidden on narrow phones',
   'components/site-header.tsx',
   'hidden min-[320px]:grid',
 );

@@ -179,7 +179,7 @@ export function SiteHeader() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="RESUME"
-            className="group nb-resume nb-btn nb-btn-yellow w-10 h-10 p-0 min-[440px]:w-auto min-[440px]:h-auto min-[440px]:px-4 min-[440px]:py-2.5 sm:px-6 sm:py-3 landscape-short:!py-2 fx-specular nb-press"
+            className="group nb-resume nb-btn nb-btn-yellow hidden min-[320px]:inline-flex w-10 h-10 p-0 min-[440px]:w-auto min-[440px]:h-auto min-[440px]:px-4 min-[440px]:py-2.5 sm:px-6 sm:py-3 landscape-short:!py-2 fx-specular nb-press"
           >
             <span className="sr-only min-[440px]:not-sr-only">
               <TextRoll>RESUME</TextRoll>
@@ -191,10 +191,13 @@ export function SiteHeader() {
             />
           </a>
         </Magnetic>
+        {/* R38: below 375 px the Calm switch steps aside (no room: name + three keys need ~430 px), and below 320 px
+            (Galaxy Fold) the Search key REPLACES Resume instead of disappearing: the palette holds every action
+            ("Calm mode", "Download Resume", the sections), so nothing is ever more than two taps away */}
         <MotionToggle className="hidden xs:grid w-10 h-10 md:w-12 md:h-12 landscape-short:!w-10 landscape-short:!h-10" />
         <button
           onClick={askPalette}
-          className="hidden min-[320px]:grid place-items-center w-10 h-10 md:w-12 md:h-12 landscape-short:!w-10 landscape-short:!h-10 rounded-full bg-white border-3 border-ink shadow-brutal-sm hover:bg-pop-lilac hover:-translate-y-0.5 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all text-ink"
+          className="grid place-items-center w-10 h-10 md:w-12 md:h-12 landscape-short:!w-10 landscape-short:!h-10 rounded-full bg-white border-3 border-ink shadow-brutal-sm hover:bg-pop-lilac hover:-translate-y-0.5 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all text-ink"
           aria-label="Open Command Palette"
           data-early-event="open-command-palette"
           title="Search (Ctrl/⌘ + K)"

@@ -146,3 +146,25 @@ test.describe('about pillar cue by keyboard (1440)', () => {
     await expect(other.locator('[data-pillar-cue]')).toHaveCSS('opacity', '1');
   });
 });
+
+/* ---------------------------------------------------------------- F-07 header keeps a way to every action */
+for (const w of [280, 320, 360]) {
+  test.describe(`narrow header @${w}`, () => {
+    test.use({ viewport: { width: w, height: 700 }, isMobile: true, hasTouch: true });
+    test(`the palette key is on screen, >= 40 px, and Calm is two taps away @${w}`, async ({ page }) => {
+      await home(page);
+      const key = page.getByRole('button', { name: 'Open Command Palette' });
+      await expect(key).toBeVisible();
+      const b = (await key.boundingBox())!;
+      expect(b.width).toBeGreaterThanOrEqual(39.5); // w-10 = 40 px (a box can read 39.99998)
+      expect(b.x + b.width).toBeLessThanOrEqual(w + 1);
+      await key.tap();
+      const dialog = page.getByRole('dialog', { name: 'Command Palette' });
+      await expect(dialog).toBeVisible();
+      const html = page.locator('html');
+      const before = await html.getAttribute('data-motion');
+      await dialog.getByRole('option', { name: /Calm mode/ }).tap();
+      await expect.poll(() => html.getAttribute('data-motion')).not.toBe(before);
+    });
+  });
+}
