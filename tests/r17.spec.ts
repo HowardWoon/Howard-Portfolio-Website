@@ -117,9 +117,17 @@ test('gallery: arrow keys browse, and the lightbox preloads its neighbours (FX-1
   await page.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto('/', { waitUntil: 'networkidle' });
+  // R39: networkidle is not hydration. The gallery is a code-split section; on a loaded runner the arrow key arrived
+  // before React owned the button (key presses are not replayed like early taps). Wait for root + this button.
+  await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
   const deck = page.locator('#project-zerolag .fx-deck').first();
   await deck.evaluate((e) => e.scrollIntoView({ block: 'center' }));
-  await deck.getByRole('button', { name: 'Next photo' }).focus();
+  const next = deck.getByRole('button', { name: 'Next photo' });
+  await expect
+    .poll(() => next.evaluate((e) => Object.keys(e).some((k) => k.startsWith('__reactProps$'))), { timeout: 30_000 })
+    .toBe(true);
+  await page.waitForTimeout(300); // let the hydration commit finish before the key press
+  await next.focus();
   await page.keyboard.press('ArrowRight');
   await expect(deck.locator('[aria-live="polite"]')).toContainText('Photo 2 of 11');
   await page.keyboard.press('ArrowLeft');

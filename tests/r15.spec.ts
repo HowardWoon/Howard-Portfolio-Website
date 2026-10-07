@@ -7,7 +7,10 @@ test.beforeEach(async ({ context }) => {
 });
 
 async function home(page: Page) {
-  await page.goto('/', { waitUntil: 'networkidle' }); // hydrated, so key presses reach React
+  await page.goto('/', { waitUntil: 'networkidle' });
+  // R39: networkidle is not hydration - on a loaded runner the torchlight test moved the mouse before React had
+  // attached the hero's pointer handler (failed 3/3 under load, also on fa451ad). Wait like the other suites do.
+  await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
   await page.evaluate(() => (window as unknown as { __lenis?: { stop: () => void } }).__lenis?.stop());
 }
 async function centre(page: Page, selector: string) {

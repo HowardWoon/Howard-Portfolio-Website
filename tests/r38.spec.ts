@@ -157,7 +157,14 @@ for (const w of [280, 320, 360]) {
       await expect(key).toBeVisible();
       const b = (await key.boundingBox())!;
       expect(b.width).toBeGreaterThanOrEqual(39.5); // w-10 = 40 px (a box can read 39.99998)
-      expect(b.x + b.width).toBeLessThanOrEqual(w + 1);
+      // R39: the header keys slide in (x 20 -> 0, 0.6 s); on a loaded runner the first box was read mid-slide (323 px
+      // at 320). The RESTING edge must be on screen, same 1 px limit
+      await expect
+        .poll(async () => {
+          const r = (await key.boundingBox())!;
+          return r.x + r.width;
+        })
+        .toBeLessThanOrEqual(w + 1);
       await key.tap();
       const dialog = page.getByRole('dialog', { name: 'Command Palette' });
       await expect(dialog).toBeVisible();
