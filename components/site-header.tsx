@@ -12,6 +12,48 @@ import { useClockActive } from '@/lib/section-clock';
 import { SpFill } from './fx/sp-fill';
 import type { PaletteWindow } from './command-palette';
 import { openResume } from '@/lib/resume';
+import { flapTo } from '@/lib/split-flap';
+
+/**
+ * R40 N3 Press Counter (owner-approved wording): an impression counter beside the name on wide screens (>= 1536 px).
+ * It counts the sections this visit has reached (IMP 0001 ... 0005) on a split-flap board, and flips only once the page
+ * has stopped scrolling (a flip lays out; lesson 30-E21). Decorative: the same fact is in the footer colophon.
+ */
+function PressCounter() {
+  const active = useClockActive();
+  const ref = useRef<HTMLSpanElement>(null);
+  const seen = useRef(new Set<string>());
+  useEffect(() => {
+    if (!active) return;
+    seen.current.add(active);
+    const text = String(seen.current.size).padStart(4, '0');
+    let t = 0;
+    const flip = () => {
+      window.clearTimeout(t);
+      t = window.setTimeout(() => {
+        if (ref.current) flapTo(ref.current, text);
+      }, 260);
+    };
+    flip();
+    window.addEventListener('scroll', flip, { passive: true });
+    return () => {
+      window.clearTimeout(t);
+      window.removeEventListener('scroll', flip);
+    };
+  }, [active]);
+  return (
+    <span
+      aria-hidden
+      data-press-counter
+      className="hidden 2xl:inline-flex items-center gap-2 rounded-lg border-2 border-ink bg-white px-2 py-1 font-mono text-xs font-extrabold tracking-[0.14em] text-ink shadow-brutal-xs"
+    >
+      IMP
+      <span ref={ref} className="tabular-nums">
+        0000
+      </span>
+    </span>
+  );
+}
 
 const NAV = [
   { id: 'about', label: 'About' },
@@ -115,6 +157,7 @@ export function SiteHeader() {
             SYSTEMS & AI ARCHITECT
           </p>
         </div>
+        {FX.pressCounter ? <PressCounter /> : null}
       </m.div>
 
       <m.div

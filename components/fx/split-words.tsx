@@ -35,13 +35,14 @@ export function SplitWords({ text, delay = 0 }: { text: string; delay?: number }
     <span ref={ref}>
       {words.map((word, i) => (
         <Fragment key={i}>
-          <span className="inline-block overflow-hidden align-bottom pb-[0.1em] -mb-[0.1em]">
+          <span className="inline-block overflow-hidden align-bottom pb-[0.1em] -mb-[0.1em] [perspective:600px]">
             <m.span
               data-fx="word"
               className="inline-block"
-              style={{ '--i': i } as React.CSSProperties} // FX-59 title-wave stagger
               initial={false}
-              animate={{ y: shown ? '0%' : '105%' }}
+              // R40 T1 movable type: a word is cast mirrored (like a metal type sort) and flips readable as it rises
+              animate={{ y: shown ? '0%' : '105%', rotateY: shown ? 0 : FX.movableType ? 180 : 0 }}
+              style={{ '--i': i } as React.CSSProperties} // FX-59 title-wave stagger (the flip's perspective is on the clip box)
               transition={shown ? { duration: 0.7, ease: EASE_SNAP, delay: delay + i * 0.045 } : { duration: 0 }}
             >
               {/* FX-82 draft-to-ink: an inner span so FX-59's hover wave (which animates the word) never resets it */}

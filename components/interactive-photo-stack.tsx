@@ -26,6 +26,7 @@ import { useLatest } from '@/lib/use-latest';
 import { FX, canHover } from '@/lib/fx';
 import { useBooted } from './boot-sequence';
 import { PHOTO_BLUR } from './photo-blur';
+import { logPhoto } from '@/lib/press-run';
 
 /** w / h = the file's real pixel size (R17 F-02): prints and the lightbox take the photo's shape before it loads */
 type Photo = { src: string; alt: string; rotation: number; w: number; h: number };
@@ -123,6 +124,7 @@ function PhotoLightbox({
   useScrollLock();
   useFocusTrap(dialogRef, true);
   const photo = list[index];
+  useEffect(() => logPhoto(photo.src), [photo.src]); // R40 colophon: photos opened this page view
   const ratio = photo.w / photo.h; // R17 P1-05: known size, so the panel never jumps between photos
   const [zoomed, setZoomed] = useState(false);
   const [playing, setPlaying] = useState(false);

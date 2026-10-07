@@ -48,6 +48,8 @@ export function TideCanvas() {
       style={!CLOCK && key ? ({ '--tide': TIDE[key] } as React.CSSProperties) : undefined}
     >
       {CLOCK && FX.atmosphereRelay ? <div className="fx-relay-b" /> : null}
+      {/* R40 P3: the ink roller rides the halftone front of the relay layer (desktop, globals.css) */}
+      {CLOCK && FX.atmosphereRelay ? <div className="fx-roller" /> : null}
     </div>
   );
 }

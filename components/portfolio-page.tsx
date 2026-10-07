@@ -21,12 +21,15 @@ import {
   PointerField,
   EasterEgg,
   SectionClock,
+  PressFx,
+  ProofTray,
 } from '@/components/lazy-sections';
 import { SiteFooter } from '@/components/site-footer';
 import { AfterBoot } from '@/components/after-boot';
 import { LogoWall } from '@/components/logo-wall';
 import dynamic from 'next/dynamic';
 import { RouteWipeClear } from '@/components/fx/route-wipe';
+import { Colophon } from '@/components/press/colophon';
 const VelocitySkew = dynamic(() => import('@/components/fx/velocity-skew').then((mod) => mod.VelocitySkew));
 
 import { BootSequence } from '@/components/boot-sequence';
@@ -97,6 +100,9 @@ export function PortfolioPage() {
           <LogoWall />
           <ContactSection />
         </main>
+        {/* R40 R3: the colophon closes the run, just above the footer (inside the footer it pushed it past the FX-83
+            85 % reveal limit) */}
+        <Colophon />
         {/* FX-83: on large screens the footer is revealed underneath the page (globals.css .fx-foundation) */}
         <div className="fx-foundation">
           <SiteFooter />
@@ -119,6 +125,8 @@ export function PortfolioPage() {
           <AmbientFx />
           <PointerField />
           <EasterEgg />
+          <PressFx />
+          <ProofTray />
         </AfterBoot>
       </div>
     </BootSequence>

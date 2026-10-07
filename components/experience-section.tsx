@@ -13,6 +13,7 @@ import { useInteractionSelect } from '@/lib/interaction-store';
 import { InteractivePhotoStack } from './interactive-photo-stack';
 import { InstitutionSeal } from './institution-seal';
 import { LocationMap } from './location-map';
+import { PinKey } from './press/pin-key';
 import {
   Building2,
   Landmark,
@@ -759,9 +760,14 @@ export default function ExperienceSection() {
                     </button>
                     <span aria-hidden className="w-7 shrink-0" />
                   </div>
-                  <div className="relative group rounded-[30px] border-3 border-ink bg-white shadow-brutal-lg overflow-hidden">
+                  <div
+                    data-crop
+                    className="relative group rounded-[30px] border-3 border-ink bg-white shadow-brutal-lg overflow-hidden"
+                  >
+                    <span aria-hidden className="fx-crop" />
                     {/* Top Bar: Number + Category Tag + Period */}
                     <div
+                      data-plate
                       className={`nb-hatch flex flex-wrap items-center justify-between gap-3 sm:gap-4 px-4 xs:px-6 sm:px-10 py-3 sm:py-4 border-b-3 border-ink ${a.fill}`}
                     >
                       <div className="flex flex-wrap items-center gap-2 xs:gap-3 min-w-0">
@@ -785,6 +791,16 @@ export default function ExperienceSection() {
                           <MapPin className="w-4 h-4 shrink-0 mt-0.5" strokeWidth={2.5} />
                           <span>{item.location}</span>
                         </div>
+                        <PinKey
+                          className="!text-ink"
+                          facts={{
+                            id: `e:${item.id}`,
+                            kind: 'e',
+                            title: `${item.role} · ${item.organization}`,
+                            meta: item.period,
+                            href: '#experience',
+                          }}
+                        />
                       </div>
                     </div>
 

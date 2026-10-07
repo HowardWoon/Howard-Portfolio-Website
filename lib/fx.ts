@@ -119,6 +119,22 @@ export const FX = {
   contactCalm: true, // FX-103 the page comes to rest in Contact (slower marquee, no scan)
   documentSettle: true, // FX-104 the certificate sheet lands and leaves with the stamp spring
   headerInstrument: true, // FX-105 sliding section marker + progress fill + label roll in the header nav
+  // R40 "Press Run" (docs/R40-PRESS-RUN-UIUX-PLAN.md): the portfolio prints itself
+  halftoneTide: true, // P1 the next section's desk colour is screened on as growing halftone dots (desktop)
+  plateRegistration: true, // P2 card colour bars land out of register and snap in; lag with scroll speed (desktop)
+  inkRoller: true, // P3 an ink roller rides the halftone front between sections (desktop)
+  feedMarks: true, // P4 printer's feed ticks + section numbers in the left margin (>= 1536 px)
+  movableType: true, // T1 section-title words are cast mirrored and flip readable as they rise
+  odometer: true, // T2 stat numbers roll in on mechanical digit wheels
+  kerningBreath: true, // T3 a focused key / chip label squeezes and springs back (keyboard focus)
+  cropMarks: true, // C1 printer's crop marks + a registration target on the inspected card
+  paperWeight: true, // C2 pressing a card pushes it into the desk
+  pressLever: true, // N1 the section rail's lever scrubs the page like a video timeline (>= 1400 px)
+  sheetFeed: true, // N2 portfolio <-> simulator: the page is fed out of the press in pulls
+  pressCounter: true, // N3 "IMP 000n" impression counter beside the header subtitle (>= 1536 px)
+  proofTray: true, // R1 + R2 pin cards to a shareable tray, compare two projects on a spec sheet
+  colophon: true, // R3 the footer reports this run (sections, projects, photos, pins)
+  registrationCursor: true, // K the cursor becomes a printer's registration tool (target, snap, trail, caret)
 } as const;
 
 export type FxName = keyof typeof FX;

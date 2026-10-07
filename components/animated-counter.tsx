@@ -2,6 +2,9 @@
 
 import { useInView, useSpring } from 'framer-motion';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { FX } from '@/lib/fx';
+
+const DIGITS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
 interface AnimatedCounterProps {
   value: string;
@@ -31,7 +34,14 @@ function parse(value: string) {
  *   still off-screen are reset to 0 so the count-up starts cleanly; counters already on screen at
  *   load simply keep their value (no animation, no flicker).
  */
+/*
+ * R40 T2 Odometer: with FX.odometer the count-up is a row of mechanical digit wheels. Each digit is a 0-9 column that
+ * turns to its value (transform only: one transition, no text written per frame - the old spring rewrote the text,
+ * i.e. laid out, on every frame); the decimal point and the rest stand still. The final digit holds each wheel's
+ * width, so the number never shifts. Screen readers read the real value once. When it has stopped, plain text again.
+ */
 export function AnimatedCounter({ value, className = '' }: AnimatedCounterProps) {
+  const [roll, setRoll] = useState<'off' | 'armed' | 'run'>('off');
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true, margin: '-50px' });
   const [displayValue, setDisplayValue] = useState(value);
@@ -46,12 +56,31 @@ export function AnimatedCounter({ value, className = '' }: AnimatedCounterProps)
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const r = el.getBoundingClientRect();
     const onScreen = r.top < window.innerHeight && r.bottom > 0;
-    if (!onScreen) {
-      shouldAnimate.current = true;
-      setDisplayValue(`${match.prefix}0${match.suffix}`);
+    // R40: a counter that mounts on screen LATE (an honours category the visitor opened) rolls too; one already on
+    // screen at page load keeps its value (no flicker)
+    const late = FX.odometer && performance.now() > 5000 && document.documentElement.dataset.motion !== 'calm';
+    if (!onScreen || late) {
+      if (FX.odometer && document.documentElement.dataset.motion !== 'calm') setRoll('armed');
+      else {
+        shouldAnimate.current = true;
+        setDisplayValue(`${match.prefix}0${match.suffix}`);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
+
+  // R40 odometer: its own effects on [roll, isInView], so it never races the in-view check (a stat already in view
+  // when the effects first ran used to take the spring path and leave the wheels armed)
+  useEffect(() => {
+    if (roll !== 'armed' || !isInView) return;
+    const raf = requestAnimationFrame(() => setRoll('run'));
+    return () => cancelAnimationFrame(raf);
+  }, [roll, isInView]);
+  useEffect(() => {
+    if (roll !== 'run') return;
+    const done = window.setTimeout(() => setRoll('off'), 1700);
+    return () => window.clearTimeout(done);
+  }, [roll]);
 
   useEffect(() => {
     if (!isInView || !shouldAnimate.current || !match) return;
@@ -72,6 +101,38 @@ export function AnimatedCounter({ value, className = '' }: AnimatedCounterProps)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isInView, value, spring]);
 
+  if (roll !== 'off' && match) {
+    const chars = [...match.numStr];
+    return (
+      <span ref={ref} className={className} data-odometer={roll}>
+        <span className="sr-only">{value}</span>
+        <span aria-hidden>
+          {match.prefix}
+          {chars.map((ch, i) =>
+            /d/.test(ch) ? (
+              <span key={i} className="fx-odo">
+                <span className="fx-odo-ph">{ch}</span>
+                <span
+                  className="fx-odo-col"
+                  style={{
+                    transform: roll === 'run' ? `translateY(-${Number(ch) * 10}%)` : 'translateY(0)',
+                    transitionDelay: `${(chars.length - 1 - i) * 110}ms`,
+                  }}
+                >
+                  {DIGITS.map((d) => (
+                    <span key={d}>{d}</span>
+                  ))}
+                </span>
+              </span>
+            ) : (
+              <span key={i}>{ch}</span>
+            ),
+          )}
+          {match.suffix}
+        </span>
+      </span>
+    );
+  }
   return (
     <span ref={ref} className={className}>
       {displayValue}

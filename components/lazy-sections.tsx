@@ -67,6 +67,14 @@ export const EasterEgg = dynamic(() => import('@/components/fx/easter-egg').then
   ssr: false,
 });
 
+// R40 Press Run: plates, feed marks, touch inspect, run log + the Proof Tray (client-only, after the boot gate)
+export const PressFx = dynamic(() => import('@/components/press/press-fx').then((mod) => mod.PressFx), {
+  ssr: false,
+});
+export const ProofTray = dynamic(() => import('@/components/press/proof-tray').then((mod) => mod.ProofTray), {
+  ssr: false,
+});
+
 // R18 FX-95: the Section Clock engine (client-only, after first paint)
 export const SectionClock = dynamic(() => import('@/components/fx/section-clock').then((mod) => mod.SectionClock), {
   ssr: false,

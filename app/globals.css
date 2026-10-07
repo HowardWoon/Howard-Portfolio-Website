@@ -1641,6 +1641,10 @@ html:not(.fx-off-arenaPinboard) :where(.fx-seal:nth-child(even)) {
   .fx-stamp,
   .boot-overlay,
   .fx-cursor,
+  .fx-cursor-trail,
+  .fx-cursor-tag,
+  [data-proof-tray],
+  .fx-feed-marks,
   .bp-scan,
   canvas,
   button[aria-label='Scroll to top'],
@@ -4598,4 +4602,302 @@ a:focus-visible > .px-card > span {
   .hero-fit .hero-title {
     font-size: max(2.6rem, min(5.6rem, calc((100svh - var(--header-h) - 24.5rem) / 3.9)));
   }
+}
+
+/* ================================================================ R40 "Press Run" (docs/R40-PRESS-RUN-UIUX-PLAN.md)
+   The portfolio prints itself. Theme tokens only (ink, paper, SIGNAL by meaning, interactive blue for controls);
+   transform / opacity / mask / translate only; every effect is final for reduced motion and Calm (the global rules
+   above stop animations and transitions; the rules below also switch the scroll-linked parts off). */
+
+@property --reg {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+
+/* P1 Halftone Ink Tide (desktop): the relay layer's leading third is screened - hard dots that grow with the hand-over
+   (--relay) until they merge into the flat desk colour at the end. One mask on the one relay layer. */
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+  html:not([data-fx-tier='lite']):not([data-motion='calm']):not(.fx-off-halftoneTide) .fx-relay-b {
+    --dot: calc(2px + var(--relay, 0) * 7px);
+    -webkit-mask-image:
+      linear-gradient(to bottom, transparent 0, transparent 8%, #000 34%),
+      radial-gradient(circle at center, #000 var(--dot), transparent calc(var(--dot) + 0.6px));
+    -webkit-mask-size:
+      100% 100%,
+      12px 12px;
+    -webkit-mask-composite: source-over;
+    mask-image:
+      linear-gradient(to bottom, transparent 0, transparent 8%, #000 34%),
+      radial-gradient(circle at center, #000 var(--dot), transparent calc(var(--dot) + 0.6px));
+    mask-size:
+      100% 100%,
+      12px 12px;
+    mask-composite: add;
+  }
+}
+
+/* P3 Ink Roller (desktop): a knurled ink cylinder rides the leading edge of the relay layer (same box, same transform,
+   so it follows the diagonal seam with zero JS) and is only there while a hand-over is in progress */
+.fx-roller {
+  display: none;
+}
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+  html[data-fx-clock='on']:not([data-fx-tier='lite']):not([data-motion='calm']):not(.fx-off-inkRoller) .fx-roller {
+    display: block;
+    position: absolute;
+    inset: -14% -6% 0;
+    z-index: 2;
+    pointer-events: none;
+    background:
+      repeating-linear-gradient(90deg, rgb(255 255 255 / 0.28) 0 2px, transparent 2px 16px) 0 0 / 100% 14px no-repeat,
+      linear-gradient(#0a0a0a, #0a0a0a) 0 0 / 100% 14px no-repeat,
+      linear-gradient(#0a0a0a, #0a0a0a) 0 19px / 100% 3px no-repeat;
+    transform: translate3d(0, calc((1 - var(--relay, 0)) * 118%), 0) skewY(-5deg);
+    opacity: min(1, calc(var(--relay, 0) * 30), calc((1 - var(--relay, 0)) * 30));
+    will-change: transform, opacity;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fx-roller {
+    display: none !important;
+  }
+}
+
+/* P2 Plate Registration: the card's colour bar is the colour plate. It lands out of register once (.fx-plate-in) and,
+   on desktop, lags with the scroll speed (--reg, written by components/press/press-fx.tsx on the visible plates) */
+html:not(.fx-off-plateRegistration) [data-plate] {
+  translate: calc(var(--reg) * 1px) 0;
+}
+html:not(.fx-off-plateRegistration) [data-plate].fx-plate-in {
+  animation: fx-plate-in 340ms var(--ease-snap) both;
+}
+@keyframes fx-plate-in {
+  from {
+    translate: 6px -3px;
+  }
+  60% {
+    translate: -1px 0;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+html[data-motion='calm'] [data-plate] {
+  translate: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-plate] {
+    translate: none;
+  }
+}
+
+/* C1 Crop Marks: hover (mouse / pen), keyboard focus inside, or a tap (data-inspect) prints crop marks in the card's
+   corners and a registration target on its top edge. Ink only, drawn by one element (.fx-crop) per card. */
+.fx-crop {
+  position: absolute;
+  inset: 12px;
+  z-index: 30;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(1.035);
+  transition:
+    opacity var(--dur-stamp) var(--ease-snap),
+    transform var(--dur-stamp) var(--ease-snap);
+  background:
+    linear-gradient(#0a0a0a, #0a0a0a) left top / 20px 3px no-repeat,
+    linear-gradient(#0a0a0a, #0a0a0a) left top / 3px 20px no-repeat,
+    linear-gradient(#0a0a0a, #0a0a0a) right top / 20px 3px no-repeat,
+    linear-gradient(#0a0a0a, #0a0a0a) right top / 3px 20px no-repeat,
+    linear-gradient(#0a0a0a, #0a0a0a) left bottom / 20px 3px no-repeat,
+    linear-gradient(#0a0a0a, #0a0a0a) left bottom / 3px 20px no-repeat,
+    linear-gradient(#0a0a0a, #0a0a0a) right bottom / 20px 3px no-repeat,
+    linear-gradient(#0a0a0a, #0a0a0a) right bottom / 3px 20px no-repeat;
+}
+.fx-crop::after {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin-left: -10px;
+  border: 3px solid #0a0a0a;
+  border-radius: 50%;
+  background:
+    linear-gradient(#0a0a0a, #0a0a0a) center / 3px 100% no-repeat,
+    linear-gradient(#0a0a0a, #0a0a0a) center / 100% 3px no-repeat,
+    #ffffff;
+}
+@media (hover: hover) and (pointer: fine) {
+  html:not(.fx-off-cropMarks) [data-crop]:hover > .fx-crop {
+    opacity: 1;
+    transform: none;
+  }
+}
+html:not(.fx-off-cropMarks) [data-crop]:focus-within > .fx-crop,
+html:not(.fx-off-cropMarks) [data-crop][data-inspect] > .fx-crop {
+  opacity: 1;
+  transform: none;
+}
+@media print {
+  .fx-crop {
+    display: none;
+  }
+}
+
+/* C2 Paper Weight: pressing a card pushes it into the desk. It uses `scale` (its own property): the project cards'
+   scroll reveal (fx-hero-in) owns `translate`, and an animation beats a declaration */
+@media (hover: hover) and (pointer: fine) {
+  html:not([data-motion='calm']):not(.fx-off-paperWeight) [data-crop]:active {
+    scale: 0.992;
+  }
+}
+
+/* P4 Feed Marks (>= 1536 px): printer's feed ticks in the empty left margin, one numbered strip per section, placed in
+   document coordinates (components/press/press-fx.tsx), so they scroll natively */
+.fx-feed-marks {
+  display: none;
+}
+@media (min-width: 1536px) {
+  html:not(.fx-off-feedMarks) .fx-feed-marks {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0;
+    z-index: 5;
+    pointer-events: none;
+  }
+}
+.fx-feed {
+  position: absolute;
+  left: max(16px, var(--safe-left));
+  width: 28px;
+  border-top: 3px solid #0a0a0a;
+  background:
+    repeating-linear-gradient(to bottom, #0a0a0a 0 3px, transparent 3px 120px) left 0 / 28px 100% no-repeat,
+    repeating-linear-gradient(to bottom, rgb(10 10 10 / 0.4) 0 2px, transparent 2px 24px) left 0 / 12px 100% no-repeat;
+}
+.fx-feed-n {
+  position: absolute;
+  top: 10px;
+  left: 0;
+  padding: 1px 4px;
+  border: 2px solid #0a0a0a;
+  border-radius: 4px;
+  background: #ffffff;
+}
+
+/* T2 Odometer: digit wheels (components/animated-counter.tsx). clip-path clips the wheel without moving the baseline
+   (overflow: hidden on an inline-block would) */
+.fx-odo {
+  position: relative;
+  display: inline-block;
+  clip-path: inset(0 -0.1em);
+}
+.fx-odo-ph {
+  visibility: hidden;
+}
+.fx-odo-col {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 1.15s var(--ease-snap);
+}
+.fx-odo-col > span {
+  display: block;
+}
+
+/* T3 Kerning Breath: a key or chip that receives keyboard focus squeezes its label and springs back (scale, so the
+   row never re-lays out) */
+html:not(.fx-off-kerningBreath) :is(.nb-chip, .nb-key, .nb-tag, .nb-btn):focus-visible {
+  animation: fx-breath 300ms var(--ease-snap);
+}
+@keyframes fx-breath {
+  35% {
+    scale: 0.95 1;
+  }
+}
+
+/* N2 Sheet Feed: portfolio <-> simulator, the old sheet is pulled out of the press in two feed pulls and the new one is
+   fed in the same way (the FX-85 simulator-screen morph keeps running on top) */
+html.fx-portal:not(.fx-off-sheetFeed)::view-transition-old(root) {
+  animation: fx-feed-out 460ms both;
+}
+html.fx-portal:not(.fx-off-sheetFeed)::view-transition-new(root) {
+  animation: fx-feed-in 520ms 90ms both;
+}
+@keyframes fx-feed-out {
+  0% {
+    transform: none;
+    animation-timing-function: var(--ease-soft);
+  }
+  30% {
+    transform: translateY(-16%);
+  }
+  42% {
+    transform: translateY(-16%);
+    animation-timing-function: var(--ease-soft);
+  }
+  100% {
+    transform: translateY(-104%);
+  }
+}
+@keyframes fx-feed-in {
+  0% {
+    transform: translateY(104%);
+    animation-timing-function: var(--ease-soft);
+  }
+  55% {
+    transform: translateY(18%);
+  }
+  66% {
+    transform: translateY(18%);
+    animation-timing-function: var(--ease-soft);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+/* N1 Press Lever (components/section-spine.tsx): the blue playhead is the page position; drag the rail to scrub */
+.fx-lever-track {
+  position: absolute;
+  left: 5px;
+  right: 5px;
+  top: 20px;
+  bottom: 20px;
+  pointer-events: none;
+}
+.fx-lever-head {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -4px;
+  height: 8px;
+  border: 2px solid #0a0a0a;
+  border-radius: 3px;
+  background: var(--pop-blue);
+  will-change: transform;
+}
+.fx-lever-flag {
+  position: absolute;
+  right: calc(100% + 16px);
+  top: 50%;
+  translate: 0 -50%;
+  white-space: nowrap;
+  padding: 4px 8px;
+  border: 2px solid #0a0a0a;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #0a0a0a;
+  box-shadow: 2px 2px 0 0 #0a0a0a;
+}
+nav[data-scrubbing] {
+  cursor: grabbing;
 }

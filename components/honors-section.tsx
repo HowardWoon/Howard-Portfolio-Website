@@ -14,6 +14,7 @@ import { CertificateDeck, type DeckCert } from './certificate-deck';
 import { AnimatedCounter } from './animated-counter';
 import { InstitutionSeal } from './institution-seal';
 import { HonorsTally } from './honors-tally';
+import { PinKey } from './press/pin-key';
 import { ResultsBoard, RolesGrid, Transcript } from './honors-academic';
 import { AmbientOrbits } from './fx/ambient-orbits';
 import { useFocusTrap } from '@/lib/use-focus-trap';
@@ -619,6 +620,7 @@ export default function HonorsSection() {
                   return (
                     <m.div
                       key={item.id}
+                      data-crop
                       data-honor-projects={linked}
                       data-trail-hit={hit ? '' : undefined}
                       initial={{ opacity: 0, scale: 0.95 }}
@@ -630,8 +632,10 @@ export default function HonorsSection() {
                           : 'shadow-brutal hover:shadow-brutal-lg'
                       } ${hit ? 'fx-trail-hit' : ''}`}
                     >
+                      <span aria-hidden className="fx-crop" />
                       {/* Top Bar */}
                       <div
+                        data-plate
                         className={`nb-hatch flex flex-wrap items-center justify-between gap-3 px-6 py-3.5 border-b-3 border-ink ${isFeatured ? c.fill : c.soft}`}
                       >
                         <div className="inline-flex min-w-0 flex-wrap items-center gap-2 text-xs font-mono font-extrabold tracking-[0.06em] uppercase text-ink">
@@ -646,6 +650,16 @@ export default function HonorsSection() {
                         <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-ink">
                           <Calendar className="w-3.5 h-3.5" strokeWidth={2.5} />
                           <span>{item.period}</span>
+                          <PinKey
+                            className="ml-1"
+                            facts={{
+                              id: `h:${item.id}`,
+                              kind: 'h',
+                              title: item.title,
+                              meta: `${item.badge} · ${item.period}`,
+                              href: '#honors',
+                            }}
+                          />
                         </div>
                       </div>
 

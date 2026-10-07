@@ -17,6 +17,8 @@ import { useBooted } from './boot-sequence';
 import { AmbientOrbits } from './fx/ambient-orbits';
 import { InteractivePhotoStack } from './interactive-photo-stack';
 import { BlueprintStage, BP_LAYERS } from './blueprint-stage';
+import { PinKey } from './press/pin-key';
+import type { PinFacts } from '@/lib/press-run';
 import {
   Award,
   ExternalLink,
@@ -421,6 +423,24 @@ function ProjectCard({ project, index }: { project: ProjectData; index: number }
   const trailKey = useInteractionSelect((s) => s.trail?.key ?? null);
   const skillKeys = project.tags.map(skillKey).join(' ');
   const a = SIGNAL[project.signal];
+  // R40 R1 / R2: the facts this card already prints, for the Proof Tray and the Spec-Sheet Compare
+  const pin = React.useMemo<PinFacts>(
+    () => ({
+      id: `p:${project.simulatorId}`,
+      kind: 'p',
+      title: project.title,
+      meta: `${SIGNAL[project.signal].label} · ${project.badge}`,
+      href: `#project-${project.simulatorId}`,
+      spec: [
+        { label: 'SIGNAL', value: SIGNAL[project.signal].label },
+        { label: 'PLACEMENT', value: project.badge },
+        { label: 'BRIEF', value: project.subtitle },
+        ...project.metrics.map((mt) => ({ label: mt.label.toUpperCase(), value: mt.value })),
+        { label: 'STACK', value: project.tags.join(', ') },
+      ],
+    }),
+    [project],
+  );
   const isGallery =
     project.telemetryType === 'agentic' ||
     project.telemetryType === 'catfish' ||
@@ -442,10 +462,13 @@ function ProjectCard({ project, index }: { project: ProjectData; index: number }
         <TiltCard maxTilt={blueprint ? 0 : 2.5}>
           <div
             id={`project-${project.simulatorId}`}
+            data-crop
             className="fx-rise-card relative w-full rounded-[32px] border-3 border-ink bg-white shadow-brutal-lg transition-shadow duration-300 group-hover:shadow-brutal-xl overflow-hidden scroll-mt-[calc(var(--header-h,5rem)+1.5rem)]"
           >
+            <span aria-hidden className="fx-crop" />
             {/* R21 spec bar: the strip colour is the project's SIGNAL (podium / qualifier / academic), and says so */}
             <div
+              data-plate
               className={`nb-hatch flex flex-wrap items-center justify-between gap-3 px-4 xs:px-6 sm:px-10 py-3 border-b-3 border-ink max-w-full ${a.fill}`}
             >
               <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
@@ -487,6 +510,7 @@ function ProjectCard({ project, index }: { project: ProjectData; index: number }
                     <Focus className="w-4 h-4" strokeWidth={2.75} aria-hidden />
                   </button>
                 ) : null}
+                <PinKey facts={pin} />
                 <span className="font-mono text-xs font-extrabold tracking-[0.12em] text-ink">
                   {project.number} / {String(projects.length).padStart(2, '0')}
                 </span>
