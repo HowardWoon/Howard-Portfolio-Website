@@ -247,12 +247,24 @@ test.describe('press stamp everywhere (desktop 1440x900)', () => {
     const btn = page.locator('#projects button[aria-label="Next photo"]').first();
     await btn.evaluate((e) => e.scrollIntoView({ block: 'center' }));
     await btn.focus();
+    // the button's box at the moment of activation (Enter cycles the gallery, so it may move right after)
+    await page.evaluate(() => {
+      const w = window as unknown as { __at?: { x: number; y: number } };
+      window.addEventListener(
+        'click',
+        (e) => {
+          const r = (e.target as Element).closest('button')!.getBoundingClientRect();
+          w.__at = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+        },
+        { capture: true, once: true },
+      );
+    });
     await page.keyboard.press('Enter');
     await expect.poll(() => stamps(page).then((s) => s.length)).toBe(1);
-    const b = (await btn.boundingBox())!;
+    const at = (await page.evaluate(() => (window as unknown as { __at?: { x: number; y: number } }).__at))!;
     const s = (await stamps(page))[0];
-    expect(Math.abs(s.x - (b.x + b.width / 2))).toBeLessThanOrEqual(1);
-    expect(Math.abs(s.y - (b.y + b.height / 2))).toBeLessThanOrEqual(1);
+    expect(Math.abs(s.x - at.x)).toBeLessThanOrEqual(1);
+    expect(Math.abs(s.y - at.y)).toBeLessThanOrEqual(1);
   });
 
   test('live from the first click: the boot gate and a simulator page stamp too', async ({ page }) => {
