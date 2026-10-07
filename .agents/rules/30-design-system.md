@@ -115,6 +115,11 @@ Rules:
     server). If a push is blocked, rerun the failed tests alone on a fresh build before calling them regressions.
 25. A page-wide effect that reacts to presses listens on `window` in the CAPTURE phase: a `document` bubble listener
     is silently swallowed by any component that calls `stopPropagation()` (R37 press stamp was "sometimes no").
+26. Aim a programmatic scroll at the target's LAYOUT position (`offsetTop` chain minus its `scroll-margin-top`), never
+    at its box on screen: a target still inside a scroll-driven reveal is drawn 85-160 px lower, so Lenis /
+    `scrollIntoView(el)` land short and the card then slides up under the header (R37 `lib/skills.ts` scrollToEvidence).
+27. A translucent or blurred fixed header lets dark content ghost through it (R37 owner screenshot): the header is solid
+    `bg-white` on every device; guarded by validate-plans B-03b and r36 "the header is solid".
 
 ## F. Definition of done additions
 
@@ -214,8 +219,17 @@ rule - layers:
 | Press stamp | `components/fx/press-stamp.tsx` (root layout)       | EVERY press stamps: mouse / pen on the press anywhere, touch on a real tap only (10 px / 600 ms, no pointercancel), Enter / Space at the control's centre; never in a text field or on the scrollbar; window capture listeners; z 100000; off for Calm / reduced motion |
 | Cursor tag  | `components/custom-cursor.tsx`, any `[data-cursor]` | A solid printed tag below-right of the pointer (paper, 3 px ink, hard ink shadow, blue icon chip, the area's own word); swings with mouse speed, presses flat on click; never blended or translucent; mouse / pen only                                                  |
 
-Guards: tests/r36.spec.ts ("press stamp everywhere", "cursor tag", plus every Command Palette command on desktop and a
-touch phone).
+R37 lecturer plan "Role-to-Proof Circuit" (phase 1), same rule - a layer on the existing Evidence Trail:
+
+| Feature               | Where                                                              | Rules                                                                                                                                                                                                                                                                                                 |
+| --------------------- | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Role-to-Proof Circuit | `components/role-proof.tsx`, `lib/skills.ts` scrollToEvidence, HUD | A role's proof card has an icon-only Trace key ("Trace <role>"); it starts the EXISTING trail over that role's proof items only (projects + the Experience card a line names, `exp:<id>`); the one HUD steps / clears it; no auto-play, no second toolbar; stops aimed at layout position (lesson 26) |
+
+Guards: tests/r36.spec.ts ("press stamp everywhere", "cursor tag", "role-to-proof circuit", "the header is solid",
+gallery counter and KRAIBURG gallery, plus every Command Palette command on desktop and a touch phone).
+Not done from the lecturer plans (owner approval or rule conflict): shareable route URLs (later slice, must not clash
+with `?photo=` / `?bp=`); honours stops (no proof line names an honour yet); glow / blur / soft gradient / light-ray /
+particle effects (AGENTS.md law 5).
 
 ## H. R24 guardrails - type floor, emblem geometry, torchlight, neo-brutalism only (owner complaints, tested)
 
