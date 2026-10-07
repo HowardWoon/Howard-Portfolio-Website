@@ -775,11 +775,15 @@ export function InteractivePhotoStack({
                           )}
                         </div>
                         {isTop && (
-                          // counter on the print's white lip (it used to sit on the photo itself on phones)
+                          // counter on the print's white lip (it used to sit on the photo itself on phones). R37: a box
+                          // exactly as tall as the lip (pb-7 / sm:pb-8) centres it, so it never crosses the photo's border
                           <span
                             aria-hidden
-                            className="absolute left-2.5 sm:left-3 bottom-1 sm:bottom-1.5 px-1.5 py-0.5 rounded-md border-2 border-ink bg-white font-mono text-xs font-extrabold tracking-[0.08em] text-ink select-none pointer-events-none"
-                          >{`${String(top + 1).padStart(2, '0')} / ${String(n).padStart(2, '0')}`}</span>
+                            data-print-counter
+                            className="absolute inset-x-0 bottom-0 h-7 sm:h-8 flex items-center pl-2.5 sm:pl-3 select-none pointer-events-none"
+                          >
+                            <span className="px-1.5 py-0.5 rounded-md border-2 border-ink bg-white font-mono text-xs font-extrabold leading-none tracking-[0.08em] text-ink">{`${String(top + 1).padStart(2, '0')} / ${String(n).padStart(2, '0')}`}</span>
+                          </span>
                         )}
                       </m.div>
                     );

@@ -468,3 +468,40 @@ for (const [w, h] of [
     expect(s.op).toBe('1');
   });
 }
+
+// R37 (owner, item 7): the gallery counter ("01 / 06") sat across the photo's bottom border; it is centred in the
+// print's white lip on every gallery, at phone, tablet and desktop widths.
+for (const [w, h] of [
+  [390, 844],
+  [768, 1024],
+  [1440, 900],
+] as const) {
+  test(`every gallery counter sits centred in its print's white lip, clear of the photo @${w}x${h}`, async ({
+    page,
+  }) => {
+    test.setTimeout(90_000);
+    await page.setViewportSize({ width: w, height: h });
+    await home(page);
+    const n = await page.locator('[data-print-counter]').count();
+    expect(n).toBeGreaterThanOrEqual(5); // project + experience galleries
+    for (let i = 0; i < n; i++) {
+      const c = page.locator('[data-print-counter]').nth(i);
+      await c.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+      await page.waitForTimeout(500); // the print settles (its entrance and tilt springs)
+      const r = await c.evaluate((lip) => {
+        // measure in the print's own (unrotated) layout box: offsets, not the tilted bounding box
+        const chip = lip.firstElementChild as HTMLElement;
+        const print = lip.parentElement as HTMLElement;
+        const photo = print.querySelector<HTMLElement>(':scope > div')!;
+        const photoBottom = photo.offsetTop + photo.offsetHeight;
+        const chipTop = (lip as HTMLElement).offsetTop + chip.offsetTop;
+        const chipBottom = chipTop + chip.offsetHeight;
+        const inner = print.clientHeight; // inside the print's border
+        return { photoBottom, chipTop, chipBottom, inner, gap: chipTop - photoBottom, below: inner - chipBottom };
+      });
+      expect(r.chipTop, `counter ${i} clear of the photo`).toBeGreaterThanOrEqual(r.photoBottom);
+      expect(r.chipBottom, `counter ${i} inside the print`).toBeLessThanOrEqual(r.inner);
+      expect(Math.abs(r.gap - r.below), `counter ${i} centred in the lip`).toBeLessThanOrEqual(1.5);
+    }
+  });
+}
