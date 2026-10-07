@@ -54,8 +54,19 @@ export function RoleProof({ roles, fillFor }: { roles: string[]; fillFor: (role:
   const proof = shown ? PROOF[shown] : undefined;
 
   return (
-    // R37: the mouse may travel from a role chip into its proof card (to the Trace key) without the card closing
-    <div className="space-y-3" onMouseLeave={() => setHover(null)}>
+    // R37: the mouse may travel from a role chip into its proof card (to the Trace key) without the card closing.
+    // R38: keyboard too - the card closes only when focus leaves the whole widget (it used to close on the chip's
+    // blur, so Tab from a chip dropped focus to <body> and the Trace key / proof links were unreachable); the mouse
+    // leaving does not close a card that holds the keyboard focus
+    <div
+      className="space-y-3"
+      onMouseLeave={(e) => {
+        if (!e.currentTarget.contains(document.activeElement)) setHover(null);
+      }}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setHover(null);
+      }}
+    >
       <div className="flex flex-wrap gap-2">
         {roles.map((role) => {
           const on = shown === role;
@@ -67,7 +78,6 @@ export function RoleProof({ roles, fillFor }: { roles: string[]; fillFor: (role:
               aria-controls="role-proof"
               onMouseEnter={() => setHover(role)}
               onFocus={() => setHover(role)}
-              onBlur={() => setHover(null)}
               onClick={() => setPinned((p) => (p === role ? null : role))}
               className={`nb-chip min-h-[40px] cursor-pointer transition-[transform,box-shadow] duration-150 hover:-translate-y-0.5 hover:shadow-brutal-xs ${
                 on ? '-translate-y-0.5 shadow-brutal-xs' : ''

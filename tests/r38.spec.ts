@@ -77,3 +77,40 @@ for (const [name, size, touch] of [
     });
   });
 }
+
+/* ---------------------------------------------------------------- F-05 Trace key reachable by keyboard */
+test.describe('role proof by keyboard (1440x900)', () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
+  // keyboard path: focus the LAST role chip (its card shows without pinning), Tab moves INTO the card
+  test('Tab from a role chip goes into its card: Trace key, then the proof links; Enter starts the trail', async ({
+    page,
+  }) => {
+    await home(page);
+    const last = page.locator('#contact').getByRole('button', { name: 'Fiscal Governance', exact: true });
+    await last.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+    await last.focus();
+    // Fiscal Governance is the LAST role chip, so the next Tab goes into its proof card
+    await page.keyboard.press('Tab');
+    const a = await page.evaluate(() => document.activeElement?.getAttribute('aria-label'));
+    expect(a).toBe('Trace Fiscal Governance');
+    await page.keyboard.press('Tab');
+    expect(await page.evaluate(() => document.activeElement?.tagName)).toBe('A'); // the first proof link
+    // Enter on the Trace key starts the trail
+    await page.keyboard.press('Shift+Tab');
+    expect(await page.evaluate(() => document.activeElement?.getAttribute('aria-label'))).toBe(
+      'Trace Fiscal Governance',
+    );
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('region', { name: 'Evidence trail for Fiscal Governance' })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await last.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+    await last.focus();
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Tab');
+    // leaving the widget closes the (unpinned) card again
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('button', { name: 'Trace Fiscal Governance' })).toHaveCount(0);
+  });
+});
