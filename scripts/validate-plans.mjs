@@ -437,7 +437,15 @@ has(
   ':not(.fx-off-letterpress)',
   ':not(.fx-off-shadowFollow)',
 );
-has('R9', 'D3', 'Lighter boot canvas on phones', 'components/fx/boot-shatter.ts', 'small ? 1.5 : 2', 'small ? 52 : 54');
+// R41: the canvas shatter (780 tiles re-drawn per frame on the main thread) became GPU slabs - fewer on phones
+has(
+  'R9',
+  'D3',
+  'Lighter boot shatter: compositor slabs, fewer on phones',
+  'components/fx/boot-shatter.ts',
+  'small ? 3 : 6',
+  'slab.animate(',
+);
 has('R9', 'D5', 'Off-screen pause for infinite animations', 'components/fx/offscreen-pause.tsx', 'data-offscreen');
 has(
   'R9',

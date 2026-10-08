@@ -120,6 +120,27 @@ Rules:
     `scrollIntoView(el)` land short and the card then slides up under the header (R37 `lib/skills.ts` scrollToEvidence).
 27. A translucent or blurred fixed header lets dark content ghost through it (R37 owner screenshot): the header is solid
     `bg-white` on every device; guarded by validate-plans B-03b and r36 "the header is solid".
+28. R41 (owner: "so laggy, slow ... mouse, scrolling, cursor"). The lag was GPU LAYER COUNT, not JavaScript: a 1920 px
+    wheel scroll spent 3.9 s in Layerize, 1.45 s in HitTest and had 437 / 1564 slow frames with 127-494 layers on
+    screen. Count layers (CDP `LayerTree` + `compositingReasons`) before touching code. What made them, never again:
+    (a) one animation per pixel / per word - the honours tally ran ~240 `rect` pop animations (490 layers), ScrollInk
+    a scroll-driven OPACITY animation per word (a scroll-timeline animation counts as running forever = a permanent
+    layer each); animate one box (a stepped clip wipe) or a non-composited property (colour); (b) a resting
+    `translate` / `transform` on many elements (R40 plates) - write it only while moving, remove it at rest;
+    (c) an element at `opacity: 0` above composited content (R40 crop marks) - `visibility: hidden` at rest.
+29. Never toggle an INHERITED property on `html` / `body` / the page root (visibility, pointer-events, inert...): it
+    re-styles every element (~6,000-8,000, 44-72 ms traced). R41 removed `visibility: hidden` from the booting page (the
+    gate is opaque and the page inert) and replaced a `body { pointer-events: none }` scroll flag with a single shield
+    element (lib/scroll-frame.ts).
+30. Scroll-quiet pointer (lib/scroll-frame.ts): on mouse devices a transparent shield covers the page while a STREAM of
+    scroll events runs (one jump never raises it), lifts 150 ms after the page stops and at once on a deliberate move
+    (>= 24 px, browser `movementX/Y`; no history = deliberate). A test that wheel-scrolls and then hovers / presses
+    must move the mouse first (any `page.mouse.move` to a new point does).
+31. The custom cursor ring is moved by one direct `transform` write per mouse move (no framer motion value, no spring);
+    framer runs only for shape changes and for the tag while it is shown. No trail springs.
+32. The boot shatter is compositor slabs (Web Animations on transform / opacity), never a full-screen canvas re-drawn
+    per frame. Retired in R41: FX-09 trace rail (`top` driven by a framer useScroll spring = layout per frame; red =
+    alerts only). Measuring: real GPU flags (lesson 9), the same session for A and B, a still mouse AND a moving mouse.
 
 ## F. Definition of done additions
 
@@ -257,8 +278,8 @@ wording and its four decisions). The portfolio prints itself; every flag is in `
 
 | Feature                       | Where                                                          | Rules                                                                                                                                                                                                                                      |
 | ----------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| P1 Halftone Ink Tide          | globals.css `.fx-relay-b` mask                                 | Desktop fine pointer, not lite / Calm: the relay layer's leading third is a 12 px dot screen whose dots grow with `--relay`; phones keep the FX-96 sweep                                                                                   |
-| P2 Plate Registration         | `[data-plate]` card bars, components/press/press-fx.tsx        | One impression on first view (`.fx-plate-in`); desktop: `--reg` (@property, inherits false) <= 6 px with scroll speed, written only on visible plates, rAF only while moving / settling, 0 at rest                                         |
+| P1 Halftone Ink Tide          | globals.css `.fx-roller::before`                               | R41: a STATIC band of 8 dot rows (the next desk colour, dots growing toward the roller) riding the roller; no mask (the R40 full-screen mask re-painted every frame); desktop, not lite / Calm                                             |
+| P2 Plate Registration         | `[data-plate]` card bars, components/press/press-fx.tsx        | One impression on first view (`.fx-plate-in`); desktop: an inline `translate` <= 6 px with scroll speed on the visible plates, REMOVED at rest (R41: a resting translate kept every bar on a GPU layer)                                    |
 | P3 Ink Roller                 | `.fx-roller` in tide-canvas.tsx                                | Same box + transform as the relay layer (zero JS), visible only while 0 < relay < 1, desktop only                                                                                                                                          |
 | P4 Feed Marks                 | press-fx.tsx `FeedMarks`                                       | >= 1536 px, measured on resize only, rendered INSIDE `.fx-page-root` (in `<body>` they painted over the header and tray)                                                                                                                   |
 | T1 Movable type               | fx/split-words.tsx                                             | Words rise mirrored (rotateY 180 -> 0) with the FX-06 rise; text untouched                                                                                                                                                                 |

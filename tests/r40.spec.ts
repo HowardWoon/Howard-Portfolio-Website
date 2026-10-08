@@ -27,7 +27,7 @@ const toEl = (page: Page, sel: string, dy = 120) =>
   );
 
 /* ---------------------------------------------------------------- P1 + P3 */
-test('desktop: the relay layer is screened as halftone dots and an ink roller rides its front (P1, P3)', async ({
+test('desktop: a static halftone band and an ink roller ride the hand-over front, no per-frame mask (P1, P3, R41)', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -35,9 +35,12 @@ test('desktop: the relay layer is screened as halftone dots and an ink roller ri
   const look = await page.evaluate(() => {
     const relay = getComputedStyle(document.querySelector('.fx-relay-b')!);
     const roller = getComputedStyle(document.querySelector('.fx-roller')!);
-    return { mask: relay.maskImage || relay.webkitMaskImage, roller: roller.display };
+    const dots = getComputedStyle(document.querySelector('.fx-roller')!, '::before');
+    return { mask: relay.maskImage || relay.webkitMaskImage, roller: roller.display, dots: dots.backgroundImage };
   });
-  expect(look.mask).toContain('radial-gradient');
+  // R41: the R40 full-screen mask was re-painted every scroll frame; the dots are now a static band on the roller
+  expect(look.mask === 'none' || look.mask === '').toBe(true);
+  expect(look.dots).toContain('radial-gradient');
   expect(look.roller).toBe('block');
   // mid hand-over the roller is visible, before / after it is not
   await toEl(page, '#experience', 900 * 0.75);
@@ -80,7 +83,7 @@ test('desktop: card colour plates lag out of register while scrolling and snap b
       Math.max(
         0,
         ...Array.from(document.querySelectorAll<HTMLElement>('[data-plate]')).map((e) =>
-          Math.abs(parseFloat(e.style.getPropertyValue('--reg') || '0')),
+          Math.abs(parseFloat(e.style.translate || '0')),
         ),
       ),
     );
@@ -94,7 +97,7 @@ test('desktop: card colour plates lag out of register while scrolling and snap b
         Math.max(
           0,
           ...Array.from(document.querySelectorAll<HTMLElement>('[data-plate]')).map((e) =>
-            Math.abs(parseFloat(e.style.getPropertyValue('--reg') || '0')),
+            Math.abs(parseFloat(e.style.translate || '0')),
           ),
         ),
       ),

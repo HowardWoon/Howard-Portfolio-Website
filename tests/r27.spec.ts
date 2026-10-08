@@ -27,7 +27,14 @@ test('ScrollInk: the About words ink in with the scroll, keep the exact text, an
   await expect(p).toContainText(
     'Software Engineering undergraduate at Universiti Malaya (4.00 CGPA). Bridging low-latency algorithmic backend',
   );
-  const op = () => page.locator('.si-w').evaluateAll((ws) => ws.map((w) => +getComputedStyle(w).opacity));
+  // R41: the words ink in by COLOUR alpha (an opacity scroll animation kept each word on its own GPU layer)
+  const op = () =>
+    page.locator('.si-w').evaluateAll((ws) =>
+      ws.map((w) => {
+        const n = getComputedStyle(w).color.match(/[\d.]+/g) ?? [];
+        return n.length > 3 ? Number(n[3]) : 1; // rgba(r, g, b, a) -> a; rgb(r, g, b) -> 1
+      }),
+    );
   // low on the screen: the later words are still faint
   await page.evaluate(() => {
     const e = document.querySelector('.si-w')!;
@@ -50,7 +57,14 @@ test('reduced motion: ScrollInk words are simply inked', async ({ page }) => {
     const e = document.querySelector('.si-w')!;
     window.scrollTo(0, e.getBoundingClientRect().top + scrollY - innerHeight * 0.9);
   });
-  const min = await page.locator('.si-w').evaluateAll((ws) => Math.min(...ws.map((w) => +getComputedStyle(w).opacity)));
+  const min = await page.locator('.si-w').evaluateAll((ws) =>
+    Math.min(
+      ...ws.map((w) => {
+        const n = getComputedStyle(w).color.match(/[\d.]+/g) ?? [];
+        return n.length > 3 ? Number(n[3]) : 1;
+      }),
+    ),
+  );
   expect(min).toBe(1);
 });
 

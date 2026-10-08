@@ -1,113 +1,104 @@
 /**
- * FX-33 Boot Shatter. Imperative on purpose: it runs once, outside React, on a canvas appended to <body>.
- * The overlay itself is hidden instantly by `html.hw-booted .boot-overlay { display:none }`, so this canvas
- * is what the visitor sees for ~0.9 s. pointer-events: none -> it can never block a click or a test.
+ * FX-33 Boot Shatter. Imperative on purpose: it runs once, outside React, on a layer appended to <body>.
+ * The overlay itself is hidden instantly by `html.hw-booted .boot-overlay { display:none }`, so this layer is what the
+ * visitor sees for ~0.9 s. pointer-events: none -> it can never block a click or a test.
  * Always removed: at the end of the animation AND by a safety timeout.
+ *
+ * R41 (owner: "the page broken become pixel then showing my website, it is so lag, slow"): the old version re-drew
+ * ~780 tiles on a full-screen canvas at 2x every frame on the main thread, in the same frames as the page reveal.
+ * Now the gate cracks into a few big Bauhaus slabs (6 x 3 on a laptop, 3 x 4 on a phone) along 3 px ink seams, and
+ * they fall away with gravity: Web Animations on transform / opacity only, so the compositor plays it and the main
+ * thread is free to show the page. Same colours, same idea, a fraction of the work.
  */
 export function bootShatter(base = '#FFC700'): void {
   if (typeof window === 'undefined') return;
   const w = window.innerWidth;
   const h = window.innerHeight;
   const small = w < 640;
-  // D3: phones get a 1.5x canvas, bigger tiles and no second fringe pass (was a ~400 ms hitch at 4x CPU)
-  const dpr = Math.min(window.devicePixelRatio || 1, small ? 1.5 : 2);
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return;
-  canvas.width = Math.round(w * dpr);
-  canvas.height = Math.round(h * dpr);
-  canvas.setAttribute('aria-hidden', 'true');
-  canvas.setAttribute('data-fx-shatter', '');
-  Object.assign(canvas.style, {
+  const cols = small ? 3 : 6;
+  const rows = small ? 4 : 3;
+
+  const layer = document.createElement('div');
+  layer.setAttribute('aria-hidden', 'true');
+  layer.setAttribute('data-fx-shatter', '');
+  Object.assign(layer.style, {
     position: 'fixed',
     inset: '0',
-    width: '100%',
-    height: '100%',
     zIndex: '100000',
     pointerEvents: 'none',
+    overflow: 'hidden',
   });
-  document.body.appendChild(canvas);
-  ctx.scale(dpr, dpr);
 
-  // R19: ~370 tiles on phones, ~780 at 1920x1080 (was ~1300: the shatter shared its frames with the page reveal)
-  const size = small ? 52 : 54;
-  const cols = Math.ceil(w / size);
-  const rows = Math.ceil(h / size);
+  const accents = ['#2B4BFF', '#FF4B2B', '#FFFFFF'] as const;
+  const total = cols * rows;
+  // two slabs in accent colours (the old 7 % accent tiles), never the same colour twice
+  const accentAt = new Map<number, string>([
+    [Math.floor(Math.random() * total), accents[Math.floor(Math.random() * 3)]],
+    [Math.floor(Math.random() * total), accents[Math.floor(Math.random() * 3)]],
+  ]);
+  const cw = w / cols;
+  const rh = h / rows;
   const cx = w / 2;
   const cy = h / 2;
-  const accents = ['#2B4BFF', '#FF4B2B', '#FFFFFF'] as const;
+  const maxD = Math.hypot(cx, cy) || 1;
+  const DURATION = 820;
+  const anims: Animation[] = [];
 
-  type Tile = { x: number; y: number; vx: number; vy: number; r: number; vr: number; c: string };
-  const tiles: Tile[] = [];
   for (let j = 0; j < rows; j++) {
     for (let i = 0; i < cols; i++) {
-      const x = i * size;
-      const y = j * size;
-      const dx = x + size / 2 - cx;
-      const dy = y + size / 2 - cy;
-      const d = Math.hypot(dx, dy) || 1;
-      const speed = 5 + Math.random() * 11;
-      const accent = Math.random() < 0.07 ? accents[Math.floor(Math.random() * accents.length)] : undefined;
-      tiles.push({
-        x,
-        y,
-        vx: (dx / d) * speed,
-        vy: (dy / d) * speed - 5,
-        r: 0,
-        vr: (Math.random() - 0.5) * 0.3,
-        c: accent ?? base,
+      const slab = document.createElement('div');
+      const x = i * cw;
+      const y = j * rh;
+      Object.assign(slab.style, {
+        position: 'absolute',
+        left: `${x}px`,
+        top: `${y}px`,
+        width: `${Math.ceil(cw) + 1}px`,
+        height: `${Math.ceil(rh) + 1}px`,
+        background: accentAt.get(j * cols + i) ?? base,
+        border: '3px solid #0A0A0A',
+        boxSizing: 'border-box',
+        willChange: 'transform, opacity',
       });
+      layer.appendChild(slab);
+      const dx = x + cw / 2 - cx;
+      const dy = y + rh / 2 - cy;
+      const d = Math.hypot(dx, dy);
+      const dir = dx === 0 ? (Math.random() < 0.5 ? -1 : 1) : Math.sign(dx);
+      const spin = dir * (8 + Math.random() * 22);
+      const drift = dx * 0.35 + dir * Math.random() * 60;
+      anims.push(
+        slab.animate(
+          [
+            { transform: 'translate3d(0, 0, 0) rotate(0deg)', opacity: 1 },
+            {
+              transform: `translate3d(${drift * 0.25}px, -${18 + Math.random() * 30}px, 0) rotate(${spin * 0.2}deg)`,
+              opacity: 1,
+              offset: 0.18,
+            },
+            { transform: `translate3d(${drift}px, ${h + rh}px, 0) rotate(${spin}deg)`, opacity: 0.9 },
+          ],
+          {
+            duration: DURATION,
+            delay: (d / maxD) * 160, // the centre breaks first, the edges follow
+            easing: 'cubic-bezier(0.55, 0, 0.8, 0.25)', // gravity: slow lift, fast fall
+            fill: 'both',
+          },
+        ),
+      );
     }
   }
+  document.body.appendChild(layer);
 
-  const DURATION = 900;
-  const start = performance.now();
-  let raf = 0;
+  let done = false;
   const cleanup = () => {
-    cancelAnimationFrame(raf);
-    canvas.remove();
+    if (done) return;
+    done = true;
+    anims.forEach((a) => a.cancel());
+    layer.remove();
   };
-  const frame = (now: number) => {
-    const t = (now - start) / DURATION;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, w, h);
-    if (t >= 1) {
-      cleanup();
-      return;
-    }
-    const fringe = t < 0.22 ? (0.22 - t) * 26 : 0; // chromatic aberration only while it's fastest
-    const s = size * (1 - t * 0.55);
-    // R19: one setTransform per tile instead of save / translate / rotate / restore (the shatter now shares its first
-    // frames with the page reveal, so every millisecond counts)
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = '#0A0A0A';
-    const alpha = 1 - t * t;
-    for (const p of tiles) {
-      p.vy += 0.9;
-      p.x += p.vx;
-      p.y += p.vy;
-      p.r += p.vr;
-      if (p.y > h + size) continue;
-      const cos = Math.cos(p.r);
-      const sin = Math.sin(p.r);
-      ctx.setTransform(cos * dpr, sin * dpr, -sin * dpr, cos * dpr, (p.x + size / 2) * dpr, (p.y + size / 2) * dpr);
-      if (fringe > 0) {
-        ctx.globalAlpha = 0.55;
-        ctx.fillStyle = '#FF4B2B';
-        ctx.fillRect(-s / 2 - fringe, -s / 2, s, s);
-        if (!small) {
-          ctx.fillStyle = '#2B4BFF';
-          ctx.fillRect(-s / 2 + fringe, -s / 2, s, s);
-        }
-      }
-      ctx.globalAlpha = alpha;
-      ctx.fillStyle = p.c;
-      ctx.fillRect(-s / 2, -s / 2, s, s);
-      ctx.strokeRect(-s / 2, -s / 2, s, s);
-    }
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    raf = requestAnimationFrame(frame);
-  };
-  raf = requestAnimationFrame(frame);
-  window.setTimeout(cleanup, DURATION + 500);
+  Promise.all(anims.map((a) => a.finished))
+    .then(cleanup)
+    .catch(cleanup);
+  window.setTimeout(cleanup, DURATION + 700);
 }

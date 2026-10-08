@@ -36,7 +36,7 @@ export function PressFx() {
           const el = e.target as HTMLElement;
           if (!e.isIntersecting) {
             visible.delete(el);
-            el.style.removeProperty('--reg');
+            el.style.removeProperty('translate');
             return;
           }
           visible.add(el);
@@ -80,8 +80,9 @@ export function PressFx() {
       const target = off ? 0 : Math.max(-6, Math.min(6, v * 2.4));
       reg += (target - reg) * 0.32;
       if (target === 0 && Math.abs(reg) < 0.06) reg = 0;
-      const val = reg.toFixed(2);
-      visible.forEach((el) => el.style.setProperty('--reg', val));
+      // R41: an inline translate only while moving; removed at rest so the bar drops its GPU layer
+      const val = reg === 0 ? '' : `${reg.toFixed(2)}px 0`;
+      visible.forEach((el) => (el.style.translate = val));
       if (reg !== 0 || target !== 0) raf = requestAnimationFrame(frame);
     };
     const onScroll = () => {
@@ -96,7 +97,7 @@ export function PressFx() {
       window.clearTimeout(t);
       cancelAnimationFrame(raf);
       window.removeEventListener('scroll', onScroll);
-      visible.forEach((el) => el.style.removeProperty('--reg'));
+      visible.forEach((el) => el.style.removeProperty('translate'));
     };
   }, []);
 

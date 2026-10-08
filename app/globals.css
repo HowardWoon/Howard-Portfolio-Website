@@ -1641,7 +1641,7 @@ html:not(.fx-off-arenaPinboard) :where(.fx-seal:nth-child(even)) {
   .fx-stamp,
   .boot-overlay,
   .fx-cursor,
-  .fx-cursor-trail,
+  .fx-cursor-pos,
   .fx-cursor-tag,
   [data-proof-tray],
   .fx-feed-marks,
@@ -1761,9 +1761,9 @@ html:not(.fx-off-arenaPinboard) :where(.fx-seal:nth-child(even)) {
 .fx-page-root {
   isolation: isolate;
 }
-html:not(.hw-booted):not(.hw-revealing) .fx-page-root {
-  visibility: hidden;
-}
+/* R41: the page is no longer visibility:hidden behind the boot gate. The gate is opaque and the page is already inert
+   (boot-sequence.tsx), and un-hiding an inherited property re-styled all ~8,000 elements in the reveal frame (70 ms,
+   traced) - the 'pixel break' stutter the owner saw. */
 .fx-tide-canvas {
   position: fixed;
   inset: 0;
@@ -3670,15 +3670,25 @@ html[data-fx-tier='lite'] .bs-hud-radar {
 /* ---- R31 Honours Tally (components/honors-tally.tsx): the pixel trophy assembles in a diagonal wave, then its hard
    ink extrusion lands; the blocks drop in row by row. One-shot (data-in), transform / opacity only; the global
    reduced-motion rule and Calm end each animation at its final frame. */
-.honors-tally:not([data-in]) .tally-px,
+.honors-tally:not([data-in]) .tally-trophy svg,
 .honors-tally:not([data-in]) .tally-trophy g:first-child,
 .honors-tally:not([data-in]) .tally-block {
   opacity: 0;
 }
-.honors-tally[data-in] .tally-px {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: tally-pop 0.42s cubic-bezier(0.2, 0.9, 0.1, 1.3) var(--d) both;
+/* R41 (owner: "so laggy"): the trophy is printed in ONE diagonal wipe of pixel rows (steps), not ~240 separate pixel
+   animations (each one was its own GPU layer: 490 layers on screen at Honours) */
+.honors-tally[data-in] .tally-trophy svg {
+  animation: tally-print 0.9s steps(16, end) both;
+}
+@keyframes tally-print {
+  from {
+    opacity: 1;
+    clip-path: polygon(0 0, 0 0, 0 0);
+  }
+  to {
+    opacity: 1;
+    clip-path: polygon(0 0, 200% 0, 0 200%);
+  }
 }
 .honors-tally[data-in] .tally-trophy g:first-child {
   animation: tally-fade 0.3s ease-out 0.75s both;
@@ -3713,7 +3723,7 @@ html[data-fx-tier='lite'] .bs-hud-radar {
     transform: perspective(520px) rotateY(-22deg) rotateX(8deg);
   }
 }
-html[data-motion='calm'] .honors-tally .tally-px,
+html[data-motion='calm'] .honors-tally .tally-trophy svg,
 html[data-motion='calm'] .honors-tally .tally-block,
 html[data-motion='calm'] .honors-tally .tally-trophy g:first-child {
   animation: none;
@@ -4492,12 +4502,14 @@ html[data-motion='calm'] .honors-tally .tally-trophy g:first-child {
     }
   }
 }
+/* R41 (owner: "so laggy"): the ink is a COLOUR change, not opacity - a scroll-driven opacity animation counts as running
+   forever, so every word sat on its own GPU layer (28 in About, plus ~100 neighbours pushed onto overlap layers) */
 @keyframes si-ink {
   from {
-    opacity: 0.18;
+    color: rgb(10 10 10 / 0.18);
   }
   to {
-    opacity: 1;
+    color: inherit;
   }
 }
 
@@ -4609,31 +4621,35 @@ a:focus-visible > .px-card > span {
    transform / opacity / mask / translate only; every effect is final for reduced motion and Calm (the global rules
    above stop animations and transitions; the rules below also switch the scroll-linked parts off). */
 
-@property --reg {
-  syntax: '<number>';
-  inherits: false;
-  initial-value: 0;
-}
-
-/* P1 Halftone Ink Tide (desktop): the relay layer's leading third is screened - hard dots that grow with the hand-over
-   (--relay) until they merge into the flat desk colour at the end. One mask on the one relay layer. */
+/* P1 Halftone Ink Tide (desktop). R41 (owner: "so laggy"): the R40 version masked the whole relay layer and re-drew the
+   mask every scroll frame (a full-screen repaint per frame). Now the screen is a STATIC band of dot rows riding just
+   ahead of the ink roller (.fx-roller::before below): the next section's desk colour, dots growing row by row toward the
+   roller. Painted once per hand-over target, moved only by the roller's transform (compositor). */
 @media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
-  html:not([data-fx-tier='lite']):not([data-motion='calm']):not(.fx-off-halftoneTide) .fx-relay-b {
-    --dot: calc(2px + var(--relay, 0) * 7px);
-    -webkit-mask-image:
-      linear-gradient(to bottom, transparent 0, transparent 8%, #000 34%),
-      radial-gradient(circle at center, #000 var(--dot), transparent calc(var(--dot) + 0.6px));
-    -webkit-mask-size:
-      100% 100%,
-      12px 12px;
-    -webkit-mask-composite: source-over;
-    mask-image:
-      linear-gradient(to bottom, transparent 0, transparent 8%, #000 34%),
-      radial-gradient(circle at center, #000 var(--dot), transparent calc(var(--dot) + 0.6px));
-    mask-size:
-      100% 100%,
-      12px 12px;
-    mask-composite: add;
+  html[data-fx-clock='on']:not([data-fx-tier='lite']):not([data-motion='calm']):not(.fx-off-halftoneTide)
+    .fx-roller::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -100px;
+    height: 96px;
+    background:
+      radial-gradient(circle, var(--tide-b, transparent) 1px, transparent calc(1px + 0.6px)) 0 0px / 12px 12px repeat-x,
+      radial-gradient(circle, var(--tide-b, transparent) 1.62px, transparent calc(1.62px + 0.6px)) 0 12px / 12px 12px
+        repeat-x,
+      radial-gradient(circle, var(--tide-b, transparent) 2.24px, transparent calc(2.24px + 0.6px)) 0 24px / 12px 12px
+        repeat-x,
+      radial-gradient(circle, var(--tide-b, transparent) 2.86px, transparent calc(2.86px + 0.6px)) 0 36px / 12px 12px
+        repeat-x,
+      radial-gradient(circle, var(--tide-b, transparent) 3.48px, transparent calc(3.48px + 0.6px)) 0 48px / 12px 12px
+        repeat-x,
+      radial-gradient(circle, var(--tide-b, transparent) 4.1px, transparent calc(4.1px + 0.6px)) 0 60px / 12px 12px
+        repeat-x,
+      radial-gradient(circle, var(--tide-b, transparent) 4.72px, transparent calc(4.72px + 0.6px)) 0 72px / 12px 12px
+        repeat-x,
+      radial-gradient(circle, var(--tide-b, transparent) 5.34px, transparent calc(5.34px + 0.6px)) 0 84px / 12px 12px
+        repeat-x;
   }
 }
 
@@ -4665,10 +4681,8 @@ a:focus-visible > .px-card > span {
 }
 
 /* P2 Plate Registration: the card's colour bar is the colour plate. It lands out of register once (.fx-plate-in) and,
-   on desktop, lags with the scroll speed (--reg, written by components/press/press-fx.tsx on the visible plates) */
-html:not(.fx-off-plateRegistration) [data-plate] {
-  translate: calc(var(--reg) * 1px) 0;
-}
+   on desktop, lags with the scroll speed (press-fx.tsx writes an inline translate on the visible plates while the page
+   moves and REMOVES it at rest - R41: a resting translate kept every bar on its own GPU layer) */
 html:not(.fx-off-plateRegistration) [data-plate].fx-plate-in {
   animation: fx-plate-in 340ms var(--ease-snap) both;
 }
@@ -4700,10 +4714,13 @@ html[data-motion='calm'] [data-plate] {
   z-index: 30;
   pointer-events: none;
   opacity: 0;
+  /* R41: hidden (not just transparent) at rest, so the marks never sit on a GPU layer over the card's photos */
+  visibility: hidden;
   transform: scale(1.035);
   transition:
     opacity var(--dur-stamp) var(--ease-snap),
-    transform var(--dur-stamp) var(--ease-snap);
+    transform var(--dur-stamp) var(--ease-snap),
+    visibility 0s linear var(--dur-stamp);
   background:
     linear-gradient(#0a0a0a, #0a0a0a) left top / 20px 3px no-repeat,
     linear-gradient(#0a0a0a, #0a0a0a) left top / 3px 20px no-repeat,
@@ -4732,12 +4749,16 @@ html[data-motion='calm'] [data-plate] {
 @media (hover: hover) and (pointer: fine) {
   html:not(.fx-off-cropMarks) [data-crop]:hover > .fx-crop {
     opacity: 1;
+    visibility: visible;
+    transition-delay: 0s;
     transform: none;
   }
 }
 html:not(.fx-off-cropMarks) [data-crop]:focus-within > .fx-crop,
 html:not(.fx-off-cropMarks) [data-crop][data-inspect] > .fx-crop {
   opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
   transform: none;
 }
 @media print {

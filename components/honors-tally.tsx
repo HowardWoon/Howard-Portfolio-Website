@@ -120,16 +120,7 @@ export function HonorsTally({
             </g>
             <g>
               {CELLS.map((p) => (
-                <rect
-                  key={`${p.x},${p.y}`}
-                  className="tally-px"
-                  x={p.x}
-                  y={p.y}
-                  width={1}
-                  height={1}
-                  fill={p.c}
-                  style={{ '--d': `${(p.x + p.y) * 22}ms` } as CSSProperties}
-                />
+                <rect key={`${p.x},${p.y}`} className="tally-px" x={p.x} y={p.y} width={1} height={1} fill={p.c} />
               ))}
             </g>
           </svg>

@@ -13,7 +13,8 @@ export const FX = {
   titleWipe: true, // FX-06 section titles rise line-by-line from a mask
   cardUnfold: true, // FX-07 project cards unfold from a tilted 3D plane as they scroll in
   velocityMarquee: true, // FX-08 marquees lean with scroll speed
-  traceRail: true, // FX-09 experience circuit trace that draws itself while scrolling
+  traceRail: false, // FX-09 retired in R41 (owner: 'a thing blocking', 'so laggy'): its packet moved by 'top' from a framer
+  // useScroll spring = a layout every scroll frame, and a red square (red = alerts only). The R40 feed marks are the margin instrument now.
   coinFlip: true, // FX-10 honors rank stickers flip like a coin on first view
   shapeBurst: true, // FX-11 Bauhaus confetti on winner cards + successful contact send
   cursorMorph: true, // FX-12 cursor turns into a diamond on buttons, a big ring on images
