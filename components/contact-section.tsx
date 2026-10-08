@@ -242,9 +242,10 @@ export default function ContactSection() {
       {/* Bauhaus composition (replaces the particle canvas, which was invisible on a light canvas
           and was also being stretched: its bitmap was viewport-sized but CSS-sized to the whole section) */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        {FX.mercuryField ? (
-          <MercuryField className="absolute right-0 top-0 h-[440px] w-[30%] hidden xl:block [mask-image:linear-gradient(to_right,transparent,black_35%)]" />
-        ) : null}
+        {/* R41 (owner: "a bright spot ... so weird to see the blue circle suddenly white and bright"): no soft edge
+            fade - it turned a blob crossing it into a white-to-blue glow. The blobs now stay inside the canvas instead
+            (mercury-field.tsx), so every one is a flat colour with a hard ink outline */}
+        {FX.mercuryField ? <MercuryField className="absolute right-0 top-0 h-[440px] w-[30%] hidden xl:block" /> : null}
         <div
           className="fx-depth absolute -left-36 top-[38%] hidden xl:block"
           style={{ '--depth': -20 } as React.CSSProperties}

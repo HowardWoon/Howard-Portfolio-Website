@@ -27,10 +27,11 @@ void main() {
   vec2 p = (gl_FragCoord.xy - 0.5 * uRes) / uRes.y;
   float aspect = uRes.x / uRes.y;
   float t = uTime * 0.22;
-  vec2 c1 = vec2(sin(t * 1.3) * 0.32 * aspect, cos(t * 0.9) * 0.20);
-  vec2 c2 = vec2(cos(t * 0.7 + 1.7) * 0.36 * aspect, sin(t * 1.1 + 0.4) * 0.22);
-  vec2 c3 = vec2(sin(t * 0.5 + 3.1) * 0.28 * aspect, sin(t * 1.7 + 2.2) * 0.18);
-  vec2 c4 = vec2(uPtr.x * 0.45 * aspect, -uPtr.y * 0.45);
+  // R41: every blob (radius + outline band) stays inside the canvas, so no edge ever cuts or fades one
+  vec2 c1 = vec2(sin(t * 1.3) * 0.22 * aspect, cos(t * 0.9) * 0.20);
+  vec2 c2 = vec2(cos(t * 0.7 + 1.7) * 0.24 * aspect, sin(t * 1.1 + 0.4) * 0.22);
+  vec2 c3 = vec2(sin(t * 0.5 + 3.1) * 0.22 * aspect, sin(t * 1.7 + 2.2) * 0.18);
+  vec2 c4 = vec2(uPtr.x * 0.26 * aspect, -uPtr.y * 0.30);
   float f1 = ball(p, c1, 0.15);
   float f2 = ball(p, c2, 0.12);
   float f3 = ball(p, c3, 0.10);
