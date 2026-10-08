@@ -602,12 +602,18 @@ test.describe('role-to-proof circuit (desktop 1440x900)', () => {
     await hud.getByRole('button', { name: 'Next (J)' }).click();
     await expect(hud).toContainText('2 / 2');
     await landedOn(page, '[data-folder="kraiburg"]');
-    // the card is not hidden under the header: its folder tab is below the header's bottom edge
-    const clear = await page.evaluate(() => {
-      const hdr = document.querySelector('header.site-header')!.getBoundingClientRect().bottom;
-      return document.querySelector('[data-folder="kraiburg"]')!.getBoundingClientRect().top - hdr;
-    });
-    expect(clear).toBeGreaterThanOrEqual(0);
+    // the card is not hidden under the header: its folder tab RESTS below the header's bottom edge (R41: read once the
+    // glide and the card's own layout settle have finished - a single read caught it mid-settle, -13 px, under load)
+    await expect
+      .poll(
+        () =>
+          page.evaluate(() => {
+            const hdr = document.querySelector('header.site-header')!.getBoundingClientRect().bottom;
+            return document.querySelector('[data-folder="kraiburg"]')!.getBoundingClientRect().top - hdr;
+          }),
+        { timeout: 5_000 },
+      )
+      .toBeGreaterThanOrEqual(0);
     await hud.getByRole('button', { name: 'Close (Esc)' }).click();
     await expect(page.locator('[data-trail-stop]')).toHaveCount(0);
   });
