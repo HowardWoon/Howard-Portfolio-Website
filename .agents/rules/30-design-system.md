@@ -138,7 +138,13 @@ Rules:
     must move the mouse first (any `page.mouse.move` to a new point does).
 31. The custom cursor ring is moved by one direct `transform` write per mouse move (no framer motion value, no spring);
     framer runs only for shape changes and for the tag while it is shown. No trail springs.
-32. The boot shatter is compositor slabs (Web Animations on transform / opacity), never a full-screen canvas re-drawn
+32. The boot gate's markup comes AFTER the page content in the HTML, and the home HTML streams: on a real network
+    Chrome paints the parsed hero before the gate is parsed (owner video, R41: a one-frame flash of the site on
+    refresh). The pre-gate cover `html:not(.hw-booted) .fx-page-root::before` (fixed, gate yellow + dots, z 99998)
+    paints with the first byte of the page root and must stay; `<noscript>` hides it. Never cover the page with an
+    inherited property instead (lesson 29). Guard: tests/r41.spec.ts (removes the not-yet-parsed gate and checks the
+    hero is covered).
+33. The boot shatter is compositor slabs (Web Animations on transform / opacity), never a full-screen canvas re-drawn
     per frame. Retired in R41: FX-09 trace rail (`top` driven by a framer useScroll spring = layout per frame; red =
     alerts only). Measuring: real GPU flags (lesson 9), the same session for A and B, a still mouse AND a moving mouse.
 

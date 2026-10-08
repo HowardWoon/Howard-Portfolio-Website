@@ -1761,9 +1761,20 @@ html:not(.fx-off-arenaPinboard) :where(.fx-seal:nth-child(even)) {
 .fx-page-root {
   isolation: isolate;
 }
-/* R41: the page is no longer visibility:hidden behind the boot gate. The gate is opaque and the page is already inert
-   (boot-sequence.tsx), and un-hiding an inherited property re-styled all ~8,000 elements in the reveal frame (70 ms,
-   traced) - the 'pixel break' stutter the owner saw. */
+/* R41 pre-gate cover (owner video: on refresh the hero flashed for a frame before the gate). The gate is drawn by React
+   after hydration, so from the first paint until then the page needs a cover. R19 hid the whole page with an inherited
+   visibility:hidden, which re-styled all ~8,000 elements at the reveal (70 ms); this is ONE fixed pseudo-element in the
+   gate's own yellow + dots (home page only: .fx-page-root), above the page and below the gate (z 99999), gone the moment
+   html.hw-booted is set. Removing it re-styles that pseudo-element only. No-JS visitors: hidden by <noscript> (layout). */
+html:not(.hw-booted) .fx-page-root::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 99998;
+  background-color: #ffc700;
+  background-image: radial-gradient(rgba(10, 10, 10, 0.14) 1.2px, transparent 1.2px);
+  background-size: 22px 22px;
+}
 .fx-tide-canvas {
   position: fixed;
   inset: 0;
