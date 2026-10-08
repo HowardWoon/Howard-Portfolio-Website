@@ -65,9 +65,12 @@ test('the cover lifts with the gate, and a returning visitor sees the page', asy
 test('without JavaScript the page is readable (the cover is hidden by <noscript>)', async ({ browser }) => {
   const ctx = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 1440, height: 900 } });
   const page = await ctx.newPage();
-  await page.goto('/', { waitUntil: 'load' });
-  expect(
-    await page.evaluate(() => getComputedStyle(document.querySelector('.fx-page-root')!, '::before').display),
-  ).toBe('none');
+  // DOM-ready, then poll: waiting for 'load' (every image) timed out on a busy runner; only the stylesheet matters here
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await expect
+    .poll(() => page.evaluate(() => getComputedStyle(document.querySelector('.fx-page-root')!, '::before').display), {
+      timeout: 20_000,
+    })
+    .toBe('none');
   await ctx.close();
 });
