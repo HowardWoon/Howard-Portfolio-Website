@@ -75,6 +75,33 @@ test.describe('registrar seals in Honours (1440)', () => {
       expect(Math.abs(r.scale - 1)).toBeLessThan(0.01);
     }
   });
+
+  // owner: the UM shield's corners crossed the white disc onto the orange band ("exceed the frame"). The crest's
+  // furthest pixel (reach x its box, measured from the PNG) must stay inside the disc's ink line, in every seal size.
+  test('every crest stays inside its white disc, never over the band', async ({ page }) => {
+    await open(page);
+    const key = page.locator('[data-honor-category]').nth(1);
+    await key.scrollIntoViewIfNeeded();
+    await key.click();
+    await page.locator('#honors [data-seal="um"][data-seal-size="ring"]').scrollIntoViewIfNeeded();
+    await page.waitForTimeout(900); // stamp-in settles
+    const seals = await page.evaluate(() => {
+      const REACH: Record<string, number> = { um: 0.6236, kmns: 0.5041 };
+      return [...document.querySelectorAll<HTMLElement>('[data-seal]')].flatMap((el) => {
+        const w = el.getBoundingClientRect().width;
+        if (!w) return [];
+        const face = el.querySelector('.seal-face')!;
+        const circles = face.querySelectorAll('svg circle');
+        const disc = circles[circles.length - 1] as SVGCircleElement; // the white disc is drawn last
+        const unit = w / 132; // viewBox units -> px
+        const inner = (disc.r.baseVal.value - 1) * unit; // inner edge of its 2-unit ink line
+        const crest = face.querySelector<HTMLElement>(':scope > span')!.getBoundingClientRect().width;
+        return [{ seal: `${el.dataset.seal}/${el.dataset.sealSize}`, reach: crest * REACH[el.dataset.seal!]!, inner }];
+      });
+    });
+    expect(seals.map((s) => s.seal)).toEqual(expect.arrayContaining(['um/ring', 'kmns/ring']));
+    for (const s of seals) expect(s.reach, s.seal).toBeLessThanOrEqual(s.inner);
+  });
 });
 
 for (const [name, size] of [

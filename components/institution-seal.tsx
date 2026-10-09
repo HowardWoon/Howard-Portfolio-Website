@@ -21,8 +21,10 @@ import { useCalm } from '@/lib/motion-pref';
 const CRESTS = {
   // R32: um_crest.png = um_logo.png trimmed to the shield and centred on a square canvas (the original sat 29 px
   // left of centre inside transparent margins, so the crest looked off-centre and small, i.e. blurry, in every seal)
-  um: { src: '/images/logos/um_crest.png', name: 'UNIVERSITI MALAYA' },
-  kmns: { src: '/images/logos/kmns_logo_clear.png', name: 'KOLEJ MATRIKULASI NEGERI SEMBILAN' },
+  // reach = the furthest opaque pixel from the image centre, as a fraction of the image side (measured with sharp):
+  // the near-square UM shield reaches 0.6236 at its corners, the round KMNS logo 0.5041
+  um: { src: '/images/logos/um_crest.png', name: 'UNIVERSITI MALAYA', reach: 0.6236 },
+  kmns: { src: '/images/logos/kmns_logo_clear.png', name: 'KOLEJ MATRIKULASI NEGERI SEMBILAN', reach: 0.5041 },
 } as const;
 
 const SIZES = {
@@ -70,11 +72,12 @@ export function InstitutionSeal({
   const animate = stampIn && !calm;
 
   // radii (viewBox units): the ring size keeps room for the letterpress, the small sizes give the crest the space
-  // R32: the crest is the point of the seal, so it takes most of the disc (its shield corners may rest on the band)
+  // R32: the crest is the point of the seal, so it takes most of the disc. Owner: it must never cross the disc's ink
+  // line onto the band, so its furthest pixel stays 1.5 units inside that line (the 2-unit stroke's inner edge)
   const band = ring ? 37 : 53;
   const disc = ring ? 31 : 46;
   const textR = 46;
-  const crestD = ring ? 56 : 84;
+  const crestD = Math.min(ring ? 56 : 84, (disc - 2.5) / c.reach);
   const pos = (d: number) => ({
     left: `${((C - d / 2) / V) * 100}%`,
     top: `${((C - d / 2) / V) * 100}%`,
