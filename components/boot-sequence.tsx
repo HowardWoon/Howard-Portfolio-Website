@@ -5,9 +5,16 @@ const BootedContext = createContext(true);
 export const useBooted = () => useContext(BootedContext);
 import { m, AnimatePresence } from 'framer-motion';
 import { useLatest } from '@/lib/use-latest';
-import { FX, prefersReducedMotion } from '@/lib/fx';
+import { FX, prefersReducedMotion, SPRING_STAMP } from '@/lib/fx';
+import { SECTIONS } from '@/lib/sections';
 import { bootShatter } from './fx/boot-shatter';
 import { useScrollLock } from '@/lib/use-scroll-lock';
+
+/** boot log (owner R43): one line per home-page section, mounted one at a time, then the shatter (~2.5 s in all) */
+const LINE_MS = 380;
+const SETTLE_MS = 200; // all lines [OK] -> 'complete'
+const EXIT_MS = 450; // 'complete' -> shatter
+const FAST_EXIT_MS = 250; // fast-forward: 'complete' -> shatter
 
 declare global {
   interface Window {
@@ -68,7 +75,7 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
     } catch {}
   }, []);
   const [bootState, setBootState] = useState<'idle' | 'booting' | 'complete'>('idle');
-  const [progress, setProgress] = useState(0);
+  const [step, setStep] = useState(0); // sections mounted so far (0 .. SECTIONS.length)
   const timers = useRef<number[]>([]);
   const justBooted = useRef(false); // true only right after the visitor clicks the gate
   const [mounted, setMounted] = useState(false);
@@ -145,21 +152,42 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
 
     setBootState('booting');
 
-    const progressInterval = window.setInterval(() => {
-      setProgress((p) => Math.min(100, p + Math.random() * 15));
-    }, 100);
-
-    const t1 = window.setTimeout(() => {
-      clearInterval(progressInterval);
-      setProgress(100);
-      setBootState('complete');
-
-      const t2 = window.setTimeout(finish, 800);
-      timers.current.push(t2);
-    }, 2000);
-
-    timers.current.push(progressInterval, t1);
+    // one timer per log line (no interval, no random jumps): the bar always fills one segment per section
+    SECTIONS.forEach((_, i) => timers.current.push(window.setTimeout(() => setStep(i + 1), LINE_MS * (i + 1))));
+    timers.current.push(
+      window.setTimeout(
+        () => {
+          setBootState('complete');
+          timers.current.push(window.setTimeout(finish, EXIT_MS));
+        },
+        LINE_MS * SECTIONS.length + SETTLE_MS,
+      ),
+    );
   }
+
+  /** any key or tap while the log runs: every line [OK] at once, then the shatter */
+  function fastForward() {
+    timers.current.forEach((t) => clearTimeout(t));
+    timers.current = [];
+    setStep(SECTIONS.length);
+    setBootState('complete');
+    timers.current.push(window.setTimeout(finish, FAST_EXIT_MS));
+  }
+  const fastForwardRef = useLatest(fastForward);
+  useEffect(() => {
+    if (bootState !== 'booting') return;
+    // added after the click that started the boot, so that click (or its Enter keydown) never fast-forwards itself
+    const onKey = (e: KeyboardEvent) => {
+      if (!e.repeat) fastForwardRef.current();
+    };
+    const onTap = () => fastForwardRef.current();
+    window.addEventListener('keydown', onKey);
+    window.addEventListener('pointerdown', onTap);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('pointerdown', onTap);
+    };
+  }, [bootState, fastForwardRef]);
 
   return (
     <BootedContext.Provider value={!showBoot}>
@@ -217,20 +245,60 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
               )}
 
               {bootState !== 'idle' && (
-                <div key="booting" className="w-[min(22rem,80vw)] flex flex-col items-center gap-4">
-                  <div
-                    className="h-7 w-full bg-white border-3 border-ink rounded-full overflow-hidden shadow-brutal"
-                    role="progressbar"
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-valuenow={Math.floor(progress)}
-                  >
+                <div
+                  key="booting"
+                  data-boot-log
+                  className="nb-card w-[min(26rem,calc(100vw-3rem))] p-3 xs:p-4 sm:p-5 flex flex-col gap-4 font-mono text-ink"
+                >
+                  <p className="text-xs sm:text-sm font-extrabold tracking-[0.08em]">&gt; HOWARD.WOON // SYSTEM BOOT</p>
+                  {/* one line per section; mint = LIVE (SIGNAL KEY): the section is up */}
+                  <ol role="log" aria-live="polite" className="flex flex-col gap-2 text-xs sm:text-sm font-bold">
+                    {SECTIONS.slice(0, Math.min(step + 1, SECTIONS.length)).map((s, i) => (
+                      <li key={s.id} data-boot-line={s.id} className="flex items-center gap-2 min-w-0">
+                        <span className="shrink-0">&gt; mount {s.label.toUpperCase()}</span>
+                        <span aria-hidden className="flex-1 min-w-2 border-b-2 border-dotted border-ink" />
+                        {i < step ? (
+                          <m.span
+                            data-boot-ok
+                            initial={{ scale: 1.35, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={SPRING_STAMP}
+                            className="nb-tag bg-pop-mint py-0.5 shrink-0 whitespace-nowrap"
+                          >
+                            OK
+                          </m.span>
+                        ) : (
+                          <span className="nb-tag bg-white py-0.5 shrink-0 whitespace-nowrap" aria-hidden>
+                            ..
+                          </span>
+                        )}
+                      </li>
+                    ))}
+                  </ol>
+                  <div className="flex items-center gap-3">
                     <div
-                      className="h-full bg-pop-blue border-r-3 border-ink transition-all duration-100 ease-out"
-                      style={{ width: `${progress}%` }}
-                    />
+                      className="flex-1 flex gap-1 h-7 p-1 bg-white border-3 border-ink rounded-full overflow-hidden"
+                      role="progressbar"
+                      aria-label="System boot"
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={Math.round((step / SECTIONS.length) * 100)}
+                    >
+                      {SECTIONS.map((s, i) => (
+                        <span key={s.id} className="flex-1 overflow-hidden first:rounded-l-full last:rounded-r-full">
+                          <span
+                            className={`block h-full bg-ink origin-left transition-transform duration-300 ease-out ${i < step ? 'scale-x-100' : 'scale-x-0'}`}
+                          />
+                        </span>
+                      ))}
+                    </div>
+                    <span className="nb-tag bg-white tabular-nums min-w-[4.5rem] justify-center">
+                      {Math.round((step / SECTIONS.length) * 100)}%
+                    </span>
                   </div>
-                  <span className="nb-tag bg-white">Initializing... {Math.floor(progress)}%</span>
+                  <p className="text-xs font-semibold uppercase tracking-[0.08em] text-center">
+                    Press any key or tap to jump ahead
+                  </p>
                 </div>
               )}
             </div>

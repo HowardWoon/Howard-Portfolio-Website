@@ -22,6 +22,45 @@ test('gate shows again on every refresh and the page then starts at the hero', a
   await expect(page.locator('#hero h1, #hero h2').first()).toBeInViewport();
 });
 
+// R43 (owner: the two gate buttons "function the same"): Initialize runs a boot log, one [OK] line per home-page
+// section on a segmented bar; any key or tap fast-forwards it; Skip intro goes straight in with no log
+test('Initialize runs the boot log: every section mounts [OK], the bar fills, then the site', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: /initialize system/i }).click();
+  const log = page.locator('[data-boot-log]');
+  await expect(log).toBeVisible();
+  await expect(log.locator('[data-boot-line]').first()).toHaveAttribute('data-boot-line', 'about');
+  await expect(log.locator('[data-boot-ok]')).toHaveCount(5, { timeout: 5000 });
+  expect(
+    await log.locator('[data-boot-line]').evaluateAll((l) => l.map((e) => e.getAttribute('data-boot-line'))),
+  ).toEqual(['about', 'projects', 'experience', 'honors', 'contact']);
+  await expect(log.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '100');
+  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 5000 });
+});
+
+test('a key or tap during the boot log jumps ahead; Skip intro never shows the log', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: /initialize system/i }).click();
+  await expect(page.locator('[data-boot-log]')).toBeVisible();
+  const t0 = Date.now();
+  await page.keyboard.press('Space');
+  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 5000 });
+  expect(Date.now() - t0, 'fast-forward beats the ~2.5 s full log').toBeLessThan(1800);
+
+  await page.reload();
+  await page.mouse.click(5, 5); // a stray tap on the idle gate does nothing
+  await expect(page.locator('.boot-overlay')).toBeVisible();
+  await page.getByRole('button', { name: /initialize system/i }).click();
+  await expect(page.locator('[data-boot-log]')).toBeVisible();
+  await page.mouse.click(20, 20);
+  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 2000 });
+
+  await page.reload();
+  await page.getByRole('button', { name: /skip intro/i }).click();
+  await expect(page.locator('[data-boot-log]')).toHaveCount(0);
+  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 5000 });
+});
+
 // R35: at 4x CPU the tap lands before hydration and the browser's own jump to #contact used to arrive after the jump
 // to the top (the page ended at Contact); the head script now drops the hash before the browser can scroll to it
 test('a /#contact link still shows the gate first, then the hero at the top (slow phone, 4x CPU)', async ({
