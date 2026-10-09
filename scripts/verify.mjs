@@ -100,7 +100,9 @@ if (!args.has('--no-build')) {
 }
 
 // 5. E2E
-if (args.has('--e2e')) run('e2e (playwright)', 'npm run test:e2e', { timeoutMin: 15 });
+// CI=1 runs Playwright with one worker (playwright.config.ts), which takes longer than 15 min for the full suite on a
+// busy local machine (owner-approved: `CI=1 git push` must be able to finish); the normal 3-worker run keeps 15 min
+if (args.has('--e2e')) run('e2e (playwright)', 'npm run test:e2e', { timeoutMin: process.env.CI ? 40 : 15 });
 
 // Summary table
 const line = (r) => `| ${r.name} | ${r.ok ? 'PASS' : 'FAIL'} | ${r.status} | ${r.secs}s |`;
