@@ -128,7 +128,7 @@ export const FX = {
   movableType: true, // T1 section-title words are cast mirrored and flip readable as they rise
   odometer: true, // T2 stat numbers roll in on mechanical digit wheels
   kerningBreath: true, // T3 a focused key / chip label squeezes and springs back (keyboard focus)
-  cropMarks: true, // C1 printer's crop marks + a registration target on the inspected card
+  cropMarks: true, // C1 printer's crop marks on the inspected card (corners only)
   paperWeight: true, // C2 pressing a card pushes it into the desk
   pressLever: true, // N1 the section rail's lever scrubs the page like a video timeline (>= 1400 px)
   sheetFeed: true, // N2 portfolio <-> simulator: the page is fed out of the press in pulls

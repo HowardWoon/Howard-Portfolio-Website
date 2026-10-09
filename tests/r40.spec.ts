@@ -117,6 +117,8 @@ test('hover a card: crop marks print and the cursor becomes a registration targe
   const b = (await card.boundingBox())!;
   await page.mouse.move(b.x + b.width * 0.5, b.y + 150, { steps: 4 });
   await expect(crop).toHaveCSS('opacity', '1');
+  // owner request: no registration target on the card's top edge, only the corner marks
+  expect(await crop.evaluate((e) => getComputedStyle(e, '::after').content)).toBe('none');
   await expect(page.locator('.fx-cursor')).toHaveAttribute('data-cursor-mode', 'target');
   await expect(page.locator('[data-cursor-target]')).toHaveCount(1);
 });

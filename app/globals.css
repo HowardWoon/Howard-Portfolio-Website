@@ -4718,7 +4718,8 @@ html[data-motion='calm'] [data-plate] {
 }
 
 /* C1 Crop Marks: hover (mouse / pen), keyboard focus inside, or a tap (data-inspect) prints crop marks in the card's
-   corners and a registration target on its top edge. Ink only, drawn by one element (.fx-crop) per card. */
+   corners. Ink only, drawn by one element (.fx-crop) per card. No registration target on the top edge (owner request:
+   it sat on the header text). */
 .fx-crop {
   position: absolute;
   inset: 12px;
@@ -4741,21 +4742,6 @@ html[data-motion='calm'] [data-plate] {
     linear-gradient(#0a0a0a, #0a0a0a) left bottom / 3px 20px no-repeat,
     linear-gradient(#0a0a0a, #0a0a0a) right bottom / 20px 3px no-repeat,
     linear-gradient(#0a0a0a, #0a0a0a) right bottom / 3px 20px no-repeat;
-}
-.fx-crop::after {
-  content: '';
-  position: absolute;
-  top: -10px;
-  left: 50%;
-  width: 20px;
-  height: 20px;
-  margin-left: -10px;
-  border: 3px solid #0a0a0a;
-  border-radius: 50%;
-  background:
-    linear-gradient(#0a0a0a, #0a0a0a) center / 3px 100% no-repeat,
-    linear-gradient(#0a0a0a, #0a0a0a) center / 100% 3px no-repeat,
-    #ffffff;
 }
 @media (hover: hover) and (pointer: fine) {
   html:not(.fx-off-cropMarks) [data-crop]:hover > .fx-crop {
