@@ -40,7 +40,7 @@ const CARDS = [
     logo: 'kraiburg',
   },
   { id: 'pekom', name: 'Persatuan Komputer Universiti Malaya (PEKOM)', place: 'Universiti Malaya', logo: 'pekom' },
-  { id: 'kmns', name: 'KMNS PAL Leader Club', place: 'Kolej Matrikulasi Negeri Sembilan', logo: null },
+  { id: 'kmns', name: 'KMNS PAL Leader Club', place: 'Kolej Matrikulasi Negeri Sembilan', logo: 'kmns' },
 ] as const;
 
 for (const [name, size, touch] of [
@@ -68,7 +68,9 @@ for (const [name, size, touch] of [
           const img = mark.locator(`[data-org-logo="${c.logo}"] img`);
           await expect(img).toHaveCount(1);
           await expect.poll(() => img.evaluate((i: HTMLImageElement) => i.complete && i.naturalWidth > 0)).toBe(true);
-        } else await expect(mark.locator('[data-seal="kmns"]')).toHaveCount(1);
+        }
+        // R50: no card frames its mark in a Registrar Seal - the plain logo sits on the white window
+        await expect(mark.locator('[data-seal]')).toHaveCount(0);
         // nothing in the plate is cut off or spills out of the card
         const fit = await plate.evaluate((p) => {
           const pr = p.getBoundingClientRect();
@@ -234,7 +236,10 @@ test.describe('desktop 1440', () => {
     const pit = page.locator('[data-pill-pit] > div[aria-hidden]');
     const inside = () =>
       pit.evaluate((box) =>
+        // (R52: a badge the pit has no room for at this width is hidden and out of the physics; on a 1440 px desktop
+        // every one of the 27 fits)
         [...box.querySelectorAll<HTMLElement>(':scope > span')].every((e) => {
+          if (e.style.visibility === 'hidden') return false; // none may be left out here
           const m = new DOMMatrix(getComputedStyle(e).transform);
           return (
             m.m41 >= -1 &&
@@ -299,3 +304,42 @@ test.describe('desktop 1440', () => {
     await expect(page.locator('[data-scene="0"]')).toHaveCount(1); // the press did not jump the story
   });
 });
+
+// R52: found by measuring the bigger pile, not by a visitor. A badge left above a full pile was steered to the MIDDLE of
+// the pit (where the full column stands) and stayed above the ceiling, out of sight: 3 of 8 desktop drops, 6 of 6 on a
+// 280 px Fold. It is now steered to where the pile is lowest, and a narrow pit drops only what it can hold.
+for (const [name, w, h, min] of [
+  ['desktop 1440', 1440, 900, 27],
+  ['tablet 768', 768, 1024, 14],
+  ['phone 390', 390, 844, 14],
+  ['fold 280', 280, 653, 14],
+] as const) {
+  test(`badge pit: every badge that is dropped lands inside the pit, none rests above the ceiling (${name})`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: w, height: h });
+    await home(page);
+    for (let round = 0; round < 3; round++) {
+      await toEl(page, '[data-pill-pit]', 80);
+      if (round) await page.getByRole('button', { name: 'DROP AGAIN' }).click();
+      const state = () =>
+        page.locator('[data-pill-pit] > div[aria-hidden]').evaluate((box) => {
+          const shown = [...box.querySelectorAll<HTMLElement>(':scope > span')].filter(
+            (e) => e.style.visibility !== 'hidden',
+          );
+          const outside = shown.filter((e) => {
+            const m = new DOMMatrix(getComputedStyle(e).transform);
+            return (
+              m.m41 < -1 ||
+              m.m42 < -1 ||
+              m.m41 + e.offsetWidth > box.clientWidth + 1 ||
+              m.m42 + e.offsetHeight > box.clientHeight + 1
+            );
+          });
+          return { shown: shown.length, outside: outside.map((e) => e.textContent) };
+        });
+      await expect.poll(async () => (await state()).outside, { timeout: 20_000 }).toEqual([]);
+      expect((await state()).shown, `round ${round}`).toBeGreaterThanOrEqual(min);
+    }
+  });
+}

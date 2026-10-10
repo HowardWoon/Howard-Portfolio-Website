@@ -191,6 +191,8 @@ export const experiences: ExperienceItem[] = [
     period: '2024',
     icon: GraduationCap,
     crest: 'kmns',
+    // R50 (owner): the plate shows the plain logo, no seal frame (the crest key stays for anything that still seals it)
+    logo: 'kmns',
     signal: 'academic',
     headline: 'Algorithmic Problem Solving & Object-Oriented Tutoring',
     bullets: [
@@ -850,10 +852,10 @@ export default function ExperienceSection() {
                           >
                             <span
                               data-org-mark
-                              className="grid h-[5.5rem] w-full shrink-0 place-items-center rounded-xl border-2 border-ink bg-white sm:w-[8.5rem]"
+                              className="relative grid h-[5.5rem] w-full shrink-0 place-items-center rounded-xl border-2 border-ink bg-white sm:w-[8.5rem]"
                             >
                               {item.logo ? (
-                                <OrgLogo org={item.logo} bare className="px-2" imgClassName="max-h-[4.25rem]" />
+                                <OrgLogo org={item.logo} bare />
                               ) : item.crest ? (
                                 <InstitutionSeal crest={item.crest} size="stamp" />
                               ) : (

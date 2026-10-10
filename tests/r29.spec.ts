@@ -95,7 +95,10 @@ test.describe('KMNS gallery desk (1440)', () => {
     expect(box.width).toBeLessThan(cardBox.width * 0.5); // a desk column, not a full-width poster
     expect(box.x).toBeGreaterThan(cardBox.x + cardBox.width * 0.5);
     await expect(card.getByRole('group', { name: 'Mentorship gallery' })).toHaveCount(1);
-    await expect(card.locator('[data-seal="kmns"]')).toHaveCount(1);
+    // R50 (owner: "why the kmns logo still got the border? remove it, i want cleanly show the kmns logo only"): the
+    // card's organisation plate shows the plain KMNS logo on white, with no Registrar Seal frame around it
+    await expect(card.locator('[data-seal="kmns"]')).toHaveCount(0);
+    await expect(card.locator('[data-org-plate] [data-org-logo="kmns"] img')).toHaveCount(1);
 
     // the filmstrip jumps straight to photo 3 (the portrait one): the print takes its real 960x1280 shape
     await card.getByRole('button', { name: 'Go to photo 3 of 6' }).click();

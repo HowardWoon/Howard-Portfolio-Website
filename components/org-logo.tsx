@@ -10,6 +10,9 @@ import Image from 'next/image';
 export const ORG_LOGOS = {
   kraiburg: { src: '/images/logos/kraiburg_logo.jpg', w: 400, h: 188 },
   pekom: { src: '/images/logos/pekom_logo.png', w: 403, h: 91 },
+  // R50 (owner: "why the kmns logo still got the border? remove it, i want cleanly show the kmns logo only"): on the
+  // Experience organisation plate the KMNS logo is shown plain, like the two wordmarks, not inside the Registrar Seal
+  kmns: { src: '/images/logos/kmns_logo_clear.png', w: 200, h: 200 },
 } as const;
 export type OrgLogoKey = keyof typeof ORG_LOGOS;
 
@@ -17,21 +20,18 @@ export type OrgLogoKey = keyof typeof ORG_LOGOS;
 export function orgLogoFor(text: string): OrgLogoKey | null {
   if (/kraiburg/i.test(text)) return 'kraiburg';
   if (/pekom/i.test(text)) return 'pekom';
-  return null;
+  return null; // 'kmns' is placed explicitly (the Experience plate); KMNS awards keep their Registrar Seal
 }
 
 export function OrgLogo({
   org,
   className = '',
-  imgClassName = 'max-h-12',
   bare = false,
 }: {
   org: OrgLogoKey;
-  /** the white window (size it here) */
+  /** the white window: give it a width and a height here (the mark is fitted inside it) */
   className?: string;
-  /** the wordmark's height cap inside the window */
-  imgClassName?: string;
-  /** only the wordmark, for a parent that is already the white window */
+  /** only the mark, filling a parent that is already the white window (the parent must be `relative`) */
   bare?: boolean;
 }) {
   const l = ORG_LOGOS[org];
@@ -40,10 +40,13 @@ export function OrgLogo({
       data-org-logo={org}
       className={
         bare
-          ? `inline-grid place-items-center ${className}`
-          : `inline-grid shrink-0 place-items-center rounded-xl border-2 border-ink bg-white px-2.5 py-2 ${className}`
+          ? `absolute inset-0 ${className}`
+          : `relative inline-block shrink-0 rounded-xl border-2 border-ink bg-white ${className}`
       }
     >
+      {/* The mark is pinned inside the window with a fixed margin and fitted by object-contain, so it can neither
+          spill out of the window (a percentage height inside an auto grid track fell back to the file's 200 px and
+          the KMNS logo overflowed) nor stay at its file size on a scaled-up canvas (R50). */}
       <Image
         src={l.src}
         alt=""
@@ -51,7 +54,7 @@ export function OrgLogo({
         height={l.h}
         sizes="160px"
         draggable={false}
-        className={`h-auto w-auto max-w-full object-contain ${imgClassName}`}
+        className="absolute inset-[0.45rem] h-[calc(100%-0.9rem)] w-[calc(100%-0.9rem)] object-contain"
       />
     </span>
   );

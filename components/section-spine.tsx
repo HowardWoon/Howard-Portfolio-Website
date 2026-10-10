@@ -91,7 +91,10 @@ export function SectionSpine() {
     let ps: number[] = [0, 0];
     const READING_LINE = 0.45; // share of the screen height where a section takes over (lib/section-clock.ts)
     const size = () => {
-      trackH = Math.max(0, nav.clientHeight - 40);
+      // the track is the lever's own box (sized in rem: it follows the R50 large-canvas scale)
+      const track = head.parentElement as HTMLElement;
+      trackH = Math.max(0, track.clientHeight);
+      const trackTop = track.offsetTop;
       const vh = window.innerHeight;
       const end = Math.max(1, document.documentElement.scrollHeight - vh);
       const y: number[] = [0];
@@ -103,7 +106,7 @@ export function SectionSpine() {
         for (let n: HTMLElement | null = el; n; n = n.offsetParent as HTMLElement | null) top += n.offsetTop;
         // strictly rising, inside the page and the track
         y.push(Math.min(end - 1, Math.max(y[y.length - 1] + 1, top - vh * READING_LINE)));
-        p.push(Math.min(trackH, Math.max(p[p.length - 1], a.offsetTop + a.offsetHeight / 2 - 20)));
+        p.push(Math.min(trackH, Math.max(p[p.length - 1], a.offsetTop + a.offsetHeight / 2 - trackTop)));
       });
       y.push(end);
       p.push(trackH);
@@ -241,7 +244,8 @@ export function SectionSpine() {
             key={s.id}
             href={`#${s.id}`}
             aria-current={on ? 'location' : undefined}
-            className="group relative flex items-center justify-center min-h-[40px] min-w-[40px] outline-none"
+            // R50: sizes in rem (1rem = 17 px where the rail shows), so the rail follows the large-canvas scale
+            className="group relative flex items-center justify-center min-h-[2.353rem] min-w-[2.353rem] outline-none"
           >
             <span
               className={`pointer-events-none absolute right-[calc(100%+22px)] top-1/2 -translate-y-1/2 whitespace-nowrap font-mono text-xs font-extrabold uppercase tracking-[0.1em] px-2 py-1 border-2 border-ink rounded-md bg-white shadow-brutal-xs transition-[opacity,transform] duration-200 ${
@@ -260,7 +264,7 @@ export function SectionSpine() {
               data-preview={preview ? 'true' : undefined}
               // R45: an upright numbered key. The current one is ink with a white number and fills blue from the bottom
               // with reading progress (blue = where you are; white reads on ink and on blue); hover = blue tint
-              className={`sp-mag relative grid place-items-center overflow-hidden w-[30px] h-[30px] rounded-lg ${on ? 'bg-ink text-white' : preview ? 'bg-[#E3E8FF] text-ink' : 'bg-white text-ink group-hover:bg-[#E3E8FF]'} ${preview ? 'scale-110' : ''} border-3 border-ink font-mono text-xs font-extrabold leading-none tabular-nums transition-colors duration-200 group-focus-visible:ring-2 group-focus-visible:ring-pop-blue`}
+              className={`sp-mag relative grid place-items-center overflow-hidden w-[1.765rem] h-[1.765rem] rounded-lg ${on ? 'bg-ink text-white' : preview ? 'bg-[#E3E8FF] text-ink' : 'bg-white text-ink group-hover:bg-[#E3E8FF]'} ${preview ? 'scale-110' : ''} border-3 border-ink font-mono text-xs font-extrabold leading-none tabular-nums transition-colors duration-200 group-focus-visible:ring-2 group-focus-visible:ring-pop-blue`}
             >
               {/* FX-99: the active marker fills with the section's reading progress (Section Clock writes --sp) */}
               {FX.instrumentRail && on ? <SpFill forId={s.id} className="fx-sp-fill" /> : null}

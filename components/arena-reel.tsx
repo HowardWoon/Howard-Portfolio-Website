@@ -189,11 +189,7 @@ function TicketLink({
           // stays as hidden text (and in the link's accessible name), so nothing is lost
           <>
             <span className="sr-only">{item.name}</span>
-            <OrgLogo
-              org={logo}
-              className="relative h-9 w-[94%] px-1.5 py-1 xs:h-10 sm:h-14"
-              imgClassName="max-h-6 xs:max-h-7 sm:max-h-10"
-            />
+            <OrgLogo org={logo} className="relative h-9 w-[94%] px-1.5 py-1 xs:h-10 sm:h-14" />
           </>
         ) : (
           <span

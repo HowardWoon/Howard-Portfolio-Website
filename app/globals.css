@@ -4392,7 +4392,9 @@ html[data-motion='calm'] .honors-tally .tally-trophy g:first-child {
 .cert-deck {
   position: relative;
   width: min(380px, 100%);
-  padding: 22px 0 0 30px;
+  /* room for the fan INSIDE the deck's own box, so no card can reach a neighbour: the third card sits 28 px left and
+     22 px up, and its 4.4 degree tilt lifts its far corner about 14 px more and swings its near edge about 12 px out */
+  padding: 40px 0 0 44px;
 }
 .cert-deck-stack {
   position: relative;
@@ -4416,7 +4418,11 @@ html[data-motion='calm'] .honors-tally .tally-trophy g:first-child {
   box-shadow: 5px 5px 0 0 var(--ink);
   text-align: left;
   cursor: pointer;
-  transform: translate(calc(var(--depth) * -14px), calc(var(--depth) * -11px)) rotate(calc(var(--depth) * -2.2deg));
+  /* R52 (owner: "why the gallery overlap? ... must not always overlap with the other element"): the deck holds 9
+     certificates now. Every card used to fan further out (card 6 sat 70 px up at 11 degrees, over the text box
+     above). Only the front three fan (the look the deck had with three cards); the rest wait under the third. */
+  --fan: min(var(--depth), 2);
+  transform: translate(calc(var(--fan) * -14px), calc(var(--fan) * -11px)) rotate(calc(var(--fan) * -2.2deg));
   transition: transform 0.55s cubic-bezier(0.34, 1.4, 0.64, 1);
 }
 .cert-card[aria-hidden='true'] {
@@ -5035,22 +5041,23 @@ html.fx-portal:not(.fx-off-sheetFeed)::view-transition-new(root) {
    edge, so it never covers a key */
 .fx-lever-track {
   position: absolute;
-  left: -14px;
-  width: 14px;
-  top: 20px;
-  bottom: 20px;
+  left: -0.8235rem;
+  width: 0.8235rem;
+  top: 1.1765rem;
+  bottom: 1.1765rem;
   pointer-events: none;
 }
 .fx-lever-head {
   position: absolute;
   left: 0;
   right: 0;
-  top: -5px;
-  height: 10px;
-  border: 2px solid #0a0a0a;
-  border-right: 0;
-  border-radius: 3px 0 0 3px;
-  background: var(--pop-blue);
+  top: -0.294rem;
+  height: 0.588rem;
+  /* R52 (owner: "why there is the blue stick hiding behind the menu bar? so weird and ugly"): the playhead is no
+     longer drawn. The dark key already shows the current section; this box only carries the label that appears
+     while the rail is being dragged. */
+  border: 0;
+  background: transparent;
   will-change: transform;
 }
 .fx-lever-flag {
@@ -5070,29 +5077,56 @@ nav[data-scrubbing] {
   cursor: grabbing;
 }
 
-/* R49 hero mascot (components/hero-mascot.tsx): the page-mascot cat sits on the top edge of the hero's award ticker.
-   Die-cut sticker look: a white edge and a hard ink shadow, both zero-blur drop-shadows that follow the cut-out. */
-.hero-mascot {
-  position: absolute;
-  right: 1.25rem;
-  top: 0;
-  z-index: 30;
-  translate: 0 -72%;
+/* R49 / R52 mascot (components/hero-mascot.tsx): the page-mascot cat, fixed in the bottom-left corner of the window.
+   Die-cut sticker look: a white edge and a hard ink shadow, both zero-blur drop-shadows that follow the cut-out.
+   z 80: above the page, under the section dock (90), the header, the proof tray and every dialog. */
+.site-mascot {
+  position: fixed;
+  /* the true bottom-left corner of the window at every size (owner's drawing). Below 1280 px the section dock used to
+     sit here: it now starts right of the cat (--cat-clear, read by components/section-dock.tsx). */
+  left: max(0.75rem, var(--safe-left));
+  bottom: max(0.75rem, calc(var(--safe-bottom) + 0.25rem));
+  z-index: 80;
+  line-height: 0;
   filter: drop-shadow(2px 0 0 #ffffff) drop-shadow(-2px 0 0 #ffffff) drop-shadow(0 2px 0 #ffffff)
     drop-shadow(0 -2px 0 #ffffff) drop-shadow(3px 3px 0 #0a0a0a);
-  animation: hero-mascot-in 420ms var(--ease-snap) both;
+  animation: site-mascot-in 420ms var(--ease-snap) both;
+  /* a 72 px box drawn at 56 px: small enough to live in the page gutter and not sit on the content */
+  scale: 0.78;
+  transform-origin: 0 100%;
 }
-.hero-mascot-key {
+:root {
+  /* where the dock starts: the cat's left edge + its drawn width + a 6 px gap */
+  --cat-clear: calc(max(0.75rem, var(--safe-left)) + 56px + 6px);
+}
+/* very narrow phones (Galaxy Fold, 280 px): a 44 px cat, so the dock and back-to-top still fit beside it */
+@media (max-width: 359px) {
+  .site-mascot {
+    scale: 0.61;
+  }
+  :root {
+    --cat-clear: calc(max(0.75rem, var(--safe-left)) + 44px + 4px);
+  }
+}
+/* wide screens have a real gutter: the cat at its full 72 px */
+@media (min-width: 1536px) {
+  .site-mascot {
+    left: 1rem;
+    bottom: 1rem;
+    scale: 1;
+  }
+}
+.site-mascot-key {
   border-radius: 9999px;
   outline: none;
   -webkit-tap-highlight-color: transparent;
 }
-.hero-mascot-key:focus-visible {
+.site-mascot-key:focus-visible {
   outline: 4px solid var(--pop-blue);
   outline-offset: 2px;
 }
-/* the pop-in animates `transform`, so the phone size (the `scale` property below) is left alone */
-@keyframes hero-mascot-in {
+/* the pop-in animates `transform`, so the sizes above (the `scale` property) are left alone */
+@keyframes site-mascot-in {
   from {
     transform: scale(0.4);
     opacity: 0;
@@ -5102,25 +5136,149 @@ nav[data-scrubbing] {
     opacity: 1;
   }
 }
-/* phones: a smaller cat, still a 60 px tap target */
-@media (max-width: 639px) {
-  .hero-mascot {
-    scale: 0.78;
-    transform-origin: 100% 100%;
-    right: 0.75rem;
-    translate: 0 -66%;
-  }
-}
 @media (prefers-reduced-motion: reduce) {
-  .hero-mascot {
+  .site-mascot {
     animation: none;
   }
 }
-html[data-motion='calm'] .hero-mascot {
+html[data-motion='calm'] .site-mascot {
   animation: none;
 }
 @media print {
-  .hero-mascot {
+  .site-mascot {
     display: none;
+  }
+}
+
+/* ================================================================ R50 zoom support (owner: "when user zoom in or zoom
+   out of my website, everything would fail ... make sure viewer must have best experience")
+
+   ZOOMED OUT. Browser zoom-out makes the window bigger in CSS px (25 % on a 1920 px screen = 7,680 px wide). The page
+   kept its 1,230 px column and its fixed pixel sizes, so it shrank to a small cluster in an empty window. Above about
+   2,400 x 1,150 the layout now grows with the window in steps (--u): the root font size scales, so everything sized in
+   rem follows (text, cards, containers, the header), and the few parts sized in fixed px take the same factor below.
+   Steps need BOTH the width and the height, so an ultra-wide but short window is never scaled past its height.
+   Nothing here applies below 2,400 px wide: laptops, tablets and phones are untouched.
+   Tried and rejected: `zoom` on the root (pointer and scroll coordinates stop agreeing: the cursor landed 4x away). */
+:root {
+  --u: 1;
+}
+@media (min-width: 2400px) and (min-height: 1150px) {
+  :root {
+    --u: 1.25;
+  }
+  html {
+    font-size: calc(106.25% * 1.25);
+  }
+}
+@media (min-width: 2880px) and (min-height: 1400px) {
+  :root {
+    --u: 1.5;
+  }
+  html {
+    font-size: calc(106.25% * 1.5);
+  }
+}
+@media (min-width: 3840px) and (min-height: 1850px) {
+  :root {
+    --u: 2;
+  }
+  html {
+    font-size: calc(106.25% * 2);
+  }
+}
+@media (min-width: 4800px) and (min-height: 2350px) {
+  :root {
+    --u: 2.5;
+  }
+  html {
+    font-size: calc(106.25% * 2.5);
+  }
+}
+@media (min-width: 5760px) and (min-height: 2800px) {
+  :root {
+    --u: 3;
+  }
+  html {
+    font-size: calc(106.25% * 3);
+  }
+}
+@media (min-width: 7680px) and (min-height: 3700px) {
+  :root {
+    --u: 4;
+  }
+  html {
+    font-size: calc(106.25% * 4);
+  }
+}
+/* the parts sized in fixed px take the same factor */
+@media (min-width: 2400px) and (min-height: 1150px) {
+  /* hero: its 1440 px column, the portrait's height cap (660 px), and with it its width and the ticker */
+  .hero-wrap {
+    max-width: calc(1440px * var(--u));
+  }
+  .hero-fit {
+    --hero-ph: max(300px, min(calc(660px * var(--u)), calc(100svh - var(--header-h) - 9.75rem)));
+  }
+  .site-mascot {
+    scale: var(--u);
+  }
+  /* The Build: every size cap on the stage */
+  .bs-stage {
+    --top: calc(var(--header-h, 72px) + 56px * var(--u));
+    --bottom: calc(104px * var(--u));
+    --card-w: min(calc(420px * var(--u)), 86vw);
+    --code-w: min(calc(470px * var(--u)), 88vw);
+    --diag-w: min(74vw, calc(900px * var(--u)));
+  }
+  /* (the section rail is sized in rem, components/section-spine.tsx, so it follows the root font by itself) */
+  /* The Build: its three fixed-width pieces, and the certificate deck in Honors */
+  .bs-manifest {
+    width: min(calc(1120px * var(--u)), 100%);
+  }
+  .bs-release {
+    width: min(calc(600px * var(--u)), 92vw);
+  }
+  .bs-scan-bed {
+    width: min(52vmin, calc(340px * var(--u)));
+  }
+  .cert-deck {
+    width: min(calc(380px * var(--u)), 100%);
+  }
+  /* Proof Reel: a print is as tall as a ticket (10rem) minus its 36 px of frame */
+  .fx-wall-track {
+    --print-h: calc(10rem - 36px);
+  }
+  /* registrar seal (ring size is a 156 px box) and the badge pit's fixed height */
+  .registrar-seal[data-seal-size='ring'] {
+    width: calc(156px * var(--u));
+    height: calc(156px * var(--u));
+  }
+  [data-pill-pit] > div[aria-hidden] {
+    height: calc(380px * var(--u));
+  }
+}
+
+/* From 2x up the film reels beside The Build step aside: they are calibrated to the pixel (148 px strip, 28 px plate,
+   100 px gate) around text that now scales, so they would fall apart. The ID card parks where it does without reels. */
+@media (min-width: 3840px) and (min-height: 1850px) {
+  .bs-reel {
+    display: none !important;
+  }
+  .bs-stage {
+    --id3s: 0.4;
+    --id3x: -39vw;
+    --id3y: -27vh;
+  }
+}
+
+/* ZOOMED IN. 300 - 500 % zoom on a laptop leaves a window 190 - 340 px tall, and the fixed header took 35 - 40 % of
+   it. On a window that short the header stops being fixed: it sits at the top of the page and scrolls away, so the
+   whole window shows content (WCAG 1.4.10 reflow). The mobile dock stays for navigation. Landscape phones (360 px
+   tall and more) keep the fixed header. */
+@media (max-height: 340px) {
+  /* --header-h stays as measured: the hero's top padding still clears the header at the top of the page */
+  .site-header {
+    position: absolute;
   }
 }

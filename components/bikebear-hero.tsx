@@ -10,7 +10,6 @@ import { TextRoll } from './fx/text-roll';
 import { TiltCard } from './tilt-card';
 import { toLocal } from '@/lib/to-local';
 import { SpiderReveal } from './spider-reveal';
-import { HeroMascot } from './lazy-sections';
 import { BauhausSolid } from './fx/bauhaus-solid';
 import { FX } from '@/lib/fx';
 
@@ -182,7 +181,7 @@ export default function BikebearHero() {
       </div>
 
       {/* Main Hero Body */}
-      <div className="relative flex-1 flex items-center w-full max-w-[1440px] mx-auto px-4 xs:px-5 sm:px-10 lg:px-16 pt-[calc(var(--header-h)+1.75rem)] sm:pt-[calc(var(--header-h)+3rem)] pb-14 lg:pt-[calc(var(--header-h)+clamp(1rem,3.6svh,2.75rem))] lg:pb-[clamp(1.25rem,5svh,3.5rem)] z-10">
+      <div className="hero-wrap relative flex-1 flex items-center w-full max-w-[1440px] mx-auto px-4 xs:px-5 sm:px-10 lg:px-16 pt-[calc(var(--header-h)+1.75rem)] sm:pt-[calc(var(--header-h)+3rem)] pb-14 lg:pt-[calc(var(--header-h)+clamp(1rem,3.6svh,2.75rem))] lg:pb-[clamp(1.25rem,5svh,3.5rem)] z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center w-full">
           {/* Left Column: Vision & Narrative (7 cols) */}
           <div className="lg:col-span-7 flex flex-col items-start space-y-7 lg:space-y-[clamp(0.9rem,3.2svh,1.75rem)] relative z-30 pointer-events-auto">
@@ -253,8 +252,6 @@ export default function BikebearHero() {
               style={{ '--d': 2 } as React.CSSProperties}
               className="fx-hero-in fx-hero-pop relative group flex flex-col items-center lg:items-end z-40 pointer-events-auto w-full sm:w-auto px-1 sm:px-0"
             >
-              {/* R49: the cat perches on the ticker's top edge (absolute: no layout change) */}
-              <HeroMascot />
               {/* News Ticker (Above Photo) */}
               <div
                 className="hero-ticker fx-depth w-full max-w-[350px] sm:max-w-none sm:w-[460px] lg:w-[460px] xl:w-[520px] mb-5 overflow-hidden bg-white rounded-2xl border-3 border-ink py-2.5 relative z-20 shadow-brutal pointer-events-auto"

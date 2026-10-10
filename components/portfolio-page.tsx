@@ -23,6 +23,7 @@ import {
   SectionClock,
   PressFx,
   ProofTray,
+  HeroMascot,
 } from '@/components/lazy-sections';
 import { SiteFooter } from '@/components/site-footer';
 import { AfterBoot } from '@/components/after-boot';
@@ -109,6 +110,8 @@ export function PortfolioPage() {
         </div>
 
         <ScrollToTop />
+        {/* R52 (owner): the cat mascot lives in the bottom-left corner of the window on every section, one instance */}
+        <HeroMascot />
         <ResumeDrawer />
         <FrameGovernor />
         <SectionClock />
