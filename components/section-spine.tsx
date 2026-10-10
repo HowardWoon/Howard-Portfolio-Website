@@ -83,10 +83,40 @@ export function SectionSpine() {
     const head = headRef.current;
     if (!nav || !head || !FX.pressLever) return;
     let trackH = 0;
-    let docH = 0;
+    // R45 (owner: the playhead sat beside 03 while 02 was the current key): the head moves key to key with the
+    // sections. ys = scroll positions (page top, each section taking over, page end), ps = the head's place on the
+    // track for each (track top, each key's centre, track bottom). Both rise, so y <-> p is one straight line per
+    // step; everything is measured on resize only.
+    let ys: number[] = [0, 1];
+    let ps: number[] = [0, 0];
+    const READING_LINE = 0.45; // share of the screen height where a section takes over (lib/section-clock.ts)
     const size = () => {
       trackH = Math.max(0, nav.clientHeight - 40);
-      docH = document.documentElement.scrollHeight;
+      const vh = window.innerHeight;
+      const end = Math.max(1, document.documentElement.scrollHeight - vh);
+      const y: number[] = [0];
+      const p: number[] = [0];
+      nav.querySelectorAll<HTMLAnchorElement>('a[href^="#"]').forEach((a) => {
+        const el = document.getElementById(a.getAttribute('href')!.slice(1));
+        if (!el) return;
+        let top = 0;
+        for (let n: HTMLElement | null = el; n; n = n.offsetParent as HTMLElement | null) top += n.offsetTop;
+        // strictly rising, inside the page and the track
+        y.push(Math.min(end - 1, Math.max(y[y.length - 1] + 1, top - vh * READING_LINE)));
+        p.push(Math.min(trackH, Math.max(p[p.length - 1], a.offsetTop + a.offsetHeight / 2 - 20)));
+      });
+      y.push(end);
+      p.push(trackH);
+      ys = y;
+      ps = p;
+    };
+    /** straight-line map between two rising lists */
+    const map = (v: number, from: number[], to: number[]) => {
+      if (v <= from[0]) return to[0];
+      for (let i = 1; i < from.length; i++)
+        if (v <= from[i])
+          return to[i - 1] + ((v - from[i - 1]) / Math.max(1e-6, from[i] - from[i - 1])) * (to[i] - to[i - 1]);
+      return to[to.length - 1];
     };
     size();
     const ro = new ResizeObserver(size);
@@ -95,9 +125,7 @@ export function SectionSpine() {
     let raf = 0;
     const paint = () => {
       raf = 0;
-      const { y, vh } = scrollFrame();
-      const p = Math.min(1, Math.max(0, y / Math.max(1, docH - vh)));
-      head.style.transform = `translate3d(0, ${(p * trackH).toFixed(1)}px, 0)`;
+      head.style.transform = `translate3d(0, ${map(scrollFrame().y, ys, ps).toFixed(1)}px, 0)`;
     };
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(paint);
@@ -114,8 +142,7 @@ export function SectionSpine() {
     };
     const down = (e: PointerEvent) => {
       if (e.pointerType === 'touch' || e.button !== 0) return;
-      const { y, vh } = scrollFrame();
-      start = { y: e.clientY, p: y / Math.max(1, docH - vh), id: e.pointerId };
+      start = { y: e.clientY, p: map(scrollFrame().y, ys, ps), id: e.pointerId };
     };
     const move = (e: PointerEvent) => {
       if (!start || e.pointerId !== start.id) return;
@@ -126,8 +153,8 @@ export function SectionSpine() {
         nav.setPointerCapture(e.pointerId);
         setScrubbing(true);
       }
-      const p = Math.min(1, Math.max(0, start.p + dy / Math.max(1, trackH)));
-      to(p * (docH - scrollFrame().vh), true);
+      // the head follows the pointer 1:1 along the track; the page goes to the place that head position stands for
+      to(map(Math.min(trackH, Math.max(0, start.p + dy)), ps, ys), true);
     };
     const up = (e: PointerEvent) => {
       if (!start || e.pointerId !== start.id) return;
@@ -188,12 +215,13 @@ export function SectionSpine() {
       data-at-footer={atFooter ? '' : undefined}
       data-scrubbing={scrubbing ? '' : undefined}
       title={FX.pressLever ? 'Drag along the rail to scrub the page' : undefined}
-      className={`fixed right-[max(1rem,var(--safe-right))] top-1/2 -translate-y-1/2 z-[9000] hidden min-[1400px]:flex flex-col items-center gap-1 rounded-full border-3 border-ink bg-white px-1 py-2.5 shadow-brutal-sm transition-[opacity,translate] duration-300 ${
+      className={`fixed right-[max(1rem,var(--safe-right))] top-1/2 -translate-y-1/2 z-[9000] hidden min-[1400px]:flex flex-col items-center gap-0.5 rounded-[18px] border-3 border-ink bg-white px-1 py-1.5 shadow-brutal-sm transition-[opacity,translate] duration-300 ${
         atFooter ? 'pointer-events-none opacity-0 translate-x-4' : ''
       }`}
     >
-      {/* R21: a real panel (the bare diamonds sat on the page edge and over the footer), numbered markers */}
-      <span aria-hidden className="absolute left-1/2 top-5 bottom-5 w-[3px] -translate-x-1/2 bg-ink/25" />
+      {/* R21: a real panel (the bare diamonds sat on the page edge and over the footer). R45 (owner: "so ugly ... so
+          weird the design"): numbered keys on a solid ink connector, so the rail reads without hovering */}
+      <span aria-hidden className="absolute left-1/2 top-6 bottom-6 w-[3px] -translate-x-1/2 bg-ink" />
       {FX.pressLever ? (
         <span aria-hidden className="fx-lever-track">
           <span ref={headRef} className="fx-lever-head">
@@ -216,7 +244,7 @@ export function SectionSpine() {
             className="group relative flex items-center justify-center min-h-[40px] min-w-[40px] outline-none"
           >
             <span
-              className={`pointer-events-none absolute right-[calc(100%+10px)] top-1/2 -translate-y-1/2 whitespace-nowrap font-mono text-xs font-extrabold uppercase tracking-[0.1em] px-2 py-1 border-2 border-ink rounded-md bg-white shadow-brutal-xs transition-[opacity,transform] duration-200 ${
+              className={`pointer-events-none absolute right-[calc(100%+22px)] top-1/2 -translate-y-1/2 whitespace-nowrap font-mono text-xs font-extrabold uppercase tracking-[0.1em] px-2 py-1 border-2 border-ink rounded-md bg-white shadow-brutal-xs transition-[opacity,transform] duration-200 ${
                 on
                   ? 'opacity-0 translate-x-0 min-[1680px]:opacity-100 group-hover:opacity-100 group-focus-visible:opacity-100'
                   : 'opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 group-focus-visible:opacity-100 group-focus-visible:translate-x-0'
@@ -230,11 +258,13 @@ export function SectionSpine() {
             <span
               aria-hidden
               data-preview={preview ? 'true' : undefined}
-              // R21: white marker, the current one fills blue with reading progress (blue = where you are); hover = blue tint
-              className={`sp-mag relative overflow-hidden w-[17px] h-[17px] ${on ? 'bg-white shadow-[2px_2px_0_0_#2B4BFF]' : preview ? 'bg-[#E3E8FF]' : 'bg-white'} ${preview ? 'scale-125' : ''} border-3 border-ink rotate-45 transition-colors duration-200 group-hover:bg-[#E3E8FF] group-focus-visible:ring-2 group-focus-visible:ring-pop-blue`}
+              // R45: an upright numbered key. The current one is ink with a white number and fills blue from the bottom
+              // with reading progress (blue = where you are; white reads on ink and on blue); hover = blue tint
+              className={`sp-mag relative grid place-items-center overflow-hidden w-[30px] h-[30px] rounded-lg ${on ? 'bg-ink text-white' : preview ? 'bg-[#E3E8FF] text-ink' : 'bg-white text-ink group-hover:bg-[#E3E8FF]'} ${preview ? 'scale-110' : ''} border-3 border-ink font-mono text-xs font-extrabold leading-none tabular-nums transition-colors duration-200 group-focus-visible:ring-2 group-focus-visible:ring-pop-blue`}
             >
               {/* FX-99: the active marker fills with the section's reading progress (Section Clock writes --sp) */}
               {FX.instrumentRail && on ? <SpFill forId={s.id} className="fx-sp-fill" /> : null}
+              <span className="relative">{String(i + 1).padStart(2, '0')}</span>
             </span>
           </a>
         );

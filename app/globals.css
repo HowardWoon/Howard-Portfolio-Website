@@ -4540,7 +4540,9 @@ html[data-motion='calm'] .honors-tally .tally-trophy g:first-child {
 /* R27 dock magnification on the section rail (after React Bits Dock): markers near the pointer grow, neighbours
    follow; scale only (the rail never changes size). */
 .sp-mag {
-  scale: var(--mag, 1);
+  /* R45: the keys are 30 px now (they were 17 px diamonds), so only a third of the dock growth is applied: the largest
+     key is about 35 px and stays inside the rail and clear of its neighbours (--mag itself still runs 1 to 1.55) */
+  scale: calc(1 + (var(--mag, 1) - 1) * 0.3);
   transition: scale 0.12s ease-out;
 }
 
@@ -4926,10 +4928,12 @@ html.fx-portal:not(.fx-off-sheetFeed)::view-transition-new(root) {
 }
 
 /* N1 Press Lever (components/section-spine.tsx): the blue playhead is the page position; drag the rail to scrub */
+/* R45 (owner: the bar slid across the markers and collided with them): the playhead is a tab on the rail's outer left
+   edge, so it never covers a key */
 .fx-lever-track {
   position: absolute;
-  left: 5px;
-  right: 5px;
+  left: -14px;
+  width: 14px;
   top: 20px;
   bottom: 20px;
   pointer-events: none;
@@ -4938,10 +4942,11 @@ html.fx-portal:not(.fx-off-sheetFeed)::view-transition-new(root) {
   position: absolute;
   left: 0;
   right: 0;
-  top: -4px;
-  height: 8px;
+  top: -5px;
+  height: 10px;
   border: 2px solid #0a0a0a;
-  border-radius: 3px;
+  border-right: 0;
+  border-radius: 3px 0 0 3px;
   background: var(--pop-blue);
   will-change: transform;
 }

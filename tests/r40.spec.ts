@@ -245,6 +245,53 @@ test('the section rail is a press lever: dragging scrubs the page, a click is st
   await expect.poll(() => page.evaluate(() => location.hash)).toBe('#contact');
 });
 
+// R45 (owner: the rail was "so ugly ... so weird"): numbered upright keys, a playhead that agrees with them, and a
+// hover growth that stays inside the rail
+test('section rail: numbered keys, the playhead sits on the current key, hover never bursts the rail (R45)', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await home(page);
+  const rail = page.getByRole('navigation', { name: 'Section navigation' });
+  expect(await rail.locator('.sp-mag').allTextContents()).toEqual(['01', '02', '03', '04', '05']);
+  expect(new Set(await rail.locator('.sp-mag').evaluateAll((ks) => ks.map((k) => getComputedStyle(k).rotate)))).toEqual(
+    new Set(['none']),
+  ); // upright keys, no diamonds
+  // as each section takes over (its top at the reading line), the playhead is level with that section's key
+  for (const id of ['about', 'projects', 'experience', 'honors', 'contact']) {
+    await page.evaluate((s) => {
+      let top = 0;
+      for (let n = document.getElementById(s) as HTMLElement | null; n; n = n.offsetParent as HTMLElement | null)
+        top += n.offsetTop;
+      window.scrollTo(0, top - innerHeight * 0.45 + 2);
+    }, id);
+    await expect
+      .poll(async () => {
+        const [head, key] = await Promise.all([
+          rail.locator('.fx-lever-head').boundingBox(),
+          rail.locator(`a[href="#${id}"] .sp-mag`).boundingBox(),
+        ]);
+        return Math.abs(head!.y + head!.height / 2 - (key!.y + key!.height / 2));
+      }, id)
+      .toBeLessThan(4);
+    // the playhead is a tab on the rail's outer edge: it never covers a key
+    const [head, key] = await Promise.all([
+      rail.locator('.fx-lever-head').boundingBox(),
+      rail.locator(`a[href="#${id}"] .sp-mag`).boundingBox(),
+    ]);
+    expect(head!.x + head!.width, id).toBeLessThanOrEqual(key!.x);
+  }
+  // hover: the grown key stays inside the rail's box
+  const key = rail.locator('a[href="#honors"] .sp-mag');
+  const k = (await key.boundingBox())!;
+  await page.mouse.move(k.x + k.width / 2, k.y + k.height / 2, { steps: 4 });
+  await page.waitForTimeout(300);
+  const [grown, box] = await Promise.all([key.boundingBox(), rail.boundingBox()]);
+  expect(grown!.width).toBeGreaterThan(k.width); // it still answers the mouse
+  expect(grown!.x).toBeGreaterThanOrEqual(box!.x);
+  expect(grown!.x + grown!.width).toBeLessThanOrEqual(box!.x + box!.width);
+});
+
 /* ---------------------------------------------------------------- N2 */
 test('the simulator route transition is a sheet feed (N2 keyframes present)', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
