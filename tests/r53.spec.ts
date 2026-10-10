@@ -438,7 +438,11 @@ test('every command in the palette does something', async ({ browser }) => {
   await gate(page);
   await expect(page.locator('html[data-after-boot="done"]')).toHaveCount(1, { timeout: 15_000 });
   const open = async () => {
-    await page.evaluate(() => window.dispatchEvent(new Event('open-command-palette')));
+    // the way the header's Search key does it: the request is queued if the palette has not mounted yet
+    await page.evaluate(() => {
+      (window as unknown as { __hwPaletteWanted?: boolean }).__hwPaletteWanted = true;
+      window.dispatchEvent(new Event('open-command-palette'));
+    });
     await expect(page.getByRole('dialog', { name: 'Command Palette' })).toBeVisible({ timeout: 15_000 });
   };
   const run = async (name: string) => {
@@ -493,4 +497,103 @@ test('every command in the palette does something', async ({ browser }) => {
   await run('Download');
   expect((await download).suggestedFilename()).toMatch(/\.pdf$/);
   await ctx.close();
+});
+
+/* ---------------------------------------------------------------- R54 contact desk */
+// owner (R54, the Profile and Console windows): "seems so messy, unorganised ... enhance and upgrade all this part,
+// make sure must function perfectly". Measured before: at 1024 px the Profile was 339 px wide and 1340 px tall beside
+// an 899 px Console (440 px of bare desk), and the progress rail ran out of the Console window.
+for (const [name, w, h] of [
+  ['desktop 1440x900', 1440, 900],
+  ['laptop 1280x720', 1280, 720],
+  ['tablet 1024x768', 1024, 768],
+  ['tablet 768x1024', 768, 1024],
+  ['phone 390x844', 390, 844],
+  ['fold 280x653', 280, 653],
+] as const) {
+  test(`contact desk: windows aligned, keys on equal columns, nothing outside its window (${name})`, async ({
+    page,
+  }) => {
+    test.setTimeout(90_000);
+    await page.setViewportSize({ width: w, height: h });
+    await gate(page);
+    await page.evaluate(() => {
+      const e = document.querySelector<HTMLElement>('#contact [data-window-desk]')!;
+      window.scrollTo(0, e.getBoundingClientRect().top + window.scrollY - 110);
+    });
+    await page.waitForTimeout(900);
+    const m = await page.evaluate(() => {
+      const box = (s: string) => document.querySelector<HTMLElement>(s)!.getBoundingClientRect();
+      const p = box('[data-os-window="profile"]');
+      const c = box('[data-os-window="console"]');
+      // every element inside a window stays inside it (the hard shadow of a key may reach 6 px further)
+      const spill = (sel: string) => {
+        const win = box(sel);
+        return [...document.querySelectorAll<HTMLElement>(`${sel} *`)].filter((e) => {
+          const r = e.getBoundingClientRect();
+          return r.width > 0 && !e.closest('.sr-only') && (r.right > win.right + 1 || r.left < win.left - 1);
+        }).length;
+      };
+      const widths = (sel: string) => [
+        ...new Set(
+          [...document.querySelectorAll<HTMLElement>(sel)].map((e) => Math.round(e.getBoundingClientRect().width)),
+        ),
+      ];
+      const rail = document.querySelector<HTMLElement>('.dispatch-rail')!;
+      return {
+        sideBySide: Math.abs(p.top - c.top) < 2,
+        heights: [Math.round(p.height), Math.round(c.height)],
+        widthsEqual: Math.abs(p.width - c.width) < 2,
+        spill: [spill('[data-os-window="profile"]'), spill('[data-os-window="console"]')],
+        railFits: rail.scrollWidth <= rail.clientWidth + 1,
+        intentWidths: widths('[data-os-window="console"] button[data-fx-stamp-target][aria-pressed]'),
+        roleWidths: widths('[data-os-window="profile"] .nb-chip').sort((a, b) => a - b),
+        overflow: document.documentElement.scrollWidth - window.innerWidth,
+      };
+    });
+    expect(m.spill, 'elements outside their window').toEqual([0, 0]);
+    expect(m.railFits, 'the progress rail fits its window').toBe(true);
+    expect(m.overflow).toBeLessThanOrEqual(0);
+    expect(
+      Math.max(...m.intentWidths) - Math.min(...m.intentWidths),
+      'the four intent keys are one width',
+    ).toBeLessThanOrEqual(1);
+    // the role keys are one width, or two when the fifth spans the row
+    expect(m.roleWidths.length).toBeLessThanOrEqual(2);
+    if (w >= 1280) {
+      expect(m.sideBySide, 'side by side from 1280 px').toBe(true);
+      expect(m.heights[0], 'both windows the same height').toBe(m.heights[1]);
+    } else {
+      expect(m.sideBySide, 'stacked below 1280 px').toBe(false);
+      expect(m.widthsEqual, 'stacked windows share one width').toBe(true);
+    }
+  });
+}
+
+test('contact desk still works after the reorganisation: intent drafts, roles prove, the rail follows', async ({
+  page,
+}) => {
+  test.setTimeout(90_000);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await gate(page);
+  const con = page.locator('[data-os-window="console"]');
+  await con.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+  const intent = con.getByRole('button', { name: /Hackathon Team/ });
+  await intent.click();
+  await expect(intent).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('#contact-message')).toHaveValue(/technical hackathon.$/, { timeout: 15_000 });
+  await page.locator('#contact-name').fill('Test Visitor');
+  await page.locator('#contact-email').fill('visitor@example.com');
+  const rail = page.getByRole('list', { name: 'Message progress' });
+  await expect
+    .poll(() => rail.locator('li').evaluateAll((ls) => ls.map((l) => (l as HTMLElement).dataset.state)))
+    .toEqual(['done', 'done', 'done', 'current']);
+  // the message box takes the spare height of the window and can still be resized by hand
+  expect(await page.locator('#contact-message').evaluate((e) => getComputedStyle(e).resize)).toBe('vertical');
+  const role = page
+    .locator('[data-os-window="profile"]')
+    .getByRole('button', { name: 'Fiscal Governance', exact: true });
+  await role.click();
+  await expect(page.locator('#role-proof')).toContainText(/Fiscal Governance/i);
+  await expect(page.getByRole('button', { name: 'Trace Fiscal Governance' })).toBeVisible();
 });

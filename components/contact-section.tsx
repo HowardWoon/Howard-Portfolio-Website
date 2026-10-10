@@ -311,135 +311,158 @@ export default function ContactSection() {
 
         {/* Main 2-Column Recruiter Hub (bento) */}
         {/* R22: the two cards are OS windows on a desk (drag / raise / minimise / maximise, components/os-window.tsx) */}
-        <WindowDesk className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+        {/* R54 (owner: "seems so messy, unorganised"): one grid for the whole desk.
+            - the two windows stand side by side only from 1280 px, where each has real room (at 1024 px the Profile was
+              339 px wide: its lines broke into 2 - 5 word stubs, it grew to 1340 px and left 440 px of bare desk under
+              the Console, and the Console's progress rail ran out of its window). Below that they stack, and the
+              Profile uses the width as two columns: who he is / how to reach him
+            - side by side they are the same height (the message box takes the spare room)
+            - the role keys, the intent keys and the link keys sit on equal columns instead of wrapping ragged */}
+        <WindowDesk className="grid grid-cols-1 xl:grid-cols-12 gap-8 xl:gap-10 items-stretch">
           {/* Left Column: Identity, Availability & 1-Click Recruiter Pack (5 Cols) */}
-          <m.div className="fx-rise lg:col-span-5 space-y-6">
-            <OsWindow id="profile" title="Profile" className="nb-card-lg" bodyClassName="p-4 xs:p-6 sm:p-8 space-y-6">
-              {/* Recruiter Live Status Pill */}
-              <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#DCFAEC] border-2 border-ink text-ink text-xs font-mono font-extrabold tracking-[0.06em]">
-                <span className="nb-led" aria-hidden />
-                <span>AVAILABLE FOR 2026 ROLES</span>
-              </div>
-
-              {/* Profile Bio */}
-              <div className="space-y-2">
-                <h3 className="font-display text-[clamp(1.5rem,7.5vw,1.875rem)] font-extrabold uppercase text-ink tracking-[-0.02em] leading-none">
-                  Howard Woon Hao Zhe
-                </h3>
-                <p className="text-sm font-mono text-pop-blue font-bold">
-                  Software Engineering @ Universiti Malaya (4.00 CGPA)
-                </p>
-                <p className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium pt-1">
-                  Open to full-time roles, high-impact backend engineering, distributed systems architecture, and AI
-                  agent research collaborations.
-                </p>
-              </div>
-
-              {/* Location & Timezone Details */}
-              <div className="space-y-2 text-xs font-mono font-semibold text-ink-soft border-t-2 border-dashed border-ink pt-4">
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-ink shrink-0" strokeWidth={2.5} />
-                  <span>Kajang, Selangor · Kuala Lumpur, Malaysia</span>
+          <m.div className="fx-rise xl:col-span-5">
+            <OsWindow
+              id="profile"
+              title="Profile"
+              outerClassName="h-full"
+              className="nb-card-lg flex h-full flex-col"
+              bodyClassName="flex-1 p-4 xs:p-6 sm:p-8 grid grid-cols-1 content-start gap-6 md:grid-cols-2 md:gap-8 xl:grid-cols-1 xl:gap-6"
+            >
+              <div className="space-y-6">
+                {/* Recruiter Live Status Pill */}
+                <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#DCFAEC] border-2 border-ink text-ink text-xs font-mono font-extrabold tracking-[0.06em]">
+                  <span className="nb-led" aria-hidden />
+                  <span>AVAILABLE FOR 2026 ROLES</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-ink shrink-0" strokeWidth={2.5} />
-                  <span>Timezone: GMT+8 (Open to Remote / Relocation)</span>
-                </div>
-              </div>
 
-              {/* 1-Click Email Clipboard Button */}
-              <div className="pt-1">
-                <button
-                  data-copy-email
-                  onClick={() => {
-                    // R23: one click reveals and copies (it used to take a click to reveal and another to copy)
-                    setEmailRevealed(true);
-                    handleCopyEmail();
-                  }}
-                  aria-live="polite"
-                  className={`relative w-full flex flex-wrap items-center justify-between gap-2 px-4 xs:px-5 py-3.5 rounded-2xl ${copiedEmail ? 'bg-[#DCFAEC]' : 'bg-white'} border-3 border-ink shadow-brutal-sm hover:-translate-y-0.5 hover:shadow-brutal active:translate-x-[2px] active:translate-y-[2px] active:shadow-none text-xs font-mono font-bold text-ink transition-all group`}
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <Mail className="w-4 h-4 shrink-0" strokeWidth={2.5} />
-                    <span className="text-left [overflow-wrap:anywhere]">
-                      {emailRevealed ? emailAddress : 'REVEAL EMAIL ADDRESS'}
-                    </span>
+                {/* Profile Bio */}
+                <div className="space-y-2">
+                  <h3 className="font-display text-[clamp(1.5rem,7.5vw,1.875rem)] font-extrabold uppercase text-ink tracking-[-0.02em] leading-none">
+                    Howard Woon Hao Zhe
+                  </h3>
+                  <p className="text-sm font-mono text-pop-blue font-bold">
+                    Software Engineering @ Universiti Malaya (4.00 CGPA)
+                  </p>
+                  <p className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium pt-1">
+                    Open to full-time roles, high-impact backend engineering, distributed systems architecture, and AI
+                    agent research collaborations.
+                  </p>
+                </div>
+
+                {/* Location & Timezone Details */}
+                <div className="space-y-2 text-xs font-mono font-semibold text-ink-soft border-t-2 border-dashed border-ink pt-4">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-ink shrink-0" strokeWidth={2.5} />
+                    <span>Kajang, Selangor · Kuala Lumpur, Malaysia</span>
                   </div>
-                  {/* success = LIVE mint (the same green as OPERATIONAL), with a small burst */}
-                  <ShapeBurst fire={copiedEmail} count={10} spread={70} />
-                  <div
-                    className={`flex items-center gap-1.5 font-extrabold shrink-0 ml-auto px-2 py-1 rounded-lg border-2 border-ink ${copiedEmail ? 'bg-pop-mint' : 'bg-pop-yellow'}`}
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-ink shrink-0" strokeWidth={2.5} />
+                    <span>Timezone: GMT+8 (Open to Remote / Relocation)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-6 md:border-l-2 md:border-dashed md:border-ink md:pl-8 xl:border-l-0 xl:pl-0">
+                {/* 1-Click Email Clipboard Button */}
+                <div className="pt-1 md:pt-0 xl:pt-1">
+                  <button
+                    data-copy-email
+                    onClick={() => {
+                      // R23: one click reveals and copies (it used to take a click to reveal and another to copy)
+                      setEmailRevealed(true);
+                      handleCopyEmail();
+                    }}
+                    aria-live="polite"
+                    className={`relative w-full flex items-center justify-between gap-2 px-4 xs:px-5 py-3.5 rounded-2xl ${copiedEmail ? 'bg-[#DCFAEC]' : 'bg-white'} border-3 border-ink shadow-brutal-sm hover:-translate-y-0.5 hover:shadow-brutal active:translate-x-[2px] active:translate-y-[2px] active:shadow-none text-xs font-mono font-bold text-ink transition-all group`}
                   >
-                    {copiedEmail ? (
-                      <>
-                        <Check className="w-3.5 h-3.5" strokeWidth={3} />
-                        <span>COPIED!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" strokeWidth={2.5} />
-                        <span>{emailRevealed ? 'COPY' : 'VIEW'}</span>
-                      </>
-                    )}
-                  </div>
-                </button>
-              </div>
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <Mail className="w-4 h-4 shrink-0" strokeWidth={2.5} />
+                      <span className="text-left [overflow-wrap:anywhere]">
+                        {emailRevealed ? emailAddress : 'REVEAL EMAIL ADDRESS'}
+                      </span>
+                    </div>
+                    {/* success = LIVE mint (the same green as OPERATIONAL), with a small burst */}
+                    <ShapeBurst fire={copiedEmail} count={10} spread={70} />
+                    <div
+                      className={`flex items-center gap-1.5 font-extrabold shrink-0 ml-auto px-2 py-1 rounded-lg border-2 border-ink ${copiedEmail ? 'bg-pop-mint' : 'bg-pop-yellow'}`}
+                    >
+                      {copiedEmail ? (
+                        <>
+                          <Check className="w-3.5 h-3.5" strokeWidth={3} />
+                          <span>COPIED!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" strokeWidth={2.5} />
+                          <span>{emailRevealed ? 'COPY' : 'VIEW'}</span>
+                        </>
+                      )}
+                    </div>
+                  </button>
+                </div>
 
-              {/* Verified Recruiter Links */}
-              <div className="grid grid-cols-1 min-[420px]:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3 gap-2.5 pt-1">
-                <a
-                  href={linkedInUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="nb-btn nb-btn-blue px-3 py-3 text-xs"
-                >
-                  <Linkedin className="w-4 h-4" strokeWidth={2.5} />
-                  <span>LINKEDIN</span>
-                </a>
-                <a
-                  href={githubUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="nb-btn nb-btn-ink px-3 py-3 text-xs"
-                >
-                  <Github className="w-4 h-4" strokeWidth={2.5} />
-                  <span>GITHUB</span>
-                </a>
-                <a
-                  href="/resume.pdf"
-                  onClick={openResume}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="nb-btn nb-btn-yellow px-3 py-3 text-xs"
-                >
-                  <FileText className="w-4 h-4" strokeWidth={2.5} />
-                  <span>RESUME</span>
-                </a>
-              </div>
+                {/* Verified Recruiter Links */}
+                <div className="grid grid-cols-1 min-[420px]:grid-cols-3 md:grid-cols-1 xl:grid-cols-3 gap-2.5 pt-1">
+                  <a
+                    href={linkedInUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="nb-btn nb-btn-blue px-3 py-3 text-xs"
+                  >
+                    <Linkedin className="w-4 h-4" strokeWidth={2.5} />
+                    <span>LINKEDIN</span>
+                  </a>
+                  <a
+                    href={githubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="nb-btn nb-btn-ink px-3 py-3 text-xs"
+                  >
+                    <Github className="w-4 h-4" strokeWidth={2.5} />
+                    <span>GITHUB</span>
+                  </a>
+                  <a
+                    href="/resume.pdf"
+                    onClick={openResume}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="nb-btn nb-btn-yellow px-3 py-3 text-xs"
+                  >
+                    <FileText className="w-4 h-4" strokeWidth={2.5} />
+                    <span>RESUME</span>
+                  </a>
+                </div>
 
-              {/* Target Engineering Specializations */}
-              <div className="space-y-2.5 border-t-2 border-dashed border-ink pt-4">
-                <span className="text-xs font-mono font-extrabold text-ink uppercase tracking-[0.1em] block">
-                  TARGET ROLES & SPECIALIZATIONS:
-                </span>
-                {/* R23 skill-to-proof: each role opens the projects that prove it (components/role-proof.tsx) */}
-                <RoleProof
-                  roles={[
-                    'Distributed Backends',
-                    'Java 21 / Spring Boot',
-                    'Agentic AI Pipelines',
-                    'High-Throughput APIs',
-                    'Fiscal Governance',
-                  ]}
-                  fillFor={(role) => (ROLE_SIGNAL[role] ? SIGNAL[ROLE_SIGNAL[role]!].soft : 'bg-white')}
-                />
+                {/* Target Engineering Specializations */}
+                <div className="space-y-2.5 border-t-2 border-dashed border-ink pt-4">
+                  <span className="text-xs font-mono font-extrabold text-ink uppercase tracking-[0.1em] block">
+                    TARGET ROLES & SPECIALIZATIONS:
+                  </span>
+                  {/* R23 skill-to-proof: each role opens the projects that prove it (components/role-proof.tsx) */}
+                  <RoleProof
+                    roles={[
+                      'Distributed Backends',
+                      'Java 21 / Spring Boot',
+                      'Agentic AI Pipelines',
+                      'High-Throughput APIs',
+                      'Fiscal Governance',
+                    ]}
+                    fillFor={(role) => (ROLE_SIGNAL[role] ? SIGNAL[ROLE_SIGNAL[role]!].soft : 'bg-white')}
+                  />
+                </div>
               </div>
             </OsWindow>
           </m.div>
 
           {/* Right Column: Interactive Dispatch Form with Quick-Intent Chips (7 Cols) */}
-          <m.div className="fx-rise lg:col-span-7">
-            <OsWindow id="console" title="Console" className="nb-card-lg" bodyClassName="p-4 xs:p-6 sm:p-10 space-y-6">
+          <m.div className="fx-rise xl:col-span-7">
+            <OsWindow
+              id="console"
+              title="Console"
+              outerClassName="h-full"
+              className="nb-card-lg flex h-full flex-col"
+              bodyClassName="flex flex-1 flex-col p-4 xs:p-6 sm:p-10 space-y-6"
+            >
               <div className="space-y-2">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <span className="nb-tag bg-pop-lilac">DIRECT TRANSMISSION CONSOLE</span>
@@ -459,7 +482,7 @@ export default function ContactSection() {
               {/* Quick Intent Pre-Fill Chips */}
               <div className="space-y-2.5">
                 <span className="text-xs font-mono font-bold text-pop-blue">{'// Select a conversation intent:'}</span>
-                <div className="flex flex-wrap gap-2">
+                <div className="grid grid-cols-1 gap-2 min-[480px]:grid-cols-2">
                   {quickIntents.map((intent) => (
                     <button
                       key={intent.label}
@@ -467,7 +490,7 @@ export default function ContactSection() {
                       aria-pressed={activeIntent === intent.label}
                       data-fx-stamp-target
                       onClick={() => handleSelectIntent(intent)}
-                      className={`min-h-[40px] px-3.5 py-2 rounded-xl text-xs font-mono font-bold border-2 border-ink transition-all ${
+                      className={`min-h-[44px] w-full px-3.5 py-2 rounded-xl text-left text-xs font-mono font-bold border-2 border-ink transition-all ${
                         activeIntent === intent.label
                           ? 'bg-pop-yellow text-ink shadow-clay-pressed translate-x-[2px] translate-y-[2px]'
                           : 'bg-white text-ink shadow-brutal-xs hover:-translate-y-0.5 hover:shadow-brutal-sm'
@@ -480,7 +503,7 @@ export default function ContactSection() {
               </div>
 
               {/* Dispatch Form */}
-              <form onSubmit={handleSubmit} onFocusCapture={markStart} className="space-y-5 pt-2">
+              <form onSubmit={handleSubmit} onFocusCapture={markStart} className="flex flex-1 flex-col space-y-5 pt-2">
                 {/* Honeypot: filled in by spam bots only. `display:none` (not an off-screen position)
                   because Chrome/Edge autofill can fill off-screen fields named like "website",
                   which silently discarded real visitors' messages. */}
@@ -532,7 +555,7 @@ export default function ContactSection() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="flex flex-1 flex-col space-y-2">
                   <label htmlFor="contact-message" className="nb-label">
                     MESSAGE / PROPOSAL *
                   </label>
@@ -547,7 +570,7 @@ export default function ContactSection() {
                       window.clearInterval(typing.current); // the visitor's typing always wins over the drafter
                       setFormData({ ...formData, message: e.target.value });
                     }}
-                    className="nb-field resize-y min-h-[140px]"
+                    className="nb-field resize-y min-h-[140px] flex-1"
                   />
                   {activeIntent && formData.message ? (
                     <div className="flex justify-end">

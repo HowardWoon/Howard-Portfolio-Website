@@ -67,7 +67,8 @@ export function RoleProof({ roles, fillFor }: { roles: string[]; fillFor: (role:
         if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setHover(null);
       }}
     >
-      <div className="flex flex-wrap gap-2">
+      {/* R54: equal columns (the keys used to wrap 2 / 2 / 1 at three different widths); an odd last key spans the row */}
+      <div className="grid grid-cols-1 gap-2 min-[440px]:grid-cols-2">
         {roles.map((role) => {
           const on = shown === role;
           return (
@@ -79,7 +80,7 @@ export function RoleProof({ roles, fillFor }: { roles: string[]; fillFor: (role:
               onMouseEnter={() => setHover(role)}
               onFocus={() => setHover(role)}
               onClick={() => setPinned((p) => (p === role ? null : role))}
-              className={`nb-chip min-h-[40px] cursor-pointer transition-[transform,box-shadow] duration-150 hover:-translate-y-0.5 hover:shadow-brutal-xs ${
+              className={`nb-chip min-h-[44px] w-full justify-center text-center cursor-pointer transition-[transform,box-shadow] duration-150 hover:-translate-y-0.5 hover:shadow-brutal-xs min-[440px]:last:odd:col-span-2 ${
                 on ? '-translate-y-0.5 shadow-brutal-xs' : ''
               } ${fillFor(role)}`}
             >

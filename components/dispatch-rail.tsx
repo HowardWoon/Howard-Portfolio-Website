@@ -9,7 +9,7 @@ export function DispatchRail({ done }: { done: [boolean, boolean, boolean, boole
   const steps = ['NAME', 'EMAIL', 'MESSAGE', 'DISPATCH'] as const;
   const current = done.indexOf(false);
   return (
-    <div>
+    <div className="dispatch-rail-box">
       <ol aria-label="Message progress" className="dispatch-rail">
         {steps.map((label, i) => {
           const state = done[i] ? 'done' : i === current ? 'current' : 'todo';

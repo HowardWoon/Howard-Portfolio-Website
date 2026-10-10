@@ -4606,8 +4606,13 @@ html[data-motion='calm'] .honors-tally .tally-trophy g:first-child {
 .dispatch-rail-now {
   display: none;
 }
-/* phones: the rail shows the numbered steps only; the current step is named in one line under it */
-@media (max-width: 479px) {
+/* Where the rail is narrow it shows the numbered steps only, and the current step is named in one line under it.
+   R54: decided by the width of the RAIL, not of the window (a container query). The four labels need about 430 px;
+   at 1024 px the Console was 492 px wide, the rule for phones did not apply, and DISPATCH ran out of the window. */
+.dispatch-rail-box {
+  container-type: inline-size;
+}
+@container (max-width: 459px) {
   .dispatch-rail-label {
     display: none;
   }
