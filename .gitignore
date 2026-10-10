@@ -27,3 +27,6 @@ playwright-report/
 audit/
 audit-live/
 ci-log.txt
+
+# R51 privacy: original documents that carry identity numbers (visible or as hidden PDF text). Never publish.
+private-originals/

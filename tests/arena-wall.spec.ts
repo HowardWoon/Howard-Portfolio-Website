@@ -10,7 +10,7 @@ test.beforeEach(async ({ context }) => {
 });
 
 const WALL = 'section[aria-labelledby="arena-wall-title"]';
-const PRINTS = [13, 20, 20]; // competitions, organisations, stack
+const PRINTS = [15, 20, 20]; // competitions, organisations, stack
 
 async function toWall(page: Page, path = '/') {
   await page.goto(path, { waitUntil: 'networkidle' });
@@ -85,7 +85,7 @@ test('every gallery photo and image certificate on the site is a print on the wa
     expected.add(m[1]);
   for (const m of readFileSync('components/honors-section.tsx', 'utf8').matchAll(/'(\/certificates\/[^']+\.png)': \[/g))
     expected.add(m[1]);
-  expect(expected.size).toBe(53); // 49 gallery photos + 4 image certificates (R49: the UM transcript)
+  expect(expected.size).toBe(55); // 49 gallery photos + 6 image certificates (R49 transcript, R51 PPAL and PAL KPM)
 
   await toWall(page);
   const shown = await page.$$eval('button.fx-print:not([aria-hidden])', (bs) =>
@@ -132,7 +132,7 @@ test('a ticket that heads a gallery counts the prints that follow it', async ({ 
       const [n, tag] = c.split(':');
       expect(tag, c).toBe(n === '0' ? '' : n.padStart(2, '0'));
     }
-  expect(counts.flat().filter((c) => !c.startsWith('0:'))).toHaveLength(12);
+  expect(counts.flat().filter((c) => !c.startsWith('0:'))).toHaveLength(14);
 });
 
 test('rows roll in opposite directions and pause under the mouse', async ({ page }) => {
@@ -234,7 +234,7 @@ test('a print straightens and lifts under the mouse, opens the lightbox on that 
   expect(hit!.rotate).toBe('0deg');
   expect(hit!.scale).toBe('1.12');
   // R46: every print is taped to the wall; the tape of the inspected print is pressed flat and square
-  expect(await page.locator('button.fx-print:not([aria-hidden]) > .tape').count()).toBe(53);
+  expect(await page.locator('button.fx-print:not([aria-hidden]) > .tape').count()).toBe(55);
   const tape = await page.evaluate(
     ([x, y]) => {
       const s = document.elementFromPoint(x, y)!.closest('.fx-print')!;

@@ -220,3 +220,46 @@ test.describe('desktop 1440', () => {
     expect(manifest.name).toBe('Howard Woon // Full Stack Developer');
   });
 });
+
+/* ---------------------------------------------------------------- R51 privacy: no identity numbers are published */
+// Found 10 Oct 2026: three certificates on the live site SHOWED identity card numbers (the PPAL 4.0 PDF, the PAL KPM
+// PDF and chem_creative.png), and the owner's IC-removed PDFs still held them as hidden text. Every certificate that
+// ever showed one is now a picture rendered from an IC-removed page; the two PDFs are gone from the site.
+test('the certificates that showed identity numbers are IC-free pictures, and their PDFs are no longer served', async ({
+  request,
+}) => {
+  for (const gone of [
+    '/certificates/HARI_INOVASI_PPAL_PENCAPAIAN_CERT.pdf',
+    '/certificates/HowardWoonHaoZhe-PERAK-SIMPOSIUM_PEER_ASSISTED_LEARNING_PROGRAM_MATRIKULASI_KPM.pdf',
+  ])
+    expect((await request.get(gone)).status(), gone).toBe(404);
+  for (const png of [
+    '/certificates/ppal_4_0_gold_medal.png',
+    '/certificates/pal_kpm_simposium_perak.png',
+    '/certificates/chem_creative.png',
+    '/certificates/um_transcript_sem2_2025_2026.png',
+  ]) {
+    const res = await request.get(png);
+    expect(res.status(), png).toBe(200);
+    expect(res.headers()['content-type'], png).toContain('image/png');
+    const body = await res.body();
+    // a picture, with no text or metadata chunk that could carry a number
+    for (const chunk of ['tEXt', 'iTXt', 'zTXt', 'eXIf'])
+      expect(body.includes(Buffer.from(chunk)), `${png} ${chunk}`).toBe(false);
+  }
+  // no honour links to a PDF that was withdrawn
+  const html = await (await request.get('/')).text();
+  expect(html).not.toContain('HARI_INOVASI_PPAL_PENCAPAIAN_CERT');
+  expect(html).not.toContain('PERAK-SIMPOSIUM');
+});
+
+test('source: the withdrawn PDFs are not in public/, and the originals folder is git-ignored', async () => {
+  const { existsSync, readFileSync } = await import('node:fs');
+  expect(existsSync('public/certificates/HARI_INOVASI_PPAL_PENCAPAIAN_CERT.pdf')).toBe(false);
+  expect(
+    existsSync(
+      'public/certificates/HowardWoonHaoZhe-PERAK-SIMPOSIUM_PEER_ASSISTED_LEARNING_PROGRAM_MATRIKULASI_KPM.pdf',
+    ),
+  ).toBe(false);
+  expect(readFileSync('.gitignore', 'utf8')).toMatch(/^private-originals\/$/m);
+});

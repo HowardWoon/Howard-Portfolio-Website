@@ -228,26 +228,35 @@ test.describe('desktop 1440', () => {
     expect(by('DSA Coaching').bg).toBe(by('Academic Mentorship').bg); // ACADEMIC
     expect(by('Gonka').bg).toBe(by('LangGraph').bg); // AI
     expect(new Set(info.map((i) => i.bg)).size).toBeGreaterThanOrEqual(5);
-    // the bigger pile comes to rest inside the pit (R31: no tremble) and under its ceiling
-    await page.waitForTimeout(5000);
-    const pos = () =>
-      badges.evaluateAll((bs) =>
-        bs.map((b) => {
-          const r = b.getBoundingClientRect();
-          const box = b.parentElement!.getBoundingClientRect();
-          return {
-            x: r.x,
-            y: r.y,
-            in:
-              r.top >= box.top - 1 && r.bottom <= box.bottom + 1 && r.left >= box.left - 1 && r.right <= box.right + 1,
-          };
+    // The bigger pile comes to rest inside the pit and under its ceiling. Measured the way tests/r22 does: by each
+    // badge's physics position (its translation), not its rotated outline - a badge that is still tilting pokes its
+    // corners a few px past the wall, which failed a fixed-wait version of this check about one run in four.
+    const pit = page.locator('[data-pill-pit] > div[aria-hidden]');
+    const inside = () =>
+      pit.evaluate((box) =>
+        [...box.querySelectorAll<HTMLElement>(':scope > span')].every((e) => {
+          const m = new DOMMatrix(getComputedStyle(e).transform);
+          return (
+            m.m41 >= -1 &&
+            m.m42 >= -1 &&
+            m.m41 + e.offsetWidth <= box.clientWidth + 1 &&
+            m.m42 + e.offsetHeight <= box.clientHeight + 1
+          );
         }),
       );
-    const a = await pos();
-    await page.waitForTimeout(600);
-    const b = await pos();
-    expect(a.every((p) => p.in)).toBe(true);
-    expect(a.map((p) => [p.x, p.y])).toEqual(b.map((p) => [p.x, p.y]));
+    await expect.poll(inside, { timeout: 15_000 }).toBe(true);
+    // and then it is exactly still (R31: no tremble): one full second without a single transform changing
+    const read = () => badges.evaluateAll((bs) => bs.map((b) => (b as HTMLElement).style.transform).join('|'));
+    await expect
+      .poll(
+        async () => {
+          const first = await read();
+          await page.waitForTimeout(1000);
+          return first === (await read());
+        },
+        { timeout: 20_000 },
+      )
+      .toBe(true);
   });
 
   // owner: "i want the background pixel must like waving, moving"

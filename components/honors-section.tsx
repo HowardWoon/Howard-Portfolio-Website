@@ -64,6 +64,11 @@ export const CERT_SIZE: Record<string, [number, number]> = {
   // R49: the UM Student Academic Performance Record (semesters 1-2, 2025/2026), published as a PICTURE of the page:
   // the owner's PDF still carried the NRIC as hidden text behind the blank field, an image carries no text at all
   '/certificates/um_transcript_sem2_2025_2026.png': [1600, 2266],
+  // R51 privacy: these two certificates were published as PDFs that SHOWED identity card numbers (the owner's, and on
+  // the PPAL one three team-mates'). They are now pictures rendered from the owner's own IC-removed copies; a picture
+  // has no text layer (his edited PDFs still held the numbers as hidden text). The PDFs are no longer in the site.
+  '/certificates/ppal_4_0_gold_medal.png': [1600, 1131],
+  '/certificates/pal_kpm_simposium_perak.png': [1200, 1692],
 };
 
 /** R29: awards issued by an institution whose crest is on the site carry its Issuer Seal beside the title */
@@ -169,7 +174,7 @@ export const honorsList: HonorItem[] = [
       'Awarded National Gold Medal for technical excellence',
       'Recognized for outstanding presentation and innovative methodologies',
     ],
-    certificateUrl: '/certificates/HARI_INOVASI_PPAL_PENCAPAIAN_CERT.pdf',
+    certificateUrl: '/certificates/ppal_4_0_gold_medal.png',
     icon: Trophy,
   },
   {
@@ -207,7 +212,7 @@ export const honorsList: HonorItem[] = [
       'Awarded National Silver Medal by the Ministry of Education (KPM)',
       'Presented highly effective academic mentorship and leadership frameworks',
     ],
-    certificateUrl: '/certificates/HowardWoonHaoZhe-PERAK-SIMPOSIUM_PEER_ASSISTED_LEARNING_PROGRAM_MATRIKULASI_KPM.pdf',
+    certificateUrl: '/certificates/pal_kpm_simposium_perak.png',
     icon: Trophy,
   },
   {

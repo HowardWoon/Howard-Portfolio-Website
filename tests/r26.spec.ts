@@ -71,7 +71,7 @@ test('honour emblems are stickers: a drag peels one up and it springs home', asy
 });
 
 // R49: four image certificates now (the UM transcript joined the Dean's Honours List)
-test('certificate deck: four real certificates, Next swaps the front card, a click opens the viewer', async ({
+test('certificate deck: six real certificates, Next swaps the front card, a click opens the viewer', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -79,7 +79,7 @@ test('certificate deck: four real certificates, Next swaps the front card, a cli
   await walk(page);
   const deck = page.locator('.cert-deck');
   await deck.scrollIntoViewIfNeeded();
-  await expect(deck.locator('.cert-card')).toHaveCount(4);
+  await expect(deck.locator('.cert-card')).toHaveCount(6);
   const front = () => deck.locator('.cert-card[aria-hidden="false"]');
   await expect(front()).toHaveCount(1);
   const first = await front().getAttribute('aria-label');

@@ -75,9 +75,9 @@ export const REEL_ROWS: { label: string; accent: 'yellow' | 'mint' | 'cyan'; ite
       ...ticket('UM Game Jam', 'Public Choice', '#honors', cert('UM_GAME_JAM_2026_HOWARD_WOON_HAO_ZHE.png')),
       ...ticket('Technothon', 'UM · 2026', '#honors'),
       ...ticket('V Hack', 'Varsity · 2026', '#honors'),
-      ...ticket('PPAL 4.0', 'Hari Inovasi', '#honors'),
+      ...ticket('PPAL 4.0', 'Hari Inovasi', '#honors', cert('ppal_4_0_gold_medal.png')),
       ...ticket('Chemcreative', 'Innovation', '#honors', cert('chem_creative.png')),
-      ...ticket('PAL KPM', 'Simposium', '#honors'),
+      ...ticket('PAL KPM', 'Simposium', '#honors', cert('pal_kpm_simposium_perak.png')),
     ],
   },
   {
