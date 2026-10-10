@@ -523,7 +523,7 @@ export function PhotoLightbox({
         <div
           ref={thumbsRef}
           onClick={(e) => e.stopPropagation()}
-          className="shrink-0 mt-3 w-full max-w-6xl mx-auto flex gap-2 overflow-x-auto overscroll-x-contain px-1 py-1.5 [scrollbar-width:none] landscape-short:hidden"
+          className="shrink-0 mt-3 w-full max-w-6xl mx-auto flex flex-wrap justify-center gap-2 px-1 py-1.5 landscape-short:hidden"
         >
           {list.map((p, i) => (
             <button
@@ -616,6 +616,85 @@ export function InteractivePhotoStack({
   const kp = Math.max(0, ...source.filter(isPortrait).map((p) => p.h / p.w));
   const kl = Math.max(0, ...source.filter((p) => !isPortrait(p)).map((p) => p.h / p.w));
   const visible = Array.from({ length: Math.min(4, n) }, (_, i) => source[(top + i) % n]);
+
+  // R53 (owner circled a fanned print hanging outside the gallery panel: "make sure the gallery dont overlap ...
+  // exceed the frame of where it can stay"): the room the prints really have. w / h = the stack's own box, gx / gy =
+  // the gap from that box to the inside of the panel around it (the nearest bordered ancestor).
+  const [room, setRoom] = useState<{ w: number; h: number; gx: number; gy: number; pw: number; lw: number } | null>(
+    null,
+  );
+  useEffect(() => {
+    const el = stackRef.current;
+    if (!el || sheet) return;
+    const read = () => {
+      const r = el.getBoundingClientRect();
+      let frame = el.parentElement;
+      while (frame && !(parseFloat(getComputedStyle(frame).borderTopWidth) >= 1.5)) frame = frame.parentElement;
+      let gx = 0;
+      let gy = 0;
+      if (frame) {
+        const fr = frame.getBoundingClientRect();
+        const cs = getComputedStyle(frame);
+        gx = Math.min(
+          r.left - fr.left - parseFloat(cs.borderLeftWidth),
+          fr.right - parseFloat(cs.borderRightWidth) - r.right,
+        );
+        gy = Math.min(
+          r.top - fr.top - parseFloat(cs.borderTopWidth),
+          fr.bottom - parseFloat(cs.borderBottomWidth) - r.bottom,
+        );
+      }
+      const own = getComputedStyle(el);
+      const next = {
+        w: Math.round(r.width),
+        h: Math.round(r.height),
+        gx: Math.max(0, Math.floor(gx)),
+        gy: Math.max(0, Math.floor(gy)),
+        // the share of the stack a portrait / landscape print takes at this breakpoint (set on the stack itself)
+        pw: parseFloat(own.getPropertyValue('--pw')) || 0.78,
+        lw: parseFloat(own.getPropertyValue('--lw')) || 1,
+      };
+      setRoom((o) => (o && (Object.keys(next) as (keyof typeof next)[]).every((k) => o[k] === next[k]) ? o : next));
+    };
+    read();
+    const ro = new ResizeObserver(read);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [sheet]);
+
+  /** Where a print behind the top one sits: the designed lean and fan, turned and shifted only as far as the panel
+   *  has room for (the rotated print's bounding box, plus its hard shadow, stays inside). */
+  const pose = (photo: Photo, index: number) => {
+    const side = index % 2 ? 1 : -1;
+    const scale = 1 - index * 0.04;
+    let x = fan ? side * index * 22 : 0;
+    const y = fan ? index * 4 : index * 9;
+    let rotate = photo.rotation * 1.4 + (fan ? side * index * 4 : 0);
+    if (room) {
+      const cw = (isPortrait(photo) ? room.pw : room.lw) * room.w;
+      const ch = (cw - 26) * (photo.h / photo.w) + 52;
+      const SHADOW = 10;
+      const halfW = room.w / 2 + room.gx - SHADOW;
+      // the prints are centred 12 px above the stack's middle (pb-6)
+      const halfH = room.h / 2 + room.gy - SHADOW - 12 - y;
+      const box = (deg: number) => {
+        const a = (Math.abs(deg) * Math.PI) / 180;
+        return [
+          (scale * (cw * Math.cos(a) + ch * Math.sin(a))) / 2,
+          (scale * (cw * Math.sin(a) + ch * Math.cos(a))) / 2,
+        ];
+      };
+      for (let i = 0; i < 12; i++) {
+        const [bw, bh] = box(rotate);
+        if (bw <= halfW && bh <= halfH) break;
+        rotate *= 0.75;
+      }
+      const [bw] = box(rotate);
+      const slack = Math.max(0, halfW - bw);
+      x = Math.sign(x) * Math.min(Math.abs(x), slack);
+    }
+    return { x, y, rotate, scale };
+  };
 
   const onDeckKey = (e: React.KeyboardEvent) => {
     if (sheet || e.altKey || e.ctrlKey || e.metaKey) return;
@@ -727,10 +806,7 @@ export function InteractivePhotoStack({
                         }
                         animate={{
                           opacity: 1,
-                          scale: isTop ? 1 : 1 - index * 0.04,
-                          x: isTop || !fan ? 0 : (index % 2 ? 1 : -1) * index * 22,
-                          y: isTop ? 0 : fan ? index * 4 : index * 9,
-                          rotate: isTop ? 0 : photo.rotation * 1.4 + (fan ? (index % 2 ? 1 : -1) * index * 4 : 0),
+                          ...(isTop ? { scale: 1, x: 0, y: 0, rotate: 0 } : pose(photo, index)),
                           zIndex: 10 - index,
                         }}
                         exit={{
@@ -859,8 +935,10 @@ export function InteractivePhotoStack({
           ) : null}
 
           {filmstrip && !sheet && n > 1 ? (
-            <div data-filmstrip className="mt-3 overflow-x-auto overscroll-x-contain [scrollbar-width:none]">
-              <div className="mx-auto flex w-max gap-2 px-1 py-1.5">
+            // R53 (owner circled a thumbnail cut in half at the frame's edge): the strip no longer scrolls sideways
+            // under a hidden scrollbar. Every thumbnail is whole: they wrap onto a second row when they do not fit.
+            <div data-filmstrip className="mt-3">
+              <div className="mx-auto flex flex-wrap justify-center gap-1.5 px-1 py-1.5">
                 {source.map((p, i) => (
                   <button
                     key={p.src}
