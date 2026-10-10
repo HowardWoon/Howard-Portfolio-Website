@@ -71,7 +71,8 @@ test('honour emblems are stickers: a drag peels one up and it springs home', asy
 });
 
 // R49: four image certificates now (the UM transcript joined the Dean's Honours List)
-test('certificate deck: six real certificates, Next swaps the front card, a click opens the viewer', async ({
+// R52: every certificate from the three categories is in the deck (6 pictures + 3 PDF previews)
+test('certificate deck: nine real certificates, Next swaps the front card, a click opens the viewer', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -79,7 +80,7 @@ test('certificate deck: six real certificates, Next swaps the front card, a clic
   await walk(page);
   const deck = page.locator('.cert-deck');
   await deck.scrollIntoViewIfNeeded();
-  await expect(deck.locator('.cert-card')).toHaveCount(6);
+  await expect(deck.locator('.cert-card')).toHaveCount(9);
   const front = () => deck.locator('.cert-card[aria-hidden="false"]');
   await expect(front()).toHaveCount(1);
   const first = await front().getAttribute('aria-label');
@@ -143,3 +144,88 @@ test('reduced motion: the living backgrounds stay empty and nothing cycles', asy
   await page.waitForTimeout(5200); // longer than one cycle
   expect(await deck.locator('.cert-card[aria-hidden="false"]').getAttribute('aria-label')).toBe(front);
 });
+
+// R52 (owner: "why this cert demo presentation didnt switch the slide automatically?"): after a mouse click on Next the
+// button kept focus, and focus inside the deck paused it for good
+test('certificate deck: it keeps dealing by itself after a mouse click on Next, with the pixel dissolve', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await walk(page);
+  const deck = page.locator('.cert-deck');
+  await deck.scrollIntoViewIfNeeded();
+  const front = () => deck.locator('.cert-card[aria-hidden="false"]').getAttribute('aria-label');
+  const next = deck.getByRole('button', { name: 'Next certificate' });
+  await next.click(); // a mouse click: focus stays on the button
+  await page.mouse.move(40, 400); // the mouse leaves the deck
+  await expect.poll(() => deck.getAttribute('data-phase')).toBe('idle');
+  const after = await front();
+  // within two cycles (4.5 s each) the front card changes on its own, through the pixel phases
+  const phases = new Set<string>();
+  await expect
+    .poll(
+      async () => {
+        phases.add((await deck.getAttribute('data-phase')) ?? '');
+        return front();
+      },
+      { timeout: 12_000, intervals: [60] },
+    )
+    .not.toBe(after);
+  expect([...phases].some((p) => p === 'cover' || p === 'reveal')).toBe(true);
+  // nine cards, nine different certificate pictures (two awards share a title, so the pictures are what is compared)
+  const pictures = await deck
+    .locator('.cert-card img')
+    .evaluateAll((is) => is.map((i) => decodeURIComponent(i.getAttribute('src') ?? '').replace(/&w=.*$/, '')));
+  expect(pictures).toHaveLength(9);
+  expect(new Set(pictures).size).toBe(9);
+  expect(pictures.filter((p) => p.includes('/certificates/previews/'))).toHaveLength(3); // the three PDF certificates
+  // keyboard focus still pauses it (so tabbing through is not interrupted)
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Shift+Tab');
+  await next.focus();
+  await page.keyboard.press('Shift'); // keyboard modality
+  const held = await front();
+  if (await deck.evaluate((d) => !!d.querySelector(':focus-visible'))) {
+    await page.waitForTimeout(6000);
+    expect(await front()).toBe(held);
+  }
+});
+
+// R52 (owner: "why the gallery overlap? ... make sure the gallery must not always overlap with the other element"):
+// with 6 certificates every card fanned further out and the back ones climbed over the text box above the deck
+for (const [name, w, h] of [
+  ['desktop 1440x900', 1440, 900],
+  ['tablet 820x1180', 820, 1180],
+  ['phone 390x844', 390, 844],
+  ['fold 280x653', 280, 653],
+] as const) {
+  test(`certificate deck: no card leaves the deck's own box or touches its neighbours (${name})`, async ({ page }) => {
+    await page.setViewportSize({ width: w, height: h });
+    await page.emulateMedia({ reducedMotion: 'reduce' }); // no auto-cycle: the test deals the cards
+    await walk(page);
+    const deck = page.locator('.cert-deck');
+    await deck.scrollIntoViewIfNeeded();
+    for (let deal = 0; deal < 9; deal++) {
+      if (deal) await deck.getByRole('button', { name: 'Next certificate' }).click();
+      await page.waitForTimeout(650); // the cards settle into their fan
+      const out = await deck.evaluate((d) => {
+        const box = d.getBoundingClientRect();
+        const cards = [...d.querySelectorAll('.cert-card')].map((c) => c.getBoundingClientRect());
+        const hit = (a: DOMRect, b: DOMRect) =>
+          a.left < b.right - 1 && b.left < a.right - 1 && a.top < b.bottom - 1 && b.top < a.bottom - 1;
+        // the elements laid out beside the deck: its previous / next siblings and its parent's
+        const near = [d.previousElementSibling, d.nextElementSibling, d.parentElement?.previousElementSibling].filter(
+          (e): e is Element => !!e,
+        );
+        return {
+          outside: cards.filter(
+            (c) => c.left < box.left - 1 || c.top < box.top - 1 || c.right > box.right + 7 || c.bottom > box.bottom + 7,
+          ).length,
+          touching: near.filter((e) => cards.some((c) => hit(c, e.getBoundingClientRect()))).length,
+          page: document.documentElement.scrollWidth <= innerWidth,
+        };
+      });
+      expect(out, `after ${deal} deals`).toEqual({ outside: 0, touching: 0, page: true });
+    }
+  });
+}

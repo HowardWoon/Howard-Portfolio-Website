@@ -6,12 +6,29 @@ import { ChevronRight } from 'lucide-react';
 
 /**
  * R26 Certificate deck (after React Bits CardSwap + PixelTransition; native, no dependency).
- * Howard's three image certificates as a stack of cards. Every few seconds the front card dissolves into paper pixels,
- * drops to the back and the next one is revealed; a click opens the existing certificate viewer. Pauses on hover /
- * focus, off screen, in a hidden tab, and never runs for reduced motion / Calm Mode (the Next button still works).
- * Every card is a real certificate already linked from its honour card; colour = PODIUM yellow (all three were won).
+ * Howard's certificates as a stack of cards. Every few seconds the front card dissolves into paper pixels, drops to
+ * the back and the next one is revealed; a click opens the existing certificate viewer. Pauses under the mouse, for
+ * keyboard focus, off screen, in a hidden tab, and never runs for reduced motion / Calm Mode (Next still works).
+ * Every card is a real certificate already linked from its honour card.
+ *
+ * R52 (owner: "why this cert demo presentation didnt switch the slide automatically? ... combine the cert with
+ * academic and national qualifier as well"):
+ * - It stopped for good after a click on Next: the button kept focus, and any focus inside the deck counted as
+ *   "paused". Only KEYBOARD focus (:focus-visible) pauses it now; a mouse click does not.
+ * - The deck holds every certificate from all three categories. A PDF certificate shows a picture preview of its
+ *   page (`src`) and opens the real file (`open`). The band is the award's own SIGNAL colour (`band`).
  */
-export type DeckCert = { title: string; src: string; w: number; h: number };
+export type DeckCert = {
+  title: string;
+  /** the picture on the card */
+  src: string;
+  w: number;
+  h: number;
+  /** what a click opens (default: `src`); the original PDF when `src` is its preview */
+  open?: string;
+  /** the band's colour: the award's SIGNAL KEY hex (default: PODIUM yellow) */
+  band?: string;
+};
 
 const GRID = { cols: 10, rows: 7 };
 const CYCLE_MS = 4500;
@@ -75,12 +92,14 @@ export function CertificateDeck({ certs, onOpen }: { certs: DeckCert[]; onOpen: 
     let held = false;
     const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting), { threshold: 0.4 });
     io.observe(el);
-    const hold = () => (held = true);
-    const release = () => (held = el.matches(':hover') || el.contains(document.activeElement));
-    el.addEventListener('pointerenter', hold);
-    el.addEventListener('pointerleave', release);
-    el.addEventListener('focusin', hold);
-    el.addEventListener('focusout', () => window.setTimeout(release, 0));
+    // paused while the mouse is over the deck, or while KEYBOARD focus is inside it (a mouse click on Next leaves
+    // focus on that button: that must not pause the deck for good)
+    const check = () => (held = el.matches(':hover') || !!el.querySelector(':focus-visible'));
+    const later = () => window.setTimeout(check, 0);
+    el.addEventListener('pointerenter', check);
+    el.addEventListener('pointerleave', check);
+    el.addEventListener('focusin', later);
+    el.addEventListener('focusout', later);
     const id = window.setInterval(() => {
       const still =
         window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
@@ -90,9 +109,10 @@ export function CertificateDeck({ certs, onOpen }: { certs: DeckCert[]; onOpen: 
     return () => {
       window.clearInterval(id);
       io.disconnect();
-      el.removeEventListener('pointerenter', hold);
-      el.removeEventListener('pointerleave', release);
-      el.removeEventListener('focusin', hold);
+      el.removeEventListener('pointerenter', check);
+      el.removeEventListener('pointerleave', check);
+      el.removeEventListener('focusin', later);
+      el.removeEventListener('focusout', later);
     };
   }, []);
 
@@ -114,11 +134,11 @@ export function CertificateDeck({ certs, onOpen }: { certs: DeckCert[]; onOpen: 
               tabIndex={front ? 0 : -1}
               aria-hidden={!front}
               aria-label={`VIEW CERTIFICATE: ${c.title}`}
-              onClick={() => (swiped.current ? (swiped.current = false) : onOpen(c.src))}
+              onClick={() => (swiped.current ? (swiped.current = false) : onOpen(c.open ?? c.src))}
               className="cert-card"
               style={{ '--depth': depth } as React.CSSProperties}
             >
-              <span aria-hidden className="cert-card-band" />
+              <span aria-hidden className="cert-card-band" style={c.band ? { background: c.band } : undefined} />
               <span className="cert-card-photo">
                 <Image
                   draggable={false}

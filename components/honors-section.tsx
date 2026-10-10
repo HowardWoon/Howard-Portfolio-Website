@@ -299,14 +299,36 @@ export const honorsList: HonorItem[] = [
   },
 ];
 
-const DECK: DeckCert[] = honorsList
-  .filter((h) => h.certificateUrl && CERT_SIZE[h.certificateUrl])
-  .map((h) => ({
-    title: h.title,
-    src: h.certificateUrl!,
-    w: CERT_SIZE[h.certificateUrl!][0],
-    h: CERT_SIZE[h.certificateUrl!][1],
-  }));
+/** R52: picture previews of the PDF certificates' pages (real pixel sizes), so the deck can show every certificate.
+ *  Rendered from the published PDFs, which were checked for identity numbers (none shown, none in their text). */
+const CERT_PREVIEW: Record<string, { src: string; w: number; h: number }> = {
+  '/certificates/UM_TECHNOTHON_2026.pdf': { src: '/certificates/previews/um_technothon_2026.png', w: 1200, h: 847 },
+  '/certificates/V_HACK_2026_QUALIFIER_HOWARD_WOON_HAO_ZHE.pdf': {
+    src: '/certificates/previews/v_hack_2026.png',
+    w: 1200,
+    h: 848,
+  },
+  '/certificates/UMSIC_HOWARD_WOON_HAO_ZHE.pdf': { src: '/certificates/previews/umsic_2025.png', w: 1200, h: 848 },
+};
+
+// R52: every certificate from every category, in the honours' own order; the band is the award's SIGNAL colour
+const DECK: DeckCert[] = honorsList.flatMap((h) => {
+  const url = h.certificateUrl;
+  if (!url) return [];
+  const size = CERT_SIZE[url];
+  const preview = CERT_PREVIEW[url];
+  if (!size && !preview) return [];
+  return [
+    {
+      title: h.title,
+      src: preview ? preview.src : url,
+      w: preview ? preview.w : size[0],
+      h: preview ? preview.h : size[1],
+      open: url,
+      band: h.signal ? SIGNAL[h.signal].hex : undefined,
+    },
+  ];
+});
 
 /**
  * Certificate lightbox — a skeuomorphic "taped paper" on a dark desk.
@@ -708,11 +730,7 @@ export default function HonorsSection() {
                           ) : orgLogoFor(item.issuingBody) ? (
                             // R48: an award issued by an organisation whose logo is on the site carries that logo on a
                             // white plate, in the slot the Registrar Seals use
-                            <OrgLogo
-                              org={orgLogoFor(item.issuingBody)!}
-                              className="h-16 w-36 shadow-brutal-xs"
-                              imgClassName="max-h-11"
-                            />
+                            <OrgLogo org={orgLogoFor(item.issuingBody)!} className="h-16 w-36 shadow-brutal-xs" />
                           ) : null}
                         </div>
 
