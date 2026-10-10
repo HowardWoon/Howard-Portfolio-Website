@@ -5069,3 +5069,58 @@ html.fx-portal:not(.fx-off-sheetFeed)::view-transition-new(root) {
 nav[data-scrubbing] {
   cursor: grabbing;
 }
+
+/* R49 hero mascot (components/hero-mascot.tsx): the page-mascot cat sits on the top edge of the hero's award ticker.
+   Die-cut sticker look: a white edge and a hard ink shadow, both zero-blur drop-shadows that follow the cut-out. */
+.hero-mascot {
+  position: absolute;
+  right: 1.25rem;
+  top: 0;
+  z-index: 30;
+  translate: 0 -72%;
+  filter: drop-shadow(2px 0 0 #ffffff) drop-shadow(-2px 0 0 #ffffff) drop-shadow(0 2px 0 #ffffff)
+    drop-shadow(0 -2px 0 #ffffff) drop-shadow(3px 3px 0 #0a0a0a);
+  animation: hero-mascot-in 420ms var(--ease-snap) both;
+}
+.hero-mascot-key {
+  border-radius: 9999px;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.hero-mascot-key:focus-visible {
+  outline: 4px solid var(--pop-blue);
+  outline-offset: 2px;
+}
+/* the pop-in animates `transform`, so the phone size (the `scale` property below) is left alone */
+@keyframes hero-mascot-in {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+/* phones: a smaller cat, still a 60 px tap target */
+@media (max-width: 639px) {
+  .hero-mascot {
+    scale: 0.78;
+    transform-origin: 100% 100%;
+    right: 0.75rem;
+    translate: 0 -66%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-mascot {
+    animation: none;
+  }
+}
+html[data-motion='calm'] .hero-mascot {
+  animation: none;
+}
+@media print {
+  .hero-mascot {
+    display: none;
+  }
+}

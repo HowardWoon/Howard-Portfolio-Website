@@ -10,6 +10,7 @@ import { TextRoll } from './fx/text-roll';
 import { TiltCard } from './tilt-card';
 import { toLocal } from '@/lib/to-local';
 import { SpiderReveal } from './spider-reveal';
+import { HeroMascot } from './lazy-sections';
 import { BauhausSolid } from './fx/bauhaus-solid';
 import { FX } from '@/lib/fx';
 
@@ -252,6 +253,8 @@ export default function BikebearHero() {
               style={{ '--d': 2 } as React.CSSProperties}
               className="fx-hero-in fx-hero-pop relative group flex flex-col items-center lg:items-end z-40 pointer-events-auto w-full sm:w-auto px-1 sm:px-0"
             >
+              {/* R49: the cat perches on the ticker's top edge (absolute: no layout change) */}
+              <HeroMascot />
               {/* News Ticker (Above Photo) */}
               <div
                 className="hero-ticker fx-depth w-full max-w-[350px] sm:max-w-none sm:w-[460px] lg:w-[460px] xl:w-[520px] mb-5 overflow-hidden bg-white rounded-2xl border-3 border-ink py-2.5 relative z-20 shadow-brutal pointer-events-auto"

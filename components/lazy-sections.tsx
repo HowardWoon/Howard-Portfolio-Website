@@ -18,6 +18,8 @@ export const ResumeDrawer = dynamic(() => import('@/components/resume-drawer'), 
 export const ExperienceSection = dynamic(() => import('@/components/experience-section'));
 export const HonorsSection = dynamic(() => import('@/components/honors-section'));
 export const ContactSection = dynamic(() => import('@/components/contact-section'));
+// R49: the hero mascot (page-mascot cat) is client-only and mounts after the gate; its code stays out of First Load
+export const HeroMascot = dynamic(() => import('@/components/hero-mascot'), { ssr: false });
 // R44 Proof Reel: the Arena Wall rows read the photo lists of the sections above, so they share those chunks
 // (server-rendered like the sections; components/logo-wall.tsx itself stays a server component)
 export const ArenaRow = dynamic(() => import('@/components/arena-reel').then((mod) => mod.ArenaRow));

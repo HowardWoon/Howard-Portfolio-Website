@@ -25,6 +25,7 @@
     "lucide-react": "^0.514.0",
     "next": "^15.5.26",
     "nodemailer": "^9.1.1",
+    "page-mascot": "0.1.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "zod": "^3.25.56"
