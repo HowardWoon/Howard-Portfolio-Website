@@ -216,6 +216,8 @@ function PrintButton({ item, copy, onOpen }: { item: Print; copy: boolean; onOpe
       onClick={() => onOpen(item)}
       className={`fx-seal fx-print relative shrink-0 flex flex-col mx-2 sm:mx-3 p-1.5 pb-0 bg-white border-3 border-ink rounded-md shadow-brutal-sm ${FOCUS}`}
     >
+      {/* R46: the site's masking tape (.tape) holds each print to the wall; it presses flat when the print is inspected */}
+      {FX.reelTape ? <span aria-hidden className="tape" /> : null}
       <span
         className="fx-print-photo relative block overflow-hidden border-2 border-ink bg-paper-deep"
         style={{ '--ar': photo.w / photo.h } as React.CSSProperties}

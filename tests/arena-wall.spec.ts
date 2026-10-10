@@ -227,6 +227,18 @@ test('a print straightens and lifts under the mouse, opens the lightbox on that 
   expect(hit).not.toBeNull();
   expect(hit!.rotate).toBe('0deg');
   expect(hit!.scale).toBe('1.12');
+  // R46: every print is taped to the wall; the tape of the inspected print is pressed flat and square
+  expect(await page.locator('button.fx-print:not([aria-hidden]) > .tape').count()).toBe(52);
+  const tape = await page.evaluate(
+    ([x, y]) => {
+      const s = document.elementFromPoint(x, y)!.closest('.fx-print')!;
+      const other = [...s.parentElement!.querySelectorAll('.fx-print')].find((p) => p !== s)!;
+      const cs = (el: Element) => getComputedStyle(el.querySelector('.tape')!);
+      return { rotate: cs(s).rotate, scale: cs(s).scale, restScale: cs(other).scale };
+    },
+    [sx, sy],
+  );
+  expect(tape).toEqual({ rotate: '3deg', scale: '0.96', restScale: '1.1' });
 
   await page.mouse.click(sx, sy);
   const dialog = page.getByRole('dialog');

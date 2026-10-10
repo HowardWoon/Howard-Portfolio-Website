@@ -1569,6 +1569,29 @@ html:not(.fx-off-ticketPunch) .fx-ticket-face::after {
   scale: 1.12;
   z-index: 2;
 }
+/* R46 tape on the reel prints: the existing .tape strip, sized for a small print. At rest it sits a little proud and
+   askew (alternating, so the wall is not uniform); when the print is inspected it is pressed flat and square. */
+.fx-print .tape {
+  width: 2.75rem;
+  height: 0.95rem;
+  scale: 1.1;
+  transition:
+    rotate 0.2s cubic-bezier(0.2, 0.9, 0.1, 1),
+    scale 0.2s cubic-bezier(0.2, 0.9, 0.1, 1);
+}
+.fx-print:nth-child(even) .tape {
+  rotate: 7deg;
+}
+.fx-print:hover .tape,
+.fx-print:focus-visible .tape {
+  rotate: 3deg;
+  scale: 0.96;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fx-print .tape {
+    transition: none;
+  }
+}
 /* the rows also slide against each other as the band scrolls through the viewport ("cross over") */
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
