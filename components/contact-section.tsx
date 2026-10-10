@@ -28,13 +28,20 @@ import { openResume } from '@/lib/resume';
 import { OsWindow, WindowDesk } from '@/components/os-window';
 import { PillPit, type PitBadge } from '@/components/pill-pit';
 import { SIGNAL, type Signal } from '@/lib/signal';
+import { experiences } from '@/components/experience-section';
 
 const ROLE_SIGNAL: Record<string, Signal | undefined> = {
   'Agentic AI Pipelines': 'ai',
   'Fiscal Governance': 'leadership',
   LangGraph: 'ai',
   'Gemini · MCP': 'ai',
+  // R48: the two AI stack names from the Arena Wall that were missing from the pit
+  'Scikit-Learn': 'ai',
+  Gonka: 'ai',
 };
+/** a badge in its SIGNAL colour at full strength (the ink plate carries white text) */
+const pigment = (signal: Signal | undefined) =>
+  signal ? `${SIGNAL[signal].fill} ${SIGNAL[signal].text ? '!text-white' : ''}` : 'bg-white';
 // the Target Roles below + the stack from the hero tape (facts already on the page); colour = SIGNAL meaning only
 const PIT_BADGES: PitBadge[] = [
   'Distributed Backends',
@@ -51,7 +58,16 @@ const PIT_BADGES: PitBadge[] = [
   'Sui Move',
   'ESP32 · MQTT',
   'Gemini · MCP',
-].map((label) => ({ label, fill: ROLE_SIGNAL[label] ? SIGNAL[ROLE_SIGNAL[label]!].soft : 'bg-white' }));
+  'Scikit-Learn',
+  'Gonka',
+].map((label) => ({ label, fill: pigment(ROLE_SIGNAL[label]) }));
+// R48 (owner: "too little pigments here, add more and more"): 10 of the 14 badges were white. Every skill tag printed
+// on an Experience card now drops in too, in the colour of the track it was proven in (INDUSTRY ink, LEADERSHIP
+// pink, ACADEMIC orange) - read from the cards, so a new tag joins the pile by itself. Coloured badges use the full
+// SIGNAL colour (they were the pale tints). A label already in the pile is not dropped twice.
+for (const e of experiences)
+  for (const label of e.tags)
+    if (!PIT_BADGES.some((b) => b.label === label)) PIT_BADGES.push({ label, fill: pigment(e.signal) });
 
 const MercuryField = dynamic(() => import('./fx/mercury-field').then((mod) => mod.MercuryField), { ssr: false });
 

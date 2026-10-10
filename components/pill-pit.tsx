@@ -381,7 +381,8 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
       <div
         ref={boxRef}
         aria-hidden
-        className={`relative h-[460px] overflow-hidden bg-paper-cream bg-dots sm:h-[340px] ${
+        // R48: the pile is about twice as deep (27 badges, not 14), so the pit is taller where the box is narrow
+        className={`relative h-[700px] overflow-hidden bg-paper-cream bg-dots sm:h-[480px] lg:h-[380px] ${
           live ? 'touch-pan-y select-none' : 'flex flex-wrap content-end items-end gap-2 p-4'
         }`}
       >

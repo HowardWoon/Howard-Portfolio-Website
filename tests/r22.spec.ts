@@ -133,7 +133,9 @@ test('badge pit: badges fall in, settle inside the pit, and can be flung', async
         );
       }),
     );
-  expect(await inside()).toBe(true);
+  // R48: the pile is 27 badges now (it was 14) and they drop in one after another, so the last one lands later than
+  // a fixed 3 s: wait until every badge is inside (same requirement, no fixed guess)
+  await expect.poll(inside, { timeout: 12_000 }).toBe(true);
   const pill = pit.locator('> span', { hasText: 'PostgreSQL' });
   const a = (await pill.boundingBox())!;
   await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2);
@@ -145,8 +147,7 @@ test('badge pit: badges fall in, settle inside the pit, and can be flung', async
   const held = (await pill.boundingBox())!;
   expect(Math.abs(held.x - a.x)).toBeGreaterThan(180);
   await page.mouse.up();
-  await page.waitForTimeout(2500);
-  expect(await inside()).toBe(true); // and after the fling everything settles inside the pit again
+  await expect.poll(inside, { timeout: 12_000 }).toBe(true); // and after the fling everything settles inside the pit again
   await expect(page.getByRole('button', { name: 'DROP AGAIN' })).toBeVisible();
 });
 
@@ -163,12 +164,13 @@ test.describe('phone pit', () => {
   test('on a phone every badge settles inside the pit (none over its title bar)', async ({ page }) => {
     await home(page);
     await to(page, '[data-pill-pit]', -120);
-    await page.waitForTimeout(3500);
-    const ys = await page
-      .locator('[data-pill-pit] > div[aria-hidden] > span')
-      .evaluateAll((els) => els.map((e) => new DOMMatrix(getComputedStyle(e).transform).m42));
-    expect(ys.length).toBe(14);
-    for (const y of ys) expect(y).toBeGreaterThanOrEqual(-1); // no badge above the pit's ceiling
+    const read = () =>
+      page
+        .locator('[data-pill-pit] > div[aria-hidden] > span')
+        .evaluateAll((els) => els.map((e) => new DOMMatrix(getComputedStyle(e).transform).m42));
+    expect((await read()).length).toBe(27); // R48: every Experience skill tag joined the 14
+    // no badge above the pit's ceiling once the (longer) fall is over
+    await expect.poll(async () => Math.min(...(await read())), { timeout: 15_000 }).toBeGreaterThanOrEqual(-1);
   });
 });
 
