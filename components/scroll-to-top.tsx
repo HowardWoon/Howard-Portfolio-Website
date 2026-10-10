@@ -97,25 +97,27 @@ export function ScrollToTop() {
               className="group relative grid place-items-center w-11 h-11 sm:w-14 sm:h-14 bg-pop-yellow border-3 border-ink rounded-full shadow-clay hover:-translate-y-1 active:translate-x-[3px] active:translate-y-[3px] active:shadow-clay-pressed transition-all"
               aria-label="Scroll to top"
             >
-              {/* FX-63 reading-progress ring (CSS scroll timeline; static where unsupported) */}
-              <svg
-                aria-hidden
-                viewBox="0 0 48 48"
-                className="fx-ring absolute -inset-[3px] -rotate-90 pointer-events-none"
-              >
-                <circle cx="24" cy="24" r="22" fill="none" stroke="#0A0A0A" strokeOpacity=".12" strokeWidth="3" />
-                <circle
-                  cx="24"
-                  cy="24"
-                  r="22"
-                  fill="none"
-                  stroke="#2B4BFF"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  pathLength={100}
-                  className="fx-ring-bar"
-                />
-              </svg>
+              {/* FX-63 reading-progress ring (CSS scroll timeline; static where unsupported).
+                  R53 (owner: the blue ring looked "not align and so random"): the <svg> was placed with all four
+                  insets, but a replaced element keeps its own size, so the ring came out 3 px short and sat towards
+                  the top-left of the button, with a round cap: a second, crooked outline. A plain box now marks the
+                  centre line of the 3 px border and the <svg> fills it; the stroke is 3 screen px at both button
+                  sizes. The border itself turns blue as the page is read. */}
+              <span aria-hidden className="fx-ring pointer-events-none absolute -inset-[1.5px] -rotate-90">
+                <svg viewBox="0 0 48 48" className="block h-full w-full overflow-visible">
+                  <circle
+                    cx="24"
+                    cy="24"
+                    r="24"
+                    fill="none"
+                    stroke="#2B4BFF"
+                    strokeWidth="3"
+                    vectorEffect="non-scaling-stroke"
+                    pathLength={100}
+                    className="fx-ring-bar"
+                  />
+                </svg>
+              </span>
               <ArrowUp
                 className="relative w-5 h-5 sm:w-6 sm:h-6 text-ink group-hover:-translate-y-0.5 transition-transform"
                 strokeWidth={3}

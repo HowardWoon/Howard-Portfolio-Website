@@ -29,6 +29,7 @@ import { OsWindow, WindowDesk } from '@/components/os-window';
 import { PillPit, type PitBadge } from '@/components/pill-pit';
 import { SIGNAL, type Signal } from '@/lib/signal';
 import { experiences } from '@/components/experience-section';
+import { SectionBackdrop } from './fx/section-backdrop';
 
 const ROLE_SIGNAL: Record<string, Signal | undefined> = {
   'Agentic AI Pipelines': 'ai',
@@ -255,6 +256,7 @@ export default function ContactSection() {
       onPointerDownCapture={markStart}
       className="fx-tide-surface fx-dot-plane relative w-full bg-paper-cream bg-dots text-ink pt-24 sm:pt-32 pb-0 overflow-clip border-t-3 border-ink"
     >
+      <SectionBackdrop layout="b" />
       {/* Bauhaus composition (replaces the particle canvas, which was invisible on a light canvas
           and was also being stretched: its bitmap was viewport-sized but CSS-sized to the whole section) */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">

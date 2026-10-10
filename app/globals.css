@@ -154,6 +154,13 @@
   }
 }
 
+/* R53: the ring is a keyboard aid. Without <html data-kbd> (components/input-modality.tsx: set by a key press, cleared
+   by a pointer press) buttons and links focused by script, e.g. the gate's auto-focused button, draw no ring. Text
+   fields always show where the caret is. */
+html:not([data-kbd]) :focus-visible:not(input, textarea, select, [contenteditable='true']) {
+  outline: none;
+}
+
 /* ---------- Lenis (smooth scroll) required styles ---------- */
 html.lenis,
 html.lenis body {
@@ -5099,13 +5106,17 @@ nav[data-scrubbing] {
   /* where the dock starts: the cat's left edge + its drawn width + a 6 px gap */
   --cat-clear: calc(max(0.75rem, var(--safe-left)) + 56px + 6px);
 }
-/* very narrow phones (Galaxy Fold, 280 px): a 44 px cat, so the dock and back-to-top still fit beside it */
-@media (max-width: 359px) {
+/* R53 phones (owner: "make sure it wont block any all my website content, must stay at empty space"): below 640 px
+   there is no empty gutter to stand in (16 - 20 px). The cat is 44 px (the tap-target floor) and stands flush with
+   the window's left edge, so its right edge is at 44 px. A card's own text starts at 16 px gutter + 3 px border +
+   24 px padding = 43 px or more, so the cat covers the gutter and a card's blank inner margin, never its words. */
+@media (max-width: 639px) {
   .site-mascot {
+    left: max(0px, var(--safe-left));
     scale: 0.61;
   }
   :root {
-    --cat-clear: calc(max(0.75rem, var(--safe-left)) + 44px + 4px);
+    --cat-clear: calc(max(0px, var(--safe-left)) + 44px + 4px);
   }
 }
 /* wide screens have a real gutter: the cat at its full 72 px */
@@ -5146,6 +5157,76 @@ html[data-motion='calm'] .site-mascot {
 }
 @media print {
   .site-mascot {
+    display: none;
+  }
+}
+
+/* ================================================================ R53 section backdrop
+   components/fx/section-backdrop.tsx: decorative ink / paper geometry behind every section's content, in the page
+   gutter. --sb-gut = the side padding the sections use at each width (px-4 / xs:px-5 / sm:px-10 / lg:px-16, then
+   the free margin beside the 80 rem column). A piece is centred --sb-at of the way across it. */
+.sb-layer {
+  --sb-gut: 1rem;
+  --sb-k: 0.62;
+  /* phones: the gutter is only 16 px, so the pieces on the right reach further in (text is set flush left, so the
+     right of a heading or of a gap between two cards is free); from 640 px every piece stays in its gutter */
+  --sb-reach: 2.6;
+  /* the pieces are placed by % of the section's height, so they move when a card in it opens. The browser must not
+     pick one as its scroll anchor: it did, and the page jumped 77 px under the mouse when a proof card opened. */
+  overflow-anchor: none;
+}
+@media (min-width: 375px) {
+  .sb-layer {
+    --sb-gut: 1.25rem;
+  }
+}
+@media (min-width: 640px) {
+  .sb-layer {
+    --sb-gut: 2.5rem;
+    --sb-k: 0.8;
+    --sb-reach: 1;
+  }
+}
+@media (min-width: 1024px) {
+  .sb-layer {
+    --sb-gut: max(4rem, calc((100% - 80rem) / 2));
+    --sb-k: 1.1;
+  }
+}
+html.fx-off-sectionBackdrop .sb-layer {
+  display: none;
+}
+.sb-piece {
+  width: var(--sb-size);
+  scale: calc(var(--sb-k) * var(--u, 1));
+}
+.sb-l {
+  left: calc(var(--sb-gut) * var(--sb-at) - var(--sb-size) / 2);
+}
+.sb-r {
+  right: calc(var(--sb-gut) * var(--sb-at) * var(--sb-reach) - var(--sb-size) / 2);
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion='calm']) .sb-float {
+    animation: sb-float var(--sb-dur, 9s) ease-in-out var(--sb-delay, 0s) infinite alternate;
+    will-change: transform;
+  }
+}
+@keyframes sb-float {
+  from {
+    transform: translate3d(0, 7px, 0) rotate(-5deg);
+  }
+  to {
+    transform: translate3d(0, -9px, 0) rotate(6deg);
+  }
+}
+/* D5: nothing animates while its section is off screen */
+[data-offscreen] .sb-float,
+[data-offscreen] .sb-layer .fx-solid {
+  animation-play-state: paused;
+}
+@media print {
+  .sb-layer {
     display: none;
   }
 }

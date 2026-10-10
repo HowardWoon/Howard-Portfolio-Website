@@ -58,6 +58,48 @@ Measured for row 25 (cat box, section dock, back-to-top, in CSS px; no pair over
 | 280 x 653   | 12, 12, 44                   | 60             | 220                   |
 | 844 x 390   | 13, 13, 56                   | 75             | 737                   |
 
+## 2b. R53 (11 Oct 2026, second batch)
+
+Each row was first measured as a bug on the production build, then fixed, then guarded by `tests/r53.spec.ts`.
+
+| #   | Request                                                     | Measured before                                                                            | What was done                                                                                                                                                                                                | Result         |
+| --- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------- |
+| 29  | Geometry floating behind every section, not one flat colour | accents only above 1024 px and only near the section titles                                | `components/fx/section-backdrop.tsx`: 12 ink / paper pieces per section (3D cube, coin, ring, plate, cross, triangle, bars, dots), in the gutters, on every size; float + scroll drift + lean from the mouse | PASS           |
+| 30  | A thumbnail was cut in half at the edge of a gallery        | the filmstrip scrolled sideways under a hidden scrollbar                                   | the strip wraps; every thumbnail is whole (also in the photo viewer)                                                                                                                                         | PASS           |
+| 31  | A fanned print hung outside the gallery panel               | 20 - 60 px outside on all six project galleries, at 390 / 768 / 1024 / 1440 px             | each stack measures the room it has; the lean and fan are reduced only as far as needed                                                                                                                      | PASS           |
+| 32  | Badge pit: badges blocked by each other, messy              | 2 - 5 pairs resting inside each other on every drop, at every width                        | new support rules (bridge, lean, slide off), no resting overlap, landing spots planned so the pile is level                                                                                                  | PASS           |
+| 33  | Blue ring on buttons: messy, not aligned, random            | the gate button drew a focus ring on load; the progress ring was 3 px short and off-centre | the focus ring is drawn for the keyboard only; the progress ring runs exactly on the button border                                                                                                           | PASS           |
+| 34  | Every command in the palette must work                      | 11 of 11 commands had an effect on desktop and on a phone (no fix needed)                  | guarded by a test that runs all 11                                                                                                                                                                           | PASS           |
+| 35  | The cat follows a finger on phones and tablets              | the package only follows a mouse                                                           | touchstart / touchmove turn the head; it faces front 1.4 s after the finger lifts                                                                                                                            | PASS           |
+| 36  | The cat must not block content                              | on a phone it covered 68 px of a card                                                      | below 640 px it is 44 px, flush with the left edge (a card's text starts at 43 px or more)                                                                                                                   | PASS, see note |
+
+Note on row 36: a phone has no empty gutter (16 - 20 px), and the cat is asked to be on screen at every scroll
+position. Section headings start at the gutter, so a heading that scrolls through the bottom-left corner passes under
+the cat for a moment, exactly as it passes under the section dock and the back-to-top button. From 640 px up the cat
+stands in the gutter.
+
+Badge pit after the fix (6 drops per width; "pairs" = badges resting inside each other):
+
+| Window | Badges shown (of 27) | Pairs | Past an edge | Left above the pit                                    | Slowest settle |
+| ------ | -------------------- | ----- | ------------ | ----------------------------------------------------- | -------------- |
+| 1440   | 27                   | 0     | 0            | 0                                                     | 6.0 s          |
+| 1024   | 27                   | 0     | 0            | 1 (removed by the overflow rule added after this run) | 12.6 s         |
+| 768    | 27                   | 0     | 0            | 0                                                     | 6.9 s          |
+| 390    | 26 - 27              | 0     | 0            | 0                                                     | 9.1 s          |
+| 320    | 22 - 25              | 0     | 0            | 0                                                     | 9.8 s          |
+| 280    | 21 - 22              | 0     | 0            | 0                                                     | 11.0 s         |
+
+Found while verifying (not reported by the owner):
+
+- The backdrop layer was chosen by the browser as its scroll anchor, so the page jumped 77 px when a proof card
+  opened under the mouse. Fixed with `overflow-anchor: none`; guarded.
+- The new pit solver first left a badge rocking 2 px across a gap, and a stacked column trembling by 1 px. Both
+  fixed (wedge rule, stacks resolve upwards only, a carried badge that stays within a pixel for 3/4 s is at rest).
+
+R53 checks on the production build: `tests/r53.spec.ts` 25 of 25; affected older specs (r14, r16, r17, r22, r24, r29,
+r31, r36, r48, r49) passed except the known load flake r36 "live from the first click" (2 of 2 when run alone);
+`audit-ui.mjs` ALL PASS; `device-sweep.mjs` ALL PASS (16 devices x 4 pages).
+
 ## 3. Whole-site checks, last run
 
 | Check                                              | Result                                                         |

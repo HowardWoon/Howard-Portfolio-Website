@@ -142,6 +142,7 @@ export const FX = {
   reelGrab: true, // drag a reel row by hand and fling it; a short press is still a click
   ticketPunch: true, // the reel's ink tickets are punched top and bottom like admission tickets (CSS mask)
   heroMascot: true, // R49 the page-mascot cat perched on the hero ticker: follows the pointer, reacts to a boop
+  sectionBackdrop: true, // R53 floating ink / paper geometry in the gutters of every section, on every screen size
   reelTape: true, // each reel print is held by the site's masking tape, which presses flat under the mouse / focus
 } as const;
 

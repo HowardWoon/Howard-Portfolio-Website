@@ -8,6 +8,7 @@ import { FX, SPRING_SOFT } from '@/lib/fx';
 import { startTrail, useInteractionSelect } from '@/lib/interaction-store';
 import { projectsWithSkill, skillKey } from '@/lib/skills';
 import { ScrollInk } from './fx/scroll-ink';
+import { SectionBackdrop } from './fx/section-backdrop';
 
 const architecturePillars = [
   {
@@ -283,6 +284,7 @@ export default function AboutSection() {
       id="about"
       className="fx-tide-surface fx-dot-plane fx-sheet relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-28 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-clip border-t-3 border-ink"
     >
+      <SectionBackdrop layout="a" />
       {/* Bauhaus accents */}
       <div
         aria-hidden
