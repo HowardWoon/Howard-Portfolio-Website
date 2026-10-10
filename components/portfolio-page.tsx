@@ -115,12 +115,14 @@ export function PortfolioPage() {
         <OffscreenPause />
         <RouteWipeClear home />
         {/* R19 FX-109: the heavy client effects start after the boot gate lifts */}
-        {/* mounted one per idle moment, most-used first */}
-        <AfterBoot>
+        {/* mounted one per idle moment, most-used first. R49 (owner: "where is the menu?"): the section rail and the
+            mobile dock are navigation the visitor looks for at once, so they mount first (the rail used to appear
+            about 2 s after the gate, fourth in this list) */}
+        <AfterBoot eager={2}>
+          <SectionSpine />
+          <SectionDock />
           <CommandPalette />
           <InteractionHud />
-          <SectionDock />
-          <SectionSpine />
           <DeskFx />
           <AmbientFx />
           <PointerField />

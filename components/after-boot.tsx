@@ -19,7 +19,17 @@ type IdleWindow = Window & {
   cancelIdleCallback?: (id: number) => void;
 };
 
-export function AfterBoot({ children }: { children: React.ReactNode }) {
+export function AfterBoot({
+  children,
+  eager = 0,
+}: {
+  children: React.ReactNode;
+  /** R49 (owner: "where is the menu?"): the first `eager` children are navigation the visitor looks for at once (the
+   *  section rail, the mobile dock). They mount as soon as the gate lifts instead of waiting for the shatter to end
+   *  and then for an idle moment (the rail used to appear 1.4 - 2.1 s after the gate). They are light: no canvas, no
+   *  physics. Everything after them keeps the settled, one-per-idle start. */
+  eager?: number;
+}) {
   const booted = useBooted();
   const items = React.Children.toArray(children);
   const total = items.length;
@@ -63,14 +73,14 @@ export function AfterBoot({ children }: { children: React.ReactNode }) {
       return;
     }
     const w = window as IdleWindow;
-    const more = () => setCount((c) => c + 1);
+    const more = () => setCount((c) => Math.max(c, eager) + 1);
     if (w.requestIdleCallback) {
       const h = w.requestIdleCallback(more, { timeout: 600 });
       return () => w.cancelIdleCallback?.(h);
     }
     const t = window.setTimeout(more, 50);
     return () => window.clearTimeout(t);
-  }, [started, count, total]);
+  }, [started, count, total, eager]);
 
-  return booted ? <>{items.slice(0, count)}</> : null;
+  return booted ? <>{items.slice(0, Math.max(count, Math.min(eager, total)))}</> : null;
 }
