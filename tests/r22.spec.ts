@@ -169,8 +169,19 @@ test.describe('phone pit', () => {
         .locator('[data-pill-pit] > div[aria-hidden] > span')
         .evaluateAll((els) => els.map((e) => new DOMMatrix(getComputedStyle(e).transform).m42));
     expect((await read()).length).toBe(27); // R48: every Experience skill tag joined the 14
-    // no badge above the pit's ceiling once the (longer) fall is over
-    await expect.poll(async () => Math.min(...(await read())), { timeout: 15_000 }).toBeGreaterThanOrEqual(-1);
+    // R52: a phone's pit drops as many badges as it can hold (the rest are hidden, not left resting above the
+    // ceiling out of sight); at least the original 14 always show
+    const shown = () =>
+      page
+        .locator('[data-pill-pit] > div[aria-hidden] > span')
+        .evaluateAll((els) =>
+          els
+            .filter((e) => (e as HTMLElement).style.visibility !== 'hidden')
+            .map((e) => new DOMMatrix(getComputedStyle(e).transform).m42),
+        );
+    await expect.poll(async () => (await shown()).length, { timeout: 10_000 }).toBeGreaterThanOrEqual(14);
+    // no shown badge above the pit's ceiling once the fall is over
+    await expect.poll(async () => Math.min(...(await shown())), { timeout: 15_000 }).toBeGreaterThanOrEqual(-1);
   });
 });
 

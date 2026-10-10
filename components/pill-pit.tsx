@@ -25,6 +25,10 @@ const MAX_V = 2600;
 // away. Resting contacts used to trade velocities every frame, so a stacked badge trembled until the loop gave up.
 const SLEEP_V = 14; // px / s
 const SLEEP_FRAMES = 6;
+// how long a badge left above a full pile is steered to a free spot (frames: about 20 s at 60 fps)
+const STUCK_FRAMES = 1200;
+// the pile builds columns, not tight rows: rows needed = tightly packed rows x this (1.15: 36 of 36 drops landed across 280 - 1440 px; 1.0 left badges above the ceiling)
+const SLACK = 1.15;
 
 // inside: the badge has fallen into the pit, so the ceiling now holds it (badges start above the pit)
 type Body = {
@@ -39,6 +43,8 @@ type Body = {
   asleep: boolean;
   still: number;
   tilt: number;
+  /** R52: not dropped this time - the pit is too small for the whole pile at this width (hidden, out of the physics) */
+  out: boolean;
 };
 
 export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }) {
@@ -70,6 +76,7 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
       asleep: false,
       still: 0,
       tilt: 0,
+      out: false,
     }));
     let raf = 0;
     let last = 0;
@@ -87,6 +94,7 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
         b.tilt += (target - b.tilt) * 0.25;
         if (Math.abs(b.tilt) < 0.05) b.tilt = 0;
         el.style.transform = `translate3d(${b.x.toFixed(1)}px, ${b.y.toFixed(1)}px, 0) rotate(${b.tilt.toFixed(2)}deg)`;
+        el.style.visibility = b.out ? 'hidden' : '';
       });
     };
     const overlapX = (a: Body, c: Body) => Math.min(a.x + a.w, c.x + c.w) - Math.max(a.x, c.x);
@@ -104,7 +112,7 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
 
     const step = (dt: number) => {
       for (const b of bodies) {
-        if (b.drag || b.asleep) continue;
+        if (b.drag || b.asleep || b.out) continue;
         b.vy += G * dt;
         b.vx = Math.max(-MAX_V, Math.min(MAX_V, b.vx));
         b.vy = Math.max(-MAX_V, Math.min(MAX_V, b.vy));
@@ -212,7 +220,7 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
       // sleep / wake: slow + supported for a few frames = asleep (exactly still); a sleeper whose support moved
       // away wakes and falls
       for (const b of bodies) {
-        if (b.drag) continue;
+        if (b.drag || b.out) continue;
         if (b.asleep) {
           if (!supported(b)) wakeBody(b);
           continue;
@@ -225,15 +233,33 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
         }
       }
       paint();
-      // a badge still above the pit (the pile reached the ceiling) slides steadily towards the side with more room
-      // (it used to get a random kick every frame for up to 10 s: the "shaking")
-      for (const b of bodies)
-        if (frames < 600 && !b.drag && !b.inside && b.y < -1 && Math.abs(b.vy) < 20)
-          b.vx = (b.x + b.w / 2 < W / 2 ? 1 : -1) * 160;
+      // A badge still above the pit (the pile under it reached the ceiling) slides steadily to where the pile is
+      // LOWEST and drops in there (it used to get a random kick every frame for up to 10 s: the "shaking").
+      // R52: the old rule sent it towards the middle of the pit, which is where a full column stands. With 14 badges
+      // no column reached the ceiling; with 27, about 3 runs in 8 left two or three badges resting above the pit,
+      // out of sight. Headroom is sampled every 40 px across the pit (only for a stuck badge, never for a resting one).
+      for (const b of bodies) {
+        if (frames >= STUCK_FRAMES || b.out || b.drag || b.inside || b.y >= -1 || Math.abs(b.vy) >= 20) continue;
+        let best = b.x;
+        let room = -Infinity;
+        for (let x = 0; x <= Math.max(0, W - b.w); x += 40) {
+          // the highest badge inside the pit under a badge placed at x (the floor when there is none)
+          let top = H;
+          for (const o of bodies)
+            if (o !== b && !o.out && o.inside && o.x < x + b.w && o.x + o.w > x && o.y < top) top = o.y;
+          // more headroom wins; between equal spots, the nearer one
+          if (top > room + 0.5 || (Math.abs(top - room) <= 0.5 && Math.abs(x - b.x) < Math.abs(best - b.x))) {
+            room = top;
+            best = x;
+          }
+        }
+        const dx = best - b.x;
+        b.vx = Math.abs(dx) < 6 ? 0 : Math.sign(dx) * 220;
+      }
       frames++;
-      const above = frames < 600 && bodies.some((b) => !b.drag && b.y < -1);
+      const above = frames < STUCK_FRAMES && bodies.some((b) => !b.out && !b.drag && b.y < -1);
       // R31: the loop runs until every badge is ASLEEP (exactly still), so none is left half-settled to creep later
-      const moving = above || bodies.some((b) => b.drag || b.tilt !== 0 || (!b.asleep && b.y >= -1));
+      const moving = above || bodies.some((b) => !b.out && (b.drag || b.tilt !== 0 || (!b.asleep && b.y >= -1)));
       calm = moving ? 0 : calm + 1;
       if (visible && calm < 20) raf = requestAnimationFrame(tick);
     };
@@ -248,7 +274,39 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
     const drop = () => {
       W = box.clientWidth;
       H = box.clientHeight;
+      // R52 capacity: how many badges this pit can hold at this width. The pile never packs perfectly (a badge rests
+      // only with its centre over the one below, so it builds columns), so rows are counted with slack (SLACK). On a
+      // desktop and a normal phone every badge fits; on a 280 px Fold or a short tablet the last few stay out rather
+      // than sit above the ceiling where nobody can see them (measured: 6 of 6 runs stuck at 280 px before this).
+      const rowH = Math.max(...bodies.map((b) => b.h)) + 2;
+      const rowsFree = Math.floor(H / rowH) / SLACK;
+      let rows = 1;
+      let used = 0;
+      let fit = bodies.length;
+      for (let i = 0; i < bodies.length; i++) {
+        const w = Math.min(W, bodies[i].w + 6);
+        if (used + w > W) {
+          rows++;
+          used = 0;
+        }
+        used += w;
+        if (rows > rowsFree) {
+          fit = i;
+          break;
+        }
+      }
       bodies.forEach((b, i) => {
+        b.out = i >= Math.max(1, fit);
+        if (b.out) {
+          b.x = 0;
+          b.y = -100000;
+          b.vx = b.vy = 0;
+          b.drag = false;
+          b.inside = false;
+          b.asleep = true;
+          b.tilt = 0;
+          return;
+        }
         b.x = Math.random() * Math.max(1, W - b.w);
         b.y = -b.h - i * 38 - Math.random() * 40;
         b.vx = (Math.random() - 0.5) * 300;
@@ -383,7 +441,7 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
         aria-hidden
         // R48: the pile is about twice as deep (27 badges, not 14), so the pit is taller where the box is narrow
         className={`relative h-[700px] overflow-hidden bg-paper-cream bg-dots sm:h-[480px] lg:h-[380px] ${
-          live ? 'touch-pan-y select-none' : 'flex flex-wrap content-end items-end gap-2 p-4'
+          live ? 'touch-pan-y select-none' : '!h-auto min-h-[380px] flex flex-wrap content-end items-end gap-2 p-4'
         }`}
       >
         {badges.map((b, i) => (
