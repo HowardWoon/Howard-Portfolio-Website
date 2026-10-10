@@ -13,9 +13,10 @@ import { HonorEmblem, type EmblemKind } from './honor-emblem';
 import { CertificateDeck, type DeckCert } from './certificate-deck';
 import { AnimatedCounter } from './animated-counter';
 import { InstitutionSeal } from './institution-seal';
+import { OrgLogo, orgLogoFor } from './org-logo';
 import { HonorsTally } from './honors-tally';
 import { PinKey } from './press/pin-key';
-import { ResultsBoard, RolesGrid, Transcript } from './honors-academic';
+import { HeadlineFigures, ResultsBoard, RolesGrid, Transcript } from './honors-academic';
 import { AmbientOrbits } from './fx/ambient-orbits';
 import { useFocusTrap } from '@/lib/use-focus-trap';
 import { useLatest } from '@/lib/use-latest';
@@ -677,13 +678,15 @@ export default function HonorsSection() {
                         {/* Title & Body. R30: an institution's own award carries its Registrar Seal beside the title
                             (above it on phones, where the title needs the full width) */}
                         <div
-                          className={`flex gap-4 justify-between items-start mb-4 ${SEAL[item.id] ? 'flex-col-reverse sm:flex-row' : ''}`}
+                          className={`flex gap-4 justify-between items-start mb-4 ${SEAL[item.id] || orgLogoFor(item.issuingBody) ? 'flex-col-reverse sm:flex-row' : ''}`}
                         >
                           <div className="min-w-0 space-y-2">
                             <h3 className="font-display text-2xl font-extrabold uppercase tracking-[-0.02em] leading-[1.05] text-ink">
                               {item.title}
                             </h3>
                             <p className="text-sm font-mono font-bold text-pop-blue">{item.issuingBody}</p>
+                            {/* R48: the academic cards fill the band beside their seal with their own figures */}
+                            <HeadlineFigures id={item.id} />
                           </div>
                           {SEAL[item.id] ? (
                             <InstitutionSeal
@@ -691,6 +694,14 @@ export default function HonorsSection() {
                               legend={SEAL[item.id]!.legend}
                               size="ring"
                               className="sm:-mt-1"
+                            />
+                          ) : orgLogoFor(item.issuingBody) ? (
+                            // R48: an award issued by an organisation whose logo is on the site carries that logo on a
+                            // white plate, in the slot the Registrar Seals use
+                            <OrgLogo
+                              org={orgLogoFor(item.issuingBody)!}
+                              className="h-16 w-36 shadow-brutal-xs"
+                              imgClassName="max-h-11"
                             />
                           ) : null}
                         </div>

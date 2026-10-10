@@ -13,6 +13,7 @@ import { useInteractionSelect } from '@/lib/interaction-store';
 import { InteractivePhotoStack } from './interactive-photo-stack';
 import { InstitutionSeal } from './institution-seal';
 import { LocationMap } from './location-map';
+import { OrgLogo, type OrgLogoKey } from './org-logo';
 import { PinKey } from './press/pin-key';
 import {
   Building2,
@@ -53,8 +54,10 @@ interface ExperienceItem {
   map?: string;
   /** R37: the gallery desk's heading (each card names its own gallery; default "Mentorship gallery") */
   galleryLabel?: string;
-  /** R29: the issuing institution's crest, printed as an Issuer Seal in the organisation pill */
+  /** R29: the issuing institution's crest, printed as an Issuer Seal in the organisation plate */
   crest?: 'kmns';
+  /** R48: the organisation's own wordmark, shown on a white window in the organisation plate */
+  logo?: OrgLogoKey;
 }
 
 export const experiences: ExperienceItem[] = [
@@ -67,6 +70,7 @@ export const experiences: ExperienceItem[] = [
     organization: 'KRAIBURG TPE Technology (M) Sdn Bhd',
     // R38 (owner): VIEW ON MAP opens Google Maps for this place (searched by the owner-supplied full name)
     map: 'KRAIBURG TPE Technology (M) Sdn Bhd',
+    logo: 'kraiburg',
     location: 'Kuala Lumpur, Malaysia',
     period: 'Nov 2025 - Present',
     icon: Building2,
@@ -153,6 +157,9 @@ export const experiences: ExperienceItem[] = [
     role: 'Finance Lead & Executive Treasurer',
     organization: 'Persatuan Komputer Universiti Malaya (PEKOM)',
     location: 'Universiti Malaya',
+    // R48 (owner: every card in a section has the same functions): VIEW ON MAP by the place already on this card
+    map: 'Universiti Malaya',
+    logo: 'pekom',
     period: '2025 - Present',
     icon: Landmark,
     signal: 'leadership',
@@ -179,6 +186,8 @@ export const experiences: ExperienceItem[] = [
     role: 'Assistant Head of Subject (Computer Science)',
     organization: 'KMNS PAL Leader Club',
     location: 'Kolej Matrikulasi Negeri Sembilan (Negeri Sembilan Matriculation College)',
+    // R48: VIEW ON MAP by the college's own name (the Malay name already in this card's location line)
+    map: 'Kolej Matrikulasi Negeri Sembilan',
     period: '2024',
     icon: GraduationCap,
     crest: 'kmns',
@@ -741,6 +750,10 @@ export default function ExperienceSection() {
                       28 px end spacer keeps the tab off the card's rounded corner; the 3 px overlap opens the tab
                       into the card; the 280 px Fold wraps the label instead of cutting it */}
                   <div data-folder-tabrow className="pointer-events-none relative z-10 -mb-[3px] flex">
+                    {/* R48 (owner: the first card's top-left looked "corrupted"): the first tab started at x 0, on
+                        the card's 30 px rounded corner, so the curve showed behind it. The same 28 px that keeps a
+                        tab off the right corner now keeps every tab off the left one */}
+                    <span aria-hidden className="w-7 shrink-0" />
                     <span
                       aria-hidden
                       className="min-w-0 shrink"
@@ -752,7 +765,7 @@ export default function ExperienceSection() {
                       aria-label={only ? 'Show all experience folders' : `Show only the ${item.categoryLabel} folder`}
                       onClick={() => setSelectedFilter(only ? 'all' : item.category)}
                       onKeyDown={onFolderTabKey}
-                      className={`nb-folder-tab pointer-events-auto flex min-h-[43px] max-w-[calc(100%-28px)] shrink-0 items-center gap-2 rounded-t-2xl border-3 border-b-0 border-ink px-4 py-2 text-left font-mono text-xs font-extrabold uppercase leading-snug tracking-[0.12em] ${a.fill} ${onFill}`}
+                      className={`nb-folder-tab pointer-events-auto flex min-h-[43px] max-w-[calc(100%-56px)] shrink-0 items-center gap-2 rounded-t-2xl border-3 border-b-0 border-ink px-4 py-2 text-left font-mono text-xs font-extrabold uppercase leading-snug tracking-[0.12em] ${a.fill} ${onFill}`}
                     >
                       <span className="min-w-0">
                         {item.number} {'//'} {item.categoryLabel}
@@ -771,7 +784,9 @@ export default function ExperienceSection() {
                       className={`nb-hatch flex flex-wrap items-center justify-between gap-3 sm:gap-4 px-4 xs:px-6 sm:px-10 py-3 sm:py-4 border-b-3 border-ink ${a.fill}`}
                     >
                       <div className="flex flex-wrap items-center gap-2 xs:gap-3 min-w-0">
-                        <span className="nb-num">{item.number}</span>
+                        {/* R48: on a dark plate (INDUSTRY ink) the ink disc had no edge - only the number showed. A
+                            white ring gives it one; on the light plates it keeps its ink ring */}
+                        <span className={`nb-num ${a.text ? '!border-white' : ''}`}>{item.number}</span>
                         <span className="rounded-md border-2 border-ink bg-white px-1.5 py-0.5 font-mono text-xs font-extrabold tracking-[0.14em] text-ink shadow-brutal-xs">
                           {a.label}
                         </span>
@@ -824,19 +839,33 @@ export default function ExperienceSection() {
                               {item.headline}
                             </p>
                           </div>
-                          {/* R38: the organisation pill, with its VIEW ON MAP key under it when the card has a map */}
-                          <div className="flex shrink-0 flex-col gap-3 self-start">
-                            <div
-                              className={`flex items-center gap-2.5 px-4 py-2.5 rounded-2xl border-3 border-ink shadow-brutal-sm ${a.soft}`}
+                          {/* R48 organisation plate (owner: "you must have a standard when designing this whole section,
+                              make sure all card must have the same function"). Every card carries the same three
+                              parts in the same order: the organisation's mark on a white window (its wordmark, or its
+                              Registrar Seal), its full name, and the R38 VIEW ON MAP key. One plate, not a pill that
+                              differed card to card and left the corner empty. */}
+                          <div
+                            data-org-plate
+                            className={`flex w-full shrink-0 flex-col items-stretch gap-3 self-start rounded-2xl border-3 border-ink p-3 shadow-brutal-sm sm:flex-row sm:items-center lg:w-[25rem] ${a.soft}`}
+                          >
+                            <span
+                              data-org-mark
+                              className="grid h-[5.5rem] w-full shrink-0 place-items-center rounded-xl border-2 border-ink bg-white sm:w-[8.5rem]"
                             >
-                              {item.crest ? (
-                                <InstitutionSeal crest={item.crest} size="pill" />
+                              {item.logo ? (
+                                <OrgLogo org={item.logo} bare className="px-2" imgClassName="max-h-[4.25rem]" />
+                              ) : item.crest ? (
+                                <InstitutionSeal crest={item.crest} size="stamp" />
                               ) : (
-                                <item.icon className="w-5 h-5 text-ink" strokeWidth={2.5} />
+                                <item.icon className="h-8 w-8 text-ink" strokeWidth={2.25} />
                               )}
-                              <span className="text-sm font-extrabold font-sans text-ink">{item.organization}</span>
+                            </span>
+                            <div className="flex min-w-0 flex-col gap-2.5">
+                              <span className="text-sm font-extrabold font-sans leading-snug text-ink [overflow-wrap:anywhere]">
+                                {item.organization}
+                              </span>
+                              {item.map ? <LocationMap place={item.map} /> : null}
                             </div>
-                            {item.map ? <LocationMap place={item.map} /> : null}
                           </div>
                         </div>
                       </div>

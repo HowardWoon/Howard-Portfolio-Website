@@ -11,6 +11,7 @@ import { experiences } from './experience-section';
 import { CERT_SIZE, honorsList } from './honors-section';
 import { ARCHIVE_DATA } from './field-archive-data';
 import { PHOTO_BLUR } from './photo-blur';
+import { OrgLogo, orgLogoFor } from './org-logo';
 
 /**
  * R44 Proof Reel (owner: "replace all the circle tag with the images, galleries that all in my website"): the Arena
@@ -155,6 +156,7 @@ function TicketLink({
   face: Face;
 }) {
   const dark = face === 'ink' && FX.arenaPinboard;
+  const logo = orgLogoFor(item.name);
   return (
     <a
       href={item.href}
@@ -174,13 +176,26 @@ function TicketLink({
       >
         {/* accent flood that rolls in from the bottom on hover / focus */}
         <span aria-hidden className={`fx-seal-fill absolute inset-0 ${ACCENT[accent]}`} />
-        <span
-          className={`relative font-display text-[0.85rem] xs:text-[0.95rem] sm:text-lg font-extrabold uppercase leading-[0.95] tracking-[-0.02em] [overflow-wrap:break-word] max-w-full transition-colors ${
-            dark ? 'text-white group-hover/seal:text-ink group-focus-visible/seal:text-ink' : 'text-ink'
-          }`}
-        >
-          {item.name}
-        </span>
+        {logo ? (
+          // R48: a ticket for an organisation whose logo is on the site prints that logo on a white window; the name
+          // stays as hidden text (and in the link's accessible name), so nothing is lost
+          <>
+            <span className="sr-only">{item.name}</span>
+            <OrgLogo
+              org={logo}
+              className="relative h-9 w-[94%] px-1.5 py-1 xs:h-10 sm:h-14"
+              imgClassName="max-h-6 xs:max-h-7 sm:max-h-10"
+            />
+          </>
+        ) : (
+          <span
+            className={`relative font-display text-[0.85rem] xs:text-[0.95rem] sm:text-lg font-extrabold uppercase leading-[0.95] tracking-[-0.02em] [overflow-wrap:break-word] max-w-full transition-colors ${
+              dark ? 'text-white group-hover/seal:text-ink group-focus-visible/seal:text-ink' : 'text-ink'
+            }`}
+          >
+            {item.name}
+          </span>
+        )}
         <span
           className={`relative font-mono text-xs font-bold uppercase tracking-[0.06em] leading-tight transition-colors ${
             dark

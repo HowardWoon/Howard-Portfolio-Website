@@ -275,3 +275,59 @@ export function RolesGrid({ roles = KMNS_ROLES }: { roles?: typeof KMNS_ROLES })
     </Panel>
   );
 }
+
+/* ---------------------------------------------- 4. headline figures (beside the Registrar Seal) */
+/**
+ * R48 (owner: the band under the title, beside the seal, was "quite empty ... must utilise the blank place to create
+ * huge impact"). A row of big figures, the same on both academic cards and COMPUTED from the data these cards already
+ * print (the transcript, the results board): nothing new is claimed and a changed grade or medal updates the tile.
+ * The first tile is the CGPA on ACADEMIC orange; medal tiles reuse the results board's own metal colours.
+ */
+type Figure = { value: string; label: string; fill: string };
+
+export function academicFigures(id: string): Figure[] {
+  if (id === 'deans-list') {
+    const aPlus = UM_TRANSCRIPT.reduce((n, s) => n + s.courses.filter((c) => c.grade === 'A+').length, 0);
+    return [
+      { value: UM_TRANSCRIPT[0]?.gpa ?? '', label: 'CGPA', fill: 'bg-pop-orange' },
+      {
+        value: String(UM_TRANSCRIPT.length),
+        label: UM_TRANSCRIPT.length === 1 ? 'Semester' : 'Semesters',
+        fill: 'bg-white',
+      },
+      { value: `${aPlus}×`, label: 'A+', fill: 'bg-white' },
+    ];
+  }
+  if (id === 'kmns-distinction') {
+    const count = (r: Result) => KMNS_RESULTS.filter((e) => e.result === r).length;
+    return [
+      // the award's own figure (its title and stat callout both print 4.00)
+      { value: '4.00', label: 'CGPA', fill: 'bg-pop-orange' },
+      { value: String(count('GOLD')), label: RESULT_STYLE.GOLD.label, fill: RESULT_STYLE.GOLD.chip },
+      { value: String(count('BRONZE')), label: RESULT_STYLE.BRONZE.label, fill: RESULT_STYLE.BRONZE.chip },
+    ];
+  }
+  return [];
+}
+
+export function HeadlineFigures({ id }: { id: string }) {
+  const figures = academicFigures(id);
+  if (!figures.length) return null;
+  return (
+    <ul data-headline-figures className="flex flex-wrap gap-2.5 pt-2">
+      {figures.map((f) => (
+        <li
+          key={f.label}
+          className={`min-w-[4.75rem] rounded-xl border-3 border-ink px-3 py-2 shadow-brutal-xs ${f.fill}`}
+        >
+          <span className="block font-display text-[1.75rem] font-extrabold leading-none tracking-[-0.03em] tabular-nums text-ink">
+            {f.value}
+          </span>
+          <span className="mt-1 block font-mono text-xs font-extrabold uppercase tracking-[0.12em] text-ink">
+            {f.label}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
