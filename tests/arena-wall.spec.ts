@@ -1,12 +1,16 @@
 import { test, expect, type Page } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 
-// FX-71 Arena Wall (components/logo-wall.tsx): three rows of round seals rolling in opposite directions.
+// FX-71 Arena Wall (components/logo-wall.tsx): three rows rolling in opposite directions.
+// R44 Proof Reel (components/arena-reel.tsx): the rows carry every gallery photo on the site as a print, between ink
+// tickets that keep the names, captions and links the round seals had. Every item is still a `.fx-seal`.
 
 test.beforeEach(async ({ context }) => {
   await context.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
 });
 
 const WALL = 'section[aria-labelledby="arena-wall-title"]';
+const PRINTS = [13, 19, 20]; // competitions, organisations, stack
 
 async function toWall(page: Page, path = '/') {
   await page.goto(path, { waitUntil: 'networkidle' });
@@ -24,22 +28,105 @@ const trackX = (page: Page, row: number) =>
     (r) => new DOMMatrix(getComputedStyle(document.querySelectorAll('.fx-wall-track')[r]).transform).m41,
     row,
   );
+/** centre of the item of this kind nearest to x in a row (hovering pauses the row wherever it is: R36) */
+const nearest = (page: Page, row: number, kind: '.fx-ticket' | '.fx-print', x = 720) =>
+  page.evaluate(
+    ([r, k, at]) => {
+      const boxes = [...document.querySelectorAll('.fx-wall-row')[r as number].querySelectorAll(k as string)].map((s) =>
+        s.getBoundingClientRect(),
+      );
+      const near = boxes.sort(
+        (a, b) => Math.abs(a.x + a.width / 2 - (at as number)) - Math.abs(b.x + b.width / 2 - (at as number)),
+      )[0];
+      return [near.x + near.width / 2, near.y + near.height / 2] as [number, number];
+    },
+    [row, kind, x] as const,
+  );
 
-test('the wall is server-rendered: 3 rows, 8 focusable seals each, copies hidden, every link resolves', async ({
+test('the wall is server-rendered: 3 rows, 8 focusable tickets and every print each, copies hidden, every link resolves', async ({
   request,
   page,
 }) => {
   const html = await (await request.get('/')).text();
   expect(html).toContain('arena-wall-title');
+  expect(html).toContain('data-reel-print'); // the prints are in the server HTML, not added by JS
   await toWall(page);
   const rows = page.locator('.fx-wall-row');
   await expect(rows).toHaveCount(3);
   for (let r = 0; r < 3; r++) {
-    await expect(rows.nth(r).locator('a.fx-seal:not([aria-hidden])')).toHaveCount(8);
-    await expect(rows.nth(r).locator('a.fx-seal[aria-hidden="true"][tabindex="-1"]')).toHaveCount(24);
+    await expect(rows.nth(r).locator('a.fx-seal.fx-ticket:not([aria-hidden])')).toHaveCount(8);
+    await expect(rows.nth(r).locator('button.fx-seal.fx-print:not([aria-hidden])')).toHaveCount(PRINTS[r]);
+    // one hidden copy of the whole row keeps the loop seamless
+    await expect(rows.nth(r).locator('.fx-seal[aria-hidden="true"][tabindex="-1"]')).toHaveCount(8 + PRINTS[r]);
   }
   const hrefs = await page.$$eval('a.fx-seal:not([aria-hidden])', (as) => as.map((a) => a.getAttribute('href')!));
+  expect(hrefs).toHaveLength(24);
   for (const h of new Set(hrefs)) expect(await page.locator(h).count(), h).toBe(1);
+});
+
+// owner: "make sure all the images must be added". The expected list is read from the files that own the galleries,
+// so a photo added to any gallery later must show up on the wall too.
+test('every gallery photo and image certificate on the site is a print on the wall, once', async ({ page }) => {
+  const sources = [
+    'components/interactive-photo-stack.tsx',
+    'components/stacked-projects.tsx',
+    'components/experience-section.tsx',
+  ];
+  const expected = new Set<string>();
+  for (const f of sources)
+    for (const m of readFileSync(f, 'utf8').matchAll(/src: '(\/images\/[^']+)'/g)) expected.add(m[1]);
+  for (const m of readFileSync('components/field-archive-data.ts', 'utf8').matchAll(/image: '(\/images\/[^']+)'/g))
+    expected.add(m[1]);
+  for (const m of readFileSync('components/honors-section.tsx', 'utf8').matchAll(/'(\/certificates\/[^']+\.png)': \[/g))
+    expected.add(m[1]);
+  expect(expected.size).toBe(52);
+
+  await toWall(page);
+  const shown = await page.$$eval('button.fx-print:not([aria-hidden])', (bs) =>
+    bs.map((b) => (b as HTMLElement).dataset.reelPrint!),
+  );
+  expect(shown).toHaveLength(expected.size); // no photo twice
+  expect(new Set(shown)).toEqual(expected);
+  // each print has the photo's real shape and a name for screen readers
+  const bad = await page.$$eval('button.fx-print:not([aria-hidden])', (bs) =>
+    bs.flatMap((b) => {
+      const img = b.querySelector('img')!;
+      // layout size (offsetWidth / Height): the prints hang a little off-square, which widens their bounding box
+      const el = b.querySelector<HTMLElement>('.fx-print-photo')!;
+      const box = { width: el.offsetWidth, height: el.offsetHeight };
+      const ar = parseFloat((b.querySelector('.fx-print-photo') as HTMLElement).style.getPropertyValue('--ar'));
+      const out: string[] = [];
+      if (!b.getAttribute('aria-label')) out.push('no name');
+      if (!img.getAttribute('src')) out.push('no image');
+      if (Math.abs(box.width / box.height - ar) > 0.03) out.push(`shape ${box.width / box.height} vs ${ar}`);
+      return out.map((o) => `${(b as HTMLElement).dataset.reelPrint}: ${o}`);
+    }),
+  );
+  expect(bad).toEqual([]);
+});
+
+test('a ticket that heads a gallery counts the prints that follow it', async ({ page }) => {
+  await toWall(page);
+  const counts = await page.$$eval('.fx-wall-row', (rows) =>
+    rows.map((row) => {
+      const items = [...row.querySelectorAll('.fx-seal:not([aria-hidden])')];
+      const out: string[] = [];
+      items.forEach((it, i) => {
+        if (!it.matches('.fx-ticket')) return;
+        let n = 0;
+        while (items[i + 1 + n]?.matches('.fx-print')) n++;
+        const tag = it.querySelector('[data-reel-count]')?.textContent?.trim() ?? '';
+        out.push(`${n}:${tag}`);
+      });
+      return out;
+    }),
+  );
+  for (const row of counts)
+    for (const c of row) {
+      const [n, tag] = c.split(':');
+      expect(tag, c).toBe(n === '0' ? '' : n.padStart(2, '0'));
+    }
+  expect(counts.flat().filter((c) => !c.startsWith('0:'))).toHaveLength(11);
 });
 
 test('rows roll in opposite directions and pause under the mouse', async ({ page }) => {
@@ -62,24 +149,19 @@ test('rows roll in opposite directions and pause under the mouse', async ({ page
   expect(Math.abs((await trackX(page, 0)) - p0)).toBeLessThan(1);
 });
 
-test('hovering a seal floods it with the row colour and tilts it', async ({ page }) => {
+test('hovering a ticket floods it with the row colour and tilts it', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await toWall(page);
   const row = page.locator('.fx-wall-row').nth(0);
   const box = (await row.boundingBox())!;
   await page.mouse.move(720, box.y + box.height / 2, { steps: 4 });
-  // R36: hovering pauses the row wherever it is, so x 720 can be the gap between two seals (failed ~1 in 10 on
-  // 9bee860, twice in a row under full-suite load): move onto the nearest seal's centre, same assertions
-  const [sx, sy] = await row.evaluate((r) => {
-    const seals = [...r.querySelectorAll('.fx-seal')].map((s) => s.getBoundingClientRect());
-    const near = seals.sort((a, b) => Math.abs(a.x + a.width / 2 - 720) - Math.abs(b.x + b.width / 2 - 720))[0];
-    return [near.x + near.width / 2, near.y + near.height / 2];
-  });
+  // R36: hovering pauses the row wherever it is, so x 720 can be a gap or a print: move onto the nearest ticket
+  const [sx, sy] = await nearest(page, 0, '.fx-ticket');
   await page.mouse.move(sx, sy, { steps: 4 });
   await page.waitForTimeout(700);
   const state = await page.evaluate(
     ([x, y]) => {
-      const s = document.elementFromPoint(x, y)?.closest('.fx-seal') as HTMLElement | null;
+      const s = document.elementFromPoint(x, y)?.closest('.fx-ticket') as HTMLElement | null;
       if (!s) return null;
       return {
         rotate: getComputedStyle(s).rotate,
@@ -91,8 +173,45 @@ test('hovering a seal floods it with the row colour and tilts it', async ({ page
   );
   expect(state).not.toBeNull();
   expect(state!.rotate).toBe('-8deg');
-  expect(state!.fill).toContain('75%');
+  expect(state!.fill).toContain('120%'); // a rectangle: the circle must pass the top corners
   expect(state!.colour).toBe('rgb(255, 199, 0)');
+});
+
+test('a print straightens and lifts under the mouse, opens the lightbox on that photo, and Escape gives focus back', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await toWall(page);
+  const row = page.locator('.fx-wall-row').nth(1);
+  const box = (await row.boundingBox())!;
+  await page.mouse.move(720, box.y + box.height / 2, { steps: 4 });
+  const [sx, sy] = await nearest(page, 1, '.fx-print');
+  await page.mouse.move(sx, sy, { steps: 4 });
+  await page.waitForTimeout(600);
+  const hit = await page.evaluate(
+    ([x, y]) => {
+      const s = document.elementFromPoint(x, y)?.closest('.fx-print') as HTMLElement | null;
+      return s
+        ? { src: s.dataset.reelPrint!, rotate: getComputedStyle(s).rotate, scale: getComputedStyle(s).scale }
+        : null;
+    },
+    [sx, sy],
+  );
+  expect(hit).not.toBeNull();
+  expect(hit!.rotate).toBe('0deg');
+  expect(hit!.scale).toBe('1.12');
+
+  await page.mouse.click(sx, sy);
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  // the lightbox shows the clicked photo, inside its whole gallery (more than this one print)
+  await expect(dialog.locator(`img[src*="${encodeURIComponent(hit!.src)}"]`).first()).toBeVisible();
+  expect(await dialog.locator('img').count()).toBeGreaterThan(2);
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+  expect(await page.evaluate(() => (document.activeElement as HTMLElement | null)?.dataset.reelPrint)).toBe(hit!.src);
+  // the page scrolls again (the lightbox released its scroll lock)
+  expect(await page.evaluate(() => getComputedStyle(document.body).overflow)).not.toBe('hidden');
 });
 
 for (const width of [320, 390, 1440]) {
@@ -100,9 +219,11 @@ for (const width of [320, 390, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     await toWall(page);
     await page.keyboard.press('Shift'); // keyboard modality, so focus is :focus-visible
-    const seals = page.locator('.fx-wall-row').nth(1).locator('a.fx-seal:not([aria-hidden])');
+    const seals = page.locator('.fx-wall-row').nth(1).locator('.fx-seal:not([aria-hidden])');
+    const n = await seals.count();
+    expect(n).toBe(8 + PRINTS[1]);
     await seals.first().focus();
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < n; i++) {
       if (i) await page.keyboard.press('Tab');
       await expect(seals.nth(i)).toBeFocused();
       await expect(seals.nth(i)).toBeInViewport({ ratio: 0.9 });
@@ -122,7 +243,7 @@ test('a seal is a working link to where it comes from', async ({ page }) => {
   await expect(page.locator('#project-proofpay')).toBeInViewport();
 });
 
-test('reduced motion: a still, centred wall with no copies and no overflow', async ({ page }) => {
+test('reduced motion: a still wall with no copies and no overflow, each row a strip to scroll', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.setViewportSize({ width: 390, height: 844 });
   await toWall(page);
@@ -134,8 +255,18 @@ test('reduced motion: a still, centred wall with no copies and no overflow', asy
       .first()
       .evaluate((e) => getComputedStyle(e).animationName),
   ).toBe('none');
-  await expect(page.locator('.fx-wall-track').first().locator('a.fx-seal:visible')).toHaveCount(8);
+  await expect(page.locator('.fx-wall-track').first().locator('.fx-seal:visible')).toHaveCount(8 + PRINTS[0]);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  // the row itself scrolls sideways to its last item, and the band stays about three rows tall
+  const row = page.locator('.fx-wall-row').first();
+  const reach = await row.evaluate((e) => {
+    e.scrollLeft = e.scrollWidth;
+    const last = [...e.querySelectorAll('.fx-seal:not([aria-hidden])')].at(-1)!.getBoundingClientRect();
+    return { scrolls: e.scrollWidth > e.clientWidth, lastRight: last.right, width: innerWidth, h: e.clientHeight };
+  });
+  expect(reach.scrolls).toBe(true);
+  expect(reach.lastRight).toBeLessThanOrEqual(reach.width);
+  expect(reach.h).toBeLessThan(220);
 });
 
 test('the rows drift against each other on scroll where scroll timelines exist', async ({ page }) => {

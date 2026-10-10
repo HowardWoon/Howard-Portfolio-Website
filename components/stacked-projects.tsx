@@ -56,7 +56,7 @@ interface ProjectData {
   galleryPhotos?: { src: string; alt: string; rotation: number; w: number; h: number }[];
 }
 
-const projects: ProjectData[] = [
+export const projects: ProjectData[] = [
   {
     id: 'zerolag',
     number: '01',

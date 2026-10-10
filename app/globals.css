@@ -1409,7 +1409,8 @@ html.fx-off-ambientOrbits .fx-orbit {
   }
 }
 
-/* FX-71 Arena Wall (components/logo-wall.tsx): rows of round seals rolling in opposite directions */
+/* FX-71 Arena Wall (components/logo-wall.tsx): rows rolling in opposite directions. R44 Proof Reel
+   (components/arena-reel.tsx): every item is still a .fx-seal - an ink ticket (.fx-ticket) or a photo print (.fx-print) */
 .fx-wall-track {
   animation: marquee var(--wall-speed, 56s) linear infinite;
 }
@@ -1462,6 +1463,36 @@ html.fx-off-ambientOrbits .fx-orbit {
   scale: 0.97;
   box-shadow: 2px 2px 0 0 #0a0a0a;
 }
+/* R44 Proof Reel. A ticket is a rectangle, so its flood needs a wider circle to reach the top corners. A print is as
+   tall as a ticket (photo + 36 px of frame and counter strip) and as wide as its photo's real shape (--ar = w / h);
+   inspected, it straightens and lifts above its neighbours instead of tilting 8 degrees. */
+.fx-ticket:hover .fx-seal-fill,
+.fx-ticket:focus-visible .fx-seal-fill {
+  clip-path: circle(120% at 50% 100%);
+}
+.fx-wall-track {
+  --print-h: 76px;
+}
+@media (min-width: 375px) {
+  .fx-wall-track {
+    --print-h: 92px;
+  }
+}
+@media (min-width: 640px) {
+  .fx-wall-track {
+    --print-h: 124px;
+  }
+}
+.fx-print-photo {
+  height: var(--print-h);
+  width: calc(var(--print-h) * var(--ar, 1.5));
+}
+.fx-print:hover,
+.fx-print:focus-visible {
+  rotate: 0deg;
+  scale: 1.12;
+  z-index: 2;
+}
 /* the rows also slide against each other as the band scrolls through the viewport ("cross over") */
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
@@ -1491,25 +1522,36 @@ html.fx-off-ambientOrbits .fx-orbit {
     translate: 6% 0;
   }
 }
-/* reduced motion / Calm: a still, centred wall of the first set only */
+/* reduced motion / Calm: a still wall of the first set only. R44: a row holds up to 28 prints and tickets, so it is a
+   strip the visitor scrolls sideways (wrapping it made the band several screens tall on a phone) */
 @media (prefers-reduced-motion: reduce) {
+  .fx-wall-row {
+    margin-inline: 0;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #0a0a0a transparent;
+    scroll-padding-inline: 1.5rem;
+  }
   .fx-wall-track {
     animation: none !important;
-    width: auto;
-    flex-wrap: wrap;
-    justify-content: center;
-    row-gap: 1rem;
+    padding-inline: 1rem;
   }
   .fx-wall-track > .fx-seal[aria-hidden='true'] {
     display: none;
   }
 }
+html[data-motion='calm'] .fx-wall-row {
+  animation: none !important;
+  translate: none;
+  margin-inline: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #0a0a0a transparent;
+  scroll-padding-inline: 1.5rem;
+}
 html[data-motion='calm'] .fx-wall-track {
   animation: none !important;
-  width: auto;
-  flex-wrap: wrap;
-  justify-content: center;
-  row-gap: 1rem;
+  padding-inline: 1rem;
 }
 html[data-motion='calm'] .fx-wall-track > .fx-seal[aria-hidden='true'] {
   display: none;

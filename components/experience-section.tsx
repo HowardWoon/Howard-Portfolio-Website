@@ -57,7 +57,7 @@ interface ExperienceItem {
   crest?: 'kmns';
 }
 
-const experiences: ExperienceItem[] = [
+export const experiences: ExperienceItem[] = [
   {
     id: 'kraiburg',
     number: '01',

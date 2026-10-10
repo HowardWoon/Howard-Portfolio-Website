@@ -145,15 +145,26 @@ test('arena seals are colour-blocked and every copy of a row matches, so the loo
   page,
 }) => {
   await home(page);
+  // R44 Proof Reel: the colour-blocked faces are the ink tickets (the photo prints between them are white frames);
+  // 8 tickets and one hidden copy of the row
   const faces = await page.$$eval('.fx-wall-track', (tracks) =>
-    tracks.map((t) => [...t.querySelectorAll<HTMLElement>('.fx-seal')].map((s) => getComputedStyle(s).backgroundColor)),
+    tracks.map((t) =>
+      [...t.querySelectorAll<HTMLElement>('.fx-seal.fx-ticket')].map((s) => getComputedStyle(s).backgroundColor),
+    ),
   );
   for (const row of faces) {
-    expect(row).toHaveLength(32);
+    expect(row).toHaveLength(16);
     expect(new Set(row).size).toBeGreaterThanOrEqual(5); // no longer an all-white wall
-    for (let i = 0; i < 8; i++) expect(row[i + 24]).toBe(row[i]); // copy 4 === copy 1
+    for (let i = 0; i < 8; i++) expect(row[i + 8]).toBe(row[i]); // the copy === the first set
     for (let i = 0; i < row.length - 1; i++) expect(row[i + 1], `neighbours ${i}`).not.toBe(row[i]);
   }
+  // the whole row (tickets and prints) repeats in the same order, so the loop is seamless
+  const order = await page.$$eval('.fx-wall-track', (tracks) =>
+    tracks.map((t) =>
+      [...t.querySelectorAll<HTMLElement>('.fx-seal')].map((s) => s.dataset.reelPrint ?? s.getAttribute('href')),
+    ),
+  );
+  for (const row of order) expect(row.slice(row.length / 2)).toEqual(row.slice(0, row.length / 2));
   // the ink seal carries light text (contrast), and ink text returns when the flood rolls in
   const ink = page.locator('.fx-wall-row').first().locator('a.fx-seal:not([aria-hidden])').nth(7);
   expect(await ink.evaluate((e) => getComputedStyle(e).backgroundColor)).toBe('rgb(10, 10, 10)');
@@ -174,6 +185,14 @@ test('arena seals hang off-square at rest, and the hovered seal lifts its neighb
   await row.scrollIntoViewIfNeeded();
   const box = (await row.boundingBox())!;
   await page.mouse.move(720, box.y + box.height / 2, { steps: 4 });
+  // R44: the row is paused under the mouse and holds tickets and photo prints; the tilt belongs to a ticket (a print
+  // straightens instead: tests/arena-wall.spec.ts), so move onto the ticket nearest the middle
+  const [tx, ty] = await row.evaluate((r) => {
+    const boxes = [...r.querySelectorAll('.fx-ticket')].map((s) => s.getBoundingClientRect());
+    const near = boxes.sort((a, b) => Math.abs(a.x + a.width / 2 - 720) - Math.abs(b.x + b.width / 2 - 720))[0];
+    return [near.x + near.width / 2, near.y + near.height / 2];
+  });
+  await page.mouse.move(tx, ty, { steps: 4 });
   await page.waitForTimeout(500);
   const state = await page.evaluate(
     ([x, y]) => {
@@ -181,7 +200,7 @@ test('arena seals hang off-square at rest, and the hovered seal lifts its neighb
       const n = s?.nextElementSibling as HTMLElement | null;
       return s && n ? { hovered: getComputedStyle(s).rotate, next: getComputedStyle(n).scale } : null;
     },
-    [720, box.y + box.height / 2],
+    [tx, ty],
   );
   expect(state).not.toBeNull();
   expect(state!.hovered).toBe('-8deg');

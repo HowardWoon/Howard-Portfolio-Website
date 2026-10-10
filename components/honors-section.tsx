@@ -56,7 +56,7 @@ interface HonorItem {
 }
 
 /** R26: the image certificates (real pixel sizes), shown as the certificate deck; titles come from honorsList */
-const CERT_SIZE: Record<string, [number, number]> = {
+export const CERT_SIZE: Record<string, [number, number]> = {
   '/certificates/Sales_Intelligence_Winner_-_2nd_Place.png': [2000, 1414],
   '/certificates/UM_GAME_JAM_2026_HOWARD_WOON_HAO_ZHE.png': [1450, 1011],
   '/certificates/chem_creative.png': [729, 1032],
@@ -69,7 +69,7 @@ const SEAL: Record<string, { crest: 'um' | 'kmns'; legend?: string } | undefined
   'kmns-distinction': { crest: 'kmns' },
 };
 
-const honorsList: HonorItem[] = [
+export const honorsList: HonorItem[] = [
   {
     id: 'supervity',
     signal: 'podium',

@@ -29,9 +29,10 @@ import { PHOTO_BLUR } from './photo-blur';
 import { logPhoto } from '@/lib/press-run';
 
 /** w / h = the file's real pixel size (R17 F-02): prints and the lightbox take the photo's shape before it loads */
-type Photo = { src: string; alt: string; rotation: number; w: number; h: number };
+export type Photo = { src: string; alt: string; rotation: number; w: number; h: number };
 
-const photos: Photo[] = [
+/** the ZeroLag gallery; also read by the Arena Wall proof reel (components/arena-reel.tsx) */
+export const photos: Photo[] = [
   // Supervity Autopilot Asia Hackathon 2026 photos (added at Howard's request)
   {
     src: '/images/projects/zerolag/supervity_standing.jpg',
@@ -103,7 +104,7 @@ const SLIDE_MS = 4000;
 const Z_MAX = 4;
 const LB_SIZES = '(max-width: 1200px) 100vw, 1150px';
 
-function PhotoLightbox({
+export function PhotoLightbox({
   list,
   index,
   onIndex,
