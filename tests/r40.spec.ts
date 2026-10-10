@@ -34,6 +34,8 @@ test('desktop: a static halftone band rides the hand-over front with no ink bar 
 }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
+  await page.locator('.fx-roller').waitFor({ state: 'attached' });
+  await page.locator('.fx-relay-b').waitFor({ state: 'attached' });
   const look = await page.evaluate(() => {
     const relay = getComputedStyle(document.querySelector('.fx-relay-b')!);
     const roller = getComputedStyle(document.querySelector('.fx-roller')!);
@@ -71,6 +73,10 @@ test('phone and reduced motion: no halftone mask, no roller (P1, P3)', async ({ 
   await ctx.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
   const page = await ctx.newPage();
   await home(page);
+  // the desk canvas is its own client-only chunk: wait for the layers this test measures (R49: the after-boot queue
+  // finishes about 0.3 s sooner now, and reading at once found them missing about one run in three)
+  await page.locator('.fx-roller').waitFor({ state: 'attached' });
+  await page.locator('.fx-relay-b').waitFor({ state: 'attached' });
   const phone = await page.evaluate(() => ({
     mask: getComputedStyle(document.querySelector('.fx-relay-b')!).maskImage,
     roller: getComputedStyle(document.querySelector('.fx-roller')!).display,
@@ -117,7 +123,11 @@ test('desktop: card colour plates lag out of register while scrolling and snap b
 });
 
 /* ---------------------------------------------------------------- C1 + K */
-test('hover a card: crop marks print and the cursor becomes a registration target (C1, K)', async ({ page }) => {
+// R49: the owner had the L-shaped crop marks removed from the whole site; a hovered card prints none, the cursor is
+// still the registration target
+test('hover a card: no crop marks print (retired), and the cursor becomes a registration target (C1, K)', async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
   await toEl(page, '#project-zerolag', 110);
@@ -127,9 +137,13 @@ test('hover a card: crop marks print and the cursor becomes a registration targe
   await expect(crop).toHaveCSS('opacity', '0');
   const b = (await card.boundingBox())!;
   await page.mouse.move(b.x + b.width * 0.5, b.y + 150, { steps: 4 });
-  await expect(crop).toHaveCSS('opacity', '1');
-  // owner request: no registration target on the card's top edge, only the corner marks
+  await page.waitForTimeout(400);
+  await expect(crop).toHaveCSS('opacity', '0');
+  await expect(crop).toHaveCSS('visibility', 'hidden');
+  // and no registration target on the card's top edge either
   expect(await crop.evaluate((e) => getComputedStyle(e, '::after').content)).toBe('none');
+  // on every card in the site, in every state the marks used to answer (hover, focus, tap)
+  expect(await page.evaluate(() => document.documentElement.classList.contains('fx-off-cropMarks'))).toBe(true);
   await expect(page.locator('.fx-cursor')).toHaveAttribute('data-cursor-mode', 'target');
   await expect(page.locator('[data-cursor-target]')).toHaveCount(1);
 });
@@ -138,7 +152,8 @@ test('keyboard focus inside a card prints its crop marks (C1)', async ({ page })
   await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
   await page.locator('#project-zerolag button[aria-label^="Focus mode"]').focus();
-  await expect(page.locator('#project-zerolag > .fx-crop')).toHaveCSS('opacity', '1');
+  // R49: retired - focus inside a card prints no crop marks either
+  await expect(page.locator('#project-zerolag > .fx-crop')).toHaveCSS('opacity', '0');
 });
 
 test('the cursor locks onto a small key and turns into a caret over body text (K)', async ({ page }) => {
@@ -452,6 +467,8 @@ test.describe('phone', () => {
     const p = (await page.locator('#project-zerolag p').first().boundingBox())!;
     await page.touchscreen.tap(p.x + 20, p.y + 6);
     await expect(page.locator('#project-zerolag')).toHaveAttribute('data-inspect', '');
+    // R49: the tap still marks the card as inspected, but no crop marks are drawn
+    await expect(page.locator('#project-zerolag > .fx-crop')).toHaveCSS('visibility', 'hidden');
     await page.evaluate(() => window.scrollBy(0, 200));
     await expect(page.locator('#project-zerolag')).not.toHaveAttribute('data-inspect', '');
   });
