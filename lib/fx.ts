@@ -136,6 +136,8 @@ export const FX = {
   proofTray: true, // R1 + R2 pin cards to a shareable tray, compare two projects on a spec sheet
   colophon: true, // R3 the footer reports this run (sections, projects, photos, pins)
   registrationCursor: true, // K the cursor becomes a printer's registration tool (target, snap, trail, caret)
+  // R46 neo-brutalist add-ons on the Arena Wall proof reel (components/arena-reel.tsx)
+  reelGrab: true, // drag a reel row by hand and fling it; a short press is still a click
 } as const;
 
 export type FxName = keyof typeof FX;

@@ -214,6 +214,107 @@ test('a print straightens and lifts under the mouse, opens the lightbox on that 
   expect(await page.evaluate(() => getComputedStyle(document.body).overflow)).not.toBe('hidden');
 });
 
+// R46 grab and fling: the reel can be pulled by hand; a drag never opens a print; a throw coasts
+for (const row of [0, 1]) {
+  test(`row ${row + 1} can be dragged by hand in both directions, and the drag opens nothing`, async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await toWall(page);
+    const box = (await page.locator('.fx-wall-row').nth(row).boundingBox())!;
+    const y = box.y + box.height / 2;
+    await page.mouse.move(600, y, { steps: 3 });
+    await page.waitForTimeout(300); // the row is paused under the mouse
+    const x0 = await trackX(page, row);
+    // the row is a loop: a pull past its seam jumps by exactly one copy, which looks the same, so distances are
+    // measured around the loop
+    const copy = await page.evaluate((r) => document.querySelectorAll('.fx-wall-track')[r].scrollWidth / 2, row);
+    const around = (d: number) => Math.abs(((((d + copy / 2) % copy) + copy) % copy) - copy / 2);
+    await page.mouse.down();
+    await page.mouse.move(900, y, { steps: 10 });
+    await expect(page.locator('.fx-wall-row').nth(row)).toHaveAttribute('data-dragging', '');
+    await page.waitForTimeout(200); // hold still: a slow release must not fling
+    const x1 = await trackX(page, row);
+    expect(around(x1 - x0 - 300), 'the row follows the hand 1:1').toBeLessThan(4);
+    await page.mouse.up();
+    await expect(page.locator('.fx-wall-row').nth(row)).not.toHaveAttribute('data-dragging', '');
+    await page.waitForTimeout(400);
+    expect(around((await trackX(page, row)) - x1), 'no fling after a held release').toBeLessThan(2);
+    await expect(page.getByRole('dialog')).toHaveCount(0); // the drag was not a click
+    expect(await page.evaluate(() => location.hash)).toBe('');
+    // and back the other way
+    await page.mouse.down();
+    await page.mouse.move(700, y, { steps: 8 });
+    await page.waitForTimeout(200);
+    expect(around((await trackX(page, row)) - (x1 - 200))).toBeLessThan(4);
+    await page.mouse.up();
+  });
+}
+
+test('a thrown row coasts on after the hand lets go, then settles', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await toWall(page);
+  const box = (await page.locator('.fx-wall-row').nth(0).boundingBox())!;
+  const y = box.y + box.height / 2;
+  await page.mouse.move(1000, y, { steps: 3 });
+  await page.waitForTimeout(300);
+  await page.mouse.down();
+  await page.mouse.move(600, y, { steps: 5 }); // a quick pull to the left
+  const released = await trackX(page, 0);
+  await page.mouse.up();
+  await page.mouse.move(600, 80); // off the wall, so the hover pause is not what holds the row
+  await page.waitForTimeout(250);
+  const coasting = await trackX(page, 0);
+  expect(coasting, 'still travelling left after release').toBeLessThan(released - 15);
+});
+
+test.describe('touch', () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
+  // found while building R46: a touch drag ends with no click, and the "swallow the click after a drag" flag then ate
+  // the visitor's next real tap
+  test('a finger drags the row, up / down still scrolls the page, and the next tap still opens a print', async ({
+    page,
+    context,
+  }) => {
+    await toWall(page);
+    const cdp = await context.newCDPSession(page);
+    const touch = (type: 'touchStart' | 'touchMove' | 'touchEnd', x = 0, y = 0) =>
+      cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y }] });
+    const box = (await page.locator('.fx-wall-row').nth(0).boundingBox())!;
+    const y = box.y + box.height / 2;
+    const x0 = await trackX(page, 0);
+    const copy = await page.evaluate(() => document.querySelectorAll('.fx-wall-track')[0].scrollWidth / 2);
+    const around = (d: number) => Math.abs(((((d + copy / 2) % copy) + copy) % copy) - copy / 2);
+    const top = await page.evaluate(() => scrollY);
+    await touch('touchStart', 320, y);
+    for (let x = 300; x >= 120; x -= 20) {
+      await touch('touchMove', x, y);
+      await page.waitForTimeout(16);
+    }
+    await page.waitForTimeout(200);
+    expect(around((await trackX(page, 0)) - x0 + 200), 'the row follows the finger').toBeLessThan(6);
+    await touch('touchEnd');
+    expect(await page.evaluate(() => scrollY)).toBe(top); // a sideways drag does not scroll the page
+    await page.waitForTimeout(700); // any coast is over
+    const [px, py] = await page.evaluate(() => {
+      const r = [...document.querySelectorAll('.fx-wall-row')[0].querySelectorAll('.fx-print')]
+        .map((e) => e.getBoundingClientRect())
+        .find((b) => b.left > 20 && b.right < innerWidth - 20)!;
+      return [r.x + r.width / 2, r.y + r.height / 2];
+    });
+    await page.touchscreen.tap(px, py);
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    // a vertical swipe that starts on the wall scrolls the page
+    await touch('touchStart', 200, y);
+    for (let yy = y - 20; yy >= y - 220; yy -= 20) {
+      await touch('touchMove', 200, yy);
+      await page.waitForTimeout(16);
+    }
+    await touch('touchEnd');
+    await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(top + 100);
+  });
+});
+
 for (const width of [320, 390, 1440]) {
   test(`keyboard: every seal in a row comes into view when focused at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });

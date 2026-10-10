@@ -1417,10 +1417,24 @@ html.fx-off-ambientOrbits .fx-orbit {
 .fx-wall-row[data-dir='r'] .fx-wall-track {
   animation-direction: reverse;
 }
+/* R46 grab and fling (components/arena-reel.tsx): sideways drags belong to the reel, up / down still scrolls the
+   page; the roll holds still while a hand has it */
+.fx-wall-row {
+  touch-action: pan-y;
+  cursor: grab;
+}
+.fx-wall-row[data-dragging] {
+  cursor: grabbing;
+}
+.fx-wall-row[data-dragging] .fx-wall-track {
+  animation-play-state: paused;
+}
 /* keyboard: a row holding focus stops rolling and becomes a plain scroller, so the browser brings the focused
    seal into view (a paused marquee could hold it off-screen) */
 .fx-wall-row:has(:focus-visible) {
   animation: none !important;
+  touch-action: auto;
+  cursor: auto;
   translate: none;
   margin-inline: 0;
   overflow-x: auto;
@@ -1526,6 +1540,8 @@ html.fx-off-ambientOrbits .fx-orbit {
    strip the visitor scrolls sideways (wrapping it made the band several screens tall on a phone) */
 @media (prefers-reduced-motion: reduce) {
   .fx-wall-row {
+    touch-action: auto;
+    cursor: auto;
     margin-inline: 0;
     overflow-x: auto;
     scrollbar-width: thin;
@@ -1542,6 +1558,8 @@ html.fx-off-ambientOrbits .fx-orbit {
 }
 html[data-motion='calm'] .fx-wall-row {
   animation: none !important;
+  touch-action: auto;
+  cursor: auto;
   translate: none;
   margin-inline: 0;
   overflow-x: auto;

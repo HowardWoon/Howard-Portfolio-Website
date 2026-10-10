@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { AnimatePresence } from 'framer-motion';
 import { Camera } from 'lucide-react';
@@ -245,9 +245,118 @@ export function ArenaRow({ row }: { row: number }) {
   let t = -1; // ticket position in the row (prints do not shift the colour blocking)
   const faces = items.map((it) => (it.kind === 'ticket' ? FACES[row][++t % FACES[row].length] : null));
 
+  // R46 grab and fling (owner: "more interactive"): drag a row with the mouse or a finger to pull the reel by hand,
+  // let go and it coasts, then the roll carries on. The row's own CSS marquee is scrubbed through its currentTime
+  // (one write per pointer move / coast frame, to one element), so nothing here lays out and the loop stays seamless.
+  // A press that moves under 6 px is still a click (opens the print / follows the ticket). With no marquee running
+  // (reduced motion, Calm, keyboard focus: the row is a native scroller) this does nothing.
+  const rowRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const rowEl = rowRef.current;
+    const track = trackRef.current;
+    if (!rowEl || !track || !FX.reelGrab) return;
+    const sign = rowEl.dataset.dir === 'r' ? 1 : -1; // which way time moves the row (the 'r' rows run reversed)
+    let start: { x: number; t: number; id: number; anim: Animation; ms: number; copy: number } | null = null;
+    let dragging = false;
+    let swallow = false;
+    let last = { x: 0, at: 0, v: 0 }; // px / ms, for the fling
+    let coast = 0;
+    const wrap = (v: number, ms: number) => ((v % ms) + ms) % ms;
+    const stopCoast = () => {
+      cancelAnimationFrame(coast);
+      coast = 0;
+    };
+    const down = (e: PointerEvent) => {
+      if (e.button !== 0) return;
+      const anim = track.getAnimations().find((a) => (a as CSSAnimation).animationName === 'marquee');
+      const ms = Number(anim?.effect?.getComputedTiming().duration);
+      if (!anim || !ms) return;
+      stopCoast();
+      swallow = false;
+      start = {
+        x: e.clientX,
+        t: Number(anim.currentTime) || 0,
+        id: e.pointerId,
+        anim,
+        ms,
+        copy: track.scrollWidth / 2,
+      };
+      last = { x: e.clientX, at: e.timeStamp, v: 0 };
+    };
+    const move = (e: PointerEvent) => {
+      if (!start || e.pointerId !== start.id) return;
+      const dx = e.clientX - start.x;
+      if (!dragging) {
+        if (Math.abs(dx) < 6) return;
+        dragging = true;
+        rowEl.setPointerCapture(e.pointerId);
+        rowEl.dataset.dragging = '';
+      }
+      const dt = e.timeStamp - last.at;
+      if (dt > 0) last = { x: e.clientX, at: e.timeStamp, v: (e.clientX - last.x) / dt };
+      // dx px of the row = dx / copy of one loop
+      start.anim.currentTime = wrap(start.t + sign * (dx / start.copy) * start.ms, start.ms);
+    };
+    const up = (e: PointerEvent) => {
+      if (!start || e.pointerId !== start.id) return;
+      const s = start;
+      start = null;
+      if (!dragging) return;
+      dragging = false;
+      // the click that ends a mouse drag opens nothing. A touch drag ends with no click at all, so the flag is dropped
+      // right after this event (and on the next press): it must never eat the visitor's next real tap
+      swallow = true;
+      window.setTimeout(() => (swallow = false), 60);
+      delete rowEl.dataset.dragging;
+      // fling: keep the hand's speed and let it die away (never for a slow release)
+      let v = Math.abs(last.v) > 0.25 && e.timeStamp - last.at < 80 ? Math.max(-3, Math.min(3, last.v)) : 0;
+      let prev = performance.now();
+      const step = (now: number) => {
+        const dt = Math.min(48, now - prev);
+        prev = now;
+        v *= Math.pow(0.994, dt);
+        if (Math.abs(v) < 0.04) return stopCoast();
+        s.anim.currentTime = wrap((Number(s.anim.currentTime) || 0) + sign * ((v * dt) / s.copy) * s.ms, s.ms);
+        coast = requestAnimationFrame(step);
+      };
+      if (v) coast = requestAnimationFrame(step);
+    };
+    const click = (e: MouseEvent) => {
+      if (!swallow) return;
+      swallow = false;
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    // a press on a ticket link and a move would start the browser's own link drag (it cancels the pointer stream)
+    const noDrag = (e: DragEvent) => e.preventDefault();
+    rowEl.addEventListener('pointerdown', down);
+    rowEl.addEventListener('pointermove', move);
+    rowEl.addEventListener('pointerup', up);
+    rowEl.addEventListener('pointercancel', up);
+    rowEl.addEventListener('click', click, true);
+    rowEl.addEventListener('dragstart', noDrag);
+    return () => {
+      stopCoast();
+      rowEl.removeEventListener('pointerdown', down);
+      rowEl.removeEventListener('pointermove', move);
+      rowEl.removeEventListener('pointerup', up);
+      rowEl.removeEventListener('pointercancel', up);
+      rowEl.removeEventListener('click', click, true);
+      rowEl.removeEventListener('dragstart', noDrag);
+    };
+  }, []);
+
   return (
-    <div role="group" aria-label={label} className="fx-wall-row mx-[-8%]" data-dir={row % 2 ? 'r' : 'l'}>
+    <div
+      ref={rowRef}
+      role="group"
+      aria-label={label}
+      className="fx-wall-row mx-[-8%] select-none"
+      data-dir={row % 2 ? 'r' : 'l'}
+    >
       <div
+        ref={trackRef}
         className="fx-wall-track flex items-center w-max py-3"
         style={{ '--wall-speed': `${rowSeconds(items)}s` } as React.CSSProperties}
       >
