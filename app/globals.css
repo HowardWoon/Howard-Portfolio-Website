@@ -4811,8 +4811,12 @@ a:focus-visible > .px-card > span {
   }
 }
 
-/* P3 Ink Roller (desktop): a knurled ink cylinder rides the leading edge of the relay layer (same box, same transform,
-   so it follows the diagonal seam with zero JS) and is only there while a hand-over is in progress */
+/* P3 Ink Roller (desktop): this box rides the leading edge of the relay layer (same box, same transform, so it follows
+   the diagonal seam with zero JS) and is only there while a hand-over is in progress.
+   R48 (owner: "what is the black line blocking? so ugly"): it used to paint a 14 px knurled ink cylinder and a 3 px ink
+   line. They sit behind the page, but an ink bar passing behind ink type read as a strikethrough across the section
+   titles. The bar and line are gone; the box now only carries the halftone dots (::before above), in the next
+   section's own desk tint, so the hand-over is still printed on without anything dark crossing the text. */
 .fx-roller {
   display: none;
 }
@@ -4823,10 +4827,6 @@ a:focus-visible > .px-card > span {
     inset: -14% -6% 0;
     z-index: 2;
     pointer-events: none;
-    background:
-      repeating-linear-gradient(90deg, rgb(255 255 255 / 0.28) 0 2px, transparent 2px 16px) 0 0 / 100% 14px no-repeat,
-      linear-gradient(#0a0a0a, #0a0a0a) 0 0 / 100% 14px no-repeat,
-      linear-gradient(#0a0a0a, #0a0a0a) 0 19px / 100% 3px no-repeat;
     transform: translate3d(0, calc((1 - var(--relay, 0)) * 118%), 0) skewY(-5deg);
     opacity: min(1, calc(var(--relay, 0) * 30), calc((1 - var(--relay, 0)) * 30));
     will-change: transform, opacity;

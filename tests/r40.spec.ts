@@ -27,7 +27,9 @@ const toEl = (page: Page, sel: string, dy = 120) =>
   );
 
 /* ---------------------------------------------------------------- P1 + P3 */
-test('desktop: a static halftone band and an ink roller ride the hand-over front, no per-frame mask (P1, P3, R41)', async ({
+// R48 (owner: "what is the black line blocking? so ugly"): the roller's ink bar and line are gone - only the halftone
+// dots, in the next section's own tint, ride the front
+test('desktop: a static halftone band rides the hand-over front with no ink bar and no per-frame mask (P1, P3, R41, R48)', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -36,12 +38,21 @@ test('desktop: a static halftone band and an ink roller ride the hand-over front
     const relay = getComputedStyle(document.querySelector('.fx-relay-b')!);
     const roller = getComputedStyle(document.querySelector('.fx-roller')!);
     const dots = getComputedStyle(document.querySelector('.fx-roller')!, '::before');
-    return { mask: relay.maskImage || relay.webkitMaskImage, roller: roller.display, dots: dots.backgroundImage };
+    return {
+      mask: relay.maskImage || relay.webkitMaskImage,
+      roller: roller.display,
+      ink: roller.backgroundImage,
+      inkColour: roller.backgroundColor,
+      dots: dots.backgroundImage,
+    };
   });
   // R41: the R40 full-screen mask was re-painted every scroll frame; the dots are now a static band on the roller
   expect(look.mask === 'none' || look.mask === '').toBe(true);
   expect(look.dots).toContain('radial-gradient');
+  expect(look.dots).not.toMatch(/rgb\(10, 10, 10\)/); // the dots are the desk tint, never ink
   expect(look.roller).toBe('block');
+  expect(look.ink).toBe('none'); // no ink cylinder, no ink line
+  expect(look.inkColour).toBe('rgba(0, 0, 0, 0)');
   // mid hand-over the roller is visible, before / after it is not
   await toEl(page, '#experience', 900 * 0.75);
   await page.waitForTimeout(400);
