@@ -1484,6 +1484,68 @@ html.fx-off-ambientOrbits .fx-orbit {
 .fx-ticket:focus-visible .fx-seal-fill {
   clip-path: circle(120% at 50% 100%);
 }
+/* R46 perforated tickets. The face is punched at the top and bottom centre: a mask cuts the two holes (the wall shows
+   through), a ring of ink redraws the border around each hole, and the hard shadow is a zero-blur drop-shadow on the
+   link, so it follows the punched outline (a box-shadow would stay a plain rectangle). */
+.fx-ticket {
+  --punch: 6px;
+  box-shadow: none;
+  filter: drop-shadow(3px 3px 0 #0a0a0a);
+  transition:
+    rotate 0.35s cubic-bezier(0.2, 0.9, 0.1, 1),
+    scale 0.35s cubic-bezier(0.2, 0.9, 0.1, 1),
+    filter 0.2s ease;
+}
+@media (min-width: 640px) {
+  .fx-ticket {
+    --punch: 9px;
+  }
+}
+.fx-ticket:hover,
+.fx-ticket:focus-visible {
+  box-shadow: none;
+  filter: drop-shadow(6px 6px 0 #0a0a0a);
+}
+.fx-ticket:active {
+  box-shadow: none;
+  filter: drop-shadow(2px 2px 0 #0a0a0a);
+}
+.fx-ticket:focus-visible {
+  outline: 4px solid var(--pop-blue);
+  outline-offset: 4px;
+}
+html:not(.fx-off-ticketPunch) .fx-ticket-face {
+  -webkit-mask:
+    radial-gradient(circle var(--punch) at 50% 0, #0000 96%, #000) intersect,
+    radial-gradient(circle var(--punch) at 50% 100%, #0000 96%, #000);
+  mask:
+    radial-gradient(circle var(--punch) at 50% 0, #0000 96%, #000) intersect,
+    radial-gradient(circle var(--punch) at 50% 100%, #0000 96%, #000);
+}
+html:not(.fx-off-ticketPunch) .fx-ticket-face::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      circle calc(var(--punch) + 3px) at 50% 0,
+      #0000 calc(var(--punch) - 0.5px),
+      #0a0a0a var(--punch) 99%,
+      #0000
+    ),
+    radial-gradient(
+      circle calc(var(--punch) + 3px) at 50% 100%,
+      #0000 calc(var(--punch) - 0.5px),
+      #0a0a0a var(--punch) 99%,
+      #0000
+    );
+}
+@media (prefers-reduced-motion: reduce) {
+  .fx-ticket {
+    transition: none;
+  }
+}
 .fx-wall-track {
   --print-h: 76px;
 }

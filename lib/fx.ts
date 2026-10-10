@@ -138,6 +138,7 @@ export const FX = {
   registrationCursor: true, // K the cursor becomes a printer's registration tool (target, snap, trail, caret)
   // R46 neo-brutalist add-ons on the Arena Wall proof reel (components/arena-reel.tsx)
   reelGrab: true, // drag a reel row by hand and fling it; a short press is still a click
+  ticketPunch: true, // the reel's ink tickets are punched top and bottom like admission tickets (CSS mask)
 } as const;
 
 export type FxName = keyof typeof FX;

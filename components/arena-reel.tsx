@@ -163,38 +163,39 @@ function TicketLink({
       aria-hidden={copy || undefined}
       tabIndex={copy ? -1 : undefined}
       aria-label={copy ? undefined : `${item.name}: ${item.caption}`}
-      className={`fx-seal fx-ticket group/seal relative shrink-0 grid place-items-center content-center gap-1.5 ${TICKET_BOX} mx-2 sm:mx-3 rounded-2xl overflow-hidden border-3 border-ink ${FX.arenaPinboard ? FACE_BG[face] : 'bg-white'} shadow-brutal-sm text-center px-3 ${FOCUS}`}
+      className={`fx-seal fx-ticket group/seal relative shrink-0 block ${TICKET_BOX} mx-2 sm:mx-3 rounded-2xl outline-none`}
     >
-      {/* accent flood that rolls in from the bottom on hover / focus */}
-      <span aria-hidden className={`fx-seal-fill absolute inset-0 ${ACCENT[accent]}`} />
+      {/* R46 perforated ticket: the face is punched top and bottom (a mask, so the wall shows through the holes); the
+          hard shadow is a drop-shadow on the link, so it follows the punched shape (globals.css .fx-ticket) */}
       <span
-        className={`relative font-display text-[0.85rem] xs:text-[0.95rem] sm:text-lg font-extrabold uppercase leading-[0.95] tracking-[-0.02em] [overflow-wrap:break-word] max-w-full transition-colors ${
-          dark ? 'text-white group-hover/seal:text-ink group-focus-visible/seal:text-ink' : 'text-ink'
-        }`}
+        className={`fx-ticket-face absolute inset-0 grid place-items-center content-center gap-1.5 rounded-2xl overflow-hidden border-3 border-ink ${FX.arenaPinboard ? FACE_BG[face] : 'bg-white'} text-center px-3`}
       >
-        {item.name}
-      </span>
-      <span
-        className={`relative font-mono text-xs font-bold uppercase tracking-[0.06em] leading-tight transition-colors ${
-          dark
-            ? 'text-pop-yellow group-hover/seal:text-ink-soft group-focus-visible/seal:text-ink-soft'
-            : 'text-ink-soft'
-        }`}
-      >
-        {item.caption}
-      </span>
-      {item.count ? (
-        // the prints that follow this ticket (a number and an icon: no new wording)
-        <span aria-hidden data-reel-count className="relative nb-tag bg-white py-0 gap-1 tabular-nums">
-          <Camera className="w-3.5 h-3.5" strokeWidth={2.5} />
-          {pad(item.count)}
+        {/* accent flood that rolls in from the bottom on hover / focus */}
+        <span aria-hidden className={`fx-seal-fill absolute inset-0 ${ACCENT[accent]}`} />
+        <span
+          className={`relative font-display text-[0.85rem] xs:text-[0.95rem] sm:text-lg font-extrabold uppercase leading-[0.95] tracking-[-0.02em] [overflow-wrap:break-word] max-w-full transition-colors ${
+            dark ? 'text-white group-hover/seal:text-ink group-focus-visible/seal:text-ink' : 'text-ink'
+          }`}
+        >
+          {item.name}
         </span>
-      ) : null}
-      {/* small registration dot, like a punched ticket */}
-      <span
-        aria-hidden
-        className={`absolute top-2 sm:top-2.5 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full border-2 border-ink ${ACCENT[accent]}`}
-      />
+        <span
+          className={`relative font-mono text-xs font-bold uppercase tracking-[0.06em] leading-tight transition-colors ${
+            dark
+              ? 'text-pop-yellow group-hover/seal:text-ink-soft group-focus-visible/seal:text-ink-soft'
+              : 'text-ink-soft'
+          }`}
+        >
+          {item.caption}
+        </span>
+        {item.count ? (
+          // the prints that follow this ticket (a number and an icon: no new wording)
+          <span aria-hidden data-reel-count className="relative nb-tag bg-white py-0 gap-1 tabular-nums">
+            <Camera className="w-3.5 h-3.5" strokeWidth={2.5} />
+            {pad(item.count)}
+          </span>
+        ) : null}
+      </span>
     </a>
   );
 }

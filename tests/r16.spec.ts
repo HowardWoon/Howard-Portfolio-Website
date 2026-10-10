@@ -149,7 +149,10 @@ test('arena seals are colour-blocked and every copy of a row matches, so the loo
   // 8 tickets and one hidden copy of the row
   const faces = await page.$$eval('.fx-wall-track', (tracks) =>
     tracks.map((t) =>
-      [...t.querySelectorAll<HTMLElement>('.fx-seal.fx-ticket')].map((s) => getComputedStyle(s).backgroundColor),
+      // R46: the colour sits on the ticket's punched face
+      [...t.querySelectorAll<HTMLElement>('.fx-seal.fx-ticket .fx-ticket-face')].map(
+        (s) => getComputedStyle(s).backgroundColor,
+      ),
     ),
   );
   for (const row of faces) {
@@ -167,10 +170,12 @@ test('arena seals are colour-blocked and every copy of a row matches, so the loo
   for (const row of order) expect(row.slice(row.length / 2)).toEqual(row.slice(0, row.length / 2));
   // the ink seal carries light text (contrast), and ink text returns when the flood rolls in
   const ink = page.locator('.fx-wall-row').first().locator('a.fx-seal:not([aria-hidden])').nth(7);
-  expect(await ink.evaluate((e) => getComputedStyle(e).backgroundColor)).toBe('rgb(10, 10, 10)');
+  expect(await ink.locator('.fx-ticket-face').evaluate((e) => getComputedStyle(e).backgroundColor)).toBe(
+    'rgb(10, 10, 10)',
+  );
   expect(
     await ink
-      .locator('span')
+      .locator('.fx-ticket-face > span')
       .nth(1)
       .evaluate((e) => getComputedStyle(e).color),
   ).toBe('rgb(255, 255, 255)');

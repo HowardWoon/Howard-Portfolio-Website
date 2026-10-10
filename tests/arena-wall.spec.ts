@@ -177,6 +177,33 @@ test('hovering a ticket floods it with the row colour and tilts it', async ({ pa
   expect(state!.colour).toBe('rgb(255, 199, 0)');
 });
 
+// R46: tickets are punched like admission tickets; the hard shadow follows the punched outline
+test('tickets are punched top and bottom, and their hard shadow is a zero-blur drop-shadow of that shape', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await toWall(page);
+  const tickets = await page.$$eval('a.fx-ticket:not([aria-hidden])', (as) =>
+    as.map((a) => {
+      const face = a.querySelector('.fx-ticket-face')!;
+      const cs = getComputedStyle(face);
+      return {
+        mask: (cs.maskImage || cs.webkitMaskImage).match(/radial-gradient/g)?.length ?? 0,
+        ring: getComputedStyle(face, '::after').backgroundImage.match(/radial-gradient/g)?.length ?? 0,
+        shadow: getComputedStyle(a).filter,
+        box: getComputedStyle(a).boxShadow,
+      };
+    }),
+  );
+  expect(tickets).toHaveLength(24);
+  for (const t of tickets) {
+    expect(t.mask).toBe(2); // top and bottom
+    expect(t.ring).toBe(2); // the ink border is redrawn around each hole
+    expect(t.shadow).toBe('drop-shadow(rgb(10, 10, 10) 3px 3px 0px)'); // hard: no blur
+    expect(t.box).toBe('none');
+  }
+});
+
 test('a print straightens and lifts under the mouse, opens the lightbox on that photo, and Escape gives focus back', async ({
   page,
 }) => {
