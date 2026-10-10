@@ -160,6 +160,8 @@ function TicketLink({
       href={item.href}
       data-fx-seal={accent}
       data-fx-stamp-target
+      // R46: the cursor names what a click does (the existing R37 tag and its existing word; prints say "expand")
+      data-cursor="view"
       aria-hidden={copy || undefined}
       tabIndex={copy ? -1 : undefined}
       aria-label={copy ? undefined : `${item.name}: ${item.caption}`}

@@ -293,6 +293,30 @@ test('a thrown row coasts on after the hand lets go, then settles', async ({ pag
   expect(coasting, 'still travelling left after release').toBeLessThan(released - 15);
 });
 
+// R46: the R37 cursor tag (existing words only) names what a click does on the wall and on the project tiles
+test('the cursor tag says VIEW over a ticket and a project tile, EXPAND over a print', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await toWall(page);
+  await page.mouse.move(400, 300);
+  await expect(page.locator('html.has-custom-cursor')).toHaveCount(1);
+  const box = (await page.locator('.fx-wall-row').nth(0).boundingBox())!;
+  await page.mouse.move(720, box.y + box.height / 2, { steps: 4 });
+  for (const [kind, word] of [
+    ['.fx-ticket', 'view'],
+    ['.fx-print', 'expand'],
+  ] as const) {
+    const [x, y] = await nearest(page, 0, kind);
+    await page.mouse.move(x, y, { steps: 4 });
+    await expect(page.locator(`[data-cursor-tag="${word}"]`)).toHaveCount(1);
+  }
+  const tile = page.locator('#projects a[href="#project-zerolag"][data-cursor="view"]').first();
+  await tile.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+  await page.waitForTimeout(600);
+  const t = (await tile.boundingBox())!;
+  await page.mouse.move(t.x + t.width / 2, t.y + t.height / 2, { steps: 4 });
+  await expect(page.locator('[data-cursor-tag="view"]')).toHaveCount(1);
+});
+
 test.describe('touch', () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
   // found while building R46: a touch drag ends with no click, and the "swallow the click after a drag" flag then ate

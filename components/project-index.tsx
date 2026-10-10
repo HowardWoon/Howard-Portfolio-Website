@@ -88,6 +88,8 @@ export function ProjectIndex({ items }: { items: readonly ProjectIndexItem[] }) 
           <a
             key={p.id}
             href={`#project-${p.id}`}
+            // R46: the R37 cursor tag (existing word) says a tile takes you to the project
+            data-cursor="view"
             onPointerEnter={() =>
               FX.honorConstellation &&
               document.querySelector(`[data-project-id="${p.id}"]`)?.setAttribute('data-preview', '')

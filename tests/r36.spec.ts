@@ -337,7 +337,8 @@ test.describe('cursor tag (desktop 1440x900)', () => {
     await home(page);
     await page.mouse.move(400, 400);
     await expect(page.locator('html.has-custom-cursor')).toHaveCount(1);
-    const stack = page.locator('#projects [data-cursor="view"]').first();
+    // R46: the project index tiles (links) carry the tag too; this test is about the gallery stack
+    const stack = page.locator('#projects [data-cursor="view"]:not(a)').first();
     await stack.evaluate((e) => e.scrollIntoView({ block: 'center' }));
     await page.waitForTimeout(600);
     const b = (await stack.boundingBox())!;
