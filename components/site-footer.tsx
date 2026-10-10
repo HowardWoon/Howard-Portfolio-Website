@@ -84,8 +84,8 @@ export function SiteFooter() {
               <h3 className="font-display text-2xl md:text-3xl font-extrabold text-white uppercase tracking-[-0.01em] leading-none">
                 Howard Woon Hao Zhe
               </h3>
-              <p className="mt-3 inline-block rounded-md border-2 border-white bg-pop-lilac px-2 py-0.5 text-sm font-mono font-extrabold text-ink uppercase tracking-[0.12em]">
-                Systems & AI Architect
+              <p className="mt-3 inline-block rounded-md border-2 border-white bg-white px-2 py-0.5 text-sm font-mono font-extrabold text-ink uppercase tracking-[0.12em]">
+                Full Stack Developer
               </p>
             </div>
 

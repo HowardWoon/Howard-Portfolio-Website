@@ -162,7 +162,7 @@ export function SiteHeader() {
             </span>
           </h1>
           <p className="text-xs sm:text-sm font-mono text-ink-muted tracking-[0.02em] sm:tracking-[0.08em] mt-1 sm:mt-1.5 font-bold">
-            SYSTEMS & AI ARCHITECT
+            FULL STACK DEVELOPER
           </p>
         </div>
         {FX.pressCounter ? <PressCounter /> : null}

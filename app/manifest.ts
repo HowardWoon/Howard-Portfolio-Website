@@ -3,7 +3,7 @@ import type { MetadataRoute } from 'next';
 /** R14 B-08: "Add to Home Screen" gets the site's own icon and name instead of a screenshot / letter tile. */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Howard Woon // Systems & AI Architect',
+    name: 'Howard Woon // Full Stack Developer',
     short_name: 'Howard Woon',
     start_url: '/',
     display: 'standalone',

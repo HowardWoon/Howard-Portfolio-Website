@@ -39,7 +39,7 @@ const DESCRIPTION =
 export const metadata: Metadata = {
   // Without this, OG/Twitter image URLs resolve to http://localhost:3000 outside Vercel previews
   metadataBase: new URL('https://howard-woon-portfolio.vercel.app'),
-  title: 'Howard Woon // Systems & AI Architect',
+  title: 'Howard Woon // Full Stack Developer',
   description: DESCRIPTION,
   alternates: { canonical: '/' },
   // Without explicit Open Graph / Twitter fields, LinkedIn & X showed a small generic link card
@@ -47,12 +47,12 @@ export const metadata: Metadata = {
     type: 'website',
     url: '/',
     siteName: 'Howard Woon',
-    title: 'Howard Woon // Systems & AI Architect',
+    title: 'Howard Woon // Full Stack Developer',
     description: DESCRIPTION,
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Howard Woon // Systems & AI Architect',
+    title: 'Howard Woon // Full Stack Developer',
     description: DESCRIPTION,
   },
 };
@@ -100,7 +100,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               '@type': 'Person',
               name: 'Howard Woon',
               url: 'https://howard-woon-portfolio.vercel.app/',
-              jobTitle: 'Software Engineer & Systems Architect',
+              jobTitle: 'Full Stack Developer',
               worksFor: {
                 '@type': 'Organization',
                 name: 'Universiti Malaya',

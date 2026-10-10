@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 
-export const alt = 'Howard Woon // Systems & AI Architect';
+export const alt = 'Howard Woon // Full Stack Developer';
 export const size = {
   width: 1200,
   height: 630,
@@ -78,7 +78,7 @@ export default function Image() {
             letterSpacing: '0.06em',
           }}
         >
-          SYSTEMS & AI ARCHITECT
+          FULL STACK DEVELOPER
         </div>
         <div
           style={{

@@ -296,7 +296,7 @@ export default function BikebearHero() {
                 >
                   <Image
                     src="/images/howard-solid.jpeg"
-                    alt="Howard Woon - Systems & AI Architect"
+                    alt="Howard Woon - Full Stack Developer"
                     fill
                     sizes="(max-width: 640px) 350px, (max-width: 1280px) 460px, 520px"
                     className="object-cover object-top saturate-[1.15] contrast-[1.05]"
