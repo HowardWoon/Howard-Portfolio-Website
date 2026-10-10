@@ -343,3 +343,65 @@ feel right there, nothing built on it will.
 6. **F2 year ruler:** approve a new control above the Experience cards?
 7. **F4 press sounds:** approve a "SOUND" switch in the status bar, off by default?
 8. **Order:** build R42 first (it carries the conductor), or lift only its C1 into R43 step 1?
+
+---
+
+## 10. Addendum (10 Oct 2026) - 3D, parallax and scroll research, and two more items
+
+Owner request: "do research for 3d animations, parallax effect, scroll effect ... then combine with neobrutalism".
+Plan only. Neither item below is built.
+
+### What the research says
+
+Sources are mostly agency and tool-vendor trend articles, so they show direction, not proof.
+
+| Trend                              | What the sources say                                                              | Where this site already is                                             |
+| ---------------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Scroll-driven CSS                  | Scroll-linked effects now run natively, without JavaScript                         | 38 `animation-timeline` uses in `app/globals.css`                       |
+| Selective, lightweight 3D          | 3D at one high-impact moment, not as a blanket style; heavy WebGL sites are out     | FX-31 / FX-45 Blueprint Bench, FX-03 solids, FX-07 unfold               |
+| Parallax becomes spatial depth     | Elements sit at real different depths instead of sliding at different speeds        | FX-02 depth parallax (`.fx-depth`, pointer-driven), FX-79 dot plane     |
+| Tactile brutalism                  | A more mature brutalism: masked images, irregular section dividers                  | Not on the site: every section edge is a straight 3 px ink rule         |
+| Restraint                          | The best scroll motion clarifies content; heavy parallax hurts phones               | R41 smoothness pass; section 7 of this plan                             |
+
+So two things are missing. Both fit neo-brutalism and the per-frame rules in section 1.
+
+### D1 Hero depth stage **APPROVAL (changes how the hero portrait moves)**
+
+The hero already moves three decorations by depth (`.fx-depth` on the sun, the lilac block and the ticker). The portrait
+card itself is flat. D1 makes the portrait one real 3D stage, the single high-impact 3D moment on the page.
+
+- Layers, back to front: sun, ink shadow slab, photo, ink frame, award ticker. Each has its own Z inside one
+  `transform-style: preserve-3d` parent.
+- Input: the existing pointer field (`--px`, `--py`) tilts the stage by at most 6 degrees. On scroll, the first 40 %
+  of the hero's exit separates the layers along Z by at most 28 px, then FX-77 takes the sun away as today.
+- Shadows stay hard: the slab is a real layer behind the photo, so its offset grows with the tilt. No blur.
+- Phone and touch: no tilt. The scroll separation runs at half depth through one CSS `view()` timeline.
+- Reduced motion, Calm, Frame Governor lite tier: flat, exactly as today.
+- Guard: the photo's `object-contain` and the face are never cropped by the frame at any tilt (test at 320, 390, 1440).
+- Budget: 5 composited layers, transform only, zero layout. Retires nothing; it replaces the three separate
+  `.fx-depth` writes in the hero with one stage transform.
+
+### D2 Tactile section edges **APPROVAL (changes the section borders, which law 0 freezes)**
+
+Where two desk tints meet, the straight `border-y-3` rule becomes a hard-cut ink edge: a sawtooth for the Arena Wall
+band, a torn-paper cut elsewhere.
+
+- How: one decorative strip per boundary, drawn as a CSS `polygon()` clip on an ink bar with the next section's tint
+  under it. Points are computed (never hand-typed), in the same spirit as `rosettePoints`.
+- Scroll: the strip slips up to 8 px against the page through a `view()` timeline, so the edge reads as a separate
+  sheet lying on top. Transform only.
+- It replaces B1's seam at these boundaries on phones (where B1 does not run), so a boundary never shows two effects.
+- Guard: text never sits within 24 px of the cut; `tests/r24` type and collision checks still pass; print styles fall
+  back to the straight rule.
+- Risk: this is a visible theme change on every section. Build one boundary first (Arena Wall top) and look at it
+  before doing the rest.
+
+### Rollout
+
+D1 slots in after step 5 of section 8 (it does not need the baton). D2 goes last, after B1, because the two share
+boundaries.
+
+### Decisions for Howard (added)
+
+9. **D1 hero depth stage:** build it, and may it replace the three `.fx-depth` writes in the hero?
+10. **D2 tactile edges:** approve changing the section borders? If yes, which cut for the Arena Wall: sawtooth or torn?
