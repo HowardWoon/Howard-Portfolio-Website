@@ -84,7 +84,7 @@ export const REEL_ROWS: { label: string; accent: 'yellow' | 'mint' | 'cyan'; ite
     label: 'Organisations',
     accent: 'mint',
     items: [
-      ...ticket('Universiti Malaya', "Dean's List", '#honors'),
+      ...ticket('Universiti Malaya', "Dean's List", '#honors', cert('um_transcript_sem2_2025_2026.png')),
       ...ticket('PEKOM', 'Finance Lead', '#experience'),
       ...ticket('KRAIBURG TPE', 'Corporate', '#experience', gallery(experience('kraiburg'), 'kraiburg')),
       ...ticket('MYTECH', 'Career Fair 2026', '#experience', gallery(mytech, undefined)),
@@ -139,10 +139,18 @@ const FOCUS = 'outline-none focus-visible:ring-4 focus-visible:ring-pop-blue';
 const pad = (n: number) => String(n).padStart(2, '0');
 // seconds for one copy of the row to pass at the wall's old pace (about 50 px a second on a desktop)
 const PACE = 50;
-const rowSeconds = (items: Item[]) =>
-  Math.round(
-    items.reduce((w, it) => w + (it.kind === 'ticket' ? 200 : (124 * it.photo.w) / it.photo.h + 60), 0) / PACE,
-  );
+/** a row's own width in css px on a desktop (tickets 200, prints 124 px tall at their real shape + frame and gap) */
+const rowWidth = (items: Item[]) =>
+  items.reduce((w, it) => w + (it.kind === 'ticket' ? 200 : (124 * it.photo.w) / it.photo.h + 60), 0);
+// R49 (owner: an empty gap at the end of a row when the browser is zoomed out - "make sure it is unlimited, and non
+// stop, non empty"). The marquee travels HALF the track and then repeats, so half the track must cover the widest
+// window plus the row's 8 % overhang each side: 25 % zoom on a 1920 px screen is 7,680 px, about 9,000 px with the
+// overhang. Each row therefore repeats itself as often as ITS width needs (the short competitions row three times per
+// half, the longer rows twice), always an even number of copies so the loop stays seamless.
+const COVER = 9000;
+const halfCopies = (items: Item[]) => Math.max(1, Math.ceil(COVER / rowWidth(items)));
+// seconds for one loop (half the track) at the wall's pace
+const rowSeconds = (items: Item[]) => Math.round((halfCopies(items) * rowWidth(items)) / PACE);
 
 function TicketLink({
   item,
@@ -380,7 +388,7 @@ export function ArenaRow({ row }: { row: number }) {
         className="fx-wall-track flex items-center w-max py-3"
         style={{ '--wall-speed': `${rowSeconds(items)}s` } as React.CSSProperties}
       >
-        {[0, 1].map((c) =>
+        {Array.from({ length: 2 * halfCopies(items) }, (_, c) => c).map((c) =>
           items.map((it, i) =>
             it.kind === 'ticket' ? (
               <TicketLink key={`${c}-${i}`} item={it} accent={accent} copy={c > 0} face={faces[i]!} />

@@ -156,9 +156,10 @@ test('arena seals are colour-blocked and every copy of a row matches, so the loo
     ),
   );
   for (const row of faces) {
-    expect(row).toHaveLength(16);
+    expect(row.length % 16).toBe(0); // 8 tickets x an even number of copies (R49: 4 or 6, by the row's width)
+    expect(row.length).toBeGreaterThanOrEqual(32);
     expect(new Set(row).size).toBeGreaterThanOrEqual(5); // no longer an all-white wall
-    for (let i = 0; i < 8; i++) expect(row[i + 8]).toBe(row[i]); // the copy === the first set
+    for (let i = 0; i + 8 < row.length; i++) expect(row[i + 8]).toBe(row[i]); // every copy === the first set
     for (let i = 0; i < row.length - 1; i++) expect(row[i + 1], `neighbours ${i}`).not.toBe(row[i]);
   }
   // the whole row (tickets and prints) repeats in the same order, so the loop is seamless

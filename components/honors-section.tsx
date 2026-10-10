@@ -61,6 +61,9 @@ export const CERT_SIZE: Record<string, [number, number]> = {
   '/certificates/Sales_Intelligence_Winner_-_2nd_Place.png': [2000, 1414],
   '/certificates/UM_GAME_JAM_2026_HOWARD_WOON_HAO_ZHE.png': [1450, 1011],
   '/certificates/chem_creative.png': [729, 1032],
+  // R49: the UM Student Academic Performance Record (semesters 1-2, 2025/2026), published as a PICTURE of the page:
+  // the owner's PDF still carried the NRIC as hidden text behind the blank field, an image carries no text at all
+  '/certificates/um_transcript_sem2_2025_2026.png': [1600, 2266],
 };
 
 /** R29: awards issued by an institution whose crest is on the site carry its Issuer Seal beside the title */
@@ -217,6 +220,8 @@ export const honorsList: HonorItem[] = [
     issuingBody: 'Faculty of Computer Science & IT, Universiti Malaya',
     period: '2025 - 2026',
     statCallout: { value: 'Top 1%', label: 'Academic Distinction' },
+    // R49 (owner: "update the new latest transcript ... the standard must align with other certificates")
+    certificateUrl: '/certificates/um_transcript_sem2_2025_2026.png',
     description: (
       <div className="space-y-4 pt-1">
         <p className="text-[0.95rem] text-ink-soft font-medium">

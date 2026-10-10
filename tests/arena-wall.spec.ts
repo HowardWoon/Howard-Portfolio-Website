@@ -10,7 +10,7 @@ test.beforeEach(async ({ context }) => {
 });
 
 const WALL = 'section[aria-labelledby="arena-wall-title"]';
-const PRINTS = [13, 19, 20]; // competitions, organisations, stack
+const PRINTS = [13, 20, 20]; // competitions, organisations, stack
 
 async function toWall(page: Page, path = '/') {
   await page.goto(path, { waitUntil: 'networkidle' });
@@ -56,8 +56,14 @@ test('the wall is server-rendered: 3 rows, 8 focusable tickets and every print e
   for (let r = 0; r < 3; r++) {
     await expect(rows.nth(r).locator('a.fx-seal.fx-ticket:not([aria-hidden])')).toHaveCount(8);
     await expect(rows.nth(r).locator('button.fx-seal.fx-print:not([aria-hidden])')).toHaveCount(PRINTS[r]);
-    // one hidden copy of the whole row keeps the loop seamless
-    await expect(rows.nth(r).locator('.fx-seal[aria-hidden="true"][tabindex="-1"]')).toHaveCount(8 + PRINTS[r]);
+    // hidden copies of the whole row keep the loop seamless at any window width (R49: a 25 % zoom ran out of row):
+    // an even number of copies in all, enough that half the track is wider than a 7,680 px window
+    const all = await rows.nth(r).locator('.fx-seal').count();
+    const copies = all / (8 + PRINTS[r]);
+    expect(Number.isInteger(copies) && copies % 2 === 0 && copies >= 4, `row ${r + 1}: ${copies} copies`).toBe(true);
+    await expect(rows.nth(r).locator('.fx-seal[aria-hidden="true"][tabindex="-1"]')).toHaveCount(
+      (copies - 1) * (8 + PRINTS[r]),
+    );
   }
   const hrefs = await page.$$eval('a.fx-seal:not([aria-hidden])', (as) => as.map((a) => a.getAttribute('href')!));
   expect(hrefs).toHaveLength(24);
@@ -79,7 +85,7 @@ test('every gallery photo and image certificate on the site is a print on the wa
     expected.add(m[1]);
   for (const m of readFileSync('components/honors-section.tsx', 'utf8').matchAll(/'(\/certificates\/[^']+\.png)': \[/g))
     expected.add(m[1]);
-  expect(expected.size).toBe(52);
+  expect(expected.size).toBe(53); // 49 gallery photos + 4 image certificates (R49: the UM transcript)
 
   await toWall(page);
   const shown = await page.$$eval('button.fx-print:not([aria-hidden])', (bs) =>
@@ -126,7 +132,7 @@ test('a ticket that heads a gallery counts the prints that follow it', async ({ 
       const [n, tag] = c.split(':');
       expect(tag, c).toBe(n === '0' ? '' : n.padStart(2, '0'));
     }
-  expect(counts.flat().filter((c) => !c.startsWith('0:'))).toHaveLength(11);
+  expect(counts.flat().filter((c) => !c.startsWith('0:'))).toHaveLength(12);
 });
 
 test('rows roll in opposite directions and pause under the mouse', async ({ page }) => {
@@ -228,7 +234,7 @@ test('a print straightens and lifts under the mouse, opens the lightbox on that 
   expect(hit!.rotate).toBe('0deg');
   expect(hit!.scale).toBe('1.12');
   // R46: every print is taped to the wall; the tape of the inspected print is pressed flat and square
-  expect(await page.locator('button.fx-print:not([aria-hidden]) > .tape').count()).toBe(52);
+  expect(await page.locator('button.fx-print:not([aria-hidden]) > .tape').count()).toBe(53);
   const tape = await page.evaluate(
     ([x, y]) => {
       const s = document.elementFromPoint(x, y)!.closest('.fx-print')!;
