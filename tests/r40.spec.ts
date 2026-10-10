@@ -253,6 +253,9 @@ test('section rail: numbered keys, the playhead sits on the current key, hover n
   await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
   const rail = page.getByRole('navigation', { name: 'Section navigation' });
+  // the rail mounts after the boot gate (AfterBoot): wait for its keys, then read them (reading at once returned an
+  // empty list about one run in three and failed the pre-push suite twice)
+  await expect(rail.locator('.sp-mag')).toHaveCount(5);
   expect(await rail.locator('.sp-mag').allTextContents()).toEqual(['01', '02', '03', '04', '05']);
   expect(new Set(await rail.locator('.sp-mag').evaluateAll((ks) => ks.map((k) => getComputedStyle(k).rotate)))).toEqual(
     new Set(['none']),
@@ -310,7 +313,11 @@ test('the simulator route transition is a sheet feed (N2 keyframes present)', as
 });
 
 /* ---------------------------------------------------------------- N3 */
-test('header impression counter counts the sections reached (>= 1536 px only) (N3)', async ({ page }) => {
+// R47 (owner: "what is the imp means ... must be all real, practical, meaningful"): the counter reads SEEN n/5 and is
+// a link to the first section this visit has not reached yet
+test('header counter: SEEN n/5 counts the sections reached and links to the next unseen one (>= 1536 px only) (N3)', async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 1600, height: 900 });
   await home(page);
   const counter = page.locator('[data-press-counter]');
@@ -318,7 +325,17 @@ test('header impression counter counts the sections reached (>= 1536 px only) (N
   await toEl(page, '#about', 0);
   await page.waitForTimeout(500);
   await toEl(page, '#projects', 0);
-  await expect.poll(() => counter.locator('[data-text]').getAttribute('data-text')).toBe('0002');
+  await expect.poll(() => counter.locator('[data-text]').getAttribute('data-text')).toBe('2/5');
+  await expect(counter).toContainText('SEEN');
+  await expect(counter).not.toContainText('IMP');
+  // About and Projects are seen: the link names and targets Experience, the first unseen section
+  await expect(counter).toHaveAttribute('href', '#experience');
+  await expect(counter).toHaveAttribute('aria-label', 'Seen 2 of 5 sections. Go to Experience');
+  await counter.click();
+  await expect.poll(() => page.evaluate(() => location.hash)).toBe('#experience');
+  await expect(page.locator('#experience')).toBeInViewport();
+  await expect.poll(() => counter.locator('[data-text]').getAttribute('data-text')).toBe('3/5');
+  await expect(counter).toHaveAttribute('href', '#honors');
   await page.setViewportSize({ width: 1440, height: 900 });
   await expect(counter).toBeHidden();
 });

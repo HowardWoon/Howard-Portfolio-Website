@@ -15,18 +15,23 @@ import { openResume } from '@/lib/resume';
 import { flapTo } from '@/lib/split-flap';
 
 /**
- * R40 N3 Press Counter (owner-approved wording): an impression counter beside the name on wide screens (>= 1536 px).
- * It counts the sections this visit has reached (IMP 0001 ... 0005) on a split-flap board, and flips only once the page
- * has stopped scrolling (a flip lays out; lesson 30-E21). Decorative: the same fact is in the footer colophon.
+ * R40 N3 Press Counter, beside the name on wide screens (>= 1536 px). R47 (owner: "what is the imp means ... must be
+ * all real, practical, meaningful"): "IMP 0003" was a printer's term nobody could read, and it did nothing. It now
+ * says what it counts - SEEN 3/5, the sections this visit has reached - and it is a link to the first section the
+ * visitor has NOT seen yet (Contact once all five are seen), so one click continues the tour. The count still sits on
+ * a split-flap board and flips only once the page has stopped scrolling (a flip lays out; lesson 30-E21).
  */
 function PressCounter() {
   const active = useClockActive();
   const ref = useRef<HTMLSpanElement>(null);
   const seen = useRef(new Set<string>());
+  const [count, setCount] = useState(0);
+  const next = NAV.find((s) => !seen.current.has(s.id)) ?? NAV[NAV.length - 1];
   useEffect(() => {
-    if (!active) return;
+    if (!NAV.some((s) => s.id === active)) return; // the hero is not one of the five
     seen.current.add(active);
-    const text = String(seen.current.size).padStart(4, '0');
+    setCount(seen.current.size); // changes only when a new section is reached, never per scroll frame
+    const text = `${seen.current.size}/${NAV.length}`;
     let t = 0;
     const flip = () => {
       window.clearTimeout(t);
@@ -42,16 +47,19 @@ function PressCounter() {
     };
   }, [active]);
   return (
-    <span
-      aria-hidden
+    <a
+      href={`#${next.id}`}
       data-press-counter
-      className="hidden 2xl:inline-flex items-center gap-2 rounded-lg border-2 border-ink bg-white px-2 py-1 font-mono text-xs font-extrabold tracking-[0.14em] text-ink shadow-brutal-xs"
+      data-seen={count}
+      aria-label={`Seen ${count} of ${NAV.length} sections. Go to ${next.label}`}
+      title={`Seen ${count} of ${NAV.length} sections. Go to ${next.label}`}
+      className="hidden 2xl:inline-flex items-center gap-2 min-h-[32px] rounded-lg border-2 border-ink bg-white px-2 py-1 font-mono text-xs font-extrabold tracking-[0.14em] text-ink shadow-brutal-xs outline-none transition-colors hover:bg-[#E3E8FF] focus-visible:ring-4 focus-visible:ring-pop-blue"
     >
-      IMP
-      <span ref={ref} className="tabular-nums">
-        0000
+      <span aria-hidden>SEEN</span>
+      <span ref={ref} aria-hidden className="tabular-nums">
+        0/{NAV.length}
       </span>
-    </span>
+    </a>
   );
 }
 
