@@ -12,7 +12,7 @@ import { useBooted } from './boot-sequence';
  *  - returning visitors (no gate) get them one per idle callback right away.
  * The server and the first client render both output nothing here, so hydration never differs.
  */
-const SETTLE_MS = 1000; // boot shatter length (fx/boot-shatter.ts) + a little
+const SETTLE_MS = 1500; // boot shatter length (fx/boot-shatter.ts BOOT_SHATTER_MS = 1420) + a little
 
 type IdleWindow = Window & {
   requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number;

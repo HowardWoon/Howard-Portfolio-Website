@@ -597,3 +597,79 @@ test('contact desk still works after the reorganisation: intent drafts, roles pr
   await expect(page.locator('#role-proof')).toContainText(/Fiscal Governance/i);
   await expect(page.getByRole('button', { name: 'Trace Fiscal Governance' })).toBeVisible();
 });
+
+/* ---------------------------------------------------------------- R55 the gate lets go */
+// owner (R55, a screenshot of 18 slabs mid-fall): "make this break part ... more amazing, ASMR, chill, relax viewing,
+// this is so boring and not creative at all". A wall of tiles now turns over in one ripple from the centre outwards.
+for (const [name, w, h, min] of [
+  ['desktop 1440x900', 1440, 900, 80],
+  ['phone 390x844', 390, 844, 30],
+] as const) {
+  test(`the gate lets go as an ordered ripple of tiles, on the compositor only, and leaves nothing behind (${name})`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: w, height: h });
+    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.evaluate(() => {
+      const win = window as unknown as { __shatter?: unknown };
+      const mo = new MutationObserver(() => {
+        const layer = document.querySelector<HTMLElement>('[data-fx-shatter]');
+        if (!layer || win.__shatter) return;
+        const cx = window.innerWidth / 2;
+        const cy = window.innerHeight / 2;
+        const tiles = [...layer.children].map((t) => {
+          const a = t.getAnimations()[0];
+          const r = t.getBoundingClientRect();
+          const timing = a.effect!.getTiming();
+          return {
+            d: Math.hypot(r.left + r.width / 2 - cx, r.top + r.height / 2 - cy),
+            delay: Number(timing.delay),
+            duration: Number(timing.duration),
+            easing: String(timing.easing),
+            props: (a.effect as KeyframeEffect)
+              .getKeyframes()
+              .flatMap((k) =>
+                Object.keys(k).filter((x) => !['offset', 'easing', 'composite', 'computedOffset'].includes(x)),
+              ),
+          };
+        });
+        win.__shatter = {
+          count: tiles.length,
+          pointer: getComputedStyle(layer).pointerEvents,
+          props: [...new Set(tiles.flatMap((t) => t.props))].sort(),
+          easings: [...new Set(tiles.map((t) => t.easing))],
+          durations: [...new Set(tiles.map((t) => t.duration))],
+          // the ripple is ordered: a tile further from the centre never starts more than its 40 ms scatter earlier
+          outOfOrder: tiles.filter((a) => tiles.some((b) => b.d > a.d + 1 && b.delay < a.delay - 41)).length,
+          first: Math.min(...tiles.map((t) => t.delay)),
+          last: Math.max(...tiles.map((t) => t.delay + t.duration)),
+        };
+      });
+      mo.observe(document.body, { childList: true });
+    });
+    await page.getByRole('button', { name: /skip intro/i }).click();
+    await expect
+      .poll(() => page.evaluate(() => !!(window as unknown as { __shatter?: unknown }).__shatter), { timeout: 8000 })
+      .toBe(true);
+    const s = (await page.evaluate(() => (window as unknown as { __shatter?: unknown }).__shatter)) as {
+      count: number;
+      pointer: string;
+      props: string[];
+      easings: string[];
+      durations: number[];
+      outOfOrder: number;
+      first: number;
+      last: number;
+    };
+    expect(s.count, 'a wall of tiles, not a handful of slabs').toBeGreaterThanOrEqual(min);
+    expect(s.count).toBeLessThanOrEqual(170);
+    expect(s.pointer).toBe('none');
+    expect(s.props, 'compositor only').toEqual(['opacity', 'transform']);
+    expect(s.easings, 'one calm curve for every tile').toHaveLength(1);
+    expect(s.durations).toHaveLength(1);
+    expect(s.outOfOrder, 'ring after ring from the centre').toBe(0);
+    expect(s.first).toBeLessThan(120);
+    expect(s.last, 'the page is clear within 1.5 s').toBeLessThanOrEqual(1500);
+    await expect(page.locator('[data-fx-shatter]')).toHaveCount(0, { timeout: 4000 });
+  });
+}

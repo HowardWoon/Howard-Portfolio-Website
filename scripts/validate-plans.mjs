@@ -438,12 +438,14 @@ has(
   ':not(.fx-off-shadowFollow)',
 );
 // R41: the canvas shatter (780 tiles re-drawn per frame on the main thread) became GPU slabs - fewer on phones
+// R55: the slabs are now a rippling wall of tiles (larger, so fewer, on a phone; capped by MAX_TILES)
 has(
   'R9',
   'D3',
   'Lighter boot shatter: compositor slabs, fewer on phones',
   'components/fx/boot-shatter.ts',
-  'small ? 3 : 6',
+  'small ? 84 : 128',
+  'MAX_TILES',
   'slab.animate(',
 );
 has('R9', 'D5', 'Off-screen pause for infinite animations', 'components/fx/offscreen-pause.tsx', 'data-offscreen');
