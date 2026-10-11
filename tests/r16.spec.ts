@@ -156,8 +156,11 @@ test('arena seals are colour-blocked and every copy of a row matches, so the loo
     ),
   );
   for (const row of faces) {
-    expect(row.length % 16).toBe(0); // 8 tickets x an even number of copies (R49: 4 or 6, by the row's width)
-    expect(row.length).toBeGreaterThanOrEqual(32);
+    // 8 tickets x an even number of copies, by the row's width (R49: 4 or 6; R57: the organisations row carries 41
+    // prints, is over 9,000 px wide by itself and needs only 2). tests/arena-wall checks that half the track covers a
+    // 7,680 px window.
+    expect(row.length % 16).toBe(0);
+    expect(row.length).toBeGreaterThanOrEqual(16);
     expect(new Set(row).size).toBeGreaterThanOrEqual(5); // no longer an all-white wall
     for (let i = 0; i + 8 < row.length; i++) expect(row[i + 8]).toBe(row[i]); // every copy === the first set
     for (let i = 0; i < row.length - 1; i++) expect(row[i + 1], `neighbours ${i}`).not.toBe(row[i]);
