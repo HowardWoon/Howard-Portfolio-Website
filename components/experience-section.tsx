@@ -505,6 +505,7 @@ function PekomTreasurerDashboard() {
               </li>
             </ul>
           </div>
+          <FieldArchive archiveId="mhw" />
         </div>
       ),
     },

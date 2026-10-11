@@ -193,6 +193,13 @@ const FIELD_REEL: ReelItem[] = [
   { src: '/images/experiences/kraiburg/kraiburg_02.jpg', w: 960, h: 1280 },
   { src: '/images/experiences/kraiburg/kraiburg_03.jpg', w: 960, h: 1280 },
   { src: '/images/experiences/kraiburg/kraiburg_04.jpg', w: 1280, h: 960 },
+  // R56: Mental Health Week 2025 & Share Your Love (Sep 2025 - Jun 2026), pink = LEADERSHIP like MYTECH; the group
+  // photos (the banner, the outreach) and the laptop session
+  { slate: 'MENTAL HEALTH WEEK 2025', fill: 'bg-pop-pink' },
+  { src: '/images/experience/mhw/01.jpg', w: 1280, h: 960 },
+  { src: '/images/experience/mhw/03.jpg', w: 1280, h: 960 },
+  { src: '/images/experience/mhw/04.jpg', w: 1280, h: 960 },
+  { src: '/images/experience/mhw/05.jpg', w: 1280, h: 960 },
   { slate: 'MYTECH CAREER FAIR 2026', fill: 'bg-pop-pink' },
   { src: '/images/experience/mytech/01.jpg', w: 1280, h: 853 },
   { src: '/images/experience/mytech/02.jpg', w: 1280, h: 853 },

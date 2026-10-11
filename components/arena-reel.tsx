@@ -40,18 +40,30 @@ const proofpay = project('proofpay');
 // (6) and MUBA (4) event photos roll with the competitions; the screens that follow them roll with the stack.
 const ZEROLAG_EVENT = 6;
 const PROOFPAY_EVENT = 4;
-// MYTECH lives in the Field Archive, which keeps no pixel sizes: these are the files' real sizes (sharp)
-const MYTECH_SIZE: Record<string, [number, number]> = {
+// MYTECH and Mental Health Week live in the Field Archive, which keeps no pixel sizes: these are the files' real
+// sizes (sharp().metadata(), AGENTS.md 6.2)
+const ARCHIVE_SIZE: Record<string, [number, number]> = {
+  '/images/experience/mhw/01.jpg': [1280, 960],
+  '/images/experience/mhw/02.jpg': [1280, 960],
+  '/images/experience/mhw/03.jpg': [1280, 960],
+  '/images/experience/mhw/04.jpg': [1280, 960],
+  '/images/experience/mhw/05.jpg': [1280, 960],
+  '/images/experience/mhw/06.jpg': [1280, 720],
+  '/images/experience/mhw/07.jpg': [1280, 960],
   '/images/experience/mytech/01.jpg': [1280, 853],
   '/images/experience/mytech/02.jpg': [1280, 853],
   '/images/experience/mytech/03.jpg': [1280, 853],
   '/images/experience/mytech/04.jpg': [1280, 853],
   '/images/experience/mytech/05.jpg': [720, 1280],
 };
-const mytech: Photo[] = (ARCHIVE_DATA.mytech ?? []).flatMap((r) => {
-  const size = MYTECH_SIZE[r.image];
-  return size ? [{ src: r.image, alt: r.caption, rotation: 0, w: size[0], h: size[1] }] : [];
-});
+const archive = (id: string): Photo[] =>
+  (ARCHIVE_DATA[id] ?? []).flatMap((r) => {
+    const size = ARCHIVE_SIZE[r.image];
+    return size ? [{ src: r.image, alt: r.caption, rotation: 0, w: size[0], h: size[1] }] : [];
+  });
+const mytech = archive('mytech');
+// R56: Mental Health Week & Share Your Love is a PEKOM event (Treasurer), so its photos roll with the PEKOM ticket
+const mhw = archive('mhw');
 // the image certificates (the PDF certificates have no picture to print); the alt is the award's own title
 const certs: Photo[] = honorsList.flatMap((h) => {
   const size = h.certificateUrl ? CERT_SIZE[h.certificateUrl] : undefined;
@@ -85,7 +97,7 @@ export const REEL_ROWS: { label: string; accent: 'yellow' | 'mint' | 'cyan'; ite
     accent: 'mint',
     items: [
       ...ticket('Universiti Malaya', "Dean's List", '#honors', cert('um_transcript_sem2_2025_2026.png')),
-      ...ticket('PEKOM', 'Finance Lead', '#experience'),
+      ...ticket('PEKOM', 'Finance Lead', '#experience', gallery(mhw, undefined)),
       ...ticket('KRAIBURG TPE', 'Corporate', '#experience', gallery(experience('kraiburg'), 'kraiburg')),
       ...ticket('MYTECH', 'Career Fair 2026', '#experience', gallery(mytech, undefined)),
       ...ticket('Alphathon', 'UM · 2025', '#experience'),
