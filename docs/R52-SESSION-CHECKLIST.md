@@ -127,6 +127,14 @@ Photo checklist: real sizes read with sharp (`kmns_14.jpg` is only 640 x 480; `1
 identity numbers; alt text says what each photo shows; all 14 new photos also roll on the Proof Reel (PAL Club ticket)
 and four join the Build Story field reel; the upload folder was moved to the git-ignored `private-originals/`.
 
+## 2e. R58 (12 Oct 2026)
+
+| #   | Request                                                       | Measured before                                                                | What was done                                                                                                | Guard               | Result |
+| --- | ------------------------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ | ------------------- | ------ |
+| 41  | No bare space beside the last photos of a Field Archive       | a 5-record archive left half of its last row empty (2 tiles in 4 columns)      | the tiles of the last row share it and grow to fill it: 1, 2, 3 or 4 tiles all end flush with the right edge | `tests/r53.spec.ts` | PASS   |
+| 42  | The organisation plate must line up with the gallery under it | the plate was a fixed 25 rem box, 25 px in from the gallery's left edge        | on a card with a gallery the header uses the same 7 / 5 grid as the body: plate and gallery share both edges | `tests/r53.spec.ts` | PASS   |
+| 43  | The VIEW MASTER ORCHESTRATOR key must open the Supervity link | the key already opened exactly that address (in the code and on the live site) | no change needed; a test now pins the address                                                                | `tests/r53.spec.ts` | PASS   |
+
 ## 3. Whole-site checks, last run
 
 | Check                                              | Result                                                         |

@@ -928,8 +928,19 @@ export default function ExperienceSection() {
                     <div className="p-4 xs:p-6 sm:p-10">
                       {/* Main Role & Org */}
                       <div className="pb-7">
-                        <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-5">
-                          <div className="space-y-3 max-w-3xl">
+                        {/* R58 (owner: "must align the part i mention with the border below of my gallery, so that more
+                            organised"): on a card with a gallery the header uses the SAME 7 / 5 grid and gap as the
+                            body below it, so the organisation plate is exactly as wide as the gallery desk and their
+                            left and right edges line up (the plate was a fixed 25 rem box, 25 px in from the desk's
+                            left edge). A card without a gallery keeps the plate at 25 rem on the right. */}
+                        <div
+                          className={
+                            g
+                              ? 'grid gap-5 lg:grid-cols-12 lg:items-start lg:gap-8'
+                              : 'flex flex-col lg:flex-row lg:items-start justify-between gap-5'
+                          }
+                        >
+                          <div className={`space-y-3 max-w-3xl ${g ? 'min-w-0 lg:col-span-7' : ''}`}>
                             <h3 className="font-display text-[clamp(1.45rem,7.4vw,1.875rem)] sm:text-4xl font-extrabold uppercase tracking-[-0.03em] leading-[1] text-ink">
                               {item.role}
                             </h3>
@@ -952,7 +963,9 @@ export default function ExperienceSection() {
                               differed card to card and left the corner empty. */}
                           <div
                             data-org-plate
-                            className={`flex w-full shrink-0 flex-col items-stretch gap-3 self-start rounded-2xl border-3 border-ink p-3 shadow-brutal-sm sm:flex-row sm:items-center lg:w-[25rem] ${a.soft}`}
+                            className={`flex w-full shrink-0 flex-col items-stretch gap-3 self-start rounded-2xl border-3 border-ink p-3 shadow-brutal-sm sm:flex-row sm:items-center ${
+                              g ? 'mx-auto min-w-0 max-w-md lg:col-span-5 lg:mx-0 lg:max-w-none' : 'lg:w-[25rem]'
+                            } ${a.soft}`}
                           >
                             <span
                               data-org-mark

@@ -673,3 +673,89 @@ for (const [name, w, h, min] of [
     await expect(page.locator('[data-fx-shatter]')).toHaveCount(0, { timeout: 4000 });
   });
 }
+
+/* ---------------------------------------------------------------- R58 no bare corners */
+// owner (R58): "i dont want the side i circled to be so empty ... make sure no blank and empty space in this part" (the
+// last row of a 5-record Field Archive) and "must align the part i mention with the border below of my gallery" (the
+// organisation plate above the gallery desk)
+for (const [name, w, h] of [
+  ['desktop 1440x900', 1440, 900],
+  ['laptop 1024x768', 1024, 768],
+  ['tablet 768x1024', 768, 1024],
+  ['phone 390x844', 390, 844],
+] as const) {
+  test(`every Field Archive row ends flush with the right edge, whatever the number of records (${name})`, async ({
+    page,
+  }) => {
+    test.setTimeout(90_000);
+    await page.setViewportSize({ width: w, height: h });
+    await gate(page);
+    for (const [id, label, tiles] of [
+      ['mytech', /Treasurer \| MYTECH/, 2],
+      ['mhw', /Treasurer \| Mental Health Week/, 4],
+    ] as const) {
+      const head = page.getByRole('button', { name: label });
+      await head.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+      await page.waitForTimeout(300);
+      if ((await head.getAttribute('aria-expanded')) !== 'true') await head.click();
+      const row = page.locator(`#pekom-event-${id} [data-archive-row]`);
+      await expect(row).toBeVisible();
+      await page.waitForTimeout(700);
+      const m = await row.evaluate((r) => {
+        const rr = r.getBoundingClientRect();
+        const boxes = [...r.children].map((t) => t.getBoundingClientRect());
+        const lines = [...new Set(boxes.map((t) => Math.round(t.top)))];
+        return {
+          tiles: boxes.length,
+          gaps: lines.map((l) =>
+            Math.round(rr.right - Math.max(...boxes.filter((t) => Math.round(t.top) === l).map((t) => t.right))),
+          ),
+          heights: [...new Set(boxes.map((t) => Math.round(t.height)))].length,
+          spill: boxes.filter((t) => t.right > rr.right + 1 || t.left < rr.left - 1).length,
+        };
+      });
+      expect(m.tiles, id).toBe(tiles);
+      expect(Math.max(...m.gaps), `${id}: bare space at the end of a row`).toBeLessThanOrEqual(1);
+      expect(m, id).toMatchObject({ heights: 1, spill: 0 });
+    }
+  });
+
+  test(`the organisation plate lines up with the gallery desk under it (${name})`, async ({ page }) => {
+    test.setTimeout(90_000);
+    await page.setViewportSize({ width: w, height: h });
+    await gate(page);
+    await walk(page);
+    const cards = await page.evaluate(() =>
+      [...document.querySelectorAll<HTMLElement>('[data-folder]')].flatMap((c) => {
+        const plate = c.querySelector('[data-org-plate]')?.getBoundingClientRect();
+        const desk = c.querySelector('[data-gallery-desk]')?.getBoundingClientRect();
+        return plate && desk
+          ? [
+              {
+                id: c.dataset.folder,
+                left: Math.round(plate.left - desk.left),
+                right: Math.round(plate.right - desk.right),
+              },
+            ]
+          : [];
+      }),
+    );
+    expect(cards.map((c) => c.id).sort()).toEqual(['kmns', 'kraiburg']);
+    for (const c of cards) {
+      expect(Math.abs(c.left), `${c.id}: left edges`).toBeLessThanOrEqual(1);
+      expect(Math.abs(c.right), `${c.id}: right edges`).toBeLessThanOrEqual(1);
+    }
+  });
+}
+
+test('the ZeroLag orchestrator key opens the Supervity workflow the owner gave', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await gate(page);
+  await walk(page);
+  const key = page.getByRole('link', { name: /VIEW MASTER ORCHESTRATOR/i });
+  await expect(key).toHaveAttribute(
+    'href',
+    'https://auto.supervity.ai/u/alpha/agent/workflow/019fd755-073c-7000-b437-02bfad99b025?tab=Workflow',
+  );
+  await expect(key).toHaveAttribute('target', '_blank');
+});

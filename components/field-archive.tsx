@@ -218,20 +218,25 @@ export function FieldArchive({ archiveId }: FieldArchiveProps) {
 
           {/* BOTTOM ROW (if more than 3 photos) */}
           {records.length > 3 && (
-            <div className="md:col-span-12 grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4">
+            // R58 (owner circled the bare half of this row under a 5-record archive: "i dont want the side i circled to
+            // be so empty ... make sure no blank and empty space"): the row was a fixed 4-column grid, so 2 tiles
+            // left 2 columns of nothing. The tiles now share the row - each takes a quarter at least and grows to
+            // fill it, so 1, 2, 3 or 4 tiles all end flush with the right edge (an odd one on a phone takes the
+            // whole row). One height for the row instead of squares, so a wide tile is not a tall one.
+            <div data-archive-row className="md:col-span-12 flex flex-wrap gap-3 md:gap-4">
               {records.slice(3).map((record, idx) => (
                 <button
                   type="button"
                   key={record.id}
                   onClick={() => setSelectedIndex(idx + 3)}
-                  className={`${tileBase} aspect-square text-left`}
+                  className={`${tileBase} h-36 min-w-0 grow basis-[calc(50%-0.375rem)] text-left sm:basis-[calc(25%-0.5625rem)] md:h-44 md:basis-[calc(25%-0.75rem)] lg:h-52 xl:h-60`}
                 >
                   <Image
                     src={record.image}
                     alt={record.caption}
                     fill
-                    sizes="(max-width: 640px) 50vw, 25vw"
-                    className="fx-wipe object-cover transition-transform duration-500 group-hover:scale-105"
+                    sizes="(max-width: 640px) 100vw, 50vw"
+                    className="fx-wipe object-cover object-[50%_28%] transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute left-3 bottom-3 right-3">
                     {/* full caption only where the square tiles are wide enough (it was cropped on phones/tablets) */}
