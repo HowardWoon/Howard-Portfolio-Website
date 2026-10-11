@@ -10,7 +10,7 @@ test.beforeEach(async ({ context }) => {
 });
 
 const WALL = 'section[aria-labelledby="arena-wall-title"]';
-const PRINTS = [15, 27, 20]; // competitions, organisations, stack
+const PRINTS = [15, 41, 20]; // competitions, organisations, stack
 
 async function toWall(page: Page, path = '/') {
   await page.goto(path, { waitUntil: 'networkidle' });
@@ -60,7 +60,14 @@ test('the wall is server-rendered: 3 rows, 8 focusable tickets and every print e
     // an even number of copies in all, enough that half the track is wider than a 7,680 px window
     const all = await rows.nth(r).locator('.fx-seal').count();
     const copies = all / (8 + PRINTS[r]);
-    expect(Number.isInteger(copies) && copies % 2 === 0 && copies >= 4, `row ${r + 1}: ${copies} copies`).toBe(true);
+    // (R57: a long row needs fewer copies - with 41 prints the organisations row is over 9,000 px wide by itself,
+    // so 2 copies are enough. What must hold is the coverage, measured here, not a fixed number of copies.)
+    expect(Number.isInteger(copies) && copies % 2 === 0 && copies >= 2, `row ${r + 1}: ${copies} copies`).toBe(true);
+    const half = await rows
+      .nth(r)
+      .locator('.fx-wall-track')
+      .evaluate((t) => t.scrollWidth / 2);
+    expect(half, `row ${r + 1}: half the track covers a 7,680 px window`).toBeGreaterThan(7680);
     await expect(rows.nth(r).locator('.fx-seal[aria-hidden="true"][tabindex="-1"]')).toHaveCount(
       (copies - 1) * (8 + PRINTS[r]),
     );
@@ -85,8 +92,9 @@ test('every gallery photo and image certificate on the site is a print on the wa
     expected.add(m[1]);
   for (const m of readFileSync('components/honors-section.tsx', 'utf8').matchAll(/'(\/certificates\/[^']+\.png)': \[/g))
     expected.add(m[1]);
-  // 56 gallery photos (R56: + 7 Mental Health Week) + 6 image certificates (R49 transcript, R51 PPAL and PAL KPM)
-  expect(expected.size).toBe(62);
+  // 70 gallery photos (R56: + 7 Mental Health Week, R57: + 14 KMNS) + 6 image certificates (R49 transcript, R51 PPAL
+  // and PAL KPM)
+  expect(expected.size).toBe(76);
 
   await toWall(page);
   const shown = await page.$$eval('button.fx-print:not([aria-hidden])', (bs) =>
@@ -235,7 +243,7 @@ test('a print straightens and lifts under the mouse, opens the lightbox on that 
   expect(hit!.rotate).toBe('0deg');
   expect(hit!.scale).toBe('1.12');
   // R46: every print is taped to the wall; the tape of the inspected print is pressed flat and square
-  expect(await page.locator('button.fx-print:not([aria-hidden]) > .tape').count()).toBe(62);
+  expect(await page.locator('button.fx-print:not([aria-hidden]) > .tape').count()).toBe(76);
   const tape = await page.evaluate(
     ([x, y]) => {
       const s = document.elementFromPoint(x, y)!.closest('.fx-print')!;

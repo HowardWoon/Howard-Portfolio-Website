@@ -117,6 +117,16 @@ Live-site device check after R55 (ten profiles, whole page scrolled on each: Des
 iPad landscape, Galaxy Tab S4, iPhone 13, iPhone SE, Pixel 7, Galaxy S9+, Fold 280): overflow 0, broken images 0,
 JavaScript errors 0, failed requests 0 on all ten.
 
+## 2d. R57 (12 Oct 2026)
+
+| #   | Request                                                                     | What was done                                                                                                                                                                      | Guard                                           | Result |
+| --- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | ------ |
+| 40  | More photos for the Assistant Head of Subject gallery, in file order 1 - 20 | the Mentorship gallery shows 20 photos in the order of the owner's files. Files 1 - 6 were the six already there (kmns_01, 02, 06, 03, 05, 04); 7 - 20 are new (kmns_07 - kmns_20) | `tests/r29.spec.ts`, `tests/arena-wall.spec.ts` | PASS   |
+
+Photo checklist: real sizes read with sharp (`kmns_14.jpg` is only 640 x 480; `15` and `17` are portrait); no EXIF, no
+identity numbers; alt text says what each photo shows; all 14 new photos also roll on the Proof Reel (PAL Club ticket)
+and four join the Build Story field reel; the upload folder was moved to the git-ignored `private-originals/`.
+
 ## 3. Whole-site checks, last run
 
 | Check                                              | Result                                                         |

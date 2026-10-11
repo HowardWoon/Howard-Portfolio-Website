@@ -187,6 +187,11 @@ const FIELD_REEL: ReelItem[] = [
   { src: '/images/experiences/kmns/kmns_05.jpg', w: 1280, h: 718 },
   { src: '/images/experiences/kmns/kmns_01.jpg', w: 1280, h: 960 },
   { src: '/images/experiences/kmns/kmns_06.jpg', w: 1280, h: 960 },
+  // R57: four of the fourteen photos added to the KMNS gallery (the leadership course, the MADANI session, the camp)
+  { src: '/images/experiences/kmns/kmns_09.jpg', w: 1280, h: 960 },
+  { src: '/images/experiences/kmns/kmns_11.jpg', w: 1280, h: 960 },
+  { src: '/images/experiences/kmns/kmns_07.jpg', w: 1280, h: 960 },
+  { src: '/images/experiences/kmns/kmns_13.jpg', w: 1280, h: 960 },
   // R37: KRAIBURG TPE (Nov 2025 -), ink = INDUSTRY; the photos with colleagues (the gallery's first four)
   { slate: 'KRAIBURG TPE Technology (M) Sdn Bhd', fill: 'bg-ink' },
   { src: '/images/experiences/kraiburg/kraiburg_01.jpg', w: 1280, h: 960 },

@@ -100,10 +100,10 @@ test.describe('KMNS gallery desk (1440)', () => {
     await expect(card.locator('[data-seal="kmns"]')).toHaveCount(0);
     await expect(card.locator('[data-org-plate] [data-org-logo="kmns"] img')).toHaveCount(1);
 
-    // the filmstrip jumps straight to photo 3 (the portrait one): the print takes its real 960x1280 shape
-    await card.getByRole('button', { name: 'Go to photo 3 of 6' }).click();
+    // the filmstrip jumps straight to photo 4 of the owner's 20 (R57 order; the portrait one): the print takes its real 960x1280 shape
+    await card.getByRole('button', { name: 'Go to photo 4 of 20' }).click();
     await page.waitForTimeout(700);
-    await expect(card.getByRole('button', { name: 'Go to photo 3 of 6' })).toHaveAttribute('aria-current', 'true');
+    await expect(card.getByRole('button', { name: 'Go to photo 4 of 20' })).toHaveAttribute('aria-current', 'true');
     await expect(card.locator('[data-photo-caption]')).toHaveText(
       'On stage with medals at the Simposium Peer Assisted Learning (PAL)',
     );

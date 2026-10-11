@@ -12,6 +12,34 @@ export const PHOTO_BLUR: Record<string, string> = {
     'data:image/webp;base64,UklGRkoAAABXRUJQVlA4ID4AAADwAQCdASoQAAkAA4BaJQBOmT+AsaGDkIAA/ryH8gz5i3Ai+8dJKk8mA4TZ9Y7mzEM1wVA+zE01wgL1cmEAAA==',
   '/images/experiences/kmns/kmns_06.jpg':
     'data:image/webp;base64,UklGRlYAAABXRUJQVlA4IEoAAAAQAgCdASoQAAwAA4BaJQBOgCHiFMUOWqQAAPZGsiSZ+AXqmZHelzVDpPXQWccdNHFVu0IoSV0vVn7KncdNDNOtRxghRFG6xHEoAA==',
+  '/images/experiences/kmns/kmns_07.jpg':
+    'data:image/webp;base64,UklGRlYAAABXRUJQVlA4IEoAAACwAQCdASoQAAwAA4BaJZACw7BfhHYAAP40LCnH7lHV/O0cpeK1V2ScgiqKj5R3ViltXX2Yzyp/pQcAsb+h/TWsPajm2Cvdx10AAA==',
+  '/images/experiences/kmns/kmns_08.jpg':
+    'data:image/webp;base64,UklGRmoAAABXRUJQVlA4IF4AAAAwAgCdASoQAAwAA4BaJQBOgCBj9d5wY9EYAAD+NGSAcgz7ld4Y24TE6vd6FMvEdZZVOehAT/O1jE1EOVoHrqLHK5w4KSbDbj2xX8DgVHwmBYlL4lYDZOWizEfNhuAA',
+  '/images/experiences/kmns/kmns_09.jpg':
+    'data:image/webp;base64,UklGRlwAAABXRUJQVlA4IFAAAACwAQCdASoQAAwAA4BaJagCdAB0zBwAAP7xgEkHZ3I4vAKh6vwR0YVMA2E386IOohBOhJwfI9ExviDKtz9uh24/0ywG1IDdNnt6adKnfwAAAA==',
+  '/images/experiences/kmns/kmns_10.jpg':
+    'data:image/webp;base64,UklGRlwAAABXRUJQVlA4IFAAAAAQAgCdASoQAAwAA4BaJbACdAECodu9ywQAAP6Jk0SrN9f/rqVZsry0lJRIpLT1jSoW4/UBCMFa5CuUeezoRw+j5v8TlVn5+ZdEfRhcyAwAAA==',
+  '/images/experiences/kmns/kmns_11.jpg':
+    'data:image/webp;base64,UklGRlwAAABXRUJQVlA4IFAAAAAwAgCdASoQAAwAA4BaJagC7AEK0OtW7UFWAAD9Ai6WDf6ofypp28Q+OO7Ow72B0hk9BkhAK+jxSHQDrSHasAVObGPZ70yi6inBwawkZx4YAA==',
+  '/images/experiences/kmns/kmns_12.jpg':
+    'data:image/webp;base64,UklGRkgAAABXRUJQVlA4IDwAAACwAQCdASoQAAwAA4BaJZwAAuY0RswAAP70X16/dR4AecXlbIbvE4eC1E4b9svk9sCtSILppX6QUXHtQAA=',
+  '/images/experiences/kmns/kmns_13.jpg':
+    'data:image/webp;base64,UklGRkoAAABXRUJQVlA4ID4AAAAQAgCdASoQAAwAA4BaJYwCdAD2LMdzO0tQAP7tJhjnR2Z2jqA+tjFaw1pOE5wSdQWeyi7nvKJWC0o8dgAAAA==',
+  '/images/experiences/kmns/kmns_14.jpg':
+    'data:image/webp;base64,UklGRlAAAABXRUJQVlA4IEQAAADQAQCdASoQAAwAA4BaJQBOgCGLZAEbwAD+kb4nupv65hoonbyGgAkWftjg0gD1vqtEdLH2POJK2EoF1qWB43FNxVmAAA==',
+  '/images/experiences/kmns/kmns_15.jpg':
+    'data:image/webp;base64,UklGRogAAABXRUJQVlA4IHwAAADQAwCdASoQABUAPu1iqU2ppaOiMAgBMB2JYgC/OBa/ps9+U1iC5QAA/maNSg6KUWo5+wmgTYoziCBmZiiF8SffavqmC1HRz/gn0Lzufq4v563rbcwGehNMXjWGonNKxd8o0/0w2wf2qE72rkd+90PsbofBjwFW0wdPAAAA',
+  '/images/experiences/kmns/kmns_16.jpg':
+    'data:image/webp;base64,UklGRlYAAABXRUJQVlA4IEoAAADQAQCdASoQAAwAA4BaJYwCdADYDaRUAAD+vGlLOX8OV9ISpZkfaMuVDo2YqAN8KkXEkibdwGG6wc3wJkWXnyQgE9zrmUplFgAAAA==',
+  '/images/experiences/kmns/kmns_17.jpg':
+    'data:image/webp;base64,UklGRnQAAABXRUJQVlA4IGgAAAAQBACdASoQABUAPu1iqU2ppaQiMAgBMB2JZQDKACHf3q67BrpC55LNKAD+9CEPYYTeYzQqVprHOqjhRvO6pRUHzM1BycE8ysDKMbsTxEietWz+MgjPx4WlaI6Jn1Y2STuNBWjgh+QAAA==',
+  '/images/experiences/kmns/kmns_18.jpg':
+    'data:image/webp;base64,UklGRnAAAABXRUJQVlA4IGQAAABQAgCdASoQAAwAA4BaJQBOkCYjHNbc/P+p4AAA/QE8bvk2uaStLXbCQF+J/4Vl22jcmPSAbT7yQybikTcjVHYqNgUYc8USic2AsitGNIItGTPPAwdn61Nx4FkmZiItsaog5nQA',
+  '/images/experiences/kmns/kmns_19.jpg':
+    'data:image/webp;base64,UklGRmYAAABXRUJQVlA4IFoAAAAwAgCdASoQAAwAA4BaJYgCdIIjGOKTD9RN8ADiA39glWqgg7wCc8KiyCaZDd9W+zSfvOU0iGyMJ1qRAmXwGWyYB2EhMbiyB9CdHEppHbNMIbju3cc96FSAAAA=',
+  '/images/experiences/kmns/kmns_20.jpg':
+    'data:image/webp;base64,UklGRmQAAABXRUJQVlA4IFgAAAAQAgCdASoQAAsAA4BaJYwC06EO69Nv89cAAP7kXEbFB9e9p1/YljiJ8ySSUlkDjtCfk04PUZUXBDmT0rocdLAaGzeLYoywcYcJWxraT6mkCij/q+huAAAA',
   '/images/experiences/kraiburg/kraiburg_01.jpg':
     'data:image/webp;base64,UklGRk4AAABXRUJQVlA4IEIAAACwAQCdASoQAAwAA4BaJQBWABQYCTW4APyxvZLWF7TkvA4HNRCi9QMRAGiuPQVa3+0hCxBWPkFwGhcm+KpOyTgAAAA=',
   '/images/experiences/kraiburg/kraiburg_02.jpg':
