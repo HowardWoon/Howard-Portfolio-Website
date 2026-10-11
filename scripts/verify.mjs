@@ -102,7 +102,9 @@ if (!args.has('--no-build')) {
 // 5. E2E
 // CI=1 runs Playwright with one worker (playwright.config.ts), which takes longer than 15 min for the full suite on a
 // busy local machine (owner-approved: `CI=1 git push` must be able to finish); the normal 3-worker run keeps 15 min
-if (args.has('--e2e')) run('e2e (playwright)', 'npm run test:e2e', { timeoutMin: process.env.CI ? 40 : 15 });
+// R57: 40 -> 60 min. The suite is 461 tests now and one worker needs 35 - 40 min on this laptop: the run of 11 Oct 2026
+// was cut off at test 437 with every test passing. Only the time limit changed; no test, retry or worker setting did.
+if (args.has('--e2e')) run('e2e (playwright)', 'npm run test:e2e', { timeoutMin: process.env.CI ? 60 : 15 });
 
 // Summary table
 const line = (r) => `| ${r.name} | ${r.ok ? 'PASS' : 'FAIL'} | ${r.status} | ${r.secs}s |`;

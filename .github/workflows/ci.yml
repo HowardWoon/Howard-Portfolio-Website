@@ -21,7 +21,8 @@ jobs:
     runs-on: ubuntu-24.04
     # R39: e2e alone is ~21 min on the runner (354 tests); with build + the motion audit the job passed 25 min and was
     # cancelled after every test had passed (run #108). Headroom, not a skipped check.
-    timeout-minutes: 35
+    # R57: 35 -> 60. The suite grew to 461 tests (one worker); the limit only stops a hung job
+    timeout-minutes: 60
     env:
       NEXT_TELEMETRY_DISABLED: 1
     steps:
