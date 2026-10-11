@@ -123,15 +123,19 @@ test('badge pit: badges fall in, settle inside the pit, and can be flung', async
   // a badge that is still tilting may poke out by a few px, so it is not what is measured
   const inside = () =>
     pit.evaluate((box) =>
-      [...box.querySelectorAll<HTMLElement>(':scope > span')].every((e) => {
-        const m = new DOMMatrix(getComputedStyle(e).transform);
-        return (
-          m.m41 >= -1 &&
-          m.m42 >= -1 &&
-          m.m41 + e.offsetWidth <= box.clientWidth + 1 &&
-          m.m42 + e.offsetHeight <= box.clientHeight + 1
-        );
-      }),
+      // (R57: a badge the pit has taken away is hidden, not shown outside: the R53 overflow rule removes one that a
+      // fling leaves above the top edge, until DROP AGAIN. The phone test below has ignored hidden badges since R52.)
+      [...box.querySelectorAll<HTMLElement>(':scope > span')]
+        .filter((e) => e.style.visibility !== 'hidden')
+        .every((e) => {
+          const m = new DOMMatrix(getComputedStyle(e).transform);
+          return (
+            m.m41 >= -1 &&
+            m.m42 >= -1 &&
+            m.m41 + e.offsetWidth <= box.clientWidth + 1 &&
+            m.m42 + e.offsetHeight <= box.clientHeight + 1
+          );
+        }),
     );
   // R48: the pile is 27 badges now (it was 14) and they drop in one after another, so the last one lands later than
   // a fixed 3 s: wait until every badge is inside (same requirement, no fixed guess)

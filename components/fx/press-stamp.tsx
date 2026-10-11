@@ -31,7 +31,9 @@ const KEY_TARGETS =
 export function PressStamp() {
   useEffect(() => {
     if (!FX.pressStamp) return;
-    let last = 0;
+    // R57: -Infinity, not 0. performance.now() counts from the start of the navigation, so with 0 the "fast double
+    // press" rule below swallowed any press in a page's first 90 ms (a quick page like a simulator hydrates sooner).
+    let last = -Infinity;
     let n = 0;
     let keyAt = -1e9;
     const taps = new Map<number, { x: number; y: number; t: number }>();
