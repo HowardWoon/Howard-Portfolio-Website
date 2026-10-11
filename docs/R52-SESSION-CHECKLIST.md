@@ -100,6 +100,23 @@ R53 checks on the production build: `tests/r53.spec.ts` 25 of 25; affected older
 r31, r36, r48, r49) passed except the known load flake r36 "live from the first click" (2 of 2 when run alone);
 `audit-ui.mjs` ALL PASS; `device-sweep.mjs` ALL PASS (16 devices x 4 pages).
 
+## 2c. R54 - R56 (11 Oct 2026, third batch)
+
+| #   | Request                                                             | Measured before                                                                                                           | What was done                                                                                                                                                             | Guard                               | Result |
+| --- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- | ------ |
+| 37  | Profile and Console windows: messy, unorganised                     | at 1024 px the Profile was 339 px wide and 1340 px tall beside an 899 px Console; the progress rail ran out of its window | one grid: side by side from 1280 px at one height, stacked below (Profile in two columns from 768 px); role, intent and link keys on equal columns; the rail sizes itself | `tests/r53.spec.ts` (6 widths)      | PASS   |
+| 38  | The "break" when the gate opens: boring, wanted calm and satisfying | 18 slabs dropping at once in 0.8 s                                                                                        | a wall of tiles (96 at 1440 px, 40 on a phone, never more than 170) turns over in one ripple from the centre; transform and opacity only; clear in about 1.4 s            | `tests/r53.spec.ts`, `tests/hotfix` | PASS   |
+| 39  | Mental Health Week & Share Your Love photos as a gallery            | the Treasurer entry had no photos                                                                                         | a Field Archive of 7 records, the same gallery as MYTECH; also on the Proof Reel (PEKOM ticket) and in the Build Story field reel, in time order                          | `tests/arena-wall.spec.ts`          | PASS   |
+
+Row 39, photo checklist (AGENTS.md section 6.2): copied to `public/images/experience/mhw/01.jpg` - `07.jpg`; real sizes
+read with sharp (six are 1280 x 960, `06.jpg` is 1280 x 720); no EXIF, no identity numbers; the upload folder was moved
+out of the repo root to the git-ignored `private-originals/`. Order: the group behind the event banner, the event
+counter, then the outreach. The captions say only what each photo shows.
+
+Live-site device check after R55 (ten profiles, whole page scrolled on each: Desktop 1920, Laptop 1366, iPad Pro 11,
+iPad landscape, Galaxy Tab S4, iPhone 13, iPhone SE, Pixel 7, Galaxy S9+, Fold 280): overflow 0, broken images 0,
+JavaScript errors 0, failed requests 0 on all ten.
+
 ## 3. Whole-site checks, last run
 
 | Check                                              | Result                                                         |
