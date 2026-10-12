@@ -145,6 +145,13 @@ test('arena seals are colour-blocked and every copy of a row matches, so the loo
   page,
 }) => {
   await home(page);
+  // R60: the hidden copies are rendered when the wall comes within two screens of the window (they were about 6 s of
+  // a slow device's load): bring it near, then every row is complete
+  await page
+    .locator('.fx-wall-row')
+    .first()
+    .evaluate((e) => e.scrollIntoView({ block: 'center' }));
+  await expect(page.locator('.fx-wall-row[data-reel-full]')).toHaveCount(3, { timeout: 10_000 });
   // R44 Proof Reel: the colour-blocked faces are the ink tickets (the photo prints between them are white frames);
   // 8 tickets and one hidden copy of the row
   const faces = await page.$$eval('.fx-wall-track', (tracks) =>

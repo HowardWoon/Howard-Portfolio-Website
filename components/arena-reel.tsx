@@ -383,11 +383,36 @@ export function ArenaRow({ row }: { row: number }) {
     };
   }, []);
 
+  // R60: the hidden copies that make the loop seamless are only rendered once the wall is within about two screens
+  // of the window. The three rows are up to 300 prints and tickets with their copies, far below the fold: rendering
+  // and hydrating all of them up front was about 6 s of a 4x-slow device's load (measured: ready after 20 s with the
+  // wall, 14 s without). The first copy (the real, focusable items) is always in the server HTML. The roll does not
+  // start before the pauser is mounted (globals.css), which is after this, so a half-built loop is never seen moving.
+  const [full, setFull] = useState(false);
+  useEffect(() => {
+    const el = rowRef.current;
+    if (!el || !('IntersectionObserver' in window)) {
+      setFull(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        setFull(true);
+        io.disconnect();
+      },
+      { rootMargin: '1800px 0px' },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   return (
     <div
       ref={rowRef}
       role="group"
       aria-label={label}
+      data-reel-full={full ? '' : undefined}
       className="fx-wall-row mx-[-8%] select-none"
       data-dir={row % 2 ? 'r' : 'l'}
     >
@@ -396,7 +421,7 @@ export function ArenaRow({ row }: { row: number }) {
         className="fx-wall-track flex items-center w-max py-3"
         style={{ '--wall-speed': `${rowSeconds(items)}s` } as React.CSSProperties}
       >
-        {Array.from({ length: 2 * halfCopies(items) }, (_, c) => c).map((c) =>
+        {Array.from({ length: full ? 2 * halfCopies(items) : 1 }, (_, c) => c).map((c) =>
           items.map((it, i) =>
             it.kind === 'ticket' ? (
               <TicketLink key={`${c}-${i}`} item={it} accent={accent} copy={c > 0} face={faces[i]!} />

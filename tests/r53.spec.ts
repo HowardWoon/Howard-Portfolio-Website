@@ -928,3 +928,121 @@ test.describe('keep my place on a phone', () => {
     expect(now).toBeLessThan(0.95);
   });
 });
+
+/* ---------------------------------------------------------------- R60 hold what was pressed */
+// owner (R60): "i click the treasurer of um alphathon section, it straight away jump down to assistant head of subject
+// without showing the part i clicked ... make sure this wont happen again in my future and entire website".
+// Measured before: the header moved 1,488 px (desktop) / 2,563 px (phone) when the panel above it closed.
+for (const [name, opt] of [
+  ['desktop 1440x900', { viewport: { width: 1440, height: 900 } }],
+  ['phone (iPhone 13)', strip(devices['iPhone 13'])],
+] as const) {
+  test.describe(`hold what was pressed (${name})`, () => {
+    test.use(opt);
+    test(`an accordion header stays under the finger while the panel above it closes (${name})`, async ({ page }) => {
+      test.setTimeout(150_000);
+      const touch = 'hasTouch' in opt && !!opt.hasTouch;
+      await page.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
+      await page.goto('/', { waitUntil: 'networkidle' });
+      await expect(page.locator('html[data-keep-place="on"]')).toHaveCount(1, { timeout: 20_000 });
+      await expect(page.locator('html[data-after-boot="done"]')).toHaveCount(1, { timeout: 30_000 });
+      await walk(page);
+      const heads = page.locator('[data-pekom-event] > button');
+      await expect(heads).toHaveCount(4);
+      const vh = page.viewportSize()!.height;
+      // open the first (tallest) event, then each one below it in turn, then back up: the pressed header never moves
+      for (const i of [0, 1, 2, 3, 0, 2]) {
+        const head = heads.nth(i);
+        await head.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+        await page.waitForTimeout(500);
+        const before = await head.evaluate((e) => e.getBoundingClientRect().top);
+        if (touch) await head.tap();
+        else await head.click();
+        await expect(head).toHaveAttribute('aria-expanded', 'true');
+        await page.waitForTimeout(1400);
+        const after = await head.evaluate((e) => e.getBoundingClientRect().top);
+        expect(
+          Math.abs(after - before),
+          `event ${i + 1}: the header moved ${Math.round(after - before)} px`,
+        ).toBeLessThanOrEqual(8);
+        expect(after, `event ${i + 1}: still in the window`).toBeGreaterThan(0);
+        expect(after).toBeLessThan(vh);
+      }
+    });
+  });
+}
+
+test('an Experience folder tab stays where it was pressed while the other folders leave', async ({ page }) => {
+  test.setTimeout(120_000);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
+  await page.goto('/', { waitUntil: 'networkidle' });
+  await expect(page.locator('html[data-keep-place="on"]')).toHaveCount(1, { timeout: 20_000 });
+  await expect(page.locator('html[data-after-boot="done"]')).toHaveCount(1, { timeout: 30_000 });
+  await walk(page);
+  const tab = page.locator('[data-folder="kmns"] .nb-folder-tab');
+  await tab.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+  await page.waitForTimeout(600);
+  const before = await tab.evaluate((e) => e.getBoundingClientRect().top);
+  await tab.click();
+  await expect(page.locator('[data-folder]')).toHaveCount(1, { timeout: 10_000 }); // the two folders above it are gone
+  await page.waitForTimeout(1300);
+  const after = await tab.evaluate((e) => e.getBoundingClientRect().top);
+  expect(Math.abs(after - before), `the tab moved ${Math.round(after - before)} px`).toBeLessThanOrEqual(10);
+});
+
+test('the hold lets go when the visitor scrolls, and never holds a link or a fixed control', async ({ page }) => {
+  test.setTimeout(120_000);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
+  await page.goto('/', { waitUntil: 'networkidle' });
+  await expect(page.locator('html[data-keep-place="on"]')).toHaveCount(1, { timeout: 20_000 });
+  await expect(page.locator('html[data-after-boot="done"]')).toHaveCount(1, { timeout: 30_000 });
+  await walk(page);
+  // a wheel turn right after a press is the visitor's: the page goes where they send it
+  const head = page.locator('[data-pekom-event] > button').first();
+  await head.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+  await page.waitForTimeout(500);
+  await head.click();
+  const y0 = await page.evaluate(() => window.scrollY);
+  await page.mouse.wheel(0, 600);
+  await page.waitForTimeout(900);
+  expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(y0 + 300);
+  // the browser's own scroll anchoring is given back afterwards
+  await page.waitForTimeout(600);
+  expect(await page.evaluate(() => document.documentElement.style.overflowAnchor)).toBe('');
+  // a header link still travels to its section (links are never held)
+  await page.locator('header nav a[href="#contact"]').click();
+  await expect
+    .poll(() => page.evaluate(() => Math.abs(document.getElementById('contact')!.getBoundingClientRect().top)), {
+      timeout: 12_000,
+    })
+    .toBeLessThan(200);
+});
+
+// R60: found while fixing the push - the photo wall rendered every hidden copy of its three rows up front
+test('the photo wall renders its hidden copies only when it comes near the window', async ({ page, request }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  // the real, focusable items are in the server HTML; no copy is
+  const html = await (await request.get('/')).text();
+  expect(html).toContain('data-reel-print');
+  await page.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
+  await page.goto('/', { waitUntil: 'networkidle' });
+  const count = () =>
+    page.evaluate(() => ({
+      real: document.querySelectorAll('.fx-wall-row .fx-seal:not([aria-hidden])').length,
+      copies: document.querySelectorAll('.fx-wall-row .fx-seal[aria-hidden="true"]').length,
+      full: document.querySelectorAll('.fx-wall-row[data-reel-full]').length,
+    }));
+  const top = await count();
+  expect(top.real).toBe(100); // 24 tickets + 76 prints
+  expect(top).toMatchObject({ copies: 0, full: 0 });
+  await page
+    .locator('.fx-wall-row')
+    .first()
+    .evaluate((e) => e.scrollIntoView({ block: 'center' }));
+  await expect(page.locator('.fx-wall-row[data-reel-full]')).toHaveCount(3, { timeout: 10_000 });
+  const near = await count();
+  expect(near.real).toBe(100);
+  expect(near.copies).toBeGreaterThanOrEqual(100); // at least one more copy of every row
+});

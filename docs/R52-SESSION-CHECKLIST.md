@@ -147,6 +147,17 @@ Row 45, measured after (the Experience title, as a share of the window's height,
 150 -> 100 %: 30 -> 28; 100 -> 80 %: 16 -> 16; 67 -> 25 %: 19 -> 19. A height-only change (a phone's address bar)
 never moves the page; the top of the page stays the top; a rotated phone keeps the same card on screen.
 
+## 2g. R60 (12 Oct 2026)
+
+| #   | Request / finding                                                     | Measured before                                                                                                                        | What was done                                                                                                                                                               | Guard                                    | Result |
+| --- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- | ------ |
+| 46  | Clicking an accordion header threw the reader to the next card        | the pressed header moved 1,488 px (desktop) / 2,563 px (phone) when the panel above it closed; an Experience folder tab moved 1,234 px | one rule for the whole site (`components/keep-place.tsx`): a pressed button inside the page stays where it was while the page re-flows; it lets go if anything else scrolls | `tests/r53.spec.ts` (desktop + phone)    | PASS   |
+| 47  | Found: the photo wall rendered every hidden copy of its rows up front | about 6 s of a 4x-slow device's load (ready after 20 s with the wall, 14 s without)                                                    | the copies are rendered when the wall comes within about two screens of the window; the real items stay in the server HTML                                                  | `tests/r53.spec.ts`, `tests/r16.spec.ts` | PASS   |
+
+Row 46, measured after: every accordion header 0 to 3 px from where it was pressed, on a 1440 px desktop and on an
+iPhone 13, in six presses each (down the list, then back up). The Honors category keys on a phone still scroll: they
+do so on purpose, to show the list they open (R17), and the hold lets go for any control that scrolls the page.
+
 ## 3. Whole-site checks, last run
 
 | Check                                              | Result                                                         |

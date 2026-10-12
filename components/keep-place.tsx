@@ -128,15 +128,90 @@ export default function KeepPlace() {
       );
     };
 
+    /**
+     * R60 Hold what was pressed (owner: "i click the treasurer of um alphathon section, it straight away jump down to
+     * assistant head of subject without showing the part i clicked ... make sure this wont happen again in my future
+     * and entire website").
+     *
+     * A control that opens one thing usually closes another. When the thing that closes is ABOVE the control (the
+     * MYTECH panel above the Alphathon header), the page gets shorter above the reader and the control they pressed
+     * is carried up and out of the window. Measured: 1,488 px on a desktop, 2,563 px on a phone; the Honors category
+     * keys (670 px on a phone) and an Experience folder tab (1,234 px) did the same.
+     *
+     * One rule for the whole site instead of a patch per accordion: after a press on any button inside <main>, that
+     * button stays where it was in the window for as long as the page is still re-flowing (about a second). Each
+     * frame, if the button has moved while nobody scrolled, the page is scrolled by exactly that much.
+     *   - only layout moves are corrected: if anything else scrolls the page (the visitor's wheel, finger or keys, or
+     *     a control whose job IS to go somewhere), the hold lets go at once
+     *   - links are never held (they navigate); neither is anything fixed or sticky (it does not move with the page)
+     *   - the browser's own scroll anchoring is switched off for that second, so the two never correct each other
+     */
+    let holding = 0;
+    let release = () => {};
+    const hold = (el: Element) => {
+      release();
+      const root = document.documentElement;
+      const top0 = el.getBoundingClientRect().top;
+      const until = performance.now() + 1100;
+      let expected = window.scrollY;
+      let live = true;
+      const anchoring = root.style.overflowAnchor;
+      root.style.overflowAnchor = 'none';
+      const stop = () => {
+        if (!live) return;
+        live = false;
+        cancelAnimationFrame(holding);
+        root.style.overflowAnchor = anchoring;
+        for (const t of ['wheel', 'touchmove', 'keydown'] as const) window.removeEventListener(t, stop);
+        window.__lenis?.resize();
+        capture(); // the place to keep through a later zoom is the new one
+      };
+      release = stop;
+      for (const t of ['wheel', 'touchmove', 'keydown'] as const) window.addEventListener(t, stop, { passive: true });
+      const frame = () => {
+        if (!live) return;
+        const r = el.getBoundingClientRect();
+        // gone (its panel closed over it), or the page was scrolled by someone else: nothing to hold any more
+        if (!el.isConnected || r.width === 0 || Math.abs(window.scrollY - expected) > 2 || locked()) return stop();
+        const d = r.top - top0;
+        if (Math.abs(d) > 3) {
+          const max = root.scrollHeight - window.innerHeight;
+          window.scrollTo({
+            top: Math.max(0, Math.min(max, window.scrollY + d)),
+            behavior: 'instant' as ScrollBehavior,
+          });
+          expected = window.scrollY;
+        }
+        if (performance.now() > until) return stop();
+        holding = requestAnimationFrame(frame);
+      };
+      holding = requestAnimationFrame(frame);
+    };
+    const onPress = (e: MouseEvent) => {
+      const main = document.querySelector('main');
+      const el =
+        e.target instanceof Element ? e.target.closest('button, [role="button"], [role="tab"], summary') : null;
+      if (!el || !main || !main.contains(el) || locked()) return;
+      for (let n: Element | null = el; n && n !== main; n = n.parentElement) {
+        const pos = getComputedStyle(n).position;
+        if (pos === 'fixed' || pos === 'sticky') return;
+      }
+      hold(el);
+    };
+
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onResize, { passive: true });
+    // capture phase: the button's place is read BEFORE its own handler changes the page
+    window.addEventListener('click', onPress, { capture: true, passive: true });
     document.documentElement.dataset.keepPlace = 'on'; // listeners are live (tests wait for this)
     capture();
     return () => {
       window.clearTimeout(idle);
       timers.forEach((t) => window.clearTimeout(t));
+      release();
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onResize);
+      window.removeEventListener('click', onPress, { capture: true });
       delete document.documentElement.dataset.keepPlace;
     };
   }, []);
