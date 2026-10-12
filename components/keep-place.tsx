@@ -24,6 +24,13 @@ import { useEffect } from 'react';
  *     tall track around it is remembered instead (how far through the scene)
  *   - at the very top of the page there is nothing to keep: it stays at the top
  *   - it stands aside while a dialog has locked the page scroll
+ *
+ * R62 (owner: "when i zoom in or zoom out, the website glitched to another part, but after like a ms, it return back
+ * ... so weird"). The place was put back from a timer and an animation frame, that is one or two PAINTED frames after
+ * the page had re-flowed: measured, 1 - 2 frames drawn 2 - 19 window heights away from the place, on every zoom
+ * change. The browser sends the resize event before it draws the re-flowed page, so the place is now put back inside
+ * that event, and again (before the paint, from a ResizeObserver) each time the page's length changes while it
+ * settles. The timers stay as a last pass. If the reader scrolls during that second, the page is theirs at once.
  */
 type Anchor = { el: Element; frac: number; line: number };
 
@@ -109,24 +116,39 @@ export default function KeepPlace() {
       }
     };
 
+    // the reader scrolls while the page is still settling after a zoom: stop putting the old place back
+    const SCROLL_KEYS = ['wheel', 'touchmove', 'keydown'] as const;
+    const thaw = () => {
+      if (!frozen) return;
+      frozen = false;
+      timers.forEach((t) => window.clearTimeout(t));
+      timers = [];
+      for (const t of SCROLL_KEYS) window.removeEventListener(t, thaw);
+    };
     const onResize = () => {
       if (window.innerWidth === width) return; // height only: a phone's address bar, not a zoom
       width = window.innerWidth;
-      frozen = true;
       window.clearTimeout(idle);
       timers.forEach((t) => window.clearTimeout(t));
+      if (!frozen) for (const t of SCROLL_KEYS) window.addEventListener(t, thaw, { passive: true });
+      frozen = true;
+      // R62: now, before the re-flowed page is drawn for the first time (the resize event comes before the paint)
+      restore();
       timers = SETTLE.map((ms, i) =>
         window.setTimeout(() => {
-          requestAnimationFrame(() => {
-            restore();
-            if (i === SETTLE.length - 1) {
-              frozen = false;
-              capture();
-            }
-          });
+          restore();
+          if (i === SETTLE.length - 1) {
+            thaw();
+            capture();
+          }
         }, ms),
       );
     };
+    // R62: while the page settles, every change of its length (a scale step, a photo stack re-measuring, the badge
+    // pit) puts the place back in the same frame, before it is drawn. Outside that second this does nothing.
+    const page = document.querySelector('main');
+    const settle = 'ResizeObserver' in window ? new ResizeObserver(() => frozen && restore()) : null;
+    if (page && settle) settle.observe(page);
 
     /**
      * R60 Hold what was pressed (owner: "i click the treasurer of um alphathon section, it straight away jump down to
@@ -208,6 +230,8 @@ export default function KeepPlace() {
     return () => {
       window.clearTimeout(idle);
       timers.forEach((t) => window.clearTimeout(t));
+      thaw();
+      settle?.disconnect();
       release();
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onResize);

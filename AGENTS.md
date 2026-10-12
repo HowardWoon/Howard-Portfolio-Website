@@ -89,3 +89,7 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
    with `tests/r17` P0-01 (phone fling < 45 layouts) and a CDP layout-invalidation trace (30-design-system E15).
 6. **Physics (badge pit):** settled bodies sleep (exactly still); no random kicks; velocity changes only on an
    approach; a body rests only with its centre over the one below. Guard: `tests/r31` "badge pit settles".
+   R62: no badge may rest on air or on a corner, at any width or after a zoom (the pit reads sizes again and
+   drops again). Guard: `tests/r62`.
+7. **Zoom (R50, R62):** a fixed-px box that holds text takes `var(--u)`; a zoom keeps the reader's place in every
+   painted frame. Guard: `tests/r62`.

@@ -60,6 +60,12 @@ type Body = {
   quiet: number;
   /** R53: frames spent resting above the top edge of the pit (see the overflow rule) */
   over: number;
+  /** R62: 1 while it waits above the pit, out of the physics, for its turn to be let go */
+  wait: number;
+  /** R62: frames it has been carried on one side only (see the slide rule) */
+  tip: number;
+  /** R62: on its way down to the seat the plan gave it (see "guided" in the solver) */
+  guided: boolean;
 };
 
 export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }) {
@@ -100,6 +106,9 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
       ay: 0,
       quiet: 0,
       over: 0,
+      wait: 0,
+      tip: 0,
+      guided: false,
     }));
     let raf = 0;
     let last = 0;
@@ -107,6 +116,9 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
     let visible = false;
     let dropped = false;
     let frames = 0; // since the last drop (see FALL_FRAMES)
+    // R62: the badges still to be let go, in order, and when the next one may go
+    let queue: number[] = [];
+    let nextAt = 0;
 
     const paint = () => {
       bodies.forEach((b, i) => {
@@ -122,7 +134,7 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
     };
     const overlapX = (a: Body, c: Body) => Math.min(a.x + a.w, c.x + c.w) - Math.max(a.x, c.x);
     const onTopOf = (b: Body, o: Body) =>
-      o !== b && !o.out && overlapX(b, o) > 2 && Math.abs(b.y + b.h - o.y) <= 1.5 && o.y > b.y;
+      o !== b && !o.out && overlapX(b, o) > SHADOW + 1 && Math.abs(b.y + b.h - o.y) <= 1.5 && o.y > b.y;
     /**
      * R53 (owner: badges came to rest on top of each other, "so messy, unorganised ... i want this section must fully
      * physics driven"). What holds a badge up, the way a real pile works:
@@ -159,7 +171,6 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
       }
       return dir;
     };
-    const supported = (b: Body) => hold(b) === 0;
     /** still inside another badge (more than a pixel on both axes): such a badge may never go to sleep */
     const buried = (b: Body) =>
       bodies.some(
@@ -211,7 +222,7 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
             const ox = Math.min(a.x + a.w, c.x + c.w) - Math.max(a.x, c.x);
             const oy = Math.min(a.y + a.h, c.y + c.h) - Math.max(a.y, c.y);
             if (ox <= 0 || oy <= 0) continue;
-            if (a.out || c.out) continue;
+            if (a.out || c.out || a.wait > 0 || c.wait > 0) continue;
             // two resting badges never fight - unless they are inside each other (a resize, a squeeze): both wake
             if (a.asleep && c.asleep) {
               if (ox <= 1 || oy <= 1) continue;
@@ -225,7 +236,21 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
             // who moves: a held badge never does; a badge resting on the floor / against a wall is never pushed into it
             const onFloor = (b: Body) => b.y + b.h >= H - 0.5;
             const atWall = (b: Body, dir: number) => (dir < 0 ? b.x <= 0.5 : b.x + b.w >= W - 0.5);
-            if (oy < ox) {
+            // R62: a badge that comes down onto the END of another one (a few px of its width, at falling speed) is
+            // deeper in it than it is wide in it after one step, and "the axis of least overlap" then shoved the two
+            // apart sideways: the one below was knocked a few px off its seat, and the next badge landed on its corner.
+            // A hit from above is a landing, whatever the widths: it is resolved upwards.
+            const fall = (a.y < c.y ? a.vy - c.vy : c.vy - a.vy) * dt;
+            // R62 guided: a badge on its way to its planned seat only ever lands (no sideways shove, given or
+            // taken). The plan has made sure the seat is free and carried; what knocked badges off their seats was
+            // the row under them still settling (measured on a phone, where a row is one or two badges: 1 - 2 badges
+            // per drop ended a row too high, on a corner). Once a badge has come to rest it is an ordinary body again.
+            const landing = a.guided || c.guided || oy < ox || (fall > 0 && oy <= fall + 3);
+            // R62: ... and a "landing" on nothing but the other one's shadow margin (the boxes are 5 px wider than the
+            // badges) is no landing at all. It used to hold a badge up by a 2 - 3 px corner nobody can see, against a
+            // wall: the badge passes the corner and falls on.
+            if (landing && ox <= SHADOW + 1) continue;
+            if (landing) {
               const dir = a.y < c.y ? -1 : 1;
               // the lower one of the two is pinned while it is itself carried (floor, asleep, or resting): a stack is
               // resolved upwards only, so a column never squeezes and springs back (the 1 px tremble)
@@ -248,7 +273,12 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
               const rel = upper.vy - lower.vy;
               // only an APPROACH changes velocity: badges falling together or moving apart keep theirs (the old
               // exchange on every overlap cut a falling column's speed by 78 % per step: it sank at ~20 px/s)
-              if (rel > 0 && rel < 220) {
+              if (rel > 0 && upper.guided && !upper.drag) {
+                // R62: a badge coming down to its seat lands with one small hop on a badge that is at rest, and
+                // simply stays on one that is still moving. (The full bounce threw it up to 120 px off a badge that
+                // was itself still bouncing, measured; the next badge then landed under it and took its seat.)
+                upper.vy = lower.asleep || lower.rest ? -Math.min(rel * 0.12, 110) : lower.vy;
+              } else if (rel > 0 && rel < 220) {
                 if (!upper.drag && !upper.asleep) upper.vy = lower.asleep ? 0 : lower.vy;
               } else if (rel >= 220) {
                 // a real impact: the upper bounces off softly, the lower takes a share of the hit
@@ -306,12 +336,28 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
       raf = 0;
       const dt = Math.min(0.033, (now - last) / 1000 || 0.016);
       last = now;
+      // R62: the badges are let go one at a time, each only when the air under it is clear. (On a phone a row is one
+      // or two badges, so the next badge starts right above the one before: let go while that one had fallen only a
+      // few px, the two collided above the pit and pushed each other off their seats.)
+      if (queue.length && now >= nextAt) {
+        const b = bodies[queue[0]];
+        const blocked = bodies.some(
+          (o) => o !== b && !o.out && o.wait <= 0 && !o.asleep && overlapX(b, o) > -2 && o.y < b.y + b.h + 12,
+        );
+        if (!blocked || now - nextAt > 600) {
+          queue.shift();
+          b.wait = 0;
+          wakeBody(b);
+          b.vy = 520; // let go with a push, so it is clear of the next one a tenth of a second later
+          nextAt = now + 95 + Math.random() * 25;
+        }
+      }
       step(dt / 2);
       step(dt / 2);
       // sleep / wake: slow + supported for a few frames = asleep (exactly still); a sleeper whose support moved
       // away wakes and falls
       for (const b of bodies) {
-        if (b.drag || b.out) continue;
+        if (b.drag || b.out || b.wait > 0) continue;
         const held = hold(b);
         b.rest = held === 0;
         if (b.asleep) {
@@ -320,7 +366,13 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
         }
         // something under one side only, and room on the other: it slides off that edge and falls. Sent back the
         // way it came = it spans a gap it cannot fall into: it is wedged and stays where it is.
-        if (held === 1 || held === -1) {
+        // R62: ... but only once it has stayed that way for a quarter of a second. The badge that is to carry its other
+        // side may have landed a frame later and still be settling (a phone's short rows): sliding at once took the
+        // badge off a seat that was about to be complete.
+        if (held !== 1 && held !== -1) b.tip = 0;
+        else if (b.guided || ++b.tip < 15) {
+          /* wait */
+        } else {
           if (b.slid === -held) {
             b.wedge = true;
             b.rest = true;
@@ -339,6 +391,8 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
         if (b.rest && b.quiet >= 45 && b.y >= -1 && !buried(b)) b.still = SLEEP_FRAMES;
         else if (b.rest && Math.abs(b.vx) < SLEEP_V && Math.abs(b.vy) < SLEEP_V && b.y >= -1 && !buried(b)) b.still++;
         else b.still = 0;
+        // guided ends with the first rest (or when it has not moved for 3/4 s, whatever holds it)
+        if (b.guided && (b.still >= SLEEP_FRAMES || b.quiet >= 45)) b.guided = false;
         if (b.still >= SLEEP_FRAMES) {
           b.asleep = true;
           b.vx = b.vy = 0;
@@ -350,7 +404,7 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
       // half a second there it is taken away. (R31 / R52 slid it along the top looking for a gap for up to 20 s,
       // peeking over the edge the whole time, and a full column under the ceiling was pressed into itself.)
       for (const b of bodies) {
-        if (b.out || b.drag) continue;
+        if (b.out || b.drag || b.wait > 0) continue;
         if (b.y < -1 && Math.abs(b.vy) < 20) b.over++;
         else b.over = 0;
         if (b.over < 30) continue;
@@ -361,7 +415,7 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
         b.vx = b.vy = 0;
       }
       frames++;
-      const above = frames < FALL_FRAMES && bodies.some((b) => !b.out && !b.drag && b.y < -1);
+      const above = queue.length > 0 || (frames < FALL_FRAMES && bodies.some((b) => !b.out && !b.drag && b.y < -1));
       // R31: the loop runs until every badge is ASLEEP (exactly still), so none is left half-settled to creep later
       const moving = above || bodies.some((b) => !b.out && (b.drag || b.tilt !== 0 || (!b.asleep && b.y >= -1)));
       calm = moving ? 0 : calm + 1;
@@ -371,6 +425,8 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
       calm = 0;
       if (!raf && visible) {
         last = performance.now();
+        // a drop that was paused (the pit left the screen) carries on from now: the time away is not waiting time
+        if (queue.length) nextAt = Math.max(nextAt, last);
         raf = requestAnimationFrame(tick);
       }
     };
@@ -378,62 +434,165 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
     const drop = () => {
       W = box.clientWidth;
       H = box.clientHeight;
-      // R53 landing plan (replaces the R52 row estimate). Random x built towers: three badges that happened to land on
-      // each other reached the ceiling while the floor beside them was empty, and later badges were left on top,
-      // outside the pit. Each badge is now given the spot where the pile is LOWEST when its turn comes (a height map in
-      // 8 px columns, the way a careful hand would fill a tray). It still falls, bounces and settles by the physics
-      // above; the plan only chooses where it is let go. A badge whose spot would end above the ceiling is not dropped.
-      const COL = 8;
-      const cols = Math.max(1, Math.ceil(W / COL));
-      const height = new Float32Array(cols);
-      const plan = bodies.map((b) => {
-        const span = Math.min(cols, Math.ceil(b.w / COL));
-        let low = Infinity;
-        const tops: number[] = [];
-        for (let c0 = 0; c0 + span <= cols; c0++) {
-          let top = 0;
-          for (let c = c0; c < c0 + span; c++) if (height[c] > top) top = height[c];
-          tops.push(top);
-          if (top < low) low = top;
+      // The landing plan: where each badge is let go. It still falls, bounces and settles by the physics above; the
+      // plan only chooses its seat. History: random x built towers (R52); "the lowest spot when its turn comes" (R53)
+      // packed spots to the pixel and counted a spot that touched the pile with one corner as a seat.
+      //
+      // R62 (owner: "got huge gap and floating on air without falling ... doesnt looks asmr"; measured: about 5 of 27
+      // badges per drop came to rest held only by the 2 - 3 px shadow corner of a neighbour, over a gap as wide as
+      // themselves). The pile is now laid the way a tray is filled by hand: ROW BY ROW from the floor. Each row takes
+      // the badges that fill the width best, so the row under any badge is nearly solid; the spare width of a row is
+      // shared out so that every badge of the row above has the pile under its centre, or a real hold under both
+      // sides. Only the top row can be short. The badges are let go straight above their seats, one at a time from
+      // the same height (they used to come as one column, 64 px apart at up to 2,600 px/s: a badge bouncing off the
+      // pile was hit in the air by the next one and knocked off its seat). One lands about every tenth of a second.
+      const GAP = 4; // least air between two badges of a row
+      const GRIP = 22; // px of a badge's visible face that must lie on a neighbour for it to carry
+      const EDGE = 10; // a centre counts as carried when it is at least this far in from the carrier's end
+      const rowH = Math.max(...bodies.map((b) => b.h));
+      const maxRows = Math.max(1, Math.floor(H / rowH - 0.5));
+      const pool = bodies.map((_, i) => i);
+      for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+      }
+      type Seat = { i: number; x: number };
+      const rows: Seat[][] = [];
+      /** how many badges of this row are not carried by the row under it */
+      const loose = (row: Seat[], under: Seat[] | undefined) => {
+        if (!under) return 0;
+        let n = 0;
+        for (const s of row) {
+          const l = s.x;
+          const r = s.x + bodies[s.i].w - SHADOW;
+          const cx = (l + r) / 2;
+          let centre = false;
+          let left = 0;
+          let right = 0;
+          for (const u of under) {
+            const ul = u.x;
+            const ur = u.x + bodies[u.i].w - SHADOW;
+            const ov = Math.min(r, ur) - Math.max(l, ul);
+            if (ov <= 0) continue;
+            if (ul + EDGE <= cx && cx <= ur - EDGE) centre = true;
+            else if (ur < cx) left = Math.max(left, ov);
+            else right = Math.max(right, ov);
+          }
+          if (!centre && !(left >= GRIP && right >= GRIP)) n++;
         }
-        // every start column as low as the lowest; taking an end of one of those runs puts the badge against a wall
-        // or a neighbour, which keeps the rows tight
-        const ends: number[] = [];
-        tops.forEach((t, c0) => {
-          if (t > low + 0.5) return;
-          const first = c0 === 0 || tops[c0 - 1] > low + 0.5;
-          const last = c0 === tops.length - 1 || tops[c0 + 1] > low + 0.5;
-          if (first || last) ends.push(c0);
+        return n;
+      };
+      // 1. the rows: each one starts with a badge of this drop's shuffle and then always takes the widest that still
+      //    fits; of all possible first badges, one whose row comes out (nearly) fullest is taken
+      const picks: { pick: number[]; used: number }[] = [];
+      while (pool.length) {
+        const tries = pool.map((first, at) => {
+          const rest = pool.filter((_, k) => k !== at);
+          const pick = [first];
+          let used = bodies[first].w;
+          for (;;) {
+            let best = -1;
+            for (let k = 0; k < rest.length; k++) {
+              const w = bodies[rest[k]].w;
+              if (used + GAP + w <= W && (best < 0 || w > bodies[rest[best]].w)) best = k;
+            }
+            if (best < 0) break;
+            used += GAP + bodies[rest[best]].w;
+            pick.push(rest.splice(best, 1)[0]);
+          }
+          return { pick, used };
         });
-        const c0 = ends.length ? ends[Math.floor(Math.random() * ends.length)] : 0;
-        const fits = low + b.h <= H - b.h / 2;
-        if (fits) for (let c = c0; c < Math.min(cols, c0 + span); c++) height[c] = low + b.h;
-        return { x: Math.min(c0 * COL, Math.max(0, W - b.w)), fits };
-      });
-      bodies.forEach((b, i) => {
-        b.out = i > 0 && !plan[i].fits;
-        if (b.out) {
-          b.x = 0;
-          b.y = -100000;
-          b.vx = b.vy = 0;
-          b.drag = false;
-          b.inside = false;
-          b.asleep = true;
-          b.tilt = 0;
-          return;
+        const fullest = Math.max(...tries.map((t) => t.used));
+        const row = tries.find((t) => t.used >= fullest - 10)!; // the first in the shuffle that is as good as the best
+        picks.push(row);
+        for (const i of row.pick) pool.splice(pool.indexOf(i), 1);
+      }
+      // 2. the fullest rows go to the bottom, so every row lies on one that is at least as solid; rows that find no
+      //    room under the brim are left out (their badges go back to the pool)
+      picks.sort((p, q) => q.used - p.used);
+      for (const p of picks.splice(maxRows)) pool.push(...p.pick);
+      // 3. where the badges of a row sit: every order (a few, for a long row) and several ways of sharing the spare
+      //    width; the one that leaves no badge loose on the row under it wins, then the one with the smallest hole
+      for (const { pick } of picks) {
+        const n = pick.length;
+        const spare = Math.max(0, W - pick.reduce((sum, i) => sum + bodies[i].w, 0));
+        const under = rows[rows.length - 1];
+        const orders: number[][] = [];
+        if (n <= 3) {
+          const walk = (head: number[], tail: number[]) => {
+            if (!tail.length) orders.push(head);
+            tail.forEach((v, k) => walk([...head, v], [...tail.slice(0, k), ...tail.slice(k + 1)]));
+          };
+          walk([], pick);
+        } else
+          for (let t = 0; t < 10; t++) {
+            const order = [...pick];
+            for (let i = n - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [order[i], order[j]] = [order[j], order[i]];
+            }
+            orders.push(order);
+          }
+        // [first x, air between two badges]
+        const ways: [number, number][] = [[spare / (n + 1), spare / (n + 1)]]; // shared evenly
+        for (const air of n > 1 ? [Math.min(spare / (n - 1), GAP), Math.min(spare / (n - 1), 24)] : [0]) {
+          const free = spare - air * (n - 1);
+          for (let k = 0; k <= 8; k++) ways.push([(free * k) / 8, air]); // from the left wall to the right wall
         }
-        b.x = plan[i].x;
-        b.over = 0;
-        // R53: one after another with air between them (a steady patter, not a single dump)
-        b.y = -b.h - i * 64 - Math.random() * 30;
-        b.vx = (Math.random() - 0.5) * 50;
-        b.vy = 0;
+        let bestRow: Seat[] = [];
+        let bestScore = Infinity;
+        for (const order of orders)
+          for (const [x0, air] of ways) {
+            let x = x0;
+            const row: Seat[] = order.map((i) => {
+              const seat = { i, x: Math.round(Math.max(0, Math.min(W - bodies[i].w, x))) };
+              x += bodies[i].w + air;
+              return seat;
+            });
+            const hole = Math.max(x0, air, spare - x0 - air * (n - 1));
+            const score = loose(row, under) * 10000 + hole + Math.random() * 6;
+            if (score < bestScore) {
+              bestScore = score;
+              bestRow = row;
+            }
+          }
+        rows.push(bestRow);
+      }
+      // what found no row is not dropped this time (R52: the pit is too small for the whole pile at this width)
+      for (const i of pool) {
+        const b = bodies[i];
+        b.out = true;
+        b.x = 0;
+        b.y = -100000;
+        b.vx = b.vy = 0;
         b.drag = false;
         b.inside = false;
+        b.asleep = true;
         b.tilt = 0;
-        b.rest = false;
-        wakeBody(b);
-      });
+        b.wait = 0;
+      }
+      queue = [];
+      for (const row of rows)
+        for (const seat of row) {
+          const b = bodies[seat.i];
+          b.out = false;
+          b.x = seat.x;
+          b.over = 0;
+          // R53: one after another (a steady patter, not a single dump); R62: by time, all from just above the pit
+          b.y = -b.h - 24;
+          b.vx = 0; // straight down onto its seat (a sideways nudge put it on its neighbour's corner)
+          b.vy = 0;
+          b.drag = false;
+          b.inside = false;
+          b.tilt = 0;
+          b.rest = false;
+          wakeBody(b);
+          b.wait = 1;
+          b.guided = true;
+          b.asleep = true;
+          queue.push(seat.i);
+        }
+      nextAt = performance.now();
       dropped = true;
       frames = 0;
       paint();
@@ -441,12 +600,26 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
     };
     dropRef.current = drop;
 
-    // before the first drop the badges wait above the pit
-    bodies.forEach((b, i) => {
-      b.y = -b.h - 60 - i * 10;
-      b.x = (i * 97) % Math.max(1, W - b.w);
-    });
-    paint();
+    // before a drop the badges wait above the pit (out of sight, out of the physics)
+    const park = () => {
+      cancelAnimationFrame(raf);
+      raf = 0;
+      queue = [];
+      bodies.forEach((b, i) => {
+        b.y = -b.h - 60 - i * 10;
+        b.x = (i * 97) % Math.max(1, W - b.w);
+        b.vx = b.vy = 0;
+        b.tilt = 0;
+        b.drag = false;
+        b.inside = false;
+        b.out = false;
+        b.asleep = true;
+        b.wait = 0;
+        b.guided = false;
+      });
+      paint();
+    };
+    park();
 
     const io = new IntersectionObserver(
       ([e]) => {
@@ -474,6 +647,7 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
       const p = local(e);
       off = { x: p.x - bodies[i].x, y: p.y - bodies[i].y };
       bodies[i].drag = true;
+      bodies[i].guided = false;
       bodies[i].vx = bodies[i].vy = 0;
       wakeBody(bodies[i]);
       hist = [{ ...p, t: performance.now() }];
@@ -510,25 +684,55 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
     box.addEventListener('pointermove', onMove);
     box.addEventListener('pointerup', onUp);
     box.addEventListener('pointercancel', onUp);
+    // R62 (owner, after zooming: badges inside each other, "huge gap and floating on air without falling ... why no
+    // physics applied?"). A zoom, a rotated phone or a late web font changes the SIZE of every badge and of the pit,
+    // but the solver kept the sizes it read when it mounted and the pile it had built for them: boxes that no longer
+    // matched what was drawn (measured: 58 - 72 pairs inside each other and every badge on air after one zoom step,
+    // and badges that had been left out of a narrow pit never came back). Clamping the old pile into the new pit
+    // cannot be right - it was laid for other sizes. So the pile is built again by the physics: the pit clears at
+    // once, and when the size has stopped changing every badge is measured again and dropped in again.
+    const measure = () => {
+      let changed = false;
+      bodies.forEach((b, i) => {
+        const el = els.current[i];
+        if (!el) return;
+        const w = el.offsetWidth + SHADOW;
+        const h = el.offsetHeight + SHADOW;
+        if (w !== b.w || h !== b.h) changed = true;
+        b.w = w;
+        b.h = h;
+      });
+      return changed;
+    };
+    let again = 0;
     const ro = new ResizeObserver(() => {
-      // R31: only a real size change moves anything (a late font / image layout used to wake the settled pile)
-      if (box.clientWidth === W && box.clientHeight === H) return;
+      // R31: only a real size change moves anything (a late image layout elsewhere used to wake the settled pile)
+      const sized = measure();
+      if (!sized && box.clientWidth === W && box.clientHeight === H) return;
       W = box.clientWidth;
       H = box.clientHeight;
-      bodies.forEach((b) => {
-        const x = Math.min(b.x, Math.max(0, W - b.w));
-        const y = Math.min(b.y, H - b.h);
-        if (x !== b.x || y !== b.y) wakeBody(b);
-        b.x = x;
-        b.y = y;
-      });
-      bodies.forEach((b) => b.asleep && !supported(b) && wakeBody(b));
-      wake();
+      if (active >= 0) els.current[active]?.removeAttribute('data-held');
+      active = -1;
+      const wasDropped = dropped;
+      dropped = false;
+      park();
+      window.clearTimeout(again);
+      if (!wasDropped && !again) return; // not dropped yet: it drops with the right sizes when it comes into view
+      again = window.setTimeout(() => {
+        again = 0;
+        measure();
+        W = box.clientWidth;
+        H = box.clientHeight;
+        // on screen: rain in again now; off screen: the next time it comes into view (the observer above)
+        if (visible) drop();
+      }, 240);
     });
     ro.observe(box);
+    nodes.forEach((el) => el && ro.observe(el));
 
     return () => {
       cancelAnimationFrame(raf);
+      window.clearTimeout(again);
       io.disconnect();
       ro.disconnect();
       box.removeEventListener('pointerdown', onDown);

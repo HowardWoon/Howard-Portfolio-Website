@@ -170,6 +170,24 @@ Sensor X ticket) and the two team photos join the Build Story field reel under a
 slate, before Supervity (May before August); the upload folder was moved to the git-ignored `private-originals/`.
 Owner's standing rule from this request: a gallery follows the file-name numbers of the photos he uploads.
 
+## 2i. R62 (12 Oct 2026)
+
+Each row was first measured as a bug on the production build, then fixed, then guarded by `tests/r62.spec.ts`.
+
+| #   | Request                                                                    | Measured before                                                                                                                            | What was done                                                                                                                                                                                                                                               | Result |
+| --- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| 49  | Zoomed out, "Gold" broke into "Gol / d" and "Top 15" left its flag         | 1 to 7 emblem values split over two lines at every zoom step from 2,400 px wide; nothing else on the page split                            | the emblem box takes the zoom factor (`--u`) like its text; unchanged below 2,400 px                                                                                                                                                                        | PASS   |
+| 50  | Badge pit after a zoom: badges inside each other, floating, "no physics"   | after one zoom step 58 - 72 pairs inside each other and every badge on air; badges left out of a narrow pit never came back                | the pit reads every badge's size again when anything changes size (zoom, rotation, late font), clears, and drops the pile again by the physics                                                                                                              | PASS   |
+| 51  | Badge pit: "huge gap and floating on air without falling", not satisfying  | about 5 of 27 badges per drop (29 in 6 drops at 1440, 27 at 1024, 33 at 390) held only by a neighbour's 2 - 3 px shadow corner, over a gap | the pile is laid row by row from the floor, fullest rows first, every badge with the pile under its centre or a real hold under both sides; one badge at a time, each guided to its seat, one small hop on landing; a shadow corner no longer holds a badge | PASS   |
+| 52  | A zoom "glitched to another part" of the page and came back a moment later | 1 - 2 painted frames 2 - 19 window heights away from the place, in 7 of 7 zoom changes                                                     | the place is put back inside the resize event (before the page is drawn) and again whenever the page's length changes while it settles; scrolling during that second hands the page back at once                                                            | PASS   |
+
+Measured after (same checks): emblem values split 0 at 1440 / 2400 / 2880 / 3840 / 5760 / 7680 px; frames away from
+the place 0 in 7 of 7 zoom changes (furthest 6 % of the window); badge pit over 10 drops per width at 280, 320, 390,
+768, 1024, 1440 and 2880 px: inside each other 0, outside 0, not carried 0, and 27 of 27 shown from 320 px up (23 at
+280 px, the pit is too small for more). A drop settles in about 5 s at every width.
+
+Found while fixing (not reported by the owner): at 320 px three to five badges were left out of every drop, now none.
+
 ## 3. Whole-site checks, last run
 
 | Check                                              | Result                                                         |

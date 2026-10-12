@@ -122,7 +122,10 @@ export function HonorEmblem({ kind, value, label }: { kind: EmblemKind; value: R
   return (
     <div className="flex items-center gap-4">
       {/* R26: the emblem is a sticker you can lift and peel (StickerPeel, after React Bits) */}
-      <StickerPeel className="relative h-[104px] w-[104px] shrink-0 -rotate-3 drop-shadow-[3px_3px_0_#0A0A0A]">
+      {/* R62 (owner: zoomed out, "Gold" broke into "Gol / d" and "Top 15" left its flag): the box was a fixed 104 px
+          while its value is sized in rem, which grows with the R50 zoom steps (--u). The box takes the same factor, so
+          the value fits at every step; below 2,400 px --u is 1 and the emblem is the same 104 px as before. */}
+      <StickerPeel className="relative h-[calc(104px*var(--u,1))] w-[calc(104px*var(--u,1))] shrink-0 -rotate-3 drop-shadow-[3px_3px_0_#0A0A0A]">
         <svg aria-hidden viewBox="0 0 120 120" className="absolute inset-0 h-full w-full overflow-visible">
           <Shape kind={kind} />
         </svg>

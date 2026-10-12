@@ -148,6 +148,20 @@ Rules:
     per frame. Retired in R41: FX-09 trace rail (`top` driven by a framer useScroll spring = layout per frame; red =
     alerts only). Measuring: real GPU flags (lesson 9), the same session for A and B, a still mouse AND a moving mouse.
 
+34. R62: a box sized in px around text sized in rem breaks when the window is zoomed out (the R50 steps scale the root
+    font by `--u`, 1.25 to 4, from 2,400 px wide): "Gold" split into "Gol / d" on a 104 px emblem. A fixed box that
+    holds text is `calc(Npx * var(--u, 1))` or rem, never bare px. Guard: tests/r62 (no word on the page is split at
+    3,840 px; emblems at five sizes).
+35. R62: anything that keeps its own copy of element sizes (the badge pit's solver) must read them again when they
+    change: observe the elements with a ResizeObserver, not only the container. A zoom, a rotation and a late web font
+    all change them.
+36. R62: correcting the scroll position from a timer or an animation frame is one painted frame too late (the owner saw
+    the wrong section flash). Do it inside the `resize` event, and from a ResizeObserver for later re-flows: both run
+    before the paint. Measure what is painted with a timer queued from the frame callback, not inside it.
+37. R62 badge pit: the pile is laid by a plan (rows from the floor, fullest first, every badge carried under its centre
+    or by a real hold on both sides) and each badge is guided to its seat. Check a new rule with the offline plan count
+    and with 10 drops per width (280 to 2,880 px), and compare the plan with the settled pile before blaming the solver.
+
 ## F. Definition of done additions
 
 - Screenshots (not just tests) of every changed area at 390x844 and 1440x900, plus 844x390 for anything pinned.
