@@ -30,6 +30,8 @@ export function OffscreenPause() {
         io.observe(t);
       });
     scan();
+    // R58: decorations that are paused until someone can pause them (section backdrop, photo wall) start now
+    document.documentElement.dataset.fxPause = 'on';
     const main = document.querySelector('main');
     const mo = new MutationObserver(scan);
     if (main) mo.observe(main, { childList: true, subtree: false });
@@ -37,6 +39,7 @@ export function OffscreenPause() {
       mo.disconnect();
       io.disconnect();
       watched.forEach((t) => delete t.dataset.offscreen);
+      delete document.documentElement.dataset.fxPause;
     };
   }, []);
   return null;

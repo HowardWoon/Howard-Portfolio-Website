@@ -1,5 +1,4 @@
 import type { CSSProperties } from 'react';
-import { BauhausSolid } from './bauhaus-solid';
 import { FX } from '@/lib/fx';
 
 /**
@@ -9,13 +8,20 @@ import { FX } from '@/lib/fx';
  * A decorative layer BEHIND a section's content: Bauhaus pieces in the page gutters, all the way down the section,
  * on every screen size (the older accents only exist above 1024 / 1280 px and only near the section title).
  *
- *   - built from what the site already has: the FX-03 CSS 3D cube and coin, plus flat rings, plates, crosses,
- *     triangles and bar stacks with the 3 px ink border and the hard ink shadow
+ *   - a cube and a coin drawn in isometric projection, plus flat rings, plates, crosses, triangles and bar stacks,
+ *     all with the ink line and the hard ink shadow.
+ *     R58: the cube and coin were the FX-03 CSS 3D solids (six faces, preserve-3d, a perspective). Fifteen of them
+ *     on the page cost 5 - 13 s of a 4x-slow device's load, even paused and even hidden with `visibility`; taking
+ *     them out of rendering with `display` (or by skipping their rendering) instead cost layouts on every scroll
+ *     (tests/r17 P0-01). They are now flat SVG that reads as 3D: no 3D transform anywhere in this layer.
  *   - ink and paper only. The SIGNAL KEY gives every colour one meaning; decoration carries none, so it has no colour
- *   - three motions, each on its own element so they add up: a slow float (time), a drift with the page (FX-13,
- *     scroll-driven CSS) and a lean away from the mouse (FX-02 --px / --py, written by the one pointer listener)
- *   - transform / translate / rotate only (no layout), paused while the section is off screen (D5), still for reduced
- *     motion and Calm. Server-rendered markup, no JavaScript of its own
+ *   - two motions, each on its own element so they add up: a slow float (time) and a lean away from the mouse (FX-02
+ *     --px / --py, written by the one pointer listener).
+ *     R58: the third one, a drift with the page (FX-13 scroll-driven CSS), is gone. 60 pieces meant 60 scroll
+ *     timelines evaluated on the main thread for the whole life of the page: on a 4x slower CPU the page was ready
+ *     after about 16 s with them and about 7 s with no below-the-fold animation at all (tests/r17 slow device).
+ *   - transform only (no layout); paused until its own section is on screen (globals.css, html[data-fx-pause]); still
+ *     for reduced motion and Calm. Server-rendered markup, no JavaScript of its own
  *   - it never covers content: the layer is the first child of the section, so the content paints over it; the pieces
  *     sit in the gutter (--sb-gut = the section's own side padding) and a piece wider than the gutter tucks behind
  *     the cards rather than over them
@@ -50,6 +56,19 @@ const LAYOUTS: Record<string, Piece[]> = { a: layoutOf(0, 'r'), b: layoutOf(3, '
 const INK = '#0A0A0A';
 
 /** an equilateral triangle in a 100 x 100 box, its points computed (never typed by hand: R24) */
+/** the six corners of a cube seen in isometric projection (a hexagon), computed, in a 100 x 100 box */
+const HEX = [0, 1, 2, 3, 4, 5].map((i) => {
+  const a = -Math.PI / 2 + (i * Math.PI) / 3;
+  return [50 + 44 * Math.cos(a), 50 + 44 * Math.sin(a)] as const;
+});
+const pts = (list: readonly (readonly [number, number])[]) =>
+  list.map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join(' ');
+const MID = [50, 50] as const;
+// top, left and right faces: each is the centre and three neighbouring corners
+const CUBE_TOP = pts([HEX[0], HEX[1], MID, HEX[5]]);
+const CUBE_RIGHT = pts([HEX[1], HEX[2], HEX[3], MID]);
+const CUBE_LEFT = pts([HEX[5], MID, HEX[3], HEX[4]]);
+
 const TRIANGLE = [0, 1, 2]
   .map((i) => {
     const a = -Math.PI / 2 + (i * 2 * Math.PI) / 3;
@@ -61,9 +80,22 @@ function Shape({ kind, size }: { kind: Kind; size: number }) {
   const box = { width: size, height: size } as CSSProperties;
   switch (kind) {
     case 'cube':
-      return <BauhausSolid kind="cube" size={size} color="#FFFFFF" spin="22s" />;
+      // paper on top and on the left, ink on the right: the lit and the shaded face
+      return (
+        <svg data-sb-solid="cube" viewBox="0 0 100 100" style={box} className="block overflow-visible">
+          <polygon points={CUBE_LEFT} fill="#FFFFFF" stroke={INK} strokeWidth={7} strokeLinejoin="round" />
+          <polygon points={CUBE_RIGHT} fill={INK} stroke={INK} strokeWidth={7} strokeLinejoin="round" />
+          <polygon points={CUBE_TOP} fill="#FFFFFF" stroke={INK} strokeWidth={7} strokeLinejoin="round" />
+        </svg>
+      );
     case 'coin':
-      return <BauhausSolid kind="coin" size={size} color="#FFFFFF" spin="14s" />;
+      // a disc seen from above at an angle: the ink rim under the paper face is its thickness
+      return (
+        <svg data-sb-solid="coin" viewBox="0 0 100 100" style={box} className="block overflow-visible">
+          <ellipse cx={50} cy={58} rx={44} ry={30} fill={INK} stroke={INK} strokeWidth={7} />
+          <ellipse cx={50} cy={44} rx={44} ry={30} fill="#FFFFFF" stroke={INK} strokeWidth={7} />
+        </svg>
+      );
     case 'ring':
       return <span className="block rounded-full border-3 border-dashed border-ink/45" style={box} />;
     case 'plate':
@@ -111,13 +143,11 @@ export function SectionBackdrop({ layout = 'a' }: { layout?: 'a' | 'b' | 'c' }) 
           className={`sb-piece fx-depth absolute ${p.side === 'l' ? 'sb-l' : 'sb-r'}`}
           style={{ top: `${p.top}%`, '--sb-at': p.at, '--sb-size': `${p.size}px`, '--depth': p.depth } as CSSProperties}
         >
-          <span className={`block ${i % 2 ? 'fx-drift-rev' : 'fx-drift'}`}>
-            <span
-              className="sb-float block"
-              style={{ '--sb-dur': `${p.dur}s`, '--sb-delay': `${-i * 1.3}s` } as CSSProperties}
-            >
-              <Shape kind={p.kind} size={p.size} />
-            </span>
+          <span
+            className="sb-float block"
+            style={{ '--sb-dur': `${p.dur}s`, '--sb-delay': `${-i * 1.3}s` } as CSSProperties}
+          >
+            <Shape kind={p.kind} size={p.size} />
           </span>
         </span>
       ))}

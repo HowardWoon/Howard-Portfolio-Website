@@ -1460,6 +1460,11 @@ html.fx-off-ambientOrbits .fx-orbit {
 [data-offscreen] .fx-wall-track {
   animation-play-state: paused;
 }
+/* R58: and it does not start rolling before the pauser is there to stop it (three rows of up to 98 prints rolled from
+   first paint, far below the fold: about 5 s of the slow-device load above) */
+html:not([data-fx-pause='on']) .fx-wall-track {
+  animation-play-state: paused;
+}
 .fx-seal {
   transition:
     rotate 0.35s cubic-bezier(0.2, 0.9, 0.1, 1),
@@ -5214,7 +5219,6 @@ html.fx-off-sectionBackdrop .sb-layer {
 @media (prefers-reduced-motion: no-preference) {
   html:not([data-motion='calm']) .sb-float {
     animation: sb-float var(--sb-dur, 9s) ease-in-out var(--sb-delay, 0s) infinite alternate;
-    will-change: transform;
   }
 }
 @keyframes sb-float {
@@ -5225,11 +5229,30 @@ html.fx-off-sectionBackdrop .sb-layer {
     transform: translate3d(0, -9px, 0) rotate(6deg);
   }
 }
-/* D5: nothing animates while its section is off screen */
-[data-offscreen] .sb-float,
-[data-offscreen] .sb-layer .fx-solid {
+/* R58: the pieces are PAUSED until fx/offscreen-pause.tsx is running (html[data-fx-pause]) and their own section is
+   on screen. They used to run from first paint and be paused later (D5), but the pauser mounts in the after-boot
+   queue: until then all 60 pieces and 15 solids on the page animated at once. Measured at 4x CPU (tests/r17's slow
+   device): the page was ready after 16.4 s with them and 11 - 13 s without; a test with a 20 s limit began to fail.
+   A paused animation costs nothing. No will-change: 60 standing layers are not worth a 9 s drift. */
+.sb-float {
   animation-play-state: paused;
 }
+html[data-fx-pause='on'] :not([data-offscreen]) > .sb-layer .sb-float {
+  animation-play-state: running;
+}
+/* R58: a piece is not even rendered until its section is on screen. Measured on the same slow device: 14 - 15 s to
+   ready with the 60 pieces on the page (the 15 CSS 3D solids - six faces each, preserve-3d under a perspective - are
+   most of it), 8 - 10 s without them. Each piece is absolutely placed, so nothing moves when it appears.
+   Hidden with `visibility`, not `display`: showing a piece must not lay anything out while the page scrolls
+   (AGENTS.md 6.5; tests/r17 P0-01 counted 50 layouts in a phone fling with `display`, the budget is 45; so did
+   skipping their rendering (the property the plan check NO-CV forbids) on the 3D stages: 23 layouts with it, 13 without, in the same fling). */
+.sb-piece {
+  visibility: hidden;
+}
+html[data-fx-pause='on'] :not([data-offscreen]) > .sb-layer .sb-piece {
+  visibility: visible;
+}
+
 @media print {
   .sb-layer {
     display: none;

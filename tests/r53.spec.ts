@@ -49,7 +49,9 @@ for (const [name, w, h] of [
           pointer: cs.pointerEvents,
           anchor: cs.overflowAnchor,
           pieces: l.querySelectorAll('.sb-piece').length,
-          solids: l.querySelectorAll('.fx-solid').length,
+          // R58: the cube and the coin are drawn in isometric projection (flat SVG), not built from CSS 3D faces
+          solids: l.querySelectorAll('[data-sb-solid]').length,
+          css3d: l.querySelectorAll('.fx-solid, .fx-stage').length,
           floating: [...l.querySelectorAll<HTMLElement>('.sb-float')].filter(
             (e) => getComputedStyle(e).animationName === 'sb-float',
           ).length,
@@ -64,6 +66,7 @@ for (const [name, w, h] of [
     for (const l of layers) {
       expect(l, l.id).toMatchObject({ first: true, hidden: 'true', pointer: 'none', anchor: 'none', pieces: 12 });
       expect(l.solids, `${l.id}: 3D solids`).toBeGreaterThanOrEqual(2);
+      expect(l.css3d, `${l.id}: no CSS 3D in the backdrop (slow-device load, R58)`).toBe(0);
       expect(l.floating, `${l.id}: every piece floats`).toBe(12);
       expect(l.staticSiblings, `${l.id}: content must paint over the layer`).toBe(0);
     }
@@ -201,6 +204,24 @@ for (const [name, w, h] of [
     test.setTimeout(120_000);
     await page.setViewportSize({ width: w, height: h });
     await gate(page);
+    // the sections above the pit mount late: go to it again until it has stopped moving down the page (a single
+    // scrollTo left the window on the hero when they arrived afterwards, and the pit never dropped)
+    await expect
+      .poll(
+        async () => {
+          await page.evaluate(() => {
+            const e = document.querySelector<HTMLElement>('[data-pill-pit]')!;
+            window.scrollTo(0, e.getBoundingClientRect().top + window.scrollY - 80);
+          });
+          await page.waitForTimeout(250);
+          return page.evaluate(() =>
+            Math.round(document.querySelector('[data-pill-pit]')!.getBoundingClientRect().top),
+          );
+        },
+        { timeout: 20_000 },
+      )
+      .toBeLessThanOrEqual(90);
+    await expect(page.locator('html[data-after-boot="done"]')).toHaveCount(1, { timeout: 20_000 });
     await page.evaluate(() => {
       const e = document.querySelector<HTMLElement>('[data-pill-pit]')!;
       window.scrollTo(0, e.getBoundingClientRect().top + window.scrollY - 80);
