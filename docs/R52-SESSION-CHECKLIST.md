@@ -158,6 +158,18 @@ Row 46, measured after: every accordion header 0 to 3 px from where it was press
 iPhone 13, in six presses each (down the list, then back up). The Honors category keys on a phone still scroll: they
 do so on purpose, to show the list they open (R17), and the hold lets go for any control that scrolls the page.
 
+## 2h. R61 (12 Oct 2026)
+
+| #   | Request                                                        | What was done                                                                                                                                                                          | Guard                                             | Result |
+| --- | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- | ------ |
+| 48  | A gallery for Sensor X Sensei, six photos in file-number order | the card keeps its telemetry window; under it, the same PROJECT GALLERY stack as the other cards shows files 1 - 6 in that order (`public/images/projects/sensor-x/01.jpg` - `06.jpg`) | `tests/r53.spec.ts` (4 sizes), `tests/arena-wall` | PASS   |
+
+Photo checklist: real sizes read with sharp (`01` and `06` are 810 x 1080, `02` is 1280 x 720, `03` - `05` are
+720 x 1280); no EXIF, no identity numbers; alt text says what each photo shows; all six roll on the Proof Reel (ESP32 /
+Sensor X ticket) and the two team photos join the Build Story field reel under a cyan (QUALIFIER) "UM Technothon 2026"
+slate, before Supervity (May before August); the upload folder was moved to the git-ignored `private-originals/`.
+Owner's standing rule from this request: a gallery follows the file-name numbers of the photos he uploads.
+
 ## 3. Whole-site checks, last run
 
 | Check                                              | Result                                                         |

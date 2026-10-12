@@ -117,7 +117,7 @@ export const REEL_ROWS: { label: string; accent: 'yellow' | 'mint' | 'cyan'; ite
       ...ticket('Next.js', 'Sensor X', '#project-sensor-x'),
       ...ticket('Spring Boot', 'Slotify', '#project-slotify', gallery(project('slotify'), 'slotify')),
       ...ticket('Scikit-Learn', 'Catfish AI', '#project-catfish', gallery(project('catfish'), 'catfish')),
-      ...ticket('ESP32', 'Sensor X', '#project-sensor-x'),
+      ...ticket('ESP32', 'Sensor X', '#project-sensor-x', gallery(project('sensor-x-sensei'), 'sensor-x')),
     ],
   },
 ];

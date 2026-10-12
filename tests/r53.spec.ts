@@ -1035,7 +1035,7 @@ test('the photo wall renders its hidden copies only when it comes near the windo
       full: document.querySelectorAll('.fx-wall-row[data-reel-full]').length,
     }));
   const top = await count();
-  expect(top.real).toBe(100); // 24 tickets + 76 prints
+  expect(top.real).toBe(106); // 24 tickets + 82 prints
   expect(top).toMatchObject({ copies: 0, full: 0 });
   await page
     .locator('.fx-wall-row')
@@ -1043,6 +1043,84 @@ test('the photo wall renders its hidden copies only when it comes near the windo
     .evaluate((e) => e.scrollIntoView({ block: 'center' }));
   await expect(page.locator('.fx-wall-row[data-reel-full]')).toHaveCount(3, { timeout: 10_000 });
   const near = await count();
-  expect(near.real).toBe(100);
+  expect(near.real).toBe(106);
   expect(near.copies).toBeGreaterThanOrEqual(100); // at least one more copy of every row
 });
+
+// R61 (owner: "add the gallery part for this sensor x sensei ... always arrange the picture according to the file name
+// sequence number"): the card keeps its telemetry window and shows the owner's six files under it, 1 - 6 in that order
+for (const [name, w, h] of [
+  ['desktop 1440x900', 1440, 900],
+  ['tablet 768x1024', 768, 1024],
+  ['phone 390x664', 390, 664],
+  ['phone 320x568', 320, 568],
+] as const) {
+  test(`Sensor X Sensei has a gallery of six photos in file order, under its telemetry window (${name})`, async ({
+    page,
+  }) => {
+    test.setTimeout(90_000);
+    await page.setViewportSize({ width: w, height: h });
+    await gate(page);
+    await walk(page);
+    const card = page.locator('#project-sensor-x');
+    await card.evaluate((e) => window.scrollTo(0, e.getBoundingClientRect().top + scrollY));
+    await expect(card.getByText('LIVE TELEMETRY WINDOW')).toBeVisible();
+    await expect(card.getByText('1.84 kW')).toBeVisible();
+    const gallery = card.locator('[data-card-gallery]');
+    await expect(gallery).toHaveCount(1);
+    await expect(gallery.getByText('PROJECT GALLERY')).toBeVisible();
+    // the gallery sits under the telemetry terminal, inside the same panel, and nothing is wider than the window
+    const box = await gallery.evaluate((g) => {
+      const r = g.getBoundingClientRect();
+      const p = g.parentElement!.getBoundingClientRect();
+      const t = g.parentElement!.querySelector('.terminal')!.getBoundingClientRect();
+      return {
+        under: r.top >= t.bottom,
+        inside: r.left >= p.left && r.right <= p.right && r.bottom <= p.bottom,
+        overflow: Math.max(0, document.documentElement.scrollWidth - innerWidth),
+      };
+    });
+    expect(box).toEqual({ under: true, inside: true, overflow: 0 });
+    // file order: Next walks 01.jpg ... 06.jpg, and the counter on the print says so
+    const stack = gallery.locator('div[data-cursor="view"]');
+    await stack.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+    for (let i = 1; i <= 6; i++) {
+      // the print that just left is still flying out for a moment: wait until only the new top print has a counter
+      await expect(stack.locator('[data-print-counter]')).toHaveCount(1);
+      await expect(stack.locator('[data-print-counter]')).toHaveText(`0${i} / 06`);
+      const src = await stack.locator('[data-print-counter]').evaluate((c) => {
+        const img = c.parentElement!.querySelector('img')!;
+        return decodeURIComponent(img.currentSrc || img.src);
+      });
+      expect(src).toContain(`/images/projects/sensor-x/0${i}.jpg`);
+      // every print (top one and the fanned ones behind it) stays inside the gallery panel
+      const out = await stack.evaluate((s) => {
+        const p = s.closest('[data-card-gallery]')!.parentElement!.getBoundingClientRect();
+        return [...s.querySelectorAll('.shadow-brutal')].filter((e) => {
+          const r = e.getBoundingClientRect();
+          return r.left < p.left - 1 || r.right > p.right + 1;
+        }).length;
+      });
+      expect(out, `photo ${i}: prints outside the panel`).toBe(0);
+      await gallery.getByRole('button', { name: 'Next photo' }).click();
+      await page.waitForTimeout(650);
+    }
+    // the print opens the shared viewer on that photo, with all six
+    await gallery.getByRole('button', { name: /^View full resolution/ }).click();
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    await expect(dialog.locator('[aria-live="polite"]').first()).toHaveText('01 / 06');
+    const fit = await dialog.evaluate((d) => {
+      const img = d.querySelector('img')!.getBoundingClientRect();
+      return {
+        w: Math.round(img.width),
+        h: Math.round(img.height),
+        inside: img.right <= innerWidth && img.bottom <= innerHeight,
+      };
+    });
+    expect(fit.inside).toBe(true);
+    expect(fit.h, 'the photo is large enough to read').toBeGreaterThanOrEqual(150);
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+  });
+}

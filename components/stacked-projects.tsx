@@ -275,6 +275,52 @@ export const projects: ProjectData[] = [
     tags: ['ESP32', 'C++', 'Next.js 15', 'MQTT', 'PostgreSQL', 'Tailwind CSS'],
     simulatorId: 'sensor-x',
     githubUrl: 'https://github.com/HowardWoon/Sensor-X-Sensei---UM-Technothon-2026',
+    // R61 (owner: "add the gallery part for this sensor x sensei ... always arrange the picture according to the file
+    // name sequence number"): the owner's six files, 1 - 6, in that order
+    galleryPhotos: [
+      {
+        src: '/images/projects/sensor-x/01.jpg',
+        alt: 'With the team and the Sensor X Sensei prototype at the UM Technothon 2026 physical final',
+        rotation: -2,
+        w: 810,
+        h: 1080,
+      },
+      {
+        src: '/images/projects/sensor-x/02.jpg',
+        alt: 'The lecture hall model with its PIR sensor, lamps and fans',
+        rotation: 1.5,
+        w: 1280,
+        h: 720,
+      },
+      {
+        src: '/images/projects/sensor-x/03.jpg',
+        alt: 'Relay modules and wiring behind the lecture hall model',
+        rotation: -1,
+        w: 720,
+        h: 1280,
+      },
+      {
+        src: '/images/projects/sensor-x/04.jpg',
+        alt: 'The RFID reader and controller wiring beside the lecture hall model',
+        rotation: 2,
+        w: 720,
+        h: 1280,
+      },
+      {
+        src: '/images/projects/sensor-x/05.jpg',
+        alt: 'Numbered fans, servos and lamps inside the lecture hall model',
+        rotation: -1.5,
+        w: 720,
+        h: 1280,
+      },
+      {
+        src: '/images/projects/sensor-x/06.jpg',
+        alt: 'Team selfie in the hall at UM Technothon 2026',
+        rotation: 1,
+        w: 810,
+        h: 1080,
+      },
+    ],
     telemetryType: 'energy',
   },
 ];
@@ -805,6 +851,23 @@ function ProjectCard({ project, index }: { project: ProjectData; index: number }
                     </div>
                   </div>
                 )}
+
+                {/* R61: the telemetry window keeps its place; a card that also has photos shows them under it, with
+                    the same header and the same stack as the other project galleries */}
+                {!isGallery && project.galleryPhotos ? (
+                  <div data-card-gallery className="space-y-4 border-t-2 border-dashed border-ink pt-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3">
+                      <div className="flex items-center gap-2 text-xs font-mono font-extrabold text-ink">
+                        <Activity className="w-4 h-4 text-ink animate-pulse" strokeWidth={2.5} />
+                        <span className="uppercase tracking-[0.1em]">PROJECT GALLERY</span>
+                      </div>
+                      <span className="nb-tag bg-[#E3E8FF]">INTERACTIVE</span>
+                    </div>
+                    <div className="w-full flex items-center justify-center py-2 sm:py-4">
+                      <InteractivePhotoStack customPhotos={project.galleryPhotos} galleryId={project.simulatorId} />
+                    </div>
+                  </div>
+                ) : null}
               </div>
             </div>
           </div>

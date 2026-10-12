@@ -84,6 +84,18 @@ export const PHOTO_BLUR: Record<string, string> = {
     'data:image/webp;base64,UklGRloAAABXRUJQVlA4IE4AAACQAwCdASoQABcAPu1iqU2ppaOiMAgBMB2JZQCw7CFrm5FdSh9AAP7pBaF93GWfeJT7DvZC3AwLG3YjXPIthtoquutwwECiH6tW7bIAAAA=',
   '/images/projects/catfish/system.png':
     'data:image/webp;base64,UklGRjgAAABXRUJQVlA4ICwAAACQAQCdASoQAA4AA4BaJZV2ARgAiwAA/vKz1iQLeVE9ncpqyz4pFZlHMlagAA==',
+  '/images/projects/sensor-x/01.jpg':
+    'data:image/webp;base64,UklGRpYAAABXRUJQVlA4IIoAAACQBACdASoQABUAPu1iqU2ppaQiMAgBMB2JaACdMoBOACaiH1T0BSZAZvWSU+gA8pVq+wYlTIXaYATGvsn3d0B9Q8f3WYJo04Dhn3smz6AushsV9TqGfmd0V6XPkZhIpk11/uxy3wbJkY60vl9yWeAgFTv0Tx3e6fyCwYs58dfwQWzxxDaYaEXjgAA=',
+  '/images/projects/sensor-x/02.jpg':
+    'data:image/webp;base64,UklGRlAAAABXRUJQVlA4IEQAAAAQAgCdASoQAAkAA4BaJZQCdMn8Bgb8DPzIAP5G+8QQNxjK8Jb8fBav4xMQnSrvbKv0WGACv3Ih6uWqFJN4Dhscz6TAAA==',
+  '/images/projects/sensor-x/03.jpg':
+    'data:image/webp;base64,UklGRpIAAABXRUJQVlA4IIYAAACQBACdASoQABwAPu1kqU2ppaQiMAgBMB2JYgCdMoADEAVzKFP63rQMZkb28nAA/uNNvXB9hJsmqRWA4X227KB/0BBz/x9bKE6ZUKpbBGSOC7rgaTeaYYkNc3YIClQ3h0X43RqjWZW6BDJjUFYfUDzEl6RskJgZRw+A4LqgFiocqGCx/AAAAA==',
+  '/images/projects/sensor-x/04.jpg':
+    'data:image/webp;base64,UklGRowAAABXRUJQVlA4IIAAAABQBACdASoQABwAPu1mq04ppaQiMAgBMB2JZQCdACGa0hkzvHggNPGmeFYAAP6MSiG1/JDQ+0Uc9L0DIX8MdSBKzN19NawyrpVr44hRFDor5+0lx4XgRVcO2u46RFlh6Itp9rnjykYSnckEB7gbqiDSp8cR33gmZYPzAjje0poAAA==',
+  '/images/projects/sensor-x/05.jpg':
+    'data:image/webp;base64,UklGRpAAAABXRUJQVlA4IIQAAACQBACdASoQABwAPu1kqk4ppaQiMAgBMB2JQBjfdQAa4U6TZLDidcu8Mx7crgAA/VOU7siYkHjg/UGiKGK76aUumSCZ/L7BXP8M/nkTSp1cPsO5oTv/UisATrk35vYMQaZ4Gv88cKvvIbJv7NmG4uYBaBWsoUXJzkMbXo0d37YtC+1kAAA=',
+  '/images/projects/sensor-x/06.jpg':
+    'data:image/webp;base64,UklGRpAAAABXRUJQVlA4IIQAAADQAwCdASoQABUAPu1iqU2ppaOiMAgBMB2JQBOgA1jcW24pnsdR6wAA/rppCiIJIW7QodBFSrlad5tlBKzk+vOVcoW0d9vG8ar1FjYUetu0bLxBBlzTw/qvBT3810Wt0xPqvioAJZN3OKzJxxj4ye5vZT33IlVy0yereAELxW8N5PZwAAA=',
   '/images/projects/slotify/01.png':
     'data:image/webp;base64,UklGRjwAAABXRUJQVlA4IDAAAADQAQCdASoQAA4AA4BaJQBOgCHcb/CqgAD+8RkMbYRzYUi/umYh8AbbCkz+rbmAAAA=',
   '/images/projects/slotify/02.png':

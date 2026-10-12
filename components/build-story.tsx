@@ -211,6 +211,10 @@ const FIELD_REEL: ReelItem[] = [
   { src: '/images/experience/mytech/03.jpg', w: 1280, h: 853 },
   { src: '/images/experience/mytech/04.jpg', w: 1280, h: 853 },
   { src: '/images/experience/mytech/05.jpg', w: 720, h: 1280 },
+  // R61: UM Technothon 2026 (May 2026), cyan = QUALIFIER (Top 15 finalist); the two photos with the team
+  { slate: 'UM Technothon 2026', fill: 'bg-pop-cyan' },
+  { src: '/images/projects/sensor-x/01.jpg', w: 810, h: 1080 },
+  { src: '/images/projects/sensor-x/06.jpg', w: 810, h: 1080 },
   { slate: 'Supervity AutoPilot Asia Hackathon 2026', fill: 'bg-pop-yellow' },
   { src: '/images/projects/zerolag/supervity_standing.jpg', w: 960, h: 1280 },
   { src: '/images/projects/zerolag/supervity_formal.jpg', w: 960, h: 1280 },
