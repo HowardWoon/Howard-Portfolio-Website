@@ -135,6 +135,18 @@ and four join the Build Story field reel; the upload folder was moved to the git
 | 42  | The organisation plate must line up with the gallery under it | the plate was a fixed 25 rem box, 25 px in from the gallery's left edge        | on a card with a gallery the header uses the same 7 / 5 grid as the body: plate and gallery share both edges | `tests/r53.spec.ts` | PASS   |
 | 43  | The VIEW MASTER ORCHESTRATOR key must open the Supervity link | the key already opened exactly that address (in the code and on the live site) | no change needed; a test now pins the address                                                                | `tests/r53.spec.ts` | PASS   |
 
+## 2f. R58 follow-up and R59 (12 Oct 2026)
+
+| #   | Request / finding                                         | Measured before                                                                  | What was done                                                                                                                                                              | Guard                                    | Result |
+| --- | --------------------------------------------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- | ------ |
+| 44  | Found: the page was slow to become ready on a slow device | 16 - 25 s at 4x CPU (limit 20 s); the R53 backdrop was 5 - 13 s of it            | the backdrop's 15 CSS 3D solids are drawn in isometric projection; its 60 scroll-timeline drifts are gone; pieces and the photo wall wait until their section is on screen | `tests/r17.spec.ts`, `tests/r53.spec.ts` | PASS   |
+| 45  | Zooming in or out threw the reader to another section     | 8 of 8 zoom changes (25 % - 200 %) left the title being read 2 - 12 windows away | `components/keep-place.tsx`: the page remembers what is under a line near the top of the window and puts it back there when the window's width changes                     | `tests/r53.spec.ts` (13 tests)           | PASS   |
+
+Row 45, measured after (the Experience title, as a share of the window's height, before -> after the zoom change):
+50 -> 33 %: 17 -> 17; 33 -> 50 %: 17 -> 17; 100 -> 50 %: 16 -> 16; 50 -> 100 %: 17 -> 17; 100 -> 150 %: 16 -> 19;
+150 -> 100 %: 30 -> 28; 100 -> 80 %: 16 -> 16; 67 -> 25 %: 19 -> 19. A height-only change (a phone's address bar)
+never moves the page; the top of the page stays the top; a rotated phone keeps the same card on screen.
+
 ## 3. Whole-site checks, last run
 
 | Check                                              | Result                                                         |

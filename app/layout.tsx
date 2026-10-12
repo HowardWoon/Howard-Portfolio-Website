@@ -6,6 +6,7 @@ import SmoothScrollProvider from '@/components/smooth-scroll-provider';
 import { CustomCursor } from '@/components/custom-cursor';
 import { PressStamp } from '@/components/fx/press-stamp';
 import InputModality from '@/components/input-modality';
+import KeepPlace from '@/components/keep-place';
 import { MotionProvider } from '@/components/motion-provider';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
@@ -122,6 +123,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <CustomCursor />
           <PressStamp />
           <InputModality />
+          <KeepPlace />
         </MotionProvider>
         <Analytics />
         <SpeedInsights />

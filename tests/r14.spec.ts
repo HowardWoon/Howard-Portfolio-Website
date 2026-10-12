@@ -184,6 +184,9 @@ test('floor, ring, wipe, card turn, lamp and CSS reveal run with motion (FX-62 â
   expect(
     await page.evaluate(() => getComputedStyle(document.querySelector('footer')!, '::after').backgroundImage),
   ).toContain('radial-gradient');
+  // R59: the back-to-top button is one of the after-boot mounts. Under load its turn came after the 7 s this test
+  // allowed (it failed twice in one push run and passes alone): wait for the queue, then scroll.
+  await expect(page.locator('html[data-after-boot="done"]')).toHaveCount(1, { timeout: 30_000 });
   await page.evaluate(() => scrollTo(0, 3000));
   await page.waitForTimeout(150);
   await page.evaluate(() => scrollTo(0, 2800));

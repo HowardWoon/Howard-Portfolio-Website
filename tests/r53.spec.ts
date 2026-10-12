@@ -780,3 +780,151 @@ test('the ZeroLag orchestrator key opens the Supervity workflow the owner gave',
   );
   await expect(key).toHaveAttribute('target', '_blank');
 });
+
+/* ---------------------------------------------------------------- R59 keep my place */
+// owner (R59): "when me as a user zoom in or zoom out, why the website like suddenly jump to other page ... at 55% i am
+// located at the executive leadership page, but then when i zoom out to 33%, the page website straight away jump to the
+// proofpay section". A browser zoom is a change of the window's size in CSS pixels: a 1920 x 978 window is
+// 3840 x 1956 at 50 % and 5818 x 2964 at 33 %. Measured before the fix: 8 of 8 zoom changes lost the place.
+const ZOOM: Record<number, [number, number]> = {
+  200: [960, 489],
+  150: [1280, 652],
+  100: [1920, 978],
+  80: [2400, 1222],
+  50: [3840, 1956],
+  33: [5818, 2964],
+  25: [7680, 3912],
+};
+/** where a landmark is in the window, as a share of the window's height (null = not rendered) */
+const placeOf = (page: Page, sel: string) =>
+  page.evaluate((s) => {
+    const e = document.querySelector(s);
+    return e ? e.getBoundingClientRect().top / window.innerHeight : null;
+  }, sel);
+async function openAt(page: Page, zoom: number, sel: string, share = 0.3) {
+  await page.setViewportSize({ width: ZOOM[zoom][0], height: ZOOM[zoom][1] });
+  await page.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
+  await page.goto('/', { waitUntil: 'networkidle' });
+  await expect(page.locator('html[data-keep-place="on"]')).toHaveCount(1, { timeout: 20_000 });
+  await expect(page.locator('html[data-after-boot="done"]')).toHaveCount(1, { timeout: 30_000 });
+  await walk(page);
+  // go to the landmark until the page above it has stopped growing (late sections)
+  await expect
+    .poll(
+      async () => {
+        await page.evaluate(
+          ([s, f]) => {
+            const e = document.querySelector(s as string)!;
+            window.scrollTo(0, e.getBoundingClientRect().top + window.scrollY - window.innerHeight * (f as number));
+          },
+          [sel, share] as const,
+        );
+        await page.waitForTimeout(350);
+        return Math.abs(((await placeOf(page, sel)) ?? 9) - share);
+      },
+      { timeout: 20_000 },
+    )
+    .toBeLessThan(0.03);
+  await page.waitForTimeout(400); // the place is read 120 ms after the scrolling stops
+}
+async function zoomTo(page: Page, zoom: number) {
+  await page.setViewportSize({ width: ZOOM[zoom][0], height: ZOOM[zoom][1] });
+  await page.waitForTimeout(1500);
+}
+
+for (const [from, to] of [
+  [50, 33],
+  [33, 50],
+  [100, 50],
+  [50, 100],
+  [100, 150],
+  [150, 100],
+  [100, 200],
+] as const) {
+  test(`zoom ${from} % -> ${to} %: the Experience title the reader was looking at is still there`, async ({ page }) => {
+    test.setTimeout(120_000);
+    await openAt(page, from, '#experience h2');
+    const before = (await placeOf(page, '#experience h2'))!;
+    await zoomTo(page, to);
+    const after = (await placeOf(page, '#experience h2'))!;
+    // the same landmark, within a tenth of the window of where it was (it was 2 - 12 windows away)
+    expect(
+      Math.abs(after - before),
+      `title moved from ${before.toFixed(2)} to ${after.toFixed(2)} of the window`,
+    ).toBeLessThan(0.1);
+  });
+}
+
+for (const [name, sel] of [
+  ['a project card (ProofPay)', '#project-proofpay h3'],
+  ['an Experience card (KMNS)', '[data-folder="kmns"] h3'],
+  ['the Honors title', '#honors h2'],
+  ['the Contact title', '#contact h2'],
+] as const) {
+  test(`zooming out and back in three steps keeps the reader on ${name}`, async ({ page }) => {
+    test.setTimeout(150_000);
+    await openAt(page, 100, sel);
+    const before = (await placeOf(page, sel))!;
+    for (const z of [50, 33, 80, 100]) {
+      await zoomTo(page, z);
+      const now = (await placeOf(page, sel))!;
+      expect(now, `${name} at ${z} %: on screen`).toBeGreaterThan(0);
+      expect(now, `${name} at ${z} %: on screen`).toBeLessThan(0.9);
+    }
+    expect(Math.abs((await placeOf(page, sel))! - before), 'back at 100 %: the same place').toBeLessThan(0.1);
+  });
+}
+
+test('keep my place: the top of the page stays the top, and a height-only change never moves the page', async ({
+  page,
+}) => {
+  test.setTimeout(120_000);
+  // at the top: nothing to keep
+  await page.setViewportSize({ width: 1920, height: 978 });
+  await page.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
+  await page.goto('/', { waitUntil: 'networkidle' });
+  await expect(page.locator('html[data-keep-place="on"]')).toHaveCount(1, { timeout: 20_000 });
+  await zoomTo(page, 50);
+  expect(await page.evaluate(() => window.scrollY)).toBe(0);
+  // a phone's address bar sliding away changes the height only: the page must not be touched
+  await openAt(page, 100, '#experience h2');
+  const y = await page.evaluate(() => window.scrollY);
+  await page.setViewportSize({ width: 1920, height: 900 });
+  await page.waitForTimeout(1300);
+  await page.setViewportSize({ width: 1920, height: 1040 });
+  await page.waitForTimeout(1300);
+  expect(await page.evaluate(() => window.scrollY)).toBe(y);
+});
+
+test.describe('keep my place on a phone', () => {
+  test.use(strip(devices['iPhone 13']));
+  test('turning the phone on its side keeps the same card on screen', async ({ page }) => {
+    test.setTimeout(120_000);
+    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.getByRole('button', { name: /skip intro/i }).tap();
+    await expect(page.locator('html[data-keep-place="on"]')).toHaveCount(1, { timeout: 20_000 });
+    await expect(page.locator('html[data-after-boot="done"]')).toHaveCount(1, { timeout: 30_000 });
+    await walk(page);
+    const sel = '[data-folder="kraiburg"] h3';
+    await expect
+      .poll(
+        async () => {
+          await page.evaluate((s) => {
+            const e = document.querySelector(s)!;
+            window.scrollTo(0, e.getBoundingClientRect().top + window.scrollY - window.innerHeight * 0.3);
+          }, sel);
+          await page.waitForTimeout(350);
+          return Math.abs(((await placeOf(page, sel)) ?? 9) - 0.3);
+        },
+        { timeout: 20_000 },
+      )
+      .toBeLessThan(0.04);
+    await page.waitForTimeout(400);
+    const vp = page.viewportSize()!;
+    await page.setViewportSize({ width: vp.height, height: vp.width });
+    await page.waitForTimeout(1500);
+    const now = (await placeOf(page, sel))!;
+    expect(now, 'the card title is still on screen after the turn').toBeGreaterThan(0);
+    expect(now).toBeLessThan(0.95);
+  });
+});
