@@ -205,6 +205,9 @@ for (const width of [360, 390, 1024, 1280]) {
     const bad = await page.evaluate(() =>
       Array.from(document.querySelectorAll<HTMLElement>('#experience .grid > div, #projects .grid > div'))
         .filter((t) => /RM9,287|1\.84 kW|-60\.8%/.test(t.textContent ?? '') && t.children.length <= 4)
+        // R61: the Sensor X card's right column now also holds a photo gallery, so it is not a stat tile (its last
+        // div is a print of the gallery). The two tiles inside it are still found, by their own grid.
+        .filter((t) => !t.querySelector('[data-card-gallery]'))
         .filter((t) => {
           const v = Array.from(t.querySelectorAll('div')).pop()!;
           const r = document.createRange();
