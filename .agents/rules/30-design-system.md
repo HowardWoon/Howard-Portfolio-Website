@@ -319,7 +319,18 @@ same photo twice. Testing lesson (R40): Lenis owns the desktop scroll position, 
 it glides is undone - tests scroll with `page.mouse.wheel` or by layout position. Guard: tests/r40.spec.ts (all 20 fail
 on the pre-R40 site).
 
-## H. R24 guardrails - type floor, emblem geometry, torchlight, neo-brutalism only (owner complaints, tested)
+R64 (owner: "add this ui ux implementation during the scrolling effect ... as new frame to scroll, but make sure it
+must function", with the React Bits FlipCard source), same rule - a layer, a brutalist remix, no new dependency:
+
+| Feature      | Where                                                                        | Rules                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------ | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Turn-over ID | components/flip-card.tsx, build-story.tsx `ID_TURN` / `ID_LIVE`, `.bs-flip*` | SCROLL: the student ID arrives back side up and turns to its face while it falls (CSS from the playhead, reversible). HAND: from landing until the crest-scan lid closes it is a button ("Flip student ID"): press, drag with flick, Enter / Space; mouse lean <= 6 deg; outside that window it is not a control and springs back face up. The back holds only the terminal's own lines (`CODE`), printed in the terminal's windows. `.bs-idcard` stays the un-rotated seat (tests and the phone fit measure it). No glare, no blurred shadow: a hard slab that narrows edge on. No transform at rest |
+
+Guard: tests/r64.spec.ts. Lesson: a flip is taken from the face the card is heading to, not from the angle it has
+reached (a quick second tap chose the same face again); a story window that ends after `STORY_GAP_AT` is stretched
+across the crest-scan gap.
+
+## H. R24 guardrails - type floor, emblem geometry, hero water reveal, neo-brutalism only (owner complaints, tested)
 
 Howard: "the font family and font size is too ugly and small, slim, i dont want this font problem happen again" and
 "the star in the medal is misalign ... make sure this type of issue wont happen again". Both are now enforced by
@@ -343,8 +354,13 @@ Howard: "the font family and font size is too ugly and small, slim, i dont want 
    never hand-typed point lists. The medal star sits inside the inner ring, below the ribbon (ribbons end y 50), and
    above the value; the value text sits inside the emblem body. Check every emblem kind at 390 and 1440 after any
    change (the test does it too).
-5. **Hero torchlight is the owner's choice (R24):** under the mouse the headline dims to 25% and the lens beam shows
-   it bright. Do not "improve" it back into a no-dim version.
+5. **Hero water reveal is the owner's choice (R63, replaces the R24 torchlight):** the dimmed headline looked "so
+   blur, like haze" and the round lens "like a torchlight"; Howard asked for water "with ripples, like swimming, very
+   smooth". The headline is NEVER dimmed. On the headline and on the portrait a body of water follows the mouse
+   (`lib/liquid.ts`: head on a spring, tail, wobbling rim, thin ink ripples) as a hard `clip-path: path()` with a
+   3 px ink rim on a layer underneath - never a mask, gradient, blur or opacity fade. Reduced motion / Calm = a plain
+   round drop under the pointer; the headline has no water on touch. Do not bring back the dim or the round lens.
+   Guards: `tests/r63.spec.ts`, `tests/r15.spec.ts` (headline), `tests/r20.spec.ts` (Spider-Sense).
 6. **Neo-brutalism only.** Flat fills, 2-3 px ink borders, hard offset shadows, chunky display type, tracked mono
    labels. Never add glassmorphism, frosted blur panels, soft drop shadows, soft or neon gradients, glow effects,
    skeuomorphic textures, 3D renders or AI imagery. New effects must look printed / mechanical (stamps, tape,

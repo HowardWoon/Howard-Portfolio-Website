@@ -6,8 +6,9 @@ import { PORTRAIT_GLYPHS } from '@/lib/story-glyphs';
 import { useCalm } from '@/lib/motion-pref';
 import { ContourField } from './fx/contour-field';
 import { FieldReel, type ReelItem } from './field-reel';
+import { FlipCard } from './flip-card';
 import { InstitutionSeal } from './institution-seal';
-import { gapTime, publishStoryProgress, storyTime } from '@/lib/story-progress';
+import { gapTime, publishStoryProgress, STORY_GAP_AT, storyTime } from '@/lib/story-progress';
 import { rereadScroll, scrollFrame } from '@/lib/scroll-frame';
 
 /**
@@ -253,6 +254,18 @@ const CODE = [
   ['›', "cgpa          4.00 · Dean's Honours List"],
   ['✓', 'parse complete · 0 warnings'],
 ] as const;
+
+/** the window in which the terminal types line `i` (the back of the ID prints the same line in the same window) */
+const typeSeg = (i: number) => seg(0.24 + i * 0.018, 0.255 + i * 0.018);
+// R64 turn-over ID. Scroll: it arrives back side up and turns to its face while it falls (story time). Hand: it can be
+// turned from the moment it has landed until the crest scan's paper lid starts to close over it (playhead).
+const ID_TURN = [0.08, 0.145] as const;
+const ID_LIVE = [storyTime(0.15), storyTime(STORY_GAP_AT)] as const;
+// The back of the ID carries the two list lines the terminal parses, split into their own words (no new text)
+const ID_FIELDS = [3, 4].map((line) => {
+  const [key, value] = CODE[line][1].split(/\s{2,}/);
+  return { line, key: key.toUpperCase(), items: value.split(' · ') };
+});
 
 const AWARDS = [
   { text: '2ND PLACE · SUPERVITY AUTOPILOT ASIA HACKATHON', fill: 'bg-pop-yellow' },
@@ -673,54 +686,106 @@ export default function BuildStory() {
           </div>
 
           {/* ---------------------------------------------------------------- 01 ENROL + 02 PARSE: the student ID */}
-          <div aria-hidden className="bs-seg bs-fade-out bs-layer" style={seg(0.8, 0.86)}>
+          {/* R64: the ID is a turn-over card (components/flip-card.tsx). It arrives back side up and turns to its face
+              as it lands (scroll), and once it has landed a visitor can turn it by hand until the story moves it on.
+              Only then is it a control; the rest of the time it is hidden from assistive technology like the stage. */}
+          <div className="bs-seg bs-fade-out bs-layer" style={seg(0.8, 0.86)}>
             <div className="bs-seg bs-id-move" style={seg(0.4, 0.5)}>
               <div className="bs-seg bs-id-shift" style={seg(0.2, 0.27)}>
                 <div className="bs-seg bs-id-drop" style={seg(0.03, 0.15)}>
-                  <div className="bs-card bs-idcard relative overflow-hidden rounded-[22px] border-3 border-ink bg-paper text-ink">
-                    <div className="flex items-center justify-between gap-2 border-b-3 border-ink bg-pop-orange px-4 py-2">
-                      <div className="flex min-w-0 items-center gap-2">
-                        <InstitutionSeal crest="um" size="badge" stampIn={false} />
-                        <span className="font-display text-[clamp(0.8rem,2.6vw,0.95rem)] font-extrabold tracking-[0.02em]">
-                          UNIVERSITI MALAYA
+                  <FlipCard
+                    className="bs-idcard"
+                    ariaLabel="Flip student ID"
+                    turn={seg(...ID_TURN)}
+                    live={ID_LIVE}
+                    front={
+                      <div className="relative overflow-hidden rounded-[22px] border-3 border-ink bg-paper text-ink">
+                        <div className="flex items-center justify-between gap-2 border-b-3 border-ink bg-pop-orange px-4 py-2">
+                          <div className="flex min-w-0 items-center gap-2">
+                            <InstitutionSeal crest="um" size="badge" stampIn={false} />
+                            <span className="font-display text-[clamp(0.8rem,2.6vw,0.95rem)] font-extrabold tracking-[0.02em]">
+                              UNIVERSITI MALAYA
+                            </span>
+                          </div>
+                          <span className="font-mono text-xs font-extrabold tracking-[0.14em]">STUDENT ID</span>
+                        </div>
+                        <div className="grid grid-cols-[34%_1fr] gap-3 p-3 sm:gap-4 sm:p-4">
+                          <div className="bs-photo relative aspect-[413/591] overflow-hidden rounded-xl border-3 border-ink">
+                            <Portrait photoSeg={seg(0.22, 0.32)} mosaicSeg={seg(0.27, 0.37)} />
+                            <span className="bs-seg bs-scan" style={seg(0.22, 0.37)} />
+                          </div>
+                          <dl className="min-w-0 space-y-1.5 font-mono text-[clamp(0.8rem,1.9vw,0.85rem)] leading-tight">
+                            <div>
+                              <dt className="font-bold text-ink-muted">NAME</dt>
+                              <dd className="font-display text-[clamp(0.8rem,2.6vw,1rem)] font-extrabold">
+                                HOWARD WOON HAO ZHE
+                              </dd>
+                            </div>
+                            <div>
+                              <dt className="font-bold text-ink-muted">FACULTY</dt>
+                              <dd className="font-extrabold">COMPUTER SCIENCE & IT</dd>
+                            </div>
+                            <div>
+                              <dt className="font-bold text-ink-muted">PROGRAMME</dt>
+                              <dd className="font-extrabold">B.COMP.SC. (SOFTWARE ENGINEERING)</dd>
+                            </div>
+                            <div className="flex items-end justify-between gap-2 pt-1">
+                              <div>
+                                <dt className="font-bold text-ink-muted">CGPA</dt>
+                                <dd className="font-display text-[clamp(0.9rem,3vw,1.3rem)] font-extrabold">4.00</dd>
+                              </div>
+                              <span className="bs-barcode h-7 w-[46%] shrink-0" />
+                            </div>
+                          </dl>
+                        </div>
+                        <span className="bs-seg bs-stamp bs-stamp-orange" style={seg(0.13, 0.19)}>
+                          ENROLLED
                         </span>
                       </div>
-                      <span className="font-mono text-xs font-extrabold tracking-[0.14em]">STUDENT ID</span>
-                    </div>
-                    <div className="grid grid-cols-[34%_1fr] gap-3 p-3 sm:gap-4 sm:p-4">
-                      <div className="bs-photo relative aspect-[413/591] overflow-hidden rounded-xl border-3 border-ink">
-                        <Portrait photoSeg={seg(0.22, 0.32)} mosaicSeg={seg(0.27, 0.37)} />
-                        <span className="bs-seg bs-scan" style={seg(0.22, 0.37)} />
+                    }
+                    back={
+                      // The machine side. Its fields are the terminal's own lines, and each one is printed on the card
+                      // in the same window in which the terminal types it: turn the card early and the fields are
+                      // empty, turn it after the parse and they are filled.
+                      <div className="flex h-full flex-col overflow-hidden rounded-[22px] border-3 border-ink bg-paper text-ink">
+                        <div className="flex items-center justify-between gap-2 border-b-3 border-ink bg-ink px-4 py-2 text-white">
+                          <span className="font-mono text-xs font-extrabold tracking-[0.14em]">STUDENT ID</span>
+                          <span className="font-mono text-xs font-extrabold tracking-[0.14em]">HWZ-2026</span>
+                        </div>
+                        <dl className="min-h-0 flex-1 space-y-2 p-3 font-mono text-xs leading-tight sm:p-4">
+                          {ID_FIELDS.map((f) => (
+                            <div key={f.key}>
+                              <dt className="font-bold text-ink-muted">{f.key}</dt>
+                              <dd className="bs-id-slot mt-1">
+                                <span className="bs-seg bs-type flex flex-wrap gap-1" style={typeSeg(f.line)}>
+                                  {f.items.map((t) => (
+                                    <span
+                                      key={t}
+                                      className="rounded-md border-2 border-ink bg-white px-1.5 py-0.5 font-extrabold"
+                                    >
+                                      {t}
+                                    </span>
+                                  ))}
+                                </span>
+                              </dd>
+                            </div>
+                          ))}
+                        </dl>
+                        <div className="flex items-end gap-3 px-3 pb-3 sm:px-4 sm:pb-4">
+                          <span
+                            className="bs-seg bs-type shrink-0 font-mono text-xs font-extrabold"
+                            // starts with the terminal's last line and ends before the crest-scan gap (the terminal's
+                            // own window runs on across the gap, where the card can no longer be turned)
+                            style={seg(0.24 + (CODE.length - 1) * 0.018, STORY_GAP_AT)}
+                          >
+                            {CODE[CODE.length - 1][0]} {CODE[CODE.length - 1][1]}
+                          </span>
+                          <span className="bs-barcode h-6 min-w-0 flex-1" />
+                        </div>
                       </div>
-                      <dl className="min-w-0 space-y-1.5 font-mono text-[clamp(0.8rem,1.9vw,0.85rem)] leading-tight">
-                        <div>
-                          <dt className="font-bold text-ink-muted">NAME</dt>
-                          <dd className="font-display text-[clamp(0.8rem,2.6vw,1rem)] font-extrabold">
-                            HOWARD WOON HAO ZHE
-                          </dd>
-                        </div>
-                        <div>
-                          <dt className="font-bold text-ink-muted">FACULTY</dt>
-                          <dd className="font-extrabold">COMPUTER SCIENCE & IT</dd>
-                        </div>
-                        <div>
-                          <dt className="font-bold text-ink-muted">PROGRAMME</dt>
-                          <dd className="font-extrabold">B.COMP.SC. (SOFTWARE ENGINEERING)</dd>
-                        </div>
-                        <div className="flex items-end justify-between gap-2 pt-1">
-                          <div>
-                            <dt className="font-bold text-ink-muted">CGPA</dt>
-                            <dd className="font-display text-[clamp(0.9rem,3vw,1.3rem)] font-extrabold">4.00</dd>
-                          </div>
-                          <span className="bs-barcode h-7 w-[46%] shrink-0" />
-                        </div>
-                      </dl>
-                    </div>
-                    <span className="bs-seg bs-stamp bs-stamp-orange" style={seg(0.13, 0.19)}>
-                      ENROLLED
-                    </span>
-                  </div>
-                  <div className="bs-seg bs-source-tag" style={seg(0.46, 0.52)}>
+                    }
+                  />
+                  <div aria-hidden className="bs-seg bs-source-tag" style={seg(0.46, 0.52)}>
                     SOURCE · UM
                   </div>
                 </div>
@@ -740,11 +805,7 @@ export default function BuildStory() {
                 </div>
                 <div className="space-y-1 bg-ink p-3 font-mono text-[clamp(0.8rem,1.9vw,0.9rem)] leading-snug text-white sm:p-4">
                   {CODE.map(([mark, line], i) => (
-                    <div
-                      key={line}
-                      className="bs-seg bs-type whitespace-nowrap"
-                      style={seg(0.24 + i * 0.018, 0.255 + i * 0.018)}
-                    >
+                    <div key={line} className="bs-seg bs-type whitespace-nowrap" style={typeSeg(i)}>
                       <span
                         className={mark === '✓' ? 'text-pop-mint' : mark === '$' ? 'text-pop-yellow' : 'text-pop-cyan'}
                       >

@@ -3105,6 +3105,69 @@ html[data-xray-mode]
   width: var(--card-w);
   container-type: inline-size;
 }
+/* R64 turn-over ID (components/flip-card.tsx, after React Bits FlipCard). The scroll turns .bs-flip-turn from the
+   card's back to its face inside its own story window; a hand turns .bs-flip-rotor (inline transform, only while it is
+   off its face). The hard slab under the card is the same 8 px offset block every .bs-card has, as an element, so it
+   can narrow while the card is edge on (cos(), with the full slab as the fallback). No blur, no glare. */
+.bs-flip {
+  position: relative;
+  perspective: 1100px;
+  border-radius: 22px;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.bs-flip[data-live] {
+  pointer-events: auto;
+}
+.bs-flip:focus-visible {
+  outline: 3px solid var(--pop-blue, #2b4bff);
+  outline-offset: 12px;
+}
+.bs-flip-shadow {
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+  background: var(--shadow, #ffc700);
+  translate: 8px 8px;
+  pointer-events: none;
+}
+@supports (transform: scaleX(calc(cos(10deg) * 1))) {
+  .bs-flip-shadow {
+    --turned: calc((1 - var(--e)) * 180deg + var(--hand, 0deg));
+    transform: scaleX(calc(0.05 + 0.95 * cos(var(--turned)) * cos(var(--turned))));
+  }
+}
+.bs-flip-turn {
+  position: relative;
+  transform-style: preserve-3d;
+  rotate: y calc((1 - var(--e)) * 180deg);
+}
+.bs-flip-rotor {
+  position: relative;
+  transform-style: preserve-3d;
+}
+.bs-flip-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.bs-flip-front {
+  position: relative;
+  transform: rotateY(0deg);
+}
+.bs-flip-back {
+  position: absolute;
+  inset: 0;
+  transform: rotateY(180deg);
+}
+/* an empty field on the back: a ruled line the parse prints on */
+.bs-id-slot {
+  min-height: 1.75rem;
+  border-bottom: 2px dashed var(--ink);
+  padding-bottom: 4px;
+}
 .bs-id-drop {
   position: relative;
   opacity: min(1, calc(var(--t) * 3));
