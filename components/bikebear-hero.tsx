@@ -10,44 +10,74 @@ import { TextRoll } from './fx/text-roll';
 import { TiltCard } from './tilt-card';
 import { toLocal } from '@/lib/to-local';
 import { SpiderReveal } from './spider-reveal';
+import { createLiquid } from '@/lib/liquid';
 import { BauhausSolid } from './fx/bauhaus-solid';
 import { FX } from '@/lib/fx';
 
 /**
- * X-ray magnifier headline.
- * Perf fix: the cursor position is written straight into CSS custom properties
+ * Hero headline with the R63 water reveal.
+ * Perf fix: the water's outline is written straight into two clip paths
  * (no React state → no re-render on every mousemove).
  * A11y fix: the duplicated overlay copy is aria-hidden so screen readers read the headline once.
  */
+// nothing shows until the first frame of water (every browser understands this one)
+const HEADLINE_CLOSED = 'circle(0px at 0px 0px)';
+
 function MagnifiedHeadline() {
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const waterRef = React.useRef<HTMLDivElement>(null);
+  const rimRef = React.useRef<HTMLDivElement>(null);
 
-  const setVars = (x: number, y: number, on: boolean) => {
-    const el = containerRef.current;
-    if (!el) return;
-    el.style.setProperty('--mx', `${x}px`);
-    el.style.setProperty('--my', `${y}px`);
-    el.dataset.hover = on ? 'true' : 'false';
-  };
-
-  // Mouse / pen only. On phones a tap fires a synthetic mousemove with no mouseleave, which used to
-  // leave a magnifier circle frozen on screen. R24 (owner): the TORCHLIGHT is back - while the mouse is on the headline
-  // the headline dims to 25 % and the lens is the bright beam. The lens still has no clip-path transition (never trails).
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (e.pointerType === 'touch' || !containerRef.current) return;
-    const { x, y } = toLocal(containerRef.current, e.clientX, e.clientY);
-    setVars(x, y, true);
-  };
-
-  // Scrolling moves the text under a still cursor → the magnifier would freeze in the wrong place.
-  // Switch it off on scroll; the next mouse move switches it back on at the right spot.
+  // R63 (owner: the dimmed headline looked "so blur, like haze", and the round lens "like a torchlight ... i want
+  // water, with ripples, like swimming"). The headline no longer dims. A body of water follows the mouse over it
+  // (lib/liquid.ts: it swims after the pointer, drags a tail, leaves rings) and the headline reads through it in
+  // white on the interactive blue, inside a hard ink rim. Mouse / pen only: on phones a tap fires a synthetic move
+  // with no leave, which used to leave a lens frozen on screen.
   React.useEffect(() => {
-    const off = () => {
-      const el = containerRef.current;
-      if (el?.dataset.hover === 'true') setVars(-1000, -1000, false);
+    const el = containerRef.current;
+    const water = waterRef.current;
+    const rim = rimRef.current;
+    if (!el || !water || !rim) return;
+    const still =
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+      document.documentElement.dataset.motion === 'calm';
+    const paths = typeof CSS !== 'undefined' && CSS.supports('clip-path', "path('M0 0L1 1')");
+    const liquid = createLiquid(({ inner, outer, radius, x, y }) => {
+      if (radius <= 0) water.style.clipPath = rim.style.clipPath = HEADLINE_CLOSED;
+      else if (paths) {
+        water.style.clipPath = `path('${inner}')`;
+        rim.style.clipPath = `path('${outer}')`;
+      } else {
+        water.style.clipPath = `circle(${radius.toFixed(1)}px at ${x.toFixed(1)}px ${y.toFixed(1)}px)`;
+        rim.style.clipPath = `circle(${(radius + 3).toFixed(1)}px at ${x.toFixed(1)}px ${y.toFixed(1)}px)`;
+      }
+    }, still);
+    const size = () => Math.round(Math.min(96, Math.max(58, el.clientWidth * 0.115)));
+    const on = (e: PointerEvent) => {
+      if (e.pointerType === 'touch') return;
+      const p = toLocal(el, e.clientX, e.clientY);
+      liquid.point(p.x, p.y);
+      if (el.dataset.hover !== 'true') {
+        el.dataset.hover = 'true';
+        liquid.show(size());
+      }
     };
+    const off = () => {
+      if (el.dataset.hover !== 'true') return;
+      el.dataset.hover = 'false';
+      liquid.hide();
+    };
+    // Scrolling moves the text under a still cursor: the water would sit in the wrong place. It drains on scroll;
+    // the next mouse move brings it back at the right spot.
+    el.addEventListener('pointermove', on, { passive: true });
+    el.addEventListener('pointerleave', off);
     window.addEventListener('scroll', off, { passive: true });
-    return () => window.removeEventListener('scroll', off);
+    return () => {
+      liquid.destroy();
+      el.removeEventListener('pointermove', on);
+      el.removeEventListener('pointerleave', off);
+      window.removeEventListener('scroll', off);
+    };
   }, []);
 
   const headlineClass =
@@ -55,18 +85,9 @@ function MagnifiedHeadline() {
   const chipClass = 'inline-block my-1 px-2 xs:px-3 border-3 rounded-xl xs:rounded-2xl -rotate-1';
 
   return (
-    <div
-      ref={containerRef}
-      onPointerMove={handlePointerMove}
-      onPointerLeave={() => setVars(-1000, -1000, false)}
-      data-hover="false"
-      style={{ ['--mx' as string]: '-1000px', ['--my' as string]: '-1000px' }}
-      className="group/headline relative space-y-2"
-    >
+    <div ref={containerRef} data-hover="false" className="group/headline relative space-y-2">
       {/* Base Normal Text */}
-      <h2
-        className={`${headlineClass} text-ink transition-opacity duration-300 group-data-[hover=true]/headline:opacity-25 fx-letterpress fx-aberration`}
-      >
+      <h2 className={`${headlineClass} text-ink fx-letterpress fx-aberration`}>
         ENGINEERING <br />
         {FX.headlineStamp ? (
           // FX-05 stamp, in CSS since R14 (.fx-stamp-in): the words are in the server HTML from the first paint
@@ -78,26 +99,27 @@ function MagnifiedHeadline() {
         STAND OUT IN <br />A NOISY WORLD.
       </h2>
 
-      {/* Scaled X-Ray Magnification Text (decorative duplicate) */}
+      {/* The water (decorative): its hard ink rim, then the same headline in white on blue, both cut to the water's
+          shape. Nothing is drawn until the mouse is on the headline. */}
       <div
+        ref={rimRef}
         aria-hidden="true"
-        className={`${headlineClass} text-pop-blue absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-150 group-data-[hover=true]/headline:opacity-100`}
-        style={{
-          ...(FX.heroInspection
-            ? {
-                WebkitTextStroke: '2px #0a0a0a',
-                clipPath: 'circle(70px at var(--mx) var(--my))',
-              }
-            : {
-                transform: 'scale(1.15)',
-                transformOrigin: 'var(--mx) var(--my)',
-                WebkitMaskImage: 'radial-gradient(circle 140px at var(--mx) var(--my), black 60%, transparent 100%)',
-                maskImage: 'radial-gradient(circle 140px at var(--mx) var(--my), black 60%, transparent 100%)',
-              }),
-        }}
+        data-liquid-rim
+        className="absolute inset-0 !mt-0 pointer-events-none bg-ink"
+        style={{ clipPath: HEADLINE_CLOSED }}
+      />
+      <div
+        ref={waterRef}
+        aria-hidden="true"
+        data-liquid
+        className={`${headlineClass} absolute inset-0 !mt-0 pointer-events-none bg-pop-blue text-white`}
+        style={{ WebkitTextStroke: '2px #0a0a0a', clipPath: HEADLINE_CLOSED }}
       >
         ENGINEERING <br />
-        <span className={`${chipClass} bg-pop-red border-ink text-white`}>SYSTEMS TO</span> <br />
+        <span className={`${chipClass} bg-white border-ink text-ink`} style={{ WebkitTextStroke: '0' }}>
+          SYSTEMS TO
+        </span>{' '}
+        <br />
         STAND OUT IN <br />A NOISY WORLD.
       </div>
 
