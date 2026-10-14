@@ -31,6 +31,7 @@ import {
   Camera,
 } from 'lucide-react';
 import { SectionBackdrop } from './fx/section-backdrop';
+import { SectionPaper } from './fx/section-paper';
 
 type FilterCategory = 'all' | 'corporate' | 'leadership' | 'academic';
 
@@ -743,6 +744,8 @@ export default function ExperienceSection() {
       id="experience"
       className="fx-tide-surface fx-dot-plane fx-sheet relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-clip border-t-3 border-ink"
     >
+      {/* R71: this section prints on its own paper */}
+      <SectionPaper stock="ledger" />
       <SectionBackdrop layout="c" />
       {/* Bauhaus accents */}
       <div

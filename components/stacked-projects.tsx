@@ -34,6 +34,7 @@ import {
   Focus,
 } from 'lucide-react';
 import { SectionBackdrop } from './fx/section-backdrop';
+import { SectionPaper } from './fx/section-paper';
 
 interface ProjectData {
   id: string;
@@ -383,6 +384,8 @@ export default function StackedProjects() {
       id="projects"
       className="fx-tide-surface fx-dot-plane fx-sheet relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-x-clip border-t-3 border-ink"
     >
+      {/* R71: this section prints on its own paper */}
+      <SectionPaper stock="mat" />
       <SectionBackdrop layout="b" />
       {FX.ambientOrbits ? <AmbientOrbits side="left" square="bg-pop-blue" /> : null}
       <div className="relative max-w-7xl mx-auto space-y-16 sm:space-y-20">

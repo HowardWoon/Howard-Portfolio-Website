@@ -390,6 +390,16 @@ When the kit is updated, re-copy `components/tokyo-diorama/` and its spec from t
 without the owner. A sign pin whose building is off the scene's edge is `visibility: hidden` (scripts/device-sweep.mjs
 skips hidden text since R68).
 
+R71 (owner: "make sure my website background for every section, menu must be special attractive, innovative, add
+some more visual effect on background"), same rule - layers:
+
+| Feature      | Where                                                     | Rules                                                                                                                                                                                                                                                                                                                                         |
+| ------------ | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Paper stocks | components/fx/section-paper.tsx, `.paper-*`, each section | Every content section prints on its own paper, chosen for its content: About = isometric engineer's paper, Projects = cutting mat, Experience = accounting ledger, Honors = guilloche security print, Contact = postal waves under an airmail band. Ink lines only, computed SVG tiles, the section's first child, `fx-depth` lean on desktop |
+| Header ruler | site-header.tsx `.hdr-ruler` (HEADER_RULER)               | The header is a drawing's title strip: a millimetre ruler (tick every 4 px, long every 20 px) along its bottom edge, inside the solid white bar; decorative, no pointer                                                                                                                                                                       |
+
+Guard: tests/r71.spec.ts. A new section gets its own paper too (never a copy of a neighbour's).
+
 ## H. R24 guardrails - type floor, emblem geometry, hero water reveal, neo-brutalism only (owner complaints, tested)
 
 Howard: "the font family and font size is too ugly and small, slim, i dont want this font problem happen again" and

@@ -44,7 +44,11 @@ for (const [name, w, h] of [
         const cs = getComputedStyle(l);
         return {
           id: sec.id,
-          first: sec.firstElementChild === l,
+          // first, or right after the section's own paper (R71), which lies under it: both paint before the content
+          first:
+            sec.firstElementChild === l ||
+            (sec.firstElementChild?.hasAttribute('data-paper') === true &&
+              l.previousElementSibling === sec.firstElementChild),
           hidden: l.getAttribute('aria-hidden'),
           pointer: cs.pointerEvents,
           anchor: cs.overflowAnchor,

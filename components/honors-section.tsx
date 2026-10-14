@@ -37,6 +37,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { SectionBackdrop } from './fx/section-backdrop';
+import { SectionPaper } from './fx/section-paper';
 
 interface HonorItem {
   id: string;
@@ -510,6 +511,8 @@ export default function HonorsSection() {
       id="honors"
       className="fx-tide-surface fx-dot-plane fx-sheet relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-clip border-t-3 border-ink flex flex-col"
     >
+      {/* R71: this section prints on its own paper */}
+      <SectionPaper stock="guilloche" />
       <SectionBackdrop layout="a" />
       {/* Structural grid + Bauhaus accents */}
       {FX.ambientOrbits ? <AmbientOrbits side="left" square="bg-white" /> : null}

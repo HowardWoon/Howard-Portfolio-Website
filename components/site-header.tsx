@@ -10,6 +10,7 @@ import { ExternalLink, FileText, Search } from 'lucide-react';
 import { FX, SPRING_STAMP } from '@/lib/fx';
 import { useClockActive } from '@/lib/section-clock';
 import { SpFill } from './fx/sp-fill';
+import { HEADER_RULER } from './fx/section-paper';
 import type { PaletteWindow } from './command-palette';
 import { openResume } from '@/lib/resume';
 import { flapTo } from '@/lib/split-flap';
@@ -137,6 +138,8 @@ export function SiteHeader() {
       data-condensed={condensed ? '' : undefined}
       className="site-header fixed top-0 left-0 w-full flex items-center justify-between gap-2 min-[400px]:gap-3 z-[9999] bg-white border-b-3 border-ink pb-2.5 sm:pb-3 pt-[max(0.625rem,var(--safe-top))] sm:pt-[max(0.75rem,var(--safe-top))] pl-[max(0.875rem,var(--safe-left))] pr-[max(0.875rem,var(--safe-right))] sm:pl-[max(2.5rem,var(--safe-left))] sm:pr-[max(2.5rem,var(--safe-right))] lg:pl-[max(4rem,var(--safe-left))] lg:pr-[max(4rem,var(--safe-right))]"
     >
+      {/* R71: the header is a drawing's title strip: a printed millimetre ruler along its bottom edge */}
+      {FX.headerRuler ? <span aria-hidden className="hdr-ruler" style={{ backgroundImage: HEADER_RULER }} /> : null}
       <m.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}

@@ -5322,6 +5322,44 @@ html[data-fx-pause='on'] :not([data-offscreen]) > .sb-layer .sb-piece {
   }
 }
 
+/* ================================================================ R71 paper stocks + header ruler
+   (components/fx/section-paper.tsx; owner: "make sure my website background for every section, menu must be special
+   attractive, innovative"). Each section prints on its own paper; the header is a drawing's title strip with a
+   millimetre ruler along its bottom edge. Ink on paper only, hard lines, painted once (no per-frame work). */
+.paper-stock {
+  z-index: 0;
+}
+.paper-print {
+  background-repeat: repeat;
+  /* the paper fades out under the section title band and at the bottom edge with hard steps (no soft gradient):
+     the top 64 px and bottom 32 px are left plain, so a section boundary stays a clean 3 px ink rule */
+  clip-path: inset(88px 0 56px 0);
+}
+.paper-airmail-band {
+  height: 12px;
+  background: repeating-linear-gradient(-45deg, #0a0a0a 0 9px, transparent 9px 18px);
+  opacity: 0.85;
+  border-bottom: 3px solid #0a0a0a;
+}
+@media print {
+  .paper-stock,
+  .hdr-ruler {
+    display: none;
+  }
+}
+.hdr-ruler {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 7px;
+  pointer-events: none;
+  /* minor tick every 4 px, a longer one every 20 px (computed in the component) */
+  background-repeat: repeat-x;
+  background-position: left bottom;
+  opacity: 0.55;
+}
+
 /* ================================================================ R69 portrait water (components/spider-reveal.tsx;
    owner: "i dont like the black border wave ... i like the kind of wave as the website i shown" - water-drop ripples).
    The drop's rim and its spreading rings are a light, see-through layer (no black outline); inside the drop, rings of
