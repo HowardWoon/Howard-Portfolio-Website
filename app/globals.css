@@ -5322,6 +5322,28 @@ html[data-fx-pause='on'] :not([data-offscreen]) > .sb-layer .sb-piece {
   }
 }
 
+/* ================================================================ R69 portrait water (components/spider-reveal.tsx;
+   owner: "i dont like the black border wave ... i like the kind of wave as the website i shown" - water-drop ripples).
+   The drop's rim and its spreading rings are a light, see-through layer (no black outline); inside the drop, rings of
+   light keep spreading from its centre (--x / --y / --ph written by the component). Hard-stop rings: no blur. */
+.spider-rim {
+  background: rgb(255 255 255 / 0.72);
+}
+.spider-ripples {
+  /* (--ph comes from the water layer above it: it must not be declared here) */
+  --a: max(0px, calc(var(--ph, 0) * 1px - 15.5px));
+  --b: calc(var(--ph, 0) * 1px);
+  --c: min(18px, calc(var(--ph, 0) * 1px + 2.5px));
+  background: repeating-radial-gradient(
+    circle at var(--x, 50%) var(--y, 50%),
+    rgb(255 255 255 / 0.26) 0 var(--a),
+    rgb(255 255 255 / 0) var(--a) var(--b),
+    rgb(255 255 255 / 0.26) var(--b) var(--c),
+    rgb(255 255 255 / 0) var(--c) 18px
+  );
+  pointer-events: none;
+}
+
 /* ================================================================ R66 branches on the section rail
    (components/spine-branches.tsx, after React Bits BranchedMenu). The rail is the trunk; a key grows a panel with one
    row per heading in its section. Square elbows and 3 px strokes; the blue "reach" is drawn out along its length to

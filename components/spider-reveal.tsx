@@ -57,18 +57,26 @@ export function SpiderReveal() {
     let suitedNow = false;
     let pointer: { cx: number; cy: number } | null = null; // last mouse position while over the photo
 
-    const liquid = createLiquid(({ inner, outer, radius, x, y }) => {
-      if (radius <= 0) layer.style.clipPath = rim.style.clipPath = CLOSED;
-      else if (paths) {
-        layer.style.clipPath = `path('${inner}')`;
-        rim.style.clipPath = `path('${outer}')`;
-      } else {
-        layer.style.clipPath = `circle(${radius.toFixed(1)}px at ${x.toFixed(1)}px ${y.toFixed(1)}px)`;
-        rim.style.clipPath = `circle(${(radius + 3).toFixed(1)}px at ${x.toFixed(1)}px ${y.toFixed(1)}px)`;
-      }
-      // the size of the water, for anything that wants to know (tests/r20 reads it)
-      layer.style.setProperty('--r', `${radius.toFixed(1)}px`);
-    }, still);
+    const liquid = createLiquid(
+      ({ inner, outer, radius, x, y }) => {
+        if (radius <= 0) layer.style.clipPath = rim.style.clipPath = CLOSED;
+        else if (paths) {
+          layer.style.clipPath = `path('${inner}')`;
+          rim.style.clipPath = `path('${outer}')`;
+        } else {
+          layer.style.clipPath = `circle(${radius.toFixed(1)}px at ${x.toFixed(1)}px ${y.toFixed(1)}px)`;
+          rim.style.clipPath = `circle(${(radius + 3).toFixed(1)}px at ${x.toFixed(1)}px ${y.toFixed(1)}px)`;
+        }
+        // the size of the water, for anything that wants to know (tests/r20 reads it)
+        layer.style.setProperty('--r', `${radius.toFixed(1)}px`);
+        // R69: where the drop is, for the rings that spread inside it (.spider-ripples), and how far they have spread
+        layer.style.setProperty('--x', `${x.toFixed(1)}px`);
+        layer.style.setProperty('--y', `${y.toFixed(1)}px`);
+        if (!still) layer.style.setProperty('--ph', (((performance.now() / 1000) * 13) % 18).toFixed(2));
+      },
+      still,
+      { pond: true },
+    );
 
     // The water scales with the photo: ~100 px on the 520 px desktop frame, ~66 px on a 350 px phone frame
     const lensRadius = () => Math.round(Math.min(108, Math.max(62, frame.clientWidth * 0.19)));
@@ -188,12 +196,13 @@ export function SpiderReveal() {
 
   return (
     <>
-      {/* the water's hard ink rim: the same shape, 3 px larger, under the picture it shows */}
+      {/* R69 (owner: no black border, ripples like water): the water's edge and the rings it sends out are a light,
+          see-through layer under the picture it shows - the drop's glossy rim, and the rings spreading on the photo */}
       <div
         ref={rimRef}
         aria-hidden
         data-liquid-rim
-        className="absolute inset-0 pointer-events-none bg-ink"
+        className="spider-rim absolute inset-0 pointer-events-none"
         style={{ clipPath: CLOSED }}
       />
       <div
@@ -212,6 +221,8 @@ export function SpiderReveal() {
           loading="lazy"
           quality={85}
         />
+        {/* R69: rings of light spreading out from the drop's centre, seen through the water */}
+        <span aria-hidden className="spider-ripples absolute inset-0" />
       </div>
 
       {/* Corner sticker = Spider-Sense toggle (spin pauses while it is hovered or focused) */}

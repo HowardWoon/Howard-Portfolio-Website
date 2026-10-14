@@ -27,7 +27,8 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
    than weight 600, only Inter / Bricolage Grotesque / JetBrains Mono; icons are computed, never hand-typed points;
    no glass, blur panels, soft shadows, glows or soft gradients. Guarded by `tests/r24.spec.ts`
    (`.agents/rules/30-design-system.md` section H). The hero headline never dims under the mouse and
-   the hero reveals (headline, portrait) are water, not a round torchlight lens (owner, R63): keep it.
+   the hero reveals (headline, portrait) are water, not a round torchlight lens (owner, R63); the portrait water has
+   light water-drop ripples and no black outline (owner, R69): keep it.
 
 ## 3. Start-of-task checklist (every single task)
 

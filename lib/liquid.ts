@@ -68,7 +68,13 @@ function blob(x: number, y: number, r: number, time: number, seed: number, wob: 
   return d + 'Z';
 }
 
-export function createLiquid(write: (p: LiquidPaths) => void, calm = false): Liquid {
+/**
+ * R69 options. `pond`: the drop also sends out rings while it rests (a ring every ~0.55 s from its centre, spreading
+ * to about 2.4x its size and thinning out), like a drop landing in still water. Off = rings only behind a moving drop.
+ */
+export type LiquidOptions = { pond?: boolean };
+
+export function createLiquid(write: (p: LiquidPaths) => void, calm = false, opts: LiquidOptions = {}): Liquid {
   const head = { x: 0, y: 0, vx: 0, vy: 0 };
   const target = { x: 0, y: 0 };
   const tail = Array.from({ length: TAIL }, () => ({ x: 0, y: 0 }));
@@ -77,6 +83,7 @@ export function createLiquid(write: (p: LiquidPaths) => void, calm = false): Liq
   let radius = 0; // current head radius
   let want = 0; // target head radius
   let travelled = 0;
+  let still = 0; // seconds since the last pond ring
   let raf = 0;
   let last = 0;
   let clock = 0;
@@ -99,11 +106,13 @@ export function createLiquid(write: (p: LiquidPaths) => void, calm = false): Liq
       if (grow > 0)
         for (const g of rings) {
           const e = 1 - Math.pow(1 - g.t, 2);
-          const rr = radius * (1.08 + 0.62 * e);
-          const band = 3.2 * (1 - g.t * g.t);
+          // a pond ring starts inside the drop and spreads well past it; a wake ring stays near the drop
+          const rr = opts.pond ? radius * (0.35 + 2.05 * e) : radius * (1.08 + 0.62 * e);
+          const band = (opts.pond ? 4.5 : 3.2) * (1 - g.t * g.t);
           if (band < 0.9 || radius < 4) continue;
-          d += blob(g.x, g.y, rr + band / 2, clock, g.x, wob * 0.5);
-          d += blob(g.x, g.y, rr - band / 2, clock, g.x, wob * 0.5, 1, 0, -1);
+          const ringWob = wob * (opts.pond ? 0.18 : 0.5); // pond rings stay round, like rings on still water
+          d += blob(g.x, g.y, rr + band / 2, clock, g.x, ringWob);
+          d += blob(g.x, g.y, rr - band / 2, clock, g.x, ringWob, 1, 0, -1);
         }
     }
     return d || HIDDEN;
@@ -148,7 +157,14 @@ export function createLiquid(write: (p: LiquidPaths) => void, calm = false): Liq
       if (radius > 6 && radius < 220 && travelled > Math.max(70, radius * 1.1)) {
         travelled = 0;
         rings.push({ x: head.x, y: head.y, t: 0 });
-        if (rings.length > 3) rings.shift();
+        if (rings.length > (opts.pond ? 5 : 3)) rings.shift();
+      }
+      // R69 pond: while the drop rests, it keeps sending rings out from its centre
+      still += dt;
+      if (opts.pond && radius > 6 && radius < 220 && Math.abs(want - radius) < 1 && still > 0.55) {
+        still = 0;
+        rings.push({ x: head.x, y: head.y, t: 0 });
+        if (rings.length > 5) rings.shift();
       }
       const speed = Math.hypot(head.vx, head.vy);
       if (radius > 6 && radius < 220 && speed > 900 && drops.length < 6 && Math.random() < dt * 9) {
@@ -163,7 +179,7 @@ export function createLiquid(write: (p: LiquidPaths) => void, calm = false): Liq
           t: 0,
         });
       }
-      for (const g of rings) g.t += dt / 0.85;
+      for (const g of rings) g.t += dt / (opts.pond ? 1.6 : 0.85);
       rings = rings.filter((g) => g.t < 1);
       for (const q of drops) {
         q.t += dt / 0.7;

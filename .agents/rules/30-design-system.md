@@ -391,6 +391,11 @@ Howard: "the font family and font size is too ugly and small, slim, i dont want 
    (`lib/liquid.ts`: head on a spring, tail, wobbling rim, thin ink ripples) as a hard `clip-path: path()` with a
    3 px ink rim on a layer underneath - never a mask, gradient, blur or opacity fade. Reduced motion / Calm = a plain
    round drop under the pointer; the headline has no water on touch. Do not bring back the dim or the round lens.
+   R69 (owner, on the PORTRAIT: "i dont like the black border wave, i like the kind of wave as the website i shown" -
+   water-drop ripple references): the portrait's water has NO black outline. Its rim and the rings it sends out are a
+   light, see-through layer (`.spider-rim`, white 72 %), the drop keeps sending round rings out while it rests
+   (`createLiquid(..., { pond: true })`), and rings of light spread inside it (`.spider-ripples`, a hard-stop
+   repeating-radial-gradient, no blur). The headline keeps its ink rim. Do not put a black border back on the portrait.
    Guards: `tests/r63.spec.ts`, `tests/r15.spec.ts` (headline), `tests/r20.spec.ts` (Spider-Sense).
 6. **Neo-brutalism only.** Flat fills, 2-3 px ink borders, hard offset shadows, chunky display type, tracked mono
    labels. Never add glassmorphism, frosted blur panels, soft drop shadows, soft or neon gradients, glow effects,

@@ -60,8 +60,9 @@ test.describe('desktop 1440x900', () => {
     const local = { x: px - frame.x, y: py - frame.y };
     expect(Math.abs((at.l + at.r) / 2 - local.x), 'the water rests under the pointer (x)').toBeLessThan(14);
     expect(Math.abs((at.t + at.b) / 2 - local.y), 'the water rests under the pointer (y)').toBeLessThan(14);
-    // the rim is the same water, about 3 px larger all round, on an ink layer UNDER the picture layer
-    const out = extent(await clip(page, rim));
+    // the rim is the same water, about 3 px larger all round, on a layer UNDER the picture layer (its first outline is
+    // the drop itself; R69: the rings it sends out follow it in the same path)
+    const out = extent('M' + (await clip(page, rim)).split('M')[1]);
     expect(out.r - out.l).toBeGreaterThan(at.r - at.l + 3);
     expect(out.r - out.l).toBeLessThan(at.r - at.l + 12);
     const order = await page.evaluate(() => {
@@ -74,7 +75,14 @@ test.describe('desktop 1440x900', () => {
       };
     });
     expect(order.rimFirst).toBe(true);
-    expect(order.ink).toBe('rgb(10, 10, 10)');
+    // R69 (owner: 'i dont like the black border wave'): the rim is a light, see-through water edge, never black
+    expect(order.ink).toBe('rgba(255, 255, 255, 0.72)');
+    // and inside the drop, rings of light spread from its centre
+    expect(
+      await page
+        .locator('[data-xray] > [data-liquid] .spider-ripples')
+        .evaluate((e) => getComputedStyle(e).backgroundImage),
+    ).toMatch(/^repeating-radial-gradient/);
     expect(decodeURIComponent(order.photo)).toContain('/images/spiderman.jpg');
     // the rim breathes: the outline is not the same a moment later, though the mouse has not moved
     const d1 = await clip(page, water);
@@ -114,7 +122,13 @@ test.describe('desktop 1440x900', () => {
     const rest = extent(await clip(page, water));
     expect(Math.abs((rest.l + rest.r) / 2 - (frame.width - 80))).toBeLessThan(14);
     expect(rest.r - rest.l).toBeLessThan((still.r - still.l) * 1.2);
-    expect(extent(await clip(page, rim)).subpaths, 'the wake has died away').toBe(rest.subpaths);
+    // R69: at rest it is a drop in still water: it keeps sending rings out, and they spread well past the drop
+    await expect
+      .poll(async () => {
+        const o = extent(await clip(page, rim));
+        return o.subpaths > rest.subpaths && o.r - o.l > (rest.r - rest.l) * 1.6;
+      })
+      .toBe(true);
   });
 
   test('the water never leaves the picture frame visible outside it, and never widens the page', async ({ page }) => {
