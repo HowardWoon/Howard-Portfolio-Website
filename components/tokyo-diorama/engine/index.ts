@@ -61,7 +61,15 @@ export interface DioramaHandle {
     /** where the player is drawn this frame (between the last two physics steps) */
     drawn(): number[];
     /** the camera's position and its distance to what it looks at */
-    cam(): { pos: number[]; dist: number };
+    cam(): {
+      pos: number[];
+      dist: number;
+      walk?: number[];
+      target?: number[];
+      camD?: number;
+      blend?: number;
+      frames?: number;
+    };
     teleport(x: number, y: number, z: number): void;
     traffic(): Traffic;
     setMove(x: number, y: number, run?: boolean): void;
@@ -284,7 +292,8 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
     camera.lookAt(t);
   };
 
-  const walkCam = { yaw: 0, pitch: 0.42, dist: 5.6, target: new THREE.Vector3(), pos: new THREE.Vector3() };
+  // R70: camD = how far behind the target the camera actually is (the wanted distance, shortened by walls)
+  const walkCam = { yaw: 0, pitch: 0.42, dist: 5.6, camD: 5.6, target: new THREE.Vector3(), pos: new THREE.Vector3() };
   let mode: Mode = 'view';
   let blend = 0; // 0 = orbit, 1 = follow camera
   const blendFrom = { pos: new THREE.Vector3(), look: new THREE.Vector3() };
@@ -487,13 +496,18 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
     // thin poles / posts / sign boards, used to pull it in and out several times a second (the whole scene lurched).
     const hit = world.raycast(walkCam.target, tmpV, walkCam.dist + 0.3, true);
     const d = Math.max(0.7, Math.min(walkCam.dist, hit - 0.3));
-    const desired = tmpV.clone().multiplyScalar(d).add(walkCam.target);
-    const gy = world.groundAt(desired.x, desired.z, desired.y, 0.05, scratch);
+    // R70: the camera sits ON the line behind the (smoothly followed) target, at a distance that eases: in quickly when a
+    // wall comes between, out gently. Its position is not chased separately any more - chasing it made the camera fall
+    // behind while walking, then lunge forward every 2 - 3 frames (a 2 -> 5 m/s sawtooth, measured: the shaking).
+    if (instant) walkCam.camD = d;
+    else walkCam.camD += (d - walkCam.camD) * (1 - Math.exp(-dt * (d < walkCam.camD ? 22 : 5)));
+    const desired = tmpV.clone().multiplyScalar(walkCam.camD).add(walkCam.target);
+    // keep it above the GROUND (street, curbs, pavement, steps: tops under 1.2 m). R70: it used to take any top under
+    // the camera - an awning, an eave, a sign box 3.5 m up - so walking along the street lifted and dropped the camera
+    // by ~3 cm every frame or two (measured: the vertical judder in the owner's view).
+    const gy = world.groundAt(desired.x, desired.z, Math.min(desired.y, 1.2), 0.05, scratch);
     desired.y = Math.max(desired.y, (gy > -Infinity ? gy : 0) + 0.3);
-    const closer = desired.distanceTo(walkCam.target) < walkCam.pos.distanceTo(walkCam.target) - 0.05;
-    // in: quickly but smoothly (it used to jump in one frame); out: gently, so it never pumps
-    if (instant) walkCam.pos.copy(desired);
-    else walkCam.pos.lerp(desired, 1 - Math.exp(-dt * (closer ? 26 : 6)));
+    walkCam.pos.copy(desired);
   };
 
   /* ------------------------------------------------------------ loop */
@@ -510,7 +524,9 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
   let prevBrake = false;
   let lastNear: Hotspot | null = null;
 
+  let tickCount = 0;
   const tick = () => {
+    tickCount++;
     const dt = Math.min(0.05, clock.getDelta());
     simulate(dt);
     render();
@@ -661,7 +677,11 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
     if (mode === 'walk') updateWalkCamera(dt);
     const target = mode === 'walk' ? 1 : 0;
     const prevBlend = blend;
-    blend = calm ? target : THREE.MathUtils.clamp(blend + (target > blend ? dt / 1.1 : -dt / 1.1), 0, 1);
+    // R70 (the shaking, found by logging every frame): this used to read 'target > blend ? +step : -step'. With the
+    // walk camera fully in (target 1, blend 1) that took a step BACK towards the orbit camera, the next frame a step
+    // forward again: the camera flicked ~5 cm between the two cameras every 2 - 3 frames for as long as one walked.
+    // Now it moves towards the target and stops there.
+    blend = calm ? target : blend + THREE.MathUtils.clamp(target - blend, -dt / 1.1, dt / 1.1);
     if (mode === 'view') {
       if (!controls.autoRotate && !calm) {
         idleTimer += dt;
@@ -942,7 +962,15 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
     debug: {
       player: () => P.pos.clone(),
       drawn: () => P.drawn.toArray(),
-      cam: () => ({ pos: camera.position.toArray(), dist: camera.position.distanceTo(walkCam.target) }),
+      cam: () => ({
+        pos: camera.position.toArray(),
+        dist: camera.position.distanceTo(walkCam.target),
+        walk: walkCam.pos.toArray(),
+        target: walkCam.target.toArray(),
+        camD: walkCam.camD,
+        blend,
+        frames: tickCount,
+      }),
       teleport(x, y, z) {
         P.pos.set(x, y, z);
         P.prev.copy(P.pos);

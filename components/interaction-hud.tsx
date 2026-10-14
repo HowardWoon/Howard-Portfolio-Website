@@ -123,6 +123,9 @@ export function InteractionHud() {
     if (!FX.shortcuts) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey || isTypingTarget(e.target)) return;
+      // R70: a key something else has already claimed (the Tokyo diorama's walk mode takes W A S D E, Shift, Space and
+      // the arrows while it has the keyboard) is not a shortcut
+      if (e.defaultPrevented) return;
       if (!keysOn() && e.key !== 'Escape') return; // switched off in the shortcut sheet
       // never act behind the boot gate or another dialog (palette, lightbox, certificate)
       const s = getInteraction();

@@ -1,6 +1,10 @@
 import * as THREE from 'three';
 
-const GAME_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'Spacebar']);
+// R70: every key walk mode uses. While the street has the keyboard these are CLAIMED (default prevented, read first in
+// the capture phase), so the site's own one-letter shortcuts stand aside: S used to toggle skim mode on and off many
+// times a second while the player walked backwards (the whole page flickered), T jumped to the top, G started the tour.
+const GAME_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'Spacebar', 'Shift']);
+const GAME_LETTERS = new Set(['w', 'a', 's', 'd', 'e']);
 
 /**
  * Walk-mode input. Keyboard keys are only captured while the diorama has focus (or the pointer is over it), so the
@@ -66,8 +70,8 @@ export class Input {
       t.addEventListener(type, fn as EventListener, opts);
       this.off.push(() => t.removeEventListener(type, fn as EventListener, opts));
     };
-    on(window, 'keydown', (e: KeyboardEvent) => this.onKey(e, true));
-    on(window, 'keyup', (e: KeyboardEvent) => this.onKey(e, false));
+    on(window, 'keydown', (e: KeyboardEvent) => this.onKey(e, true), { capture: true });
+    on(window, 'keyup', (e: KeyboardEvent) => this.onKey(e, false), { capture: true });
     on(window, 'blur', () => this.reset());
     on(document, 'visibilitychange', () => this.reset());
     on(container, 'pointerenter', () => (this.hover = true));
@@ -94,7 +98,7 @@ export class Input {
     if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
     const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
     if (down) {
-      if (GAME_KEYS.has(e.key)) e.preventDefault();
+      if (GAME_KEYS.has(e.key) || (GAME_LETTERS.has(k) && !e.metaKey && !e.ctrlKey && !e.altKey)) e.preventDefault();
       if ((k === ' ' || k === 'Spacebar') && !e.repeat) this.jumpQueued = true;
       if ((k === 'e' || k === 'Enter') && !e.repeat && t?.tagName !== 'BUTTON') this.interactQueued = true;
       this.keys.add(k);

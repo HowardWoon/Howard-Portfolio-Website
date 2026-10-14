@@ -13,7 +13,7 @@ type Handle = {
   debug: {
     player(): { toArray(): number[] };
     drawn(): number[];
-    cam(): { pos: number[]; dist: number };
+    cam(): { pos: number[]; dist: number; blend?: number };
     teleport(x: number, y: number, z: number): void;
     setMove(x: number, y: number, run?: boolean): void;
     step(s: number, draw?: boolean): void;
@@ -82,6 +82,30 @@ test('walking is smooth at 180 Hz: the player is drawn between physics steps and
   expect(r[0].camera, 'camera step variation, walking north').toBeLessThan(1.5);
   for (const w of r)
     expect(w.jerk, 'the largest sudden change of the camera movement (m per frame)').toBeLessThan(0.05);
+});
+
+// The real cause of the shaking (found by logging every frame in a real-time walk): the orbit -> walk camera blend
+// stepped BACK from 1 whenever it had arrived ('target > blend ? +step : -step'), so in walk mode the camera flicked
+// ~5 cm towards the orbit camera every 2 - 3 frames, for as long as one walked. Once in, it must stay exactly in.
+test('in walk mode the camera stays fully in the walk camera, every frame (no flicking back to the orbit camera)', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await openDiorama(page);
+  const blends = await page.evaluate(() => {
+    const d = (window as W).__diorama!;
+    d.setMode('walk');
+    d.debug.step(2, false); // the blend in (1.1 s)
+    d.debug.setMove(0, 1, false);
+    const out: number[] = [];
+    for (let f = 0; f < 180; f++) {
+      d.debug.step(1 / 60, false);
+      out.push(d.debug.cam().blend ?? -1);
+    }
+    d.debug.setMove(0, 0, false);
+    return out;
+  });
+  expect(new Set(blends)).toEqual(new Set([1]));
 });
 
 test('the section signs stay up in walk mode, over the buildings in view, and still lead to their sections', async ({

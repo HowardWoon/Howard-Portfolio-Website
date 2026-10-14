@@ -362,7 +362,11 @@ the last two 120 Hz physics steps (`P.prev` -> `P.pos` = `P.drawn`), the walk ca
 ray (`world.raycast(..., true)`) ignores moving actors and thin poles / signs (< 0.7 m both ways) and eases in instead of
 snapping; the five section signs show in walk mode too. The 3D street loads only when the section is on screen, and on
 software-drawn WebGL (SwiftShader / llvmpipe / Basic Render: no graphics chip, and CI) it waits for START 3D - building it
-for every test that scrolled past pushed CI past its 1-hour limit (run 129). Guard: tests/r70.spec.ts. These are
+for every test that scrolled past pushed CI past its 1-hour limit (run 129). The shaking itself was a kit bug: the orbit -> walk camera blend stepped back from 1 every other frame
+('target > blend ? +step : -step'), so the walk camera flicked ~5 cm towards the orbit camera every 2 - 3 frames; it now
+moves towards its target and stops (view angle per frame 0.32 -> 0.005 deg). Walk mode CLAIMS W A S D E, Shift, Space and
+the arrows (capture phase, default prevented) and `components/interaction-hud.tsx` ignores claimed keys: S used to
+toggle skim mode many times a second while walking backwards, T jumped to the top, G started the tour. Guard: tests/r70.spec.ts. These are
 changes to the kit's engine: keep them when the kit is re-copied.
 
 When the kit is updated, re-copy `components/tokyo-diorama/` and its spec from the kit, never edit the engine by hand
