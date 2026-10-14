@@ -6,6 +6,7 @@ import { SignalKey } from './signal-key';
 import { openResume } from '@/lib/resume';
 import { flapIn } from '@/lib/split-flap';
 import { DotField } from './fx/dot-field';
+import { TearStub } from './tear-stub';
 
 export function SiteFooter() {
   const linkedInUrl = 'https://www.linkedin.com/in/howard-woon-hao-zhe-730b9337a/';
@@ -62,7 +63,10 @@ export function SiteFooter() {
       <DotField />
       <div className="relative z-[1] max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-start gap-14 lg:gap-10">
         {/* Left: System of Record / Title Block (blueprint-style drawing frame); bg-ink keeps the dots out of it */}
-        <div className="flex-1 w-full border-3 border-white rounded-[22px] overflow-hidden flex flex-col relative bg-ink shadow-[5px_5px_0_0_#FFFFFF] sm:shadow-[8px_8px_0_0_#FFFFFF]">
+        <div
+          data-tear-frame
+          className="flex-1 w-full border-3 border-white rounded-[22px] overflow-hidden flex flex-col relative bg-ink shadow-[5px_5px_0_0_#FFFFFF] sm:shadow-[8px_8px_0_0_#FFFFFF]"
+        >
           {/* Header Bar */}
           <div className="flex flex-wrap items-center justify-between border-b-3 border-white bg-white/[0.04] px-6 py-5 gap-4">
             <span className="text-sm font-mono font-extrabold text-white tracking-[0.12em] uppercase">
@@ -75,7 +79,7 @@ export function SiteFooter() {
           </div>
 
           {/* Body */}
-          <div className="p-4 xs:p-6 md:p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10">
+          <div className="relative p-4 xs:p-6 md:p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10">
             {/* Identity */}
             <div className="space-y-1">
               <div className="text-xs font-mono font-bold text-white/60 tracking-[0.12em] mb-4 uppercase">
@@ -101,8 +105,9 @@ export function SiteFooter() {
               <p className="text-sm font-mono font-semibold text-white/80">B.Comp.Sc. / Software Engineering</p>
             </div>
 
-            {/* Metadata */}
-            <div className="space-y-2">
+            {/* Metadata. R65: this cell is the block's tear-off stub (components/tear-stub.tsx): it carries the
+                document's number, so tearing it off hands the document over = opens the resume, like the RESUME link */}
+            <TearStub className="space-y-2" ariaLabel="Tear off to open the resume" onTear={() => openResume()}>
               <div className="text-xs font-mono font-bold text-white/60 tracking-[0.12em] mb-4 uppercase">
                 Document Metadata
               </div>
@@ -123,7 +128,7 @@ export function SiteFooter() {
                   KUL-MY-01
                 </span>
               </div>
-            </div>
+            </TearStub>
           </div>
 
           {/* R21 status row: availability is LIVE (mint); location is a neutral fact */}

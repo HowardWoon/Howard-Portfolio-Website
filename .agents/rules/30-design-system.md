@@ -330,6 +330,25 @@ Guard: tests/r64.spec.ts. Lesson: a flip is taken from the face the card is head
 reached (a quick second tap chose the same face again); a story window that ends after `STORY_GAP_AT` is stretched
 across the crest-scan gap.
 
+R65 / R66 (owner: React Bits TearTicket on the footer's System Handover block, BranchedMenu on the section rail; "must
+function ... everything is related to neo brutalism"), same rule - layers, brutalist remixes, no new dependency (the
+`motion` and `@hugeicons/*` packages the originals ask for are NOT installed and must not be added):
+
+| Feature       | Where                                                            | Rules                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------- | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tear-off stub | components/tear-stub.tsx, site-footer.tsx, `.tear-*`             | The Document Metadata cell is the block's counterfoil. The perforation is read from layout (down its left when it has a neighbour there, across its top when the cells stack) and again on every resize. Mouse / pen: pull it (bridges stretch as white fibres and snap from the far end; let go early = springs back). The perforation is the real button ("Tear off to open the resume", 44 px, touch + keyboard): it tears by itself. Torn = `openResume()`, then a new stub is fed in. The stub's words stay plain text (the stub is not the button). A finger on the stub scrolls the page. No transform at rest |
+| Rail branches | components/spine-branches.tsx, section-spine.tsx, `.sp-branch-*` | A key that is pointed at or focused grows a panel: section name + one row per visible `h3` INSIDE that section, read from the page when it opens (the menu has no words of its own). A row scrolls to its heading's layout position, clear of the header. Blue reach line (stroke-dashoffset) to the row pointed at, else the heading being read. Square elbows, 3 px ink, hard shadow, rem sizes. Tab goes key -> its rows; Escape folds it; it folds when the rail steps aside or is dragged; a press inside it never starts the Press Lever. Only where the rail shows (>= 1400 px)                                |
+
+Guards: tests/r65.spec.ts (stub, and the zoom-in word check below), tests/r66.spec.ts (branches).
+
+R65 zoom diagnosis (owner: "diagnose the zoom in zoom out effect"). Measured at 17 zoom steps, 25 % to 500 % of a
+1920 x 1080 screen: no sideways overflow and no page error at any step. The defect was zoomed IN: a Tailwind
+`grid-cols-3` is `repeat(3, minmax(0, 1fr))`, so a column can be squeezed below its longest word and the word is cut
+in two (20 words at 175 % - 300 %). Lesson: a row of small text tiles is a wrapping flex row (`flex-wrap`, tiles
+`flex-1`, marked `data-metrics`): a flex item never goes below its longest word, and when three no longer fit the
+third takes the next row at full width (no orphan hole). Where three fit, the widths are the same as the grid's.
+Lesson: after a pull or drag, do not leave a "this was a drag" flag set for the next press; compare times instead.
+
 ## H. R24 guardrails - type floor, emblem geometry, hero water reveal, neo-brutalism only (owner complaints, tested)
 
 Howard: "the font family and font size is too ugly and small, slim, i dont want this font problem happen again" and

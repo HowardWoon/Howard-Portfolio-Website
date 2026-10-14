@@ -5322,6 +5322,159 @@ html[data-fx-pause='on'] :not([data-offscreen]) > .sb-layer .sb-piece {
   }
 }
 
+/* ================================================================ R66 branches on the section rail
+   (components/spine-branches.tsx, after React Bits BranchedMenu). The rail is the trunk; a key grows a panel with one
+   row per heading in its section. Square elbows and 3 px strokes; the blue "reach" is drawn out along its length to
+   the row being pointed at or read (stroke-dashoffset: paint only). Sizes in rem, so it follows the R50 scale. */
+.sp-branch-stem {
+  position: absolute;
+  left: calc(100% + 3px);
+  width: 0.9rem;
+  height: 3px;
+  margin-top: -1.5px;
+  background: var(--ink);
+}
+.sp-branch-lines {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+.sp-branch-base,
+.sp-branch-reach {
+  fill: none;
+  stroke-width: 3;
+  stroke-linejoin: miter;
+}
+.sp-branch-base {
+  stroke: var(--ink);
+  stroke-linecap: square;
+}
+.sp-branch-reach {
+  stroke: var(--pop-blue, #2b4bff);
+  transition: stroke-dashoffset 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.sp-branch-row {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-height: 2rem;
+  padding: 0.4rem 0.75rem 0.4rem 2.5rem;
+  text-align: left;
+  font:
+    800 0.8rem/1.25 var(--font-mono),
+    monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+  outline: none;
+  cursor: pointer;
+}
+.sp-branch-row:hover,
+.sp-branch-row:focus-visible {
+  background: #e3e8ff;
+}
+.sp-branch-row:last-child {
+  border-radius: 0 0 0.5rem 0.5rem;
+}
+.sp-branch-dot {
+  position: absolute;
+  left: 1.55rem;
+  top: 50%;
+  width: 0.55rem;
+  height: 0.55rem;
+  translate: 0 -50%;
+  border: 2px solid var(--ink);
+  background: #fff;
+}
+.sp-branch-row[data-on] .sp-branch-dot {
+  background: var(--pop-blue, #2b4bff);
+}
+@media (prefers-reduced-motion: reduce) {
+  .sp-branch-reach {
+    transition: none;
+  }
+}
+html[data-motion='calm'] .sp-branch-reach {
+  transition: none;
+}
+
+/* ================================================================ R65 tear-off stub (components/tear-stub.tsx, after
+   React Bits TearTicket; the footer's Document Metadata cell). The stub is the cell plus an ink sheet that reaches the
+   block's edges; the perforation is two white scalloped lines (one stays on the block, one leaves with the stub);
+   the bridges are white fibres. Transform / opacity only, written by the component while it is being torn. */
+.tear-stub {
+  position: relative;
+}
+.tear-piece {
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+}
+.tear-paper {
+  position: absolute;
+  z-index: -1;
+  background: var(--ink);
+}
+.tear-svg {
+  position: absolute;
+  overflow: visible;
+  pointer-events: none;
+}
+.tear-svg path {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2;
+}
+.tear-piece > .tear-svg {
+  z-index: -1;
+}
+.tear-fibres path {
+  stroke-linecap: round;
+  opacity: 0;
+}
+/* the perforation is the button: no face of its own, the two scalloped lines are what is seen */
+.tear-key {
+  position: absolute;
+  z-index: 2;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+}
+.tear-key:focus-visible {
+  outline: 3px solid var(--pop-blue, #2b4bff);
+  outline-offset: -3px;
+}
+.tear-stub[data-torn] .tear-key {
+  pointer-events: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .tear-piece {
+    cursor: grab;
+  }
+  .tear-stub[data-grabbing] .tear-piece {
+    cursor: grabbing;
+  }
+}
+/* while the stub is off its seat the block must not clip it; the new stub is fed in with the clip back on */
+[data-tear-frame][data-tearing] {
+  overflow: visible;
+}
+@keyframes tear-feed {
+  from {
+    transform: translateX(105%);
+  }
+  to {
+    transform: none;
+  }
+}
+.tear-piece.tear-feed {
+  animation: tear-feed 0.5s steps(7, end) both;
+}
+
 /* ================================================================ R50 zoom support (owner: "when user zoom in or zoom
    out of my website, everything would fail ... make sure viewer must have best experience")
 

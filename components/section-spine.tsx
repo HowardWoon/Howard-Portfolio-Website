@@ -6,6 +6,7 @@ import { SECTIONS, SECTION_IDS } from '@/lib/sections';
 import React from 'react';
 import { useActiveSection } from '@/lib/use-active-section';
 import { scrollFrame } from '@/lib/scroll-frame';
+import { SpineBranches } from './spine-branches';
 
 /**
  * FX-20: fixed scroll-spy rail. Only on very wide screens (>= 1400 px) where the right gutter is empty.
@@ -145,6 +146,7 @@ export function SectionSpine() {
     };
     const down = (e: PointerEvent) => {
       if (e.pointerType === 'touch' || e.button !== 0) return;
+      if (e.target instanceof Element && e.target.closest('[data-branches]')) return; // a press in a branch is not a drag
       start = { y: e.clientY, p: map(scrollFrame().y, ys, ps), id: e.pointerId };
     };
     const move = (e: PointerEvent) => {
@@ -209,6 +211,21 @@ export function SectionSpine() {
   }, []);
   const activeIndex = SECTIONS.findIndex((s) => s.id === active);
 
+  // R66 branches (components/spine-branches.tsx): a key that is pointed at or focused grows a panel listing the
+  // headings inside its section. It closes a moment after the mouse has left the rail and the panel, when focus
+  // leaves them, on Escape, and whenever the rail steps aside or is being dragged.
+  const [branch, setBranch] = React.useState<string | null>(null);
+  const keyRefs = React.useRef<Record<string, HTMLAnchorElement | null>>({});
+  const closeTimer = React.useRef(0);
+  const openBranch = (id: string) => {
+    window.clearTimeout(closeTimer.current);
+    setBranch(id);
+  };
+  React.useEffect(() => () => window.clearTimeout(closeTimer.current), []);
+  React.useEffect(() => {
+    if (atFooter || scrubbing) setBranch(null);
+  }, [atFooter, scrubbing]);
+
   if (!FX.sectionSpine) return null;
 
   return (
@@ -218,6 +235,19 @@ export function SectionSpine() {
       data-at-footer={atFooter ? '' : undefined}
       data-scrubbing={scrubbing ? '' : undefined}
       title={FX.pressLever ? 'Drag along the rail to scrub the page' : undefined}
+      onMouseEnter={() => window.clearTimeout(closeTimer.current)}
+      onMouseLeave={() => {
+        window.clearTimeout(closeTimer.current);
+        closeTimer.current = window.setTimeout(() => setBranch(null), 180);
+      }}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setBranch(null);
+      }}
+      onKeyDown={(e) => {
+        if (e.key !== 'Escape' || !branch) return;
+        keyRefs.current[branch]?.focus();
+        setBranch(null);
+      }}
       className={`fixed right-[max(1rem,var(--safe-right))] top-1/2 -translate-y-1/2 z-[9000] hidden min-[1400px]:flex flex-col items-center gap-0.5 rounded-[18px] border-3 border-ink bg-white px-1 py-1.5 shadow-brutal-sm transition-[opacity,translate] duration-300 ${
         atFooter ? 'pointer-events-none opacity-0 translate-x-4' : ''
       }`}
@@ -240,37 +270,54 @@ export function SectionSpine() {
         const on = active === s.id;
         const preview = previewId === s.id;
         return (
-          <a
-            key={s.id}
-            href={`#${s.id}`}
-            aria-current={on ? 'location' : undefined}
-            // R50: sizes in rem (1rem = 17 px where the rail shows), so the rail follows the large-canvas scale
-            className="group relative flex items-center justify-center min-h-[2.353rem] min-w-[2.353rem] outline-none"
-          >
-            <span
-              className={`pointer-events-none absolute right-[calc(100%+22px)] top-1/2 -translate-y-1/2 whitespace-nowrap font-mono text-xs font-extrabold uppercase tracking-[0.1em] px-2 py-1 border-2 border-ink rounded-md bg-white shadow-brutal-xs transition-[opacity,transform] duration-200 ${
-                on
-                  ? 'opacity-0 translate-x-0 min-[1680px]:opacity-100 group-hover:opacity-100 group-focus-visible:opacity-100'
-                  : 'opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 group-focus-visible:opacity-100 group-focus-visible:translate-x-0'
-              }`}
+          <React.Fragment key={s.id}>
+            <a
+              ref={(el) => {
+                keyRefs.current[s.id] = el;
+              }}
+              href={`#${s.id}`}
+              onMouseEnter={() => openBranch(s.id)}
+              onFocus={() => openBranch(s.id)}
+              aria-current={on ? 'location' : undefined}
+              // R50: sizes in rem (1rem = 17 px where the rail shows), so the rail follows the large-canvas scale
+              className="group relative flex items-center justify-center min-h-[2.353rem] min-w-[2.353rem] outline-none"
             >
-              <span aria-hidden className="mr-1.5 text-ink-muted">
-                {String(i + 1).padStart(2, '0')}
+              <span
+                // (an open branch carries the section's name itself: the name tags stand down while one is open)
+                className={`${branch ? 'hidden' : ''} pointer-events-none absolute right-[calc(100%+22px)] top-1/2 -translate-y-1/2 whitespace-nowrap font-mono text-xs font-extrabold uppercase tracking-[0.1em] px-2 py-1 border-2 border-ink rounded-md bg-white shadow-brutal-xs transition-[opacity,transform] duration-200 ${
+                  on
+                    ? 'opacity-0 translate-x-0 min-[1680px]:opacity-100 group-hover:opacity-100 group-focus-visible:opacity-100'
+                    : 'opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 group-focus-visible:opacity-100 group-focus-visible:translate-x-0'
+                }`}
+              >
+                <span aria-hidden className="mr-1.5 text-ink-muted">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                {s.label}
               </span>
-              {s.label}
-            </span>
-            <span
-              aria-hidden
-              data-preview={preview ? 'true' : undefined}
-              // R45: an upright numbered key. The current one is ink with a white number and fills blue from the bottom
-              // with reading progress (blue = where you are; white reads on ink and on blue); hover = blue tint
-              className={`sp-mag relative grid place-items-center overflow-hidden w-[1.765rem] h-[1.765rem] rounded-lg ${on ? 'bg-ink text-white' : preview ? 'bg-[#E3E8FF] text-ink' : 'bg-white text-ink group-hover:bg-[#E3E8FF]'} ${preview ? 'scale-110' : ''} border-3 border-ink font-mono text-xs font-extrabold leading-none tabular-nums transition-colors duration-200 group-focus-visible:ring-2 group-focus-visible:ring-pop-blue`}
-            >
-              {/* FX-99: the active marker fills with the section's reading progress (Section Clock writes --sp) */}
-              {FX.instrumentRail && on ? <SpFill forId={s.id} className="fx-sp-fill" /> : null}
-              <span className="relative">{String(i + 1).padStart(2, '0')}</span>
-            </span>
-          </a>
+              <span
+                aria-hidden
+                data-preview={preview ? 'true' : undefined}
+                // R45: an upright numbered key. The current one is ink with a white number and fills blue from the bottom
+                // with reading progress (blue = where you are; white reads on ink and on blue); hover = blue tint
+                className={`sp-mag relative grid place-items-center overflow-hidden w-[1.765rem] h-[1.765rem] rounded-lg ${on ? 'bg-ink text-white' : preview ? 'bg-[#E3E8FF] text-ink' : 'bg-white text-ink group-hover:bg-[#E3E8FF]'} ${preview ? 'scale-110' : ''} border-3 border-ink font-mono text-xs font-extrabold leading-none tabular-nums transition-colors duration-200 group-focus-visible:ring-2 group-focus-visible:ring-pop-blue`}
+              >
+                {/* FX-99: the active marker fills with the section's reading progress (Section Clock writes --sp) */}
+                {FX.instrumentRail && on ? <SpFill forId={s.id} className="fx-sp-fill" /> : null}
+                <span className="relative">{String(i + 1).padStart(2, '0')}</span>
+              </span>
+            </a>
+            {/* right after its key in the DOM, so Tab goes from the key into its branch */}
+            {branch === s.id ? (
+              <SpineBranches
+                sectionId={s.id}
+                index={i}
+                label={s.label}
+                anchor={keyRefs.current[s.id] ?? null}
+                reading={on}
+              />
+            ) : null}
+          </React.Fragment>
         );
       })}
     </nav>
