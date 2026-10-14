@@ -154,6 +154,8 @@ export class Traffic {
   catTimer = 2;
   catYaw = 0;
   catSpeed = 0;
+  /** R73: seconds of the cat's zoomies left (it sprints to the far side of its patch) */
+  catDashT = 0;
   events: string[] = [];
   private scratch: Box[] = [];
   private tmpBox = { minX: 0, maxX: 0, minZ: 0, maxZ: 0 };
@@ -477,6 +479,19 @@ export class Traffic {
   }
 
   /* ------------------------------------------------------------ cat */
+  /** R73: the cat's zoomies: off at a sprint to the farthest corner of its patch */
+  catDash() {
+    const z = this.built.catZone;
+    this.catTarget.set(
+      this.catPos.x < (z.minX + z.maxX) / 2 ? z.maxX : z.minX,
+      0,
+      z.minZ + Math.random() * (z.maxZ - z.minZ),
+    );
+    this.catTimer = 3;
+    this.catDashT = 3;
+    this.events.push('meow');
+  }
+
   private updateCat(dt: number, player: PlayerInfo) {
     const z = this.built.catZone;
     const c = this.cat;
@@ -501,7 +516,8 @@ export class Traffic {
       this.catTarget.set(z.minX + Math.random() * (z.maxX - z.minX), 0, z.minZ + Math.random() * (z.maxZ - z.minZ));
       this.catTimer = 2 + Math.random() * 5;
     }
-    const want = d > 0.1 ? (flee ? 3.2 : 0.8) : 0;
+    if (this.catDashT > 0) this.catDashT = Math.max(0, this.catDashT - dt);
+    const want = d > 0.1 ? (flee || this.catDashT > 0 ? 3.2 : 0.8) : 0;
     this.catSpeed += (want - this.catSpeed) * (1 - Math.exp(-dt * 8));
     if (d > 0.01) {
       const step = Math.min(d, this.catSpeed * dt);

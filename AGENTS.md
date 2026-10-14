@@ -116,7 +116,7 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
    painted frame. Guard: `tests/r62`. Zoomed IN (R65): a row of small text tiles is a wrapping flex row, never a
    Tailwind `grid-cols-N` (its `minmax(0, 1fr)` squeezes a column below its longest word). Guard: `tests/r65`.
 
-## 7. Owner standing rules added R63-R70
+## 7. Owner standing rules added R63-R73
 
 1. **React Bits requests** ("integrate the <X /> component from React Bits"): build a brutalist remix of it as a
    layer, from the site's tokens, with NO new dependency (`motion`, `@hugeicons/*` stay uninstalled), no glare, blur
@@ -130,3 +130,9 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
 4. **Smoothness is measured, not assumed:** an animation the owner says "shakes" is logged frame by frame in REAL
    time on the GPU (`--use-angle=d3d11 --enable-gpu --ignore-gpu-blocklist`), not only in a stepped simulation - the
    stepped run missed the R70 camera-blend bug that caused the shaking.
+5. **Sections are never hardcoded (R73, owner: "section must not hardcode, must be dynamic"):** every list of the
+   home-page sections (header nav, command palette, section clock, dock, spine, the 3D street's doors and signs) reads
+   `lib/sections.ts`; per-feature extras are maps keyed by section id. Guard: `tests/r73`.
+6. **3D must look sharp (R73, owner: "why it look so blur?"):** no soft point sprites near the camera, a tight low bloom,
+   fog behind the scene, MSAA on every composer tier (30-design-system E45). Every scene control is clicked in a test
+   that fails on any page error (`tests/r73`).

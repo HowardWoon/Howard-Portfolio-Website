@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import { SECTIONS } from '@/lib/sections';
 import Image from 'next/image';
 import { m } from 'framer-motion';
 import { Magnetic } from './magnetic-button';
@@ -64,13 +65,8 @@ function PressCounter() {
   );
 }
 
-const NAV = [
-  { id: 'about', label: 'About' },
-  { id: 'projects', label: 'Projects' },
-  { id: 'experience', label: 'Experience' },
-  { id: 'honors', label: 'Honors' },
-  { id: 'contact', label: 'Contact' },
-] as const;
+// R73: the one section registry (lib/sections.ts), so a section added there shows up here by itself
+const NAV = SECTIONS;
 
 export function SiteHeader() {
   const ref = useRef<HTMLElement>(null);

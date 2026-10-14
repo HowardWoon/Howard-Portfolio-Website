@@ -13,6 +13,12 @@ export class Weather {
   group = new THREE.Group();
   rainOn = true;
   intensity = 1;
+  /** R73: how hard it rains when it rains (1 = normal); surge() moves it for a while, then it settles back */
+  level = 1;
+  private levelWant = 1;
+  private surgeLeft = 0;
+  private gustT = 0;
+  private readonly wind0 = new THREE.Vector2(-0.9, 0.5);
   private rain: THREE.LineSegments;
   private rainMat: THREE.ShaderMaterial;
   private splash: THREE.Mesh;
@@ -22,7 +28,6 @@ export class Weather {
     [];
   private steamPts: THREE.Points;
   private steamState: { life: number; src: number; vx: number; vz: number }[] = [];
-  private bokehPts: THREE.Points;
   private pointMats: THREE.ShaderMaterial[] = [];
   private streaks: THREE.Mesh[] = [];
   private dummy = new THREE.Object3D();
@@ -192,7 +197,8 @@ export class Weather {
     this.group.add(this.petals);
     this.disposables.push(petalGeo, petalMat);
 
-    /* -------- steam + bokeh: one GPU point system each (2 draw calls instead of 64 sprites) */
+    /* -------- steam: one GPU point system. R73: the 46 soft 'bokeh' discs that used to float on a ring 58 - 103 m out
+       are gone - the VIEW camera sits inside that ring, so some of them filled the lens as huge blurred blobs. */
     const dotTex = softDot();
     const pointMat = (additive: boolean, fog: boolean) => {
       const m = new THREE.ShaderMaterial({
@@ -258,27 +264,6 @@ export class Weather {
         vx: (R() - 0.5) * 0.1,
         vz: (R() - 0.5) * 0.1,
       });
-    const cols = [0xffc700, 0xff4fd8, 0x29e3ff, 0xff7a3a, 0x8e6bff, 0x3ddc97, 0xffffff];
-    const BOKEH = 46;
-    this.bokehPts = mkPoints(BOKEH, pointMat(true, false));
-    {
-      const g = this.bokehPts.geometry;
-      const pos = g.getAttribute('position') as THREE.BufferAttribute;
-      const size = g.getAttribute('size') as THREE.BufferAttribute;
-      const tint = g.getAttribute('tint') as THREE.BufferAttribute;
-      const phase = g.getAttribute('phase') as THREE.BufferAttribute;
-      const c = new THREE.Color();
-      for (let i = 0; i < BOKEH; i++) {
-        const a = R() * Math.PI * 2;
-        const r = 58 + R() * 45;
-        pos.setXYZ(i, Math.cos(a) * r, -14 + R() * 34, Math.sin(a) * r);
-        size.setX(i, 3 + R() * 8);
-        c.set(cols[i % cols.length]);
-        tint.setXYZW(i, c.r, c.g, c.b, 0.18 + R() * 0.2);
-        phase.setX(i, 0.01 + R() * 0.98);
-      }
-    }
-
     /* -------- neon reflections streaking across the wet road */
     const streak = streakTexture();
     const addStreak = (x: number, y: number, z: number, w: number, d: number, color: number, opacity: number) => {
@@ -328,6 +313,21 @@ export class Weather {
     this.rainOn = on;
   }
 
+  /** R73: rain at `level` x normal for `seconds`, then back to the session's own level */
+  surge(level: number, seconds: number) {
+    this.levelWant = level;
+    this.surgeLeft = seconds;
+  }
+
+  /** R73: a gust: the rain leans over and the cherry blossom is blown off the tree */
+  gust(seconds: number) {
+    this.gustT = seconds;
+    for (const s of this.petalState) if (s.rest > 0) this.respawnPetal(s);
+  }
+
+  /** R73: each visit starts with its own rain, from a drizzle to a downpour */
+  baseLevel = 1;
+
   setDensity(drops: number, splashes: number) {
     this.rain.geometry.setDrawRange(0, Math.min(this.maxDrops, drops) * 2);
     (this.splash.geometry as THREE.InstancedBufferGeometry).instanceCount = Math.min(
@@ -339,7 +339,16 @@ export class Weather {
   update(dt: number, camera: THREE.Camera) {
     this.time += dt;
     const k = 1 - Math.exp(-dt * 1.5);
-    this.intensity += ((this.rainOn ? 1 : 0) - this.intensity) * k;
+    if (this.surgeLeft > 0) {
+      this.surgeLeft -= dt;
+      if (this.surgeLeft <= 0) this.levelWant = this.baseLevel;
+    } else this.levelWant = this.baseLevel;
+    this.level += (this.levelWant - this.level) * (1 - Math.exp(-dt * 0.8));
+    this.intensity += ((this.rainOn ? this.level : 0) - this.intensity) * k;
+    // gust: the wind swells and dies over its length (smooth, no jolt)
+    const g = this.gustT > 0 ? Math.sin(Math.PI * Math.min(1, this.gustT / 4.5)) : 0;
+    if (this.gustT > 0) this.gustT = Math.max(0, this.gustT - dt);
+    (this.rainMat.uniforms.uWind.value as THREE.Vector2).copy(this.wind0).multiplyScalar(1 + g * 2.6);
     this.rainMat.uniforms.uTime.value = this.time;
     this.rainMat.uniforms.uIntensity.value = this.intensity;
     this.splashMat.uniforms.uTime.value = this.time;
@@ -356,6 +365,8 @@ export class Weather {
         if (s.rest <= 0) this.respawnPetal(s);
       } else {
         s.p.addScaledVector(s.v, dt);
+        s.p.x -= g * 2.2 * dt;
+        s.p.z += g * 1.2 * dt;
         s.p.x += Math.sin(this.time * 1.7 + i) * 0.25 * dt * sway;
         s.rot.x += s.spin.x * dt * sway;
         s.rot.y += s.spin.y * dt * sway;

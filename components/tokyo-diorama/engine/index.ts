@@ -10,6 +10,7 @@ import { Traffic } from './traffic';
 import { Weather } from './weather';
 import { Soundscape } from './audio';
 import { Input } from './input';
+import { Director, type StreetEvent } from './director';
 import { animatePerson, makePerson, resetActorTextures, disposePerson, type Person } from './actors';
 import { disposeTextures } from './textures';
 
@@ -41,6 +42,8 @@ export interface DioramaOptions extends DioramaCallbacks {
 }
 
 export interface DioramaHandle {
+  /** R73: roll a random street event now (the dice); returns which one */
+  randomEvent(): StreetEvent;
   setMode(m: Mode): void;
   getMode(): Mode;
   setRain(on: boolean): void;
@@ -79,6 +82,12 @@ export interface DioramaHandle {
     camYaw(y: number): void;
     census(): Record<string, number>;
     root(): THREE.Object3D;
+    /** R73: what the camera sees: bloom, fog, distance, pixel ratio, multisampling */
+    look(): { bloom: number; radius: number; fogNear: number; camDist: number; dpr: number; msaa: number };
+    director(): { last: string | null; count: number; available: string[] };
+    event(name: StreetEvent): void;
+    /** no events by themselves (tests) */
+    quiet(): void;
   };
 }
 
@@ -96,7 +105,8 @@ const PROFILES: Record<
   }
 > = {
   high: { dpr: 2, bloom: true, shadows: true, shadow: 2048, drops: 9000, splash: 700, lights: 14, msaa: 4 },
-  medium: { dpr: 1.5, bloom: true, shadows: false, shadow: 1024, drops: 5200, splash: 420, lights: 8, msaa: 0 },
+  // R73: MED is multisampled too (it used to render the composer target without any anti-aliasing: jagged, smeared)
+  medium: { dpr: 1.5, bloom: true, shadows: false, shadow: 1024, drops: 5200, splash: 420, lights: 8, msaa: 4 },
   low: { dpr: 1, bloom: false, shadows: false, shadow: 512, drops: 2600, splash: 220, lights: 5, msaa: 0 },
 };
 
@@ -224,6 +234,19 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
   scene.add(weather.group);
   const audio = new Soundscape();
   const input = new Input(container, canvas);
+  // R73: each visit starts with its own rain, from a light drizzle to a heavy shower
+  weather.baseLevel = weather.level = calm ? 1 : 0.55 + Math.random() * 0.75;
+  const director = new Director({
+    hemi,
+    moon,
+    weather,
+    traffic,
+    built,
+    audio,
+    calm,
+    gift: () => dropCan(),
+    toast: (t) => opts.onToast?.(t),
+  });
 
   /* ------------------------------------------------------------ player */
   const player: Person = makePerson({
@@ -281,7 +304,9 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
   canvas.style.touchAction = 'pan-y';
 
   let fit = 90;
-  const orbit = { theta: -0.52, phi: 0.92, dist: 90 };
+  // R73: each visit opens on its own angle of the block (reduced motion: the classic one)
+  const homeTheta = calm ? -0.52 : -0.52 + (Math.random() - 0.5) * 1.4;
+  const orbit = { theta: homeTheta, phi: 0.92, dist: 90 };
   const setOrbitFromSpherical = () => {
     const t = controls.target;
     camera.position.set(
@@ -304,7 +329,10 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
   let bloom: UnrealBloomPass | null = null;
   const size = new THREE.Vector2(1, 1);
 
-  const bloomView = () => (tier === 'high' ? 0.68 : 0.58);
+  // R73 (owner: "why it look so blur? make my eye fainted"): the bloom was strong (0.68) and wide (radius 0.5), so from
+  // the VIEW camera every lit sign smeared into the next. Now a tight, low halo on the neon only.
+  const BLOOM_RADIUS = 0.16;
+  const bloomView = () => (tier === 'high' ? 0.34 : 0.3);
   const applyTier = () => {
     const p = PROFILES[tier];
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, p.dpr));
@@ -330,7 +358,7 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
       const rt = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: p.msaa });
       composer = new EffectComposer(renderer, rt);
       composer.addPass(new RenderPass(scene, camera));
-      bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), bloomView(), 0.5, 0.9);
+      bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), bloomView(), BLOOM_RADIUS, 0.92);
       composer.addPass(bloom);
       composer.addPass(new OutputPass());
     }
@@ -371,8 +399,16 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
 
   const activate = (h: Hotspot) => {
     if (h.id === 'vending') {
-      audio.clunk();
+      dropCan();
       opts.onToast?.('ガコン！ A cold drink drops out. ¥130');
+      return;
+    }
+    audio.click();
+    opts.onActivate?.(h);
+  };
+  function dropCan() {
+    {
+      audio.clunk();
       const mesh = new THREE.Mesh(canGeo, canMats[cans.length % canMats.length]);
       mesh.castShadow = true;
       mesh.position.copy(built.vendingSlot);
@@ -387,11 +423,8 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
         const old = cans.shift()!;
         built.root.remove(old.mesh);
       }
-      return;
     }
-    audio.click();
-    opts.onActivate?.(h);
-  };
+  }
 
   /* ------------------------------------------------------------ player physics (fixed step) */
   const scratch: Box[] = [];
@@ -521,6 +554,7 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
   let fpsFrames = 0;
   let fpsTime = 0;
   let sinceStart = 0;
+  let slowWindows = 0;
   let prevBrake = false;
   let lastNear: Hotspot | null = null;
 
@@ -537,9 +571,15 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
     fpsTime += dt;
     if (fpsTime > 2.5) {
       const fps = fpsFrames / fpsAcc;
-      if (autoTier && sinceStart > 4 && fps < 38 && tier !== 'low') {
+      // R73: only after two slow windows in a row (one hitch - a tab switch, a GC - used to drop the street to LOW
+      // for good, which looked blurred); and the visitor is told
+      slowWindows = fps < 38 ? slowWindows + 1 : 0;
+      if (autoTier && sinceStart > 4 && slowWindows >= 2 && tier !== 'low') {
         tier = tier === 'high' ? 'medium' : 'low';
+        slowWindows = 0;
+        director.settle();
         applyTier();
+        opts.onToast?.(`Graphics set to ${tier === 'medium' ? 'MED' : 'LOW'} to keep it smooth.`);
       }
       fpsAcc = fpsFrames = fpsTime = 0;
     }
@@ -648,6 +688,7 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
     }
 
     weather.update(dt, camera);
+    director.update(dt);
     built.led.update(calm ? dt * 0.4 : dt);
     const t = traffic.clock;
     built.tv.emissiveIntensity = calm ? 1 : 0.8 + 0.6 * Math.abs(Math.sin(t * 2.3) * Math.sin(t * 5.1));
@@ -709,7 +750,15 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
       controls.update(0);
     }
     // street level fills the screen with lit surfaces: bloom eases off as the camera comes down
-    if (bloom) bloom.strength = THREE.MathUtils.lerp(bloomView(), 0.26, blend);
+    if (bloom) bloom.strength = THREE.MathUtils.lerp(bloomView(), 0.22, blend);
+    // R73: the fog began 90 m from the camera - the VIEW camera is ~70 m out, so the far half of the table was in haze.
+    // Now it starts behind the table's far edge, wherever the camera is; in the street it stays as it was.
+    {
+      const fog = scene.fog as THREE.Fog;
+      const out = camera.position.distanceTo(controls.target);
+      fog.near = THREE.MathUtils.lerp(out + 38, 90, blend);
+      fog.far = THREE.MathUtils.lerp(out + 170, 230, blend);
+    }
     renderer.toneMappingExposure = THREE.MathUtils.lerp(1.18, 1.0, blend);
     const fovWant = mode === 'walk' ? 50 : 32;
     if (Math.abs(camera.fov - fovWant) > 0.05) {
@@ -842,6 +891,7 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
   setRunning();
 
   const handle: DioramaHandle = {
+    randomEvent: () => director.roll(),
     setMode(m) {
       if (m === mode) return;
       if (m === 'walk') {
@@ -877,6 +927,7 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
       autoTier = t === 'auto';
       tier = t === 'auto' ? detectTier(renderer.getContext()) : t;
       sinceStart = 0;
+      director.settle();
       applyTier();
     },
     getTier: () => tier,
@@ -918,7 +969,7 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
         walkCam.dist = 5.6;
         return;
       }
-      orbit.theta = -0.52;
+      orbit.theta = homeTheta;
       orbit.phi = camera.aspect < 0.8 ? 0.78 : 0.92;
       orbit.dist = fit;
       setOrbitFromSpherical();
@@ -933,6 +984,7 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
       document.removeEventListener('visibilitychange', onVis);
       canvas.removeEventListener('webglcontextlost', onLost);
       canvas.removeEventListener('webglcontextrestored', onRestored);
+      director.settle();
       controls.dispose();
       input.dispose();
       audio.dispose();
@@ -1002,6 +1054,19 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
         controls.update(0);
       },
       root: () => built.root,
+      look: () => ({
+        bloom: bloom ? bloom.strength : 0,
+        radius: bloom ? bloom.radius : 0,
+        fogNear: (scene.fog as THREE.Fog).near,
+        camDist: camera.position.distanceTo(controls.target),
+        dpr: renderer.getPixelRatio(),
+        msaa: PROFILES[tier].msaa,
+      }),
+      director: () => ({ last: director.last, count: director.count, available: director.available() }),
+      event: (name) => director.trigger(name),
+      quiet: () => {
+        director.auto = false;
+      },
       census() {
         const out: Record<string, number> = {};
         scene.traverseVisible((o) => {
@@ -1029,6 +1094,12 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
         barrier: +traffic.barrierT.toFixed(2),
         door: +built.door.open.toFixed(2),
         near: near?.id ?? null,
+        rain: weather.rainOn,
+        lights: {
+          hemi: +hemi.intensity.toFixed(3),
+          moon: +moon.intensity.toFixed(3),
+          lamps: built.lights.map((l) => +l.light.intensity.toFixed(3)),
+        },
       }),
     },
   };

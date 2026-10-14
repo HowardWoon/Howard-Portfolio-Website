@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react';
+import { SECTION_IDS } from './sections';
 
 /**
  * FX-95 Section Clock store (docs/R18-LIVING-ENGINEERING-WORKSPACE-PLAN.md §3). One scroll engine
@@ -9,7 +10,8 @@ import { useSyncExternalStore } from 'react';
  *   - `relay` 0 -> 1 over the last stretch before the next section's top (the desk hands its material over).
  * Visual consumers get CSS variables written straight onto them; React only hears about `active` changes.
  */
-export const CLOCK_IDS = ['hero', 'about', 'projects', 'experience', 'honors', 'contact'] as const;
+// R73: the hero, then every section of the registry (lib/sections.ts)
+export const CLOCK_IDS = ['hero', ...SECTION_IDS] as const;
 
 /** Section soft tints (the existing About / Experience accent fills; FX-76). Hero = the plain cream desk. */
 export const TIDE: Record<string, string> = {

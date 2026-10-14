@@ -6,6 +6,7 @@ import { createPortal } from 'react-dom';
 import { useFocusTrap } from '@/lib/use-focus-trap';
 import { useScrollLock } from '@/lib/use-scroll-lock';
 import { Command } from 'cmdk';
+import { SECTIONS } from '@/lib/sections';
 import {
   Search,
   Code,
@@ -28,6 +29,16 @@ import { isSkim, setSkim } from '@/lib/skim';
 import { FX } from '@/lib/fx';
 
 /** Scroll to a section through Lenis (smooth + header offset) with a native fallback. */
+type SectionId = (typeof SECTIONS)[number]['id'];
+const NAV_ICON: Record<SectionId, typeof User> = {
+  about: User,
+  projects: Code,
+  experience: Briefcase,
+  honors: GraduationCap,
+  contact: Send,
+};
+const NAV_LABEL: Partial<Record<SectionId, string>> = { honors: 'Honors & Awards' };
+
 function goTo(hash: string) {
   const el = document.querySelector(hash);
   // On /simulators/* or /admin/* the section doesn't exist → go to the home page section instead
@@ -174,26 +185,20 @@ export function CommandPalette() {
                 </Command.Empty>
 
                 <Command.Group heading="Navigation" className={groupClass}>
-                  <Command.Item onSelect={() => runCommand(() => goTo('#about'))} className={itemClass}>
-                    <User className="w-5 h-5" strokeWidth={2.5} />
-                    <span>About</span>
-                  </Command.Item>
-                  <Command.Item onSelect={() => runCommand(() => goTo('#projects'))} className={itemClass}>
-                    <Code className="w-5 h-5" strokeWidth={2.5} />
-                    <span>Projects</span>
-                  </Command.Item>
-                  <Command.Item onSelect={() => runCommand(() => goTo('#experience'))} className={itemClass}>
-                    <Briefcase className="w-5 h-5" strokeWidth={2.5} />
-                    <span>Experience</span>
-                  </Command.Item>
-                  <Command.Item onSelect={() => runCommand(() => goTo('#honors'))} className={itemClass}>
-                    <GraduationCap className="w-5 h-5" strokeWidth={2.5} />
-                    <span>Honors & Awards</span>
-                  </Command.Item>
-                  <Command.Item onSelect={() => runCommand(() => goTo('#contact'))} className={itemClass}>
-                    <Send className="w-5 h-5" strokeWidth={2.5} />
-                    <span>Contact</span>
-                  </Command.Item>
+                  {/* R73: one item per section of the registry (lib/sections.ts) */}
+                  {SECTIONS.map((sec) => {
+                    const Icon = NAV_ICON[sec.id];
+                    return (
+                      <Command.Item
+                        key={sec.id}
+                        onSelect={() => runCommand(() => goTo(`#${sec.id}`))}
+                        className={itemClass}
+                      >
+                        <Icon className="w-5 h-5" strokeWidth={2.5} />
+                        <span>{NAV_LABEL[sec.id] ?? sec.label}</span>
+                      </Command.Item>
+                    );
+                  })}
                 </Command.Group>
 
                 <Command.Group heading="Actions" className={`${groupClass} border-t-2 border-dashed border-ink mt-1`}>

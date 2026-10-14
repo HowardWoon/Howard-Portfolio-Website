@@ -178,6 +178,16 @@ Rules:
     screens ahead built it for every test that scrolled past and pushed CI past its 1-hour limit.
 44. R68: `scripts/device-sweep.mjs` treats `visibility: hidden` text as not seen (a hidden 3D sign pin off the scene's
     edge is not a crop).
+45. R73: a 3D scene looks sharp only if nothing soft sits near the lens: no additive soft point sprites (the old
+    'bokeh' ring sat AROUND the VIEW camera and filled it with blurred discs), bloom radius <= 0.2 and strength <= 0.36,
+    fog that starts behind the table (`camera distance + 38`), and every composer target multisampled (MSAA 4).
+    Auto quality drops a tier only after two slow windows in a row and says so in a toast.
+46. R73: a local test against :3000 must run against THIS build: a server left over from an aborted push keeps the
+    port, the new `npm run start` dies with EADDRINUSE, and every page loads chunks that 400 (no hydration at all).
+    Check `netstat -ano | grep :3000` and kill the old PID before testing.
+47. R73: section lists are never typed out twice. The header nav, the command palette, the section clock and the 3D
+    street's doors and signs all read `lib/sections.ts`; per-feature extras (an icon, a longer palette label, a door's
+    place in the street, a Japanese sign line) are maps keyed by section id. Guard: tests/r73 "one registry".
 
 ## F. Definition of done additions
 
@@ -399,6 +409,20 @@ some more visual effect on background"), same rule - layers:
 | Header ruler | site-header.tsx `.hdr-ruler` (HEADER_RULER)               | The header is a drawing's title strip: a millimetre ruler (tick every 4 px, long every 20 px) along its bottom edge, inside the solid white bar; decorative, no pointer                                                                                                                                                                       |
 
 Guard: tests/r71.spec.ts. A new section gets its own paper too (never a copy of a neighbour's).
+
+R73 (owner, Tokyo After Rain: "why it look so blur? ... every button, must function perfectly, must no errors, can make
+more variables, make more random events"; and "section must not hardcode, must be dynamic"), same rule - layers:
+
+| Feature         | Where                                      | Rules                                                                                                                                                                                                                                                  |
+| --------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Sharp street    | tokyo-diorama/engine/index.ts, weather.ts  | No bokeh discs; tight low bloom (0.34 / 0.30 VIEW, 0.22 WALK, radius 0.16); fog behind the table; MSAA on HIGH and MED (E45)                                                                                                                         |
+| Street director | tokyo-diorama/engine/director.ts           | Every 14 - 30 s a random event, never twice in a row: thunder, downpour, drizzle, gust, a lamp on the blink, an express train, a free drink, the cat's zoomies. Reduced motion: none by itself and no flashes. Flashes stay under 3 a second (WCAG 2.3.1) |
+| Dice            | the stage's button stack (above zoom)      | "Start a random street event": rolls one now; the yellow toast says which. In the stage, not the title bar, so the bar still fits a 280 px phone                                                                                                    |
+| Per-visit state | engine/index.ts                            | Each visit opens on its own camera angle (reset returns to it) and its own rain, drizzle to downpour. Reduced motion: the classic angle and rain                                                                                                    |
+| Doors           | tokyo-diorama/engine/doors.ts              | One door and one sign per section of lib/sections.ts (E47); a sign shows only while its section is on the page. doors.ts has no three.js import, so the page bundle never pulls in the engine                                                          |
+
+Guard: tests/r73.spec.ts (sharpness numbers, every control clicked with no error, every event runs and puts the lights
+back, one registry).
 
 ## H. R24 guardrails - type floor, emblem geometry, hero water reveal, neo-brutalism only (owner complaints, tested)
 

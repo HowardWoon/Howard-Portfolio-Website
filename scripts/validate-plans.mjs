@@ -411,11 +411,12 @@ lacks(
 has(
   'R9',
   'R9-10',
-  'Palette reaches About and Contact',
+  'Palette reaches every section (R73: from the registry)',
   'components/command-palette.tsx',
-  '<span>About</span>',
-  '<span>Contact</span>',
+  'SECTIONS.map((sec)',
+  'goTo(`#${sec.id}`)',
 );
+has('R9', 'R9-10b', 'The registry holds About and Contact', 'lib/sections.ts', "id: 'about'", "id: 'contact'");
 has(
   'R9',
   'R9-11',

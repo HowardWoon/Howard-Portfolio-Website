@@ -148,6 +148,17 @@ export class Soundscape {
   meow() {
     this.tone(720, 0.35, 'sine', 0.06, 0, 520);
   }
+  /** R73: thunder: a long low rumble with a crack on top */
+  thunder() {
+    this.burst(0.35, 1400, 0.25);
+    this.burst(2.6, 90, 0.7, 0.05, 'lowpass');
+    this.burst(1.8, 160, 0.4, 0.5, 'lowpass');
+  }
+  /** R73: a gust through the street */
+  wind() {
+    this.burst(2.2, 420, 0.18);
+    this.burst(1.6, 700, 0.1, 0.4);
+  }
   click() {
     this.tone(1200, 0.05, 'square', 0.03);
   }

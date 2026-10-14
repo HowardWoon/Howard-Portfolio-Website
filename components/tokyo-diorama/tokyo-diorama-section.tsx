@@ -5,6 +5,7 @@ import {
   ArrowUpRight,
   Cloud,
   CloudRain,
+  Dices,
   Eye,
   Footprints,
   Gauge,
@@ -17,6 +18,8 @@ import {
   VolumeX,
 } from 'lucide-react';
 import type { DioramaHandle, Hotspot, Mode, Tier } from './engine';
+import { SECTIONS } from '@/lib/sections';
+import { SECTION_DOORS, SECTION_JP } from './engine/doors';
 
 /**
  * 夜雨の街角 — Tokyo After Rain. A walkable 3D diorama section.
@@ -26,13 +29,8 @@ import type { DioramaHandle, Hotspot, Mode, Tier } from './engine';
  * is hidden, and every hotspot leads to an existing section of the portfolio (#about, #projects, ...).
  */
 
-const PINS = [
-  { id: 'about', label: 'About', jp: '自己紹介' },
-  { id: 'projects', label: 'Projects', jp: 'プロジェクト' },
-  { id: 'experience', label: 'Experience', jp: '経験' },
-  { id: 'honors', label: 'Honors', jp: '受賞' },
-  { id: 'contact', label: 'Contact', jp: '連絡' },
-] as const;
+// R73: one sign per section of the site's registry (lib/sections.ts) that has a door in the street
+const PINS = SECTIONS.filter((s) => s.id in SECTION_DOORS).map((s) => ({ ...s, jp: SECTION_JP[s.id] ?? '' }));
 
 type TierChoice = Tier | 'auto';
 const TIER_ORDER: TierChoice[] = ['auto', 'high', 'medium', 'low'];
@@ -180,8 +178,11 @@ export default function TokyoDioramaSection({
           return;
         }
         handleRef.current = handle;
-        for (const [pid, el] of pinRefs.current) handle.bindPin(pid, el);
+        // R73: a sign shows only while its section is really on the page
+        for (const [pid, el] of pinRefs.current) handle.bindPin(pid, document.getElementById(pid) ? el : null);
         handle.setRain(rain);
+        // R73: a rebuilt street (lost graphics context) keeps the visitor's sound choice
+        if (sound) void handle.setSound(true);
         // test hook (dev builds, or any build opened with ?diorama-test): tests/tokyo-diorama.spec.ts drives it
         if (process.env.NODE_ENV !== 'production' || new URLSearchParams(window.location.search).has('diorama-test'))
           (window as unknown as { __diorama?: DioramaHandle }).__diorama = handle;
@@ -207,11 +208,15 @@ export default function TokyoDioramaSection({
     if (m === 'walk') frameRef.current?.focus({ preventScroll: true });
     else setHot(null);
   };
+  // R73: the engine is told outside the state updater (React may run an updater twice: rain flicked on and off again)
   const toggleRain = () => {
-    setRain((r) => {
-      handleRef.current?.setRain(!r);
-      return !r;
-    });
+    const next = !rain;
+    setRain(next);
+    handleRef.current?.setRain(next);
+  };
+  // R73: the dice: a random street event right now (the toast says which)
+  const rollEvent = () => {
+    handleRef.current?.randomEvent();
   };
   const toggleSound = () => {
     const next = !sound;
@@ -534,6 +539,16 @@ export default function TokyoDioramaSection({
               <div
                 className={`absolute right-3 z-[6] flex flex-col gap-2 ${mode === 'walk' && touch ? 'bottom-28' : 'bottom-3'}`}
               >
+                {/* R73: the dice - a random street event now (it sits in the stage, so the title bar fits a 280 px phone) */}
+                <button
+                  type="button"
+                  aria-label="Start a random street event"
+                  title="Random street event"
+                  onClick={rollEvent}
+                  className={keyBtn}
+                >
+                  <Dices className="h-4 w-4" strokeWidth={2.75} aria-hidden />
+                </button>
                 <button
                   type="button"
                   aria-label="Zoom in"

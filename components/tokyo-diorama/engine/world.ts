@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import { SECTIONS } from '@/lib/sections';
+import { SECTION_DOORS, SECTION_JP } from './doors';
 import { Batch, Materials, World, box, mtx, type Box, type UnitShape } from './kit';
 import * as TX from './textures';
 
@@ -1355,56 +1357,28 @@ export function buildWorld(mats: Materials, world: World): Built {
   light(0xffc700, 18, 10, 18.3, 12.3, 15.4, 14);
 
   /* ============================================================ hotspots → portfolio sections */
-  hotspots.push(
-    {
-      id: 'about',
-      label: 'About',
-      jp: '自己紹介',
-      target: '#about',
-      pos: new THREE.Vector3(-17.4, CURB, -8.6),
-      radius: 1.9,
-    },
-    {
-      id: 'projects',
-      label: 'Projects',
-      jp: 'プロジェクト',
-      target: '#projects',
-      pos: new THREE.Vector3(-5.5, CURB, -7.7),
-      radius: 2.0,
-    },
-    {
-      id: 'vending',
-      label: 'Buy a drink',
-      jp: '自販機',
-      target: null,
-      pos: new THREE.Vector3(-0.85, CURB, -8.6),
-      radius: 1.4,
-    },
-    {
-      id: 'honors',
-      label: 'Honors',
-      jp: '受賞',
-      target: '#honors',
-      pos: new THREE.Vector3(18.2, CURB + 0.4, -12.6),
-      radius: 2.0,
-    },
-    {
-      id: 'experience',
-      label: 'Experience',
-      jp: '経験',
-      target: '#experience',
-      pos: new THREE.Vector3(-17, CURB, 5.9),
-      radius: 2.0,
-    },
-    {
-      id: 'contact',
-      label: 'Contact',
-      jp: '連絡',
-      target: '#contact',
-      pos: new THREE.Vector3(12.9, CURB, 7.4),
-      radius: 1.7,
-    },
-  );
+  // R73 (owner: "section must not hardcode, must be dynamic"): one lit door per section of the site's registry
+  // (lib/sections.ts), labelled and linked from it. A door's place in the street is the only thing kept here.
+  for (const sec of SECTIONS) {
+    const door = SECTION_DOORS[sec.id];
+    if (!door) continue;
+    hotspots.push({
+      id: sec.id,
+      label: sec.label,
+      jp: SECTION_JP[sec.id] ?? '',
+      target: `#${sec.id}`,
+      pos: new THREE.Vector3(door.x, CURB + (door.lift ?? 0), door.z),
+      radius: door.radius,
+    });
+  }
+  hotspots.push({
+    id: 'vending',
+    label: 'Buy a drink',
+    jp: '自販機',
+    target: null,
+    pos: new THREE.Vector3(-0.85, CURB, -8.6),
+    radius: 1.4,
+  });
 
   B.build(root, mats);
 
