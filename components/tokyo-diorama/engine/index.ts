@@ -58,6 +58,10 @@ export interface DioramaHandle {
   /** debug + tests */
   debug: {
     player(): THREE.Vector3;
+    /** where the player is drawn this frame (between the last two physics steps) */
+    drawn(): number[];
+    /** the camera's position and its distance to what it looks at */
+    cam(): { pos: number[]; dist: number };
     teleport(x: number, y: number, z: number): void;
     traffic(): Traffic;
     setMove(x: number, y: number, run?: boolean): void;
@@ -227,6 +231,11 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
   scene.add(player.group);
   const P = {
     pos: built.spawn.clone(),
+    // R70 (owner: 'when i walking ... the whole thing 3d here is shaking'): physics runs at 120 Hz, the screen at 60 -
+    // 180 Hz, so a frame got 0, 1 or 2 steps and the player and the camera moved in uneven jumps. What is DRAWN is the
+    // position between the last two physics steps (prev -> pos, by the time left over), so it moves evenly.
+    prev: built.spawn.clone(),
+    drawn: built.spawn.clone(),
     vel: new THREE.Vector3(),
     grounded: true,
     coyote: 0,
@@ -383,6 +392,7 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
   let moveOverride: { x: number; y: number; run: boolean } | null = null;
 
   const physicsStep = (h: number) => {
+    P.prev.copy(P.pos);
     const mx = moveOverride ? moveOverride.x : input.move.x;
     const my = moveOverride ? moveOverride.y : input.move.y;
     const run = moveOverride ? moveOverride.run : input.run;
@@ -446,6 +456,7 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
 
   const respawn = () => {
     P.pos.copy(built.spawn);
+    P.prev.copy(P.pos);
     P.vel.set(0, 0, 0);
     P.grounded = true;
   };
@@ -466,20 +477,23 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
       if (Math.abs(d) < 2.2) walkCam.yaw += d * (1 - Math.exp(-dt * 0.9 * Math.min(1, sp / 3)));
     }
     const k = instant ? 1 : 1 - Math.exp(-dt * 12);
-    const ty = P.pos.y + 1.3;
-    walkCam.target.x += (P.pos.x - walkCam.target.x) * k;
-    walkCam.target.z += (P.pos.z - walkCam.target.z) * k;
+    const ty = P.drawn.y + 1.3;
+    walkCam.target.x += (P.drawn.x - walkCam.target.x) * k;
+    walkCam.target.z += (P.drawn.z - walkCam.target.z) * k;
     walkCam.target.y += (ty - walkCam.target.y) * (instant ? 1 : 1 - Math.exp(-dt * 7));
     const cp = Math.cos(walkCam.pitch);
     tmpV.set(Math.sin(walkCam.yaw) * cp, Math.sin(walkCam.pitch), Math.cos(walkCam.yaw) * cp);
-    const hit = world.raycast(walkCam.target, tmpV, walkCam.dist + 0.3);
+    // R70: the camera is kept out of walls and buildings only. Cars, people and the train passing behind the player, and
+    // thin poles / posts / sign boards, used to pull it in and out several times a second (the whole scene lurched).
+    const hit = world.raycast(walkCam.target, tmpV, walkCam.dist + 0.3, true);
     const d = Math.max(0.7, Math.min(walkCam.dist, hit - 0.3));
     const desired = tmpV.clone().multiplyScalar(d).add(walkCam.target);
     const gy = world.groundAt(desired.x, desired.z, desired.y, 0.05, scratch);
     desired.y = Math.max(desired.y, (gy > -Infinity ? gy : 0) + 0.3);
     const closer = desired.distanceTo(walkCam.target) < walkCam.pos.distanceTo(walkCam.target) - 0.05;
-    if (instant || closer) walkCam.pos.copy(desired);
-    else walkCam.pos.lerp(desired, 1 - Math.exp(-dt * 14));
+    // in: quickly but smoothly (it used to jump in one frame); out: gently, so it never pumps
+    if (instant) walkCam.pos.copy(desired);
+    else walkCam.pos.lerp(desired, 1 - Math.exp(-dt * (closer ? 26 : 6)));
   };
 
   /* ------------------------------------------------------------ loop */
@@ -533,6 +547,7 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
       n++;
     }
     if (n === 8) acc = 0;
+    P.drawn.lerpVectors(P.prev, P.pos, Math.min(1, acc / FIXED));
 
     // player visuals
     const sp = Math.hypot(P.vel.x, P.vel.z);
@@ -542,7 +557,7 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
       d = Math.atan2(Math.sin(d), Math.cos(d));
       player.yaw += d * (1 - Math.exp(-dt * 12));
     }
-    player.group.position.copy(P.pos);
+    player.group.position.copy(P.drawn);
     player.group.rotation.y = player.yaw;
     animatePerson(player, sp, dt, !P.grounded, calm);
     const blob = player.group.getObjectByName('blob');
@@ -683,8 +698,9 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
     }
     weather.setViewport(size.y * renderer.getPixelRatio(), camera.fov);
 
-    // pins follow their hotspots (view mode only)
-    const showPins = mode === 'view' && blend < 0.05;
+    // pins follow their hotspots. R70 (owner: the signs 'dissappear' after switching to walk): in walk mode too, over
+    // each building that leads to a section, once the camera has finished moving into the street
+    const showPins = (mode === 'view' && blend < 0.05) || (mode === 'walk' && blend > 0.95);
     for (const [id, el] of pins) {
       const h = built.hotspots.find((x) => x.id === id);
       if (!h || !showPins) {
@@ -925,8 +941,11 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
     },
     debug: {
       player: () => P.pos.clone(),
+      drawn: () => P.drawn.toArray(),
+      cam: () => ({ pos: camera.position.toArray(), dist: camera.position.distanceTo(walkCam.target) }),
       teleport(x, y, z) {
         P.pos.set(x, y, z);
+        P.prev.copy(P.pos);
         P.vel.set(0, 0, 0);
         P.grounded = false;
       },

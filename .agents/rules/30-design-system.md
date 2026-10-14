@@ -357,6 +357,14 @@ follow every instructions, code, design everything" - the kit `tokyo-diorama-kit
 | ------------------ | --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 3D diorama section | components/tokyo-diorama/\*\*, lazy-sections `TokyoDiorama`, portfolio-page | Owner-approved dependency `three@0.180.0` + `@types/three@0.180.0` (pinned, the kit's version). Section `#diorama` between Honors and the logo wall; NOT in `lib/sections.ts` (nav, spine, dock, boot log keep five). three.js + engine load only near the section (First Load JS unchanged). Bloom / neon / soft light exist ONLY inside the WebGL canvas (the owner's night-street look); the DOM frame stays neo-brutalist. Tests: tests/tokyo-diorama.spec.ts (the kit's) |
 
+R70 (owner: walking "the whole thing 3d here is shaking"; the signs "dissappear" in walk): the player is drawn between
+the last two 120 Hz physics steps (`P.prev` -> `P.pos` = `P.drawn`), the walk camera follows `P.drawn`, its collision
+ray (`world.raycast(..., true)`) ignores moving actors and thin poles / signs (< 0.7 m both ways) and eases in instead of
+snapping; the five section signs show in walk mode too. The 3D street loads only when the section is on screen, and on
+software-drawn WebGL (SwiftShader / llvmpipe / Basic Render: no graphics chip, and CI) it waits for START 3D - building it
+for every test that scrolled past pushed CI past its 1-hour limit (run 129). Guard: tests/r70.spec.ts. These are
+changes to the kit's engine: keep them when the kit is re-copied.
+
 When the kit is updated, re-copy `components/tokyo-diorama/` and its spec from the kit, never edit the engine by hand
 without the owner. A sign pin whose building is off the scene's edge is `visibility: hidden` (scripts/device-sweep.mjs
 skips hidden text since R68).

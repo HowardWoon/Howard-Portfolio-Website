@@ -54,6 +54,25 @@ function prefersCalm() {
   );
 }
 
+/**
+ * R70: true when WebGL is drawn by the CPU (SwiftShader, llvmpipe, Microsoft Basic Render Driver: no graphics chip, or
+ * graphics turned off). The street runs at a few frames a second there and slows the whole page down (the full test
+ * suite took 13 minutes longer and CI hit its 1-hour limit), so it waits for the visitor to start it.
+ */
+function softwareWebgl() {
+  try {
+    const c = document.createElement('canvas');
+    const gl = (c.getContext('webgl2') || c.getContext('webgl')) as WebGLRenderingContext | null;
+    if (!gl) return false;
+    const ext = gl.getExtension('WEBGL_debug_renderer_info');
+    const name = String(gl.getParameter(ext ? ext.UNMASKED_RENDERER_WEBGL : gl.RENDERER));
+    gl.getExtension('WEBGL_lose_context')?.loseContext();
+    return /swiftshader|llvmpipe|softpipe|software|basic render/i.test(name);
+  } catch {
+    return false;
+  }
+}
+
 function webglAvailable() {
   try {
     const c = document.createElement('canvas');
@@ -89,13 +108,18 @@ export default function TokyoDioramaSection({
   const [full, setFull] = useState<'off' | 'native' | 'pseudo'>('off');
   const [touch, setTouch] = useState(false);
   const [mountKey, setMountKey] = useState(0);
+  // R70: software-drawn WebGL waits for a press (START 3D); a hardware GPU starts by itself
+  const [held, setHeld] = useState(false);
+  const [started, setStarted] = useState(false);
 
   /* ---------- mount the engine only when the section is close to the viewport */
   useEffect(() => {
     const el = frameRef.current;
     if (!el) return;
+    // R70: only once the section is on screen (it used to load 1.5 screens ahead, so every scroll past the section -
+    // and every test that walked the page - built the whole 3D street)
     const io = new IntersectionObserver((e) => e.some((x) => x.isIntersecting) && setNear(true), {
-      rootMargin: '150% 0px',
+      threshold: 0.15,
     });
     io.observe(el);
     setTouch(window.matchMedia?.('(pointer: coarse)').matches ?? false);
@@ -121,6 +145,12 @@ export default function TokyoDioramaSection({
       setFailed(true);
       return;
     }
+    const testing = new URLSearchParams(window.location.search).has('diorama-test');
+    if (!started && !testing && softwareWebgl()) {
+      setHeld(true);
+      return;
+    }
+    setHeld(false);
     let disposed = false;
     let handle: DioramaHandle | null = null;
     let toastTimer = 0;
@@ -168,7 +198,7 @@ export default function TokyoDioramaSection({
     };
     // the engine is created once per mount; later changes go through the handle
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [near, failed, mountKey]);
+  }, [near, failed, mountKey, started]);
 
   /* ---------- controls */
   const chooseMode = (m: Mode) => {
@@ -401,10 +431,29 @@ export default function TokyoDioramaSection({
             ))}
 
             {/* loading / failure */}
-            {!ready && !failed && (
+            {!ready && !failed && !held && (
               <div className="absolute inset-0 z-[7] grid place-items-center bg-[#0a0e1c]">
                 <div className="rounded-xl border-3 border-ink bg-white px-4 py-3 font-mono text-xs font-extrabold tracking-[0.14em] text-ink shadow-brutal-sm">
                   {near ? 'BUILDING THE BLOCK…' : 'SCROLL TO LOAD'}
+                </div>
+              </div>
+            )}
+            {/* R70: no graphics chip on this device: the street starts when the visitor asks for it */}
+            {held && !failed && (
+              <div className="absolute inset-0 z-[7] grid place-items-center bg-[#0a0e1c] p-6">
+                <div className="max-w-sm rounded-xl border-3 border-ink bg-white p-4 text-ink shadow-brutal">
+                  <p className="font-mono text-xs font-extrabold tracking-[0.12em]">NO GRAPHICS CHIP FOUND</p>
+                  <p className="mt-2 text-sm font-medium">
+                    This device draws 3D without a graphics chip, so the street may run slowly.
+                  </p>
+                  <button
+                    type="button"
+                    data-diorama-start
+                    onClick={() => setStarted(true)}
+                    className={`${keyBtn} mt-3`}
+                  >
+                    START 3D
+                  </button>
                 </div>
               </div>
             )}

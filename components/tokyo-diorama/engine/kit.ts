@@ -249,12 +249,18 @@ export class World {
     return best;
   }
 
-  /** Ray (origin o, unit dir d, length len) against all camera-blocking boxes. Returns the hit distance. */
-  raycast(o: THREE.Vector3, d: THREE.Vector3, len: number) {
+  /**
+   * Ray (origin o, unit dir d, length len) against all camera-blocking boxes. Returns the hit distance.
+   * `cameraOnly` (R70, the walk camera): only what the camera must never pass through - walls, buildings, roofs. Moving
+   * actors (cars, people, the train) and thin things (poles, posts, sign boards: under 0.7 m across in BOTH directions)
+   * are let through, so a passing car or a pole no longer pulls the camera in and out.
+   */
+  raycast(o: THREE.Vector3, d: THREE.Vector3, len: number, cameraOnly = false) {
     let best = len;
-    const all = this.statics.concat(this.dynamics);
+    const all = cameraOnly ? this.statics : this.statics.concat(this.dynamics);
     for (const b of all) {
       if (b.off || b.noCam) continue;
+      if (cameraOnly && b.maxX - b.minX < 0.7 && b.maxZ - b.minZ < 0.7) continue;
       let t0 = 0;
       let t1 = best;
       let ok = true;
