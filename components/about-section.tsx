@@ -212,9 +212,15 @@ function PillarCard({
         <p className="text-sm font-mono font-bold text-pop-blue">{pillar.headline}</p>
         <p className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium pt-1">{pillar.description}</p>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-5 border-t-2 border-dashed border-ink">
+      {/* R65 zoom: a row that wraps, not a 3-column grid. A grid column can be squeezed below its longest word (at
+          175 % zoom the tiles were 90 px and "Architecture" broke in two); a flex tile never goes below it, so when
+          three no longer fit, the third takes the next row at full width. Where three fit they are equal, as before. */}
+      <div
+        data-metrics
+        className="flex flex-col sm:flex-row sm:flex-wrap gap-3 pt-5 border-t-2 border-dashed border-ink"
+      >
         {pillar.metrics.map((metric, mIdx) => (
-          <div key={mIdx} className="bg-white rounded-xl p-3 border-2 border-ink">
+          <div key={mIdx} className="sm:flex-1 bg-white rounded-xl p-3 border-2 border-ink">
             <div className="text-xs font-mono font-bold text-ink-muted uppercase tracking-[0.06em] leading-tight">
               {metric.label}
             </div>

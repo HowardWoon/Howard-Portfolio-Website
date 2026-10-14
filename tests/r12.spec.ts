@@ -203,7 +203,12 @@ for (const width of [360, 390, 1024, 1280]) {
     await page.setViewportSize({ width, height: 900 });
     await home(page);
     const bad = await page.evaluate(() =>
-      Array.from(document.querySelectorAll<HTMLElement>('#experience .grid > div, #projects .grid > div'))
+      // (R65: the stat rows are wrapping flex rows now, marked data-metrics; the grids are still looked at too)
+      Array.from(
+        document.querySelectorAll<HTMLElement>(
+          '#experience .grid > div, #projects .grid > div, #experience [data-metrics] > div, #projects [data-metrics] > div',
+        ),
+      )
         .filter((t) => /RM9,287|1\.84 kW|-60\.8%/.test(t.textContent ?? '') && t.children.length <= 4)
         // R61: the Sensor X card's right column now also holds a photo gallery, so it is not a stat tile (its last
         // div is a print of the gallery). The two tiles inside it are still found, by their own grid.

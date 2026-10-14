@@ -80,7 +80,8 @@ export function RoleProof({ roles, fillFor }: { roles: string[]; fillFor: (role:
               onMouseEnter={() => setHover(role)}
               onFocus={() => setHover(role)}
               onClick={() => setPinned((p) => (p === role ? null : role))}
-              className={`nb-chip min-h-[44px] w-full justify-center text-center cursor-pointer transition-[transform,box-shadow] duration-150 hover:-translate-y-0.5 hover:shadow-brutal-xs min-[440px]:last:odd:col-span-2 ${
+              // (md to lg: the card's column is at its narrowest, 118 px a key; 8 px less padding keeps "Distributed" whole)
+              className={`nb-chip md:max-lg:px-2 min-h-[44px] w-full justify-center text-center cursor-pointer transition-[transform,box-shadow] duration-150 hover:-translate-y-0.5 hover:shadow-brutal-xs min-[440px]:last:odd:col-span-2 ${
                 on ? '-translate-y-0.5 shadow-brutal-xs' : ''
               } ${fillFor(role)}`}
             >

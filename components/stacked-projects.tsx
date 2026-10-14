@@ -629,13 +629,15 @@ function ProjectCard({ project, index }: { project: ProjectData; index: number }
 
                   {/* Live Benchmarks & Metric Chips (bento) */}
                   <div
-                    className="grid grid-cols-1 sm:grid-cols-3 gap-3 fx-layer"
+                    // R65 zoom: a wrapping row (see about-section.tsx): a tile is never narrower than its longest word
+                    data-metrics
+                    className="flex flex-col sm:flex-row sm:flex-wrap gap-3 fx-layer"
                     data-bp-label={`L5 · ${BP_LAYERS[4]}`}
                   >
                     {project.metrics.map((m, mIdx) => (
                       <div
                         key={mIdx}
-                        className={`rounded-2xl p-3.5 border-3 border-ink ${mIdx === 0 ? 'bg-ink text-white' : 'bg-white text-ink'} shadow-brutal-sm`}
+                        className={`sm:flex-1 rounded-2xl p-3.5 border-3 border-ink ${mIdx === 0 ? 'bg-ink text-white' : 'bg-white text-ink'} shadow-brutal-sm`}
                       >
                         <div
                           className={`text-xs font-mono font-bold uppercase tracking-[0.06em] ${mIdx === 0 ? 'text-white/75' : 'text-ink/70'}`}

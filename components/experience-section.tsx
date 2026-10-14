@@ -1012,11 +1012,15 @@ export default function ExperienceSection() {
                           </div>
 
                           {/* Metrics & Impact Grid (beside a gallery the column is too narrow for three: they stack) */}
-                          <div className={`grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8 ${g ? 'lg:grid-cols-1' : ''}`}>
+                          {/* R65 zoom: a wrapping row (see about-section.tsx): a tile is never narrower than its longest word */}
+                          <div
+                            data-metrics
+                            className={`flex flex-col sm:flex-row sm:flex-wrap gap-3 mb-8 ${g ? 'lg:flex-col lg:flex-nowrap' : ''}`}
+                          >
                             {item.metrics.map((metric, mIdx) => (
                               <div
                                 key={mIdx}
-                                className={`rounded-2xl p-4 border-3 border-ink shadow-brutal-sm flex flex-col justify-center ${mIdx === 1 ? 'bg-ink text-white' : 'bg-white text-ink'}`}
+                                className={`sm:flex-1 rounded-2xl p-4 border-3 border-ink shadow-brutal-sm flex flex-col justify-center ${mIdx === 1 ? 'bg-ink text-white' : 'bg-white text-ink'}`}
                               >
                                 <span
                                   className={`text-xs font-mono font-bold uppercase tracking-[0.08em] mb-1 ${mIdx === 1 ? 'text-white/75' : 'text-ink/70'}`}
