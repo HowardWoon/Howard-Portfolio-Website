@@ -108,7 +108,10 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
 6. **Physics (badge pit):** settled bodies sleep (exactly still); no random kicks; velocity changes only on an
    approach; a body rests only with its centre over the one below. Guard: `tests/r31` "badge pit settles".
    R62: no badge may rest on air or on a corner, at any width or after a zoom (the pit reads sizes again and
-   drops again). Guard: `tests/r62`.
+   drops again). Guard: `tests/r62`. R72 (owner: "drop randomly ... more fun"): the next badge let go is a RANDOM
+   one of those whose carriers have landed, it tumbles on the way down (drawn only) and lands flat, and each drop
+   takes a random layout among those that leave every badge carried - never back to a fixed left-to-right wall.
+   Guard: `tests/r72`.
 7. **Zoom (R50, R62):** a fixed-px box that holds text takes `var(--u)`; a zoom keeps the reader's place in every
    painted frame. Guard: `tests/r62`. Zoomed IN (R65): a row of small text tiles is a wrapping flex row, never a
    Tailwind `grid-cols-N` (its `minmax(0, 1fr)` squeezes a column below its longest word). Guard: `tests/r65`.

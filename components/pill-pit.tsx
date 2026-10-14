@@ -66,6 +66,10 @@ type Body = {
   tip: number;
   /** R62: on its way down to the seat the plan gave it (see "guided" in the solver) */
   guided: boolean;
+  /** R72: the tumble it falls with (deg, drawn only; it lands flat) */
+  spin: number;
+  /** R72: the badges of the row under its seat that carry it - it is let go only once they have landed */
+  need: number[];
 };
 
 export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }) {
@@ -109,6 +113,8 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
       wait: 0,
       tip: 0,
       guided: false,
+      spin: 0,
+      need: [],
     }));
     let raf = 0;
     let last = 0;
@@ -125,7 +131,13 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
         const el = els.current[i];
         if (!el) return;
         // tilt only in real flight (a dead zone, eased), so a badge that is settling never shimmers
-        const target = Math.abs(b.vx) < 160 || b.asleep ? 0 : Math.max(-12, Math.min(12, b.vx * 0.01));
+        // R72: on its way down it tumbles with its own spin; it straightens as it lands (rest / asleep = flat)
+        const falling = b.guided && !b.rest && !b.asleep && b.wait <= 0 && b.vy > 40;
+        const target = falling
+          ? b.spin
+          : Math.abs(b.vx) < 160 || b.asleep
+            ? 0
+            : Math.max(-12, Math.min(12, b.vx * 0.01));
         b.tilt += (target - b.tilt) * 0.25;
         if (Math.abs(b.tilt) < 0.05) b.tilt = 0;
         el.style.transform = `translate3d(${b.x.toFixed(1)}px, ${b.y.toFixed(1)}px, 0) rotate(${b.tilt.toFixed(2)}deg)`;
@@ -339,17 +351,35 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
       // R62: the badges are let go one at a time, each only when the air under it is clear. (On a phone a row is one
       // or two badges, so the next badge starts right above the one before: let go while that one had fallen only a
       // few px, the two collided above the pit and pushed each other off their seats.)
+      // R72 (owner: "make this drop randomly as well, more fun"): not row by row from the left any more. The next badge
+      // is a RANDOM one of those whose carriers (the badges of the row under its seat) have landed, so the pile still
+      // grows only on something solid, but the badges rain in from all over the pit.
       if (queue.length && now >= nextAt) {
-        const b = bodies[queue[0]];
-        const blocked = bodies.some(
-          (o) => o !== b && !o.out && o.wait <= 0 && !o.asleep && overlapX(b, o) > -2 && o.y < b.y + b.h + 12,
-        );
-        if (!blocked || now - nextAt > 600) {
-          queue.shift();
+        const ready = queue.filter((i) => bodies[i].need.every((j) => bodies[j].asleep && bodies[j].wait <= 0));
+        const clear = ready.filter((i) => {
+          const b = bodies[i];
+          return !bodies.some(
+            (o) => o !== b && !o.out && o.wait <= 0 && !o.asleep && overlapX(b, o) > -2 && o.y < b.y + b.h + 12,
+          );
+        });
+        // (a carrier that is slow to fall asleep never stalls the drop: after 1.5 s its being let go is enough)
+        const late = queue.filter((i) => bodies[i].need.every((j) => bodies[j].wait <= 0));
+        const pool = clear.length
+          ? clear
+          : now - nextAt > 600 && ready.length
+            ? ready
+            : now - nextAt > 1500
+              ? late
+              : [];
+        if (pool.length) {
+          const i = pool[Math.floor(Math.random() * pool.length)];
+          const b = bodies[i];
+          queue.splice(queue.indexOf(i), 1);
           b.wait = 0;
           wakeBody(b);
-          b.vy = 520; // let go with a push, so it is clear of the next one a tenth of a second later
-          nextAt = now + 95 + Math.random() * 25;
+          b.vy = 480 + Math.random() * 160; // let go with a push (a little different each time)
+          b.spin = (Math.random() < 0.5 ? -1 : 1) * (5 + Math.random() * 9);
+          nextAt = now + 70 + Math.random() * 70;
         }
       }
       step(dt / 2);
@@ -539,6 +569,9 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
           const free = spare - air * (n - 1);
           for (let k = 0; k <= 8; k++) ways.push([(free * k) / 8, air]); // from the left wall to the right wall
         }
+        // R72: of the layouts that leave NO badge of this row loose on the row under it, a random one (it used to be
+        // the tidiest, so every drop built the same brick wall); if none is perfect, the best one, as before
+        const fine: Seat[][] = [];
         let bestRow: Seat[] = [];
         let bestScore = Infinity;
         for (const order of orders)
@@ -551,12 +584,13 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
             });
             const hole = Math.max(x0, air, spare - x0 - air * (n - 1));
             const score = loose(row, under) * 10000 + hole + Math.random() * 6;
+            if (score < 10000) fine.push(row);
             if (score < bestScore) {
               bestScore = score;
               bestRow = row;
             }
           }
-        rows.push(bestRow);
+        rows.push(fine.length ? fine[Math.floor(Math.random() * fine.length)] : bestRow);
       }
       // what found no row is not dropped this time (R52: the pit is too small for the whole pile at this width)
       for (const i of pool) {
@@ -572,6 +606,17 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
         b.wait = 0;
       }
       queue = [];
+      rows.forEach((row, r) =>
+        row.forEach((seat) => {
+          const b = bodies[seat.i];
+          // R72: the badges of the row under it that its seat lies on (it waits for them to land)
+          const l = seat.x;
+          const rr = seat.x + b.w - SHADOW;
+          b.need = (rows[r - 1] ?? [])
+            .filter((u) => Math.min(rr, u.x + bodies[u.i].w - SHADOW) - Math.max(l, u.x) > 0)
+            .map((u) => u.i);
+        }),
+      );
       for (const row of rows)
         for (const seat of row) {
           const b = bodies[seat.i];
@@ -579,7 +624,7 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
           b.x = seat.x;
           b.over = 0;
           // R53: one after another (a steady patter, not a single dump); R62: by time, all from just above the pit
-          b.y = -b.h - 24;
+          b.y = -b.h - 24 - Math.random() * 70; // R72: from a slightly different height each
           b.vx = 0; // straight down onto its seat (a sideways nudge put it on its neighbour's corner)
           b.vy = 0;
           b.drag = false;
