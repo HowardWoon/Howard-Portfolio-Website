@@ -18,6 +18,9 @@ export const ResumeDrawer = dynamic(() => import('@/components/resume-drawer'), 
 export const ExperienceSection = dynamic(() => import('@/components/experience-section'));
 export const HonorsSection = dynamic(() => import('@/components/honors-section'));
 export const ContactSection = dynamic(() => import('@/components/contact-section'));
+// Tokyo After Rain: walkable 3D diorama section. Its own chunk; three.js itself is fetched only when the
+// section comes near the viewport (components/tokyo-diorama/tokyo-diorama-section.tsx).
+export const TokyoDiorama = dynamic(() => import('@/components/tokyo-diorama/tokyo-diorama-section'));
 // R49: the hero mascot (page-mascot cat) is client-only and mounts after the gate; its code stays out of First Load
 export const HeroMascot = dynamic(() => import('@/components/hero-mascot'), { ssr: false });
 // R44 Proof Reel: the Arena Wall rows read the photo lists of the sections above, so they share those chunks

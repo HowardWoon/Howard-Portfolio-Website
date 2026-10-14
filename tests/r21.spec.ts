@@ -69,7 +69,8 @@ test('The Build is self-contained: no section id, dock / spine sections unchange
   const section = page.locator('section.bs-section');
   expect(await section.getAttribute('id')).toBeNull();
   const ids = await page.evaluate(() => [...document.querySelectorAll('main section[id]')].map((s) => s.id));
-  expect(ids).toEqual(['hero', 'about', 'projects', 'experience', 'honors', 'contact']);
+  // R68 (owner): the Tokyo After Rain diorama is its own section between Honors and Contact; the nav keeps five
+  expect(ids).toEqual(['hero', 'about', 'projects', 'experience', 'honors', 'diorama', 'contact']);
   // it sits between About and Projects
   const order = await page.evaluate(() => {
     const els = [

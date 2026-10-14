@@ -28,6 +28,7 @@
     "page-mascot": "0.1.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "three": "0.180.0",
     "zod": "^3.25.56"
   },
   "devDependencies": {
@@ -37,6 +38,7 @@
     "@types/nodemailer": "^8.0.1",
     "@types/react": "^19.1.5",
     "@types/react-dom": "^19.1.5",
+    "@types/three": "0.180.0",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.28.0",
     "eslint-config-next": "^15.5.26",

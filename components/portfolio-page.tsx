@@ -8,6 +8,7 @@ import {
   StackedProjects,
   ExperienceSection,
   HonorsSection,
+  TokyoDiorama,
   ContactSection,
   InteractionHud,
   AmbientFx,
@@ -98,6 +99,8 @@ export function PortfolioPage() {
           <StackedProjects />
           <ExperienceSection />
           <HonorsSection />
+          {/* Tokyo After Rain: walkable 3D diorama (adds a section, changes nothing above or below it) */}
+          <TokyoDiorama />
           <LogoWall />
           <ContactSection />
         </main>

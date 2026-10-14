@@ -349,6 +349,18 @@ in two (20 words at 175 % - 300 %). Lesson: a row of small text tiles is a wrapp
 third takes the next row at full width (no orphan hole). Where three fit, the widths are the same as the grid's.
 Lesson: after a pull or drag, do not leave a "this was a drag" flag set for the next press; compare times instead.
 
+R68 Tokyo After Rain (owner, 14 Oct 2026: "add this entire creative idea 3d blendering model ... into new section ...
+follow every instructions, code, design everything" - the kit `tokyo-diorama-kit.zip`, kept OUTSIDE the repo in
+`Documents/tokyo-diorama-kit`). Installed exactly by the kit's docs/INTEGRATION.md option B:
+
+| Feature            | Where                                                                       | Rules                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ------------------ | --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 3D diorama section | components/tokyo-diorama/\*\*, lazy-sections `TokyoDiorama`, portfolio-page | Owner-approved dependency `three@0.180.0` + `@types/three@0.180.0` (pinned, the kit's version). Section `#diorama` between Honors and the logo wall; NOT in `lib/sections.ts` (nav, spine, dock, boot log keep five). three.js + engine load only near the section (First Load JS unchanged). Bloom / neon / soft light exist ONLY inside the WebGL canvas (the owner's night-street look); the DOM frame stays neo-brutalist. Tests: tests/tokyo-diorama.spec.ts (the kit's) |
+
+When the kit is updated, re-copy `components/tokyo-diorama/` and its spec from the kit, never edit the engine by hand
+without the owner. A sign pin whose building is off the scene's edge is `visibility: hidden` (scripts/device-sweep.mjs
+skips hidden text since R68).
+
 ## H. R24 guardrails - type floor, emblem geometry, hero water reveal, neo-brutalism only (owner complaints, tested)
 
 Howard: "the font family and font size is too ugly and small, slim, i dont want this font problem happen again" and

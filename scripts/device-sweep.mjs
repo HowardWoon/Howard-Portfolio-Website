@@ -125,7 +125,9 @@ for (const [name, profile] of PROFILES) {
       const vw = document.documentElement.clientWidth;
       const crops = [];
       for (const el of document.querySelectorAll('h1,h2,h3,h4,p,a,button,span,li,label')) {
-        if (!el.checkVisibility({ opacityProperty: true })) continue;
+        // (R68: text hidden with visibility: hidden is not seen either - the diorama hides a sign pin whose building is
+        // off the edge of the scene, and the pin keeps its last place)
+        if (!el.checkVisibility({ opacityProperty: true, visibilityProperty: true })) continue;
         if (el.closest('[aria-hidden="true"], .sr-only, [data-type-exempt]')) continue;
         if (!el.textContent.trim() || el.children.length > 3) continue;
         const b = el.getBoundingClientRect();
