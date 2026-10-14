@@ -65,7 +65,7 @@ Rules:
 
 1. CI runners report <= 4 CPU cores: an emulated phone starts in the FX-93 `lite` tier. Phone tests of effects
    that lite disables must load `/?fxtier=full` and wait for `html[data-fx-desk="on"]` (lazy DeskFx).
-2. The pre-push hook runs the FULL suite on the working tree (about 5 minutes). Do not create or edit files while it
+2. The pre-push hook runs the FULL suite on the working tree (45-60 min with `CI=1`, AGENTS.md 3.8). Do not create or edit files while it
    runs, or it tests half-written code and blocks the push. `git status` "ahead N" after a push = it was blocked.
 3. Locally, `/_vercel/insights` and `/_vercel/speed-insights` return 404. That is expected (Vercel-only scripts).
 4. Playwright cannot `.click()` / `.tap()` / `scrollIntoViewIfNeeded()` an element that is always animating
@@ -161,6 +161,23 @@ Rules:
 37. R62 badge pit: the pile is laid by a plan (rows from the floor, fullest first, every badge carried under its centre
     or by a real hold on both sides) and each badge is guided to its seat. Check a new rule with the offline plan count
     and with 10 drops per width (280 to 2,880 px), and compare the plan with the settled pile before blaming the solver.
+
+38. R67: behaviour that must work before hydration (the keyboard focus-ring mark) also lives in the early static
+    script in `app/layout.tsx` (plain vanilla JS, and harmless alongside the React version). A React-only listener
+    misses every key pressed in the first seconds on a slow device.
+39. R70: easing towards a target is `x += clamp(target - x, -step, step)`, NEVER `x += target > x ? step : -step` - the
+    second one overshoots back the moment it arrives and oscillates forever (the Tokyo walk camera flicked every 2 - 3
+    frames: "the whole thing is shaking").
+40. R70: a fixed physics step (120 Hz) must be DRAWN interpolated between the last two steps (`prev -> pos` by the
+    leftover time); otherwise a 60 / 144 / 180 Hz screen gets 0, 1 or 2 steps per frame and motion judders.
+41. R70: a follow camera sits on the line behind its smoothly followed target at an eased distance; do not also chase
+    its position (it lags, then lunges), and its collision ray ignores moving actors and thin poles.
+42. R70: page-wide single-letter shortcuts (interaction-hud: S skim, T top, G tour, C calm, J/K, F, /) skip any key
+    whose default was prevented; a component that takes the keyboard claims its keys in the capture phase.
+43. R68 / R70: heavy WebGL loads only when on screen and waits for a press on software-drawn WebGL; preloading it 1.5
+    screens ahead built it for every test that scrolled past and pushed CI past its 1-hour limit.
+44. R68: `scripts/device-sweep.mjs` treats `visibility: hidden` text as not seen (a hidden 3D sign pin off the scene's
+    edge is not a crop).
 
 ## F. Definition of done additions
 

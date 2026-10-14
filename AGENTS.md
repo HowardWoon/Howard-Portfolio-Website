@@ -40,7 +40,12 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
 5. Read every file you will edit in full before editing it.
 6. Make the smallest correct change.
 7. Run `node scripts/verify.mjs` (add `--e2e` for UI changes) and, for any UI change, `node scripts/audit-ui.mjs` AND `node scripts/device-sweep.mjs`. Paste both summary tables.
-8. Commit (the pre-commit hook re-checks), push (the pre-push hook runs the full suite for ~5 min: do not touch files meanwhile; if `git status` still says "ahead", the push was blocked), confirm GitHub CI is green and Vercel shows `success` for that hash, and report in the format of `00-core.md` section F,
+8. Commit (the pre-commit hook re-checks), stop the :3000 server, then push with `CI=1 git push origin main` as a
+   BACKGROUND command (Bash; PowerShell: `$env:CI='1'; git push origin main`). The pre-push hook runs the full suite
+   with one worker: 45-60 min for 550+ tests (without `CI=1` it uses 3 workers and a 15-min e2e timeout and times
+   out). Do not touch files meanwhile; if `git status` still says "ahead", the push was blocked. Aborting a push
+   (kill its node / git processes) is safe: the commits stay local. Then confirm GitHub CI is green and Vercel shows
+   `success` for that hash (06-stability G), and report in the format of `00-core.md` section F,
    with evidence per `05-obedience.md` section D and the "SELF-CHECK" line.
 
 ## 4. Commands
@@ -55,14 +60,26 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
 | Type check / lint / format                 | `npm run typecheck` / `npm run lint` / `npx prettier --write <files you changed>`          |
 | E2E tests                                  | `npm run test:e2e`                                                                         |
 | Every device (16 real profiles, 4 pages)   | server running, then `node scripts/device-sweep.mjs`                                       |
+| Push (full suite runs first, 45-60 min)    | stop :3000, then `CI=1 git push origin main` in the background                             |
+| Rerun failures alone (load or real?)       | `npx playwright test <file>:<line> --workers 1 --repeat-each 3`                            |
 
 ## 5. Where things live
 
 - `app/` routes: `page.tsx` (home), `simulators/[type]` (only `agentic`, `flood`, `energy` exist), `admin/` (inbox only), `api/contact` (contact form), `layout.tsx` (fonts, metadata, JSON-LD, boot-gate script).
 - `components/` one file per section: `bikebear-hero`, `about-section`, `stacked-projects`, `experience-section`, `honors-section`, `contact-section`, `site-footer` (rendered after `</main>` in `portfolio-page.tsx`), plus shared UI (`site-header`, `boot-sequence`, `interactive-photo-stack` (its top-level `photos` array is the ZeroLag gallery; other projects pass `galleryPhotos` in `stacked-projects.tsx`), `field-archive*`, `command-palette`, `section-dock`, `scroll-to-top`, `tilt-card`, `reveal`, `motion-provider` (all animations use `m.*` from framer-motion inside `<LazyMotion>`), `lazy-sections` (below-the-fold sections, code-split), `fx/route-wipe`, `fx/press-stamp` (R37: every click / tap / Enter stamps a shape on every page; mounted in `app/layout.tsx`), `custom-cursor` (ring + the R37 `[data-cursor]` tag), ...).
 - R21: `build-story` (scroll storyboard between About and Projects, docs/R21-BUILD-STORY.md), `signal-key` (colour legend), `honor-emblem` (medal / seal / ticket emblems), `marquees` (two-deck highlight tape + crossing slogan tapes).
+- R63-R70 layers: `spider-reveal` + `lib/liquid.ts` (the hero water reveal; portrait = light ripples, R69),
+  `flip-card` (the turn-over student ID in The Build), `tear-stub` (footer Document Metadata counterfoil -> resume),
+  `spine-branches` (section rail panels listing each section's headings), `tokyo-diorama/**` (R68 walkable 3D
+  section `#diorama`: three.js 0.180.0, owner-approved; the kit's source stays OUTSIDE the repo in
+  `Documents/tokyo-diorama-kit`; R70 engine fixes are listed in 30-design-system), `input-modality` (keyboard ring
+  mark, also set by the early script in `app/layout.tsx` so a Tab before hydration draws the ring).
 - `lib/` hooks and helpers: `use-scroll-lock`, `use-focus-trap`, `use-latest`, `to-local`, `use-active-section`, `sections`, Supabase clients, `signal.ts` (SIGNAL KEY colours, the only place colour meanings are defined), `story-glyphs.ts`, `site-data.ts` (mostly legacy - content is inside the section components).
 - `public/` assets. File names use `snake_case` / `kebab-case`, **never spaces**.
+- The repo root holds only the project. Uploads, kits and zips the owner drops there are moved out (ask first) or
+  into `public/`: `tsc` and `eslint .` scan every `.ts` in the root, and a dropped three.js kit broke every build.
+  Generated folders (`playwright-report/`, `test-results/`, `audit/`) are git-ignored but `eslint .` still lints
+  `playwright-report/` - delete it when lint suddenly reports hundreds of errors in minified files.
 - `tests/smoke.spec.ts` Playwright tests. `.github/workflows/ci.yml` CI. `scripts/` verify.mjs, audit-ui.mjs, check-encoding.mjs. `audit/` is output only and is git-ignored.
 
 ## 6. Owner standing rules added R29-R32 (read before touching photos, crests or The Build)
@@ -93,4 +110,20 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
    R62: no badge may rest on air or on a corner, at any width or after a zoom (the pit reads sizes again and
    drops again). Guard: `tests/r62`.
 7. **Zoom (R50, R62):** a fixed-px box that holds text takes `var(--u)`; a zoom keeps the reader's place in every
-   painted frame. Guard: `tests/r62`.
+   painted frame. Guard: `tests/r62`. Zoomed IN (R65): a row of small text tiles is a wrapping flex row, never a
+   Tailwind `grid-cols-N` (its `minmax(0, 1fr)` squeezes a column below its longest word). Guard: `tests/r65`.
+
+## 7. Owner standing rules added R63-R70
+
+1. **React Bits requests** ("integrate the <X /> component from React Bits"): build a brutalist remix of it as a
+   layer, from the site's tokens, with NO new dependency (`motion`, `@hugeicons/*` stay uninstalled), no glare, blur
+   or soft gradient, every word already on the page, and it must function on touch, mouse and keyboard. Record it
+   as a row in 30-design-system G.
+2. **An owner's direct design request overrides an older design rule** (R69: "no black border" on the portrait
+   water). Do it, then rewrite the old rule in AGENTS.md / 30-design-system in the same commit so it cannot come back.
+3. **3D / WebGL (R68, R70):** load only when the section is on screen; on software-drawn WebGL (SwiftShader,
+   llvmpipe, no graphics chip - also CI) wait for START 3D; bloom / neon only inside the canvas. A component that
+   takes the keyboard CLAIMS its keys (capture phase, `preventDefault`) and page-wide shortcuts skip claimed keys.
+4. **Smoothness is measured, not assumed:** an animation the owner says "shakes" is logged frame by frame in REAL
+   time on the GPU (`--use-angle=d3d11 --enable-gpu --ignore-gpu-blocklist`), not only in a stepped simulation - the
+   stepped run missed the R70 camera-blend bug that caused the shaking.

@@ -20,6 +20,14 @@ A task is DONE only when every applicable item below has actually been executed 
 - Never remove an assertion. A test without an `expect` is not a test.
 - `tests/r24.spec.ts` is the permanent guard for the type floor, the three fonts, emblem geometry, build-story
   collisions and the phone header. When it fails, fix the site, never loosen the thresholds.
+- Local runs use 3 workers, CI and the pre-push hook use 1. A test that fails with 3 workers but passes
+  `--workers 1 --repeat-each 3` is load-sensitive; to blame a change, rebuild WITHOUT the change and run the same
+  set (R67: r53 "proof card" / "reading-progress ring" failed with 3 workers with and without the change).
+- A test that fails on CI but never locally: reproduce at 6x CPU (`Emulation.setCPUThrottlingRate`) before calling it
+  a flake. R67: the focus ring after a Tab before hydration was a real bug, 4 of 4 at 6x CPU.
+- Animation and camera smoothness: measure per frame (position, angle, and their frame-to-frame change) in a REAL-time
+  run with the GPU flags, as well as in a stepped simulation; log the component's own state each frame (R70: the
+  stepped run looked fine, the real-time log showed the camera blend flicking 1.000 -> 0.985 every 2 - 3 frames).
 - A test that fails only inside the full suite but passes 3x alone is a load flake: re-run it, report it honestly,
   and never commit around it. If it fails twice in a row in the full suite it is a real bug.
 - Before trusting a new guard test, prove it can fail (it must flag the defect it was written for).

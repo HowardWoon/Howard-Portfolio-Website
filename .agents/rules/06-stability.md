@@ -5,6 +5,7 @@ trigger: always_on
 # 06 - Stability: no crashes, no hangs, no corrupted files (always on)
 
 ## A. Terminal is Windows PowerShell - write commands for it
+
 1. Do NOT use `&&` or `||` (not valid in Windows PowerShell 5.1). Run one command per call,
    or use `;` and then check `$LASTEXITCODE` (0 = success).
 2. Do NOT use `rm -rf`, `cp -r`, `export`, `grep`, `sed`, `cat <<EOF`. Use:
@@ -14,6 +15,7 @@ trigger: always_on
 4. Quote paths that contain spaces or brackets: `"app/simulators/[type]/page.tsx"`.
 
 ## B. Long-running processes must never block you
+
 1. Never run `npm run dev` or `npm run start` as a normal (blocking) command. Start it as a background
    process, wait for "Ready", do your checks, then stop it.
 2. Before starting a server, free port 3000:
@@ -23,8 +25,14 @@ trigger: always_on
 4. Any command expected to take > 2 minutes: say so first, then run it once. Never loop-retry the same failing command
    more than twice - stop and report the error text instead.
 5. Out of memory during build: `$env:NODE_OPTIONS="--max-old-space-size=4096"`, then build once more.
+6. Never run two `verify.mjs --e2e` / Playwright runs (or a run and a push) at the same time: they share port 3000 and
+   `.next` and both results are void (it happened in R63). One background job at a time; check with
+   `Get-Process node` before starting another.
+7. Keep diagnostic probes out of the repo (the session scratchpad). A probe that loads the 3D section needs
+   `?diorama-test`, and real frame timing needs the GPU flags (30-design-system E9).
 
 ## C. Protect your context window (the main cause of "the AI crashed / forgot the rules")
+
 1. Never open or print: package-lock.json, .next/, node_modules/, public/ binaries (pdf, jpg, png, webp, mp4), *.map files.
 2. Limit command output: pipe to `Select-Object -Last 40` (or `-First 40`). Never print whole build logs.
 3. Read big files in parts; only the part you need.
@@ -33,6 +41,7 @@ trigger: always_on
 5. If you notice you have forgotten something from earlier in the conversation, stop and re-read AGENTS.md and .agents/rules/.
 
 ## D. Safe editing
+
 1. Read the whole file before editing it. Edit the smallest block possible.
 2. No mass search-and-replace scripts across many files (no Python/PowerShell regex rewrites).
    One file at a time, with your edit tool, then re-read the changed region.
@@ -41,14 +50,29 @@ trigger: always_on
 4. After every edit run `node scripts/check-encoding.mjs`. Exit code must be 0.
 
 ## E. Git safety
+
 1. Commit on `main` only after `node scripts/verify.mjs --e2e` passes.
 2. Before commit: `node scripts/verify.mjs --no-build` must print `RESULT: ALL PASS`.
    The pre-commit hook enforces this. NEVER use `git commit --no-verify`.
 3. Never `git push --force`, `git reset --hard`, `git clean -fd` or `git rebase` on main without Howard's written OK.
 4. Never commit: .env*, .next/, node_modules/, test-results/, playwright-report/, *.log, files you did not intend to change.
-5. Push the branch after each commit so the work is verifiable.
+5. Push the branch after each commit so the work is verifiable: stop the :3000 server, then `CI=1 git push origin main`
+   as a background command (45-60 min; AGENTS.md section 3.8). Several commits may go in one push when the next change
+   is already being made - a push that is running when new bugs are reported can be aborted and redone (safe).
+
+## G. Reading CI and Vercel after a push
+
+1. The public GitHub API rate-limits this machine's IP after a few dozen calls (HTTP 403 "rate limit exceeded");
+   never poll it in a loop. Read the run page instead: `github.com/HowardWoon/Howard-Portfolio-Website/actions` and
+   `.../actions/runs/<id>` (built-in browser `get_page_text`, or curl the HTML). A `grep` for "Failure" in that HTML
+   is not a verdict - read the Status field.
+2. The CI job has a 1-hour limit and the suite takes ~45 min there. Anything that makes every test slower (R68: the 3D
+   street built on every scroll past it, on software WebGL) gets the run CANCELLED, not failed - read the duration.
+3. Vercel: confirm the commit's deployment, then fetch the live HTML and look for the new markup. The built-in browser
+   pane does not draw while the app window is minimised; use a headless Playwright run against the live URL instead.
 
 ## F. If something goes wrong
+
 - Build or test fails: show the last 40 lines of the error, state the cause in one sentence, fix only that.
 - You broke a file: `git restore <file>` (uncommitted) or `git revert <hash>` (committed). Report it.
 - Tool or terminal hangs: stop the process, report which command hung. Do not start the same command again blindly.
