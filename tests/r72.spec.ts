@@ -15,6 +15,13 @@ async function open(page: Page) {
     await page.waitForTimeout(40);
   }
   await page.locator('[data-pill-pit]').evaluate((e) => e.scrollIntoView({ block: 'center' }));
+  // The stream of scrolls above raised the scroll-quiet shield (lib/scroll-frame.ts, 30-design-system E30): until a
+  // deliberate mouse move lifts it, it covers "Drop again", Playwright's click retries by scrolling the button to
+  // another spot, the pit leaves the screen and its physics pauses - no badge falls (R75: 7 of 10 runs failed).
+  await page.mouse.move(5, 5);
+  await expect
+    .poll(() => page.evaluate(() => document.querySelector<HTMLElement>('[data-scroll-shield]')?.style.display ?? ''))
+    .not.toBe('block');
 }
 /** the badges in reading order (rows from the top, left to right), once the pile is still */
 const pile = (page: Page) =>
