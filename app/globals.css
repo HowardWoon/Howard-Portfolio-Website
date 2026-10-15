@@ -5341,8 +5341,107 @@ html[data-fx-pause='on'] :not([data-offscreen]) > .sb-layer .sb-piece {
   opacity: 0.85;
   border-bottom: 3px solid #0a0a0a;
 }
+/* ================================================================ R74 flyers (components/fx/flyers.tsx; owner: "add some
+   objects floating flying behind ... upgrade the background of this two section"). Ink-outlined paper stickers with a
+   hard shadow cross About (sideways) and rise through Honors. Transform properties only (translate / rotate), sized in
+   container units so a crossing spans the whole section; paused off screen; at rest under Calm / reduced motion. */
+/* behind EVERYTHING in its section, the text included (a sticker crossed over the About headline at z-index 0):
+   the section becomes its own stacking context, so -1 sits on its paper and under its content */
+section:has(> .flyers) {
+  isolation: isolate;
+}
+.flyers {
+  z-index: -1;
+  /* clip, not hidden: hidden makes a scroll container and the sticky sky inside would stop sticking */
+  overflow: clip;
+  /* the stickers move: the browser must never pick one as its scroll anchor (R53 lesson) */
+  overflow-anchor: none;
+}
+/* the sky: one screen tall, pinned to the viewport while its section scrolls past */
+.flyers-sky {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100svh;
+  container-type: size;
+}
+.flyer {
+  position: absolute;
+  width: var(--size);
+  height: var(--size);
+  background: center / contain no-repeat;
+  rotate: var(--tilt);
+  will-change: translate, rotate;
+}
+.flyer[data-far] {
+  opacity: 0.7;
+}
+.flyers-about .flyer {
+  left: 0;
+  top: var(--lane);
+  translate: calc(var(--rest) * 1cqw) 0;
+}
+.flyers-honors .flyer {
+  left: var(--lane);
+  top: 0;
+  translate: 0 calc(var(--rest) * 1cqh);
+}
+@keyframes flyer-across {
+  from {
+    translate: calc(-1 * var(--size) - 48px) 0;
+  }
+  to {
+    translate: calc(100cqw + 48px) 0;
+  }
+}
+@keyframes flyer-rise {
+  from {
+    translate: 0 calc(100cqh + 48px);
+  }
+  to {
+    translate: 0 calc(-1 * var(--size) - 48px);
+  }
+}
+@keyframes flyer-turn {
+  from {
+    rotate: var(--tilt);
+  }
+  to {
+    rotate: calc(var(--tilt) + var(--spin));
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion='calm']) .flyers-about .flyer,
+  html:not([data-motion='calm']) .flyers-honors .flyer {
+    animation-duration: var(--dur), var(--dur);
+    animation-delay: var(--delay), var(--delay);
+    animation-timing-function: linear, linear;
+    animation-iteration-count: infinite, infinite;
+    animation-play-state: paused;
+  }
+  html:not([data-motion='calm']) .flyers-about .flyer {
+    animation-name: flyer-across, flyer-turn;
+  }
+  html:not([data-motion='calm']) .flyers-honors .flyer {
+    animation-name: flyer-rise, flyer-turn;
+  }
+  html:not([data-motion='calm']) .flyers[data-run] .flyer {
+    animation-play-state: running;
+  }
+}
+/* phones and the lite tier keep the near layer only */
+@media (max-width: 639px) {
+  .flyer[data-far] {
+    display: none;
+  }
+}
+html[data-fx-tier='lite'] .flyer[data-far] {
+  display: none;
+}
 @media print {
   .paper-stock,
+  .flyers,
   .hdr-ruler {
     display: none;
   }

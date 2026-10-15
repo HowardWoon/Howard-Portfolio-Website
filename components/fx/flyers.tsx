@@ -1,0 +1,333 @@
+'use client';
+
+import { useEffect, useRef, type CSSProperties } from 'react';
+import { FX } from '@/lib/fx';
+
+/**
+ * R74 Flyers (owner: "i not quite like the background design of this two ... add some objects floating flying behind
+ * etc, must be creative to upgrade the background of this two section").
+ *
+ * Cut-out stickers drift behind a section's content, drawn from what the section is about:
+ *   - about   "systems in flight": server units, a database, a gear, code braces, a data packet, a pipeline graph, a
+ *             terminal prompt and a cube fly across the sheet like traffic between services, at two depths.
+ *   - honors  "after the ceremony": stars, medals, a trophy, a rosette and a ticket rise from the bottom and turn.
+ *             Stars and medals are podium yellow (SIGNAL: placement or award won); everything else is ink on white.
+ *
+ * Neo-brutalist: white paper, 3 px ink outline, a hard ink offset shadow, no blur or soft gradient; every shape is
+ * COMPUTED here (no hand-typed points). Motion is CSS transform only (no layout per frame), measured in container
+ * units of a screen-tall 'sky' that stays pinned to the viewport while the section scrolls past (so every screen of a
+ * tall section shows the whole set), and runs only while the section is on screen. Calm and reduced
+ * motion: every sticker rests in place. Phones and the lite tier keep the near layer only.
+ */
+export type FlyerSet = 'about' | 'honors';
+
+const INK = '#0A0A0A';
+const WHITE = '#FFFFFF';
+const PODIUM = '#FFC700';
+const f = (n: number) => +n.toFixed(2);
+const pts = (p: [number, number][]) => p.map(([x, y]) => `${f(x)},${f(y)}`).join(' ');
+const polar = (cx: number, cy: number, r: number, a: number): [number, number] => [
+  cx + r * Math.cos(a),
+  cy + r * Math.sin(a),
+];
+
+/** a shape is drawn twice: once solid ink 4 px down-right (the hard shadow), then filled with an ink outline */
+type Draw = (fill: string, shadow: boolean) => string;
+const sw = (shadow: boolean) => (shadow ? 0 : 3);
+const st = (fill: string, shadow: boolean) =>
+  `fill='${shadow ? INK : fill}' stroke='${INK}' stroke-width='${sw(shadow)}' stroke-linejoin='round'`;
+const line = (x1: number, y1: number, x2: number, y2: number, shadow: boolean) =>
+  shadow
+    ? ''
+    : `<line x1='${f(x1)}' y1='${f(y1)}' x2='${f(x2)}' y2='${f(y2)}' stroke='${INK}' stroke-width='3' stroke-linecap='round'/>`;
+
+/* ------------------------------------------------------------------ about: systems in flight (64 x 64 boxes) */
+const server: Draw = (fill, s) => {
+  let b = '';
+  for (let i = 0; i < 3; i++) {
+    const y = 8 + i * 17;
+    b += `<rect x='6' y='${y}' width='52' height='14' rx='3' ${st(fill, s)}/>`;
+    if (!s) b += `<circle cx='15' cy='${y + 7}' r='2.6' fill='${INK}'/>` + line(26, y + 7, 50, y + 7, s);
+  }
+  return b;
+};
+const database: Draw = (fill, s) => {
+  const rx = 24;
+  const ry = 7;
+  const body = `M${32 - rx} 14 L${32 - rx} 50 A${rx} ${ry} 0 0 0 ${32 + rx} 50 L${32 + rx} 14`;
+  let b = `<path d='${body} Z' ${st(fill, s)}/>`;
+  b += `<ellipse cx='32' cy='14' rx='${rx}' ry='${ry}' ${st(fill, s)}/>`;
+  if (!s)
+    for (const y of [26, 38])
+      b += `<path d='M${32 - rx} ${y} A${rx} ${ry} 0 0 0 ${32 + rx} ${y}' fill='none' stroke='${INK}' stroke-width='3'/>`;
+  return b;
+};
+const gear: Draw = (fill, s) => {
+  const teeth = 8;
+  const p: [number, number][] = [];
+  for (let i = 0; i < teeth; i++) {
+    const a = (i / teeth) * Math.PI * 2;
+    const w = (Math.PI / teeth) * 0.55;
+    p.push(
+      polar(32, 32, 21, a - w * 1.25),
+      polar(32, 32, 28, a - w),
+      polar(32, 32, 28, a + w),
+      polar(32, 32, 21, a + w * 1.25),
+    );
+  }
+  return (
+    `<polygon points='${pts(p)}' ${st(fill, s)}/>` +
+    (s ? '' : `<circle cx='32' cy='32' r='8' fill='${WHITE}' stroke='${INK}' stroke-width='3'/>`)
+  );
+};
+const braces: Draw = (fill, s) => {
+  // two curly braces, each one path of quarter turns (mirrored for the closing one)
+  const brace = (x: number, dir: 1 | -1) => {
+    const d = dir;
+    return `<path d='M${x + 7 * d} 8 Q${x} 8 ${x} 16 L${x} 26 Q${x} 32 ${x - 6 * d} 32 Q${x} 32 ${x} 38 L${x} 48 Q${x} 56 ${x + 7 * d} 56' fill='none' stroke='${INK}' stroke-width='${s ? 8 : 5}' stroke-linecap='round' stroke-linejoin='round'/>`;
+  };
+  const card = `<rect x='4' y='4' width='56' height='56' rx='8' ${st(fill, s)}/>`;
+  return card + (s ? '' : brace(22, 1) + brace(42, -1));
+};
+const packet: Draw = (fill, s) => {
+  let b = `<rect x='4' y='14' width='56' height='36' rx='4' ${st(fill, s)}/>`;
+  if (!s) {
+    b += `<rect x='4' y='14' width='56' height='10' fill='${INK}'/>`;
+    b += line(10, 32, 38, 32, s) + line(10, 41, 50, 41, s);
+  }
+  return b;
+};
+const pipeline: Draw = (fill, s) => {
+  const nodes: [number, number][] = [
+    [12, 32],
+    [32, 14],
+    [32, 50],
+    [52, 32],
+  ];
+  let b = '';
+  if (!s)
+    for (const [a, c] of [
+      [0, 1],
+      [0, 2],
+      [1, 3],
+      [2, 3],
+    ])
+      b += line(nodes[a][0], nodes[a][1], nodes[c][0], nodes[c][1], s);
+  for (const [x, y] of nodes) b += `<circle cx='${x}' cy='${y}' r='8' ${st(fill, s)}/>`;
+  return b;
+};
+const terminal: Draw = (fill, s) => {
+  let b = `<rect x='4' y='8' width='56' height='48' rx='6' ${st(fill, s)}/>`;
+  if (!s) {
+    b += line(4, 18, 60, 18, s);
+    b += `<polyline points='${pts([
+      [14, 28],
+      [22, 35],
+      [14, 42],
+    ])}' fill='none' stroke='${INK}' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/>`;
+    b += line(28, 44, 42, 44, s);
+  }
+  return b;
+};
+const cube: Draw = (fill, s) => {
+  // isometric cube: the hexagon outline, then the three inner edges
+  const c: [number, number] = [32, 32];
+  const r = 26;
+  const hex = Array.from({ length: 6 }, (_, i) => polar(c[0], c[1], r, -Math.PI / 2 + (i * Math.PI) / 3));
+  let b = `<polygon points='${pts(hex)}' ${st(fill, s)}/>`;
+  if (!s) for (const i of [1, 3, 5]) b += line(c[0], c[1], hex[i][0], hex[i][1], s);
+  return b;
+};
+
+/* ------------------------------------------------------------------ honors: after the ceremony */
+const star: Draw = (fill, s) => {
+  const p: [number, number][] = [];
+  for (let i = 0; i < 10; i++) p.push(polar(32, 34, i % 2 ? 12 : 28, -Math.PI / 2 + (i * Math.PI) / 5));
+  return `<polygon points='${pts(p)}' ${st(fill, s)}/>`;
+};
+const medal: Draw = (fill, s) => {
+  const ribbon = (x: number, d: number) =>
+    `<polygon points='${pts([
+      [x, 4],
+      [x + 12 * d, 4],
+      [x + 12 * d + 8 * d, 28],
+      [x + 8 * d, 28],
+    ])}' ${st(WHITE, s)}/>`;
+  let b = ribbon(18, 1) + ribbon(46, -1);
+  b += `<circle cx='32' cy='42' r='17' ${st(fill, s)}/>`;
+  if (!s) b += `<circle cx='32' cy='42' r='9' fill='none' stroke='${INK}' stroke-width='3'/>`;
+  return b;
+};
+const trophy: Draw = (fill, s) => {
+  let b = '';
+  if (!s)
+    for (const d of [-1, 1])
+      b += `<path d='M${32 + 16 * d} 14 Q${32 + 28 * d} 14 ${32 + 26 * d} 24 Q${32 + 24 * d} 32 ${32 + 14 * d} 32' fill='none' stroke='${INK}' stroke-width='3' stroke-linecap='round'/>`;
+  b += `<path d='M16 8 L48 8 L48 18 Q48 38 32 40 Q16 38 16 18 Z' ${st(fill, s)}/>`;
+  b += `<rect x='28' y='40' width='8' height='8' ${st(fill, s)}/>`;
+  b += `<rect x='18' y='48' width='28' height='9' rx='2' ${st(WHITE, s)}/>`;
+  return b;
+};
+const rosette: Draw = (fill, s) => {
+  // a scalloped disc: one arc per petal around the centre
+  const n = 12;
+  const R = 22;
+  let d = '';
+  for (let i = 0; i <= n; i++) {
+    const [x, y] = polar(32, 28, R, (i / n) * Math.PI * 2);
+    d += i === 0 ? `M${f(x)} ${f(y)}` : ` A6 6 0 0 1 ${f(x)} ${f(y)}`;
+  }
+  let b = `<polygon points='${pts([
+    [24, 40],
+    [20, 60],
+    [27, 55],
+    [32, 61],
+    [32, 40],
+  ])}' ${st(WHITE, s)}/><polygon points='${pts([
+    [40, 40],
+    [44, 60],
+    [37, 55],
+    [32, 61],
+    [32, 40],
+  ])}' ${st(WHITE, s)}/>`;
+  b += `<path d='${d} Z' ${st(fill, s)}/>`;
+  if (!s) b += `<circle cx='32' cy='28' r='10' fill='${WHITE}' stroke='${INK}' stroke-width='3'/>`;
+  return b;
+};
+const ticket: Draw = (fill, s) => {
+  // a stub with a half-round notch on each side and a perforation line
+  const d = 'M6 14 L58 14 L58 26 A6 6 0 0 0 58 38 L58 50 L6 50 L6 38 A6 6 0 0 0 6 26 Z';
+  let b = `<path d='${d}' ${st(fill, s)}/>`;
+  if (!s) {
+    b += `<line x1='44' y1='17' x2='44' y2='47' stroke='${INK}' stroke-width='3' stroke-dasharray='3 4'/>`;
+    b += line(14, 26, 34, 26, s) + line(14, 38, 28, 38, s);
+  }
+  return b;
+};
+
+const SHAPES: Record<string, Draw> = {
+  server,
+  database,
+  gear,
+  braces,
+  packet,
+  pipeline,
+  terminal,
+  cube,
+  star,
+  medal,
+  trophy,
+  rosette,
+  ticket,
+};
+
+/** one sticker as an SVG image: shadow first (4 px down-right), then the shape */
+function art(shape: string, fill: string) {
+  const draw = SHAPES[shape];
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='-2 -2 72 72'><g transform='translate(4 4)'>${draw(fill, true)}</g>${draw(fill, false)}</svg>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+}
+
+/**
+ * The flight plan. `lane` = where it travels (about: % from the top; honors: % from the left), `size` in px,
+ * `dur` seconds for one crossing, `delay` = how far into its crossing it starts (so the sky is full at once),
+ * `spin` = degrees turned per crossing, `far` = the back layer (smaller, lighter, gone on phones and the lite tier),
+ * `rest` = where it sits when motion is off (% across).
+ */
+type Flyer = {
+  shape: string;
+  fill?: string;
+  lane: number;
+  size: number;
+  dur: number;
+  delay: number;
+  spin: number;
+  tilt: number;
+  far?: boolean;
+  rest: number;
+  dir?: 1 | -1;
+};
+
+const PLANS: Record<FlyerSet, Flyer[]> = {
+  // near layer: big, slow, on lanes spread over the whole height; far layer: smaller, quicker turns
+  about: [
+    { shape: 'server', lane: 7, size: 84, dur: 52, delay: 0.1, spin: 8, tilt: -6, rest: 88 },
+    { shape: 'packet', lane: 19, size: 64, dur: 38, delay: 0.55, spin: -6, tilt: 4, rest: 3 },
+    { shape: 'gear', lane: 31, size: 78, dur: 60, delay: 0.3, spin: 240, tilt: 0, rest: 92, dir: -1 },
+    { shape: 'database', lane: 44, size: 80, dur: 48, delay: 0.78, spin: 10, tilt: 5, rest: 2 },
+    { shape: 'pipeline', lane: 57, size: 86, dur: 56, delay: 0.15, spin: -14, tilt: -4, rest: 90, dir: -1 },
+    { shape: 'terminal', lane: 70, size: 74, dur: 44, delay: 0.45, spin: 6, tilt: -3, rest: 5 },
+    { shape: 'cube', lane: 83, size: 70, dur: 50, delay: 0.92, spin: -60, tilt: 0, rest: 94, dir: -1 },
+    { shape: 'braces', lane: 93, size: 66, dur: 42, delay: 0.25, spin: 12, tilt: 8, rest: 6 },
+    { shape: 'braces', lane: 13, size: 44, dur: 70, delay: 0.85, spin: 20, tilt: 8, far: true, rest: 50, dir: -1 },
+    { shape: 'cube', lane: 37, size: 42, dur: 76, delay: 0.05, spin: -40, tilt: 0, far: true, rest: 60 },
+    { shape: 'packet', lane: 63, size: 40, dur: 64, delay: 0.6, spin: 8, tilt: -6, far: true, rest: 40, dir: -1 },
+    { shape: 'gear', lane: 88, size: 44, dur: 72, delay: 0.35, spin: -260, tilt: 0, far: true, rest: 70 },
+  ],
+  honors: [
+    { shape: 'star', fill: PODIUM, lane: 3, size: 74, dur: 46, delay: 0.2, spin: 160, tilt: 0, rest: 12 },
+    { shape: 'medal', fill: PODIUM, lane: 12, size: 82, dur: 58, delay: 0.65, spin: -30, tilt: -8, rest: 64 },
+    { shape: 'ticket', lane: 22, size: 70, dur: 52, delay: 0.4, spin: 50, tilt: 12, rest: 36 },
+    { shape: 'rosette', fill: WHITE, lane: 31, size: 76, dur: 54, delay: 0.9, spin: 40, tilt: -6, rest: 86 },
+    { shape: 'trophy', fill: PODIUM, lane: 50, size: 80, dur: 60, delay: 0.05, spin: -20, tilt: 6, rest: 48 },
+    { shape: 'star', fill: WHITE, lane: 66, size: 62, dur: 42, delay: 0.55, spin: -180, tilt: 0, rest: 24 },
+    { shape: 'medal', fill: PODIUM, lane: 76, size: 78, dur: 56, delay: 0.3, spin: 26, tilt: 8, rest: 76 },
+    { shape: 'star', fill: PODIUM, lane: 88, size: 66, dur: 44, delay: 0.75, spin: 200, tilt: 0, rest: 6 },
+    { shape: 'rosette', fill: WHITE, lane: 95, size: 64, dur: 50, delay: 0.12, spin: -50, tilt: 4, rest: 56 },
+    { shape: 'star', fill: WHITE, lane: 8, size: 38, dur: 34, delay: 0.5, spin: 220, tilt: 0, far: true, rest: 40 },
+    { shape: 'ticket', lane: 40, size: 44, dur: 40, delay: 0.8, spin: -70, tilt: -10, far: true, rest: 92 },
+    { shape: 'star', fill: PODIUM, lane: 58, size: 36, dur: 32, delay: 0.2, spin: -240, tilt: 0, far: true, rest: 70 },
+    { shape: 'medal', fill: PODIUM, lane: 82, size: 46, dur: 46, delay: 0.95, spin: 40, tilt: 6, far: true, rest: 30 },
+  ],
+};
+
+export function Flyers({ set }: { set: FlyerSet }) {
+  const ref = useRef<HTMLDivElement>(null);
+  // run only while the section is on screen (the stickers stop where they are when it leaves)
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (e) => {
+        if (e.some((x) => x.isIntersecting)) el.dataset.run = '';
+        else delete el.dataset.run;
+      },
+      { rootMargin: '120px 0px' },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  if (!FX.flyers) return null;
+  const plan = PLANS[set];
+  return (
+    <div
+      ref={ref}
+      aria-hidden
+      data-flyers={set}
+      className={`flyers flyers-${set} pointer-events-none absolute inset-0`}
+    >
+      <div className="flyers-sky">
+        {plan.map((p, i) => (
+          <span
+            key={i}
+            data-far={p.far ? '' : undefined}
+            className="flyer"
+            style={
+              {
+                '--lane': `${p.lane}%`,
+                '--size': `${p.size}px`,
+                '--dur': `${p.dur}s`,
+                '--delay': `${-p.delay * p.dur}s`,
+                '--spin': `${p.spin}deg`,
+                '--tilt': `${p.tilt}deg`,
+                '--rest': `${p.rest}`,
+                animationDirection: p.dir === -1 ? 'reverse' : undefined,
+                backgroundImage: art(p.shape, p.fill ?? WHITE),
+              } as CSSProperties
+            }
+          />
+        ))}
+      </div>
+    </div>
+  );
+}

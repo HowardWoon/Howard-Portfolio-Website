@@ -7,10 +7,11 @@ import { FX } from '@/lib/fx';
  *
  * Every section used to sit on the same cream sheet with the same dots, so the page read as one long sheet. Each
  * section now has its OWN printed paper, chosen for what the section is about:
- *   - about       iso       isometric engineer's paper (systems architecture is drawn on it)
+ *   - about       plot      a drafting sheet: a small register cross every 96 px (R74: the dense isometric lattice
+ *                           read as noise - owner: "so ugly"; the flyers are the picture now)
  *   - projects    mat       a cutting mat: 10 px grid, heavier every 50 px (the workbench things are made on)
  *   - experience  ledger    accounting ledger: ruled lines and double money columns (finance and governance roles)
- *   - honors      guilloche the overlapping-circle security print of certificates and banknotes
+ *   - honors      sparkle   scattered four-point sparkles (R74: replaced the overlapping-circle guilloche)
  *   - contact     airmail   postal cancellation waves, under airmail stripe bands (sending a message)
  *
  * Neo-brutalist and quiet: ink lines on the paper (decoration carries no SIGNAL colour), hard edges, no blur, no soft
@@ -19,7 +20,7 @@ import { FX } from '@/lib/fx';
  * `.fx-depth`), so it reads as a sheet under the content; still on touch, Calm, reduced motion and the lite tier.
  * It is the FIRST child of its section, under the Bauhaus pieces (section-backdrop) and the content.
  */
-export type Stock = 'iso' | 'mat' | 'ledger' | 'guilloche' | 'airmail';
+export type Stock = 'plot' | 'mat' | 'ledger' | 'sparkle' | 'airmail';
 
 const INK = '#0A0A0A';
 const f = (n: number) => +n.toFixed(2);
@@ -30,25 +31,12 @@ const tile = (w: number, h: number, body: string) =>
 const line = (x1: number, y1: number, x2: number, y2: number, w: number, o: number) =>
   `<line x1='${f(x1)}' y1='${f(y1)}' x2='${f(x2)}' y2='${f(y2)}' stroke='${INK}' stroke-width='${w}' stroke-opacity='${o}'/>`;
 
-/** isometric paper: the triangle lattice (side 40) with a dot on every node */
-const ISO = (() => {
-  const W = 40;
-  const H = W * Math.sqrt(3); // two rows of triangles
-  const h = H / 2;
-  const o = 0.11;
-  let b = line(0, 0, W, 0, 1, o) + line(0, h, W, h, 1, o);
-  // every edge whose ends are lattice nodes inside or on the tile (the neighbours draw the rest)
-  b +=
-    line(0, 0, W / 2, h, 1, o) + line(W, 0, W / 2, h, 1, o) + line(W / 2, h, 0, H, 1, o) + line(W / 2, h, W, H, 1, o);
-  for (const [x, y] of [
-    [0, 0],
-    [W, 0],
-    [W / 2, h],
-    [0, H],
-    [W, H],
-  ])
-    b += `<circle cx='${f(x)}' cy='${f(y)}' r='1.6' fill='${INK}' fill-opacity='0.22'/>`;
-  return { image: tile(W, H, b), size: `${W}px ${f(H)}px` };
+/** drafting sheet: a register cross every 96 px, the next row shifted half a step */
+const PLOT = (() => {
+  const W = 96;
+  const H = 96;
+  const cross = (x: number, y: number) => line(x - 5, y, x + 5, y, 1.5, 0.2) + line(x, y - 5, x, y + 5, 1.5, 0.2);
+  return { image: tile(W, H, cross(W / 4, H / 4) + cross((W * 3) / 4, (H * 3) / 4)), size: `${W}px ${H}px` };
 })();
 
 /** cutting mat: a 10 px grid, every fifth line heavier */
@@ -69,30 +57,32 @@ const LEDGER = (() => {
   return { image: tile(W, H, b), size: `${W}px ${H}px` };
 })();
 
-/** guilloche: rings on a hexagonal lattice that overlap into rosettes (two ring sizes per centre) */
-const GUILLOCHE = (() => {
-  const W = 60;
-  const H = W * Math.sqrt(3);
-  // every centre whose rings reach into the tile: the corners, the middle, and the middles of the neighbours
-  const centres = [
-    [0, 0],
-    [W, 0],
-    [0, H],
-    [W, H],
-    [W / 2, H / 2],
-    [-W / 2, H / 2],
-    [W * 1.5, H / 2],
-    [W / 2, -H / 2],
-    [W / 2, H * 1.5],
-  ];
+/** sparkles: four-point stars of three sizes, placed on a golden-angle spiral inside the tile (computed) */
+const SPARKLE = (() => {
+  const S = 180;
   let b = '';
-  for (const [x, y] of centres)
-    for (const [r, o] of [
-      [W * 0.58, 0.085],
-      [W * 0.33, 0.06],
-    ])
-      b += `<circle cx='${f(x)}' cy='${f(y)}' r='${f(r)}' fill='none' stroke='${INK}' stroke-width='1' stroke-opacity='${o}'/>`;
-  return { image: tile(W, H, b), size: `${W}px ${f(H)}px` };
+  for (let i = 0; i < 7; i++) {
+    const a = i * 2.39996;
+    const r = 18 + (i / 7) * 62;
+    const x = S / 2 + r * Math.cos(a);
+    const y = S / 2 + r * Math.sin(a);
+    const R = [7, 4.5, 3][i % 3];
+    const k = R * 0.28;
+    const p = [
+      [x, y - R],
+      [x + k, y - k],
+      [x + R, y],
+      [x + k, y + k],
+      [x, y + R],
+      [x - k, y + k],
+      [x - R, y],
+      [x - k, y - k],
+    ]
+      .map(([px, py]) => `${f(px)},${f(py)}`)
+      .join(' ');
+    b += `<polygon points='${p}' fill='${INK}' fill-opacity='0.2'/>`;
+  }
+  return { image: tile(S, S, b), size: `${S}px ${S}px` };
 })();
 
 /** postal cancellation: five sine waves 7 px apart, one wavelength per tile */
@@ -110,10 +100,10 @@ const AIRMAIL = (() => {
 })();
 
 const STOCKS: Record<Stock, { image: string; size: string }> = {
-  iso: ISO,
+  plot: PLOT,
   mat: MAT,
   ledger: LEDGER,
-  guilloche: GUILLOCHE,
+  sparkle: SPARKLE,
   airmail: AIRMAIL,
 };
 

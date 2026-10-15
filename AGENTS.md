@@ -116,7 +116,7 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
    painted frame. Guard: `tests/r62`. Zoomed IN (R65): a row of small text tiles is a wrapping flex row, never a
    Tailwind `grid-cols-N` (its `minmax(0, 1fr)` squeezes a column below its longest word). Guard: `tests/r65`.
 
-## 7. Owner standing rules added R63-R73
+## 7. Owner standing rules added R63-R74
 
 1. **React Bits requests** ("integrate the <X /> component from React Bits"): build a brutalist remix of it as a
    layer, from the site's tokens, with NO new dependency (`motion`, `@hugeicons/*` stay uninstalled), no glare, blur
@@ -136,3 +136,7 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
 6. **3D must look sharp (R73, owner: "why it look so blur?"):** no soft point sprites near the camera, a tight low bloom,
    fog behind the scene, MSAA on every composer tier (30-design-system E45). Every scene control is clicked in a test
    that fails on any page error (`tests/r73`).
+7. **Backgrounds are sparse, objects fly (R74, owner: About / Honors backgrounds "so ugly ... add some objects floating
+   flying behind"):** never a dense line pattern behind text. About and Honors carry `components/fx/flyers.tsx`
+   (stickers from the section's own subject, behind the content at `z-index: -1` in an isolated section, transform-only,
+   paused off screen, still under Calm). Guard: `tests/r74`.

@@ -38,6 +38,7 @@ import {
 } from 'lucide-react';
 import { SectionBackdrop } from './fx/section-backdrop';
 import { SectionPaper } from './fx/section-paper';
+import { Flyers } from './fx/flyers';
 
 interface HonorItem {
   id: string;
@@ -512,8 +513,10 @@ export default function HonorsSection() {
       className="fx-tide-surface fx-dot-plane fx-sheet relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-clip border-t-3 border-ink flex flex-col"
     >
       {/* R71: this section prints on its own paper */}
-      <SectionPaper stock="guilloche" />
+      <SectionPaper stock="sparkle" />
       <SectionBackdrop layout="a" />
+      {/* R74: after the ceremony - stars, medals and a trophy rise behind the content (z-index -1: paints under everything) */}
+      <Flyers set="honors" />
       {/* Structural grid + Bauhaus accents */}
       {FX.ambientOrbits ? <AmbientOrbits side="left" square="bg-white" /> : null}
 

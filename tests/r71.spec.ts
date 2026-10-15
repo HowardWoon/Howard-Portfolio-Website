@@ -11,7 +11,8 @@ async function open(page: Page) {
   await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
 }
 
-const STOCKS = { about: 'iso', projects: 'mat', experience: 'ledger', honors: 'guilloche', contact: 'airmail' };
+// R74: About and Honors moved to quieter stocks (plot, sparkle) under their flyers
+const STOCKS = { about: 'plot', projects: 'mat', experience: 'ledger', honors: 'sparkle', contact: 'airmail' };
 
 test('every content section prints on its own paper, under its content, and no two are the same', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
