@@ -139,4 +139,8 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
 7. **Backgrounds are sparse, objects fly (R74, owner: About / Honors backgrounds "so ugly ... add some objects floating
    flying behind"):** never a dense line pattern behind text. About and Honors carry `components/fx/flyers.tsx`
    (stickers from the section's own subject, behind the content at `z-index: -1` in an isolated section, transform-only,
-   paused off screen, still under Calm). Guard: `tests/r74`.
+   paused off screen, still under Calm). Guard: `tests/r74`. R75 (owner: the stickers looked "duplicate"): nothing
+   is seen THROUGH a card - in a flyer section the card reveal rises without a fade and every sticker is solid. R75
+   (owner: "i dont want all the object overlapped, block the font, sentence, word"): stickers fly ONLY in the free
+   margins beside the text column, never across a word; where the margin is too narrow (phones, tablets, laptops up
+   to ~1500 px) there are none. Guard: `tests/r75`.

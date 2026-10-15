@@ -20,7 +20,7 @@ const to = (page: Page, id: string) =>
 
 for (const id of ['about', 'honors']) {
   test(`${id}: stickers fly behind the content, inside the section, while it is on screen`, async ({ page }) => {
-    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.setViewportSize({ width: 1920, height: 1080 });
     await open(page);
     await to(page, id);
     await page.waitForTimeout(600);
@@ -62,7 +62,7 @@ for (const id of ['about', 'honors']) {
 }
 
 test('the stickers move, and stop when the section leaves the screen', async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.setViewportSize({ width: 1920, height: 1080 });
   await open(page);
   await to(page, 'honors');
   const where = () =>
@@ -84,19 +84,20 @@ test('the stickers move, and stop when the section leaves the screen', async ({ 
 });
 
 test('Calm: every sticker rests in place, inside its section', async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.setViewportSize({ width: 1920, height: 1080 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await open(page);
   for (const id of ['about', 'honors']) {
     await to(page, id);
     const r = await page.evaluate((i) => {
       const kids = [...document.querySelectorAll<HTMLElement>(`#${i} [data-flyers] .flyer`)];
-      const sky = document.querySelector<HTMLElement>(`#${i} .flyers-sky`)!.getBoundingClientRect();
       return kids.map((k) => {
+        // R75: two skies, one per margin - each sticker rests inside its own
+        const sky = k.closest<HTMLElement>('.flyers-sky')!.getBoundingClientRect();
         const b = k.getBoundingClientRect();
         return {
           anim: getComputedStyle(k).animationName,
-          inside: b.left >= sky.left - 1 && b.right <= sky.right + 100,
+          inside: b.left >= sky.left - 1 && b.right <= sky.right + 1,
         };
       });
     }, id);

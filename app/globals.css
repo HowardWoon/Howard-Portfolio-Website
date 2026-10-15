@@ -5343,10 +5343,12 @@ html[data-fx-pause='on'] :not([data-offscreen]) > .sb-layer .sb-piece {
 }
 /* ================================================================ R74 flyers (components/fx/flyers.tsx; owner: "add some
    objects floating flying behind ... upgrade the background of this two section"). Ink-outlined paper stickers with a
-   hard shadow cross About (sideways) and rise through Honors. Transform properties only (translate / rotate), sized in
-   container units so a crossing spans the whole section; paused off screen; at rest under Calm / reduced motion. */
-/* behind EVERYTHING in its section, the text included (a sticker crossed over the About headline at z-index 0):
-   the section becomes its own stacking context, so -1 sits on its paper and under its content */
+   hard shadow ride up and down About and rise through Honors. Transform properties only (translate / rotate), sized in
+   container units so a crossing spans the whole screen; paused off screen; at rest under Calm / reduced motion.
+   R75 (owner: "i dont want all the object overlapped, block the font, sentence, word"): they fly ONLY in the two free
+   margins beside the text column, never across it. */
+/* behind EVERYTHING in its section (a sticker crossed over the About headline at z-index 0): the section becomes its
+   own stacking context, so -1 sits on its paper and under its content */
 section:has(> .flyers) {
   isolation: isolate;
 }
@@ -5356,8 +5358,48 @@ section:has(> .flyers) {
   overflow: clip;
   /* the stickers move: the browser must never pick one as its scroll anchor (R53 lesson) */
   overflow-anchor: none;
+  /* the free margin = the section's side padding (px-4 / xs:px-5 / sm:px-10 / lg:px-16), or more where the text
+     column (max-w-7xl = 80rem, centred) is narrower than the section */
+  --pad: 1rem;
+  --margin: max(var(--pad), calc((100% - 80rem) / 2));
 }
-/* the sky: one screen tall, pinned to the viewport while its section scrolls past */
+@media (min-width: 375px) {
+  .flyers {
+    --pad: 1.25rem;
+  }
+}
+@media (min-width: 640px) {
+  .flyers {
+    --pad: 2.5rem;
+  }
+}
+@media (min-width: 1024px) {
+  .flyers {
+    --pad: 4rem;
+  }
+}
+/* the lane: the margin less a 1.5rem band along the text column - the headline's movable type (T1) turns each word
+   in on a perspective, and a turning word swells up to ~24 px past the column's edge while it enters */
+.flyers-margin {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: max(0px, calc(var(--margin) - 1.5rem));
+}
+.flyers-margin[data-side='l'] {
+  left: 0;
+}
+.flyers-margin[data-side='r'] {
+  right: 0;
+}
+/* from 1400 px the fixed section rail (86 px) stands at the right edge: the right lane starts clear of it */
+@media (min-width: 1400px) {
+  .flyers-margin[data-side='r'] {
+    right: 6rem;
+    width: max(0px, calc(var(--margin) - 7.5rem));
+  }
+}
+/* the sky: one screen tall and one margin wide, pinned to the viewport while its section scrolls past */
 .flyers-sky {
   position: sticky;
   top: 0;
@@ -5367,40 +5409,57 @@ section:has(> .flyers) {
   container-type: size;
 }
 .flyer {
+  /* its size: as designed, but never more than 70 % of its margin; turned 45 degrees its corners reach 0.21 of its
+     width past its box, so its lane keeps that much clear on both sides and a spinning sticker never leaves the margin */
+  --w: min(var(--size), 70cqw);
   position: absolute;
-  width: var(--size);
-  height: var(--size);
+  top: 0;
+  left: calc(var(--w) * 0.21 + (100cqw - var(--w) * 1.42) * var(--x));
+  width: var(--w);
+  height: var(--w);
   background: center / contain no-repeat;
   rotate: var(--tilt);
+  translate: 0 calc(var(--rest) * 1cqh);
   will-change: translate, rotate;
 }
-.flyer[data-far] {
-  opacity: 0.7;
+/* a lane too narrow for a readable sticker (under 32 px: phones, tablets, laptops up to ~1500 px) carries none */
+@container (max-width: 45.5px) {
+  .flyer {
+    display: none;
+  }
 }
-.flyers-about .flyer {
-  left: 0;
-  top: var(--lane);
-  translate: calc(var(--rest) * 1cqw) 0;
+/* R75 (owner: the stickers looked "duplicate"): nothing in a flyer section is see-through. The far layer is solid (a
+   lighter copy of a near sticker read as its ghost), and the cards' scroll reveal rises WITHOUT the fade - a card at
+   opacity 0.5 showed the stickers passing behind it as faded doubles for half a screen of scrolling. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-motion='calm']):not(.fx-off-cssReveal) section:has(> .flyers) .fx-rise {
+      animation-name: fx-rise-solid;
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) and (min-width: 1024px) and (pointer: fine) {
+    html:not([data-motion='calm']):not(.fx-off-cssReveal):not(.fx-off-kineticType):not([data-fx-tier='lite'])
+      section:has(> .flyers)
+      .fx-rise.nb-title {
+      animation-name: fx-rise-solid, fx-weight;
+    }
+  }
 }
-.flyers-honors .flyer {
-  left: var(--lane);
-  top: 0;
-  translate: 0 calc(var(--rest) * 1cqh);
-}
-@keyframes flyer-across {
+@keyframes fx-rise-solid {
   from {
-    translate: calc(-1 * var(--size) - 48px) 0;
+    translate: 0 18px;
   }
   to {
-    translate: calc(100cqw + 48px) 0;
+    translate: 0 0;
   }
 }
+/* up the margin (a 'reverse' plan runs it down) */
 @keyframes flyer-rise {
   from {
     translate: 0 calc(100cqh + 48px);
   }
   to {
-    translate: 0 calc(-1 * var(--size) - 48px);
+    translate: 0 calc(-1 * var(--w) - 48px);
   }
 }
 @keyframes flyer-turn {
@@ -5412,30 +5471,19 @@ section:has(> .flyers) {
   }
 }
 @media (prefers-reduced-motion: no-preference) {
-  html:not([data-motion='calm']) .flyers-about .flyer,
-  html:not([data-motion='calm']) .flyers-honors .flyer {
+  html:not([data-motion='calm']) .flyers .flyer {
+    animation-name: flyer-rise, flyer-turn;
     animation-duration: var(--dur), var(--dur);
     animation-delay: var(--delay), var(--delay);
     animation-timing-function: linear, linear;
     animation-iteration-count: infinite, infinite;
     animation-play-state: paused;
   }
-  html:not([data-motion='calm']) .flyers-about .flyer {
-    animation-name: flyer-across, flyer-turn;
-  }
-  html:not([data-motion='calm']) .flyers-honors .flyer {
-    animation-name: flyer-rise, flyer-turn;
-  }
   html:not([data-motion='calm']) .flyers[data-run] .flyer {
     animation-play-state: running;
   }
 }
-/* phones and the lite tier keep the near layer only */
-@media (max-width: 639px) {
-  .flyer[data-far] {
-    display: none;
-  }
-}
+/* the lite tier keeps the near layer only */
 html[data-fx-tier='lite'] .flyer[data-far] {
   display: none;
 }

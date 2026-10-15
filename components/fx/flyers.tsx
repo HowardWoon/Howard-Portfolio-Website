@@ -7,17 +7,20 @@ import { FX } from '@/lib/fx';
  * R74 Flyers (owner: "i not quite like the background design of this two ... add some objects floating flying behind
  * etc, must be creative to upgrade the background of this two section").
  *
- * Cut-out stickers drift behind a section's content, drawn from what the section is about:
+ * Cut-out stickers fly in the free margins beside a section's text column, drawn from what the section is about:
  *   - about   "systems in flight": server units, a database, a gear, code braces, a data packet, a pipeline graph, a
- *             terminal prompt and a cube fly across the sheet like traffic between services, at two depths.
- *   - honors  "after the ceremony": stars, medals, a trophy, a rosette and a ticket rise from the bottom and turn.
+ *             terminal prompt and a cube ride up and down the two margins like traffic on two data buses.
+ *   - honors  "after the ceremony": stars, medals, a trophy, a rosette and a ticket rise up both margins and turn.
  *             Stars and medals are podium yellow (SIGNAL: placement or award won); everything else is ink on white.
+ * R75 (owner: "i dont want all the object overlapped, block the font, sentence, word"): a sticker never crosses the
+ * text column. The margins are computed in CSS from the column's own width (max-w-7xl) and the section's padding;
+ * a sticker shrinks to fit its margin and is not drawn where the margin is too narrow (phones, small tablets).
  *
  * Neo-brutalist: white paper, 3 px ink outline, a hard ink offset shadow, no blur or soft gradient; every shape is
  * COMPUTED here (no hand-typed points). Motion is CSS transform only (no layout per frame), measured in container
- * units of a screen-tall 'sky' that stays pinned to the viewport while the section scrolls past (so every screen of a
- * tall section shows the whole set), and runs only while the section is on screen. Calm and reduced
- * motion: every sticker rests in place. Phones and the lite tier keep the near layer only.
+ * units of a screen-tall 'sky' in each margin that stays pinned to the viewport while the section scrolls past (so
+ * every screen of a tall section shows the whole set), and runs only while the section is on screen. Calm and reduced
+ * motion: every sticker rests in place. The lite tier keeps the near layer only.
  */
 export type FlyerSet = 'about' | 'honors';
 
@@ -229,55 +232,79 @@ function art(shape: string, fill: string) {
 }
 
 /**
- * The flight plan. `lane` = where it travels (about: % from the top; honors: % from the left), `size` in px,
- * `dur` seconds for one crossing, `delay` = how far into its crossing it starts (so the sky is full at once),
- * `spin` = degrees turned per crossing, `far` = the back layer (smaller, lighter, gone on phones and the lite tier),
- * `rest` = where it sits when motion is off (% across).
+ * The flight plan. R75 (owner: "i dont want all the object overlapped, block the font, sentence, word"): stickers fly
+ * ONLY in the free margins left and right of the section's text column (`side`), never across it. `x` = where in its
+ * margin it travels (0 = outer edge, 1 = the column's edge), `size` = its largest size in px (it shrinks to fit a
+ * narrow margin and is not drawn where the margin is too narrow - phones and small tablets), `dur` seconds for one
+ * crossing of the screen, `delay` = how far into its crossing it starts (so the sky is full at once), `spin` =
+ * degrees turned per crossing, `up` = rises (else falls; Honors always rises), `far` = the back layer (smaller and solid - R75: a lighter
+ * copy read as a ghost of the near sticker; gone on the lite tier), `rest` = where it sits when motion is off (% down).
  */
 type Flyer = {
   shape: string;
   fill?: string;
-  lane: number;
+  side: 'l' | 'r';
+  x: number;
   size: number;
   dur: number;
   delay: number;
   spin: number;
   tilt: number;
+  up?: boolean;
   far?: boolean;
   rest: number;
-  dir?: 1 | -1;
 };
 
 const PLANS: Record<FlyerSet, Flyer[]> = {
-  // near layer: big, slow, on lanes spread over the whole height; far layer: smaller, quicker turns
+  // about: traffic between services - each margin carries packets up and down like two data buses
   about: [
-    { shape: 'server', lane: 7, size: 84, dur: 52, delay: 0.1, spin: 8, tilt: -6, rest: 88 },
-    { shape: 'packet', lane: 19, size: 64, dur: 38, delay: 0.55, spin: -6, tilt: 4, rest: 3 },
-    { shape: 'gear', lane: 31, size: 78, dur: 60, delay: 0.3, spin: 240, tilt: 0, rest: 92, dir: -1 },
-    { shape: 'database', lane: 44, size: 80, dur: 48, delay: 0.78, spin: 10, tilt: 5, rest: 2 },
-    { shape: 'pipeline', lane: 57, size: 86, dur: 56, delay: 0.15, spin: -14, tilt: -4, rest: 90, dir: -1 },
-    { shape: 'terminal', lane: 70, size: 74, dur: 44, delay: 0.45, spin: 6, tilt: -3, rest: 5 },
-    { shape: 'cube', lane: 83, size: 70, dur: 50, delay: 0.92, spin: -60, tilt: 0, rest: 94, dir: -1 },
-    { shape: 'braces', lane: 93, size: 66, dur: 42, delay: 0.25, spin: 12, tilt: 8, rest: 6 },
-    { shape: 'braces', lane: 13, size: 44, dur: 70, delay: 0.85, spin: 20, tilt: 8, far: true, rest: 50, dir: -1 },
-    { shape: 'cube', lane: 37, size: 42, dur: 76, delay: 0.05, spin: -40, tilt: 0, far: true, rest: 60 },
-    { shape: 'packet', lane: 63, size: 40, dur: 64, delay: 0.6, spin: 8, tilt: -6, far: true, rest: 40, dir: -1 },
-    { shape: 'gear', lane: 88, size: 44, dur: 72, delay: 0.35, spin: -260, tilt: 0, far: true, rest: 70 },
+    { shape: 'server', side: 'l', x: 0.35, size: 84, dur: 30, delay: 0.1, spin: 8, tilt: -6, rest: 8 },
+    { shape: 'gear', side: 'l', x: 0.65, size: 78, dur: 36, delay: 0.45, spin: 240, tilt: 0, up: true, rest: 30 },
+    { shape: 'database', side: 'l', x: 0.4, size: 80, dur: 28, delay: 0.78, spin: 10, tilt: 5, rest: 54 },
+    { shape: 'terminal', side: 'l', x: 0.6, size: 74, dur: 34, delay: 0.25, spin: 6, tilt: -3, up: true, rest: 78 },
+    { shape: 'braces', side: 'l', x: 0.2, size: 44, dur: 40, delay: 0.62, spin: 20, tilt: 8, far: true, rest: 92 },
+    { shape: 'packet', side: 'r', x: 0.4, size: 64, dur: 26, delay: 0.55, spin: -6, tilt: 4, up: true, rest: 12 },
+    { shape: 'pipeline', side: 'r', x: 0.6, size: 86, dur: 32, delay: 0.15, spin: -14, tilt: -4, rest: 36 },
+    { shape: 'cube', side: 'r', x: 0.35, size: 70, dur: 30, delay: 0.92, spin: -60, tilt: 0, up: true, rest: 60 },
+    { shape: 'braces', side: 'r', x: 0.65, size: 66, dur: 27, delay: 0.35, spin: 12, tilt: 8, rest: 84 },
+    { shape: 'gear', side: 'r', x: 0.8, size: 44, dur: 42, delay: 0.05, spin: -260, tilt: 0, far: true, rest: 24 },
   ],
+  // honors: after the ceremony - everything rises
   honors: [
-    { shape: 'star', fill: PODIUM, lane: 3, size: 74, dur: 46, delay: 0.2, spin: 160, tilt: 0, rest: 12 },
-    { shape: 'medal', fill: PODIUM, lane: 12, size: 82, dur: 58, delay: 0.65, spin: -30, tilt: -8, rest: 64 },
-    { shape: 'ticket', lane: 22, size: 70, dur: 52, delay: 0.4, spin: 50, tilt: 12, rest: 36 },
-    { shape: 'rosette', fill: WHITE, lane: 31, size: 76, dur: 54, delay: 0.9, spin: 40, tilt: -6, rest: 86 },
-    { shape: 'trophy', fill: PODIUM, lane: 50, size: 80, dur: 60, delay: 0.05, spin: -20, tilt: 6, rest: 48 },
-    { shape: 'star', fill: WHITE, lane: 66, size: 62, dur: 42, delay: 0.55, spin: -180, tilt: 0, rest: 24 },
-    { shape: 'medal', fill: PODIUM, lane: 76, size: 78, dur: 56, delay: 0.3, spin: 26, tilt: 8, rest: 76 },
-    { shape: 'star', fill: PODIUM, lane: 88, size: 66, dur: 44, delay: 0.75, spin: 200, tilt: 0, rest: 6 },
-    { shape: 'rosette', fill: WHITE, lane: 95, size: 64, dur: 50, delay: 0.12, spin: -50, tilt: 4, rest: 56 },
-    { shape: 'star', fill: WHITE, lane: 8, size: 38, dur: 34, delay: 0.5, spin: 220, tilt: 0, far: true, rest: 40 },
-    { shape: 'ticket', lane: 40, size: 44, dur: 40, delay: 0.8, spin: -70, tilt: -10, far: true, rest: 92 },
-    { shape: 'star', fill: PODIUM, lane: 58, size: 36, dur: 32, delay: 0.2, spin: -240, tilt: 0, far: true, rest: 70 },
-    { shape: 'medal', fill: PODIUM, lane: 82, size: 46, dur: 46, delay: 0.95, spin: 40, tilt: 6, far: true, rest: 30 },
+    { shape: 'star', fill: PODIUM, side: 'l', x: 0.4, size: 74, dur: 30, delay: 0.2, spin: 160, tilt: 0, rest: 10 },
+    { shape: 'medal', fill: PODIUM, side: 'l', x: 0.6, size: 82, dur: 36, delay: 0.65, spin: -30, tilt: -8, rest: 34 },
+    { shape: 'ticket', side: 'l', x: 0.35, size: 70, dur: 32, delay: 0.4, spin: 50, tilt: 12, rest: 58 },
+    { shape: 'rosette', fill: WHITE, side: 'l', x: 0.6, size: 76, dur: 34, delay: 0.9, spin: 40, tilt: -6, rest: 82 },
+    {
+      shape: 'star',
+      fill: WHITE,
+      side: 'l',
+      x: 0.2,
+      size: 38,
+      dur: 24,
+      delay: 0.5,
+      spin: 220,
+      tilt: 0,
+      far: true,
+      rest: 70,
+    },
+    { shape: 'trophy', fill: PODIUM, side: 'r', x: 0.5, size: 80, dur: 38, delay: 0.05, spin: -20, tilt: 6, rest: 14 },
+    { shape: 'star', fill: WHITE, side: 'r', x: 0.35, size: 62, dur: 28, delay: 0.55, spin: -180, tilt: 0, rest: 38 },
+    { shape: 'medal', fill: PODIUM, side: 'r', x: 0.6, size: 78, dur: 35, delay: 0.3, spin: 26, tilt: 8, rest: 62 },
+    { shape: 'rosette', fill: WHITE, side: 'r', x: 0.4, size: 64, dur: 31, delay: 0.12, spin: -50, tilt: 4, rest: 86 },
+    {
+      shape: 'star',
+      fill: PODIUM,
+      side: 'r',
+      x: 0.8,
+      size: 36,
+      dur: 22,
+      delay: 0.8,
+      spin: -240,
+      tilt: 0,
+      far: true,
+      rest: 50,
+    },
   ],
 };
 
@@ -306,28 +333,35 @@ export function Flyers({ set }: { set: FlyerSet }) {
       data-flyers={set}
       className={`flyers flyers-${set} pointer-events-none absolute inset-0`}
     >
-      <div className="flyers-sky">
-        {plan.map((p, i) => (
-          <span
-            key={i}
-            data-far={p.far ? '' : undefined}
-            className="flyer"
-            style={
-              {
-                '--lane': `${p.lane}%`,
-                '--size': `${p.size}px`,
-                '--dur': `${p.dur}s`,
-                '--delay': `${-p.delay * p.dur}s`,
-                '--spin': `${p.spin}deg`,
-                '--tilt': `${p.tilt}deg`,
-                '--rest': `${p.rest}`,
-                animationDirection: p.dir === -1 ? 'reverse' : undefined,
-                backgroundImage: art(p.shape, p.fill ?? WHITE),
-              } as CSSProperties
-            }
-          />
-        ))}
-      </div>
+      {(['l', 'r'] as const).map((side) => (
+        <div key={side} className="flyers-margin" data-side={side}>
+          <div className="flyers-sky">
+            {plan
+              .filter((p) => p.side === side)
+              .map((p, i) => (
+                <span
+                  key={i}
+                  data-far={p.far ? '' : undefined}
+                  className="flyer"
+                  style={
+                    {
+                      '--x': `${side === 'l' ? p.x : 1 - p.x}`,
+                      '--size': `${p.size}px`,
+                      '--dur': `${p.dur}s`,
+                      '--delay': `${-p.delay * p.dur}s`,
+                      '--spin': `${p.spin}deg`,
+                      '--tilt': `${p.tilt}deg`,
+                      '--rest': `${p.rest}`,
+                      // About traffic runs both ways; in Honors everything rises
+                      animationDirection: p.up || set === 'honors' ? undefined : 'reverse',
+                      backgroundImage: art(p.shape, p.fill ?? WHITE),
+                    } as CSSProperties
+                  }
+                />
+              ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
