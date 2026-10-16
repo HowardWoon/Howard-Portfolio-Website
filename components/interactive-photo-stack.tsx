@@ -5,6 +5,8 @@ import { createPortal, preload } from 'react-dom';
 import { m, AnimatePresence, LayoutGroup } from 'framer-motion';
 import Image, { getImageProps } from 'next/image';
 import {
+  ChevronFirst,
+  ChevronLast,
   ChevronLeft,
   ChevronRight,
   Layers,
@@ -204,17 +206,31 @@ export function PhotoLightbox({
     const r = panelRef.current?.getBoundingClientRect();
     return r ? [clientX - (r.left + r.width / 2), clientY - (r.top + r.height / 2)] : [0, 0];
   };
-  // a new photo always starts at 1x, and its thumbnail scrolls into view
+  // a new photo always starts at 1x (R76: its thumbnail is always in the window - see `win` - so nothing scrolls)
   useEffect(() => {
     z.current = { s: 1, x: 0, y: 0 };
     if (zoomRef.current) zoomRef.current.style.transform = '';
     if (panelRef.current) panelRef.current.style.opacity = '';
     if (readoutRef.current) readoutRef.current.textContent = '100%';
     setZoomed(false);
-    thumbsRef.current
-      ?.querySelector<HTMLElement>('[aria-current="true"]')
-      ?.scrollIntoView({ block: 'nearest', inline: 'center' });
   }, [index]);
+
+  // R76: how many whole thumbnails one row holds. With every one shown it is the row's width; when a window is needed,
+  // two 44 px first / last keys share the row.
+  const [thumbFit, setThumbFit] = useState(list.length);
+  useEffect(() => {
+    const el = thumbsRef.current;
+    if (!el) return;
+    const read = () => {
+      const w = el.clientWidth - 8; // px-1
+      const all = Math.floor((w + 8) / 64);
+      setThumbFit(all >= list.length ? list.length : Math.max(1, Math.floor((w - 2 * 52 + 8) / 64)));
+    };
+    read();
+    const ro = new ResizeObserver(read);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [list.length, chrome]);
 
   const ptrs = useRef(new Map<number, { x: number; y: number }>());
   const g = useRef({ x0: 0, y0: 0, lx: 0, ly: 0, d0: 1, s0: 1, pinched: false, lastTap: 0 });
@@ -349,6 +365,41 @@ export function PhotoLightbox({
 
   const tool =
     'grid place-items-center w-10 h-10 shrink-0 rounded-full bg-white border-3 border-ink shadow-brutal-xs text-ink hover:bg-pop-yellow active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-colors';
+  const playKey =
+    list.length > 1 ? (
+      <button
+        type="button"
+        onClick={() => setPlaying((p) => !p)}
+        aria-pressed={playing}
+        aria-label={playing ? 'Pause slideshow' : 'Play slideshow'}
+        className={`${tool} ${playing ? '!bg-pop-yellow' : ''}`}
+      >
+        {playing ? (
+          <Pause className="w-4 h-4" strokeWidth={3} aria-hidden />
+        ) : (
+          <Play className="w-4 h-4" strokeWidth={3} aria-hidden />
+        )}
+      </button>
+    ) : null;
+  const fsKey = fs.can ? (
+    <button
+      type="button"
+      onClick={toggleFs}
+      aria-pressed={fs.on}
+      aria-label={fs.on ? 'Exit full screen' : 'Full screen'}
+      className={tool}
+    >
+      {fs.on ? (
+        <Minimize className="w-4 h-4" strokeWidth={3} aria-hidden />
+      ) : (
+        <Maximize className="w-4 h-4" strokeWidth={3} aria-hidden />
+      )}
+    </button>
+  ) : null;
+  // R76: the thumbnail window - as many whole thumbnails as one row holds (56 px + 8 px gap), centred on the photo
+  const fit = thumbFit >= list.length ? list.length : Math.max(1, thumbFit);
+  const winStart = Math.min(Math.max(0, index - Math.floor((fit - 1) / 2)), list.length - fit);
+  const win = { start: winStart, end: winStart + fit };
 
   return createPortal(
     <m.div
@@ -362,13 +413,13 @@ export function PhotoLightbox({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={onClose}
-      className="fixed inset-0 z-[10000] flex flex-col h-screen-safe bg-ink/90 sm:backdrop-blur-sm pt-[max(0.75rem,var(--safe-top))] pb-[max(0.75rem,var(--safe-bottom))] pl-[max(0.75rem,var(--safe-left))] pr-[max(0.75rem,var(--safe-right))] sm:p-6"
+      className="fixed inset-0 z-[10000] flex flex-col h-screen-safe bg-ink/90 pt-[max(0.75rem,var(--safe-top))] pb-[max(0.75rem,var(--safe-bottom))] pl-[max(0.75rem,var(--safe-left))] pr-[max(0.75rem,var(--safe-right))] sm:p-6"
     >
       <div
         className={`${chrome ? 'flex' : 'hidden'} items-center justify-between gap-3 mb-3 shrink-0 w-full max-w-6xl mx-auto`}
         onClick={(e) => e.stopPropagation()}
       >
-        <span className="nb-tag bg-pop-yellow" aria-live="polite">
+        <span className="nb-tag bg-pop-yellow shrink-0 whitespace-nowrap" aria-live="polite">
           {String(index + 1).padStart(2, '0')} / {String(list.length).padStart(2, '0')}
         </span>
         <div className="flex-1" />
@@ -387,10 +438,12 @@ export function PhotoLightbox({
           type="button"
           data-autofocus
           onClick={onClose}
-          className="inline-flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 bg-white border-3 border-ink rounded-xl shadow-brutal hover:-translate-y-1 hover:shadow-brutal-lg transition-all"
+          className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap min-h-[44px] min-w-[44px] justify-center px-3 py-2 sm:px-4 sm:py-2.5 bg-white border-3 border-ink rounded-xl shadow-brutal hover:-translate-y-1 hover:shadow-brutal-lg transition-all"
         >
-          <X className="w-5 h-5 sm:w-6 sm:h-6 text-ink" strokeWidth={3} />
-          <span className="font-mono font-bold text-xs sm:text-sm text-ink">Return to Website</span>
+          <X className="w-5 h-5 sm:w-6 sm:h-6 text-ink" strokeWidth={3} aria-hidden />
+          {/* R76: under 400 px the words do not fit beside the counter and the link key (they wrapped onto two lines):
+              the X stays, the words stay for screen readers (the RESUME key does the same) */}
+          <span className="font-mono font-bold text-xs sm:text-sm text-ink max-[399px]:sr-only">Return to Website</span>
         </button>
       </div>
 
@@ -433,117 +486,133 @@ export function PhotoLightbox({
         </m.div>
       </div>
 
-      {chrome ? (
+      {/* mouse / pen: zoom keys + slideshow + full screen on their own row */}
+      {chrome && hover ? (
         <div
           className="shrink-0 mt-3 flex items-center justify-center gap-2 landscape-short:hidden"
           onClick={(e) => e.stopPropagation()}
         >
-          {hover ? (
-            <>
-              <button type="button" onClick={() => zoomTo(z.current.s / 1.5)} aria-label="Zoom out" className={tool}>
-                <ZoomOut className="w-4 h-4" strokeWidth={3} aria-hidden />
-              </button>
-              <button
-                type="button"
-                onClick={() => zoomTo(1)}
-                aria-label="Reset zoom"
-                className="nb-tag bg-white min-w-[4.25rem] justify-center h-10"
-              >
-                <span ref={readoutRef}>100%</span>
-              </button>
-              <button type="button" onClick={() => zoomTo(z.current.s * 1.5)} aria-label="Zoom in" className={tool}>
-                <ZoomIn className="w-4 h-4" strokeWidth={3} aria-hidden />
-              </button>
-            </>
-          ) : null}
+          <button type="button" onClick={() => zoomTo(z.current.s / 1.5)} aria-label="Zoom out" className={tool}>
+            <ZoomOut className="w-4 h-4" strokeWidth={3} aria-hidden />
+          </button>
+          <button
+            type="button"
+            onClick={() => zoomTo(1)}
+            aria-label="Reset zoom"
+            className="nb-tag bg-white min-w-[4.25rem] justify-center h-10"
+          >
+            <span ref={readoutRef}>100%</span>
+          </button>
+          <button type="button" onClick={() => zoomTo(z.current.s * 1.5)} aria-label="Zoom in" className={tool}>
+            <ZoomIn className="w-4 h-4" strokeWidth={3} aria-hidden />
+          </button>
+          {playKey}
+          {fsKey}
+        </div>
+      ) : null}
+
+      {/* R76: touch has no zoom keys (pinch / double-tap), so slideshow and full screen ride in the navigation row: one
+          row instead of two, and the photo gets the height (iPhone SE: the photo was 115 x 153 px) */}
+      {chrome && (list.length > 1 || (!hover && fsKey)) ? (
+        <div
+          className="shrink-0 mt-3 w-full max-w-6xl mx-auto flex items-center justify-center gap-2 sm:gap-4"
+          onClick={(e) => e.stopPropagation()}
+        >
           {list.length > 1 ? (
             <button
               type="button"
-              onClick={() => setPlaying((p) => !p)}
-              aria-pressed={playing}
-              aria-label={playing ? 'Pause slideshow' : 'Play slideshow'}
-              className={`${tool} ${playing ? '!bg-pop-yellow' : ''}`}
+              onClick={() => {
+                stopShow();
+                prev();
+              }}
+              aria-label="Previous photo"
+              className="w-12 h-12 shrink-0 rounded-full bg-white border-3 border-ink shadow-brutal-sm grid place-items-center text-ink hover:bg-pop-yellow active:bg-pop-yellow"
             >
-              {playing ? (
-                <Pause className="w-4 h-4" strokeWidth={3} aria-hidden />
-              ) : (
-                <Play className="w-4 h-4" strokeWidth={3} aria-hidden />
-              )}
+              <ChevronLeft className="w-5 h-5" strokeWidth={3} />
             </button>
           ) : null}
-          {fs.can ? (
+          {!hover ? playKey : null}
+          {/* R76: two lines of the description instead of one cut-off line */}
+          <span
+            data-lightbox-caption
+            className="font-mono text-xs font-bold text-white/80 min-w-0 flex-1 sm:flex-none sm:max-w-[50vw] line-clamp-2 text-center"
+          >
+            {photo.alt}
+          </span>
+          {!hover ? fsKey : null}
+          {list.length > 1 ? (
             <button
               type="button"
-              onClick={toggleFs}
-              aria-pressed={fs.on}
-              aria-label={fs.on ? 'Exit full screen' : 'Full screen'}
-              className={tool}
+              onClick={() => {
+                stopShow();
+                next();
+              }}
+              aria-label="Next photo"
+              className="w-12 h-12 shrink-0 rounded-full bg-white border-3 border-ink shadow-brutal-sm grid place-items-center text-ink hover:bg-pop-yellow active:bg-pop-yellow"
             >
-              {fs.on ? (
-                <Minimize className="w-4 h-4" strokeWidth={3} aria-hidden />
-              ) : (
-                <Maximize className="w-4 h-4" strokeWidth={3} aria-hidden />
-              )}
+              <ChevronRight className="w-5 h-5" strokeWidth={3} />
             </button>
           ) : null}
         </div>
       ) : null}
 
-      {list.length > 1 && chrome && (
-        <div className="shrink-0 mt-3 flex items-center justify-center gap-4" onClick={(e) => e.stopPropagation()}>
-          <button
-            type="button"
-            onClick={() => {
-              stopShow();
-              prev();
-            }}
-            aria-label="Previous photo"
-            className="w-12 h-12 rounded-full bg-white border-3 border-ink shadow-brutal-sm grid place-items-center text-ink hover:bg-pop-yellow active:bg-pop-yellow"
-          >
-            <ChevronLeft className="w-5 h-5" strokeWidth={3} />
-          </button>
-          <span className="font-mono text-xs font-bold text-white/80 max-w-[50vw] truncate text-center">
-            {photo.alt}
-          </span>
-          <button
-            type="button"
-            onClick={() => {
-              stopShow();
-              next();
-            }}
-            aria-label="Next photo"
-            className="w-12 h-12 rounded-full bg-white border-3 border-ink shadow-brutal-sm grid place-items-center text-ink hover:bg-pop-yellow active:bg-pop-yellow"
-          >
-            <ChevronRight className="w-5 h-5" strokeWidth={3} />
-          </button>
-        </div>
-      )}
-
+      {/* R76: ONE row of whole thumbnails. When they do not all fit, a window of them follows the current photo, with
+          first / last keys at the ends (11 thumbnails used to wrap into three rows and squeeze the photo on phones) */}
       {list.length > 1 && chrome && (
         <div
           ref={thumbsRef}
+          data-lightbox-thumbs
           onClick={(e) => e.stopPropagation()}
-          className="shrink-0 mt-3 w-full max-w-6xl mx-auto flex flex-wrap justify-center gap-2 px-1 py-1.5 landscape-short:hidden"
+          className="shrink-0 mt-3 w-full max-w-6xl mx-auto flex justify-center gap-2 px-1 py-1.5 landscape-short:hidden"
         >
-          {list.map((p, i) => (
+          {win.start > 0 ? (
             <button
-              key={p.src}
               type="button"
               onClick={() => {
                 stopShow();
-                onIndex(i);
+                onIndex(0);
               }}
-              aria-label={`Go to photo ${i + 1} of ${list.length}`}
-              aria-current={i === index ? 'true' : undefined}
-              className={`relative shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 bg-paper-deep transition-transform ${
-                i === index
-                  ? 'border-pop-yellow outline outline-2 outline-pop-yellow -translate-y-0.5'
-                  : 'border-ink opacity-70 hover:opacity-100'
-              }`}
+              aria-label="First photo"
+              className="grid h-14 w-11 shrink-0 place-items-center rounded-lg border-2 border-ink bg-white text-ink hover:bg-pop-yellow"
             >
-              <Image src={p.src} alt="" fill sizes="56px" className="object-cover" />
+              <ChevronFirst className="h-5 w-5" strokeWidth={3} aria-hidden />
             </button>
-          ))}
+          ) : null}
+          {list.slice(win.start, win.end).map((p, k) => {
+            const i = win.start + k;
+            return (
+              <button
+                key={p.src}
+                type="button"
+                onClick={() => {
+                  stopShow();
+                  onIndex(i);
+                }}
+                aria-label={`Go to photo ${i + 1} of ${list.length}`}
+                aria-current={i === index ? 'true' : undefined}
+                className={`relative shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 bg-paper-deep transition-transform ${
+                  i === index
+                    ? 'border-pop-yellow outline outline-2 outline-pop-yellow -translate-y-0.5'
+                    : 'border-ink opacity-70 hover:opacity-100'
+                }`}
+              >
+                <Image src={p.src} alt="" fill sizes="56px" className="object-cover" />
+              </button>
+            );
+          })}
+          {win.end < list.length ? (
+            <button
+              type="button"
+              onClick={() => {
+                stopShow();
+                onIndex(list.length - 1);
+              }}
+              aria-label="Last photo"
+              className="grid h-14 w-11 shrink-0 place-items-center rounded-lg border-2 border-ink bg-white text-ink hover:bg-pop-yellow"
+            >
+              <ChevronLast className="h-5 w-5" strokeWidth={3} aria-hidden />
+            </button>
+          ) : null}
         </div>
       )}
     </m.div>,
@@ -716,7 +785,9 @@ export function InteractivePhotoStack({
           aria-roledescription="carousel"
           aria-label={label}
           onKeyDown={onDeckKey}
-          className="fx-deck w-full"
+          // R76: the deck itself takes focus, so Left / Right browse it without first tabbing to one of its buttons
+          tabIndex={0}
+          className="fx-deck w-full rounded-2xl focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-pop-blue"
         >
           {sheet ? (
             <div data-contact-sheet data-lenis-prevent className="columns-2 xs:columns-3 gap-2 sm:gap-3">
