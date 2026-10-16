@@ -94,7 +94,9 @@ for (const [name, size] of [
       }
       expect(still, 'the pit never came to rest within 15 s').toBe(10);
       const first = await read();
-      expect(first).toContain('translate3d'); // the physics is live, not the static pile
+      // the physics is live, not the static pile (which has no transform). R76: a settled badge rests on a 2D
+      // translate (no GPU layer at rest); translate3d is used only while it moves
+      expect(first).toMatch(/translate(3d)?\(/);
       let changes = 0;
       let prev = first;
       for (let i = 0; i < 20; i++) {

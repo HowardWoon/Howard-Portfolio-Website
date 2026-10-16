@@ -180,7 +180,10 @@ test('floor, ring, wipe, card turn, lamp and CSS reveal run with motion (FX-62 â
   await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
   expect(await anim(page.locator('.fx-floor-grid'))).toBe('fx-floor');
-  expect(await anim(page.locator('#about .fx-rise').first())).toBe('fx-hero-in');
+  // R75 (owner: the stickers showed through fading cards as "duplicates"): in a section with flyers (About, Honors) the
+  // reveal rises without a fade (fx-rise-solid); every other section keeps the FX-67 fx-hero-in
+  expect(await anim(page.locator('#about .fx-rise').first())).toBe('fx-rise-solid');
+  expect(await anim(page.locator('#experience .fx-rise').first())).toMatch(/^fx-hero-in/);
   expect(
     await page.evaluate(() => getComputedStyle(document.querySelector('footer')!, '::after').backgroundImage),
   ).toContain('radial-gradient');

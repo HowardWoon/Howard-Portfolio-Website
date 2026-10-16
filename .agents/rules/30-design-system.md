@@ -451,6 +451,22 @@ more variables, make more random events"; and "section must not hardcode, must b
 Guard: tests/r73.spec.ts (sharpness numbers, every control clicked with no error, every event runs and puts the lights
 back, one registry).
 
+R76 (owner: full diagnosis; "ESPECIALLY CHECK FOR THE WHOLE 3D ... not random"; "so bad if open in mobile phone";
+"enhance this photo part"; scroll "glitched and lagging"). Plan and evidence: docs/R76-FULL-DIAGNOSIS-AND-PLAN.md.
+
+| Feature / fix            | Where                                       | Rules                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ------------------------ | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Random street            | tokyo-diorama/engine/traffic.ts             | Fleet 5 + 3 (low tier 4 + 2), kinds / paint / opening line-up rolled, only on the approach before the stop line; respawn = random lane of the same axis (clipping edges), 80 - 120 % driver speed, new coat; walkers on a corner graph (never straight back unless a dead end), pauses only at corners, keep right to pass head on; train direction and speed per run; lights open at a random phase (reduced motion: classic) |
+| Street engine hygiene    | tokyo-diorama/engine/index.ts               | Composer passes disposed with the composer (bloom targets leaked per tier change); model geometry / materials / textures disposed; no per-frame clones or name lookups; signs: nearest wins, an overlapping sign hides, styles written only on change; `?diorama-model=/models/x.glb` only with `?diorama-test`                                                                                                                |
+| Street on phones         | tokyo-diorama-section.tsx                   | Active mode key is `!bg-pop-yellow` (keyBtn's bg-white beat it); the control row wraps (nothing clipped at 280 px); touch walk hint shown; touch-first devices wait for START 3D; CSS full screen through useScrollLock + safe areas                                                                                                                                                                                           |
+| Lightbox on phones       | interactive-photo-stack.tsx `PhotoLightbox` | One thumbnail row (window of whole thumbnails + first / last keys), touch: slideshow + full screen in the nav row, counter / close never wrap (close word sr-only under 400 px), caption two lines, no backdrop blur; the deck takes focus (arrow keys)                                                                                                                                                                        |
+| Pit + backdrop on phones | pill-pit.tsx, globals.css `.sb-l`           | Badges `touch-action: pan-y` (a finger on the pile scrolls the page); translate3d only while a badge moves, no will-change; left backdrop pieces hidden under 640 px (they hung 8 px off the screen)                                                                                                                                                                                                                           |
+
+Guard: tests/r76.spec.ts. Lesson: `scripts/device-sweep.mjs` cannot see a control clipped INSIDE an `overflow: hidden`
+frame (the 280 px gauge key) and never builds the 3D street (software WebGL waits): look at phone screenshots with
+`?diorama-test` too. Lesson: computed `transform` turns `translate3d(x, y, 0)` into `matrix(...)`; to check for 3D
+layers read the inline style.
+
 ## H. R24 guardrails - type floor, emblem geometry, hero water reveal, neo-brutalism only (owner complaints, tested)
 
 Howard: "the font family and font size is too ugly and small, slim, i dont want this font problem happen again" and

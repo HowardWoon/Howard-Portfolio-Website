@@ -144,3 +144,13 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
    (owner: "i dont want all the object overlapped, block the font, sentence, word"): stickers fly ONLY in the free
    margins beside the text column, never across a word; where the margin is too narrow (phones, tablets, laptops up
    to ~1500 px) there are none. Guard: `tests/r75`.
+8. **Nothing on the 3D street runs on a fixed schedule (R76, owner: "walkers, cars, train like appearing in their fix
+   algorithm"):** each visit rolls the fleet, the paint, the opening line-up, the light phase and the train timing; each
+   respawn rolls lane / driver speed / coat; walkers roam a graph of corners with random pauses and pass each other on
+   the right (never wait nose to nose); the train picks its direction and speed per run. The rules (lights, gaps,
+   crossings) keep it safe, not a fixed plan. Touch-first devices start the street with START 3D (it was built in the
+   middle of the visitor's scroll). Guard: `tests/r76` (200 s: no collision, no red run, lanes / coats / both train
+   directions / walker routes vary, no stuck walker). Diagnosis and plan: `docs/R76-FULL-DIAGNOSIS-AND-PLAN.md`.
+9. **Photos get the screen on phones (R76):** the lightbox keeps ONE row of whole thumbnails (a window that follows the
+   photo, first / last keys) and one control row on touch; labels never wrap; caption two lines. Guard: `tests/r76`
+   (photo >= 45 % of the screen height on iPhone SE / 13 / Fold).
