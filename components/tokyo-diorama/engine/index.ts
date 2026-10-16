@@ -88,6 +88,8 @@ export interface DioramaHandle {
     event(name: StreetEvent): void;
     /** no events by themselves (tests) */
     quiet(): void;
+    /** R76: the optional Blender model: loaded yet, and how many COL_ boxes became colliders */
+    model(): { loaded: boolean; colliders: number };
   };
 }
 
@@ -229,7 +231,8 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
   const built: Built = buildWorld(mats, world);
   scene.add(built.root);
 
-  const traffic = new Traffic(built.root, mats, world, built, calm);
+  // R76: a lighter crowd on the low tier (phones without a strong graphics chip)
+  const traffic = new Traffic(built.root, mats, world, built, calm, tier === 'low' ? 'low' : 'full');
   const weather = new Weather(built, world, calm);
   scene.add(weather.group);
   const audio = new Soundscape();
@@ -260,6 +263,8 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
     if ((o as THREE.Mesh).isMesh && o.name !== 'blob') o.castShadow = true;
   });
   scene.add(player.group);
+  // R76: found once (it was looked up by name, a walk of the whole figure, every frame)
+  const playerBlob = player.group.getObjectByName('blob') ?? null;
   const P = {
     pos: built.spawn.clone(),
     // R70 (owner: 'when i walking ... the whole thing 3d here is shaking'): physics runs at 120 Hz, the screen at 60 -
@@ -323,6 +328,9 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
   let blend = 0; // 0 = orbit, 1 = follow camera
   const blendFrom = { pos: new THREE.Vector3(), look: new THREE.Vector3() };
   const lookNow = new THREE.Vector3();
+  // R76: scratch vectors - the frame loop used to clone three vectors every frame (garbage the phone collects mid-walk)
+  const camTmp = new THREE.Vector3();
+  const orbitTmp = new THREE.Vector3();
 
   /* ------------------------------------------------------------ post */
   let composer: EffectComposer | null = null;
@@ -333,10 +341,20 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
   // the VIEW camera every lit sign smeared into the next. Now a tight, low halo on the neon only.
   const BLOOM_RADIUS = 0.16;
   const bloomView = () => (tier === 'high' ? 0.34 : 0.3);
+  // R76: EffectComposer.dispose() frees its own two targets but not its passes - every tier change (auto or the gauge
+  // key) leaked the bloom pass' mip chain of render targets on the graphics card
+  const disposeComposer = () => {
+    if (composer) {
+      for (const pass of composer.passes) pass.dispose();
+      composer.dispose();
+    }
+    composer = null;
+  };
   const applyTier = () => {
     const p = PROFILES[tier];
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, p.dpr));
-    const shadows = p.shadows && !calm ? true : p.shadows;
+    // R76: this read `p.shadows && !calm ? true : p.shadows` - the same value either way
+    const shadows = p.shadows;
     if (renderer.shadowMap.enabled !== shadows) {
       renderer.shadowMap.enabled = shadows;
       scene.traverse((o) => {
@@ -351,8 +369,7 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
     const ordered = [...built.lights].sort((a, b) => a.priority - b.priority);
     ordered.forEach((l, i) => (l.light.visible = i < p.lights));
     weather.setDensity(p.drops, p.splash);
-    composer?.dispose();
-    composer = null;
+    disposeComposer();
     bloom = null;
     if (p.bloom) {
       const rt = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: p.msaa });
@@ -378,6 +395,7 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
       composer.setSize(w, h);
     }
     if (bloom) bloom.resolution.set(w * 0.5, h * 0.5);
+    for (const s of pinSlots) measurePin(s);
     // fit the whole table in view at any aspect ratio (phones in portrait get a farther camera)
     const vf = THREE.MathUtils.degToRad(camera.fov);
     const hf = 2 * Math.atan(Math.tan(vf / 2) * camera.aspect);
@@ -393,7 +411,26 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
   }
 
   /* ------------------------------------------------------------ hotspots + pins */
-  const pins = new Map<string, HTMLElement>();
+  type PinSlot = {
+    id: string;
+    el: HTMLElement;
+    w: number;
+    h: number;
+    px: number;
+    py: number;
+    depth: number;
+    vis: boolean;
+    shown: boolean;
+    lx: number;
+    ly: number;
+  };
+  const pinSlots: PinSlot[] = [];
+  const hotspotById = new Map(built.hotspots.map((h) => [h.id, h]));
+  /** a sign's size, read when it is bound and on resize (never inside the frame loop) */
+  const measurePin = (s: PinSlot) => {
+    s.w = s.el.offsetWidth;
+    s.h = s.el.offsetHeight;
+  };
   let near: Hotspot | null = null;
   const tmpV = new THREE.Vector3();
 
@@ -534,7 +571,7 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
     // behind while walking, then lunge forward every 2 - 3 frames (a 2 -> 5 m/s sawtooth, measured: the shaking).
     if (instant) walkCam.camD = d;
     else walkCam.camD += (d - walkCam.camD) * (1 - Math.exp(-dt * (d < walkCam.camD ? 22 : 5)));
-    const desired = tmpV.clone().multiplyScalar(walkCam.camD).add(walkCam.target);
+    const desired = camTmp.copy(tmpV).multiplyScalar(walkCam.camD).add(walkCam.target);
     // keep it above the GROUND (street, curbs, pavement, steps: tops under 1.2 m). R70: it used to take any top under
     // the camera - an awning, an eave, a sign box 3.5 m up - so walking along the street lifted and dropped the camera
     // by ~3 cm every frame or two (measured: the vertical judder in the owner's view).
@@ -616,7 +653,7 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
     player.group.position.copy(P.drawn);
     player.group.rotation.y = player.yaw;
     animatePerson(player, sp, dt, !P.grounded, calm);
-    const blob = player.group.getObjectByName('blob');
+    const blob = playerBlob;
     if (blob) {
       const g = world.groundAt(P.pos.x, P.pos.z, P.pos.y + 0.05, 0.05, scratch);
       blob.position.y = (g > -Infinity ? g : 0) - P.pos.y + 0.012;
@@ -732,13 +769,12 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
     }
     if (blend > 0 && blend < 1) {
       const s = blend * blend * (3 - 2 * blend);
-      const orbitPos = mode === 'walk' ? blendFrom.pos : camera.position.clone();
       if (mode === 'walk') {
-        camera.position.lerpVectors(orbitPos, walkCam.pos, s);
+        camera.position.lerpVectors(blendFrom.pos, walkCam.pos, s);
         lookNow.lerpVectors(blendFrom.look, walkCam.target, s);
       } else {
         setOrbitFromSpherical();
-        camera.position.lerpVectors(camera.position.clone(), walkCam.pos, s);
+        camera.position.lerpVectors(orbitTmp.copy(camera.position), walkCam.pos, s);
         lookNow.lerpVectors(controls.target, walkCam.target, s);
       }
       camera.lookAt(lookNow);
@@ -770,21 +806,44 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
     // pins follow their hotspots. R70 (owner: the signs 'dissappear' after switching to walk): in walk mode too, over
     // each building that leads to a section, once the camera has finished moving into the street
     const showPins = (mode === 'view' && blend < 0.05) || (mode === 'walk' && blend > 0.95);
-    for (const [id, el] of pins) {
-      const h = built.hotspots.find((x) => x.id === id);
-      if (!h || !showPins) {
-        el.style.visibility = 'hidden';
-        continue;
-      }
+    for (const slot of pinSlots) {
+      const h = hotspotById.get(slot.id);
+      slot.vis = false;
+      if (!h || !showPins) continue;
       tmpV
         .copy(h.pos)
         .setY(h.pos.y + 2.8)
         .project(camera);
-      const px = ((tmpV.x + 1) / 2) * size.x;
-      const py = ((1 - tmpV.y) / 2) * size.y;
-      const inside = tmpV.z < 1 && px > 56 && px < size.x - 56 && py > 48 && py < size.y - 8;
-      el.style.visibility = inside ? 'visible' : 'hidden';
-      el.style.transform = `translate(${px}px, ${py}px) translate(-50%, -100%)`;
+      slot.px = ((tmpV.x + 1) / 2) * size.x;
+      slot.py = ((1 - tmpV.y) / 2) * size.y;
+      slot.depth = tmpV.z;
+      slot.vis = tmpV.z < 1 && slot.px > 56 && slot.px < size.x - 56 && slot.py > 48 && slot.py < size.y - 8;
+    }
+    // R76: on a narrow stage the signs were drawn on top of each other. The nearest sign wins; a sign that would
+    // overlap a nearer one waits until the camera turns. (A sign sits centred above its point: translate(-50%, -100%).)
+    pinSlots.sort((a, b) => a.depth - b.depth);
+    for (let i = 0; i < pinSlots.length; i++) {
+      const a = pinSlots[i];
+      if (!a.vis) continue;
+      for (let j = 0; j < i; j++) {
+        const b = pinSlots[j];
+        if (b.vis && Math.abs(a.px - b.px) < (a.w + b.w) / 2 + 4 && a.py - a.h < b.py + 4 && b.py - b.h < a.py + 4) {
+          a.vis = false;
+          break;
+        }
+      }
+    }
+    // only what changed is written (a style write per sign per frame restyled the overlay every frame)
+    for (const s of pinSlots) {
+      if (s.vis !== s.shown) {
+        s.shown = s.vis;
+        s.el.style.visibility = s.vis ? 'visible' : 'hidden';
+      }
+      if (s.vis && (Math.abs(s.px - s.lx) > 0.2 || Math.abs(s.py - s.ly) > 0.2)) {
+        s.lx = s.px;
+        s.ly = s.py;
+        s.el.style.transform = `translate(${s.px.toFixed(1)}px, ${s.py.toFixed(1)}px) translate(-50%, -100%)`;
+      }
     }
   }
 
@@ -842,6 +901,7 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
   updateWalkCamera(0, true);
   // optional Blender model (loader code is only downloaded when a model is configured)
   let modelGroup: THREE.Object3D | null = null;
+  let modelColliders = 0;
   if (opts.modelUrl) {
     const url = opts.modelUrl;
     void (async () => {
@@ -859,6 +919,7 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
           const name = o.name || '';
           if (name.startsWith('COL_')) {
             const b = new THREE.Box3().setFromObject(o);
+            modelColliders++;
             world.addStatic({
               minX: b.min.x,
               maxX: b.max.x,
@@ -880,9 +941,32 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
         hide.forEach((o) => (o.visible = false));
         built.root.add(modelGroup);
       } catch (err) {
-        console.warn('[tokyo-diorama] model failed to load, using the built-in block', err);
+        // R76: the kit's Blender guide lists Draco as optional, but no Draco decoder is hosted: say so plainly
+        const draco = /draco/i.test(String(err));
+        console.warn(
+          draco
+            ? '[tokyo-diorama] the model is Draco-compressed; export it uncompressed or with Meshopt (see BLENDER.md). Using the built-in block.'
+            : '[tokyo-diorama] model failed to load, using the built-in block',
+          err,
+        );
       }
     })();
+  }
+  /** R76: the model's geometries, materials and textures go with the street (they were never freed on unmount) */
+  function disposeModel() {
+    if (!modelGroup) return;
+    modelGroup.traverse((o) => {
+      const m = o as THREE.Mesh;
+      if (!m.isMesh) return;
+      m.geometry?.dispose();
+      for (const mat of Array.isArray(m.material) ? m.material : [m.material]) {
+        if (!mat) continue;
+        for (const v of Object.values(mat)) if (v instanceof THREE.Texture) v.dispose();
+        mat.dispose();
+      }
+    });
+    modelGroup.removeFromParent();
+    modelGroup = null;
   }
 
   // shaders compile up front so the first frames don't hitch
@@ -957,10 +1041,25 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
       if (h) activate(h);
     },
     bindPin(id, el) {
-      if (el) {
-        el.style.visibility = 'hidden';
-        pins.set(id, el);
-      } else pins.delete(id);
+      const at = pinSlots.findIndex((s) => s.id === id);
+      if (at >= 0) pinSlots.splice(at, 1);
+      if (!el) return;
+      el.style.visibility = 'hidden';
+      const slot: PinSlot = {
+        id,
+        el,
+        w: 0,
+        h: 0,
+        px: 0,
+        py: 0,
+        depth: 1,
+        vis: false,
+        shown: false,
+        lx: -1e9,
+        ly: -1e9,
+      }; // far off: the first visible frame always writes
+      measurePin(slot);
+      pinSlots.push(slot);
     },
     resetCamera() {
       if (mode === 'walk') {
@@ -993,7 +1092,8 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
       disposePerson(player);
       canGeo.dispose();
       canMats.forEach((m) => m.dispose());
-      composer?.dispose();
+      disposeComposer();
+      disposeModel();
       envTex.dispose();
       pmrem.dispose();
       envDisposables.forEach((d) => d.dispose());
@@ -1064,6 +1164,7 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
       }),
       director: () => ({ last: director.last, count: director.count, available: director.available() }),
       event: (name) => director.trigger(name),
+      model: () => ({ loaded: !!modelGroup, colliders: modelColliders }),
       quiet: () => {
         director.auto = false;
       },

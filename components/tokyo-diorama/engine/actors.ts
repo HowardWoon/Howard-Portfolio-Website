@@ -340,6 +340,9 @@ export interface Car {
   group: THREE.Group;
   wheels: THREE.Object3D[];
   brake: THREE.MeshStandardMaterial;
+  /** R76: the body paint, so a car that comes round again can come back in another colour */
+  paint: THREE.MeshStandardMaterial;
+  kind: CarKind;
   length: number;
   width: number;
   dispose(): void;
@@ -490,6 +493,8 @@ export function makeCar(kind: CarKind, color: number, clip: THREE.Plane[]): Car 
     group,
     wheels,
     brake,
+    paint,
+    kind,
     length: dims.L,
     width: dims.W,
     dispose() {

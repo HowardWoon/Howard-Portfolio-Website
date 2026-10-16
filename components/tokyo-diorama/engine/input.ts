@@ -56,7 +56,8 @@ export class Input {
       container.appendChild(d);
       return d;
     };
-    this.base = mk(112, 'rgba(255,255,255,0.85)');
+    // R76: solid paper, not see-through (no glass panels, AGENTS.md law 5)
+    this.base = mk(112, '#FFFFFF');
     this.knob = mk(48, '#FFC700');
     this.base.setAttribute('aria-hidden', 'true');
     this.knob.setAttribute('aria-hidden', 'true');

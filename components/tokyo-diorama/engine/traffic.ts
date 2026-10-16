@@ -54,25 +54,38 @@ const LANES: Record<string, Lane> = {
   NB: { axis: 'z', dir: -1, fixed: 7.5, stop: 5.9, signal: 'NS', start: 42, end: -42, xing: 18.9 },
 };
 
+/* R76 (owner: "all the walkers, cars, train like appearing in their fix algorithm"): nothing on the street repeats on a
+   schedule any more. Each visit and each time an actor comes round again rolls its own lane, colour, speed, route,
+   pause and timing. Math.random only - the street is never the same twice, and the rules (lights, gaps, crossings)
+   are what keep it safe, not a fixed plan. */
+const rnd = (a: number, b: number) => a + Math.random() * (b - a);
+const pick = <T>(list: readonly T[]): T => list[Math.floor(Math.random() * list.length)];
+const PAINTS = [0xe8e6e0, 0x7fb8a6, 0xf2f2ee, 0xffc700, 0xb5262b, 0x2b4bff, 0x3a3f48, 0xff9ecf, 0x3ddc97, 0x15161a];
+/** the usual top speed of each kind; a driver rolls 80 - 120 % of it each time round */
+const KIND_V: Record<CarKind, number> = { kei: 7, hatch: 8, taxi: 8.5, van: 7 };
+
 class CarAgent {
-  s: number;
+  s = 0;
   v = 0;
+  vmax = 7;
   hidden = 0;
   braking = false;
   collider: Box;
   constructor(
     public car: Car,
     public lane: Lane,
-    public vmax: number,
-    s: number,
     world: World,
   ) {
-    this.s = s;
-    this.v = vmax * 0.6;
     this.collider = world.addDynamic(box(0, 0, 0, 1.75, 0, 0, { tag: 'car' }));
-    const g = car.group;
+    this.setLane(lane);
+  }
+  /** a new run: this lane (same axis - the car is clipped at that axis' table edges), a new driver, maybe a new coat */
+  setLane(lane: Lane) {
+    this.lane = lane;
+    this.vmax = KIND_V[this.car.kind] * rnd(0.8, 1.2);
+    if (this.car.kind !== 'taxi') this.car.paint.color.setHex(pick(PAINTS));
+    const g = this.car.group;
     g.rotation.y = lane.axis === 'x' ? (lane.dir === 1 ? 0 : Math.PI) : lane.dir === 1 ? -Math.PI / 2 : Math.PI / 2;
-    this.place();
   }
   get front() {
     return this.s + (this.lane.dir * this.car.length) / 2;
@@ -103,25 +116,77 @@ class CarAgent {
   }
 }
 
+/* R76: the pavements as a graph of corners. A walker picks a random next corner at every corner (never straight back,
+   unless it is a dead end), so the routes differ every time. `cross` = the signal a walker waits for on that edge (it
+   crosses a road): walk with the parallel traffic, as before. */
+const CORNERS = [
+  { x: -14, z: -4.3 }, // 0 west end, north pavement
+  { x: 4.7, z: -4.3 }, // 1
+  { x: 13.3, z: -4.3 }, // 2
+  { x: 13.3, z: -12 }, // 3 dead end by the shops
+  { x: 13.3, z: 4.3 }, // 4
+  { x: 4.7, z: 4.3 }, // 5
+  { x: -14, z: 4.3 }, // 6 west end, south pavement
+] as const;
+type Edge = { to: number; cross?: 'EW' | 'NS' };
+const PAVEMENT: Edge[][] = CORNERS.map(() => []);
+for (const [a, b, cross] of [
+  [0, 1],
+  [1, 2, 'EW'],
+  [2, 3],
+  [2, 4, 'NS'],
+  [4, 5, 'EW'],
+  [5, 6],
+  [5, 1, 'NS'],
+] as [number, number, ('EW' | 'NS')?][]) {
+  PAVEMENT[a].push({ to: b, cross });
+  PAVEMENT[b].push({ to: a, cross });
+}
+
 class PedAgent {
   pos = new THREE.Vector3();
-  idx: number;
+  from: number;
+  to: number;
+  cross: 'EW' | 'NS' | undefined;
   crossing = false;
   speed: number;
   moving = 0;
+  /** seconds left standing at a corner (checking the phone, looking around) */
+  pause = 0;
+  /** heading (unit, xz) and how far the walker has stepped to its right to pass someone */
+  nx = 0;
+  nz = 0;
+  side = 0;
   collider: Box;
   constructor(
     public person: Person,
-    public path: { x: number; z: number; cross?: 'EW' | 'NS' }[],
     start: number,
-    speed: number,
     world: World,
   ) {
-    const p = path[start];
+    const p = CORNERS[start];
     this.pos.set(p.x, 0.15, p.z);
-    this.idx = (start + 1) % path.length;
-    this.speed = speed;
+    this.from = start;
+    this.to = start;
+    this.speed = rnd(1.15, 1.45);
     this.collider = world.addDynamic(box(0, 0, 0, 1.7, 0, 0, { noCam: true, tag: 'ped' }));
+    this.chooseNext();
+    this.pause = rnd(0, 2.5);
+  }
+  get target() {
+    return CORNERS[this.to];
+  }
+  /** at a corner: a random next corner (not straight back unless there is no other way), a new pace, maybe a pause */
+  chooseNext() {
+    const here = this.to;
+    const ways = PAVEMENT[here];
+    const onward = ways.filter((e) => e.to !== this.from);
+    const e = pick(onward.length ? onward : ways);
+    this.from = here;
+    this.to = e.to;
+    this.cross = e.cross;
+    this.crossing = false;
+    this.speed = THREE.MathUtils.clamp(this.speed + rnd(-0.08, 0.08), 1.15, 1.45);
+    this.pause = here === 3 ? rnd(1, 4) : Math.random() < 0.3 ? rnd(0.5, 2.5) : 0;
   }
 }
 
@@ -137,10 +202,12 @@ export class Traffic {
   peds: PedAgent[] = [];
   train: Train;
   trainState: 'idle' | 'run' = 'idle';
-  trainWait = 6;
+  /** R76: the first train comes at a random moment, and each run rolls its own direction and speed */
+  trainWait = rnd(4, 14);
   trainX = 0;
   trainDir: 1 | -1 = 1;
   trainV = 0;
+  trainCruise = 13;
   trainBrakingForPlayer = false;
   trainCollider: Box;
   crossingActive = false;
@@ -160,7 +227,8 @@ export class Traffic {
   private scratch: Box[] = [];
   private tmpBox = { minX: 0, maxX: 0, minZ: 0, maxZ: 0 };
   private tmpBox2 = { minX: 0, maxX: 0, minZ: 0, maxZ: 0 };
-  private trainCount = 0;
+  private catVel = new THREE.Vector3();
+  private catNear: Box[] = [];
 
   constructor(
     private root: THREE.Object3D,
@@ -168,23 +236,26 @@ export class Traffic {
     private world: World,
     private built: Built,
     private calm: boolean,
+    /** R76: 'low' = the low graphics tier (fewer cars and walkers) */
+    crowd: 'low' | 'full' = 'full',
   ) {
     const clipX = [new THREE.Plane(new THREE.Vector3(1, 0, 0), 22), new THREE.Plane(new THREE.Vector3(-1, 0, 0), 22)];
     const clipZ = [new THREE.Plane(new THREE.Vector3(0, 0, 1), 18), new THREE.Plane(new THREE.Vector3(0, 0, -1), 18)];
-    const fleet: [string, CarKind, number, number, number][] = [
-      ['EB', 'hatch', 0xe8e6e0, 8, -10],
-      ['EB', 'kei', 0x7fb8a6, 7, -32],
-      ['WB', 'taxi', 0x1f2a4d, 8.5, 18],
-      ['WB', 'van', 0xf2f2ee, 7, 40],
-      ['SB', 'kei', 0xffc700, 7, -20],
-      ['NB', 'hatch', 0xb5262b, 7.5, 30],
-    ];
-    for (const [laneKey, kind, color, vmax, s] of fleet) {
-      const lane = LANES[laneKey];
-      const car = makeCar(kind, color, lane.axis === 'x' ? clipX : clipZ);
-      root.add(car.group);
-      this.cars.push(new CarAgent(car, lane, vmax, s, world));
+    // R76: a random fleet. The main road carries more cars than the side road; each car rolls its kind and its lane
+    // (within its axis), and enters the street at a random moment
+    const kinds: CarKind[] = ['hatch', 'kei', 'taxi', 'van'];
+    const perAxis = crowd === 'low' ? { x: 4, z: 2 } : { x: 5, z: 3 };
+    for (const axis of ['x', 'z'] as const) {
+      const lanes = Object.values(LANES).filter((l) => l.axis === axis);
+      for (let i = 0; i < perAxis[axis]; i++) {
+        // one taxi at most per axis, so the fleet never reads as a taxi rank
+        const kind = i === 0 ? 'taxi' : pick(kinds.filter((k) => k !== 'taxi'));
+        const car = makeCar(kind, kind === 'taxi' ? 0x1f2a4d : pick(PAINTS), axis === 'x' ? clipX : clipZ);
+        root.add(car.group);
+        this.cars.push(new CarAgent(car, lanes[i % lanes.length], world));
+      }
     }
+    this.seedCars();
 
     this.train = makeTrain(clipX, mats.get('trainWin').map!);
     this.train.group.position.set(0, 0.12, 16.6);
@@ -192,34 +263,35 @@ export class Traffic {
     root.add(this.train.group);
     this.trainCollider = world.addDynamic(box(0, 0, 0, 3.6, 15.3, 17.9, { off: true, tag: 'train' }));
 
-    const path = [
-      { x: -14, z: -4.3 },
-      { x: 4.7, z: -4.3 },
-      { x: 13.3, z: -4.3, cross: 'EW' as const },
-      { x: 13.3, z: -12 },
-      { x: 13.3, z: -4.3 },
-      { x: 13.3, z: 4.3, cross: 'NS' as const },
-      { x: 4.7, z: 4.3, cross: 'EW' as const },
-      { x: -14, z: 4.3 },
-      { x: 4.7, z: 4.3 },
-      { x: 4.7, z: -4.3, cross: 'NS' as const },
-    ];
-    const looks = [
-      { top: 0x2b4bff, bottom: 0x2b2b2b, hair: 0x1a1a1a, umbrella: 0xffffff, bag: 0x5a3a24 },
-      { top: 0xff9ecf, bottom: 0x3a3f48, hair: 0x4a2a18, umbrella: 0xff4b2b },
-      { top: 0x3ddc97, bottom: 0x1d2433, hair: 0x111111, umbrella: 0x2b4bff },
-    ];
-    looks.forEach((l, i) => {
-      const p = makePerson({ ...l, scale: 0.97 });
+    // R76: walkers dressed at random, each starting at its own corner of the block
+    const tops = [0x2b4bff, 0xff9ecf, 0x3ddc97, 0xf2f2ee, 0xffc700, 0x8e6bff, 0xb5262b, 0x3a3f48];
+    const bottoms = [0x2b2b2b, 0x3a3f48, 0x1d2433, 0x5a4a3a, 0x111111];
+    const hairs = [0x1a1a1a, 0x4a2a18, 0x111111, 0x6b4a2a, 0x2a2420];
+    const umbrellas = [0xffffff, 0xff4b2b, 0x2b4bff, 0x111111, 0xffc700, 0x3ddc97];
+    const starts = [...CORNERS.keys()].sort(() => Math.random() - 0.5);
+    const count = crowd === 'low' ? 3 : 5;
+    for (let i = 0; i < count; i++) {
+      const p = makePerson({
+        top: pick(tops),
+        bottom: pick(bottoms),
+        hair: pick(hairs),
+        umbrella: pick(umbrellas),
+        bag: Math.random() < 0.5 ? 0x5a3a24 : undefined,
+        scale: rnd(0.93, 1.02),
+      });
       root.add(p.group);
-      this.peds.push(new PedAgent(p, path, [0, 4, 7][i], 1.2 + i * 0.08, world));
-    });
+      this.peds.push(new PedAgent(p, starts[i % starts.length], world));
+    }
 
     this.cat = makeCat();
     const z = built.catZone;
     this.catPos.set((z.minX + z.maxX) / 2, 0.15, (z.minZ + z.maxZ) / 2);
     this.catTarget.copy(this.catPos);
     root.add(this.cat.group);
+    // R76: the lights are at a random point of their cycle when the street opens (it always opened on east-west green).
+    // Reduced motion keeps the classic opening.
+    if (!calm) this.clock = rnd(0, CYCLE_T);
+    this.updateSignals();
   }
 
   /* ------------------------------------------------------------ signals */
@@ -303,23 +375,61 @@ export class Traffic {
     return gap;
   }
 
+  /**
+   * R76: the opening line-up. Each lane gets a random number of its cars at random, well spaced places on its approach
+   * (before the stop line, so nobody starts inside the junction); the rest wait off the table and drive in at random
+   * moments over the first seconds.
+   */
+  private seedCars() {
+    for (const L of Object.values(LANES)) {
+      const mine = this.cars.filter((c) => c.lane === L);
+      // the approach: from the table edge to 2 m short of the stop line
+      const near = L.stop - L.dir * 2;
+      const far = L.start + L.dir * 3;
+      const room = Math.abs(near - far);
+      let used = 0;
+      for (const c of mine) {
+        const fits = used + c.car.length + 6 <= room && Math.random() < 0.7;
+        if (fits) {
+          used += rnd(0, Math.min(6, room - used - c.car.length - 6));
+          // front bumper `used` metres back from `near`
+          c.s = near - L.dir * (used + c.car.length / 2);
+          used += c.car.length + 6;
+          // slow off the mark: the lights open at a random phase, and a car this close to the line must be able to stop
+          c.v = c.vmax * rnd(0, 0.3);
+          c.hidden = 0;
+        } else {
+          c.s = L.start;
+          c.v = c.vmax * 0.7;
+          c.hidden = rnd(0.5, 9);
+        }
+        c.place();
+      }
+    }
+  }
+
   private updateCars(dt: number, player: PlayerInfo) {
     for (const a of this.cars) {
-      const L = a.lane;
       if (a.hidden > 0) {
         a.hidden -= dt;
         if (a.hidden <= 0) {
-          // respawn only into a free entry
-          a.s = L.start;
-          a.v = a.vmax * 0.7;
+          // R76: it comes round again in a random lane of its road, with a new driver (speed) and maybe a new coat;
+          // only into a free entry, else it tries again a moment later
+          const lane = pick(Object.values(LANES).filter((l) => l.axis === a.lane.axis));
           const blocked = this.cars.some(
-            (o) => o !== a && o.lane === L && o.hidden <= 0 && Math.abs(o.s - L.start) < 9,
+            (o) => o !== a && o.lane === lane && o.hidden <= 0 && Math.abs(o.s - lane.start) < 9,
           );
-          if (blocked) a.hidden = 1.5;
+          if (blocked) a.hidden = rnd(0.8, 2.2);
+          else {
+            a.setLane(lane);
+            a.s = lane.start;
+            a.v = a.vmax * 0.7;
+          }
         }
         a.place();
         continue;
       }
+      const L = a.lane;
       let gap = this.corridorGap(a, player) - 0.9;
       const f = a.front;
       const toLine = (L.stop - f) * L.dir;
@@ -354,9 +464,11 @@ export class Traffic {
       this.train.group.visible = false;
       if (this.trainWait <= 0) {
         this.trainState = 'run';
-        this.trainDir = this.trainCount++ % 2 === 0 ? 1 : -1;
+        // R76: either way, at its own speed (it used to alternate east / west at 13 m/s every time)
+        this.trainDir = Math.random() < 0.5 ? 1 : -1;
+        this.trainCruise = rnd(10.5, 15.5);
         this.trainX = X - this.trainDir * (50 + L / 2);
-        this.trainV = 13;
+        this.trainV = this.trainCruise;
         this.train.setDirection(this.trainDir);
         this.train.group.rotation.y = 0;
         this.events.push('train');
@@ -384,7 +496,7 @@ export class Traffic {
           if (d > -0.5) gap = Math.min(gap, d - 2.5);
         }
       }
-      const target = gap <= 0 ? 0 : Math.min(13, Math.sqrt(2 * 7 * gap));
+      const target = gap <= 0 ? 0 : Math.min(this.trainCruise, Math.sqrt(2 * 7 * gap));
       if (this.trainV < target) this.trainV = Math.min(target, this.trainV + 2.4 * dt);
       else this.trainV = Math.max(target, this.trainV - 12 * dt);
       this.trainX += this.trainV * dt * dir;
@@ -397,7 +509,7 @@ export class Traffic {
       this.crossingActive = (rear - X) * dir < 3;
       if ((rear - X) * dir > 52) {
         this.trainState = 'idle';
-        this.trainWait = 10 + Math.random() * 8;
+        this.trainWait = rnd(9, 24);
         this.crossingActive = false;
       }
       void front;
@@ -422,13 +534,18 @@ export class Traffic {
   /* ------------------------------------------------------------ pedestrians */
   private updatePeds(dt: number, player: PlayerInfo) {
     for (const a of this.peds) {
-      const t = a.path[a.idx];
+      const t = a.target;
       const dx = t.x - a.pos.x;
       const dz = t.z - a.pos.z;
       const dist = Math.hypot(dx, dz);
       let go = true;
-      if (t.cross && !a.crossing) {
-        go = (t.cross === 'EW' ? this.pedEW : this.pedNS) === 'walk';
+      // R76: a moment at the corner first (phone, umbrella, a look round) - never in the road: a pause only starts at a
+      // corner, before the walker steps off
+      if (a.pause > 0) {
+        a.pause -= dt;
+        go = false;
+      } else if (a.cross && !a.crossing) {
+        go = (a.cross === 'EW' ? this.pedEW : this.pedNS) === 'walk';
         if (go) a.crossing = true;
       }
       const nx = dx / (dist || 1);
@@ -440,22 +557,33 @@ export class Traffic {
         const pd = Math.hypot(px, pz);
         if (pd < 1.15 && (px * nx + pz * nz) / (pd || 1) > 0.35) go = false;
       }
+      // R76: routes are random now, so two walkers can meet head on. Someone coming the other way: both keep to their
+      // own right and pass (two walkers who both waited for the other used to stand nose to nose for ever). Someone
+      // ahead going the same way (or waiting at the same corner): queue behind them, as before.
+      let oncoming = false;
       for (const o of this.peds) {
         if (o === a) continue;
         const ox = o.pos.x - a.pos.x;
         const oz = o.pos.z - a.pos.z;
         const od = Math.hypot(ox, oz);
-        if (od < 1.0 && (ox * nx + oz * nz) / (od || 1) > 0.6 && o.moving < a.moving + 0.5) go = go && od > 0.7;
+        if (od > 1.8 || (ox * nx + oz * nz) / (od || 1) < 0.35) continue;
+        if (o.nx * nx + o.nz * nz < -0.2) oncoming = true;
+        else if (od < 1.0 && (ox * nx + oz * nz) / (od || 1) > 0.6 && o.moving < a.moving + 0.5) go = go && od > 0.7;
       }
+      const side = oncoming ? 0.55 : 0;
+      const ds = (side - a.side) * (1 - Math.exp(-dt * 4));
+      a.side += ds;
       const target = go ? a.speed : 0;
       a.moving += (target - a.moving) * (1 - Math.exp(-dt * 6));
       const step = Math.min(dist, a.moving * dt);
-      a.pos.x += nx * step;
-      a.pos.z += nz * step;
-      if (dist < 0.05) {
-        a.idx = (a.idx + 1) % a.path.length;
-        a.crossing = false;
+      // forward, plus the sidestep (to the walker's right: (-nz, nx)); heading at the corner takes the offset back out
+      a.pos.x += nx * step - nz * ds;
+      a.pos.z += nz * step + nx * ds;
+      if (dist > 0.05) {
+        a.nx = nx;
+        a.nz = nz;
       }
+      if (dist < 0.05) a.chooseNext();
       const gy = this.world.groundAt(a.pos.x, a.pos.z, a.pos.y + 0.4, 0.12, this.scratch);
       a.pos.y += (Math.max(0, gy) - a.pos.y) * (1 - Math.exp(-dt * 18));
       const p = a.person;
@@ -527,15 +655,12 @@ export class Traffic {
       yd = Math.atan2(Math.sin(yd), Math.cos(yd));
       this.catYaw += yd * (1 - Math.exp(-dt * 10));
     }
-    const vel = new THREE.Vector3();
-    resolveCircle(
-      this.catPos,
-      vel,
-      0.2,
-      0.5,
-      0.2,
-      this.world.query(this.catPos.x, this.catPos.z, 0.6, this.scratch).filter((b) => b.tag !== 'ped'),
-    );
+    // R76: no new vector or array every frame (garbage the phone has to collect mid-scroll)
+    const nearBy = this.catNear;
+    nearBy.length = 0;
+    for (const b of this.world.query(this.catPos.x, this.catPos.z, 0.6, this.scratch))
+      if (b.tag !== 'ped') nearBy.push(b);
+    resolveCircle(this.catPos, this.catVel.set(0, 0, 0), 0.2, 0.5, 0.2, nearBy);
     this.catPos.x = THREE.MathUtils.clamp(this.catPos.x, z.minX - 0.4, z.maxX + 0.4);
     this.catPos.z = THREE.MathUtils.clamp(this.catPos.z, z.minZ - 0.4, z.maxZ + 0.4);
     this.catPos.y = Math.max(

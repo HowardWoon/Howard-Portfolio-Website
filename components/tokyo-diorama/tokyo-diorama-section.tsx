@@ -20,6 +20,7 @@ import {
 import type { DioramaHandle, Hotspot, Mode, Tier } from './engine';
 import { SECTIONS } from '@/lib/sections';
 import { SECTION_DOORS, SECTION_JP } from './engine/doors';
+import { useScrollLock } from '@/lib/use-scroll-lock';
 
 /**
  * 夜雨の街角 — Tokyo After Rain. A walkable 3D diorama section.
@@ -107,7 +108,7 @@ export default function TokyoDioramaSection({
   const [touch, setTouch] = useState(false);
   const [mountKey, setMountKey] = useState(0);
   // R70: software-drawn WebGL waits for a press (START 3D); a hardware GPU starts by itself
-  const [held, setHeld] = useState(false);
+  const [held, setHeld] = useState<false | 'soft' | 'touch'>(false);
   const [started, setStarted] = useState(false);
 
   /* ---------- mount the engine only when the section is close to the viewport */
@@ -143,11 +144,22 @@ export default function TokyoDioramaSection({
       setFailed(true);
       return;
     }
-    const testing = new URLSearchParams(window.location.search).has('diorama-test');
-    if (!started && !testing && softwareWebgl()) {
-      setHeld(true);
-      return;
+    const params = new URLSearchParams(window.location.search);
+    const testing = params.has('diorama-test');
+    // R76: on a touch-first device (phone, tablet) the street waits for START 3D too. Built as soon as it scrolled into
+    // view, the world, its textures and its shaders took 1.1 - 1.6 s of main thread in the middle of the visitor's
+    // scroll, and the render loop then competed with the scrolling for the graphics chip.
+    const touchFirst = window.matchMedia?.('(hover: none) and (pointer: coarse)').matches === true;
+    if (!started && !testing) {
+      const why = softwareWebgl() ? 'soft' : touchFirst ? 'touch' : null;
+      if (why) {
+        setHeld(why);
+        return;
+      }
     }
+    // R76: tests can load a Blender model (?diorama-test&diorama-model=/models/x.glb, same-site models only)
+    const testModel = testing ? params.get('diorama-model') : null;
+    const model = modelUrl ?? (testModel && /^\/models\/[\w-]+\.glb$/.test(testModel) ? testModel : undefined);
     setHeld(false);
     let disposed = false;
     let handle: DioramaHandle | null = null;
@@ -159,7 +171,7 @@ export default function TokyoDioramaSection({
           handle = createTokyoDiorama({
             container: stage,
             reducedMotion: prefersCalm(),
-            modelUrl,
+            modelUrl: model,
             tier: tierChoice,
             onReady: () => setReady(true),
             onHotspot: (h) => setHot(h),
@@ -260,20 +272,16 @@ export default function TokyoDioramaSection({
     document.addEventListener('fullscreenchange', onChange);
     return () => document.removeEventListener('fullscreenchange', onChange);
   }, [full]);
+  // R76: the CSS full screen locks the page the site's one way (rule 10-B: body lock + Lenis, ref-counted), not by
+  // writing html overflow and Lenis by hand
+  // the frame lives inside <main>: no depth-of-field blur (it would blur the street itself and pin it to <main>)
+  useScrollLock(full === 'pseudo', { dim: false });
   useEffect(() => {
     requestAnimationFrame(() => handleRef.current?.resize());
     if (full !== 'pseudo') return;
-    const w = window as Win;
-    const prev = document.documentElement.style.overflow;
-    document.documentElement.style.overflow = 'hidden';
-    w.__lenis?.stop?.();
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setFull('off');
     window.addEventListener('keydown', onKey);
-    return () => {
-      document.documentElement.style.overflow = prev;
-      w.__lenis?.start?.();
-      window.removeEventListener('keydown', onKey);
-    };
+    return () => window.removeEventListener('keydown', onKey);
   }, [full]);
 
   const hint = touch
@@ -319,7 +327,9 @@ export default function TokyoDioramaSection({
           data-lenis-prevent={mode === 'walk' ? '' : undefined}
           className={
             full === 'pseudo'
-              ? 'fixed inset-0 z-[10001] flex flex-col bg-ink outline-none'
+              ? // R76: !m-0 - the parent's space-y gave the fixed frame a 2.5 rem top margin: it started 42 px down and its
+                // bottom (the zoom keys, the hint) hung off the screen
+                '!m-0 fixed inset-0 z-[10001] flex flex-col bg-ink pb-[var(--safe-bottom)] pl-[var(--safe-left)] pr-[var(--safe-right)] pt-[var(--safe-top)] outline-none'
               : 'relative flex flex-col overflow-hidden rounded-2xl border-3 border-ink bg-ink shadow-brutal-lg outline-none focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-pop-blue'
           }
         >
@@ -335,14 +345,15 @@ export default function TokyoDioramaSection({
                 <span className="hidden md:inline">夜雨の街角 · </span>TOKYO_AFTER_RAIN
               </span>
             </div>
-            <div className="order-3 flex w-full items-center gap-1 xs:gap-1.5 sm:order-2 sm:w-auto sm:gap-2">
+            {/* R76: the row wraps, so no control is ever clipped by the frame (the gauge key was cut off at 280 px) */}
+            <div className="order-3 flex w-full flex-wrap items-center gap-1 xs:gap-1.5 sm:order-2 sm:w-auto sm:gap-2">
               <div role="radiogroup" aria-label="Camera mode" className="flex gap-1 xs:gap-1.5">
                 <button
                   type="button"
                   role="radio"
                   aria-checked={mode === 'view'}
                   onClick={() => chooseMode('view')}
-                  className={`${keyBtn} ${mode === 'view' ? 'bg-pop-yellow' : ''}`}
+                  className={`${keyBtn} ${mode === 'view' ? '!bg-pop-yellow' : ''}`}
                 >
                   <Eye className="hidden h-4 w-4 xs:block" strokeWidth={2.5} aria-hidden />
                   VIEW
@@ -353,7 +364,7 @@ export default function TokyoDioramaSection({
                   aria-checked={mode === 'walk'}
                   onClick={() => chooseMode('walk')}
                   disabled={!ready}
-                  className={`${keyBtn} ${mode === 'walk' ? 'bg-pop-yellow' : ''} disabled:opacity-50`}
+                  className={`${keyBtn} ${mode === 'walk' ? '!bg-pop-yellow' : ''} disabled:opacity-50`}
                 >
                   <Footprints className="hidden h-4 w-4 xs:block" strokeWidth={2.5} aria-hidden />
                   WALK
@@ -427,7 +438,9 @@ export default function TokyoDioramaSection({
                 }}
                 onClick={() => handleRef.current?.activate(p.id)}
                 aria-label={`Go to ${p.label}`}
-                style={{ visibility: 'hidden' }}
+                // R76: no transition on transform - the engine moves the sign every frame, and the .nb-key 0.12 s
+                // transform transition made every sign trail behind its building while the camera turned
+                style={{ visibility: 'hidden', transition: 'box-shadow 0.12s, background-color 0.15s' }}
                 className="nb-key absolute left-0 top-0 z-[5] flex min-h-[40px] flex-col items-center rounded-lg border-3 border-ink bg-white px-2.5 py-1 text-center leading-none text-ink will-change-transform"
               >
                 <span className="font-mono text-xs font-extrabold tracking-[0.1em]">{p.label.toUpperCase()}</span>
@@ -447,10 +460,17 @@ export default function TokyoDioramaSection({
             {held && !failed && (
               <div className="absolute inset-0 z-[7] grid place-items-center bg-[#0a0e1c] p-6">
                 <div className="max-w-sm rounded-xl border-3 border-ink bg-white p-4 text-ink shadow-brutal">
-                  <p className="font-mono text-xs font-extrabold tracking-[0.12em]">NO GRAPHICS CHIP FOUND</p>
-                  <p className="mt-2 text-sm font-medium">
-                    This device draws 3D without a graphics chip, so the street may run slowly.
-                  </p>
+                  {held === 'soft' ? (
+                    <>
+                      <p className="font-mono text-xs font-extrabold tracking-[0.12em]">NO GRAPHICS CHIP FOUND</p>
+                      <p className="mt-2 text-sm font-medium">
+                        This device draws 3D without a graphics chip, so the street may run slowly.
+                      </p>
+                    </>
+                  ) : (
+                    // R76: a phone / tablet starts the street with a tap (the window's own name, no new wording)
+                    <p className="font-mono text-xs font-extrabold tracking-[0.12em]">TOKYO_AFTER_RAIN</p>
+                  )}
                   <button
                     type="button"
                     data-diorama-start
@@ -514,10 +534,21 @@ export default function TokyoDioramaSection({
                       e.preventDefault();
                       handleRef.current?.jump();
                     }}
+                    // a keyboard press (no pointer) jumps too
+                    onClick={(e) => e.detail === 0 && handleRef.current?.jump()}
                     className="nb-key absolute bottom-6 right-6 z-[8] grid h-16 w-16 place-items-center rounded-full border-3 border-ink bg-pop-yellow font-mono text-xs font-extrabold tracking-[0.1em] text-ink"
                   >
                     JUMP
                   </button>
+                )}
+                {/* R76: touch visitors were never told how to walk (the string existed, it was only shown to mice) */}
+                {touch && (
+                  <p
+                    data-walk-hint
+                    className="pointer-events-none absolute left-3 right-3 top-3 z-[6] mx-auto w-fit max-w-full rounded-lg border-2 border-ink bg-white px-2.5 py-1.5 text-center font-mono text-xs font-bold text-ink"
+                  >
+                    {hint}
+                  </p>
                 )}
                 {!touch && (
                   <p className="pointer-events-none absolute bottom-3 left-3 z-[6] hidden max-w-[60%] rounded-lg border-2 border-ink bg-white px-2.5 py-1.5 font-mono text-xs font-bold text-ink md:block">
