@@ -821,8 +821,9 @@ html.hw-booted .boot-overlay {
     border-radius: 6px;
     background: #0a0a0a;
     color: #fff;
+    /* R76: the 0.8rem type floor (it was 10 px; the r24 guard only read text-[...] classes) */
     font:
-      800 10px/1.4 var(--font-mono, ui-monospace),
+      800 0.8rem/1.4 var(--font-mono, ui-monospace),
       monospace;
     letter-spacing: 0.1em;
     white-space: nowrap;
@@ -5276,6 +5277,14 @@ html.fx-off-sectionBackdrop .sb-layer {
 .sb-l {
   left: calc(var(--sb-gut) * var(--sb-at) - var(--sb-size) / 2);
 }
+/* R76: a phone's left gutter (16 - 20 px) is narrower than a piece, so the left pieces sat at x = -8 px: cut by the
+   screen edge they read as broken marks beside the headlines (text is flush left there). Phones keep the right ones,
+   which have the free space at the end of each line. */
+@media (max-width: 639px) {
+  .sb-l {
+    display: none;
+  }
+}
 .sb-r {
   right: calc(var(--sb-gut) * var(--sb-at) * var(--sb-reach) - var(--sb-size) / 2);
 }
@@ -5433,7 +5442,10 @@ section:has(> .flyers) {
    opacity 0.5 showed the stickers passing behind it as faded doubles for half a screen of scrolling. */
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
-    html:not([data-motion='calm']):not(.fx-off-cssReveal) section:has(> .flyers) .fx-rise {
+    /* R76: an opened Honors category keeps its FX-66 card turn (this selector outranked it, so the turn never ran) */
+    html:not([data-motion='calm']):not(.fx-off-cssReveal)
+      section:has(> .flyers)
+      .fx-rise:not([data-honor-category][aria-expanded='true']) {
       animation-name: fx-rise-solid;
     }
   }

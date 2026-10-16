@@ -140,7 +140,10 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
             : Math.max(-12, Math.min(12, b.vx * 0.01));
         b.tilt += (target - b.tilt) * 0.25;
         if (Math.abs(b.tilt) < 0.05) b.tilt = 0;
-        el.style.transform = `translate3d(${b.x.toFixed(1)}px, ${b.y.toFixed(1)}px, 0) rotate(${b.tilt.toFixed(2)}deg)`;
+        // R76: a GPU layer only while it moves. 27 badges on translate3d + will-change were 27 standing layers even with
+        // the pile asleep (30-design-system E28: layer count was the R41 lag); at rest a plain 2D translate.
+        const moving = b.drag || (!b.asleep && !b.out && b.y > -b.h); // only while it moves in sight
+        el.style.transform = `${moving ? 'translate3d' : 'translate'}(${b.x.toFixed(1)}px, ${b.y.toFixed(1)}px${moving ? ', 0' : ''}) rotate(${b.tilt.toFixed(2)}deg)`;
         el.style.visibility = b.out ? 'hidden' : '';
       });
     };
@@ -819,7 +822,9 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
             }}
             className={`${
               live
-                ? 'absolute left-0 top-0 cursor-grab touch-none will-change-transform data-[held]:cursor-grabbing'
+                ? // R76: pan-y, not none - a finger that lands on the pile (most of a 760 px pit on a phone) must still
+                  // scroll the page; a sideways drag still picks the badge up and flings it. No will-change (see paint)
+                  'absolute left-0 top-0 cursor-grab touch-pan-y data-[held]:cursor-grabbing'
                 : ''
             } inline-flex items-center whitespace-nowrap rounded-full border-3 border-ink px-2.5 py-1.5 font-mono text-xs font-extrabold uppercase tracking-[0.06em] text-ink shadow-brutal-sm sm:px-4 sm:py-2 sm:text-sm sm:tracking-[0.08em] ${b.fill}`}
           >

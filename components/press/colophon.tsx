@@ -26,7 +26,9 @@ export function Colophon() {
     else window.scrollTo({ top: 0, behavior: calm ? 'auto' : 'smooth' });
   };
   return (
-    <div
+    // R76: an aside landmark - between </main> and the footer it was content outside every landmark (axe "region")
+    <aside
+      aria-label="Colophon"
       data-colophon
       className="relative z-10 flex flex-wrap items-center justify-between gap-x-5 gap-y-3 border-t-3 border-ink bg-paper-cream px-4 xs:px-5 sm:px-10 lg:px-16 py-3 font-mono text-xs font-extrabold uppercase tracking-[0.12em] text-ink"
     >
@@ -45,6 +47,6 @@ export function Colophon() {
         <RotateCcw className="h-4 w-4" strokeWidth={2.75} aria-hidden />
         REPRINT
       </button>
-    </div>
+    </aside>
   );
 }
