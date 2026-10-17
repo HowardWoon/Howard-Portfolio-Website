@@ -15,13 +15,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Static checks, build and the motion audit. The Playwright suite runs in the "e2e" shards below, in parallel.
   check:
     # Pinned: ubuntu-latest moves to Ubuntu 26 on 2026-10-19; `playwright install --with-deps`
     # installs apt packages by name. Move to the next LTS only after Playwright lists it as supported.
     runs-on: ubuntu-24.04
-    # R39: e2e alone is ~21 min on the runner (354 tests); with build + the motion audit the job passed 25 min and was
-    # cancelled after every test had passed (run #108). Headroom, not a skipped check.
-    # R57: 35 -> 60. The suite grew to 461 tests (one worker); the limit only stops a hung job
+    # The limit only stops a hung job (06-stability G2: a run that hits it is CANCELLED, not failed).
     timeout-minutes: 60
     env:
       NEXT_TELEMETRY_DISABLED: 1
@@ -47,7 +46,6 @@ jobs:
           path: ~/.cache/ms-playwright
           key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e
       # R17 P2-09: the default audit runs with reduced motion, which switches every scroll effect off; the lag and
       # layer problems only exist with motion on, so CI also audits the site the way a normal visitor sees it.
       - name: Layout + axe audit with motion ON
@@ -55,17 +53,74 @@ jobs:
           npm run start > /dev/null 2>&1 &
           for i in $(seq 1 60); do curl -s -o /dev/null http://localhost:3000 && break; sleep 1; done
           node scripts/audit-ui.mjs --motion
-      - name: Upload Playwright report
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 7
       - name: Upload motion audit
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
         with:
           name: motion-audit
           path: audit/motion/report.md
+          retention-days: 7
+
+  # R77: the full suite (601 tests, one worker) took ~52 min in one job against the 60-min limit (run 39008258839).
+  # It is split into 4 shards on 4 runners; every test still runs, one worker per shard (playwright.config.ts).
+  # Each shard builds the site itself (the build is ~30 s) and runs its own `npm run start` via the webServer config.
+  e2e:
+    name: e2e (${{ matrix.shard }}/4)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      NEXT_TELEMETRY_DISABLED: 1
+    strategy:
+      # Every shard reports its own result, so one failing shard does not hide the others.
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Cache Playwright browsers
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - run: npx playwright install --with-deps chromium
+      # The blob reporter replaces the per-shard html report; the "e2e-report" job merges the blobs into one.
+      - run: npx playwright test --shard=${{ matrix.shard }}/4 --reporter=github,list,blob
+      - name: Upload blob report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: blob-report-${{ matrix.shard }}
+          path: blob-report/
+          retention-days: 1
+
+  # One HTML report for the whole suite, as before the split (artifact "playwright-report").
+  e2e-report:
+    needs: e2e
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: blob-report-*
+          path: all-blob-reports
+          merge-multiple: true
+      - run: npx playwright merge-reports --reporter html ./all-blob-reports
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: playwright-report/
           retention-days: 7

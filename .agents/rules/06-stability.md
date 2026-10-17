@@ -66,8 +66,11 @@ trigger: always_on
    never poll it in a loop. Read the run page instead: `github.com/HowardWoon/Howard-Portfolio-Website/actions` and
    `.../actions/runs/<id>` (built-in browser `get_page_text`, or curl the HTML). A `grep` for "Failure" in that HTML
    is not a verdict - read the Status field.
-2. The CI job has a 1-hour limit and the suite takes ~45 min there. Anything that makes every test slower (R68: the 3D
-   street built on every scroll past it, on software WebGL) gets the run CANCELLED, not failed - read the duration.
+2. Every CI job has a 1-hour limit. R77: the suite took ~52 min in one job, so it runs as 4 Playwright shards
+   (`e2e (1/4)` ... `e2e (4/4)`, one worker each) next to `check` (static checks, build, motion audit); `e2e-report`
+   merges the shards into the `playwright-report` artifact. Shard 4 holds the 3D files. Anything that makes every test
+   slower (R68: the 3D street built on every scroll past it, on software WebGL) gets a job CANCELLED, not failed - read
+   the duration of the longest shard.
 3. Vercel: confirm the commit's deployment, then fetch the live HTML and look for the new markup. The built-in browser
    pane does not draw while the app window is minimised; use a headless Playwright run against the live URL instead.
 
