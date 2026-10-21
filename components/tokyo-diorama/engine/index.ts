@@ -961,6 +961,8 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
   };
   const onRestored = () => {
     lost = false;
+    // R82: the loop restarts here too (it waited for a scroll or a tab switch to notice); the section may still rebuild
+    setRunning();
     opts.onContextRestored?.();
   };
   canvas.addEventListener('webglcontextlost', onLost);

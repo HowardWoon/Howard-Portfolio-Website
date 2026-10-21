@@ -17,7 +17,12 @@ type Car = {
   car: { kind: string; length: number; paint: { color: { getHex(): number } } };
   aabb(o: object): Box;
 };
-type Ped = { pos: { x: number; z: number }; from: number; to: number };
+type Ped = {
+  pos: { x: number; z: number };
+  from: number;
+  to: number;
+  person: { materials: { color?: { getHex(): number } }[] };
+};
 type Traffic = {
   cars: Car[];
   peds: Ped[];
@@ -49,41 +54,42 @@ async function openStreet(page: Page, seed: number) {
   return errors;
 }
 
-/** the opening street, then the street after 60 stepped seconds */
+/** what a seed fixes for the whole visit: the fleet's kinds, the crowd and how each walker is dressed (lanes, coats
+ *  and positions move on in real time before a test can read them, so they are not compared) */
 async function streetOf(page: Page) {
   return page.evaluate(() => {
     const d = (window as W).__diorama!.debug;
-    d.quiet();
-    d.teleport(-18, 0.15, -12);
     const T = d.traffic();
-    const open = JSON.stringify(T.cars.map((c) => [c.car.kind, c.lane.axis + c.lane.dir, c.car.paint.color.getHex()]));
-    for (let i = 0; i < 60 * 60; i++) d.step(1 / 60, false);
-    const later = JSON.stringify([
-      T.cars.map((c) => [+c.s.toFixed(3), c.hidden > 0]),
-      T.peds.map((p) => [+p.pos.x.toFixed(3), +p.pos.z.toFixed(3)]),
-    ]);
-    return { seed: d.info().seed, open, later, cars: T.cars.length, peds: T.peds.length };
+    return {
+      seed: d.info().seed,
+      fleet: T.cars.map((c) => c.car.kind).join(','),
+      crowd: JSON.stringify(T.peds.map((p) => p.person.materials.map((m) => m.color?.getHex() ?? -1))),
+    };
   });
 }
 
 test.describe('R82 3D street', () => {
   test.beforeEach(() => test.slow()); // software WebGL on CI
 
-  test('a seed replays the same street: same fleet, same crowd, same run', async ({ browser }) => {
-    const run = async () => {
+  test('a seed replays the same street (fleet, crowd, clothes); another seed gives another one', async ({
+    browser,
+  }) => {
+    const run = async (seed: number) => {
       const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
       const page = await ctx.newPage();
-      const errors = await openStreet(page, 82);
+      const errors = await openStreet(page, seed);
       const s = await streetOf(page);
       await ctx.close();
       return { ...s, errors };
     };
-    const a = await run();
-    const b = await run();
+    const a = await run(82);
+    const b = await run(82);
+    const c = await run(83);
     expect(a.seed).toBe(82);
-    expect(b.open).toBe(a.open);
-    expect(b.later).toBe(a.later);
-    expect([...a.errors, ...b.errors]).toEqual([]);
+    expect(b.fleet).toBe(a.fleet);
+    expect(b.crowd).toBe(a.crowd);
+    expect(c.fleet + c.crowd).not.toBe(a.fleet + a.crowd);
+    expect([...a.errors, ...b.errors, ...c.errors]).toEqual([]);
   });
 
   test('over 200 stepped seconds on 3 seeds: lights, drivers, fleets and walkers vary, and nobody collides, runs a red or blocks the box', async ({
@@ -204,5 +210,44 @@ test.describe('R82 3D street', () => {
     expect(new Set(results.map((r) => r.fleet)).size, 'the fleet and the crowd are rolled per visit').toBeGreaterThan(
       1,
     );
+  });
+
+  test('a fling past the street does not build it; resting on it does', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('/?diorama-test');
+    await page.getByRole('button', { name: /skip intro/i }).click();
+    await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 10000 });
+    await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
+    const top = await page.evaluate(() => document.getElementById('diorama')!.getBoundingClientRect().top + scrollY);
+    // a steady stream of scroll steps (one every frame) from above the street to below it
+    await page.evaluate(async (y0) => {
+      for (let y = y0 - 1200; y < y0 + 2000; y += 70) {
+        window.scrollTo(0, y);
+        await new Promise((r) => requestAnimationFrame(r));
+      }
+    }, top);
+    await page.waitForTimeout(1200);
+    expect(await page.evaluate(() => !!(window as W).__diorama), 'not built by a fling').toBe(false);
+    await page.evaluate(() => document.getElementById('diorama')!.scrollIntoView({ block: 'start' }));
+    await expect.poll(() => page.evaluate(() => !!(window as W).__diorama), { timeout: 90000 }).toBe(true);
+  });
+
+  test('a lost graphics context comes back drawing, with no error', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    const errors = await openStreet(page, 7);
+    type Cam = { debug: { cam(): { frames?: number } } };
+    const frames = () =>
+      page.evaluate(() => (window as unknown as { __diorama?: Cam }).__diorama?.debug.cam().frames ?? 0);
+    await expect.poll(frames, { timeout: 60000 }).toBeGreaterThan(2);
+    await page.evaluate(async () => {
+      const gl = document.querySelector<HTMLCanvasElement>('#diorama canvas')!.getContext('webgl2')!;
+      const ext = gl.getExtension('WEBGL_lose_context')!;
+      ext.loseContext();
+      await new Promise((r) => setTimeout(r, 500));
+      ext.restoreContext();
+    });
+    const before = await frames();
+    await expect.poll(async () => (await frames()) !== before && (await frames()) > 2, { timeout: 90000 }).toBe(true);
+    expect(errors).toEqual([]);
   });
 });

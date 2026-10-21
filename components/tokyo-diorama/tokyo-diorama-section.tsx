@@ -120,12 +120,30 @@ export default function TokyoDioramaSection({
     if (!el) return;
     // R70: only once the section is on screen (it used to load 1.5 screens ahead, so every scroll past the section -
     // and every test that walked the page - built the whole 3D street)
-    const io = new IntersectionObserver((e) => e.some((x) => x.isIntersecting) && setNear(true), {
-      threshold: 0.15,
-    });
+    // R82 (measured, real GPU: 5 of the 9 frames over 100 ms in a whole-page wheel scroll came from passing this
+    // section, worst 269 ms): and only once the page has rested on it for 250 ms - a fling past the street never
+    // builds it
+    let shown = false;
+    let rest = 0;
+    const arm = () => {
+      window.clearTimeout(rest);
+      if (shown) rest = window.setTimeout(() => shown && setNear(true), 250);
+    };
+    const io = new IntersectionObserver(
+      (e) => {
+        shown = e.some((x) => x.isIntersecting);
+        arm();
+      },
+      { threshold: 0.15 },
+    );
     io.observe(el);
+    window.addEventListener('scroll', arm, { passive: true });
     setTouch(window.matchMedia?.('(pointer: coarse)').matches ?? false);
-    return () => io.disconnect();
+    return () => {
+      io.disconnect();
+      window.removeEventListener('scroll', arm);
+      window.clearTimeout(rest);
+    };
   }, []);
 
   const navigate = useCallback(async (h: Hotspot) => {

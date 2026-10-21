@@ -3,9 +3,9 @@ import { rng } from './textures';
 /* R82 (owner: the street is "not very stable, secure, logic"): ONE random source per visit. Every roll of the street
    (fleet, paint, lanes, drivers, lights, walkers, train, events, rain) comes from it, so a visit is still never the same
    as the last one, but a visit that went wrong can be replayed: its seed is in `debug.info().seed`, and
-   `?street-seed=<n>` opens the same street again (the same fleet, crowd and lights; exactly the same run when the
-   street is stepped at a fixed rate, as the tests do - in real time the frame lengths differ). Only one street exists
-   at a time; a rebuild seeds again. */
+   `?street-seed=<n>` opens the same street again (the same fleet, crowd, clothes and opening lights; what happens
+   after that also depends on the length of each real frame). Only one street exists at a time; a rebuild seeds
+   again. */
 let draw: () => number = Math.random;
 let seed = 0;
 

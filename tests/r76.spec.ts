@@ -354,9 +354,13 @@ test.describe('3D street on phones', () => {
     const page = await ctx.newPage();
     await page.goto('/');
     await skipGate(page);
-    await page.evaluate(() => document.getElementById('diorama')?.scrollIntoView({ block: 'start' }));
     const start = page.locator('[data-diorama-start]');
-    await expect(start).toBeVisible({ timeout: 30000 });
+    // R82: the street is only prepared once the page has rested on it, and right after the gate the page may still be
+    // taken back to the top - so scroll until it is there
+    await expect(async () => {
+      await page.evaluate(() => document.getElementById('diorama')?.scrollIntoView({ block: 'start' }));
+      await expect(start).toBeVisible({ timeout: 1500 });
+    }).toPass({ timeout: 30000 });
     expect(await page.locator('#diorama canvas').count()).toBe(0);
     await start.click();
     await expect(page.locator('#diorama canvas')).toHaveCount(1, { timeout: 60000 });
