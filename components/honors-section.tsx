@@ -698,16 +698,6 @@ export default function HonorsSection() {
                         </div>
                       </div>
 
-                      {/* Featured Watermark */}
-                      {isFeatured && (
-                        <div
-                          aria-hidden
-                          className="absolute -right-10 top-10 opacity-[0.06] pointer-events-none rotate-12 group-hover:rotate-6 transition-transform duration-700"
-                        >
-                          <Trophy className="w-60 h-60" />
-                        </div>
-                      )}
-
                       <div className="relative z-10 flex flex-col flex-1 p-4 xs:p-6 sm:p-7">
                         {/* Title & Body. R30: an institution's own award carries its Registrar Seal beside the title
                             (above it on phones, where the title needs the full width) */}
