@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { Github, Linkedin, FileText } from 'lucide-react';
+import { FileText } from 'lucide-react';
+import { Github, Linkedin } from './brand-icons';
 import { SignalKey } from './signal-key';
 import { openResume } from '@/lib/resume';
 import { flapIn } from '@/lib/split-flap';

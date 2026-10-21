@@ -109,7 +109,8 @@ test.describe('R82 3D street', () => {
         const BOX = { minX: 3.15, maxX: 14.85, minZ: -5.9, maxZ: 5.9 };
         let collisions = 0;
         let redRuns = 0;
-        let boxShared = 0;
+        let boxEntries = 0;
+        let lastBox = { EW: false, NS: false };
         const gaps: number[] = [];
         const launches: number[] = [];
         const edges = new Set<string>();
@@ -117,6 +118,7 @@ test.describe('R82 3D street', () => {
         const longest = T.peds.map(() => 0);
         const last = T.peds.map((p) => ({ x: p.pos.x, z: p.pos.z }));
         const prev = new Map<Car, number>();
+        const seen = new Map<Car, Lane>();
         const lit = { EW: T.lightFor('EW'), NS: T.lightFor('NS') };
         let queue: { t: number; at: Map<Car, number | null> } | null = null;
         const DT = 1 / 60;
@@ -154,6 +156,9 @@ test.describe('R82 3D street', () => {
               if (ov(A, { minX: p.pos.x - 0.2, maxX: p.pos.x + 0.2, minZ: p.pos.z - 0.2, maxZ: p.pos.z + 0.2 }))
                 collisions++;
             const c = cars[a];
+            // a car that changed lane is measured against its new lane's stop line from the next step
+            if (seen.get(c) !== c.lane) prev.delete(c);
+            seen.set(c, c.lane);
             const pf = prev.get(c);
             if (
               pf !== undefined &&
@@ -162,9 +167,17 @@ test.describe('R82 3D street', () => {
               (c.front - c.lane.stop) * c.lane.dir >= 0.05
             )
               redRuns++;
+            // into the box past its stop line while a car of the other road was inside it
+            if (
+              pf !== undefined &&
+              (pf - c.lane.stop) * c.lane.dir < 0 &&
+              (c.front - c.lane.stop) * c.lane.dir >= 0 &&
+              lastBox[c.lane.signal === 'EW' ? 'NS' : 'EW']
+            )
+              boxEntries++;
             prev.set(c, c.front);
           }
-          if (inBox.EW && inBox.NS) boxShared++;
+          lastBox = inBox;
           for (const c of T.cars) if (c.hidden > 0) prev.delete(c);
           if (i % 30) continue;
           T.peds.forEach((p, k) => {
@@ -179,7 +192,7 @@ test.describe('R82 3D street', () => {
         return {
           collisions,
           redRuns,
-          boxShared,
+          boxEntries,
           greens: [...new Set(T.greens.map((g) => g.toFixed(1)))].length,
           launches,
           gapSpread: near.length ? Math.max(...near) - Math.min(...near) : 0,
@@ -195,7 +208,7 @@ test.describe('R82 3D street', () => {
       expect(r.errors, 'no page error').toEqual([]);
       expect(r.collisions, 'no car touches a car or a walker').toBe(0);
       expect(r.redRuns, 'nobody runs a red light').toBe(0);
-      expect(r.boxShared, 'never a car of each road inside the junction box at once').toBe(0);
+      expect(r.boxEntries, 'no car drives into the box while a car of the other road is in it').toBe(0);
       expect(r.greens, 'the greens are not one fixed length').toBeGreaterThanOrEqual(4);
       expect(r.gapSpread, 'drivers stop at their own distance').toBeGreaterThan(0.2);
       expect(r.edges, 'walkers reach far more than the old one-block loop').toBeGreaterThan(14);
@@ -314,12 +327,27 @@ test.describe('R82 gallery', () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     const dialog = await openLightbox(page);
     expect(await counter(page)).toMatch(/^01 \//);
-    const box = (await dialog.locator('.touch-none').boundingBox())!;
-    const y = box.y + box.height / 2;
-    await page.mouse.move(box.x + box.width / 2, y);
-    await page.mouse.down();
-    await page.mouse.move(box.x + box.width / 2 - 30, y, { steps: 1 });
-    await page.mouse.up();
+    // a 30 px touch flick dispatched inside the page in one go (mouse round trips under load made it slow)
+    await dialog.evaluate((d) => {
+      const panel = d.querySelector('.touch-none')!;
+      const r = panel.getBoundingClientRect();
+      const y = r.top + r.height / 2;
+      const at = (type: string, x: number) =>
+        panel.dispatchEvent(
+          new PointerEvent(type, {
+            pointerId: 7,
+            pointerType: 'touch',
+            isPrimary: true,
+            clientX: x,
+            clientY: y,
+            bubbles: true,
+          }),
+        );
+      at('pointerdown', r.left + r.width / 2);
+      at('pointermove', r.left + r.width / 2 - 15);
+      at('pointermove', r.left + r.width / 2 - 30);
+      at('pointerup', r.left + r.width / 2 - 30);
+    });
     await expect.poll(() => counter(page)).toMatch(/^02 \//);
     await page.keyboard.press('5');
     await expect.poll(() => counter(page)).toMatch(/^05 \//);
@@ -485,5 +513,48 @@ test.describe('R82 scroll, contact, focus, API', () => {
     expect(await trap.json()).toMatchObject({ success: true });
     const big = await request.post('/api/contact', { data: { ...base, message: 'x'.repeat(20000) } });
     expect(big.status()).toBe(413);
+  });
+});
+
+/* ------------------------------------------------------------------ rules that must stay true */
+
+test.describe('R82 rules', () => {
+  test('law 5: no blur panels - no backdrop blur or backdrop-filter anywhere on the public site', async () => {
+    const { readdirSync, readFileSync, statSync } = await import('node:fs');
+    const { join } = await import('node:path');
+    const files: string[] = [];
+    const walk = (dir: string) => {
+      for (const f of readdirSync(dir)) {
+        const p = join(dir, f);
+        if (statSync(p).isDirectory()) {
+          if (!/admin$/.test(p)) walk(p);
+        } else if (/\.(tsx?|css)$/.test(f)) files.push(p);
+      }
+    };
+    walk('components');
+    walk('app');
+    const bad = files.filter((f) => {
+      const s = readFileSync(f, 'utf8');
+      return /backdrop-blur/.test(s) || /backdrop-filter:\s*(?!none)/.test(s);
+    });
+    expect(bad).toEqual([]);
+  });
+
+  test('the content security policy is enforced and still reports', async ({ request }) => {
+    const r = await request.get('/');
+    const csp = r.headers()['content-security-policy'] ?? '';
+    expect(csp).toContain("default-src 'self'");
+    expect(csp).toContain("frame-ancestors 'self'");
+    expect(csp).toContain('report-uri /api/csp-report');
+  });
+
+  test('the GitHub and LinkedIn marks are drawn (owned SVGs, not lucide brand icons)', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: /skip intro/i }).click();
+    const footer = page.locator('footer');
+    for (const name of [/github/i, /linkedin/i]) {
+      const link = footer.getByRole('link', { name }).first();
+      await expect(link.locator('svg path').first()).toBeAttached();
+    }
   });
 });

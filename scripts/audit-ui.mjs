@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Visual + layout + accessibility audit using the Playwright Chromium that the e2e tests already use.
- * No new dependencies: axe-core is read from node_modules (it ships with eslint-config-next).
+ * axe-core is a devDependency of its own (R82: it used to arrive only through eslint-config-next's a11y plugin).
  *
  * Usage (a production server must already be running, see 06-stability B):
  *   node scripts/audit-ui.mjs                      -> audits http://localhost:3000
@@ -14,8 +14,15 @@ import { chromium } from '@playwright/test';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 
-const arg = (k, d) => (process.argv.find((a) => a.startsWith(`--${k}=`)) || '').split('=').slice(1).join('=') || d;
+// R82: `--base=URL` and `--base URL` both work (the second form was ignored and :3000 tested in silence)
+const arg = (k, d) => {
+  const i = process.argv.findIndex((a) => a === `--${k}` || a.startsWith(`--${k}=`));
+  if (i < 0) return d;
+  const a = process.argv[i];
+  return (a.includes('=') ? a.split('=').slice(1).join('=') : process.argv[i + 1]) || d;
+};
 const BASE = arg('base', 'http://localhost:3000').replace(/\/$/, '');
+console.log(`base: ${BASE}`);
 const MOTION = process.argv.includes('--motion');
 const OUT = arg('out', MOTION ? 'audit/motion' : 'audit');
 const PATHS = arg('paths', '/,/simulators/agentic,/simulators/flood,/simulators/energy').split(',');

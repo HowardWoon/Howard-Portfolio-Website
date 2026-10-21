@@ -7,19 +7,8 @@ import { DispatchRail } from './dispatch-rail';
 import { BauhausSolid } from './fx/bauhaus-solid';
 import dynamic from 'next/dynamic';
 import { FX } from '@/lib/fx';
-import {
-  Mail,
-  Copy,
-  Check,
-  Send,
-  Linkedin,
-  Github,
-  FileText,
-  MapPin,
-  Clock,
-  Sparkles,
-  CheckCircle2,
-} from 'lucide-react';
+import { Mail, Copy, Check, Send, FileText, MapPin, Clock, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Github, Linkedin } from './brand-icons';
 import { personalDetails } from '@/lib/site-data';
 import { SloganTape } from '@/components/marquees';
 import { ShapeBurst } from '@/components/fx/shape-burst';

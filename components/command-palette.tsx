@@ -153,7 +153,7 @@ export function CommandPalette() {
             role="dialog"
             aria-modal="true"
             aria-label="Command Palette"
-            className="fixed inset-0 z-[10000] flex items-start justify-center pt-[max(4.5rem,12dvh)] sm:pt-[18vh] px-3 xs:px-4 bg-ink/40 backdrop-blur-[2px]"
+            className="fixed inset-0 z-[10000] flex items-start justify-center pt-[max(4.5rem,12dvh)] sm:pt-[18vh] px-3 xs:px-4 bg-ink/40"
             data-lenis-prevent
           >
             <div className="fixed inset-0" onClick={() => setOpen(false)} />

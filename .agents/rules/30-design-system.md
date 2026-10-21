@@ -32,6 +32,9 @@ Rules:
 6. Medal metals are allowed where the honour IS a medal: gold `#FFC700`, silver `#D5D9E0`, bronze `#E0A86B`
    (`components/honor-emblem.tsx`). Bronze is never orange (orange = ACADEMIC).
 7. A "headline" metric is ink with white text, not the badge colour again.
+8. R82, the one recorded exception to rule 1: the celebration bursts (FX-11 confetti when a message is sent, FX-17 shape
+   rain easter egg) throw the pop colours as confetti for 1 - 2 s. They carry no meaning, label nothing and never sit
+   behind text; nothing else may borrow this exception.
 
 ## B. Neo-brutalist craft
 
@@ -532,6 +535,25 @@ visual style effect into it"), on top of R79 - the log is printed like a dot-mat
 
 Guard: tests/r79.spec.ts "R81" (one head per line, feed advanced 5, >= 3 shapes hop after the blast and >= 3 fly off,
 LIVE chip, no page error) and the Fold test (no sprocket strips under 640 px).
+
+R82 (owner: "audit now, fix after"; the street still read as a "fixed algorithm", "must enhance this photo part"; full
+audit, measurements and every finding: `docs/R82-FULL-AUDIT-AND-PLAN.md`), same rule - layers, no new word, no new
+colour meaning:
+
+| Feature             | Where                                       | Rules                                                                                                                                                                                                                                                  |
+| ------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Replayable street   | tokyo-diorama/engine/random.ts              | ONE seeded source per visit for every roll; `?street-seed=<n>`; tests of the street use fixed seeds                                                                                                                                                    |
+| Lights that read    | engine/traffic.ts `updateSignals`           | Greens rolled per cycle (EW 7-11 s, NS 6-9.5 s), held 2-4 s for a queue when nobody waits on the other road, decided once when the walkers' flash is due; amber 2.5 s and all-red 1.5 s never change                                                   |
+| Drivers             | engine/traffic.ts `CarAgent`                | Per-driver reaction / pull-away / braking / gap / speed wander; no car enters the box while a car of the other road is in it (turning cars: held back, they collided)                                                                                  |
+| Whole-block walkers | engine/traffic.ts `CORNERS` / `PAVEMENT`    | 16 corners, every one on paving (world.ts slabs) and clear of poles, lamps and the NE bench; stops at shops / konbini / station / street ends                                                                                                          |
+| Build at rest       | tokyo-diorama-section.tsx                   | The street is built only after the page has rested on it 250 ms                                                                                                                                                                                        |
+| Photo viewer        | interactive-photo-stack.tsx `PhotoLightbox` | Native non-passive wheel (a pinch never zooms the page); zoom cap = 1.5x the photo's pixels; slide-in from the side it came from (transform / opacity; off for reduced motion / Calm); flick; 1-9; landscape phones: keys in a column beside the photo |
+
+Guard: tests/r82.spec.ts. Lessons: a probe that clicks with `force: true` clicks a card that is still sliding in and can
+miss (it measured 1 in 12 "dead" clicks that a normal, stability-checked click never sees: 32 / 32); test a traffic rule
+as the rule itself (no car ENTERS the box while the other road is in it), not as a snapshot that a later feature makes
+wrong; a gesture test that depends on speed dispatches the gesture inside the page (mouse round trips under load made a
+"quick" flick slow); a comment like `R82: any shape` trips the B-11 "no explicit any" plan check.
 
 ## H. R24 guardrails - type floor, emblem geometry, hero water reveal, neo-brutalism only (owner complaints, tested)
 

@@ -17,10 +17,13 @@ const nextConfig = {
             key: 'Strict-Transport-Security',
             value: 'max-age=31536000; includeSubDomains; preload',
           },
+          // R82 (owner: "proceed all"): ENFORCED. Measured first with the report-only policy: 0 violations on every
+          // page, a phone, the 3D street with sound, the lightbox, the palette and the Google map embed. Violations are
+          // still reported to /api/csp-report.
           {
-            key: 'Content-Security-Policy-Report-Only',
+            key: 'Content-Security-Policy',
             value:
-              "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co; frame-src 'self' https://www.google.com; report-uri /api/csp-report;",
+              "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co; frame-src 'self' https://www.google.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; report-uri /api/csp-report;",
           },
         ],
       },

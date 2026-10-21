@@ -647,8 +647,8 @@ html.hw-booted .boot-overlay {
   }
 }
 @keyframes fx-glass {
-  /* D4: only the background alpha animates (the header keeps its static backdrop-blur-md). Animating
-     backdrop-filter re-rasterised the blur every scroll frame, and 0.8 let dark content ghost through. */
+  /* D4: only the background alpha animates. Animating the old header blur re-rasterised it every scroll frame, and 0.8
+     let dark content ghost through (R82: the header has had no blur since E27 - it is solid). */
   from {
     background-color: rgb(255 255 255 / 0.95);
   }
@@ -2026,12 +2026,6 @@ html[data-tide='on'] .fx-tide-surface {
 html[data-fx-tier='lite'] #main-content,
 html[data-fx-tier='lite'] .site-header {
   filter: none !important; /* FX-19 depth-of-field blur */
-}
-/* R17: the header's backdrop blur re-rasterises the page under it every scroll frame; lite devices keep the (95 %
-   white) header without it */
-html[data-fx-tier='lite'] .site-header {
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
 }
 html[data-fx-tier='lite'] .fx-aberration {
   --fx-vel: 0 !important; /* FX-30: beats the inline value VelocitySkew writes, so the fringes stay at zero */

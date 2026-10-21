@@ -42,8 +42,9 @@ Playwright's Chromium is already installed (the e2e tests use it), so screenshot
 2. `node scripts/audit-ui.mjs` (all pages, 10 viewports from 320x568 to 1920x1080 plus 844x390 landscape).
    It measures overflow px, broken images, tap targets under 24 px, page errors and failed requests, runs axe-core,
    and saves full-page screenshots in `audit/screens/`. Paste its summary table and axe table.
-3. `node scripts/device-sweep.mjs` (16 real device profiles incl. 280 px Fold, iPads and Android tablets in both
-   orientations, 4 pages): overflow, cropped text, page / console errors, failed requests. Must print ALL PASS.
+3. `node scripts/device-sweep.mjs` (23 profiles since R82: 280 px Fold, iPhones and Android phones in both orientations,
+   a 600 px tablet, iPads and Android tablets in both orientations, 1366 - 2560 px desktops; 6 pages incl. the admin
+   sign-in and the 404 page): overflow, cropped text, page / console errors, failed requests. Must print ALL PASS.
 4. Open at least the 390x844 and 1440x900 screenshots of every page you changed and say what you checked. For type
    or spacing changes also look at 375x667 and 844x390, and at the pinned build-story frames (10 / 45 / 80 / 97 %).
 5. For a "no visual change" claim, compare before/after screenshots of the same viewport (build main, then your branch).

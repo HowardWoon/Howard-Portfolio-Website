@@ -16,9 +16,21 @@
  */
 import { chromium, devices } from '@playwright/test';
 
-const arg = (k, d) => (process.argv.find((a) => a.startsWith(`--${k}=`)) || '').split('=').slice(1).join('=') || d;
+// R82: `--base=URL` and `--base URL` both work (the second form was ignored and :3000 tested in silence)
+const arg = (k, d) => {
+  const i = process.argv.findIndex((a) => a === `--${k}` || a.startsWith(`--${k}=`));
+  if (i < 0) return d;
+  const a = process.argv[i];
+  return (a.includes('=') ? a.split('=').slice(1).join('=') : process.argv[i + 1]) || d;
+};
 const BASE = arg('base', 'http://localhost:3000').replace(/\/$/, '');
-const PATHS = arg('paths', '/,/simulators/agentic,/simulators/flood,/simulators/energy').split(',');
+// R82: the admin sign-in page and the 404 page are pages too (they were never swept)
+const NOT_FOUND = '/no-such-page';
+const PATHS = arg(
+  'paths',
+  `/,/simulators/agentic,/simulators/flood,/simulators/energy,/admin/login,${NOT_FOUND}`,
+).split(',');
+console.log(`base: ${BASE}`);
 
 const fold = {
   viewport: { width: 280, height: 653 },
@@ -45,14 +57,36 @@ const PROFILES = [
     'Galaxy Tab S4',
     'Galaxy Tab S4 landscape',
     'Nexus 10',
-  ]
-    .filter((n) => devices[n])
-    .map((n) => {
-      // Playwright rejects defaultBrowserType inside newContext()
-      const o = { ...devices[n] };
-      delete o.defaultBrowserType;
-      return [n, o];
-    }),
+    // R82: an Android phone on its side too (only an iPhone was swept in landscape)
+    'Pixel 7 landscape',
+    'Galaxy S9+ landscape',
+  ].map((n) => {
+    // R82: a profile Playwright renamed or dropped fails the sweep (it was filtered out in silence)
+    if (!devices[n]) throw new Error(`device profile "${n}" is missing from this Playwright version`);
+    // Playwright rejects defaultBrowserType inside newContext()
+    const o = { ...devices[n] };
+    delete o.defaultBrowserType;
+    return [n, o];
+  }),
+  // R82 (20-responsive-a11y A): a 600 px tablet both ways and the desktop widths audit-ui does not cover
+  ...[
+    [600, 960, true],
+    [960, 600, true],
+    [1366, 768, false],
+    [1536, 864, false],
+    [2560, 1440, false],
+  ].map(([w, h, touch]) => [
+    `${touch ? 'tablet' : 'desktop'} ${w}x${h}`,
+    touch
+      ? {
+          viewport: { width: w, height: h },
+          deviceScaleFactor: 2,
+          isMobile: true,
+          hasTouch: true,
+          userAgent: devices['Galaxy Tab S4'].userAgent,
+        }
+      : { viewport: { width: w, height: h } },
+  ]),
 ];
 
 async function storyFit(page) {
@@ -108,7 +142,9 @@ for (const [name, profile] of PROFILES) {
     const page = await ctx.newPage();
     const errors = [];
     page.on('response', (r) => {
-      if (r.status() >= 400 && !/\/_vercel\//.test(r.url())) errors.push(`${r.status()} ${r.url()}`);
+      // (the 404 page answers 404 on purpose)
+      if (r.status() >= 400 && !/\/_vercel\//.test(r.url()) && !(r.status() === 404 && r.url().endsWith(NOT_FOUND)))
+        errors.push(`${r.status()} ${r.url()}`);
     });
     page.on('pageerror', (e) => errors.push(String(e).slice(0, 160)));
     page.on('console', (m) => {

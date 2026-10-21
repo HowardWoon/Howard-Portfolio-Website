@@ -61,7 +61,7 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
 | Encoding check                             | `node scripts/check-encoding.mjs`                                                          |
 | Type check / lint / format                 | `npm run typecheck` / `npm run lint` / `npx prettier --write <files you changed>`          |
 | E2E tests                                  | `npm run test:e2e`                                                                         |
-| Every device (16 real profiles, 4 pages)   | server running, then `node scripts/device-sweep.mjs`                                       |
+| Every device (23 profiles, 6 pages, R82)   | server running, then `node scripts/device-sweep.mjs`                                       |
 | Push (full suite runs first, 45-60 min)    | stop :3000, then `CI=1 git push origin main` in the background                             |
 | Rerun failures alone (load or real?)       | `npx playwright test <file>:<line> --workers 1 --repeat-each 3`                            |
 
@@ -165,3 +165,22 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
     keeps the street moving but draws nothing until its shaders are ready. It used to be ONE 6 - 8 s task under load
     (4.1 s of synchronous shader linking on a quiet machine). Guard: `tests/r80` (no gap between painted frames longer
     than 4 ordinary frames + 600 ms, while building and after a tier change).
+11. **The 3D street is rolled, replayable and safe, not scheduled (R82, owner: "fixed algorithm", "not very stable,
+    secure, logic"; measured before on 5 of 5 visits: 8 cars / 2 taxis / 5 walkers, greens exactly 9.00 / 8.00 s, a
+    queue pulling away within 0.12 s, every car stopping 0.92 m behind the next, walkers exhausting a one-block loop):**
+    every roll comes from ONE seeded source per visit (`engine/random.ts`; `?street-seed=<n>` replays a street, the seed
+    is in `debug.info().seed`); greens are rolled per cycle and held 2 - 4 s for a queue (amber / all-red fixed); each
+    driver has a reaction, pull-away, braking, standstill gap and speed wander; nobody drives into the junction box while
+    a car of the other road is in it; walkers roam 16 corners on real pavement. The street is built only after the page
+    has RESTED on it 250 ms (a fling past it never builds it). Tests of the street use fixed seeds. Guard: `tests/r82`
+    (200 s on 3 seeds: no collision, red run or box entry; varied greens, launches, gaps, fleets and routes). Turning
+    cars are NOT in yet: a first version collided (482 overlaps in one 200 s run) and was held back.
+12. **Photos (R82, owner: "must enhance this photo part"):** a trackpad pinch zooms the photo only (native non-passive
+    wheel listener); zoom stops at 1.5x the photo's own pixels; the next photo slides in from its side over the blurred
+    preview; a quick flick changes photo; 1 - 9 jump; on a phone held sideways the keys and caption sit in a column
+    beside the photo; the caption opens in full on a tap; the margin closes only on a real tap. Guard: `tests/r82`.
+13. **Security / rules that are now tested (R82):** the CSP is ENFORCED (measured 0 violations first; violations still
+    go to `/api/csp-report`); no blur panels anywhere on the public site; GitHub / LinkedIn marks are owned SVGs
+    (`components/brand-icons.tsx`), never lucide brand icons; `scripts/device-sweep.mjs` covers 23 profiles (incl. Android
+    landscape, a 600 px tablet, 1366 - 2560 px desktops) and the admin sign-in + 404 pages; both scripts accept
+    `--base URL` and `--base=URL`. The full audit with every finding and its evidence: `docs/R82-FULL-AUDIT-AND-PLAN.md`.

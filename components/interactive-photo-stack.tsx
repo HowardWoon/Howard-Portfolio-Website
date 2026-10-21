@@ -282,7 +282,11 @@ export function PhotoLightbox({
   };
   const onPointerDown = (e: React.PointerEvent) => {
     stopShow();
-    e.currentTarget.setPointerCapture(e.pointerId);
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // R82: a pointer that already lifted (a very fast tap) cannot be captured; the gesture still works
+    }
     ptrs.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     const st = g.current;
     if (ptrs.current.size === 2) {

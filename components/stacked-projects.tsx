@@ -30,9 +30,9 @@ import {
   Layers,
   CheckCircle2,
   Network,
-  Github,
   Focus,
 } from 'lucide-react';
+import { Github } from './brand-icons';
 import { SectionPaper } from './fx/section-paper';
 
 interface ProjectData {
