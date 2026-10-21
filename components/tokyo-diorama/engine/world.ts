@@ -62,7 +62,19 @@ export interface Built {
 export const BASE = { minX: -22, maxX: 22, minZ: -18, maxZ: 18 };
 export const CURB = 0.15;
 
+/**
+ * R80: the block is built in parts; the engine draws a frame of the page between them (`yield`), so the visitor's
+ * scroll never stops while the street is built. `buildWorld` runs all of it at once.
+ */
 export function buildWorld(mats: Materials, world: World): Built {
+  const steps = buildWorldSteps(mats, world);
+  for (;;) {
+    const r = steps.next();
+    if (r.done) return r.value;
+  }
+}
+
+export function* buildWorldSteps(mats: Materials, world: World): Generator<void, Built, void> {
   const root = new THREE.Group();
   root.name = 'tokyo-diorama';
   const B = new Batch();
@@ -335,6 +347,7 @@ export function buildWorld(mats: Materials, world: World): Built {
     roofHeights.push(h);
   };
 
+  yield; // R80: a frame for the page between parts of the build
   /* ============================================================ the plinth (diorama base) */
   B.add('wood', 'boxBottom', mtx(0, -1.55, 0, 0, 46.4, 0.66, 38.4));
   B.add('woodEdge', 'boxBottom', mtx(0, -0.92, 0, 0, 45.4, 0.08, 37.4));
@@ -431,6 +444,7 @@ export function buildWorld(mats: Materials, world: World): Built {
   ] as const)
     centred('paint', 0.9, 0.012, 0.9, x, 0.006, z, Math.PI / 4);
 
+  yield; // R80: a frame for the page between parts of the build
   /* ============================================================ railway */
   for (const [x0, x1] of [
     [-22, 6],
@@ -579,6 +593,7 @@ export function buildWorld(mats: Materials, world: World): Built {
   wire(new THREE.Vector3(14.2, 6.6, 11.5), new THREE.Vector3(15, 7.4, 11.5), 0.15, 0.016);
   wire(new THREE.Vector3(14.2, 6.6, -12.5), new THREE.Vector3(16.6, 2.9, -15.5), 0.25, 0.016);
 
+  yield; // R80: a frame for the page between parts of the build
   /* ============================================================ street lamps */
   const lamp = (x: number, z: number, ax: number, az: number, pri: number) => {
     cyl('metalDark', 0.08, 5.3, x, CURB, z, 'cyl8');
@@ -686,6 +701,7 @@ export function buildWorld(mats: Materials, world: World): Built {
   pedSignal(5.75, 5.3, Math.PI / 2, 'EW');
   pedSignal(12.25, 5.3, -Math.PI / 2, 'EW');
 
+  yield; // R80: a frame for the page between parts of the build
   /* ============================================================ KONBINI あかりマート */
   const kx0 = -15;
   const kx1 = -3;
@@ -848,6 +864,7 @@ export function buildWorld(mats: Materials, world: World): Built {
   solid('wallGrey', 18.5, 1.6, 0.25, -5.75, CURB, -17.7);
   solid('wallGrey', 0.25, 1.6, 2.7, 3.35, CURB, -16.5);
 
+  yield; // R80: a frame for the page between parts of the build
   /* ============================================================ APARTMENT 雨音ハイツ + café */
   {
     const x0 = -21.5;
@@ -1037,6 +1054,7 @@ export function buildWorld(mats: Materials, world: World): Built {
   solid('woodMid', 1.6, 0.45, 0.45, 13.25, CURB, -8.5, Math.PI / 2);
   bx('metalDark', 0.06, 0.45, 1.6, 13.0, CURB + 0.45, -8.5);
 
+  yield; // R80: a frame for the page between parts of the build
   /* ============================================================ IZAKAYA 鳥よし */
   {
     const x0 = -21.5;
@@ -1164,6 +1182,7 @@ export function buildWorld(mats: Materials, world: World): Built {
     light(0xffa860, 22, 7, -1.0, 2.4, 6.4, 1);
   }
 
+  yield; // R80: a frame for the page between parts of the build
   /* ============================================================ ARCADE / KARAOKE building */
   {
     const x0 = 15;
@@ -1278,6 +1297,7 @@ export function buildWorld(mats: Materials, world: World): Built {
   // hedges along the SW pavement (like a garden strip), gap for the yatai
   solid('hedge', 6.2, 0.7, 0.55, -8.1, CURB, 5.85);
 
+  yield; // R80: a frame for the page between parts of the build
   /* ============================================================ back facades (seen when orbiting) */
   const backFace = (
     a0: number,
@@ -1380,6 +1400,7 @@ export function buildWorld(mats: Materials, world: World): Built {
     radius: 1.4,
   });
 
+  yield; // R80: a frame for the page between parts of the build
   B.build(root, mats);
 
   return {

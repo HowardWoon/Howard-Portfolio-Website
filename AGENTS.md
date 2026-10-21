@@ -157,3 +157,12 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
 9. **Photos get the screen on phones (R76):** the lightbox keeps ONE row of whole thumbnails (a window that follows the
    photo, first / last keys) and one control row on touch; labels never wrap; caption two lines. Guard: `tests/r76`
    (photo >= 45 % of the screen height on iPhone SE / 13 / Fold).
+10. **Scrolling into the 3D street never freezes the page (R80, owner: "when i scroll to this part ... lagging,
+    crashing"):** the street is built in stages a frame apart (`createTokyoDiorama` is async, `buildWorldSteps` yields
+    between parts); shaders are requested per material for the target they are really drawn into (the bloom
+    composer's render target, the passes without lights, clipped materials with the clipping state primed), linked in
+    parallel (`KHR_parallel_shader_compile`) and first used only once ALL are linked; textures upload and every material
+    is drawn once (its own camera, 8 x 8 pixels) in small batches paced by a GPU fence, never `gl.finish()`. A tier change
+    keeps the street moving but draws nothing until its shaders are ready. It used to be ONE 6 - 8 s task under load
+    (4.1 s of synchronous shader linking on a quiet machine). Guard: `tests/r80` (no gap between painted frames longer
+    than 4 ordinary frames + 600 ms, while building and after a tier change).

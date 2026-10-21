@@ -5,7 +5,7 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { Materials, World, resolveCircle, type Box } from './kit';
-import { buildWorld, type Built, type Hotspot } from './world';
+import { buildWorldSteps, type Built, type Hotspot } from './world';
 import { Traffic } from './traffic';
 import { Weather } from './weather';
 import { Soundscape } from './audio';
@@ -90,6 +90,8 @@ export interface DioramaHandle {
     quiet(): void;
     /** R76: the optional Blender model: loaded yet, and how many COL_ boxes became colliders */
     model(): { loaded: boolean; colliders: number };
+    /** R80: shaders are still being prepared (first build or a tier change): the street is not drawn yet */
+    warming(): boolean;
   };
 }
 
@@ -138,7 +140,41 @@ const RADIUS = 0.3;
 const HEIGHT = 1.7;
 const FIXED = 1 / 120;
 
-export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
+/**
+ * R80: hand the main thread back for a frame (the page paints and the visitor's scroll goes on). A timer backs up the
+ * frame callback, which a browser holds back in a hidden tab.
+ */
+function nextFrame() {
+  return new Promise<void>((done) => {
+    const t = window.setTimeout(done, 50);
+    requestAnimationFrame(() => {
+      window.clearTimeout(t);
+      window.setTimeout(done, 0);
+    });
+  });
+}
+const wait = (ms: number) => new Promise<void>((done) => window.setTimeout(done, ms));
+
+/** R80: a stage of the build, measured (`performance.getEntriesByType('measure')`, names `diorama:*`) */
+function measured<T>(name: string, run: () => T): T {
+  const t0 = performance.now();
+  try {
+    return run();
+  } finally {
+    performance.measure(`diorama:${name}`, { start: t0, end: performance.now() });
+  }
+}
+
+type ProgramState = { currentProgram?: { isReady(): boolean; getUniforms(): unknown } };
+
+/**
+ * R80 (owner: "when i scroll to this part ... it start lagging, crashing"): the street used to be built in ONE task of
+ * 4.3 - 4.9 s on a laptop GPU (D3D11) - 4.1 s of it compiling shaders - so the page froze in the middle of the scroll.
+ * It is now built in stages one frame apart; the shaders compile in parallel (KHR_parallel_shader_compile) for the
+ * render target they are really drawn into, and the textures upload in short slices. Resolves once the first frame
+ * can be drawn without a stall.
+ */
+export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaHandle> {
   const { container } = opts;
   const calm = !!opts.reducedMotion;
 
@@ -157,13 +193,17 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
     touchAction: 'pan-y',
   });
   container.appendChild(canvas);
-  const renderer = new THREE.WebGLRenderer({
-    canvas,
-    antialias: true,
-    powerPreference: 'high-performance',
-    stencil: false,
-    alpha: false,
-  });
+  const renderer = measured(
+    'renderer',
+    () =>
+      new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        powerPreference: 'high-performance',
+        stencil: false,
+        alpha: false,
+      }),
+  );
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.18;
@@ -172,6 +212,7 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
 
   let autoTier = opts.tier === undefined || opts.tier === 'auto';
   let tier: Tier = autoTier ? detectTier(renderer.getContext()) : (opts.tier as Tier);
+  await nextFrame();
 
   /* ------------------------------------------------------------ scene */
   const scene = new THREE.Scene();
@@ -207,7 +248,7 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
     panel(0x8e6bff, 2.2, 20, 10, 0, 6, 36);
     panel(0x3a4c86, 1.2, 70, 70, 0, 19, 0);
   }
-  const envTex = pmrem.fromScene(envScene, 0.035).texture;
+  const envTex = measured('environment', () => pmrem.fromScene(envScene, 0.035).texture);
   scene.environment = envTex;
   scene.environmentIntensity = 0.55;
 
@@ -226,15 +267,33 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
   moon.shadow.normalBias = 0.03;
   scene.add(moon, moon.target);
 
+  await nextFrame();
   const mats = new Materials();
   const world = new World();
-  const built: Built = buildWorld(mats, world);
+  let built: Built;
+  {
+    const steps = buildWorldSteps(mats, world);
+    for (let i = 0; ; i++) {
+      const r = measured(`world-${i}`, () => steps.next());
+      if (r.done) {
+        built = r.value;
+        break;
+      }
+      await nextFrame();
+    }
+  }
   scene.add(built.root);
+  await nextFrame();
 
   // R76: a lighter crowd on the low tier (phones without a strong graphics chip)
-  const traffic = new Traffic(built.root, mats, world, built, calm, tier === 'low' ? 'low' : 'full');
-  const weather = new Weather(built, world, calm);
+  const traffic = measured(
+    'traffic',
+    () => new Traffic(built.root, mats, world, built, calm, tier === 'low' ? 'low' : 'full'),
+  );
+  await nextFrame();
+  const weather = measured('weather', () => new Weather(built, world, calm));
   scene.add(weather.group);
+  await nextFrame();
   const audio = new Soundscape();
   const input = new Input(container, canvas);
   // R73: each visit starts with its own rain, from a light drizzle to a heavy shower
@@ -377,7 +436,12 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
       composer.addPass(new RenderPass(scene, camera));
       bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), bloomView(), BLOOM_RADIUS, 0.92);
       composer.addPass(bloom);
-      composer.addPass(new OutputPass());
+      // R80: the defines OutputPass would set on its first frame (sRGB, ACES - fixed above), set now so the warm-up
+      // compiles the very program that frame uses (three 0.180.0 internals; the version is pinned)
+      const output = new OutputPass();
+      output.material.defines = { SRGB_TRANSFER: '', ACES_FILMIC_TONE_MAPPING: '' };
+      Object.assign(output, { _outputColorSpace: renderer.outputColorSpace, _toneMapping: renderer.toneMapping });
+      composer.addPass(output);
     }
     resize();
     opts.onTier?.(tier);
@@ -600,6 +664,9 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
     tickCount++;
     const dt = Math.min(0.05, clock.getDelta());
     simulate(dt);
+    // R80: while new shaders compile (a tier change) the street keeps moving but is not drawn: a draw would wait for
+    // them. Nor is the frame rate counted.
+    if (warming > 0) return;
     render();
     // adaptive quality: drop a tier if the device cannot hold ~40 fps
     sinceStart += dt;
@@ -616,6 +683,7 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
         slowWindows = 0;
         director.settle();
         applyTier();
+        void warmUp(); // R80: the new shaders compile without freezing the page
         opts.onToast?.(`Graphics set to ${tier === 'medium' ? 'MED' : 'LOW'} to keep it smooth.`);
       }
       fpsAcc = fpsFrames = fpsTime = 0;
@@ -852,8 +920,11 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
     else renderer.render(scene, camera);
   }
 
+  // R80: nothing is drawn while shaders compile (a tier change, see tick); the loop starts once the first build is ready
+  let warming = 0;
+  let building = true;
   const setRunning = () => {
-    const should = visible && pageVisible && !lost;
+    const should = visible && pageVisible && !lost && !building && !disposed;
     if (should === running) return;
     running = should;
     if (running) {
@@ -891,7 +962,8 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
   canvas.addEventListener('webglcontextlost', onLost);
   canvas.addEventListener('webglcontextrestored', onRestored);
 
-  applyTier();
+  measured('tier', applyTier);
+  await nextFrame();
   orbit.dist = fit;
   if (camera.aspect < 0.8) orbit.phi = 0.78; // portrait phones: a little more top-down fills the frame
   setOrbitFromSpherical();
@@ -969,9 +1041,259 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
     modelGroup = null;
   }
 
-  // shaders compile up front so the first frames don't hitch
-  renderer.compile(scene, camera);
-  render();
+  /**
+   * R80: compile every shader the next frames need WITHOUT blocking, then upload the textures in short slices.
+   * The old `renderer.compile(scene, camera)` compiled for the screen; with bloom the street is drawn into the composer's
+   * render target (linear colour, no tone mapping = other programs), so every program was compiled a second time,
+   * synchronously, on the first frame (4.1 s of shader linking on a D3D11 laptop). The bloom / output passes and the
+   * vending cans are compiled too. Without KHR_parallel_shader_compile each program is linked in its own slice.
+   */
+  const parallel = renderer.extensions.has('KHR_parallel_shader_compile');
+  const warmGeo = new THREE.PlaneGeometry(1, 1);
+  const uploaded = new WeakSet<THREE.Texture>();
+  /**
+   * Leaves three's clipping state at `n` planes (as when a material with n planes was the last one drawn), so that
+   * compile() builds the same program as the real draw: one tiny unlit draw of a clipped plain material.
+   */
+  const primers = new Map<number, THREE.Scene>();
+  const primerMats: THREE.Material[] = [];
+  function primeClipping(n: number, target: THREE.WebGLRenderTarget | null) {
+    let s = primers.get(n);
+    if (!s) {
+      const far = new THREE.Plane(new THREE.Vector3(0, 1, 0), 1e6);
+      const mat = new THREE.MeshBasicMaterial({ clippingPlanes: Array.from({ length: n }, () => far) });
+      primerMats.push(mat);
+      const quad = new THREE.Mesh(warmGeo, mat);
+      quad.frustumCulled = false;
+      quad.scale.setScalar(1e-4);
+      s = new THREE.Scene();
+      s.add(quad);
+      primers.set(n, s);
+    }
+    const auto = renderer.autoClear;
+    renderer.autoClear = false;
+    renderer.setRenderTarget(target);
+    renderer.render(s, camera);
+    renderer.autoClear = auto;
+  }
+  /**
+   * Waits - without blocking - until the graphics process has done everything sent so far (a WebGL2 fence, polled).
+   * `gl.finish()` does not wait in Chrome: queued uploads and warm-up draws piled up there, and the page's next frame
+   * waited for all of them at once (978 ms on software WebGL). WebGL1: one frame.
+   */
+  async function gpuDone() {
+    const g = renderer.getContext();
+    const sync =
+      typeof WebGL2RenderingContext !== 'undefined' && g instanceof WebGL2RenderingContext
+        ? g.fenceSync(g.SYNC_GPU_COMMANDS_COMPLETE, 0)
+        : null;
+    if (!sync) return nextFrame();
+    const g2 = g as WebGL2RenderingContext;
+    g2.flush();
+    try {
+      // a fence never signals before the page's code returns to the event loop: this always yields at least once
+      while (!disposed && !lost && g2.clientWaitSync(sync, 0, 0) === g2.TIMEOUT_EXPIRED) await wait(8);
+    } finally {
+      g2.deleteSync(sync);
+    }
+  }
+  async function warmUp() {
+    warming++;
+    try {
+      const t0 = performance.now();
+      const drawTarget = composer ? composer.readBuffer : null;
+      const passes = new THREE.Scene();
+      for (const pass of composer?.passes ?? [])
+        for (const v of Object.values(pass))
+          for (const m of Array.isArray(v) ? v : [v])
+            if (m instanceof THREE.Material) passes.add(new THREE.Mesh(warmGeo, m));
+      const extras = new THREE.Scene();
+      for (const m of canMats) extras.add(new THREE.Mesh(canGeo, m));
+      // materials cut by clipping planes (cars and walkers at the table's edge): compile() does not apply a material's
+      // own planes, so they are compiled again below with the clipping state primed to their plane count
+      const clipped = new Map<number, THREE.Scene>();
+      const seen = new Set<THREE.Material>();
+      scene.traverse((o) => {
+        const mesh = o as THREE.Mesh;
+        if (!mesh.isMesh || (o as THREE.InstancedMesh).isInstancedMesh) return;
+        for (const m of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) {
+          const n = m.clippingPlanes?.length ?? 0;
+          if (!n || m.clipIntersection || seen.has(m)) continue;
+          seen.add(m);
+          if (!clipped.has(n)) clipped.set(n, new THREE.Scene());
+          clipped.get(n)!.add(new THREE.Mesh(mesh.geometry, m));
+        }
+      });
+      type Job = { root: THREE.Object3D; target: THREE.WebGLRenderTarget | null; lights: THREE.Scene; planes?: number };
+      const jobs: Job[] = [
+        { root: scene, target: drawTarget, lights: scene },
+        { root: extras, target: drawTarget, lights: scene },
+        // the passes draw a full-screen quad with no lights, into their own targets and (the last) onto the screen
+        { root: passes, target: drawTarget, lights: passes },
+        { root: passes, target: null, lights: passes },
+        // last: a primed clipping state stays set until the next real draw
+        ...[...clipped].map(([n, root]) => ({ root, target: drawTarget, lights: scene, planes: n })),
+      ];
+      // Without KHR_parallel_shader_compile (software WebGL, some phones) the graphics process links the queued programs
+      // in order and the first query waits for ALL of them (a 5.6 s task on SwiftShader): there each material is
+      // compiled alone (in a scene of its own, as a copy of an object that carries it) and used at once, a few per frame.
+      // With it, the requests are split the same way: one request for the whole street was a 70 - 430 ms task.
+      const split = (root: THREE.Object3D): THREE.Object3D[] => {
+        const parts: THREE.Object3D[] = [];
+        const keys = new Set<string>();
+        root.traverse((o) => {
+          const r = o as THREE.Mesh;
+          const drawn =
+            r.isMesh || (o as THREE.Points).isPoints || (o as THREE.Line).isLine || (o as THREE.Sprite).isSprite;
+          if (!drawn || !r.material) return;
+          // a clipped material is compiled in its own job (with the clipping state primed)
+          if (root === scene && seen.has(r.material as THREE.Material)) return;
+          const mat = Array.isArray(r.material) ? r.material.map((m) => m.uuid).join() : r.material.uuid;
+          const key = `${o.type}|${mat}|${r.geometry?.attributes.color ? 1 : 0}|${(o as THREE.InstancedMesh).instanceColor ? 1 : 0}`;
+          if (keys.has(key)) return;
+          keys.add(key);
+          const part = new THREE.Scene();
+          part.add(o.clone(false));
+          parts.push(part);
+        });
+        return parts;
+      };
+      const programs = new Set<NonNullable<ProgramState['currentProgram']>>();
+      let slice = performance.now();
+      for (const { root, target, lights, planes } of jobs) {
+        for (const part of split(root)) {
+          const before = renderer.getRenderTarget();
+          renderer.setRenderTarget(target);
+          if (planes) primeClipping(planes, target);
+          const set = measured('compile-request', () => renderer.compile(part, camera, lights));
+          renderer.setRenderTarget(before);
+          for (const m of set) {
+            const p = (renderer.properties.get(m) as ProgramState).currentProgram;
+            if (!p) continue;
+            if (parallel) programs.add(p);
+            else measured('link', () => p.getUniforms()); // the link itself
+          }
+          if (performance.now() - slice > 8) {
+            await nextFrame();
+            if (disposed) return;
+            slice = performance.now();
+          }
+        }
+        await nextFrame();
+        if (disposed) return;
+        slice = performance.now();
+      }
+      if (parallel) while (!disposed && !lost && [...programs].some((p) => !p.isReady())) await wait(16);
+      while (programs.size && !disposed) {
+        const s = performance.now();
+        measured('first-use', () => {
+          for (const p of programs) {
+            if (performance.now() - s > 8) break;
+            p.getUniforms(); // first use: reads the link status and logs (instant once linked)
+            programs.delete(p);
+          }
+        });
+        if (programs.size) await nextFrame();
+      }
+      // textures: a few per slice, and the graphics process finishes them before the next (see gpuDone)
+      const textures: THREE.Texture[] = [];
+      scene.traverse((o) => {
+        const m = (o as THREE.Mesh).material;
+        if (!m) return;
+        for (const x of Array.isArray(m) ? m : [m])
+          for (const v of Object.values(x)) if (v instanceof THREE.Texture && !uploaded.has(v)) textures.push(v);
+      });
+      let n = 0;
+      for (const t of textures) {
+        if (disposed) return;
+        if (uploaded.has(t)) continue;
+        uploaded.add(t);
+        measured('texture', () => renderer.initTexture(t));
+        if (++n % 4 === 0) await gpuDone();
+      }
+      await gpuDone();
+      // A linked program is not yet a drawn one: many drivers (SwiftShader, Metal, D3D) build the real GPU code at the
+      // first draw with it - a 3.5 s first frame on software WebGL. So every distinct material is drawn once, alone (its
+      // object on layer 31, with the lights and the moon), into one pixel of the real target, three at a
+      // time, each three finished by the graphics process before the next (gpuDone). It also builds the shadow programs (HIGH) and is exact for clipped materials.
+      const WARM = 31;
+      const lit: THREE.Object3D[] = [];
+      const reps: THREE.Object3D[] = [];
+      const keys = new Set<string>();
+      scene.traverse((o) => {
+        if ((o as THREE.Light).isLight) lit.push(o);
+        const r = o as THREE.Mesh;
+        const drawn =
+          r.isMesh || (o as THREE.Points).isPoints || (o as THREE.Line).isLine || (o as THREE.Sprite).isSprite;
+        if (!drawn || !r.material) return;
+        const mat = Array.isArray(r.material) ? r.material.map((m) => m.uuid).join() : r.material.uuid;
+        const key = `${o.type}|${mat}|${r.geometry?.attributes.color ? 1 : 0}|${(o as THREE.InstancedMesh).instanceColor ? 1 : 0}`;
+        if (keys.has(key)) return;
+        keys.add(key);
+        reps.push(o);
+      });
+      const autoClear = renderer.autoClear;
+      const view = drawTarget ? drawTarget.viewport.clone() : null;
+      // its own camera, close to the object: a draw that covers no pixel never runs (nor builds) the pixel stage
+      const eye = new THREE.PerspectiveCamera(50, 1, 0.01, 500);
+      eye.layers.set(WARM);
+      const ball = new THREE.Sphere();
+      const away = new THREE.Vector3(0.35, 0.55, 1).normalize();
+      lit.forEach((l) => l.layers.enable(WARM));
+      renderer.autoClear = false;
+      try {
+        for (const o of reps) {
+          if (disposed || lost) return;
+          const had = o.layers.isEnabled(WARM);
+          o.layers.enable(WARM);
+          // hidden for now (the train between runs, a car waiting to drive in) or off camera: drawn all the same
+          const hidden: THREE.Object3D[] = [];
+          for (let a: THREE.Object3D | null = o; a; a = a.parent) if (!a.visible) hidden.push(a);
+          hidden.forEach((a) => (a.visible = true));
+          const culled = o.frustumCulled;
+          o.frustumCulled = false;
+          const geo = (o as THREE.Mesh).geometry;
+          if (geo && !geo.boundingSphere) geo.computeBoundingSphere();
+          if (geo?.boundingSphere) ball.copy(geo.boundingSphere).applyMatrix4(o.matrixWorld);
+          else ball.set(o.getWorldPosition(ball.center), 1);
+          eye.position.copy(ball.center).addScaledVector(away, Math.max(0.5, ball.radius * 1.6));
+          eye.lookAt(ball.center);
+          eye.updateMatrixWorld();
+          if (drawTarget) {
+            drawTarget.viewport.set(0, 0, 8, 8);
+            renderer.setRenderTarget(drawTarget);
+          } else {
+            renderer.setRenderTarget(null);
+            renderer.setViewport(0, 0, 8 / renderer.getPixelRatio(), 8 / renderer.getPixelRatio());
+          }
+          measured('warm-draw', () => renderer.render(scene, eye));
+          if (!had) o.layers.disable(WARM);
+          hidden.forEach((a) => (a.visible = false));
+          o.frustumCulled = culled;
+          if (++n % 3 === 0) {
+            // the frame between belongs to the page (a test's step(draw) may draw the street in it)
+            renderer.setRenderTarget(null);
+            if (view) drawTarget!.viewport.copy(view);
+            await gpuDone();
+          }
+        }
+      } finally {
+        lit.forEach((l) => l.layers.disable(WARM));
+        renderer.autoClear = autoClear;
+        if (view) drawTarget!.viewport.copy(view);
+        renderer.setRenderTarget(null);
+        renderer.setViewport(0, 0, size.x, size.y);
+      }
+      await gpuDone();
+      performance.measure('diorama:warm', { start: t0, end: performance.now() });
+    } finally {
+      warming--;
+    }
+  }
+
+  await warmUp();
+  building = false;
+  measured('first-frame', render);
   setRunning();
 
   const handle: DioramaHandle = {
@@ -1013,6 +1335,7 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
       sinceStart = 0;
       director.settle();
       applyTier();
+      void warmUp(); // R80: the new shaders compile without freezing the page
     },
     getTier: () => tier,
     zoom(step) {
@@ -1091,6 +1414,8 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
       weather.dispose();
       disposePerson(player);
       canGeo.dispose();
+      warmGeo.dispose();
+      primerMats.forEach((m) => m.dispose());
       canMats.forEach((m) => m.dispose());
       disposeComposer();
       disposeModel();
@@ -1165,6 +1490,7 @@ export function createTokyoDiorama(opts: DioramaOptions): DioramaHandle {
       director: () => ({ last: director.last, count: director.count, available: director.available() }),
       event: (name) => director.trigger(name),
       model: () => ({ loaded: !!modelGroup, colliders: modelColliders }),
+      warming: () => building || warming > 0,
       quiet: () => {
         director.auto = false;
       },

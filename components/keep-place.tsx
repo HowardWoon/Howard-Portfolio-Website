@@ -60,7 +60,12 @@ export default function KeepPlace() {
       return pick;
     };
 
+    // R80: the scan runs in slices of at most 8 ms. Over the 3D street (a 720 px canvas, no small block to stop at) all
+    // 100 points were read in one task, ~6 ms each: a 300 - 650 ms freeze every time the reader paused while scrolling
+    // there. Same points, same order, same anchor - only spread over a few tasks; a new scroll or a zoom cancels it.
+    let scan = 0;
     const capture = () => {
+      const id = ++scan;
       if (frozen || locked()) return;
       if (window.scrollY < 4) {
         anchor = null;
@@ -74,25 +79,42 @@ export default function KeepPlace() {
       // photo): its place in the window is exact. A big box (a whole card, a whole section) is only a fallback - its
       // height changes with the zoom in a different proportion from the page, so a fraction of it drifts. The topmost
       // layer at a point may be a fixed overlay outside <main> (a canvas, the cursor), so every layer is looked at.
+      const XS = [0.5, 0.35, 0.65, 0.2, 0.8];
       let best: Anchor | null = null;
       let bestH = Infinity;
-      for (let y = header + 20; y < vh * 0.8; y += 40) {
-        for (const x of [0.5, 0.35, 0.65, 0.2, 0.8]) {
+      let y = header + 20;
+      let i = 0;
+      const step = () => {
+        if (id !== scan || frozen || locked()) return;
+        const t0 = performance.now();
+        while (y < vh * 0.8) {
+          if (performance.now() - t0 > 8) {
+            idle = window.setTimeout(step, 0);
+            return;
+          }
+          const x = XS[i];
           const hit = document.elementsFromPoint(window.innerWidth * x, y).find((e) => e !== main && main.contains(e));
           const el = stable(hit, main);
-          if (!el) continue;
-          const r = el.getBoundingClientRect();
-          if (r.height < 1 || r.height >= bestH) continue;
-          best = { el, frac: (y - r.top) / r.height, line: y / vh };
-          bestH = r.height;
+          if (el) {
+            const r = el.getBoundingClientRect();
+            if (r.height >= 1 && r.height < bestH) {
+              best = { el, frac: (y - r.top) / r.height, line: y / vh };
+              bestH = r.height;
+            }
+          }
+          if (++i < XS.length) continue;
+          i = 0;
+          y += 40;
+          // a small block near the top of the window is what the reader is looking at: no need to look further down
+          if (bestH <= 160) break;
         }
-        // a small block near the top of the window is what the reader is looking at: no need to look further down
-        if (bestH <= 160) break;
-      }
-      if (best) anchor = best;
+        if (best) anchor = best;
+      };
+      step();
     };
     const onScroll = () => {
       if (frozen) return;
+      scan++; // a scan still running read the page before this scroll
       window.clearTimeout(idle);
       idle = window.setTimeout(capture, 120);
     };

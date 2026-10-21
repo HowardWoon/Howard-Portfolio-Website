@@ -188,6 +188,22 @@ Rules:
 47. R73: section lists are never typed out twice. The header nav, the command palette, the section clock and the 3D
     street's doors and signs all read `lib/sections.ts`; per-feature extras (an icon, a longer palette label, a door's
     place in the street, a Japanese sign line) are maps keyed by section id. Guard: tests/r73 "one registry".
+48. R80: `renderer.compile(scene, camera)` compiles for the SCREEN. A scene drawn into a render target (a bloom
+    composer) uses other programs (linear colour, no tone mapping), so they were all compiled again, synchronously, on
+    the first frame: 4.1 s of shader linking in one task on a D3D11 laptop. Compile with the real target set
+    (`setRenderTarget(composer.readBuffer)`), compile full-screen passes with their own (light-free) scene, prime the
+    clipping state for materials with `clippingPlanes` (compile() ignores them), wait until EVERY program reports
+    `COMPLETION_STATUS_KHR` before the first use (a log read waits behind every link still running), and pause drawing
+    while a tier change recompiles. Without the extension (SwiftShader) the graphics process links queued programs in
+    order and the first query waits for ALL (5.6 s): request and use them one material at a time. A linked program is
+    not a drawn one: drivers build the pixel code at the first draw that covers a pixel, so each material is drawn once
+    through its own close camera. `gl.finish()` does not wait in Chrome; pace GPU work with a WebGL2 fence
+    (`fenceSync` + `clientWaitSync(sync, 0, 0)` polled from timers). Check with a per-program diff of
+    `renderer.info.programs` before / after the first frame. A probe run while other sessions run suites measures their
+    load too: compare against a HEAD build served at the same time (a second worktree on its own port).
+49. R80: `components/keep-place.tsx` reads up to 100 `elementsFromPoint` after every scroll pause; over a big canvas
+    (no small block to stop at) that was 300 - 650 ms per pause. A time budget broke the anchor (r53 / r24 zoom tests
+    failed: a coarser block was kept); the same scan in slices of <= 8 ms, cancelled by the next scroll, keeps both.
 
 ## F. Definition of done additions
 
@@ -466,6 +482,23 @@ Guard: tests/r76.spec.ts. Lesson: `scripts/device-sweep.mjs` cannot see a contro
 frame (the 280 px gauge key) and never builds the 3D street (software WebGL waits): look at phone screenshots with
 `?diorama-test` too. Lesson: computed `transform` turns `translate3d(x, y, 0)` into `matrix(...)`; to check for 3D
 layers read the inline style.
+
+R80 (owner, Tokyo After Rain: "when i scroll to this part of my website, it start lagging, crashing, and cannot function
+perfectly ... make sure when user scroll to this part must be smooth"):
+
+| Fix                     | Where                                            | Rules                                                                                                                                                                                                                                                                                                                                                     |
+| ----------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Staged street build     | tokyo-diorama/engine/index.ts, world.ts, section | `createTokyoDiorama` is async: renderer, environment, world (`buildWorldSteps`, 9 parts), traffic, weather, tier, warm-up, each a frame apart; the section disposes a street that finished building after it unmounted. Measures: `performance` `diorama:*`                                                                                               |
+| Parallel shader warm-up | tokyo-diorama/engine/index.ts `warmUp`           | Per-material requests for the real draw target, passes without lights, clipped materials primed, OutputPass defines set up front, first use only after all are linked; then textures and one 8 x 8 px draw per material, paced by a GPU fence (`gpuDone`). The loop starts after it; a tier change keeps simulating but draws nothing until it ends (E48) |
+| Hit-test slices         | components/keep-place.tsx                        | `capture` reads the same points in the same order, in slices of <= 8 ms (setTimeout 0 between); a new scroll, a zoom or a lock cancels it (E49)                                                                                                                                                                                                           |
+
+Guard: tests/r80.spec.ts (frames keep painting while the street is built and after a LOW -> MED change; fails on the
+build before R80 with 2,850 / 2,783 ms gaps). Before / after, HEAD and R80 served side by side under the same load (RTX
+laptop, D3D11, 1920 x 1080, real-time wheel scroll into and through `#diorama`): longest main-thread task 5,991 / 8,320
+ms -> 238 / 379 ms, long-task total 13.1 / 21.8 s -> 2.3 / 3.9 s, longest frame 6,050 / 8,366 ms -> 383 / 450 ms; the
+auto tier drop's second freeze (2,974 / 3,818 ms) is gone. Quiet machine (CPU 11 %): longest task 4,882 -> 76 - 95 ms,
+long-task total 5,490 -> 364 - 427 ms, frame p95 49.9 -> 33.4 ms, longest frame 4,916 -> 283 - 350 ms. Software WebGL (forced build): 3,313 -> 1,517 ms (its first
+full frame, ~3 ordinary ones there).
 
 R78 (owner, the hero portrait: "i am very hate the wave effect as shown, i want like very water wave clean, asmr,
 smooth like this", with the React Bits PatternWaves source), same rule - a layer, a brutalist remix, no new

@@ -75,7 +75,10 @@ function softwareWebgl() {
 function webglAvailable() {
   try {
     const c = document.createElement('canvas');
-    return !!(c.getContext('webgl2') || c.getContext('webgl'));
+    const gl = (c.getContext('webgl2') || c.getContext('webgl')) as WebGLRenderingContext | null;
+    // R80: let the test context go at once (a browser keeps ~16 live contexts and drops the oldest - maybe the street's)
+    gl?.getExtension('WEBGL_lose_context')?.loseContext();
+    return !!gl;
   } catch {
     return false;
   }
@@ -165,10 +168,11 @@ export default function TokyoDioramaSection({
     let handle: DioramaHandle | null = null;
     let toastTimer = 0;
     import('./engine')
-      .then(({ createTokyoDiorama }) => {
+      .then(async ({ createTokyoDiorama }) => {
         if (disposed) return;
         try {
-          handle = createTokyoDiorama({
+          // R80: built in stages over several frames (it used to freeze the page for seconds mid-scroll)
+          const made = await createTokyoDiorama({
             container: stage,
             reducedMotion: prefersCalm(),
             modelUrl: model,
@@ -185,8 +189,14 @@ export default function TokyoDioramaSection({
             onContextLost: () => setReady(false),
             onContextRestored: () => setMountKey((k) => k + 1),
           });
+          // the section went away (or the street was rebuilt) while it was being built
+          if (disposed) {
+            made.dispose();
+            return;
+          }
+          handle = made;
         } catch {
-          setFailed(true);
+          if (!disposed) setFailed(true);
           return;
         }
         handleRef.current = handle;
