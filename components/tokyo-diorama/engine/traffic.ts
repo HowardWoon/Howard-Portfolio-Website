@@ -13,22 +13,29 @@ import {
 } from './actors';
 import { World, box, resolveCircle, type Box, Materials } from './kit';
 import type { Built } from './world';
+import { chance, pick, rand, rnd } from './random';
 
 /* ================================================================ signals */
 
 export type Light = 'green' | 'yellow' | 'red';
 export type Walk = 'walk' | 'flash' | 'stop';
 
-// one 25 s cycle: EW green → yellow → all-red → NS green → yellow → all-red
-const CYCLE = [
-  { ew: 'green', ns: 'red', t: 9 },
-  { ew: 'yellow', ns: 'red', t: 2.5 },
-  { ew: 'red', ns: 'red', t: 1.5 },
-  { ew: 'red', ns: 'green', t: 8 },
-  { ew: 'red', ns: 'yellow', t: 2.5 },
-  { ew: 'red', ns: 'red', t: 1.5 },
+/* EW green → yellow → all-red → NS green → yellow → all-red. R82 (owner: "fixed algorithm"; measured: every green was
+   exactly 9.00 / 8.00 s on every visit): each green is rolled when it starts, and when the walkers' "hurry" flash is
+   due it is held on for 2 - 4 s more if cars still queue on this road and nobody waits on the other one. Yellow and
+   all-red never change: they are what keeps the junction safe. Reduced motion keeps the classic 9 / 8 s plan. */
+const PHASES = [
+  { ew: 'green', ns: 'red' },
+  { ew: 'yellow', ns: 'red' },
+  { ew: 'red', ns: 'red' },
+  { ew: 'red', ns: 'green' },
+  { ew: 'red', ns: 'yellow' },
+  { ew: 'red', ns: 'red' },
 ] as const;
-const CYCLE_T = CYCLE.reduce((a, c) => a + c.t, 0);
+const AMBER = 2.5;
+const ALL_RED = 1.5;
+/** the box both roads share: no car drives into it while a car of the other road is still inside (R82) */
+const BOX = { minX: 3.15, maxX: 14.85, minZ: -5.9, maxZ: 5.9 };
 
 export interface PlayerInfo {
   pos: THREE.Vector3;
@@ -56,10 +63,9 @@ const LANES: Record<string, Lane> = {
 
 /* R76 (owner: "all the walkers, cars, train like appearing in their fix algorithm"): nothing on the street repeats on a
    schedule any more. Each visit and each time an actor comes round again rolls its own lane, colour, speed, route,
-   pause and timing. Math.random only - the street is never the same twice, and the rules (lights, gaps, crossings)
-   are what keep it safe, not a fixed plan. */
-const rnd = (a: number, b: number) => a + Math.random() * (b - a);
-const pick = <T>(list: readonly T[]): T => list[Math.floor(Math.random() * list.length)];
+   pause and timing. The street is never the same twice, and the rules (lights, gaps, crossings) are what keep it
+   safe, not a fixed plan. R82: every roll comes from the visit's one seeded source (./random), so a visit can be
+   replayed. */
 const PAINTS = [0xe8e6e0, 0x7fb8a6, 0xf2f2ee, 0xffc700, 0xb5262b, 0x2b4bff, 0x3a3f48, 0xff9ecf, 0x3ddc97, 0x15161a];
 /** the usual top speed of each kind; a driver rolls 80 - 120 % of it each time round */
 const KIND_V: Record<CarKind, number> = { kei: 7, hatch: 8, taxi: 8.5, van: 7 };
@@ -70,6 +76,17 @@ class CarAgent {
   vmax = 7;
   hidden = 0;
   braking = false;
+  /* R82: the driver (measured before: a whole queue pulled away within 0.12 s of the green, every car at 3.2 m/s2, and
+     every car stopped exactly 0.92 m behind the next). Each run rolls its own reaction, pull-away, braking, standstill
+     gap and a slow wander of its cruising speed. */
+  accel = 3.2;
+  decel = 8;
+  gap0 = 0.9;
+  reaction = 0.6;
+  /** seconds this driver still takes to react, once the way ahead is free */
+  wait = 0;
+  drift = 0;
+  driftRate = 0.3;
   collider: Box;
   constructor(
     public car: Car,
@@ -83,6 +100,13 @@ class CarAgent {
   setLane(lane: Lane) {
     this.lane = lane;
     this.vmax = KIND_V[this.car.kind] * rnd(0.8, 1.2);
+    this.accel = rnd(2.4, 3.8);
+    this.decel = rnd(6.5, 9);
+    this.gap0 = rnd(0.6, 1.4);
+    this.reaction = rnd(0.3, 1.2);
+    this.drift = rand() * Math.PI * 2;
+    this.driftRate = rnd(0.15, 0.4);
+    this.wait = 0;
     if (this.car.kind !== 'taxi') this.car.paint.color.setHex(pick(PAINTS));
     const g = this.car.group;
     g.rotation.y = lane.axis === 'x' ? (lane.dir === 1 ? 0 : Math.PI) : lane.dir === 1 ? -Math.PI / 2 : Math.PI / 2;
@@ -119,25 +143,49 @@ class CarAgent {
 /* R76: the pavements as a graph of corners. A walker picks a random next corner at every corner (never straight back,
    unless it is a dead end), so the routes differ every time. `cross` = the signal a walker waits for on that edge (it
    crosses a road): walk with the parallel traffic, as before. */
+/* R82 (measured before: the 7-corner block was walked end to end - all 14 stretches - in every 200 s run, so a route
+   could never look new): the whole pavement network of the block, every point on paving (world.ts slabs) and clear of
+   the poles, lamps and the NE bench (the old shops route walked through the bench). Dead ends are places to stop:
+   the konbini door, the shops, the station and the far ends of the street. */
 const CORNERS = [
   { x: -14, z: -4.3 }, // 0 west end, north pavement
   { x: 4.7, z: -4.3 }, // 1
   { x: 13.3, z: -4.3 }, // 2
-  { x: 13.3, z: -12 }, // 3 dead end by the shops
+  { x: 13.85, z: -11.4 }, // 3 dead end by the shops
   { x: 13.3, z: 4.3 }, // 4
   { x: 4.7, z: 4.3 }, // 5
   { x: -14, z: 4.3 }, // 6 west end, south pavement
+  { x: 19.5, z: -4.3 }, // 7 east end, north pavement
+  { x: 19.5, z: 4.3 }, // 8 east end, south pavement
+  { x: 4.7, z: -12 }, // 9 up the N-S road, west side
+  { x: 4.7, z: 12 }, // 10 down to the level crossing, west side
+  { x: 13.3, z: 12 }, // 11 down to the level crossing, east side
+  { x: -5.5, z: -4.3 }, // 12 north pavement, by the konbini
+  { x: -5.5, z: -7.6 }, // 13 the konbini door
+  { x: -5.5, z: 4.3 }, // 14 south pavement
+  { x: 14.0, z: -5.6 }, // 15 round the bench to the shops
 ] as const;
+/** corners where a walker stands for a while (a shop, the station, the end of the street) */
+const STOPS = new Set([3, 7, 8, 9, 10, 11, 13]);
 type Edge = { to: number; cross?: 'EW' | 'NS' };
 const PAVEMENT: Edge[][] = CORNERS.map(() => []);
 for (const [a, b, cross] of [
-  [0, 1],
+  [0, 12],
+  [12, 1],
+  [12, 13],
   [1, 2, 'EW'],
-  [2, 3],
+  [2, 15],
+  [15, 3],
+  [2, 7],
   [2, 4, 'NS'],
+  [4, 8],
   [4, 5, 'EW'],
-  [5, 6],
+  [4, 11],
+  [5, 14],
+  [14, 6],
   [5, 1, 'NS'],
+  [1, 9],
+  [5, 10],
 ] as [number, number, ('EW' | 'NS')?][]) {
   PAVEMENT[a].push({ to: b, cross });
   PAVEMENT[b].push({ to: a, cross });
@@ -167,7 +215,7 @@ class PedAgent {
     this.pos.set(p.x, 0.15, p.z);
     this.from = start;
     this.to = start;
-    this.speed = rnd(1.15, 1.45);
+    this.speed = rnd(1.0, 1.6);
     this.collider = world.addDynamic(box(0, 0, 0, 1.7, 0, 0, { noCam: true, tag: 'ped' }));
     this.chooseNext();
     this.pause = rnd(0, 2.5);
@@ -185,8 +233,8 @@ class PedAgent {
     this.to = e.to;
     this.cross = e.cross;
     this.crossing = false;
-    this.speed = THREE.MathUtils.clamp(this.speed + rnd(-0.08, 0.08), 1.15, 1.45);
-    this.pause = here === 3 ? rnd(1, 4) : Math.random() < 0.3 ? rnd(0.5, 2.5) : 0;
+    this.speed = THREE.MathUtils.clamp(this.speed + rnd(-0.1, 0.1), 1.0, 1.6);
+    this.pause = STOPS.has(here) ? rnd(1.5, 6) : chance(0.3) ? rnd(0.5, 2.5) : 0;
   }
 }
 
@@ -198,6 +246,14 @@ export class Traffic {
   ns: Light = 'red';
   pedEW: Walk = 'walk';
   pedNS: Walk = 'stop';
+  /** R82: where the signals are (index into PHASES), how long this phase has run and how long it lasts */
+  phase = 0;
+  phaseT = 0;
+  phaseLen = 9;
+  /** the green's length was already decided (held on or not) */
+  private decided = false;
+  /** R82: the length of each green that has ended, newest last (tests) */
+  greens: number[] = [];
   cars: CarAgent[] = [];
   peds: PedAgent[] = [];
   train: Train;
@@ -227,6 +283,7 @@ export class Traffic {
   private scratch: Box[] = [];
   private tmpBox = { minX: 0, maxX: 0, minZ: 0, maxZ: 0 };
   private tmpBox2 = { minX: 0, maxX: 0, minZ: 0, maxZ: 0 };
+  private inBox = { EW: false, NS: false };
   private catVel = new THREE.Vector3();
   private catNear: Box[] = [];
 
@@ -242,17 +299,20 @@ export class Traffic {
     const clipX = [new THREE.Plane(new THREE.Vector3(1, 0, 0), 22), new THREE.Plane(new THREE.Vector3(-1, 0, 0), 22)];
     const clipZ = [new THREE.Plane(new THREE.Vector3(0, 0, 1), 18), new THREE.Plane(new THREE.Vector3(0, 0, -1), 18)];
     // R76: a random fleet. The main road carries more cars than the side road; each car rolls its kind and its lane
-    // (within its axis), and enters the street at a random moment
-    const kinds: CarKind[] = ['hatch', 'kei', 'taxi', 'van'];
-    const perAxis = crowd === 'low' ? { x: 4, z: 2 } : { x: 5, z: 3 };
+    // (within its axis), and enters the street at a random moment. R82 (measured before: 8 cars and exactly 2 taxis on
+    // every visit): the size of the fleet is rolled too, and a road has a taxi on about half of the visits
+    const kinds: CarKind[] = ['hatch', 'kei', 'van'];
+    const count = (a: number, b: number) => Math.floor(rnd(a, b + 1));
+    const perAxis = crowd === 'low' ? { x: count(3, 4), z: count(1, 2) } : { x: count(4, 6), z: count(2, 4) };
     for (const axis of ['x', 'z'] as const) {
       const lanes = Object.values(LANES).filter((l) => l.axis === axis);
+      const taxi = chance(0.5);
       for (let i = 0; i < perAxis[axis]; i++) {
         // one taxi at most per axis, so the fleet never reads as a taxi rank
-        const kind = i === 0 ? 'taxi' : pick(kinds.filter((k) => k !== 'taxi'));
+        const kind: CarKind = i === 0 && taxi ? 'taxi' : pick(kinds);
         const car = makeCar(kind, kind === 'taxi' ? 0x1f2a4d : pick(PAINTS), axis === 'x' ? clipX : clipZ);
         root.add(car.group);
-        this.cars.push(new CarAgent(car, lanes[i % lanes.length], world));
+        this.cars.push(new CarAgent(car, pick(lanes), world));
       }
     }
     this.seedCars();
@@ -268,15 +328,20 @@ export class Traffic {
     const bottoms = [0x2b2b2b, 0x3a3f48, 0x1d2433, 0x5a4a3a, 0x111111];
     const hairs = [0x1a1a1a, 0x4a2a18, 0x111111, 0x6b4a2a, 0x2a2420];
     const umbrellas = [0xffffff, 0xff4b2b, 0x2b4bff, 0x111111, 0xffc700, 0x3ddc97];
-    const starts = [...CORNERS.keys()].sort(() => Math.random() - 0.5);
-    const count = crowd === 'low' ? 3 : 5;
-    for (let i = 0; i < count; i++) {
+    // R82: a fair shuffle (sorting with a random comparator favours the first corners) and a rolled crowd
+    const starts = [...CORNERS.keys()];
+    for (let i = starts.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1));
+      [starts[i], starts[j]] = [starts[j], starts[i]];
+    }
+    const walkers = crowd === 'low' ? count(3, 4) : count(4, 7);
+    for (let i = 0; i < walkers; i++) {
       const p = makePerson({
         top: pick(tops),
         bottom: pick(bottoms),
         hair: pick(hairs),
         umbrella: pick(umbrellas),
-        bag: Math.random() < 0.5 ? 0x5a3a24 : undefined,
+        bag: chance(0.5) ? 0x5a3a24 : undefined,
         scale: rnd(0.93, 1.02),
       });
       root.add(p.group);
@@ -290,25 +355,60 @@ export class Traffic {
     root.add(this.cat.group);
     // R76: the lights are at a random point of their cycle when the street opens (it always opened on east-west green).
     // Reduced motion keeps the classic opening.
-    if (!calm) this.clock = rnd(0, CYCLE_T);
-    this.updateSignals();
+    if (!calm) {
+      this.clock = rnd(0, 25);
+      this.phase = Math.floor(rnd(0, PHASES.length));
+      this.phaseLen = this.lengthOf(this.phase);
+      this.phaseT = rnd(0, this.phaseLen);
+      this.decided = this.phaseLen - this.phaseT <= 3;
+    }
+    this.updateSignals(0);
   }
 
   /* ------------------------------------------------------------ signals */
-  private updateSignals() {
-    let t = this.clock % CYCLE_T;
-    let i = 0;
-    while (t >= CYCLE[i].t) {
-      t -= CYCLE[i].t;
-      i++;
+  /** a phase's planned length: greens are rolled (R82), amber and all-red are fixed */
+  private lengthOf(i: number) {
+    if (i === 1 || i === 4) return AMBER;
+    if (i === 2 || i === 5) return ALL_RED;
+    if (this.calm) return i === 0 ? 9 : 8;
+    return i === 0 ? rnd(7, 11) : rnd(6, 9.5);
+  }
+
+  /** cars of this road waiting at, or closing on, its stop line */
+  private queued(signal: 'EW' | 'NS') {
+    return this.cars.some((c) => {
+      if (c.hidden > 0 || c.lane.signal !== signal) return false;
+      const toLine = (c.lane.stop - c.front) * c.lane.dir;
+      return toLine > -0.4 && toLine < 25;
+    });
+  }
+
+  private updateSignals(dt: number) {
+    this.phaseT += dt;
+    const green = this.phase === 0 || this.phase === 3;
+    // R82: when the "hurry" flash is due, hold the green 2 - 4 s more for a queue that is still coming, if nobody waits
+    // on the other road (decided once, at that moment, so the flash never starts and then stops)
+    if (green && !this.decided && this.phaseLen - this.phaseT <= 3) {
+      this.decided = true;
+      const mine = this.phase === 0 ? 'EW' : 'NS';
+      if (!this.calm && this.queued(mine) && !this.queued(mine === 'EW' ? 'NS' : 'EW')) this.phaseLen += rnd(2, 4);
     }
-    const c = CYCLE[i];
+    while (this.phaseT >= this.phaseLen) {
+      if (this.phase === 0 || this.phase === 3) this.greens.push(+this.phaseLen.toFixed(2));
+      if (this.greens.length > 40) this.greens.shift();
+      this.phaseT -= this.phaseLen;
+      this.phase = (this.phase + 1) % PHASES.length;
+      this.phaseLen = this.lengthOf(this.phase);
+      this.decided = false;
+    }
+    const c = PHASES[this.phase];
     this.ew = c.ew;
     this.ns = c.ns;
+    const left = this.phaseLen - this.phaseT;
     const blink = Math.floor(this.clock * 3) % 2 === 0;
     // pedestrians walk with the parallel traffic; the last 3 s of green flash ("hurry")
-    this.pedEW = i === 0 ? (c.t - t > 3 ? 'walk' : 'flash') : 'stop';
-    this.pedNS = i === 3 ? (c.t - t > 3 ? 'walk' : 'flash') : 'stop';
+    this.pedEW = this.phase === 0 ? (left > 3 ? 'walk' : 'flash') : 'stop';
+    this.pedNS = this.phase === 3 ? (left > 3 ? 'walk' : 'flash') : 'stop';
     const on = 3.2;
     const set = (key: string, v: number) => (this.mats.get(key).emissiveIntensity = v);
     for (const [axis, state] of [
@@ -389,7 +489,7 @@ export class Traffic {
       const room = Math.abs(near - far);
       let used = 0;
       for (const c of mine) {
-        const fits = used + c.car.length + 6 <= room && Math.random() < 0.7;
+        const fits = used + c.car.length + 6 <= room && rand() < 0.7;
         if (fits) {
           used += rnd(0, Math.min(6, room - used - c.car.length - 6));
           // front bumper `used` metres back from `near`
@@ -409,6 +509,14 @@ export class Traffic {
   }
 
   private updateCars(dt: number, player: PlayerInfo) {
+    // R82: which road has a car inside the shared box right now
+    const inBox = this.inBox;
+    inBox.EW = inBox.NS = false;
+    for (const o of this.cars) {
+      if (o.hidden > 0) continue;
+      const b = o.aabb(this.tmpBox);
+      if (b.minX < BOX.maxX && b.maxX > BOX.minX && b.minZ < BOX.maxZ && b.maxZ > BOX.minZ) inBox[o.lane.signal] = true;
+    }
     for (const a of this.cars) {
       if (a.hidden > 0) {
         a.hidden -= dt;
@@ -430,7 +538,7 @@ export class Traffic {
         continue;
       }
       const L = a.lane;
-      let gap = this.corridorGap(a, player) - 0.9;
+      let gap = this.corridorGap(a, player) - a.gap0;
       const f = a.front;
       const toLine = (L.stop - f) * L.dir;
       const light = this.lightFor(L.signal);
@@ -438,18 +546,34 @@ export class Traffic {
         const canStop = toLine > (a.v * a.v) / (2 * 6) - 0.4;
         if (light === 'red' || canStop) gap = Math.min(gap, toLine - 0.15);
       }
+      // R82: never into the box while a car of the other road is still in it (one that ran the amber, one held up by
+      // a walker): the all-red phase alone was the only guard
+      if (toLine > -0.4 && inBox[L.signal === 'EW' ? 'NS' : 'EW']) gap = Math.min(gap, toLine - 0.15);
       if (L.xing !== undefined && (this.crossingActive || this.barrierT > 0.02)) {
         const toX = (L.xing - f) * L.dir;
         if (toX > -0.4) gap = Math.min(gap, toX - 0.15);
       }
-      const target = gap <= 0.05 ? 0 : Math.min(a.vmax, Math.sqrt(2 * 5.5 * gap));
-      if (a.v < target) a.v = Math.min(target, a.v + 3.2 * dt);
-      else a.v = Math.max(target, a.v - (gap < 2 ? 16 : 8) * dt);
+      // R82: the driver's own cruising speed wanders a little, and a car that has stopped moves off only after its
+      // driver reacts (so a queue pulls away one car after another, not as one block)
+      a.drift += a.driftRate * dt;
+      const cruise = a.vmax * (1 + 0.05 * Math.sin(a.drift));
+      const target = gap <= 0.05 ? 0 : Math.min(cruise, Math.sqrt(2 * 5.5 * gap));
+      let held = false;
+      if (a.v < 0.05) {
+        if (target <= 0.05) a.wait = a.reaction;
+        else if (a.wait > 0) {
+          a.wait -= dt;
+          held = true;
+        }
+      }
+      if (held) a.v = 0;
+      else if (a.v < target) a.v = Math.min(target, a.v + a.accel * dt);
+      else a.v = Math.max(target, a.v - (gap < 2 ? 16 : a.decel) * dt);
       a.braking = a.v < a.vmax * 0.95 && target < a.v + 0.01;
       a.car.brake.emissiveIntensity = a.braking || a.v < 0.05 ? 3.2 : 0.8;
       a.s += a.v * dt * L.dir;
       for (const w of a.car.wheels) w.rotation.z -= (a.v * dt) / 0.32;
-      if ((a.s - L.end) * L.dir > 0) a.hidden = 1 + Math.random() * 5;
+      if ((a.s - L.end) * L.dir > 0) a.hidden = 1 + rand() * 5;
       a.place();
     }
   }
@@ -465,7 +589,7 @@ export class Traffic {
       if (this.trainWait <= 0) {
         this.trainState = 'run';
         // R76: either way, at its own speed (it used to alternate east / west at 13 m/s every time)
-        this.trainDir = Math.random() < 0.5 ? 1 : -1;
+        this.trainDir = rand() < 0.5 ? 1 : -1;
         this.trainCruise = rnd(10.5, 15.5);
         this.trainX = X - this.trainDir * (50 + L / 2);
         this.trainV = this.trainCruise;
@@ -561,6 +685,9 @@ export class Traffic {
       // own right and pass (two walkers who both waited for the other used to stand nose to nose for ever). Someone
       // ahead going the same way (or waiting at the same corner): queue behind them, as before.
       let oncoming = false;
+      // R82: the one ahead is standing ON this walker's corner (waiting for a signal, or a stop): this walker counts as
+      // arrived where it queues and picks its next stretch from there, instead of waiting up to a whole signal cycle
+      let arrived = false;
       for (const o of this.peds) {
         if (o === a) continue;
         const ox = o.pos.x - a.pos.x;
@@ -568,7 +695,10 @@ export class Traffic {
         const od = Math.hypot(ox, oz);
         if (od > 1.8 || (ox * nx + oz * nz) / (od || 1) < 0.35) continue;
         if (o.nx * nx + o.nz * nz < -0.2) oncoming = true;
-        else if (od < 1.0 && (ox * nx + oz * nz) / (od || 1) > 0.6 && o.moving < a.moving + 0.5) go = go && od > 0.7;
+        else if (od < 1.0 && (ox * nx + oz * nz) / (od || 1) > 0.6 && o.moving < a.moving + 0.5) {
+          go = go && od > 0.7;
+          if (dist < 1.0 && o.moving < 0.1 && Math.hypot(o.pos.x - t.x, o.pos.z - t.z) < 0.6) arrived = true;
+        }
       }
       const side = oncoming ? 0.55 : 0;
       const ds = (side - a.side) * (1 - Math.exp(-dt * 4));
@@ -583,7 +713,7 @@ export class Traffic {
         a.nx = nx;
         a.nz = nz;
       }
-      if (dist < 0.05) a.chooseNext();
+      if (dist < 0.05 || (arrived && a.pause <= 0)) a.chooseNext();
       const gy = this.world.groundAt(a.pos.x, a.pos.z, a.pos.y + 0.4, 0.12, this.scratch);
       a.pos.y += (Math.max(0, gy) - a.pos.y) * (1 - Math.exp(-dt * 18));
       const p = a.person;
@@ -610,11 +740,7 @@ export class Traffic {
   /** R73: the cat's zoomies: off at a sprint to the farthest corner of its patch */
   catDash() {
     const z = this.built.catZone;
-    this.catTarget.set(
-      this.catPos.x < (z.minX + z.maxX) / 2 ? z.maxX : z.minX,
-      0,
-      z.minZ + Math.random() * (z.maxZ - z.minZ),
-    );
+    this.catTarget.set(this.catPos.x < (z.minX + z.maxX) / 2 ? z.maxX : z.minX, 0, z.minZ + rand() * (z.maxZ - z.minZ));
     this.catTimer = 3;
     this.catDashT = 3;
     this.events.push('meow');
@@ -633,7 +759,7 @@ export class Traffic {
         const tx = THREE.MathUtils.clamp(this.catPos.x + (dx / (d || 1)) * 3, z.minX, z.maxX);
         const tz = THREE.MathUtils.clamp(this.catPos.z + (dz / (d || 1)) * 3, z.minZ, z.maxZ);
         this.catTarget.set(tx, 0, tz);
-        if (Math.random() < dt * 0.6) this.events.push('meow');
+        if (rand() < dt * 0.6) this.events.push('meow');
       }
     }
     this.catTimer -= dt;
@@ -641,8 +767,8 @@ export class Traffic {
     const dz = this.catTarget.z - this.catPos.z;
     const d = Math.hypot(dx, dz);
     if (!flee && d < 0.1 && this.catTimer <= 0) {
-      this.catTarget.set(z.minX + Math.random() * (z.maxX - z.minX), 0, z.minZ + Math.random() * (z.maxZ - z.minZ));
-      this.catTimer = 2 + Math.random() * 5;
+      this.catTarget.set(z.minX + rand() * (z.maxX - z.minX), 0, z.minZ + rand() * (z.maxZ - z.minZ));
+      this.catTimer = 2 + rand() * 5;
     }
     if (this.catDashT > 0) this.catDashT = Math.max(0, this.catDashT - dt);
     const want = d > 0.1 ? (flee || this.catDashT > 0 ? 3.2 : 0.8) : 0;
@@ -681,7 +807,7 @@ export class Traffic {
 
   update(dt: number, player: PlayerInfo) {
     this.clock += dt;
-    this.updateSignals();
+    this.updateSignals(dt);
     this.updateTrain(dt, player);
     this.updateCars(dt, player);
     this.updatePeds(dt, player);

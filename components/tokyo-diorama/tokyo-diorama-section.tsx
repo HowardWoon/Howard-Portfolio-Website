@@ -163,6 +163,9 @@ export default function TokyoDioramaSection({
     // R76: tests can load a Blender model (?diorama-test&diorama-model=/models/x.glb, same-site models only)
     const testModel = testing ? params.get('diorama-model') : null;
     const model = modelUrl ?? (testModel && /^\/models\/[\w-]+\.glb$/.test(testModel) ? testModel : undefined);
+    // R82: `?street-seed=<n>` replays a visit's street (digits only; anything else = a new street)
+    const seedParam = params.get('street-seed');
+    const seed = seedParam && /^\d{1,10}$/.test(seedParam) ? Number(seedParam) : undefined;
     setHeld(false);
     let disposed = false;
     let handle: DioramaHandle | null = null;
@@ -176,6 +179,7 @@ export default function TokyoDioramaSection({
             container: stage,
             reducedMotion: prefersCalm(),
             modelUrl: model,
+            seed,
             tier: tierChoice,
             onReady: () => setReady(true),
             onHotspot: (h) => setHot(h),

@@ -13,6 +13,7 @@ import { Input } from './input';
 import { Director, type StreetEvent } from './director';
 import { animatePerson, makePerson, resetActorTextures, disposePerson, type Person } from './actors';
 import { disposeTextures } from './textures';
+import { rand, seedStreet, streetSeed } from './random';
 
 export type Mode = 'view' | 'walk';
 export type Tier = 'low' | 'medium' | 'high';
@@ -39,6 +40,8 @@ export interface DioramaOptions extends DioramaCallbacks {
    * invisible colliders; objects named `HIDE_<batchKey>` hide the built-in parts of that material (to replace them).
    */
   modelUrl?: string;
+  /** R82: replay a visit's street (its seed is in `debug.info().seed`); omitted = a new street */
+  seed?: number;
 }
 
 export interface DioramaHandle {
@@ -177,6 +180,7 @@ type ProgramState = { currentProgram?: { isReady(): boolean; getUniforms(): unkn
 export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaHandle> {
   const { container } = opts;
   const calm = !!opts.reducedMotion;
+  seedStreet(opts.seed);
 
   /* ------------------------------------------------------------ renderer */
   const canvas = document.createElement('canvas');
@@ -297,7 +301,7 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
   const audio = new Soundscape();
   const input = new Input(container, canvas);
   // R73: each visit starts with its own rain, from a light drizzle to a heavy shower
-  weather.baseLevel = weather.level = calm ? 1 : 0.55 + Math.random() * 0.75;
+  weather.baseLevel = weather.level = calm ? 1 : 0.55 + rand() * 0.75;
   const director = new Director({
     hemi,
     moon,
@@ -369,7 +373,7 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
 
   let fit = 90;
   // R73: each visit opens on its own angle of the block (reduced motion: the classic one)
-  const homeTheta = calm ? -0.52 : -0.52 + (Math.random() - 0.5) * 1.4;
+  const homeTheta = calm ? -0.52 : -0.52 + (rand() - 0.5) * 1.4;
   const orbit = { theta: homeTheta, phi: 0.92, dist: 90 };
   const setOrbitFromSpherical = () => {
     const t = controls.target;
@@ -516,7 +520,7 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
       built.root.add(mesh);
       cans.push({
         mesh,
-        vel: new THREE.Vector3((Math.random() - 0.5) * 0.6, 1.4, 1.5 + Math.random() * 0.6),
+        vel: new THREE.Vector3((rand() - 0.5) * 0.6, 1.4, 1.5 + rand() * 0.6),
         life: 9,
         spin: 0,
       });
@@ -1509,6 +1513,7 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
         return out;
       },
       info: () => ({
+        seed: streetSeed(),
         tier,
         mode,
         drawCalls: renderer.info.render.calls,

@@ -3,6 +3,7 @@ import type { Soundscape } from './audio';
 import type { Traffic } from './traffic';
 import type { Weather } from './weather';
 import type { Built } from './world';
+import { rand } from './random';
 
 /**
  * R73 (owner: "make more variables, make more random events"): the street director. Every 14 - 30 s something
@@ -63,7 +64,7 @@ export class Director {
   private readonly moonBase: number;
 
   constructor(private d: DirectorDeps) {
-    this.next = 10 + Math.random() * 8;
+    this.next = 10 + rand() * 8;
     this.hemiBase = d.hemi.intensity;
     this.moonBase = d.moon.intensity;
   }
@@ -81,7 +82,7 @@ export class Director {
 
   roll(): StreetEvent {
     const pool = this.available().filter((e) => e !== this.last);
-    const e = pool[Math.floor(Math.random() * pool.length)] ?? 'gift';
+    const e = pool[Math.floor(rand() * pool.length)] ?? 'gift';
     this.trigger(e);
     return e;
   }
@@ -90,18 +91,18 @@ export class Director {
     const { weather, traffic, built, audio } = this.d;
     this.last = e;
     this.count++;
-    this.next = 14 + Math.random() * 16;
+    this.next = 14 + rand() * 16;
     switch (e) {
       case 'thunder':
         this.flashT = 0;
-        this.thunderAt = 0.7 + Math.random() * 0.8;
+        this.thunderAt = 0.7 + rand() * 0.8;
         weather.surge(1.5, 8);
         break;
       case 'downpour':
-        weather.surge(1.7, 12 + Math.random() * 6);
+        weather.surge(1.7, 12 + rand() * 6);
         break;
       case 'drizzle':
-        weather.surge(0.3, 14 + Math.random() * 6);
+        weather.surge(0.3, 14 + rand() * 6);
         break;
       case 'gust':
         weather.gust(4.5);
@@ -109,7 +110,7 @@ export class Director {
         break;
       case 'flicker': {
         const lit = built.lights.filter((l) => l.light.visible);
-        const pick = lit[Math.floor(Math.random() * lit.length)];
+        const pick = lit[Math.floor(rand() * lit.length)];
         if (pick) this.lamp = { light: pick.light, base: pick.light.intensity, t: 0 };
         break;
       }
