@@ -467,6 +467,18 @@ frame (the 280 px gauge key) and never builds the 3D street (software WebGL wait
 `?diorama-test` too. Lesson: computed `transform` turns `translate3d(x, y, 0)` into `matrix(...)`; to check for 3D
 layers read the inline style.
 
+R78 (owner, the hero portrait: "i am very hate the wave effect as shown, i want like very water wave clean, asmr,
+smooth like this", with the React Bits PatternWaves source), same rule - a layer, a brutalist remix, no new
+dependency, no new word, no new colour meaning:
+
+| From                    | Feature             | Where                                       | Rules                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ----------------------- | ------------------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| React Bits PatternWaves | Calm portrait water | lib/water.ts + components/spider-reveal.tsx | Raw WebGL2 (ogl NOT added); kept: the cursor wake (damped 2D wave equation, RGBA16F ping-pong at 1/6 resolution, 60 steps/s, impulse along the pointer's path only while it moves), click splash, lit normal printed as paper-white halftone dots (crests only), off-screen / hidden-tab pause, pixel cap 4.5e6, DPR <= 2. Dropped: ambient motion, intro, edge fade, tint (the photo stays the photo). The GL context is made on the first pointer / Spider-Sense press, the canvas draws only while the water moves (4 s after the last input) and then hides |
+
+Guard: tests/r63.spec.ts. Measured (R78, 1440 x 900, RTX laptop GPU, `--use-angle=d3d11`): the same pointer sweep with
+and without the water gives the same frame times (p50 16.7 ms, p95 33.3 ms both; the 33 ms frames are the test's
+mouse flood). On software WebGL (SwiftShader, CI) the water runs at ~20 fps while it moves and stops when still.
+
 ## H. R24 guardrails - type floor, emblem geometry, hero water reveal, neo-brutalism only (owner complaints, tested)
 
 Howard: "the font family and font size is too ugly and small, slim, i dont want this font problem happen again" and
@@ -492,17 +504,21 @@ Howard: "the font family and font size is too ugly and small, slim, i dont want 
    above the value; the value text sits inside the emblem body. Check every emblem kind at 390 and 1440 after any
    change (the test does it too).
 5. **Hero water reveal is the owner's choice (R63, replaces the R24 torchlight):** the dimmed headline looked "so
-   blur, like haze" and the round lens "like a torchlight"; Howard asked for water "with ripples, like swimming, very
-   smooth". The headline is NEVER dimmed. On the headline and on the portrait a body of water follows the mouse
-   (`lib/liquid.ts`: head on a spring, tail, wobbling rim, thin ink ripples) as a hard `clip-path: path()` with a
-   3 px ink rim on a layer underneath - never a mask, gradient, blur or opacity fade. Reduced motion / Calm = a plain
-   round drop under the pointer; the headline has no water on touch. Do not bring back the dim or the round lens.
-   R69 (owner, on the PORTRAIT: "i dont like the black border wave, i like the kind of wave as the website i shown" -
-   water-drop ripple references): the portrait's water has NO black outline. Its rim and the rings it sends out are a
-   light, see-through layer (`.spider-rim`, white 72 %), the drop keeps sending round rings out while it rests
-   (`createLiquid(..., { pond: true })`), and rings of light spread inside it (`.spider-ripples`, a hard-stop
-   repeating-radial-gradient, no blur). The headline keeps its ink rim. Do not put a black border back on the portrait.
-   Guards: `tests/r63.spec.ts`, `tests/r15.spec.ts` (headline), `tests/r20.spec.ts` (Spider-Sense).
+   blur, like haze" and the round lens "like a torchlight"; Howard asked for water. The headline is NEVER dimmed. On
+   the headline a body of water follows the mouse (`lib/liquid.ts`: head on a spring, tail, wobbling rim) as a hard
+   `clip-path: path()` with a 3 px ink rim on a layer underneath - never a mask, gradient, blur or opacity fade; it
+   has no water on touch. Do not bring back the dim or the round lens.
+   R78 (owner, on the PORTRAIT's R63 / R69 ring water: "i am very hate the wave effect as shown, i want like very
+   water wave clean, asmr, smooth like this" + React Bits PatternWaves; replaces R69's white rim, resting rings and
+   `.spider-ripples`): the portrait is CALM water, `lib/water.ts` in raw WebGL2 (no `ogl`, no new dependency). A
+   still pond: the pointer opens it onto the Spider-Man photo (hard edge, 1 device px of anti-aliasing), MOVING drags
+   a soft wake that bends the photo (refraction from a damped wave field) and prints a few paper-white halftone
+   glints on crests facing the light, a click / tap / Spider-Sense press drops a splash; a resting pointer leaves the
+   water still. Away from the water the canvas matches the DOM photo pixel for pixel (same files, cover / top, the
+   photo's contrast / saturate grade), and once still it hides. Never draw rings, outlines or a rim on the photo again,
+   never a tint, glow or soft fade. Reduced motion / Calm / lite tier / no WebGL2 / a lost context = a hard round
+   drop on the DOM photo under the pointer. Guards: `tests/r63.spec.ts` (portrait water, per-pixel), `tests/r15.spec.ts`
+   (headline), `tests/r20.spec.ts` (Spider-Sense).
 6. **Neo-brutalism only.** Flat fills, 2-3 px ink borders, hard offset shadows, chunky display type, tracked mono
    labels. Never add glassmorphism, frosted blur panels, soft drop shadows, soft or neon gradients, glow effects,
    skeuomorphic textures, 3D renders or AI imagery. New effects must look printed / mechanical (stamps, tape,

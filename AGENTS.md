@@ -27,8 +27,10 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
    than weight 600, only Inter / Bricolage Grotesque / JetBrains Mono; icons are computed, never hand-typed points;
    no glass, blur panels, soft shadows, glows or soft gradients. Guarded by `tests/r24.spec.ts`
    (`.agents/rules/30-design-system.md` section H). The hero headline never dims under the mouse and
-   the hero reveals (headline, portrait) are water, not a round torchlight lens (owner, R63); the portrait water has
-   light water-drop ripples and no black outline (owner, R69): keep it.
+   the hero reveals (headline, portrait) are water, not a round torchlight lens (owner, R63). The portrait is CALM
+   water (owner, R78: "i am very hate the wave effect as shown, i want like very water wave clean, asmr, smooth"):
+   `lib/water.ts`, a raw-WebGL2 remix of React Bits PatternWaves - a still pond the pointer opens, a soft wake that
+   bends the photo, a click splash, a few halftone glints; never rings, outlines or a rim drawn on the photo again.
 
 ## 3. Start-of-task checklist (every single task)
 
@@ -68,7 +70,8 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
 - `app/` routes: `page.tsx` (home), `simulators/[type]` (only `agentic`, `flood`, `energy` exist), `admin/` (inbox only), `api/contact` (contact form), `layout.tsx` (fonts, metadata, JSON-LD, boot-gate script).
 - `components/` one file per section: `bikebear-hero`, `about-section`, `stacked-projects`, `experience-section`, `honors-section`, `contact-section`, `site-footer` (rendered after `</main>` in `portfolio-page.tsx`), plus shared UI (`site-header`, `boot-sequence`, `interactive-photo-stack` (its top-level `photos` array is the ZeroLag gallery; other projects pass `galleryPhotos` in `stacked-projects.tsx`), `field-archive*`, `command-palette`, `section-dock`, `scroll-to-top`, `tilt-card`, `reveal`, `motion-provider` (all animations use `m.*` from framer-motion inside `<LazyMotion>`), `lazy-sections` (below-the-fold sections, code-split), `fx/route-wipe`, `fx/press-stamp` (R37: every click / tap / Enter stamps a shape on every page; mounted in `app/layout.tsx`), `custom-cursor` (ring + the R37 `[data-cursor]` tag), ...).
 - R21: `build-story` (scroll storyboard between About and Projects, docs/R21-BUILD-STORY.md), `signal-key` (colour legend), `honor-emblem` (medal / seal / ticket emblems), `marquees` (two-deck highlight tape + crossing slogan tapes).
-- R63-R70 layers: `spider-reveal` + `lib/liquid.ts` (the hero water reveal; portrait = light ripples, R69),
+- R63-R70 layers: `spider-reveal` + `lib/water.ts` (the portrait's calm WebGL2 water, R78) and `lib/liquid.ts` (the
+  headline's water, R63),
   `flip-card` (the turn-over student ID in The Build), `tear-stub` (footer Document Metadata counterfoil -> resume),
   `spine-branches` (section rail panels listing each section's headings), `tokyo-diorama/**` (R68 walkable 3D
   section `#diorama`: three.js 0.180.0, owner-approved; the kit's source stays OUTSIDE the repo in
