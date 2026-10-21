@@ -10,7 +10,9 @@ test.beforeEach(async ({ context }) => {
 });
 
 const WALL = 'section[aria-labelledby="arena-wall-title"]';
-const PRINTS = [15, 41, 26]; // competitions, organisations, stack
+const PRINTS = [31, 41, 33]; // competitions, organisations, stack
+// DOSM Datathon 2026: one more ticket on the competitions row (the award photos) and on the stack row (Monsun Bridge)
+const TICKETS = [9, 8, 9];
 
 async function toWall(page: Page, path = '/') {
   await page.goto(path, { waitUntil: 'networkidle' });
@@ -43,7 +45,7 @@ const nearest = (page: Page, row: number, kind: '.fx-ticket' | '.fx-print', x = 
     [row, kind, x] as const,
   );
 
-test('the wall is server-rendered: 3 rows, 8 focusable tickets and every print each, copies hidden, every link resolves', async ({
+test('the wall is server-rendered: 3 rows, their focusable tickets and every print each, copies hidden, every link resolves', async ({
   request,
   page,
 }) => {
@@ -54,12 +56,12 @@ test('the wall is server-rendered: 3 rows, 8 focusable tickets and every print e
   const rows = page.locator('.fx-wall-row');
   await expect(rows).toHaveCount(3);
   for (let r = 0; r < 3; r++) {
-    await expect(rows.nth(r).locator('a.fx-seal.fx-ticket:not([aria-hidden])')).toHaveCount(8);
+    await expect(rows.nth(r).locator('a.fx-seal.fx-ticket:not([aria-hidden])')).toHaveCount(TICKETS[r]);
     await expect(rows.nth(r).locator('button.fx-seal.fx-print:not([aria-hidden])')).toHaveCount(PRINTS[r]);
     // hidden copies of the whole row keep the loop seamless at any window width (R49: a 25 % zoom ran out of row):
     // an even number of copies in all, enough that half the track is wider than a 7,680 px window
     const all = await rows.nth(r).locator('.fx-seal').count();
-    const copies = all / (8 + PRINTS[r]);
+    const copies = all / (TICKETS[r] + PRINTS[r]);
     // (R57: a long row needs fewer copies - with 41 prints the organisations row is over 9,000 px wide by itself,
     // so 2 copies are enough. What must hold is the coverage, measured here, not a fixed number of copies.)
     expect(Number.isInteger(copies) && copies % 2 === 0 && copies >= 2, `row ${r + 1}: ${copies} copies`).toBe(true);
@@ -69,11 +71,11 @@ test('the wall is server-rendered: 3 rows, 8 focusable tickets and every print e
       .evaluate((t) => t.scrollWidth / 2);
     expect(half, `row ${r + 1}: half the track covers a 7,680 px window`).toBeGreaterThan(7680);
     await expect(rows.nth(r).locator('.fx-seal[aria-hidden="true"][tabindex="-1"]')).toHaveCount(
-      (copies - 1) * (8 + PRINTS[r]),
+      (copies - 1) * (TICKETS[r] + PRINTS[r]),
     );
   }
   const hrefs = await page.$$eval('a.fx-seal:not([aria-hidden])', (as) => as.map((a) => a.getAttribute('href')!));
-  expect(hrefs).toHaveLength(24);
+  expect(hrefs).toHaveLength(26);
   for (const h of new Set(hrefs)) expect(await page.locator(h).count(), h).toBe(1);
 });
 
@@ -93,8 +95,8 @@ test('every gallery photo and image certificate on the site is a print on the wa
   for (const m of readFileSync('components/honors-section.tsx', 'utf8').matchAll(/'(\/certificates\/[^']+\.png)': \[/g))
     expected.add(m[1]);
   // 76 gallery photos (R56: + 7 Mental Health Week, R57: + 14 KMNS, R61: + 6 Sensor X Sensei) + 6 image certificates
-  // (R49 transcript, R51 PPAL and PAL KPM)
-  expect(expected.size).toBe(82);
+  // (R49 transcript, R51 PPAL and PAL KPM), + 23 DOSM Datathon 2026 / Monsun Bridge
+  expect(expected.size).toBe(105);
 
   await toWall(page);
   const shown = await page.$$eval('button.fx-print:not([aria-hidden])', (bs) =>
@@ -141,8 +143,9 @@ test('a ticket that heads a gallery counts the prints that follow it', async ({ 
       const [n, tag] = c.split(':');
       expect(tag, c).toBe(n === '0' ? '' : n.padStart(2, '0'));
     }
-  // R61: 16 tickets head a gallery (the ESP32 / Sensor X ticket now carries the six Sensor X Sensei photos)
-  expect(counts.flat().filter((c) => !c.startsWith('0:'))).toHaveLength(16);
+  // R61: 16 tickets head a gallery (the ESP32 / Sensor X ticket now carries the six Sensor X Sensei photos); + the DOSM
+  // Datathon and Power BI / Monsun Bridge tickets
+  expect(counts.flat().filter((c) => !c.startsWith('0:'))).toHaveLength(18);
 });
 
 test('rows roll in opposite directions and pause under the mouse', async ({ page }) => {
@@ -211,7 +214,7 @@ test('tickets are punched top and bottom, and their hard shadow is a zero-blur d
       };
     }),
   );
-  expect(tickets).toHaveLength(24);
+  expect(tickets).toHaveLength(26);
   for (const t of tickets) {
     expect(t.mask).toBe(2); // top and bottom
     expect(t.ring).toBe(2); // the ink border is redrawn around each hole
@@ -244,7 +247,7 @@ test('a print straightens and lifts under the mouse, opens the lightbox on that 
   expect(hit!.rotate).toBe('0deg');
   expect(hit!.scale).toBe('1.12');
   // R46: every print is taped to the wall; the tape of the inspected print is pressed flat and square
-  expect(await page.locator('button.fx-print:not([aria-hidden]) > .tape').count()).toBe(82);
+  expect(await page.locator('button.fx-print:not([aria-hidden]) > .tape').count()).toBe(105);
   const tape = await page.evaluate(
     ([x, y]) => {
       const s = document.elementFromPoint(x, y)!.closest('.fx-print')!;
@@ -401,7 +404,7 @@ for (const width of [320, 390, 1440]) {
     await page.keyboard.press('Shift'); // keyboard modality, so focus is :focus-visible
     const seals = page.locator('.fx-wall-row').nth(1).locator('.fx-seal:not([aria-hidden])');
     const n = await seals.count();
-    expect(n).toBe(8 + PRINTS[1]);
+    expect(n).toBe(TICKETS[1] + PRINTS[1]);
     await seals.first().focus();
     for (let i = 0; i < n; i++) {
       if (i) await page.keyboard.press('Tab');
@@ -435,7 +438,7 @@ test('reduced motion: a still wall with no copies and no overflow, each row a st
       .first()
       .evaluate((e) => getComputedStyle(e).animationName),
   ).toBe('none');
-  await expect(page.locator('.fx-wall-track').first().locator('.fx-seal:visible')).toHaveCount(8 + PRINTS[0]);
+  await expect(page.locator('.fx-wall-track').first().locator('.fx-seal:visible')).toHaveCount(TICKETS[0] + PRINTS[0]);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   // the row itself scrolls sideways to its last item, and the band stays about three rows tall
   const row = page.locator('.fx-wall-row').first();

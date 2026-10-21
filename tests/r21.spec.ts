@@ -154,11 +154,11 @@ test('honours: every card has an emblem that says what it is, and no card is lef
   const grid = page.locator('#honors [style*="honors-results"] > div').first();
   await grid.scrollIntoViewIfNeeded();
   const boxes = await grid.evaluate((g) => [...g.children].map((c) => (c as HTMLElement).offsetTop));
-  expect(boxes.length).toBe(7);
+  expect(boxes.length).toBe(8); // + DOSM Datathon 2026
   const rows = new Map<number, number>();
   boxes.forEach((t) => rows.set(t, (rows.get(t) ?? 0) + 1));
   expect([...rows.values()].every((n) => n > 1)).toBe(true); // no orphan (offsetTop = layout row, unaffected by the entrance scale)
-  expect(await grid.locator('svg[viewBox="0 0 120 120"]').count()).toBe(7);
+  expect(await grid.locator('svg[viewBox="0 0 120 120"]').count()).toBe(8);
 });
 
 /* ---------------------------------------------------------------- round 4: nav, spine, filter, footer */

@@ -50,11 +50,13 @@ interface ProjectData {
   tags: string[];
   deckUrl?: string;
   prototypeUrl?: string;
+  /** a live dashboard of its own (mint = LIVE) */
+  dashboardUrl?: string;
   orchestratorUrl?: string;
   colabUrl?: string;
   simulatorId: string;
   githubUrl?: string;
-  telemetryType: 'agentic' | 'flood' | 'energy' | 'catfish' | 'slotify' | 'proofpay';
+  telemetryType: 'agentic' | 'flood' | 'energy' | 'catfish' | 'slotify' | 'proofpay' | 'monsun';
   galleryPhotos?: { src: string; alt: string; rotation: number; w: number; h: number }[];
 }
 
@@ -324,6 +326,200 @@ export const projects: ProjectData[] = [
     ],
     telemetryType: 'energy',
   },
+  {
+    id: 'monsun-bridge',
+    number: '07',
+    badge: '🏆 Top 5 Finalist & Consolation Prize · DOSM Datathon 2026',
+    signal: 'podium',
+    title: 'MONSUN BRIDGE',
+    subtitle: 'The monsoon is predictable. Now, so is the plan.',
+    description:
+      'A planning tool for state and district planners. It turns the monsoon window METMalaysia already publishes into a plan a district can budget. Built by Team DATAVENGERS (IPTA-093), Universiti Malaya, for the DOSM Datathon 2026 theme "Leveraging ML & AI for Sustainable Tourism in Malaysia".',
+    architecturePoints: [
+      'Exposure: 13,703 tourism-linked workers across 4 districts (Besut, Marang, Kuala Nerus, Rompin); 52,655 worker-months exposed',
+      'Skill Bridge NLP: TF-IDF → TruncatedSVD → cosine similarity on MASCO 2020 task text',
+      'East-coast fish landings retention gap −35.4% (p = 0.00062), so fishing gets zero allocation',
+      // a word joiner after the dash: the range never breaks over two lines (tests/r65)
+      `Besut pilot of 100 participants, RM 266,200, scale gate ≥ 43 of 100 placed; break-even placement 30–${String.fromCodePoint(0x2060)}35%`,
+    ],
+    metrics: [
+      { label: 'Worker-Months Exposed', value: '52,655' },
+      { label: 'Cost per Worker-Month', value: 'RM 887' },
+      { label: 'Power BI Dashboard', value: '8 Pages · 114 Visuals' },
+    ],
+    tags: ['Python', 'Scikit-Learn', 'SciPy', 'NumPy', 'Power BI', 'Tailwind CSS'],
+    // owner: "this is the website and dashboard for this monsun bridge" (the website edition; the 8-page Power BI
+    // dashboard is its #dashboard section)
+    prototypeUrl: 'https://shenenleow10521.github.io/monsun-bridge/web.html',
+    dashboardUrl: 'https://shenenleow10521.github.io/monsun-bridge/web.html#dashboard',
+    // AGENTS.md 6.1 gallery order: Howard with the award at the result first (on stage, the team, Putrajaya), then the
+    // live-pitching day, then the product screens (the website, then the Power BI dashboard). Real pixel sizes (sharp).
+    galleryPhotos: [
+      {
+        src: '/images/projects/monsun-bridge/stage-holding-certificate.jpg',
+        alt: 'Holding the DOSM Datathon 2026 award on stage at Hari Statistik Negara, 20 October 2026',
+        rotation: -2,
+        w: 960,
+        h: 1280,
+      },
+      {
+        src: '/images/projects/monsun-bridge/stage-five.jpg',
+        alt: 'Raising five fingers with the DOSM Datathon 2026 award on stage at Hari Statistik Negara 2026',
+        rotation: 2,
+        w: 960,
+        h: 1280,
+      },
+      {
+        src: '/images/projects/monsun-bridge/team-certificates-selfie.jpg',
+        alt: 'Team DATAVENGERS with their award folders after the DOSM Datathon 2026 results',
+        rotation: -1,
+        w: 1280,
+        h: 960,
+      },
+      {
+        src: '/images/projects/monsun-bridge/putrajaya-certificate-open.jpg',
+        alt: 'Showing the DOSM Datathon 2026 Consolation Prize certificate in Putrajaya',
+        rotation: 1.5,
+        w: 960,
+        h: 1280,
+      },
+      {
+        src: '/images/projects/monsun-bridge/putrajaya-five.jpg',
+        alt: 'Raising five fingers with the DOSM Datathon 2026 certificate in Putrajaya',
+        rotation: -1.5,
+        w: 960,
+        h: 1280,
+      },
+      {
+        src: '/images/projects/monsun-bridge/putrajaya-certificate-close.jpg',
+        alt: 'Holding up the DOSM Datathon 2026 certificate in Putrajaya',
+        rotation: 2,
+        w: 960,
+        h: 1280,
+      },
+      {
+        src: '/images/projects/monsun-bridge/putrajaya-certificate-lawn.jpg',
+        alt: 'Showing the DOSM Datathon 2026 certificate on the lawn in Putrajaya',
+        rotation: -2,
+        w: 960,
+        h: 1280,
+      },
+      {
+        src: '/images/projects/monsun-bridge/putrajaya-folder-lawn.jpg',
+        alt: 'Holding the DOSM Datathon 2026 award folder on the lawn in Putrajaya',
+        rotation: 1,
+        w: 960,
+        h: 1280,
+      },
+      {
+        src: '/images/projects/monsun-bridge/putrajaya-folder-close.jpg',
+        alt: 'Holding the DOSM Datathon 2026 award folder in Putrajaya',
+        rotation: -1,
+        w: 960,
+        h: 1280,
+      },
+      {
+        src: '/images/projects/monsun-bridge/perbadanan-putrajaya.jpg',
+        alt: 'With the DOSM Datathon 2026 award in front of Perbadanan Putrajaya',
+        rotation: 1.5,
+        w: 960,
+        h: 1280,
+      },
+      {
+        src: '/images/projects/monsun-bridge/ceremony-with-dosm.jpg',
+        alt: 'Team DATAVENGERS with a DOSM official at the Hari Statistik Negara 2026 ceremony',
+        rotation: -1.5,
+        w: 960,
+        h: 1280,
+      },
+      {
+        src: '/images/projects/monsun-bridge/ceremony-hall.jpg',
+        alt: 'In the hall at the Hari Statistik Negara 2026 ceremony, Auditorium TAZA',
+        rotation: 2,
+        w: 960,
+        h: 1280,
+      },
+      {
+        src: '/images/projects/monsun-bridge/team-live-pitching.jpg',
+        alt: 'Team DATAVENGERS on stage at the DOSM Datathon 2026 live pitching, 19 October 2026, Auditorium TAZA',
+        rotation: -2,
+        w: 1280,
+        h: 960,
+      },
+      {
+        src: '/images/projects/monsun-bridge/pitch-live.jpg',
+        alt: 'Pitching Monsun Bridge live at the DOSM Datathon 2026 Grand Final',
+        rotation: 1,
+        w: 1280,
+        h: 720,
+      },
+      {
+        src: '/images/projects/monsun-bridge/pitch-qa.jpg',
+        alt: 'Team DATAVENGERS taking questions on stage after the Monsun Bridge pitch',
+        rotation: -1,
+        w: 1280,
+        h: 707,
+      },
+      {
+        src: '/images/projects/monsun-bridge/finalists-seated.jpg',
+        alt: 'Team DATAVENGERS with their DOSM Datathon 2026 finalist passes',
+        rotation: 1.5,
+        w: 1280,
+        h: 960,
+      },
+      {
+        src: '/images/projects/monsun-bridge/site-hero.jpg',
+        alt: 'Monsun Bridge website: The monsoon is predictable. So is the plan.',
+        rotation: -1.5,
+        w: 1879,
+        h: 912,
+      },
+      {
+        src: '/images/projects/monsun-bridge/site-problem.png',
+        alt: 'Monsun Bridge website: the closure season timeline and who is affected',
+        rotation: 2,
+        w: 1882,
+        h: 952,
+      },
+      {
+        src: '/images/projects/monsun-bridge/site-districts.png',
+        alt: 'Monsun Bridge website: monsoon livelihood risk across four districts',
+        rotation: -1,
+        w: 1882,
+        h: 948,
+      },
+      {
+        src: '/images/projects/monsun-bridge/site-steps.png',
+        alt: 'Monsun Bridge website: the four steps of what Monsun Bridge does',
+        rotation: 1.5,
+        w: 1877,
+        h: 955,
+      },
+      {
+        src: '/images/projects/monsun-bridge/site-data.png',
+        alt: 'Monsun Bridge website: the official, open datasets behind every input',
+        rotation: -2,
+        w: 1829,
+        h: 965,
+      },
+      {
+        src: '/images/projects/monsun-bridge/dashboard-action-planner.png',
+        alt: 'Monsun Bridge Power BI dashboard: Action Planner page',
+        rotation: 1,
+        w: 1902,
+        h: 979,
+      },
+      {
+        src: '/images/projects/monsun-bridge/dashboard-risk-cost.png',
+        alt: 'Monsun Bridge Power BI dashboard: Risk, Cost and Return page',
+        rotation: -1,
+        w: 1900,
+        h: 984,
+      },
+    ],
+    simulatorId: 'monsun-bridge',
+    telemetryType: 'monsun',
+  },
 ];
 
 const SIMULATOR_ROUTE: Partial<Record<ProjectData['telemetryType'], 'agentic' | 'flood' | 'energy'>> = {
@@ -496,7 +692,8 @@ function ProjectCard({ project, index }: { project: ProjectData; index: number }
     project.telemetryType === 'agentic' ||
     project.telemetryType === 'catfish' ||
     project.telemetryType === 'slotify' ||
-    project.telemetryType === 'proofpay';
+    project.telemetryType === 'proofpay' ||
+    project.telemetryType === 'monsun';
 
   return (
     <div
@@ -699,6 +896,17 @@ function ProjectCard({ project, index }: { project: ProjectData; index: number }
                         LAUNCH LIVE PROTOTYPE
                       </a>
                     )}
+                    {project.dashboardUrl && (
+                      <a
+                        href={project.dashboardUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group nb-btn bg-pop-mint px-5 py-3 fx-specular nb-press"
+                      >
+                        <Activity className="w-4 h-4" strokeWidth={2.75} />
+                        <TextRoll>OPEN DASHBOARD</TextRoll>
+                      </a>
+                    )}
                     {SIMULATOR_ROUTE[project.telemetryType] && (
                       <WipeLink
                         href={`/simulators/${SIMULATOR_ROUTE[project.telemetryType]}`}
@@ -792,7 +1000,8 @@ function ProjectCard({ project, index }: { project: ProjectData; index: number }
 
                 {(project.telemetryType === 'catfish' ||
                   project.telemetryType === 'slotify' ||
-                  project.telemetryType === 'proofpay') && (
+                  project.telemetryType === 'proofpay' ||
+                  project.telemetryType === 'monsun') && (
                   <div className="flex-1 w-full flex items-center justify-center py-2 sm:py-4">
                     <InteractivePhotoStack customPhotos={project.galleryPhotos} galleryId={project.simulatorId} />
                   </div>

@@ -143,6 +143,26 @@ export const honorsList: HonorItem[] = [
     icon: Trophy,
   },
   {
+    id: 'dosm-datathon',
+    signal: 'podium',
+    emblem: 'star',
+    isFeatured: true,
+    badge: 'DOSM DATATHON 2026 GRAND FINAL',
+    badgeColor: 'gold',
+    title: 'TOP 5 FINALIST & CONSOLATION PRIZE (HADIAH SAGU HATI)',
+    issuingBody: 'DOSM Datathon 2026 (Department of Statistics Malaysia)',
+    period: 'October 2026',
+    statCallout: { value: 'Top 5', label: 'DOSM Datathon 2026 Grand Final' },
+    description:
+      'Lead builder and pitcher of Monsun Bridge, a planning tool for state and district planners. It turns the monsoon window METMalaysia already publishes into a plan a district can budget.',
+    highlights: [
+      'Top 10 finalists selected after shortlisting; live pitching at Auditorium Tun Azizan Zainul Abidin (TAZA), Kompleks Perbadanan Putrajaya',
+      'Team DATAVENGERS (IPTA-093), Universiti Malaya',
+      'Theme: "Leveraging ML & AI for Sustainable Tourism in Malaysia"',
+    ],
+    icon: Trophy,
+  },
+  {
     id: 'technothon',
     signal: 'qualifier',
     emblem: 'finalist',
@@ -651,11 +671,21 @@ export default function HonorsSection() {
                   const Icon = item.icon;
                   const isFeatured = item.isFeatured;
                   const c = colorFor(item);
-                  const linked = item.id === 'supervity' ? 'zerolag' : item.id === 'proofpay' ? 'proofpay' : undefined;
+                  const linked =
+                    item.id === 'supervity'
+                      ? 'zerolag'
+                      : item.id === 'proofpay'
+                        ? 'proofpay'
+                        : item.id === 'dosm-datathon'
+                          ? 'monsun-bridge'
+                          : undefined;
                   const hit = !!trail && trail.ids.some((id) => linked === id);
+                  // featured wins fill their rows: 3 per row, or 2 per row when their count does not divide by 3
+                  const featuredSpan =
+                    activeItems.filter((i) => i.isFeatured).length % 3 === 0 ? 'xl:col-span-4' : 'xl:col-span-6';
                   const span =
                     activeItems.length > 2
-                      ? `${isFeatured ? 'xl:col-span-4' : 'xl:col-span-3'} ${itemIdx === 0 && activeItems.length % 2 === 1 ? 'lg:col-span-2 xl:col-span-4' : ''}`
+                      ? `${isFeatured ? featuredSpan : 'xl:col-span-3'} ${itemIdx === 0 && activeItems.length % 2 === 1 ? 'lg:col-span-2 xl:col-span-4' : ''}`
                       : '';
 
                   return (

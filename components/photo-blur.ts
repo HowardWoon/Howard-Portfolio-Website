@@ -84,6 +84,52 @@ export const PHOTO_BLUR: Record<string, string> = {
     'data:image/webp;base64,UklGRloAAABXRUJQVlA4IE4AAACQAwCdASoQABcAPu1iqU2ppaOiMAgBMB2JZQCw7CFrm5FdSh9AAP7pBaF93GWfeJT7DvZC3AwLG3YjXPIthtoquutwwECiH6tW7bIAAAA=',
   '/images/projects/catfish/system.png':
     'data:image/webp;base64,UklGRjgAAABXRUJQVlA4ICwAAACQAQCdASoQAA4AA4BaJZV2ARgAiwAA/vKz1iQLeVE9ncpqyz4pFZlHMlagAA==',
+  '/images/projects/monsun-bridge/ceremony-hall.jpg':
+    'data:image/webp;base64,UklGRpIAAABXRUJQVlA4IIYAAADQBACdASoQABUAPu1iqU2ppaOiMAgBMB2JbACdMoRgC5XOAAK1Dy1oHgETU71ToAD+nsWAms0sGz/mMucIYhnFqSWz6YD7HZSahs142RnWoXSveSejS8qwkaGSdQ8ddAZZkBy+JHLOM8+2TlkYM9+x+frdfY2wmQ5dCbeD4JrySZYsMkAAAA==',
+  '/images/projects/monsun-bridge/ceremony-with-dosm.jpg':
+    'data:image/webp;base64,UklGRoAAAABXRUJQVlA4IHQAAABwBACdASoQABUAPu1iqU2ppaQiMAgBMB2JagCdMoR3ACELIcxG5nRzhSXb4ACtlsjRCN1eBDjuguMuATHfUcxEkrEpqxmgpWDmSRUGfDA5Iw39pO/T5BEz6ng/IJoXNcx5VKwyMEjK+pSSwFt8WWTkdIAAAA==',
+  '/images/projects/monsun-bridge/dashboard-action-planner.png':
+    'data:image/webp;base64,UklGRjwAAABXRUJQVlA4IDAAAADQAQCdASoQAAgAA4BaJZwAAusjjzlEAAD+8/lNpDhu7CEWwGuKnkfs8YaRVAHgAAA=',
+  '/images/projects/monsun-bridge/dashboard-risk-cost.png':
+    'data:image/webp;base64,UklGRj4AAABXRUJQVlA4IDIAAADQAQCdASoQAAgAA4BaJZwAAueLWHXYAAD+8m9Plse5+IpPc/AfIW0zBLSYs/lAEAAAAA==',
+  '/images/projects/monsun-bridge/finalists-seated.jpg':
+    'data:image/webp;base64,UklGRlwAAABXRUJQVlA4IFAAAAAQAgCdASoQAAwAA4BaJYgCdAEfnBvNXikAAP6U+uw12qcQmrAFc0R+VRBmfojXu+gqGxexO0o3AATnzjw33J5Zwo+glly9xroI+ef+F02IAA==',
+  '/images/projects/monsun-bridge/perbadanan-putrajaya.jpg':
+    'data:image/webp;base64,UklGRmwAAABXRUJQVlA4IGAAAACwAwCdASoQABUAPu1kq04ppaQiMAgBMB2JQAALcNzRkRJAbgpYAAD+6nsS5bX4gD9/oCKgFTTaiC3Nlv2C5+Bgf59bS2MGMgqxbCiJXY5IRwXkKIA0/iD8c/zk9DSzAAA=',
+  '/images/projects/monsun-bridge/pitch-live.jpg':
+    'data:image/webp;base64,UklGRlQAAABXRUJQVlA4IEgAAADQAQCdASoQAAkAA4BaJYwCdAD1N0tEXAD+4Avqr4ivDsp2T5FhAJaWkXIrdT+9tWckyx1fkaxMNr65maWSuTcRhEljyp5XwAA=',
+  '/images/projects/monsun-bridge/pitch-qa.jpg':
+    'data:image/webp;base64,UklGRlgAAABXRUJQVlA4IEwAAADQAQCdASoQAAkAA4BaJZQCsACh+wRNWAD+6AD2gUUR9DXFgmscfs6M2WTM6n91EMMuuGTMXzur81adiORaFtqqYFOWp1AcY1BykAAA',
+  '/images/projects/monsun-bridge/putrajaya-certificate-close.jpg':
+    'data:image/webp;base64,UklGRnQAAABXRUJQVlA4IGgAAADQAwCdASoQABUAPu1kqk4ppaQiMAgBMB2JZQDImCHXvEQpXBAcMDgA/u+/kcKKVZbBqY2I8lTLlM07n7HEqF9XlrOj5KKm6vqSy41v+6KZyH8dvtvFFuToYzePn/m+qUFCLpQFHs4AAA==',
+  '/images/projects/monsun-bridge/putrajaya-certificate-lawn.jpg':
+    'data:image/webp;base64,UklGRm4AAABXRUJQVlA4IGIAAACwAwCdASoQABUAPu1iqk4ppaQiMAgBMB2JQAALfQrRTxvq/K6wQAD+6nKJ+7D5F8sifj1BTT9zP39tAXPXUwR99ROr8S482ExW5h7XM4dYXLH/Td9h522XXZm69sqzSvcEAA==',
+  '/images/projects/monsun-bridge/putrajaya-certificate-open.jpg':
+    'data:image/webp;base64,UklGRmYAAABXRUJQVlA4IFoAAAAwBACdASoQABUAPu1iqk4ppaQiMAgBMB2JZwDE2CHf+Pf61dTEfUKHbgAA/u08iSt7xYXFzP86WItDL1mI/eWcFO+sL+cPLkkICiHBAXW1DHKKiEkGv/vYAAA=',
+  '/images/projects/monsun-bridge/putrajaya-five.jpg':
+    'data:image/webp;base64,UklGRmQAAABXRUJQVlA4IFgAAAAQBACdASoQABUAPu1iqk4ppaQiMAgBMB2JZwDCgCHekXQ/SVzcsYTwAAD+7T7URQCTfVB/bxQkJYnChXkLhjxiVinlQ4cQ/wK9J/42Oh8XDor4N/MfAAAA',
+  '/images/projects/monsun-bridge/putrajaya-folder-close.jpg':
+    'data:image/webp;base64,UklGRmoAAABXRUJQVlA4IF4AAADwAwCdASoQABUAPu1iqk4ppaQiMAgBMB2JYwC/OCHfnR4+aU+HRdYAAP7tQ1VHoFKlKOap/+sJrhpGRRv1eLHoE63F90j0RxxwBya5qR7O5zGl2mtT8Cfj7bQQuAAA',
+  '/images/projects/monsun-bridge/putrajaya-folder-lawn.jpg':
+    'data:image/webp;base64,UklGRm4AAABXRUJQVlA4IGIAAACQAwCdASoQABUAPu1kqk4ppaQiMAgBMB2JQAALfQrEHy+0DfIAAP7qduJJxhucmyOpC7J/aD1CvToFp60AZ/9QUgRbMqbwy1c5MIQIHV0e2BZtsG3T+OhHq9tDXHq29wQAAA==',
+  '/images/projects/monsun-bridge/site-data.png':
+    'data:image/webp;base64,UklGRi4AAABXRUJQVlA4ICIAAADQAQCdASoQAAgAA4BaJZwAAu1/dtM8UAD+9R+6vKGdrYAA',
+  '/images/projects/monsun-bridge/site-districts.png':
+    'data:image/webp;base64,UklGRjYAAABXRUJQVlA4ICoAAADQAQCdASoQAAgAA4BaJZwAAvrefwmiMAD+9ilsM+sNcvw6kr89PeEAAAA=',
+  '/images/projects/monsun-bridge/site-hero.jpg':
+    'data:image/webp;base64,UklGRkIAAABXRUJQVlA4IDYAAADwAQCdASoQAAgAA4BaJQBOgB6SJ3DnDEAA/tz80qUh2vUcNfm1lQTYsl5IKIHKH/eumbUAAAA=',
+  '/images/projects/monsun-bridge/site-problem.png':
+    'data:image/webp;base64,UklGRjYAAABXRUJQVlA4ICoAAACwAQCdASoQAAgAA4BaJZwAAudGJKRAAP71H3n0rpKITU/hSWogtRFgAAA=',
+  '/images/projects/monsun-bridge/site-steps.png':
+    'data:image/webp;base64,UklGRjAAAABXRUJQVlA4ICQAAAAwAQCdASoQAAgAA4BaJaQAA3AA/vLP9ksfgjLxPJ/f9v0wAAA=',
+  '/images/projects/monsun-bridge/stage-five.jpg':
+    'data:image/webp;base64,UklGRpIAAABXRUJQVlA4IIYAAAAwBACdASoQABUAPu1iqU2ppaOiMAgBMB2JYgCdACHpPaxYn1XWvHxnlgAA/tUJuesiPCFhthzKRDDg9TvsSpEamLnWiHX2waLvB0zmepT7vO3hIwIH1Gx8kdEH6AvJJ9YBX8/VfIFtqcei+w906ZIJSORH7CIGCnWYO8M2TKhw43ZcdtTgAA==',
+  '/images/projects/monsun-bridge/stage-holding-certificate.jpg':
+    'data:image/webp;base64,UklGRp4AAABXRUJQVlA4IJIAAACQBACdASoQABUAPu1iqU2ppaOiMAgBMB2JYgCdMoSA2CnRy/mTT3Mee64B9JAA/tUJuesiPCFK9LpiniTesmgiz7tJJtv5clwSZ5QIPZ5Prpx9po/Nr7aVtl85f3tifjpWFDqX9UbX9NMQ3nt7Xd7CMnXFl3kqSsfLNtFeZ5DE0bSg+Xj97sKv7Dg8NvFmV4AAAA==',
+  '/images/projects/monsun-bridge/team-certificates-selfie.jpg':
+    'data:image/webp;base64,UklGRloAAABXRUJQVlA4IE4AAAAQAgCdASoQAAwAA4BaJaACdACzw+LQyuQAAP0C80CJXwzOl85nt8mmrmZSRqE3P7TN57Rx9q7/2FtptmzxvEUSmGESwJLWLjH6LMkSaAA=',
+  '/images/projects/monsun-bridge/team-live-pitching.jpg':
+    'data:image/webp;base64,UklGRl4AAABXRUJQVlA4IFIAAADwAQCdASoQAAwAA4BaJbACdADp9T/7eQAA/vGzKDACyVlbiS4YSUH+SY4yimKvbm01+lQtCS/CXQfvjHZ3ncfcdSLi+JYv/bj2FTCCT+O6ZgAA',
   '/images/projects/sensor-x/01.jpg':
     'data:image/webp;base64,UklGRpYAAABXRUJQVlA4IIoAAACQBACdASoQABUAPu1iqU2ppaQiMAgBMB2JaACdMoBOACaiH1T0BSZAZvWSU+gA8pVq+wYlTIXaYATGvsn3d0B9Q8f3WYJo04Dhn3smz6AushsV9TqGfmd0V6XPkZhIpk11/uxy3wbJkY60vl9yWeAgFTv0Tx3e6fyCwYs58dfwQWzxxDaYaEXjgAA=',
   '/images/projects/sensor-x/02.jpg':

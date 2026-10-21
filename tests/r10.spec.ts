@@ -8,15 +8,16 @@ test.beforeEach(async ({ context }) => {
 
 test('evidence trail: a skill in the Tooling Matrix traces the projects that use it (FX-38)', async ({ page }) => {
   await page.goto('/', { waitUntil: 'networkidle' });
-  const chip = page.getByRole('button', { name: /trace python 3\.12: used in 2 projects/i });
+  const chip = page.getByRole('button', { name: /trace python 3\.12: used in 3 projects/i });
   await chip.scrollIntoViewIfNeeded();
   await chip.click();
   const hud = page.getByRole('region', { name: /evidence trail for python 3\.12/i });
   await expect(hud).toBeVisible();
-  await expect(hud).toContainText('1 / 2');
-  await expect(page.locator('[data-trail-hit]')).toHaveCount(3); // 2 project cards + 1 honor card (FX-47)
+  await expect(hud).toContainText('1 / 3');
+  // 3 project cards (ZeroLag, Catfish, Monsun Bridge) + 2 honor cards (Supervity, DOSM Datathon) (FX-47)
+  await expect(page.locator('[data-trail-hit]')).toHaveCount(5);
   await page.keyboard.press('j');
-  await expect(hud).toContainText('2 / 2');
+  await expect(hud).toContainText('2 / 3');
   await page.keyboard.press('Escape');
   await expect(page.locator('[data-trail-hit]')).toHaveCount(0);
 });
@@ -37,10 +38,10 @@ test('focus mode spotlights one project and J/K moves the spotlight (FX-39)', as
   await page.waitForTimeout(1500);
   await btn.click();
   const hud = page.getByRole('region', { name: /focus mode/i });
-  await expect(hud).toContainText('02 / 06');
+  await expect(hud).toContainText('02 / 07');
   await expect(page.locator('[data-focus-active]')).toHaveCount(1);
   await page.keyboard.press('j');
-  await expect(hud).toContainText('03 / 06');
+  await expect(hud).toContainText('03 / 07');
   await page.keyboard.press('Escape');
   await expect(page.locator('[data-focus-active]')).toHaveCount(0);
 });

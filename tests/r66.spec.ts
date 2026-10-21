@@ -76,7 +76,7 @@ test.describe('desktop 1440x900', () => {
     expect(r.id).toBe('projects');
     expect(r.head).toBe('02Projects');
     expect(r.rows).toEqual(r.heads); // the page's own words, nothing added
-    expect(r.rows.length).toBe(6);
+    expect(r.rows.length).toBe(7);
     expect([r.inside, r.besideRail, r.tagsHidden]).toEqual([true, true, true]);
     // neo-brutalist: 3 px ink border and a hard offset shadow (no blur radius)
     expect(r.border).toBe('3px');

@@ -1039,7 +1039,7 @@ test('the photo wall renders its hidden copies only when it comes near the windo
       full: document.querySelectorAll('.fx-wall-row[data-reel-full]').length,
     }));
   const top = await count();
-  expect(top.real).toBe(106); // 24 tickets + 82 prints
+  expect(top.real).toBe(131); // 26 tickets + 105 prints (+ 2 tickets and 23 prints: DOSM Datathon 2026)
   expect(top).toMatchObject({ copies: 0, full: 0 });
   await page
     .locator('.fx-wall-row')
@@ -1047,7 +1047,7 @@ test('the photo wall renders its hidden copies only when it comes near the windo
     .evaluate((e) => e.scrollIntoView({ block: 'center' }));
   await expect(page.locator('.fx-wall-row[data-reel-full]')).toHaveCount(3, { timeout: 10_000 });
   const near = await count();
-  expect(near.real).toBe(106);
+  expect(near.real).toBe(131);
   expect(near.copies).toBeGreaterThanOrEqual(100); // at least one more copy of every row
 });
 

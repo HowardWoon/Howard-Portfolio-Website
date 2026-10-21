@@ -228,6 +228,17 @@ const FIELD_REEL: ReelItem[] = [
   { src: '/images/muba/solo_muba.jpg', w: 960, h: 1280 },
   { src: '/images/muba/gonka_4ppl_muba.jpg', w: 960, h: 472 },
   { src: '/images/muba/zilian_muba.jpg', w: 960, h: 1280 },
+  // DOSM Datathon 2026 (19 - 20 Oct 2026), yellow = PODIUM (Top 5, Consolation Prize): the live-pitching day, then the
+  // results day with the award (Howard's own moments; the whole set is in the Monsun Bridge gallery)
+  { slate: 'DOSM Datathon 2026', fill: 'bg-pop-yellow' },
+  { src: '/images/projects/monsun-bridge/team-live-pitching.jpg', w: 1280, h: 960 },
+  { src: '/images/projects/monsun-bridge/pitch-live.jpg', w: 1280, h: 720 },
+  { src: '/images/projects/monsun-bridge/pitch-qa.jpg', w: 1280, h: 707 },
+  { src: '/images/projects/monsun-bridge/stage-holding-certificate.jpg', w: 960, h: 1280 },
+  { src: '/images/projects/monsun-bridge/stage-five.jpg', w: 960, h: 1280 },
+  { src: '/images/projects/monsun-bridge/team-certificates-selfie.jpg', w: 1280, h: 960 },
+  { src: '/images/projects/monsun-bridge/putrajaya-certificate-open.jpg', w: 960, h: 1280 },
+  { src: '/images/projects/monsun-bridge/perbadanan-putrajaya.jpg', w: 960, h: 1280 },
 ];
 const BUILD_REEL: ReelItem[] = [
   { slate: 'ZEROLAG', fill: 'bg-pop-yellow' },
@@ -243,6 +254,9 @@ const BUILD_REEL: ReelItem[] = [
   { slate: 'CATFISH DETECTOR AI', fill: 'bg-pop-orange' },
   { src: '/images/projects/catfish/dashboard.png', w: 1210, h: 883 },
   { src: '/images/projects/catfish/scanner.png', w: 613, h: 877 },
+  { slate: 'MONSUN BRIDGE', fill: 'bg-pop-yellow' },
+  { src: '/images/projects/monsun-bridge/site-hero.jpg', w: 1879, h: 912 },
+  { src: '/images/projects/monsun-bridge/dashboard-action-planner.png', w: 1902, h: 979 },
 ];
 
 const CODE = [

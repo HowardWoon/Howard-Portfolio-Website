@@ -40,6 +40,10 @@ const proofpay = project('proofpay');
 // (6) and MUBA (4) event photos roll with the competitions; the screens that follow them roll with the stack.
 const ZEROLAG_EVENT = 6;
 const PROOFPAY_EVENT = 4;
+// DOSM Datathon 2026: the 16 award and pitching photos roll with the competitions, the 7 Monsun Bridge screens with
+// the stack
+const monsun = project('monsun-bridge');
+const MONSUN_EVENT = 16;
 // MYTECH and Mental Health Week live in the Field Archive, which keeps no pixel sizes: these are the files' real
 // sizes (sharp().metadata(), AGENTS.md 6.2)
 const ARCHIVE_SIZE: Record<string, [number, number]> = {
@@ -90,6 +94,12 @@ export const REEL_ROWS: { label: string; accent: 'yellow' | 'mint' | 'cyan'; ite
       ...ticket('PPAL 4.0', 'Hari Inovasi', '#honors', cert('ppal_4_0_gold_medal.png')),
       ...ticket('Chemcreative', 'Innovation', '#honors', cert('chem_creative.png')),
       ...ticket('PAL KPM', 'Simposium', '#honors', cert('pal_kpm_simposium_perak.png')),
+      ...ticket(
+        'DOSM Datathon',
+        'Top 5 · 2026',
+        '#project-monsun-bridge',
+        gallery(monsun, 'monsun-bridge', 0, MONSUN_EVENT),
+      ),
     ],
   },
   {
@@ -118,6 +128,7 @@ export const REEL_ROWS: { label: string; accent: 'yellow' | 'mint' | 'cyan'; ite
       ...ticket('Spring Boot', 'Slotify', '#project-slotify', gallery(project('slotify'), 'slotify')),
       ...ticket('Scikit-Learn', 'Catfish AI', '#project-catfish', gallery(project('catfish'), 'catfish')),
       ...ticket('ESP32', 'Sensor X', '#project-sensor-x', gallery(project('sensor-x-sensei'), 'sensor-x')),
+      ...ticket('Power BI', 'Monsun Bridge', '#project-monsun-bridge', gallery(monsun, 'monsun-bridge', MONSUN_EVENT)),
     ],
   },
 ];
@@ -141,9 +152,9 @@ const FACE_BG: Record<Face, string> = {
   ink: 'bg-ink',
 };
 const FACES: Face[][] = [
-  ['white', 'cyan', 'pink', 'mint', 'white', 'lilac', 'orange', 'ink'],
+  ['white', 'cyan', 'pink', 'mint', 'white', 'lilac', 'orange', 'ink', 'cyan'],
   ['lilac', 'white', 'orange', 'cyan', 'white', 'pink', 'ink', 'white'],
-  ['pink', 'white', 'mint', 'ink', 'orange', 'white', 'lilac', 'white'],
+  ['pink', 'white', 'mint', 'ink', 'orange', 'white', 'lilac', 'white', 'mint'],
 ];
 
 const TICKET_BOX = 'w-32 h-28 xs:w-36 xs:h-32 sm:w-44 sm:h-40';
