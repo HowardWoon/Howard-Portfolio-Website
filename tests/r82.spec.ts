@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, devices, type Page, type BrowserContextOptions } from '@playwright/test';
 
 // Round 82 (owner: "audit now, fix after"; the 3D street still looked like a "fixed algorithm" and "not very stable,
 // secure, logic"). Full audit with measurements: docs/R82-FULL-AUDIT-AND-PLAN.md. Measured on the commit before R82,
@@ -249,5 +249,155 @@ test.describe('R82 3D street', () => {
     const before = await frames();
     await expect.poll(async () => (await frames()) !== before && (await frames()) > 2, { timeout: 90000 }).toBe(true);
     expect(errors).toEqual([]);
+  });
+});
+
+/* ------------------------------------------------------------------ the photo part (owner: "must enhance this photo part") */
+
+const dev = (name: string): BrowserContextOptions => {
+  const { defaultBrowserType: _d, ...o } = devices[name];
+  void _d;
+  return o;
+};
+
+async function openLightbox(page: Page) {
+  await page.goto('/');
+  await page.getByRole('button', { name: /skip intro/i }).click();
+  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 10000 });
+  const key = page
+    .locator('#project-zerolag')
+    .getByRole('button', { name: /view full resolution/i })
+    .first();
+  await key.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+  await page.waitForTimeout(400);
+  await key.click();
+  const dialog = page.getByRole('dialog').filter({ has: page.getByRole('button', { name: 'Next photo' }) });
+  await expect(dialog).toBeVisible();
+  await page.waitForTimeout(400);
+  return dialog;
+}
+const counter = (page: Page) => page.getByRole('dialog').locator('.nb-tag[aria-live="polite"]').first().innerText();
+
+test.describe('R82 gallery', () => {
+  test('a trackpad pinch (ctrl + wheel) zooms the photo, never the page', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const dialog = await openLightbox(page);
+    const prevented = await dialog.evaluate((d) => {
+      const panel = d.querySelector('.touch-none')!;
+      const r = panel.getBoundingClientRect();
+      const ev = new WheelEvent('wheel', {
+        deltaY: -40,
+        ctrlKey: true,
+        bubbles: true,
+        cancelable: true,
+        clientX: r.left + r.width / 2,
+        clientY: r.top + r.height / 2,
+      });
+      panel.dispatchEvent(ev);
+      return ev.defaultPrevented;
+    });
+    expect(prevented).toBe(true);
+    await expect(dialog.getByRole('button', { name: 'Reset zoom' })).not.toHaveText('100%');
+  });
+
+  test('the zoom stops where the photo runs out of pixels', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const dialog = await openLightbox(page);
+    for (let i = 0; i < 8; i++) await page.keyboard.press('+');
+    const pct = Number((await dialog.getByRole('button', { name: 'Reset zoom' }).innerText()).replace('%', ''));
+    // a 960 px photo in a ~435 px panel: 1.5 x 960 / 435 = 3.3x, never the old fixed 4x
+    expect(pct).toBeGreaterThanOrEqual(200);
+    expect(pct).toBeLessThan(400);
+  });
+
+  test('a quick flick changes the photo; 1 - 9 jump straight to a photo', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const dialog = await openLightbox(page);
+    expect(await counter(page)).toMatch(/^01 \//);
+    const box = (await dialog.locator('.touch-none').boundingBox())!;
+    const y = box.y + box.height / 2;
+    await page.mouse.move(box.x + box.width / 2, y);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width / 2 - 30, y, { steps: 1 });
+    await page.mouse.up();
+    await expect.poll(() => counter(page)).toMatch(/^02 \//);
+    await page.keyboard.press('5');
+    await expect.poll(() => counter(page)).toMatch(/^05 \//);
+  });
+
+  test('a press that starts on the photo and ends on the margin does not close; a tap on the margin does', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const dialog = await openLightbox(page);
+    await page.mouse.move(40, 450);
+    await page.mouse.down();
+    await page.mouse.move(90, 450, { steps: 4 });
+    await page.mouse.up();
+    await expect(dialog).toBeVisible();
+    await page.mouse.click(40, 450);
+    await expect(dialog).toBeHidden();
+  });
+
+  test('the "View full resolution" key opens the viewer every time (20 loads)', async ({ browser }) => {
+    test.setTimeout(240_000);
+    let missed = 0;
+    for (let i = 0; i < 20; i++) {
+      const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+      await ctx.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
+      const page = await ctx.newPage();
+      await page.goto('/', { waitUntil: 'networkidle' });
+      const key = page.getByRole('button', { name: /view full resolution/i }).first();
+      await key.scrollIntoViewIfNeeded();
+      await key.click();
+      const open = await page
+        .locator('[role="dialog"][aria-modal="true"]')
+        .last()
+        .waitFor({ timeout: 3000 })
+        .then(() => true)
+        .catch(() => false);
+      if (!open) missed++;
+      await ctx.close();
+    }
+    expect(missed).toBe(0);
+  });
+
+  test('a phone held sideways gives the photo the height; every key stays on screen', async ({ browser }) => {
+    const ctx = await browser.newContext(dev('iPhone 13 landscape'));
+    const page = await ctx.newPage();
+    const dialog = await openLightbox(page);
+    const m = await dialog.evaluate((d) => {
+      const panel = d.querySelector('.touch-none')!.getBoundingClientRect();
+      const keys = [...d.querySelectorAll('button')].filter((b) => b.getClientRects().length);
+      const off = keys.filter((b) => {
+        const r = b.getBoundingClientRect();
+        return r.left < -1 || r.top < -1 || r.right > innerWidth + 1 || r.bottom > innerHeight + 1;
+      }).length;
+      return { h: panel.height / innerHeight, area: (panel.width * panel.height) / (innerWidth * innerHeight), off };
+    });
+    expect(m.h, 'the photo panel takes most of the height').toBeGreaterThan(0.8);
+    expect(m.area, 'the photo is far more than 7 % of the screen').toBeGreaterThan(0.2);
+    expect(m.off).toBe(0);
+    await ctx.close();
+  });
+
+  test('phones: the caption opens in full on a tap; a drag on the thumbnails pages them', async ({ browser }) => {
+    const ctx = await browser.newContext(dev('iPhone SE'));
+    const page = await ctx.newPage();
+    const dialog = await openLightbox(page);
+    const cap = dialog.locator('[data-lightbox-caption]');
+    await cap.click();
+    await expect(cap).toHaveAttribute('aria-expanded', 'true');
+    expect(await cap.evaluate((e) => e.scrollHeight <= e.clientHeight + 1)).toBe(true);
+    const thumbs = dialog.locator('[data-lightbox-thumbs] button[aria-label^="Go to photo"]');
+    const first = await thumbs.first().getAttribute('aria-label');
+    const row = (await dialog.locator('[data-lightbox-thumbs]').boundingBox())!;
+    await page.mouse.move(row.x + row.width * 0.8, row.y + row.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(row.x + row.width * 0.2, row.y + row.height / 2, { steps: 5 });
+    await page.mouse.up();
+    await expect.poll(() => thumbs.first().getAttribute('aria-label')).not.toBe(first);
+    expect(await counter(page)).toMatch(/^01 \//); // paging the row opens no photo
+    await ctx.close();
   });
 });

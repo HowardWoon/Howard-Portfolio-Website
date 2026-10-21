@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useId, useRef, useState } from 'react';
+import React, { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal, preload } from 'react-dom';
 import { m, AnimatePresence, LayoutGroup } from 'framer-motion';
 import Image, { getImageProps } from 'next/image';
@@ -29,6 +29,7 @@ import { FX, canHover } from '@/lib/fx';
 import { useBooted } from './boot-sequence';
 import { PHOTO_BLUR } from './photo-blur';
 import { logPhoto } from '@/lib/press-run';
+import { useMotionAllowed } from './fx/use-motion-allowed';
 
 /** w / h = the file's real pixel size (R17 F-02): prints and the lightbox take the photo's shape before it loads */
 export type Photo = { src: string; alt: string; rotation: number; w: number; h: number };
@@ -103,7 +104,9 @@ export const photos: Photo[] = [
  * sheet on phones.
  */
 const SLIDE_MS = 4000;
-const Z_MAX = 4;
+/** R82: the zoom stops at 1.5x the photo's own pixels (at least 2x): beyond that it only magnified the file (the
+ *  uploads are ~960 px wide, so the old fixed 4x showed each file pixel 2 - 4 times over) */
+const Z_MIN_CAP = 2;
 const LB_SIZES = '(max-width: 1200px) 100vw, 1150px';
 
 export function PhotoLightbox({
@@ -135,6 +138,20 @@ export function PhotoLightbox({
   const [fs, setFs] = useState({ can: false, on: false });
   const [hover, setHover] = useState(false);
   const readoutRef = useRef<HTMLSpanElement>(null);
+  // R82: touch has no zoom row; a readout on the photo shows the zoom while it is not 100 %
+  const touchReadoutRef = useRef<HTMLSpanElement>(null);
+  const backdrop = useRef<{ x: number; y: number } | null>(null);
+  const [capOpen, setCapOpen] = useState(false); // R82: the caption opens in full on a tap (it is cut at 2 lines)
+  const [thumbShift, setThumbShift] = useState(0);
+  const slide = useMotionAllowed();
+  // R82: which way the photo came from (next = from the right), for the slide-in
+  const lastIndex = useRef(index);
+  const from = useRef(0);
+  if (lastIndex.current !== index) {
+    const n = list.length;
+    from.current = index === (lastIndex.current + 1) % n ? 1 : index === (lastIndex.current - 1 + n) % n ? -1 : 0;
+    lastIndex.current = index;
+  }
   const prev = () => onIndex((index - 1 + list.length) % list.length);
   const next = () => onIndex((index + 1) % list.length);
   const stopShow = () => setPlaying(false);
@@ -190,12 +207,18 @@ export function PhotoLightbox({
       zoomRef.current.style.transform = `translate(${c.x.toFixed(1)}px, ${c.y.toFixed(1)}px) scale(${c.s.toFixed(3)})`;
     }
     if (readoutRef.current) readoutRef.current.textContent = `${Math.round(c.s * 100)}%`;
+    if (touchReadoutRef.current) touchReadoutRef.current.textContent = `${Math.round(c.s * 100)}%`;
     setZoomed(c.s > 1.01);
+  };
+  /** R82: the most zoom that still shows real detail of this photo in this panel */
+  const zoomCap = () => {
+    const w = panelRef.current?.clientWidth || 1;
+    return Math.max(Z_MIN_CAP, (1.5 * photo.w) / (w * (window.devicePixelRatio || 1)));
   };
   /** zoom to `s`, keeping the point (cx, cy) (relative to the panel centre) under the finger / cursor */
   const zoomTo = (s: number, cx = 0, cy = 0) => {
     const c = z.current;
-    const ns = Math.min(Z_MAX, Math.max(1, s));
+    const ns = Math.min(zoomCap(), Math.max(1, s));
     c.x = cx - ((cx - c.x) * ns) / c.s;
     c.y = cy - ((cy - c.y) * ns) / c.s;
     c.s = ns;
@@ -213,12 +236,15 @@ export function PhotoLightbox({
     if (panelRef.current) panelRef.current.style.opacity = '';
     if (readoutRef.current) readoutRef.current.textContent = '100%';
     setZoomed(false);
+    setCapOpen(false);
+    setThumbShift(0);
   }, [index]);
 
   // R76: how many whole thumbnails one row holds. With every one shown it is the row's width; when a window is needed,
-  // two 44 px first / last keys share the row.
+  // two 44 px first / last keys share the row. R82: measured before the first paint (the first frame laid out every
+  // thumbnail - 23 for Monsun Bridge - and then shrank the row)
   const [thumbFit, setThumbFit] = useState(list.length);
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = thumbsRef.current;
     if (!el) return;
     const read = () => {
@@ -233,7 +259,7 @@ export function PhotoLightbox({
   }, [list.length, chrome]);
 
   const ptrs = useRef(new Map<number, { x: number; y: number }>());
-  const g = useRef({ x0: 0, y0: 0, lx: 0, ly: 0, d0: 1, s0: 1, pinched: false, lastTap: 0 });
+  const g = useRef({ x0: 0, y0: 0, lx: 0, ly: 0, lt: 0, vx: 0, d0: 1, s0: 1, pinched: false, lastTap: 0 });
   const tapTimer = useRef(0);
   useEffect(() => () => window.clearTimeout(tapTimer.current), []);
   /** swipe follow at 1x: the photo tracks the finger, and springs back when the swipe is not a navigation */
@@ -265,7 +291,15 @@ export function PhotoLightbox({
       st.s0 = z.current.s;
       st.pinched = true;
     } else if (ptrs.current.size === 1) {
-      Object.assign(st, { x0: e.clientX, y0: e.clientY, lx: e.clientX, ly: e.clientY, pinched: false });
+      Object.assign(st, {
+        x0: e.clientX,
+        y0: e.clientY,
+        lx: e.clientX,
+        ly: e.clientY,
+        lt: e.timeStamp,
+        vx: 0,
+        pinched: false,
+      });
     }
   };
   const onPointerMove = (e: React.PointerEvent) => {
@@ -283,8 +317,11 @@ export function PhotoLightbox({
       z.current.y += e.clientY - st.ly;
       writeZoom();
     } else if (!st.pinched && e.pointerType !== 'mouse') follow(e.clientX - st.x0, e.clientY - st.y0);
+    const dt = e.timeStamp - st.lt;
+    if (dt > 0) st.vx = (e.clientX - st.lx) / dt;
     st.lx = e.clientX;
     st.ly = e.clientY;
+    st.lt = e.timeStamp;
   };
   const onPointerUp = (e: React.PointerEvent) => {
     if (!ptrs.current.delete(e.pointerId)) return;
@@ -319,16 +356,37 @@ export function PhotoLightbox({
       return;
     }
     if (z.current.s > 1) return; // that was a pan
-    if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) (dx < 0 ? next : prev)();
+    // R82: a quick flick counts too (velocity >= 0.5 px/ms over >= 20 px), not only a 45 px drag
+    const flick = Math.abs(dx) > 20 && Math.abs(st.vx) >= 0.5 && e.timeStamp - st.lt < 80;
+    if ((Math.abs(dx) > 45 || flick) && Math.abs(dx) > Math.abs(dy)) (dx < 0 ? next : prev)();
     else if (dy > 120 && dy > Math.abs(dx))
       onClose(); // swipe down to close
     else springBack();
   };
-  const onWheel = (e: React.WheelEvent) => {
+  // R82: a NATIVE, non-passive wheel listener: React's is passive, so a trackpad pinch (ctrl + wheel) zoomed the photo
+  // AND the browser page (measured: defaultPrevented = false on every profile)
+  const wheelRef = useLatest((e: WheelEvent) => {
+    e.preventDefault();
     stopShow();
     const [cx, cy] = fromCentre(e.clientX, e.clientY);
-    zoomTo(z.current.s * Math.exp(-e.deltaY * 0.0025), cx, cy);
-  };
+    zoomTo(z.current.s * Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0025)), cx, cy);
+  });
+  useEffect(() => {
+    const el = panelRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => wheelRef.current(e);
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, [wheelRef]);
+  // R82: iOS Safari scrolls the page behind a dialog through `overflow: hidden` on body; nothing in the lightbox
+  // scrolls, so a touch move inside it never reaches the page
+  useEffect(() => {
+    const el = dialogRef.current;
+    if (!el) return;
+    const stop = (e: TouchEvent) => e.cancelable && e.preventDefault();
+    el.addEventListener('touchmove', stop, { passive: false });
+    return () => el.removeEventListener('touchmove', stop);
+  }, []);
 
   const keyRef = useLatest((e: KeyboardEvent) => {
     const k = e.key;
@@ -338,6 +396,9 @@ export function PhotoLightbox({
     else if (k === 'ArrowRight') next();
     else if (k === 'Home') onIndex(0);
     else if (k === 'End') onIndex(list.length - 1);
+    // R82: 1 - 9 go straight to that photo
+    else if (/^[1-9]$/.test(k) && Number(k) <= list.length && !e.ctrlKey && !e.metaKey && !e.altKey)
+      onIndex(Number(k) - 1);
     else if (k === '+' || k === '=') zoomTo(z.current.s * 1.5);
     else if (k === '-' || k === '_') zoomTo(z.current.s / 1.5);
     else if (k === '0') zoomTo(1);
@@ -398,7 +459,13 @@ export function PhotoLightbox({
   ) : null;
   // R76: the thumbnail window - as many whole thumbnails as one row holds (56 px + 8 px gap), centred on the photo
   const fit = thumbFit >= list.length ? list.length : Math.max(1, thumbFit);
-  const winStart = Math.min(Math.max(0, index - Math.floor((fit - 1) / 2)), list.length - fit);
+  const clampStart = (s: number) => Math.min(Math.max(0, s), list.length - fit);
+  const centred = clampStart(index - Math.floor((fit - 1) / 2));
+  // R82: a sideways drag on the row pages the window by one row of whole thumbnails (a new photo re-centres it)
+  const winStart = clampStart(centred + thumbShift);
+  const pageThumbs = (dir: number) => setThumbShift(clampStart(winStart + dir * fit) - centred);
+  const thumbDrag = useRef<{ x: number; at: number } | null>(null);
+  const thumbDragged = useRef(0);
   const win = { start: winStart, end: winStart + fit };
 
   return createPortal(
@@ -412,11 +479,23 @@ export function PhotoLightbox({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      onClick={onClose}
-      className="fixed inset-0 z-[10000] flex flex-col h-screen-safe bg-ink/90 pt-[max(0.75rem,var(--safe-top))] pb-[max(0.75rem,var(--safe-bottom))] pl-[max(0.75rem,var(--safe-left))] pr-[max(0.75rem,var(--safe-right))] sm:p-6"
+      // R82: the dark margin closes only on a real tap that starts AND ends on it (a thumb landing beside a portrait
+      // photo while reaching for a thumbnail, or a swipe ending there, closed the viewer)
+      onPointerDown={(e) => {
+        const t = e.target as HTMLElement;
+        backdrop.current = t === e.currentTarget || 'lbStage' in t.dataset ? { x: e.clientX, y: e.clientY } : null;
+      }}
+      onClick={(e) => {
+        const s = backdrop.current;
+        backdrop.current = null;
+        if (s && Math.hypot(e.clientX - s.x, e.clientY - s.y) < 10) onClose();
+      }}
+      className="fixed inset-0 z-[10000] flex flex-col h-screen-safe bg-ink/90 pt-[max(0.75rem,var(--safe-top))] pb-[max(0.75rem,var(--safe-bottom))] pl-[max(0.75rem,var(--safe-left))] pr-[max(0.75rem,var(--safe-right))] sm:p-6 landscape-short:grid landscape-short:grid-cols-[minmax(0,1fr)_11.5rem] landscape-short:grid-rows-[auto_minmax(0,1fr)] landscape-short:gap-x-3 landscape-short:sm:p-3"
     >
+      {/* R82: a phone held sideways puts the counter / keys / caption in a column beside the photo (measured: the photo
+          was 7 % of the screen under a top bar, a key row and a caption) */}
       <div
-        className={`${chrome ? 'flex' : 'hidden'} items-center justify-between gap-3 mb-3 shrink-0 w-full max-w-6xl mx-auto`}
+        className={`${chrome ? 'flex' : 'hidden'} items-center justify-between gap-3 mb-3 shrink-0 w-full max-w-6xl mx-auto landscape-short:col-start-2 landscape-short:row-start-1 landscape-short:mb-0 landscape-short:gap-2 landscape-short:flex-wrap landscape-short:min-w-0`}
         onClick={(e) => e.stopPropagation()}
       >
         <span className="nb-tag bg-pop-yellow shrink-0 whitespace-nowrap" aria-live="polite">
@@ -443,38 +522,66 @@ export function PhotoLightbox({
           <X className="w-5 h-5 sm:w-6 sm:h-6 text-ink" strokeWidth={3} aria-hidden />
           {/* R76: under 400 px the words do not fit beside the counter and the link key (they wrapped onto two lines):
               the X stays, the words stay for screen readers (the RESUME key does the same) */}
-          <span className="font-mono font-bold text-xs sm:text-sm text-ink max-[399px]:sr-only">Return to Website</span>
+          <span className="font-mono font-bold text-xs sm:text-sm text-ink max-[399px]:sr-only landscape-short:sr-only">
+            Return to Website
+          </span>
         </button>
       </div>
 
       {/* Stage: the panel hugs the photo's real aspect ratio, so wide screenshots on a portrait phone are no
           longer a thin strip inside a huge empty cream box. `cq*` units fall back to full width on iOS 15. */}
-      <div className="relative flex-1 min-h-0 w-full max-w-6xl mx-auto flex items-center justify-center [container-type:size]">
+      <div
+        data-lb-stage
+        className="relative flex-1 min-h-0 w-full max-w-6xl mx-auto flex items-center justify-center [container-type:size] landscape-short:col-start-1 landscape-short:row-start-1 landscape-short:row-span-2 landscape-short:h-full"
+      >
         <m.div
           ref={panelRef}
           onClick={(e) => e.stopPropagation()}
-          onPointerDown={onPointerDown}
+          onPointerDown={(e) => {
+            e.stopPropagation();
+            onPointerDown(e);
+          }}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
-          onWheel={onWheel}
           style={{ aspectRatio: ratio, width: `min(100cqw, calc(100cqh * ${ratio}))`, maxHeight: '100%' }}
           className={`relative w-full bg-paper-deep rounded-2xl overflow-hidden border-4 border-ink shadow-brutal touch-none select-none ${
             zoomed ? 'cursor-grab active:cursor-grabbing' : 'cursor-zoom-in'
           }`}
         >
           <div ref={zoomRef} className="absolute inset-0 origin-center">
-            <Image
+            {/* R82: the next photo slides in from the side it came from (transform / opacity only; off for reduced
+                motion and Calm), over the blurred preview the deck already uses (the panel was blank while it loaded) */}
+            <m.div
               key={photo.src}
-              src={photo.src}
-              alt={photo.alt}
-              fill
-              sizes={LB_SIZES}
-              draggable={false}
-              className="object-contain p-1.5 sm:p-3 pointer-events-none"
-              priority
-            />
+              className="absolute inset-0"
+              initial={slide && from.current ? { x: from.current * 48, opacity: 0 } : false}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ duration: 0.22, ease: [0.2, 0.9, 0.1, 1] }}
+            >
+              <Image
+                src={photo.src}
+                alt={photo.alt}
+                fill
+                sizes={LB_SIZES}
+                draggable={false}
+                placeholder={PHOTO_BLUR[photo.src] ? 'blur' : 'empty'}
+                blurDataURL={PHOTO_BLUR[photo.src]}
+                className="object-contain p-1.5 sm:p-3 pointer-events-none"
+                priority
+              />
+            </m.div>
           </div>
+          {!hover && zoomed ? (
+            <span
+              ref={touchReadoutRef}
+              aria-hidden
+              data-zoom-readout
+              className="nb-tag bg-white absolute left-2 top-2 pointer-events-none"
+            >
+              {`${Math.round(z.current.s * 100)}%`}
+            </span>
+          ) : null}
           {playing ? (
             <span
               key={index}
@@ -515,7 +622,7 @@ export function PhotoLightbox({
           row instead of two, and the photo gets the height (iPhone SE: the photo was 115 x 153 px) */}
       {chrome && (list.length > 1 || (!hover && fsKey)) ? (
         <div
-          className="shrink-0 mt-3 w-full max-w-6xl mx-auto flex items-center justify-center gap-2 sm:gap-4"
+          className="shrink-0 mt-3 w-full max-w-6xl mx-auto flex items-center justify-center gap-2 sm:gap-4 landscape-short:col-start-2 landscape-short:row-start-2 landscape-short:mt-2 landscape-short:flex-wrap landscape-short:content-end landscape-short:sm:gap-2"
           onClick={(e) => e.stopPropagation()}
         >
           {list.length > 1 ? (
@@ -532,13 +639,19 @@ export function PhotoLightbox({
             </button>
           ) : null}
           {!hover ? playKey : null}
-          {/* R76: two lines of the description instead of one cut-off line */}
-          <span
+          {/* R76: two lines of the description instead of one cut-off line. R82: a tap opens it in full (it is still
+              cut at 2 lines on 280 - 390 px phones); the same words */}
+          <button
+            type="button"
             data-lightbox-caption
-            className="font-mono text-xs font-bold text-white/80 min-w-0 flex-1 sm:flex-none sm:max-w-[50vw] line-clamp-2 text-center"
+            aria-expanded={capOpen}
+            onClick={() => setCapOpen((o) => !o)}
+            className={`font-mono text-xs font-bold text-white/80 min-w-0 flex-1 sm:flex-none sm:max-w-[50vw] text-center min-h-[40px] landscape-short:order-first landscape-short:basis-full landscape-short:!max-w-full ${
+              capOpen ? '' : 'line-clamp-2 landscape-short:line-clamp-4'
+            }`}
           >
             {photo.alt}
-          </span>
+          </button>
           {!hover ? fsKey : null}
           {list.length > 1 ? (
             <button
@@ -563,6 +676,22 @@ export function PhotoLightbox({
           ref={thumbsRef}
           data-lightbox-thumbs
           onClick={(e) => e.stopPropagation()}
+          onPointerDown={(e) => {
+            if (fit < list.length) thumbDrag.current = { x: e.clientX, at: e.timeStamp };
+          }}
+          onPointerUp={(e) => {
+            const d = thumbDrag.current;
+            thumbDrag.current = null;
+            if (!d || Math.abs(e.clientX - d.x) < 40) return;
+            pageThumbs(e.clientX < d.x ? 1 : -1);
+            thumbDragged.current = e.timeStamp; // the click that ends a drag opens no photo
+          }}
+          onClickCapture={(e) => {
+            if (e.timeStamp - thumbDragged.current < 400) {
+              e.stopPropagation();
+              e.preventDefault();
+            }
+          }}
           className="shrink-0 mt-3 w-full max-w-6xl mx-auto flex justify-center gap-2 px-1 py-1.5 landscape-short:hidden"
         >
           {win.start > 0 ? (
@@ -913,7 +1042,9 @@ export function InteractivePhotoStack({
                                 e.stopPropagation();
                                 setViewer(source.indexOf(photo));
                               }}
-                              className="absolute top-1.5 right-1.5 sm:top-3 sm:right-3 z-50 w-10 h-10 grid place-items-center bg-white border-2 border-ink rounded-lg shadow-brutal-xs hover:bg-pop-yellow hover:-translate-y-0.5 active:translate-y-0 transition-all text-ink group/expand"
+                              // R82: a 12 px wider invisible hit area: the print lifts and turns as the pointer
+                              // arrives, which moved the 40 px key from under it (1 click in 12 cycled the deck)
+                              className="absolute top-1.5 right-1.5 sm:top-3 sm:right-3 z-50 w-10 h-10 grid place-items-center bg-white border-2 border-ink rounded-lg shadow-brutal-xs hover:bg-pop-yellow hover:-translate-y-0.5 active:translate-y-0 transition-all text-ink group/expand before:absolute before:-inset-3 before:content-['']"
                               title="View full resolution"
                               aria-label={`View full resolution: ${photo.alt}`}
                             >
@@ -944,7 +1075,8 @@ export function InteractivePhotoStack({
                 aria-hidden
                 className="absolute bottom-0 left-1/2 -translate-x-1/2 w-max max-w-[92%] whitespace-nowrap max-[359px]:hidden flex items-center gap-2 nb-tag bg-white shadow-brutal-xs pointer-events-none z-50"
               >
-                <span className="w-2 h-2 rounded-full bg-pop-red border border-ink animate-pulse" />
+                {/* R82 (SIGNAL KEY: red = alerts only): an ink dot, the decoration colour */}
+                <span className="w-2 h-2 rounded-full bg-ink border border-ink animate-pulse" />
                 CLICK ALBUM TO CYCLE
               </div>
             </div>
