@@ -8,7 +8,7 @@ import { FX } from '@/lib/fx';
  * Every section used to sit on the same cream sheet with the same dots, so the page read as one long sheet. Each
  * section now has its OWN printed paper, chosen for what the section is about:
  *   - about       plot      a drafting sheet: a small register cross every 96 px (R74: the dense isometric lattice
- *                           read as noise - owner: "so ugly"; the flyers are the picture now)
+ *                           read as noise - owner: "so ugly")
  *   - projects    mat       a cutting mat: 10 px grid, heavier every 50 px (the workbench things are made on)
  *   - experience  ledger    accounting ledger: ruled lines and double money columns (finance and governance roles)
  *   - honors      sparkle   scattered four-point sparkles (R74: replaced the overlapping-circle guilloche)
@@ -18,7 +18,7 @@ import { FX } from '@/lib/fx';
  * gradient. Every pattern is COMPUTED (no hand-typed points) into one small SVG tile, painted once: no JavaScript, no
  * per-frame work. On a desktop the paper shifts a few px against the mouse (the existing FX-02 --px / --py lean,
  * `.fx-depth`), so it reads as a sheet under the content; still on touch, Calm, reduced motion and the lite tier.
- * It is the FIRST child of its section, under the Bauhaus pieces (section-backdrop) and the content.
+ * It is the FIRST child of its section, under the content.
  */
 export type Stock = 'plot' | 'mat' | 'ledger' | 'sparkle' | 'airmail';
 

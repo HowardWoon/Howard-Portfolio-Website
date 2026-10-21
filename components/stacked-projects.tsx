@@ -33,7 +33,6 @@ import {
   Github,
   Focus,
 } from 'lucide-react';
-import { SectionBackdrop } from './fx/section-backdrop';
 import { SectionPaper } from './fx/section-paper';
 
 interface ProjectData {
@@ -582,7 +581,6 @@ export default function StackedProjects() {
     >
       {/* R71: this section prints on its own paper */}
       <SectionPaper stock="mat" />
-      <SectionBackdrop layout="b" />
       {FX.ambientOrbits ? <AmbientOrbits side="left" square="bg-pop-blue" /> : null}
       <div className="relative max-w-7xl mx-auto space-y-16 sm:space-y-20">
         {/* Section Header */}

@@ -11,7 +11,7 @@ async function open(page: Page) {
   await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
 }
 
-// R74: About and Honors moved to quieter stocks (plot, sparkle) under their flyers
+// R74: About and Honors moved to quieter stocks (plot, sparkle); R77 removed the flyers that flew over them
 const STOCKS = { about: 'plot', projects: 'mat', experience: 'ledger', honors: 'sparkle', contact: 'airmail' };
 
 test('every content section prints on its own paper, under its content, and no two are the same', async ({ page }) => {
@@ -25,7 +25,7 @@ test('every content section prints on its own paper, under its content, and no t
       const print = paper?.querySelector<HTMLElement>('.paper-print');
       out[id] = {
         stock: paper?.dataset.paper ?? null,
-        // the first child of the section, so the content (and the Bauhaus pieces) paint over it
+        // the first child of the section, so the content paints over it
         first: s.firstElementChild === paper,
         image: print ? getComputedStyle(print).backgroundImage : '',
         behind: paper

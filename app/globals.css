@@ -5235,102 +5235,6 @@ html[data-motion='calm'] .site-mascot {
   }
 }
 
-/* ================================================================ R53 section backdrop
-   components/fx/section-backdrop.tsx: decorative ink / paper geometry behind every section's content, in the page
-   gutter. --sb-gut = the side padding the sections use at each width (px-4 / xs:px-5 / sm:px-10 / lg:px-16, then
-   the free margin beside the 80 rem column). A piece is centred --sb-at of the way across it. */
-.sb-layer {
-  --sb-gut: 1rem;
-  --sb-k: 0.62;
-  /* phones: the gutter is only 16 px, so the pieces on the right reach further in (text is set flush left, so the
-     right of a heading or of a gap between two cards is free); from 640 px every piece stays in its gutter */
-  --sb-reach: 2.6;
-  /* the pieces are placed by % of the section's height, so they move when a card in it opens. The browser must not
-     pick one as its scroll anchor: it did, and the page jumped 77 px under the mouse when a proof card opened. */
-  overflow-anchor: none;
-}
-@media (min-width: 375px) {
-  .sb-layer {
-    --sb-gut: 1.25rem;
-  }
-}
-@media (min-width: 640px) {
-  .sb-layer {
-    --sb-gut: 2.5rem;
-    --sb-k: 0.8;
-    --sb-reach: 1;
-  }
-}
-@media (min-width: 1024px) {
-  .sb-layer {
-    --sb-gut: max(4rem, calc((100% - 80rem) / 2));
-    --sb-k: 1.1;
-  }
-}
-html.fx-off-sectionBackdrop .sb-layer {
-  display: none;
-}
-.sb-piece {
-  width: var(--sb-size);
-  scale: calc(var(--sb-k) * var(--u, 1));
-}
-.sb-l {
-  left: calc(var(--sb-gut) * var(--sb-at) - var(--sb-size) / 2);
-}
-/* R76: a phone's left gutter (16 - 20 px) is narrower than a piece, so the left pieces sat at x = -8 px: cut by the
-   screen edge they read as broken marks beside the headlines (text is flush left there). Phones keep the right ones,
-   which have the free space at the end of each line. */
-@media (max-width: 639px) {
-  .sb-l {
-    display: none;
-  }
-}
-.sb-r {
-  right: calc(var(--sb-gut) * var(--sb-at) * var(--sb-reach) - var(--sb-size) / 2);
-}
-@media (prefers-reduced-motion: no-preference) {
-  html:not([data-motion='calm']) .sb-float {
-    animation: sb-float var(--sb-dur, 9s) ease-in-out var(--sb-delay, 0s) infinite alternate;
-  }
-}
-@keyframes sb-float {
-  from {
-    transform: translate3d(0, 7px, 0) rotate(-5deg);
-  }
-  to {
-    transform: translate3d(0, -9px, 0) rotate(6deg);
-  }
-}
-/* R58: the pieces are PAUSED until fx/offscreen-pause.tsx is running (html[data-fx-pause]) and their own section is
-   on screen. They used to run from first paint and be paused later (D5), but the pauser mounts in the after-boot
-   queue: until then all 60 pieces and 15 solids on the page animated at once. Measured at 4x CPU (tests/r17's slow
-   device): the page was ready after 16.4 s with them and 11 - 13 s without; a test with a 20 s limit began to fail.
-   A paused animation costs nothing. No will-change: 60 standing layers are not worth a 9 s drift. */
-.sb-float {
-  animation-play-state: paused;
-}
-html[data-fx-pause='on'] :not([data-offscreen]) > .sb-layer .sb-float {
-  animation-play-state: running;
-}
-/* R58: a piece is not even rendered until its section is on screen. Measured on the same slow device: 14 - 15 s to
-   ready with the 60 pieces on the page (the 15 CSS 3D solids - six faces each, preserve-3d under a perspective - are
-   most of it), 8 - 10 s without them. Each piece is absolutely placed, so nothing moves when it appears.
-   Hidden with `visibility`, not `display`: showing a piece must not lay anything out while the page scrolls
-   (AGENTS.md 6.5; tests/r17 P0-01 counted 50 layouts in a phone fling with `display`, the budget is 45; so did
-   skipping their rendering (the property the plan check NO-CV forbids) on the 3D stages: 23 layouts with it, 13 without, in the same fling). */
-.sb-piece {
-  visibility: hidden;
-}
-html[data-fx-pause='on'] :not([data-offscreen]) > .sb-layer .sb-piece {
-  visibility: visible;
-}
-
-@media print {
-  .sb-layer {
-    display: none;
-  }
-}
-
 /* ================================================================ R71 paper stocks + header ruler
    (components/fx/section-paper.tsx; owner: "make sure my website background for every section, menu must be special
    attractive, innovative"). Each section prints on its own paper; the header is a drawing's title strip with a
@@ -5350,108 +5254,22 @@ html[data-fx-pause='on'] :not([data-offscreen]) > .sb-layer .sb-piece {
   opacity: 0.85;
   border-bottom: 3px solid #0a0a0a;
 }
-/* ================================================================ R74 flyers (components/fx/flyers.tsx; owner: "add some
-   objects floating flying behind ... upgrade the background of this two section"). Ink-outlined paper stickers with a
-   hard shadow ride up and down About and rise through Honors. Transform properties only (translate / rotate), sized in
-   container units so a crossing spans the whole screen; paused off screen; at rest under Calm / reduced motion.
-   R75 (owner: "i dont want all the object overlapped, block the font, sentence, word"): they fly ONLY in the two free
-   margins beside the text column, never across it. */
-/* behind EVERYTHING in its section (a sticker crossed over the About headline at z-index 0): the section becomes its
-   own stacking context, so -1 sits on its paper and under its content */
-section:has(> .flyers) {
-  isolation: isolate;
-}
-.flyers {
-  z-index: -1;
-  /* clip, not hidden: hidden makes a scroll container and the sticky sky inside would stop sticking */
-  overflow: clip;
-  /* the stickers move: the browser must never pick one as its scroll anchor (R53 lesson) */
-  overflow-anchor: none;
-  /* the free margin = the section's side padding (px-4 / xs:px-5 / sm:px-10 / lg:px-16), or more where the text
-     column (max-w-7xl = 80rem, centred) is narrower than the section */
-  --pad: 1rem;
-  --margin: max(var(--pad), calc((100% - 80rem) / 2));
-}
-@media (min-width: 375px) {
-  .flyers {
-    --pad: 1.25rem;
-  }
-}
-@media (min-width: 640px) {
-  .flyers {
-    --pad: 2.5rem;
-  }
-}
-@media (min-width: 1024px) {
-  .flyers {
-    --pad: 4rem;
-  }
-}
-/* the lane: the margin less a 1.5rem band along the text column - the headline's movable type (T1) turns each word
-   in on a perspective, and a turning word swells up to ~24 px past the column's edge while it enters */
-.flyers-margin {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: max(0px, calc(var(--margin) - 1.5rem));
-}
-.flyers-margin[data-side='l'] {
-  left: 0;
-}
-.flyers-margin[data-side='r'] {
-  right: 0;
-}
-/* from 1400 px the fixed section rail (86 px) stands at the right edge: the right lane starts clear of it */
-@media (min-width: 1400px) {
-  .flyers-margin[data-side='r'] {
-    right: 6rem;
-    width: max(0px, calc(var(--margin) - 7.5rem));
-  }
-}
-/* the sky: one screen tall and one margin wide, pinned to the viewport while its section scrolls past */
-.flyers-sky {
-  position: sticky;
-  top: 0;
-  width: 100%;
-  height: 100vh;
-  height: 100svh;
-  container-type: size;
-}
-.flyer {
-  /* its size: as designed, but never more than 70 % of its margin; turned 45 degrees its corners reach 0.21 of its
-     width past its box, so its lane keeps that much clear on both sides and a spinning sticker never leaves the margin */
-  --w: min(var(--size), 70cqw);
-  position: absolute;
-  top: 0;
-  left: calc(var(--w) * 0.21 + (100cqw - var(--w) * 1.42) * var(--x));
-  width: var(--w);
-  height: var(--w);
-  background: center / contain no-repeat;
-  rotate: var(--tilt);
-  translate: 0 calc(var(--rest) * 1cqh);
-  will-change: translate, rotate;
-}
-/* a lane too narrow for a readable sticker (under 32 px: phones, tablets, laptops up to ~1500 px) carries none */
-@container (max-width: 45.5px) {
-  .flyer {
-    display: none;
-  }
-}
-/* R75 (owner: the stickers looked "duplicate"): nothing in a flyer section is see-through. The far layer is solid (a
-   lighter copy of a near sticker read as its ghost), and the cards' scroll reveal rises WITHOUT the fade - a card at
-   opacity 0.5 showed the stickers passing behind it as faded doubles for half a screen of scrolling. */
+/* R75 (owner: "why the part i circled is like duplicate?"): About and Honors cards rise WITHOUT the FX-67 fade (a card
+   at opacity 0.5 let whatever lay behind it show through as a faded double). R77 (owner: "remove all the object at
+   background, so messy, unorganised"): the R74 flyers and the R53 backdrop pieces are gone for good; the solid rise
+   stays so the reveal does not change. */
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
     /* R76: an opened Honors category keeps its FX-66 card turn (this selector outranked it, so the turn never ran) */
     html:not([data-motion='calm']):not(.fx-off-cssReveal)
-      section:has(> .flyers)
+      section:is([id='about'], [id='honors'])
       .fx-rise:not([data-honor-category][aria-expanded='true']) {
       animation-name: fx-rise-solid;
     }
   }
   @media (prefers-reduced-motion: no-preference) and (min-width: 1024px) and (pointer: fine) {
     html:not([data-motion='calm']):not(.fx-off-cssReveal):not(.fx-off-kineticType):not([data-fx-tier='lite'])
-      section:has(> .flyers)
+      section:is([id='about'], [id='honors'])
       .fx-rise.nb-title {
       animation-name: fx-rise-solid, fx-weight;
     }
@@ -5465,43 +5283,8 @@ section:has(> .flyers) {
     translate: 0 0;
   }
 }
-/* up the margin (a 'reverse' plan runs it down) */
-@keyframes flyer-rise {
-  from {
-    translate: 0 calc(100cqh + 48px);
-  }
-  to {
-    translate: 0 calc(-1 * var(--w) - 48px);
-  }
-}
-@keyframes flyer-turn {
-  from {
-    rotate: var(--tilt);
-  }
-  to {
-    rotate: calc(var(--tilt) + var(--spin));
-  }
-}
-@media (prefers-reduced-motion: no-preference) {
-  html:not([data-motion='calm']) .flyers .flyer {
-    animation-name: flyer-rise, flyer-turn;
-    animation-duration: var(--dur), var(--dur);
-    animation-delay: var(--delay), var(--delay);
-    animation-timing-function: linear, linear;
-    animation-iteration-count: infinite, infinite;
-    animation-play-state: paused;
-  }
-  html:not([data-motion='calm']) .flyers[data-run] .flyer {
-    animation-play-state: running;
-  }
-}
-/* the lite tier keeps the near layer only */
-html[data-fx-tier='lite'] .flyer[data-far] {
-  display: none;
-}
 @media print {
   .paper-stock,
-  .flyers,
   .hdr-ruler {
     display: none;
   }
@@ -5697,58 +5480,6 @@ html[data-motion='calm'] .sp-branch-reach {
   :root {
     --u: 1.5;
   }
-/* R81 (owner: the SYSTEM BOOT card was still "too boring"): the log is printed like a dot-matrix job.
-   Sprocket holes: punched ink rings in the card's side margins (decoration = ink); --feed (sections mounted) pulls the
-   paper up one hole per section in three clicks. Hard-stop rings, the same technique as .bg-dots: no soft edge. */
-.boot-feed {
-  position: absolute;
-  top: 1.25rem;
-  bottom: 1.25rem;
-  width: 10px;
-  pointer-events: none;
-  background-image: radial-gradient(circle, transparent 2.5px, #0a0a0a 2.5px 4px, transparent 4px);
-  background-size: 10px 18px;
-  background-position: 50% calc(var(--feed, 0) * -18px);
-  transition: background-position 0.2s steps(3, end);
-}
-/* the print head: an ink carriage that runs along the dot leader while it is printed, then parks out of sight */
-.boot-head {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: 7px;
-  height: 13px;
-  margin-top: -6.5px;
-  background: #0a0a0a;
-  border-radius: 1px;
-  pointer-events: none;
-  animation: boot-head 0.3s 0.1s cubic-bezier(0.2, 0.9, 0.1, 1) both;
-}
-@keyframes boot-head {
-  from {
-    left: 0;
-  }
-  97% {
-    left: calc(100% - 7px);
-    visibility: visible;
-  }
-  to {
-    left: calc(100% - 7px);
-    visibility: hidden;
-  }
-}
-/* the closing stamp: the 100 % chip turns LIVE mint with one hard slam */
-.boot-pct[data-live] {
-  animation: boot-slam 0.24s cubic-bezier(0.2, 0.9, 0.1, 1) both;
-}
-@keyframes boot-slam {
-  from {
-    transform: scale(1.6) rotate(-8deg);
-  }
-  to {
-    transform: none;
-  }
-}
   html {
     font-size: calc(106.25% * 1.5);
   }
@@ -5965,4 +5696,56 @@ html[data-motion='calm'] .sp-branch-reach {
   transition:
     translate 0.14s cubic-bezier(0.2, 0.9, 0.1, 1),
     box-shadow 0.14s cubic-bezier(0.2, 0.9, 0.1, 1);
+}
+/* R81 (owner: the SYSTEM BOOT card was still "too boring"): the log is printed like a dot-matrix job.
+   Sprocket holes: punched ink rings in the card's side margins (decoration = ink); --feed (sections mounted) pulls the
+   paper up one hole per section in three clicks. Hard-stop rings, the same technique as .bg-dots: no soft edge. */
+.boot-feed {
+  position: absolute;
+  top: 1.25rem;
+  bottom: 1.25rem;
+  width: 10px;
+  pointer-events: none;
+  background-image: radial-gradient(circle, transparent 2.5px, #0a0a0a 2.5px 4px, transparent 4px);
+  background-size: 10px 18px;
+  background-position: 50% calc(var(--feed, 0) * -18px);
+  transition: background-position 0.2s steps(3, end);
+}
+/* the print head: an ink carriage that runs along the dot leader while it is printed, then parks out of sight */
+.boot-head {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 7px;
+  height: 13px;
+  margin-top: -6.5px;
+  background: #0a0a0a;
+  border-radius: 1px;
+  pointer-events: none;
+  animation: boot-head 0.3s 0.1s cubic-bezier(0.2, 0.9, 0.1, 1) both;
+}
+@keyframes boot-head {
+  from {
+    left: 0;
+  }
+  97% {
+    left: calc(100% - 7px);
+    visibility: visible;
+  }
+  to {
+    left: calc(100% - 7px);
+    visibility: hidden;
+  }
+}
+/* the closing stamp: the 100 % chip turns LIVE mint with one hard slam */
+.boot-pct[data-live] {
+  animation: boot-slam 0.24s cubic-bezier(0.2, 0.9, 0.1, 1) both;
+}
+@keyframes boot-slam {
+  from {
+    transform: scale(1.6) rotate(-8deg);
+  }
+  to {
+    transform: none;
+  }
 }

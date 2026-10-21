@@ -23,85 +23,35 @@ const strip = <T extends { defaultBrowserType?: unknown }>(d: T) => {
   return rest;
 };
 
-/* ---------------------------------------------------------------- section backdrop */
-// owner: "make sure my website background for every section, at least have some geometry 3d shape or any interactive
-// element floating, moving, waving ... dont just put a single color behind"
+/* ---------------------------------------------------------------- section backdrop (retired) */
+// R53 asked for geometry floating behind every section; R77 (owner, 19 Oct 2026: "remove all the object at background,
+// so messy, unorganised") retired it. Every section's background is its paper and nothing floats in its gutters (the
+// full guard is tests/r74). The page stays no wider than the screen at the three sizes R53 checked.
 for (const [name, w, h] of [
   ['desktop 1440x900', 1440, 900],
   ['tablet 768x1024', 768, 1024],
   ['phone 390x844', 390, 844],
 ] as const) {
-  test(`every section has floating geometry behind its content, and it is never in front of it (${name})`, async ({
-    page,
-  }) => {
+  test(`no floating geometry behind any section, and no sideways scroll (${name})`, async ({ page }) => {
     test.setTimeout(90_000);
     await page.setViewportSize({ width: w, height: h });
     await gate(page);
     await walk(page);
-    const layers = await page.evaluate(() =>
-      [...document.querySelectorAll<HTMLElement>('[data-section-backdrop]')].map((l) => {
-        const sec = l.parentElement!;
-        const cs = getComputedStyle(l);
+    const r = await page.evaluate(() =>
+      ['about', 'projects', 'experience', 'honors', 'contact'].map((id) => {
+        const sec = document.getElementById(id)!;
         return {
-          id: sec.id,
-          // first, or right after the section's own paper (R71), which lies under it: both paint before the content
-          first:
-            sec.firstElementChild === l ||
-            (sec.firstElementChild?.hasAttribute('data-paper') === true &&
-              l.previousElementSibling === sec.firstElementChild),
-          hidden: l.getAttribute('aria-hidden'),
-          pointer: cs.pointerEvents,
-          anchor: cs.overflowAnchor,
-          pieces: l.querySelectorAll('.sb-piece').length,
-          // R58: the cube and the coin are drawn in isometric projection (flat SVG), not built from CSS 3D faces
-          solids: l.querySelectorAll('[data-sb-solid]').length,
-          css3d: l.querySelectorAll('.fx-solid, .fx-stage').length,
-          floating: [...l.querySelectorAll<HTMLElement>('.sb-float')].filter(
-            (e) => getComputedStyle(e).animationName === 'sb-float',
-          ).length,
-          // a later sibling that is not positioned would paint UNDER the absolutely positioned layer
-          staticSiblings: [...sec.children].filter(
-            (c) => c !== l && getComputedStyle(c).position === 'static' && c.getBoundingClientRect().height > 0,
-          ).length,
+          id,
+          layers: sec.querySelectorAll('[data-section-backdrop], .sb-layer').length,
+          pieces: sec.querySelectorAll('.sb-piece, .sb-float, [data-sb-solid]').length,
+          paper: sec.firstElementChild?.hasAttribute('data-paper') === true,
         };
       }),
     );
-    expect(layers.map((l) => l.id).sort()).toEqual(['about', 'contact', 'experience', 'honors', 'projects']);
-    for (const l of layers) {
-      expect(l, l.id).toMatchObject({ first: true, hidden: 'true', pointer: 'none', anchor: 'none', pieces: 12 });
-      expect(l.solids, `${l.id}: 3D solids`).toBeGreaterThanOrEqual(2);
-      expect(l.css3d, `${l.id}: no CSS 3D in the backdrop (slow-device load, R58)`).toBe(0);
-      expect(l.floating, `${l.id}: every piece floats`).toBe(12);
-      expect(l.staticSiblings, `${l.id}: content must paint over the layer`).toBe(0);
-    }
+    for (const s of r) expect(s, s.id).toEqual({ id: s.id, layers: 0, pieces: 0, paper: true });
     expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
   });
 }
-
-test('the backdrop is ink and paper only, and stands still for reduced motion', async ({ browser }) => {
-  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
-  const page = await ctx.newPage();
-  await gate(page);
-  await walk(page);
-  const r = await page.evaluate(() => {
-    const INK = ['rgb(10, 10, 10)', 'rgb(255, 255, 255)', 'rgba(0, 0, 0, 0)'];
-    const bad: string[] = [];
-    let moving = 0;
-    for (const e of document.querySelectorAll<HTMLElement>('[data-section-backdrop] *')) {
-      const cs = getComputedStyle(e);
-      const colours = [cs.backgroundColor, cs.borderTopColor].map((c) =>
-        c.replace(/rgba\((\d+), (\d+), (\d+), [\d.]+\)/, 'rgb($1, $2, $3)'),
-      );
-      if (!INK.includes(colours[0]) && colours[0] !== 'rgb(0, 0, 0)') bad.push(`bg ${cs.backgroundColor}`);
-      if (cs.borderTopWidth !== '0px' && !INK.includes(colours[1])) bad.push(`border ${cs.borderTopColor}`);
-      if (e.classList.contains('sb-float') && cs.animationName !== 'none') moving++;
-    }
-    return { bad: [...new Set(bad)], moving };
-  });
-  expect(r.bad).toEqual([]);
-  expect(r.moving).toBe(0);
-  await ctx.close();
-});
 
 // the layer is placed by % of the section's height. It was picked as the browser's scroll anchor, so the page jumped
 // when a proof card opened under the mouse (tests/r36 role-to-proof broke on it)

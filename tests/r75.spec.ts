@@ -4,6 +4,8 @@ import { test, expect, type Page } from '@playwright/test';
 // R74 stickers fly BEHIND the cards, and the cards' scroll reveal (.fx-rise) faded them in from opacity 0 over the
 // first 45 % of their entry: for half a screen of scrolling a card was see-through, and every sticker passing behind
 // it showed as a faded double. The far layer (opacity 0.7) read as a ghost copy of the near stickers too.
+// R77 (owner: "remove all the object at background, so messy, unorganised"): the stickers are gone (guard: tests/r74);
+// the cards keep the solid rise, so nothing behind a card can ever show through it.
 
 async function open(page: Page) {
   await page.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
@@ -43,19 +45,9 @@ for (const id of ['about', 'honors']) {
   });
 }
 
-test('the far stickers are solid, never a faded copy of the near ones', async ({ page }) => {
-  await page.setViewportSize({ width: 1920, height: 1080 });
-  await open(page);
-  const ops = await page.evaluate(() =>
-    [...document.querySelectorAll<HTMLElement>('[data-flyers] .flyer')].map((e) => getComputedStyle(e).opacity),
-  );
-  expect(ops.length).toBeGreaterThan(6);
-  expect(new Set(ops)).toEqual(new Set(['1']));
-});
-
 // R75 (owner, phone screenshot of the About headline: "i dont want all the object overlapped, block the font, sentence,
-// word in my website"). The stickers fly only in the free margins beside the text column: at every width, at every
-// scroll position through the section and at every point of their flight, no sticker touches a line of text.
+// word in my website") was answered by keeping the stickers in the free margins; R77 removed them. At every width the
+// owner's R75 screenshots were checked at, and at every scroll position through About and Honors, nothing flies there.
 for (const [w, h] of [
   [390, 844],
   [1024, 768],
@@ -65,11 +57,11 @@ for (const [w, h] of [
   [1920, 1080],
   [2560, 1440],
 ]) {
-  test(`${w}x${h}: no sticker ever overlaps a word in About or Honors`, async ({ page }) => {
+  test(`${w}x${h}: nothing flies behind the words of About or Honors`, async ({ page }) => {
     test.setTimeout(120_000);
     await page.setViewportSize({ width: w, height: h });
     await open(page);
-    let seen = 0;
+    let stops = 0;
     for (const id of ['about', 'honors']) {
       const [top, height] = await page.evaluate((i) => {
         let y = 0;
@@ -80,48 +72,20 @@ for (const [w, h] of [
       for (let y = top - h * 0.5; y < top + height; y += h * 0.6) {
         await page.evaluate((y) => window.scrollTo(0, y), y);
         await page.waitForTimeout(150);
-        for (const at of [0, 0.25, 0.5, 0.75]) {
-          const hits = await page.evaluate(
-            ([i, at]) => {
-              const sec = document.getElementById(i as string)!;
-              const fl = [...sec.querySelectorAll<HTMLElement>('[data-flyers] .flyer')];
-              // freeze every sticker at the same point of its own flight
-              for (const k of fl)
-                for (const a of k.getAnimations()) {
-                  a.pause();
-                  a.currentTime = (at as number) * Number(a.effect!.getComputedTiming().duration);
-                }
-              const boxes = fl
-                .map((k) => k.getBoundingClientRect())
-                .filter((b) => b.width > 0 && b.bottom > 0 && b.top < innerHeight);
-              const words: { t: string; r: DOMRect }[] = [];
-              const walk = document.createTreeWalker(sec, NodeFilter.SHOW_TEXT);
-              for (let n = walk.nextNode(); n; n = walk.nextNode()) {
-                if (!n.textContent!.trim() || n.parentElement!.closest('[data-flyers], .sr-only')) continue;
-                const cs = getComputedStyle(n.parentElement!);
-                if (cs.visibility === 'hidden' || +cs.opacity === 0) continue;
-                const r = document.createRange();
-                r.selectNodeContents(n);
-                for (const b of r.getClientRects())
-                  if (b.width > 1 && b.bottom > 0 && b.top < innerHeight)
-                    words.push({ t: n.textContent!.trim().slice(0, 30), r: b });
-              }
-              const out: string[] = [];
-              for (const b of boxes)
-                for (const { t, r } of words)
-                  if (b.left < r.right && b.right > r.left && b.top < r.bottom && b.bottom > r.top)
-                    out.push(`"${t}" at ${Math.round(r.left)},${Math.round(r.top)}`);
-              return { out, n: boxes.length };
-            },
-            [id, at],
-          );
-          seen += hits.n;
-          expect(hits.out, `#${id} scroll ${Math.round(y)} flight ${at}`).toEqual([]);
-        }
+        const r = await page.evaluate((i) => {
+          const sec = document.getElementById(i)!;
+          return {
+            stickers: sec.querySelectorAll('[data-flyers], .flyer, [data-section-backdrop], .sb-piece').length,
+            flights: sec
+              .getAnimations({ subtree: true })
+              .map((a) => (a as CSSAnimation).animationName)
+              .filter((n) => /^(flyer-|sb-float)/.test(n ?? '')),
+          };
+        }, id);
+        stops++;
+        expect(r, `#${id} scroll ${Math.round(y)}`).toEqual({ stickers: 0, flights: [] });
       }
     }
-    // wide screens carry the stickers; up to ~1500 px the margin beside the text is too narrow, so they carry none
-    if (w >= 1600) expect(seen).toBeGreaterThan(0);
-    else expect(seen).toBe(0);
+    expect(stops).toBeGreaterThan(2);
   });
 }

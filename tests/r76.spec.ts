@@ -481,26 +481,28 @@ test('the badge pit lets a finger scroll the page and keeps no GPU layer at rest
   await ctx.close();
 });
 
-test('phones: no backdrop piece hangs off the left edge of the screen', async ({ browser }) => {
+// R77 (owner: "remove all the object at background, so messy, unorganised"): the backdrop pieces are gone, so none can
+// hang off a phone's edge; on the phone where they did (iPhone SE) every section is checked for any left over
+test('phones: no backdrop piece in any section, none off the left edge of the screen', async ({ browser }) => {
   const ctx = await browser.newContext(SE);
   const page = await ctx.newPage();
   await page.goto('/');
   await skipGate(page);
-  const off: string[] = [];
+  const left: string[] = [];
   for (const id of ['about', 'projects', 'experience', 'honors', 'contact']) {
     await page.evaluate((i) => document.getElementById(i)?.scrollIntoView({ block: 'start' }), id);
     await page.waitForTimeout(500);
-    off.push(
+    left.push(
       ...(await page.evaluate(
         (i) =>
-          [...document.querySelectorAll<HTMLElement>(`#${i} .sb-piece`)]
-            .filter((e) => getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().left < 0)
-            .map((e) => `${i}: ${Math.round(e.getBoundingClientRect().left)}`),
+          [
+            ...document.querySelectorAll<HTMLElement>(`#${i} .sb-piece, #${i} [data-section-backdrop], #${i} .flyer`),
+          ].map((e) => `${i}: ${e.className}`),
         id,
       )),
     );
   }
-  expect(off).toEqual([]);
+  expect(left).toEqual([]);
   await ctx.close();
 });
 

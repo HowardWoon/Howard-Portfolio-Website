@@ -8,9 +8,7 @@ import { FX, SPRING_SOFT } from '@/lib/fx';
 import { startTrail, useInteractionSelect } from '@/lib/interaction-store';
 import { projectsWithSkill, skillKey } from '@/lib/skills';
 import { ScrollInk } from './fx/scroll-ink';
-import { SectionBackdrop } from './fx/section-backdrop';
 import { SectionPaper } from './fx/section-paper';
-import { Flyers } from './fx/flyers';
 
 const architecturePillars = [
   {
@@ -294,9 +292,6 @@ export default function AboutSection() {
     >
       {/* R71: this section prints on its own paper */}
       <SectionPaper stock="plot" />
-      <SectionBackdrop layout="a" />
-      {/* R74: systems in flight behind the content (z-index -1: paints under everything) */}
-      <Flyers set="about" />
       {/* Bauhaus accents */}
       <div
         aria-hidden

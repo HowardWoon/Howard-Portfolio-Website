@@ -139,14 +139,13 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
 6. **3D must look sharp (R73, owner: "why it look so blur?"):** no soft point sprites near the camera, a tight low bloom,
    fog behind the scene, MSAA on every composer tier (30-design-system E45). Every scene control is clicked in a test
    that fails on any page error (`tests/r73`).
-7. **Backgrounds are sparse, objects fly (R74, owner: About / Honors backgrounds "so ugly ... add some objects floating
-   flying behind"):** never a dense line pattern behind text. About and Honors carry `components/fx/flyers.tsx`
-   (stickers from the section's own subject, behind the content at `z-index: -1` in an isolated section, transform-only,
-   paused off screen, still under Calm). Guard: `tests/r74`. R75 (owner: the stickers looked "duplicate"): nothing
-   is seen THROUGH a card - in a flyer section the card reveal rises without a fade and every sticker is solid. R75
-   (owner: "i dont want all the object overlapped, block the font, sentence, word"): stickers fly ONLY in the free
-   margins beside the text column, never across a word; where the margin is too narrow (phones, tablets, laptops up
-   to ~1500 px) there are none. Guard: `tests/r75`.
+7. **Backgrounds are clean: no objects behind sections (R77, owner, About / Honors screenshots: "remove all the object
+   at background, so messy, unorganised"; replaces R74 "objects floating flying behind" and R53 "geometry ... floating"
+   in every section):** the R74 flyers (`components/fx/flyers.tsx`) and the R53 section backdrop
+   (`components/fx/section-backdrop.tsx`) are DELETED - never add floating / flying stickers, shapes or icons behind a
+   section again, and never a dense line pattern behind text either; a section's background is its R71 paper. About
+   and Honors cards keep the solid rise (no fade, R75: nothing is seen THROUGH a card). Guards: `tests/r74` (no such
+   markup, CSS, flag or import), `tests/r75`, `tests/r53`.
 8. **Nothing on the 3D street runs on a fixed schedule (R76, owner: "walkers, cars, train like appearing in their fix
    algorithm"):** each visit rolls the fleet, the paint, the opening line-up, the light phase and the train timing; each
    respawn rolls lane / driver speed / coat; walkers roam a graph of corners with random pauses and pass each other on

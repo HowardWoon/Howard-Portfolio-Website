@@ -30,7 +30,6 @@ import {
   ChevronDown,
   Camera,
 } from 'lucide-react';
-import { SectionBackdrop } from './fx/section-backdrop';
 import { SectionPaper } from './fx/section-paper';
 
 type FilterCategory = 'all' | 'corporate' | 'leadership' | 'academic';
@@ -746,7 +745,6 @@ export default function ExperienceSection() {
     >
       {/* R71: this section prints on its own paper */}
       <SectionPaper stock="ledger" />
-      <SectionBackdrop layout="c" />
       {/* Bauhaus accents */}
       <div
         aria-hidden

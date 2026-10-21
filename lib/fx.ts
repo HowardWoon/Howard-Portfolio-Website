@@ -142,9 +142,9 @@ export const FX = {
   reelGrab: true, // drag a reel row by hand and fling it; a short press is still a click
   ticketPunch: true, // the reel's ink tickets are punched top and bottom like admission tickets (CSS mask)
   heroMascot: true, // R49 the page-mascot cat perched on the hero ticker: follows the pointer, reacts to a boop
-  sectionBackdrop: true, // R53 floating ink / paper geometry in the gutters of every section, on every screen size
+  // R53 sectionBackdrop and R74 flyers retired in R77 (owner: "remove all the object at background, so messy,
+  // unorganised"): no floating shapes or stickers behind any section (components deleted; guard tests/r74)
   sectionPaper: true, // R71 each section has its own printed paper (plot / mat / ledger / sparkle / airmail)
-  flyers: true, // R74 sticker objects fly behind About (systems in flight) and Honors (after the ceremony)
   headerRuler: true, // R71 a printed millimetre ruler along the bottom edge of the header
   reelTape: true, // each reel print is held by the site's masking tape, which presses flat under the mouse / focus
 } as const;

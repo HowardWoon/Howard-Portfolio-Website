@@ -1,134 +1,74 @@
 import { test, expect, type Page } from '@playwright/test';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
 
-// Round 74 (owner, 15 Oct 2026, About + Honors): "i not quite like the background design of this two, so ugly ...
-// add some objects floating flying behind etc, must be creative to upgrade the background of this two section".
-// The dense isometric lattice (About) and the overlapping-circle guilloche (Honors) became quiet stocks (plot,
-// sparkle), and cut-out stickers fly behind the content: systems in flight across About, awards rising through
-// Honors (components/fx/flyers.tsx).
+// Round 77 (owner, 19 Oct 2026, screenshots of About and Honors): "remove all the object at background, so messy,
+// unorganised". The R74 flyers (cut-out stickers flying in the margins of About and Honors: server, gear, terminal,
+// braces, stars, medals ...) and the R53 section backdrop (rings, crosses, dot grids, cubes, coins, bars floating in
+// the gutters of every section) are retired for good. This file used to prove the stickers flew; it now proves that
+// nothing of the kind renders or can come back.
+
+const SECTIONS = ['about', 'projects', 'experience', 'honors', 'contact'];
+// every hook the two layers ever had: their markup, their classes, their FX flags
+const OBJECTS = '[data-flyers], .flyers, .flyer, .flyers-sky, [data-section-backdrop], .sb-layer, .sb-piece, .sb-float';
 
 async function open(page: Page) {
   await page.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
   await page.goto('/', { waitUntil: 'networkidle' });
   await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
 }
-const to = (page: Page, id: string) =>
-  page.evaluate((i) => {
-    const el = document.getElementById(i)!;
-    window.scrollTo(0, el.getBoundingClientRect().top + scrollY + 200);
-  }, id);
 
-for (const id of ['about', 'honors']) {
-  test(`${id}: stickers fly behind the content, inside the section, while it is on screen`, async ({ page }) => {
-    await page.setViewportSize({ width: 1920, height: 1080 });
+for (const [w, h] of [
+  [1920, 1080],
+  [1440, 900],
+  [390, 844],
+] as const) {
+  test(`${w}x${h}: no flying stickers or floating backdrop pieces in any section`, async ({ page }) => {
+    test.setTimeout(90_000);
+    await page.setViewportSize({ width: w, height: h });
     await open(page);
-    await to(page, id);
-    await page.waitForTimeout(600);
-    const a = await page.evaluate((i) => {
-      const sec = document.getElementById(i)!;
-      const fl = sec.querySelector<HTMLElement>(':scope > [data-flyers]')!;
-      const kids = [...fl.querySelectorAll<HTMLElement>('.flyer')].filter(
-        (e) => getComputedStyle(e).display !== 'none',
+    for (const id of SECTIONS) {
+      await page.evaluate((i) => document.getElementById(i)!.scrollIntoView({ block: 'start' }), id);
+      await page.waitForTimeout(250);
+      const r = await page.evaluate(
+        ([i, sel]) => {
+          const sec = document.getElementById(i)!;
+          return {
+            objects: sec.querySelectorAll(sel).length,
+            // no sticker / piece keyframes run anywhere in the section
+            anims: sec
+              .getAnimations({ subtree: true })
+              .map((a) => (a as CSSAnimation).animationName)
+              .filter((n) => /^(flyer-|sb-float)/.test(n ?? '')),
+          };
+        },
+        [id, OBJECTS],
       );
-      return {
-        set: fl.dataset.flyers,
-        behind: getComputedStyle(fl).zIndex === '-1' && getComputedStyle(sec).isolation === 'isolate',
-        decorative: fl.getAttribute('aria-hidden') === 'true' && getComputedStyle(fl).pointerEvents === 'none',
-        running:
-          fl.hasAttribute('data-run') &&
-          kids.every((k) => getComputedStyle(k).animationPlayState.startsWith('running')),
-        count: kids.length,
-        pos: kids.map((k) => k.getBoundingClientRect().x),
-      };
-    }, id);
-    expect(a.set).toBe(id);
-    expect(a.behind, 'under the text, on the paper').toBe(true);
-    expect(a.decorative).toBe(true);
-    expect(a.running).toBe(true);
-    expect(a.count).toBeGreaterThanOrEqual(6);
-    // they move
-    await page.waitForTimeout(1500);
-    const b = await page.evaluate(
-      (i) =>
-        [...document.querySelectorAll<HTMLElement>(`#${i} [data-flyers] .flyer`)]
-          .filter((e) => getComputedStyle(e).display !== 'none')
-          .map((k) => [k.getBoundingClientRect().x, k.getBoundingClientRect().y]),
-      id,
-    );
-    expect(b.length).toBe(a.count);
-    // and the page is no wider than the screen
+      expect(r, `#${id}`).toEqual({ objects: 0, anims: [] });
+    }
+    expect(await page.evaluate((sel) => document.querySelectorAll(sel).length, OBJECTS)).toBe(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
   });
 }
 
-test('the stickers move, and stop when the section leaves the screen', async ({ page }) => {
-  await page.setViewportSize({ width: 1920, height: 1080 });
-  await open(page);
-  await to(page, 'honors');
-  const where = () =>
-    page.evaluate(() =>
-      [...document.querySelectorAll<HTMLElement>('#honors [data-flyers] .flyer')].map((k) =>
-        Math.round(k.getBoundingClientRect().y),
-      ),
-    );
-  const y0 = await where();
-  await page.waitForTimeout(1200);
-  const y1 = await where();
-  expect(
-    y1.some((y, i) => y < y0[i] - 3),
-    'they rise',
-  ).toBe(true);
-  await page.evaluate(() => window.scrollTo(0, 0));
-  await page.waitForTimeout(400);
-  expect(await page.locator('#honors [data-flyers]').getAttribute('data-run')).toBeNull();
-});
-
-test('Calm: every sticker rests in place, inside its section', async ({ page }) => {
-  await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await open(page);
-  for (const id of ['about', 'honors']) {
-    await to(page, id);
-    const r = await page.evaluate((i) => {
-      const kids = [...document.querySelectorAll<HTMLElement>(`#${i} [data-flyers] .flyer`)];
-      return kids.map((k) => {
-        // R75: two skies, one per margin - each sticker rests inside its own
-        const sky = k.closest<HTMLElement>('.flyers-sky')!.getBoundingClientRect();
-        const b = k.getBoundingClientRect();
-        return {
-          anim: getComputedStyle(k).animationName,
-          inside: b.left >= sky.left - 1 && b.right <= sky.right + 1,
-        };
-      });
-    }, id);
-    for (const k of r) {
-      expect(k.anim).toBe('none');
-      expect(k.inside).toBe(true);
+test('the flyer and backdrop layers cannot come back: no component, no CSS, no FX flag, no import', () => {
+  expect(existsSync('components/fx/flyers.tsx')).toBe(false);
+  expect(existsSync('components/fx/section-backdrop.tsx')).toBe(false);
+  const fx = readFileSync('lib/fx.ts', 'utf8').replace(/\/\/[^\n]*/g, '');
+  expect(fx).not.toMatch(/\b(flyers|sectionBackdrop)\s*:/);
+  const css = readFileSync('app/globals.css', 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  expect(css).not.toMatch(/\.(flyers?|flyers-sky|flyers-margin|sb-layer|sb-piece|sb-float|sb-l|sb-r)\b/);
+  expect(css).not.toMatch(/@keyframes\s+(flyer-rise|flyer-turn|sb-float)\b/);
+  const files: string[] = [];
+  const walk = (d: string) => {
+    for (const e of readdirSync(d, { withFileTypes: true })) {
+      if (e.isDirectory()) walk(join(d, e.name));
+      else if (/\.tsx?$/.test(e.name)) files.push(join(d, e.name));
     }
-  }
-});
-
-test('phones keep the near layer only; the page stays put', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await open(page);
-  await to(page, 'about');
-  const r = await page.evaluate(() => ({
-    far: [...document.querySelectorAll<HTMLElement>('[data-flyers] .flyer[data-far]')].filter(
-      (e) => getComputedStyle(e).display !== 'none',
-    ).length,
-    wide: document.documentElement.scrollWidth - innerWidth,
-  }));
-  expect(r.far).toBe(0);
-  expect(r.wide).toBeLessThanOrEqual(0);
-});
-
-test('the stickers are neo-brutalist: ink outline, hard shadow, computed shapes, no blur or soft gradient', () => {
-  const src = readFileSync('components/fx/flyers.tsx', 'utf8').replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, '');
-  expect(src).not.toMatch(/blur|radial-gradient|linear-gradient|drop-shadow|glow|dangerouslySetInnerHTML/i);
-  // ink, paper white and podium yellow (SIGNAL: placement or award won) only
-  expect([...new Set(src.match(/#[0-9A-Fa-f]{6}\b/g) ?? [])].sort()).toEqual(['#0A0A0A', '#FFC700', '#FFFFFF']);
-  const css = readFileSync('app/globals.css', 'utf8');
-  const block = css.slice(css.indexOf('R74 flyers'), css.indexOf('@media print', css.indexOf('R74 flyers')));
-  // transform properties only: nothing that lays out per frame
-  expect(block).not.toMatch(/@keyframes[^}]*\b(top|left|width|height|margin)\s*:/);
+  };
+  for (const d of ['app', 'components', 'lib']) walk(d);
+  const users = files.filter((f) =>
+    /fx\/(flyers|section-backdrop)['"]|<(Flyers|SectionBackdrop)\b/.test(readFileSync(f, 'utf8')),
+  );
+  expect(users).toEqual([]);
 });

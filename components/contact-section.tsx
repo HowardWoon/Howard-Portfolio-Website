@@ -29,7 +29,6 @@ import { OsWindow, WindowDesk } from '@/components/os-window';
 import { PillPit, type PitBadge } from '@/components/pill-pit';
 import { SIGNAL, type Signal } from '@/lib/signal';
 import { experiences } from '@/components/experience-section';
-import { SectionBackdrop } from './fx/section-backdrop';
 import { SectionPaper } from './fx/section-paper';
 
 const ROLE_SIGNAL: Record<string, Signal | undefined> = {
@@ -259,7 +258,6 @@ export default function ContactSection() {
     >
       {/* R71: this section prints on its own paper */}
       <SectionPaper stock="airmail" />
-      <SectionBackdrop layout="b" />
       {/* Bauhaus composition (replaces the particle canvas, which was invisible on a light canvas
           and was also being stretched: its bitmap was viewport-sized but CSS-sized to the whole section) */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
