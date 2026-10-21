@@ -418,14 +418,47 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
   }, [fastForwardRef]);
 
   // R79: each OK stamp lands with a jolt through the card (its own `translate`, so framer's transform is untouched)
+  // R81: ... and the thump carries into the Bauhaus shapes, which hop and settle (added on top of whatever they are
+  // doing, so a stamp during the lift-off blast still reads)
   useEffect(() => {
     if (step === 0 || prefersReducedMotion()) return;
+    const ease = 'cubic-bezier(0.2, 0.9, 0.1, 1)';
     cardRef.current?.animate([{ translate: '0 0' }, { translate: '0 3px' }, { translate: '0 0' }], {
       duration: 170,
       delay: 70,
-      easing: 'cubic-bezier(0.2, 0.9, 0.1, 1)',
+      easing: ease,
+    });
+    shapesRef.current?.querySelectorAll<HTMLElement>('[data-boot-shape]').forEach((el, i) => {
+      const hop = `translateY(${8 + (i % 2) * 4}px) rotate(${(i % 2 ? 1 : -1) * 4}deg)`;
+      el.animate([{ transform: 'none' }, { transform: hop, offset: 0.3 }, { transform: 'none' }], {
+        duration: 300,
+        delay: 70 + i * 25,
+        easing: ease,
+        composite: 'add',
+      });
     });
   }, [step]);
+
+  // R81 hand-off: when every section is up the shapes are flung off towards the screen edges (the shatter follows)
+  useEffect(() => {
+    if (bootState !== 'complete' || prefersReducedMotion()) return;
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
+    shapesRef.current?.querySelectorAll<HTMLElement>('[data-boot-shape]').forEach((el, i) => {
+      const r = el.getBoundingClientRect();
+      const dx = r.left + r.width / 2 - cx;
+      const dy = r.top + r.height / 2 - cy;
+      const d = Math.hypot(dx, dy) || 1;
+      const out = `translate(${((dx / d) * 140).toFixed(1)}px, ${((dy / d) * 140).toFixed(1)}px) rotate(${(i % 2 ? 1 : -1) * 24}deg)`;
+      el.animate([{ transform: 'none' }, { transform: out }], {
+        duration: 420,
+        delay: 60,
+        easing: 'cubic-bezier(0.5, 0, 0.9, 0.4)',
+        fill: 'forwards',
+        composite: 'add',
+      });
+    });
+  }, [bootState]);
 
   const pct = Math.round((step / SECTIONS.length) * 100);
   const atGate = bootState === 'idle' || bootState === 'launch';
@@ -552,6 +585,17 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
                   transition={SPRING_STAMP}
                   className="boot-card nb-card w-[min(26rem,calc(100vw-3rem))] p-3 xs:p-4 sm:p-5 flex flex-col gap-4 landscape-short:gap-2 font-mono text-ink"
                 >
+                  {/* R81: continuous printer paper - a column of sprocket holes down each edge advances one hole per
+                      mounted section (from 640 px; phones keep the card's full width for the lines) */}
+                  {(['left', 'right'] as const).map((side) => (
+                    <span
+                      key={side}
+                      aria-hidden
+                      data-boot-feed
+                      className={`boot-feed hidden sm:block ${side === 'left' ? 'left-[5px]' : 'right-[5px]'}`}
+                      style={{ '--feed': step } as React.CSSProperties}
+                    />
+                  ))}
                   <p className="text-xs sm:text-sm font-extrabold tracking-[0.08em]">
                     <Typed text="> HOWARD.WOON // SYSTEM BOOT" cps={95} />
                   </p>
@@ -562,7 +606,11 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
                         <span className="shrink-0">
                           <Typed text={`> mount ${s.label.toUpperCase()}`} cps={120} />
                         </span>
-                        <span aria-hidden className="boot-leader flex-1 min-w-2 border-b-2 border-dotted border-ink" />
+                        {/* R81: the dot leader is printed by a carriage that runs out to the status chip */}
+                        <span aria-hidden className="relative flex-1 min-w-2">
+                          <span className="boot-leader block border-b-2 border-dotted border-ink" />
+                          <span data-boot-head className="boot-head" />
+                        </span>
                         {i < step ? (
                           <m.span
                             data-boot-ok
@@ -599,8 +647,13 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
                         </span>
                       ))}
                     </div>
-                    {/* R79: the figure rolls over like an odometer wheel */}
-                    <span className="relative nb-tag bg-white tabular-nums min-w-[4.5rem] justify-center overflow-hidden">
+                    {/* R79: the figure rolls over like an odometer wheel. R81: at 100 % the chip is stamped LIVE (mint,
+                        SIGNAL KEY: the whole system is up) - the boot's closing stamp, on its own chip, over no word */}
+                    <span
+                      data-boot-pct
+                      data-live={bootState === 'complete' ? '' : undefined}
+                      className={`boot-pct relative nb-tag tabular-nums min-w-[4.5rem] justify-center overflow-hidden ${bootState === 'complete' ? 'bg-pop-mint' : 'bg-white'}`}
+                    >
                       <AnimatePresence initial={false} mode="popLayout">
                         <m.span
                           key={pct}

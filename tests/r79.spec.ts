@@ -34,6 +34,14 @@ type Rec = {
   okOutside: boolean;
   vw: number;
   vh: number;
+  /** R81: print heads on the leaders, the sprocket feed (shown? how far it advanced), the LIVE 100 % chip, and the
+   * most shapes seen hopping at once while the log runs / flung off at the hand-off */
+  heads: number;
+  feedShown: boolean;
+  feedMax: number;
+  pctLive: boolean;
+  shapesHopping: number;
+  shapesFlung: number;
 };
 /**
  * Everything the gate shows is recorded IN the page, every frame, until the gate is gone. A loaded CI runner can run
@@ -59,8 +67,15 @@ const record = (page: Page) =>
       okOutside: false,
       vw: document.documentElement.clientWidth,
       vh: innerHeight,
+      heads: 0,
+      feedShown: false,
+      feedMax: 0,
+      pctLive: false,
+      shapesHopping: 0,
+      shapesFlung: 0,
     };
     (window as unknown as { __rec: Rec }).__rec = r;
+    let logSince = 0;
     const tick = () => {
       const k = document.querySelector<HTMLElement>('[data-boot-action="init"]');
       if (k) {
@@ -106,6 +121,19 @@ const record = (page: Page) =>
           const landed = !chip.style.transform || chip.style.transform === 'none';
           if (settled && landed && chip.getBoundingClientRect().right > box.right + 0.5) r.okOutside = true;
         }
+        r.heads = Math.max(r.heads, log.querySelectorAll('[data-boot-head]').length);
+        for (const f of log.querySelectorAll<HTMLElement>('[data-boot-feed]')) {
+          if (f.offsetWidth > 0) r.feedShown = true;
+          r.feedMax = Math.max(r.feedMax, Number(f.style.getPropertyValue('--feed')) || 0);
+        }
+        if (log.querySelector('[data-boot-pct][data-live]')) r.pctLive = true;
+        const moving = [...document.querySelectorAll('[data-boot-shape]')].filter((s) =>
+          s.getAnimations().some((a) => a.playState === 'running'),
+        ).length;
+        // (the lift-off blast still runs for the log's first ~0.3 s: hops count only from 0.6 s in)
+        logSince ||= performance.now();
+        if (log.dataset.state === 'complete') r.shapesFlung = Math.max(r.shapesFlung, moving);
+        else if (performance.now() - logSince > 600) r.shapesHopping = Math.max(r.shapesHopping, moving);
       }
       if (document.querySelector('.boot-overlay')) requestAnimationFrame(tick);
     };
@@ -172,6 +200,28 @@ test('the boot log keeps every word: the header and one typed mount line per sec
     '> mount CONTACT',
   ]);
   expect(r.hint).toBe('Press any key or tap to jump ahead');
+});
+
+// R81 (owner, the old SYSTEM BOOT card: "too boring, add more some features and animations, visual style effect"):
+// the log prints like a dot-matrix job and the gate's shapes take part
+test('R81: print heads run the leaders, the sprocket paper feeds, shapes hop on each OK and fly off, 100 % is stamped LIVE', async ({
+  page,
+}) => {
+  const errors = watchErrors(page);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/', { waitUntil: 'networkidle' });
+  await hydrated(page);
+  await record(page);
+  await page.locator('[data-boot-action="init"]').click();
+  await gateGone(page);
+  const r = await recorded(page);
+  expect(r.heads, 'one print head per mounted line').toBe(5);
+  expect(r.feedShown, 'sprocket strips on a desktop card').toBe(true);
+  expect(r.feedMax, 'the paper fed one hole per section').toBe(5);
+  expect(r.shapesHopping, 'the shapes hop with the OK stamps').toBeGreaterThanOrEqual(3);
+  expect(r.shapesFlung, 'the shapes are flung off at the hand-off').toBeGreaterThanOrEqual(3);
+  expect(r.pctLive, 'the 100 % chip is stamped LIVE').toBe(true);
+  expect(errors).toEqual([]);
 });
 
 test('keyboard: Enter launches at once, any key during the climb jumps straight to the site', async ({ page }) => {
@@ -248,6 +298,7 @@ test('Galaxy Fold (280 px): the key, its pods and the full log fit, no sideways 
   expect(r.card.right).toBeLessThanOrEqual(280);
   expect(r.okOutside).toBe(false);
   expect(r.rowWrapped).toBe(false);
+  expect(r.feedShown, 'no sprocket strips on a phone: the lines keep the full card width').toBe(false);
   const sw = await page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.clientWidth]);
   expect(sw[0]).toBeLessThanOrEqual(sw[1]);
 });
