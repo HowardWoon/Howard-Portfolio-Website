@@ -194,21 +194,14 @@ test('pressing a card pushes it into the desk (C2)', async ({ page }) => {
 });
 
 /* ---------------------------------------------------------------- P4 */
-test('feed marks: five numbered strips in the left margin at >= 1536 px, none at 1440 (P4)', async ({ page }) => {
-  await page.setViewportSize({ width: 1600, height: 900 });
-  await home(page);
-  const strips = page.locator('.fx-page-root .fx-feed');
-  await expect(strips).toHaveCount(5);
-  await expect(strips.locator('.fx-feed-n')).toHaveText(['01', '02', '03', '04', '05']);
-  // the header paints above the marks
-  const top = await page.evaluate(() => {
-    const h = document.querySelector('.site-header')!.getBoundingClientRect();
-    const e = document.elementFromPoint(30, h.top + h.height / 2);
-    return !!e?.closest('.site-header');
-  });
-  expect(top).toBe(true);
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await expect(page.locator('.fx-feed-marks').first()).toBeHidden();
+// R77 (owner: "make my whole website, every section background clean and tidy"): the P4 feed marks (ticks and
+// section numbers down the left margin) are retired, at every width
+test('no feed marks in the left margin at any width (P4 retired in R77)', async ({ page }) => {
+  for (const w of [1920, 1600, 1440]) {
+    await page.setViewportSize({ width: w, height: 900 });
+    await home(page);
+    expect(await page.locator('.fx-feed-marks, .fx-feed, .fx-feed-n').count(), `${w}px`).toBe(0);
+  }
 });
 
 /* ---------------------------------------------------------------- T1 */

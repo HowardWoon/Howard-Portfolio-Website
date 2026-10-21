@@ -30,7 +30,6 @@ import {
   ChevronDown,
   Camera,
 } from 'lucide-react';
-import { SectionPaper } from './fx/section-paper';
 
 type FilterCategory = 'all' | 'corporate' | 'leadership' | 'academic';
 
@@ -743,21 +742,6 @@ export default function ExperienceSection() {
       id="experience"
       className="fx-tide-surface fx-dot-plane fx-sheet relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-clip border-t-3 border-ink"
     >
-      {/* R71: this section prints on its own paper */}
-      <SectionPaper stock="ledger" />
-      {/* Bauhaus accents */}
-      <div
-        aria-hidden
-        className="fx-drift pointer-events-none absolute -left-40 top-[45%] w-72 h-72 rounded-full border-3 border-dashed border-ink/40 hidden xl:block"
-      />
-      <svg
-        aria-hidden
-        className="fx-drift-rev pointer-events-none absolute right-10 top-24 w-24 h-24 hidden lg:block"
-        viewBox="0 0 100 100"
-      >
-        <polygon points="50,6 96,92 4,92" fill="#FFFFFF" stroke="#0A0A0A" strokeWidth="6" strokeLinejoin="round" />
-      </svg>
-
       <div className="relative max-w-6xl mx-auto space-y-12">
         {/* Section Header */}
         <div className="space-y-7">

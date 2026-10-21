@@ -6,7 +6,6 @@ import { Github, Linkedin } from './brand-icons';
 import { SignalKey } from './signal-key';
 import { openResume } from '@/lib/resume';
 import { flapIn } from '@/lib/split-flap';
-import { DotField } from './fx/dot-field';
 import { TearStub } from './tear-stub';
 
 export function SiteFooter() {
@@ -58,12 +57,10 @@ export function SiteFooter() {
   return (
     <footer
       data-dark-surface
-      className="fx-lamp fx-grain relative z-10 bg-ink text-white mt-0 pt-16 sm:pt-20 pb-[max(3.5rem,calc(var(--safe-bottom)+2rem))] px-4 xs:px-5 sm:px-10 lg:px-16"
+      className="fx-lamp relative z-10 bg-ink text-white mt-0 pt-16 sm:pt-20 pb-[max(3.5rem,calc(var(--safe-bottom)+2rem))] px-4 xs:px-5 sm:px-10 lg:px-16"
     >
-      {/* R26: a field of white squares the mouse pushes aside (DotGrid / Vanta Dots, brutalist remix) */}
-      <DotField />
       <div className="relative z-[1] max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-start gap-14 lg:gap-10">
-        {/* Left: System of Record / Title Block (blueprint-style drawing frame); bg-ink keeps the dots out of it */}
+        {/* Left: System of Record / Title Block (blueprint-style drawing frame) */}
         <div
           data-tear-frame
           className="flex-1 w-full border-3 border-white rounded-[22px] overflow-hidden flex flex-col relative bg-ink shadow-[5px_5px_0_0_#FFFFFF] sm:shadow-[8px_8px_0_0_#FFFFFF]"

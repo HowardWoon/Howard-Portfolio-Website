@@ -1,9 +1,10 @@
 import { test, expect, type Page } from '@playwright/test';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 
-// Round 71 (owner, 14 Oct 2026): "put more efforts in the background, make sure my website background for every
-// section, menu must be special attractive, innovative, add some more visual effect on background". Each section now
-// prints on its own paper (components/fx/section-paper.tsx) and the header carries a millimetre ruler.
+// Round 71 (owner, 14 Oct 2026): "put more efforts in the background ... add some more visual effect on background"
+// gave each section its own printed paper and the header a millimetre ruler. R77 (owner, 21 Oct 2026: "make my whole
+// website, every section background clean and tidy") retired the papers: every section sits on plain paper. The
+// header ruler stays (components/fx/header-ruler.ts).
 
 async function open(page: Page) {
   await page.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
@@ -11,45 +12,41 @@ async function open(page: Page) {
   await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
 }
 
-// R74: About and Honors moved to quieter stocks (plot, sparkle); R77 removed the flyers that flew over them
-const STOCKS = { about: 'plot', projects: 'mat', experience: 'ledger', honors: 'sparkle', contact: 'airmail' };
+const SECTIONS = ['about', 'projects', 'experience', 'honors', 'contact'];
 
-test('every content section prints on its own paper, under its content, and no two are the same', async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await open(page);
-  const r = await page.evaluate((stocks) => {
-    const out: Record<string, { stock: string | null; first: boolean; image: string; behind: boolean }> = {};
-    for (const id of Object.keys(stocks)) {
-      const s = document.getElementById(id)!;
-      const paper = s.querySelector<HTMLElement>(':scope > [data-paper]');
-      const print = paper?.querySelector<HTMLElement>('.paper-print');
-      out[id] = {
-        stock: paper?.dataset.paper ?? null,
-        // the first child of the section, so the content paints over it
-        first: s.firstElementChild === paper,
-        image: print ? getComputedStyle(print).backgroundImage : '',
-        behind: paper
-          ? getComputedStyle(paper).pointerEvents === 'none' && paper.getAttribute('aria-hidden') === 'true'
-          : false,
-      };
-    }
-    return out;
-  }, STOCKS);
-  for (const [id, stock] of Object.entries(STOCKS)) {
-    expect(r[id].stock, id).toBe(stock);
-    expect(r[id].first, `${id}: the paper is the section's first child`).toBe(true);
-    expect(r[id].behind, `${id}: decorative and never catches the pointer`).toBe(true);
-    expect(r[id].image, id).toMatch(/^url\("data:image\/svg\+xml/);
-  }
-  expect(new Set(Object.values(r).map((x) => x.image)).size, 'five different papers').toBe(5);
-});
+for (const [w, h] of [
+  [1440, 900],
+  [390, 844],
+] as const) {
+  test(`${w}x${h}: no section prints a paper pattern; the page is no wider than the screen (R71 papers retired)`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: w, height: h });
+    await open(page);
+    const r = await page.evaluate((ids) => {
+      const out: Record<string, { papers: number; tiles: number }> = {};
+      for (const id of ids) {
+        const s = document.getElementById(id)!;
+        out[id] = {
+          papers: s.querySelectorAll('[data-paper], .paper-stock, .paper-print, .paper-airmail-band').length,
+          // no computed SVG tile anywhere behind the section's content
+          tiles: [s, ...s.querySelectorAll<HTMLElement>('[aria-hidden="true"]')].filter((e) =>
+            getComputedStyle(e).backgroundImage.includes('data:image/svg+xml'),
+          ).length,
+        };
+      }
+      return { out, wide: document.documentElement.scrollWidth - innerWidth };
+    }, SECTIONS);
+    for (const id of SECTIONS) expect(r.out[id], id).toEqual({ papers: 0, tiles: 0 });
+    expect(r.wide).toBeLessThanOrEqual(0);
+  });
+}
 
-test('the papers are ink on paper: no colour, no blur, no soft gradient (neo-brutalism)', () => {
-  const src = readFileSync('components/fx/section-paper.tsx', 'utf8').replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, '');
+test('the paper component is gone and the header ruler is ink only (no colour, blur or soft gradient)', () => {
+  expect(existsSync('components/fx/section-paper.tsx')).toBe(false);
+  const src = readFileSync('components/fx/header-ruler.ts', 'utf8').replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, '');
   expect(src).not.toMatch(/blur|radial-gradient|box-shadow|drop-shadow|glow/i);
-  // the only colour in the tiles is the ink
-  const colours = new Set(src.match(/#[0-9A-Fa-f]{6}\b/g) ?? []);
-  expect([...colours]).toEqual(['#0A0A0A']);
+  expect([...new Set(src.match(/#[0-9A-Fa-f]{6}\b/g) ?? [])]).toEqual(['#0A0A0A']);
 });
 
 test('the header is a title strip: a solid white bar with a printed ruler along its bottom edge', async ({ page }) => {
@@ -69,15 +66,4 @@ test('the header is a title strip: a solid white bar with a printed ruler along 
     };
   });
   expect(r).toEqual({ bg: 'rgb(255, 255, 255)', ruler: true, atBottom: true, wide: true, clicks: 'none' });
-});
-
-test('on a phone the papers are there, still, and the page is no wider than the screen', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await open(page);
-  const r = await page.evaluate(() => ({
-    papers: document.querySelectorAll('[data-paper]').length,
-    wide: document.documentElement.scrollWidth - innerWidth,
-  }));
-  expect(r.papers).toBe(5);
-  expect(r.wide).toBeLessThanOrEqual(0);
 });

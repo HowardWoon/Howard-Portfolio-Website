@@ -271,8 +271,8 @@ dependencies - everything native; Vanta / ShaderGradient as a BRUTALIST REMIX, n
 | React Bits StickerPeel + GSAP Draggable | Sticker peel                 | components/sticker-peel.tsx; honour emblems                     | Mouse / pen drag on a rubber band, elastic return; touch = tap lift only (never blocks scroll); same box element as before                                    |
 | React Bits CardSwap + PixelTransition   | Certificate deck             | components/certificate-deck.tsx; Honours, beside the Signal Key | Only the three image certificates; real pixel sizes; pauses on hover / focus / off screen; no auto-cycle for reduced motion / Calm; fans LEFT (dock is right) |
 | React Bits Stepper                      | Dispatch rail                | components/dispatch-rail.tsx; Contact, above Dispatch           | Steps = the form's own fields; email completes only when valid; phones show numbers + one caption line                                                        |
-| React Bits DotGrid + Vanta Dots         | Dot field                    | components/fx/dot-field.tsx; ink footer                         | White squares only (decoration = ink / paper); mouse / pen; idles when settled                                                                                |
-| ShaderGradient + Vanta Topology         | Contour field                | components/fx/contour-field.tsx; The Build title card           | Four flat tone bands + pixel contours at 1/8 resolution, pixelated; only during scene 0                                                                       |
+| React Bits DotGrid + Vanta Dots         | Dot field (RETIRED R77)      | was components/fx/dot-field.tsx; ink footer                     | Deleted in R77 (owner: every section background "clean and tidy"): the footer is plain ink, no canvas, no grain                                               |
+| ShaderGradient + Vanta Topology         | Contour field (RETIRED R77)  | was components/fx/contour-field.tsx; The Build title card       | Deleted in R77: the title card stands on the plain story floor (the bs-floor print grain went too)                                                            |
 | Lenis                                   | (already the scroll engine)  | smooth-scroll-provider.tsx                                      | smoothWheel stays OFF (R20); data-lenis-prevent on every scrollable overlay                                                                                   |
 | GSAP (ScrollTrigger / Flip / SplitText) | (already native equivalents) | build story playhead, FLIP pills, title wipe, kicker decode     | Do not add the gsap package for effects the site already has                                                                                                  |
 
@@ -347,7 +347,7 @@ wording and its four decisions). The portfolio prints itself; every flag is in `
 | P1 Halftone Ink Tide          | globals.css `.fx-roller::before`                               | R41: a STATIC band of 8 dot rows (the next desk colour, dots growing toward the roller) riding the roller; no mask (the R40 full-screen mask re-painted every frame); desktop, not lite / Calm                                             |
 | P2 Plate Registration         | `[data-plate]` card bars, components/press/press-fx.tsx        | One impression on first view (`.fx-plate-in`); desktop: an inline `translate` <= 6 px with scroll speed on the visible plates, REMOVED at rest (R41: a resting translate kept every bar on a GPU layer)                                    |
 | P3 Ink Roller                 | `.fx-roller` in tide-canvas.tsx                                | Same box + transform as the relay layer (zero JS), visible only while 0 < relay < 1, desktop only                                                                                                                                          |
-| P4 Feed Marks                 | press-fx.tsx `FeedMarks`                                       | >= 1536 px, measured on resize only, rendered INSIDE `.fx-page-root` (in `<body>` they painted over the header and tray)                                                                                                                   |
+| P4 Feed Marks (RETIRED R77)   | was press-fx.tsx `FeedMarks`                                   | Deleted in R77 (owner: "make my whole website, every section background clean and tidy"): no ticks or section numbers down the left margin at any width; PressFx renders nothing of its own                                                |
 | T1 Movable type               | fx/split-words.tsx                                             | Words rise mirrored (rotateY 180 -> 0) with the FX-06 rise; text untouched                                                                                                                                                                 |
 | T2 Odometer                   | animated-counter.tsx `.fx-odo*`                                | Digit wheels (transform only), sr-only real value, then plain text; a stat mounted late (category opened) rolls when in view. Its run lives in its own [roll, isInView] effect (race fix)                                                  |
 | T3 Kerning Breath             | `.nb-chip/.nb-key/.nb-tag/.nb-btn:focus-visible`               | `scale` 0.95 1 for 300 ms, keyboard focus only                                                                                                                                                                                             |
@@ -422,31 +422,39 @@ skips hidden text since R68).
 R71 (owner: "make sure my website background for every section, menu must be special attractive, innovative, add
 some more visual effect on background"), same rule - layers:
 
-| Feature      | Where                                                     | Rules                                                                                                                                                                                                                                                                                                                                                                        |
-| ------------ | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Paper stocks | components/fx/section-paper.tsx, `.paper-*`, each section | Every content section prints on its own paper, chosen for its content: About = drafting plot crosses (R74, was isometric), Projects = cutting mat, Experience = accounting ledger, Honors = scattered sparkles (R74, was guilloche), Contact = postal waves under an airmail band. Ink lines only, computed SVG tiles, the section's first child, `fx-depth` lean on desktop |
-| Header ruler | site-header.tsx `.hdr-ruler` (HEADER_RULER)               | The header is a drawing's title strip: a millimetre ruler (tick every 4 px, long every 20 px) along its bottom edge, inside the solid white bar; decorative, no pointer                                                                                                                                                                                                      |
+| Feature                    | Where                                                                      | Rules                                                                                                                                                                                                                               |
+| -------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Paper stocks (RETIRED R77) | was components/fx/section-paper.tsx, `.paper-*`                            | Deleted in R77: every section sits on plain paper (its desk colour + the dot-grid canvas). Never print a pattern (crosses, grid, ledger rules, sparkles, waves) behind a section again                                              |
+| Header ruler               | site-header.tsx `.hdr-ruler`, components/fx/header-ruler.ts (HEADER_RULER) | The header is a drawing's title strip: a millimetre ruler (tick every 4 px, long every 20 px) along its bottom edge, inside the solid white bar; decorative, no pointer. Kept in R77 (part of the header, not a section background) |
 
-Guard: tests/r71.spec.ts. A new section gets its own paper too (never a copy of a neighbour's).
+Guard: tests/r71.spec.ts. R77: the papers are retired (see below) - a new section gets plain paper, never a pattern.
 
-R74 / R75 / R53 RETIRED in R77 (owner, 19 Oct 2026, screenshots of About and Honors: "remove all the object at
-background, so messy, unorganised"). The owner's newer word overrides R74 ("add some objects floating flying behind")
-and R53 ("at least have some geometry 3d shape ... floating" in every section), so:
+R74 / R75 / R53 / R71 RETIRED in R77. Owner, 19 Oct 2026, screenshots of About and Honors: "remove all the object at
+background, so messy, unorganised"; then, 21 Oct 2026, a Projects screenshot: "not only this part, make my whole
+website, every section background clean and tidy". The owner's newer words override R74 ("add some objects floating
+flying behind"), R53 ("at least have some geometry 3d shape ... floating" in every section) and R71 ("special
+attractive ... add some more visual effect on background"), so:
 
-- The R74 flyers (`components/fx/flyers.tsx`, `.flyers*` / `.flyer`, FX `flyers`) and the R53 section backdrop
-  (`components/fx/section-backdrop.tsx`, `.sb-*`, FX `sectionBackdrop`: rings, crosses, 3 x 3 dot grids, cubes, coins,
-  bars, plates, triangles in the gutters of every section) are DELETED, with their CSS and flags.
-- Never add floating / flying stickers, shapes or icons behind a section again, in any section, at any width - not as a
-  "layer", not as a React Bits remix. A section's background is its R71 paper (sparse ink marks) and nothing else moves
-  behind its content. A DENSE line pattern behind text stays banned too (R74: the isometric lattice and the overlapping
-  guilloche rings read as noise).
+- DELETED with their CSS and FX flags: the R74 flyers (`flyers.tsx`), the R53 section backdrop (`section-backdrop.tsx`),
+  the R71 section papers (`section-paper.tsx`: plot crosses, cutting-mat grid, ledger, sparkles, airmail), the P4 feed
+  marks, the FX-60 orbits (`ambient-orbits.tsx`), the FX-03 solids (`bauhaus-solid.tsx`) and FX-13 drifting shapes
+  (title decorations in About, Experience, Honors, Contact; the hero's circle / cube / triangle, sun and lilac block;
+  the logo-wall shapes), the FX-34 mercury blobs (`mercury-field.tsx`), the hero grid floor (FX-62) and its FX-78
+  lens, the FX-97 grid on the Projects desk, the R26 footer dot field (`dot-field.tsx`) and contour field
+  (`contour-field.tsx`), and the R27 print grain.
+- Never add floating / flying stickers, shapes, icons, printed patterns, grids or living textures behind a section
+  again, in any section, at any width - not as a "layer", not as a React Bits remix. Every section sits on plain paper:
+  its desk colour and the dot-grid canvas (AGENTS.md law 0). Kept on purpose: the dot-grid canvas, the cat mascot (an
+  interactive character), the header ruler, the arena wall's stage light, the section rail and the scroll-to-top key.
 - Kept from R75: nothing is ever seen THROUGH a card. About and Honors cards rise without the FX-67 fade
   (`fx-rise-solid`, translate only, selected by section id); never add an opacity fade or a translucent fill to a box
   that sits over a background.
 
-Guards: tests/r74.spec.ts (no flyer / backdrop markup or animation in any section at 1920, 1440 and 390 px; no component
-file, CSS rule, FX flag or import can bring them back), tests/r75.spec.ts (solid cards; nothing flies in About or Honors
-at 7 sizes), tests/r53.spec.ts and tests/r76.spec.ts (no backdrop piece on desktop, tablet, phone, iPhone SE).
+Guards: tests/r74.spec.ts (none of the retired markup or keyframes in the hero or any section at 1920, 1440 and 390 px,
+nothing page-wide; no component file, CSS rule, FX flag or import can bring them back), tests/r71.spec.ts (no paper
+tile behind any section; the header ruler), tests/r75.spec.ts (solid cards; nothing flies in About or Honors at 7
+sizes), r13 / r14 / r16 / r16b / r26 / r27 / r40 / r48 (each retired effect is absent), tests/r53.spec.ts and
+tests/r76.spec.ts (no backdrop piece on desktop, tablet, phone, iPhone SE), scripts/validate-plans.mjs R77-a ... d.
 
 R73 (owner, Tokyo After Rain: "why it look so blur? ... every button, must function perfectly, must no errors, can make
 more variables, make more random events"; and "section must not hardcode, must be dynamic"), same rule - layers:

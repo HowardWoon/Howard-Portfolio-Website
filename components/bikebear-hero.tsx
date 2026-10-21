@@ -11,7 +11,6 @@ import { TiltCard } from './tilt-card';
 import { toLocal } from '@/lib/to-local';
 import { SpiderReveal } from './spider-reveal';
 import { createLiquid } from '@/lib/liquid';
-import { BauhausSolid } from './fx/bauhaus-solid';
 import { FX } from '@/lib/fx';
 
 /**
@@ -167,41 +166,6 @@ export default function BikebearHero() {
       style={{ opacity, scale, y: yTranslate }}
       className="hero-fit relative min-h-screen-safe bg-paper text-ink flex flex-col justify-between overflow-hidden"
     >
-      {/* Structural grid + dot texture */}
-      <div
-        aria-hidden
-        className="fx-floor-grid absolute inset-0 bg-grid [mask-image:radial-gradient(ellipse_75%_65%_at_45%_45%,#000_60%,transparent_100%)] pointer-events-none"
-      >
-        {/* FX-78 grid gravity: the same grid a second time, only visible in a soft circle under the lamp (mouse);
-            a child of the floor so it tilts with FX-62 */}
-        {FX.gridGravity ? <div className="fx-grid-lens absolute inset-0 bg-grid hidden lg:block" /> : null}
-      </div>
-
-      {/* Bauhaus geometry (decorative) */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div
-          className="fx-depth absolute -left-28 bottom-6 w-44 h-44 rounded-full bg-pop-blue border-3 border-ink hidden xl:block"
-          style={{ '--depth': -14 } as React.CSSProperties}
-        />
-        {FX.solids3d ? (
-          <div
-            className="fx-depth absolute left-[38%] top-28 hidden lg:block"
-            style={{ '--depth': 26 } as React.CSSProperties}
-          >
-            <BauhausSolid kind="cube" size={40} color="#FF4B2B" />
-          </div>
-        ) : (
-          <div className="absolute left-[38%] top-28 w-10 h-10 bg-pop-red border-3 border-ink rotate-12 hidden lg:block" />
-        )}
-        <svg
-          className="fx-depth absolute left-[46%] bottom-24 w-16 h-16 hidden lg:block animate-wobble"
-          style={{ '--depth': 20 } as React.CSSProperties}
-          viewBox="0 0 100 100"
-        >
-          <polygon points="50,6 96,92 4,92" fill="#FFC700" stroke="#0A0A0A" strokeWidth="7" strokeLinejoin="round" />
-        </svg>
-      </div>
-
       {/* Main Hero Body */}
       <div className="hero-wrap relative flex-1 flex items-center w-full max-w-[1440px] mx-auto px-4 xs:px-5 sm:px-10 lg:px-16 pt-[calc(var(--header-h)+1.75rem)] sm:pt-[calc(var(--header-h)+3rem)] pb-14 lg:pt-[calc(var(--header-h)+clamp(1rem,3.6svh,2.75rem))] lg:pb-[clamp(1.25rem,5svh,3.5rem)] z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center w-full">
@@ -258,18 +222,6 @@ export default function BikebearHero() {
 
           {/* Right Column: Portrait Card (5 cols) */}
           <div className="lg:col-span-5 flex justify-center lg:justify-end w-full relative">
-            {/* Big Bauhaus sun behind the portrait (FX-77 .fx-sunset: sinks and swells as the hero leaves) */}
-            <div
-              aria-hidden
-              className="fx-depth fx-sunset pointer-events-none absolute -top-6 right-0 sm:right-10 w-40 h-40 xs:w-56 xs:h-56 sm:w-72 sm:h-72 rounded-full bg-pop-yellow border-3 border-ink"
-              style={{ '--depth': -10 } as React.CSSProperties}
-            />
-            <div
-              aria-hidden
-              className="fx-depth pointer-events-none absolute -bottom-6 left-0 lg:left-auto lg:right-[70%] w-20 h-20 xs:w-28 xs:h-28 bg-pop-lilac border-3 border-ink rounded-[28px] rotate-6"
-              style={{ '--depth': 6 } as React.CSSProperties}
-            />
-
             <div
               style={{ '--d': 2 } as React.CSSProperties}
               className="fx-hero-in fx-hero-pop relative group flex flex-col items-center lg:items-end z-40 pointer-events-auto w-full sm:w-auto px-1 sm:px-0"

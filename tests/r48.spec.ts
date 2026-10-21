@@ -264,44 +264,26 @@ test.describe('desktop 1440', () => {
       .toBe(true);
   });
 
-  // owner: "i want the background pixel must like waving, moving"
-  test('the contour field behind The Build title rolls on its own and a press sends a ring out', async ({ page }) => {
+  // R48 asked for a waving pixel field behind The Build title; R77 (owner: "make my whole website, every section
+  // background clean and tidy") retired it. The title card stands on the plain floor, and a press still never jumps
+  // the story.
+  test('no contour field behind The Build title, and a press on the stage does not jump the story', async ({
+    page,
+  }) => {
     await home(page);
     await page.evaluate(() => {
       const s = document.querySelector('.bs-section')!;
       window.scrollTo(0, s.getBoundingClientRect().top + window.scrollY + 4);
     });
     await expect(page.locator('[data-scene="0"]')).toHaveCount(1);
-    await page.waitForTimeout(1200);
-    const snap = () =>
-      page.evaluate(() => {
-        const c = document.querySelector<HTMLCanvasElement>('canvas.bs-contour')!;
-        const d = c.getContext('2d')!.getImageData(0, 0, c.width, c.height).data;
-        return { w: c.width, h: c.height, a: Array.from({ length: d.length / 4 }, (_, i) => d[i * 4 + 3]) };
-      });
-    const a = await snap();
-    await page.waitForTimeout(600);
-    const b = await snap();
-    const moved = a.a.filter((v, i) => v !== b.a[i]).length / a.a.length;
-    expect(moved, 'share of field pixels that changed in 0.6 s').toBeGreaterThan(0.3); // it was about 0.05 before R48
-    // still a hard bitmap: only the four flat tones and the contour line
-    expect([...new Set(b.a)].every((v) => [0, 5, 10, 15, 30].includes(v))).toBe(true);
-    // a press on empty stage (bottom-left corner: no scene card there) drops a ring of contour lines around that point
+    expect(await page.locator('canvas.bs-contour, .bs-contour-layer').count()).toBe(0);
     const at = await page.evaluate(() => {
-      const r = document.querySelector('canvas.bs-contour')!.getBoundingClientRect();
-      return { x: r.left + 90, y: r.bottom - 70, cx: 90 / 8, cy: (r.height - 70) / 8 };
+      const r = document.querySelector('.bs-stage')!.getBoundingClientRect();
+      return { x: r.left + 90, y: r.bottom - 70 };
     });
-    const lines = (s: { w: number; h: number; a: number[] }) => {
-      let n = 0;
-      for (let y = 0; y < s.h; y++)
-        for (let x = 0; x < s.w; x++) if (Math.hypot(x - at.cx, y - at.cy) < 20 && s.a[y * s.w + x] === 30) n++;
-      return n;
-    };
-    const before = lines(await snap());
     await page.mouse.click(at.x, at.y);
     await page.waitForTimeout(350);
-    expect(lines(await snap())).toBeGreaterThan(before);
-    await expect(page.locator('[data-scene="0"]')).toHaveCount(1); // the press did not jump the story
+    await expect(page.locator('[data-scene="0"]')).toHaveCount(1);
   });
 });
 

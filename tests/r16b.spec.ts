@@ -42,12 +42,21 @@ test('reduced motion: no sink, no recede, titles are plain ink', async ({ page }
   expect(await word.evaluate((e) => getComputedStyle(e).color)).toBe('rgb(10, 10, 10)');
 });
 
-test('the hero grid wakes up under the mouse (FX-78)', async ({ page }) => {
+// R77 (owner: "make my whole website, every section background clean and tidy"): the hero grid and its FX-78 lens
+// are gone; the mouse no longer lights up a grid behind the headline
+test('the hero has no grid behind it, and none wakes up under the mouse (FX-78 retired in R77)', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
   await page.mouse.move(400, 400);
   await page.mouse.move(520, 460, { steps: 4 });
-  await expect.poll(() => page.locator('.fx-grid-lens').evaluate((e) => getComputedStyle(e).opacity)).toBe('1');
+  expect(await page.locator('#hero .fx-grid-lens, #hero .fx-floor-grid').count()).toBe(0);
+  const grid = await page.evaluate(
+    () =>
+      [...document.querySelectorAll<HTMLElement>('#hero *')].filter((e) =>
+        /linear-gradient\(to right, rgba\(10, 10, 10/.test(getComputedStyle(e).backgroundImage),
+      ).length,
+  );
+  expect(grid).toBe(0);
 });
 
 test('desktop: the footer is revealed underneath the page, and stays fully usable (FX-83)', async ({ page }) => {

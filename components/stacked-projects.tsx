@@ -14,7 +14,6 @@ import { projectsWithSkill, scrollToProject, skillKey } from '@/lib/skills';
 import { readDeepLink } from '@/lib/share';
 import { TiltCard } from './tilt-card';
 import { useBooted } from './boot-sequence';
-import { AmbientOrbits } from './fx/ambient-orbits';
 import { InteractivePhotoStack } from './interactive-photo-stack';
 import { BlueprintStage, BP_LAYERS } from './blueprint-stage';
 import { PinKey } from './press/pin-key';
@@ -33,7 +32,6 @@ import {
   Focus,
 } from 'lucide-react';
 import { Github } from './brand-icons';
-import { SectionPaper } from './fx/section-paper';
 
 interface ProjectData {
   id: string;
@@ -579,9 +577,6 @@ export default function StackedProjects() {
       id="projects"
       className="fx-tide-surface fx-dot-plane fx-sheet relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-x-clip border-t-3 border-ink"
     >
-      {/* R71: this section prints on its own paper */}
-      <SectionPaper stock="mat" />
-      {FX.ambientOrbits ? <AmbientOrbits side="left" square="bg-pop-blue" /> : null}
       <div className="relative max-w-7xl mx-auto space-y-16 sm:space-y-20">
         {/* Section Header */}
         <div className="space-y-7">

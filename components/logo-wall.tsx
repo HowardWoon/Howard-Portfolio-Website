@@ -17,24 +17,9 @@ export function LogoWall() {
       className={`fx-wall relative w-full overflow-x-clip bg-pop-yellow ${FX.arenaPinboard ? 'bg-dots' : ''} border-y-3 border-ink py-14 sm:py-20`}
     >
       {FX.arenaPinboard ? (
-        // FX-94: the boot-gate composition (yellow + dots + blue sun, red square, white moon, triangle) returns as the
-        // wall's backdrop, plus a stage light that follows the mouse along the band. Decorative only.
+        // FX-94: a stage light that follows the mouse along the band. Decorative only. R77 (owner: "make my whole website,
+        // every section background clean and tidy"): the boot-gate shapes that stood behind the wall are gone.
         <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div
-            className="fx-depth absolute -left-20 -top-20 w-40 h-40 sm:-left-24 sm:-top-24 sm:w-72 sm:h-72 rounded-full bg-pop-blue border-3 border-ink"
-            style={{ '--depth': -16 } as React.CSSProperties}
-          />
-          <div className="fx-drift absolute right-[7%] top-[9%] w-12 h-12 sm:w-20 sm:h-20 bg-pop-red border-3 border-ink rotate-12 hidden sm:block" />
-          <svg
-            className="fx-drift-rev absolute left-[6%] bottom-[5%] w-16 h-16 sm:w-24 sm:h-24 hidden md:block"
-            viewBox="0 0 100 100"
-          >
-            <polygon points="50,6 96,92 4,92" fill="#FFFFFF" stroke="#0A0A0A" strokeWidth="7" strokeLinejoin="round" />
-          </svg>
-          <div
-            className="fx-depth absolute -right-16 -bottom-16 w-36 h-36 sm:-right-20 sm:-bottom-20 sm:w-64 sm:h-64 rounded-full bg-white border-3 border-ink"
-            style={{ '--depth': 12 } as React.CSSProperties}
-          />
           <div className="fx-wall-lamp absolute inset-y-0 left-1/2 w-[46%] -ml-[23%]" />
         </div>
       ) : null}

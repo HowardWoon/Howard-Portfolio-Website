@@ -4,7 +4,6 @@ import Image from 'next/image';
 import { useEffect, useRef, type CSSProperties } from 'react';
 import { PORTRAIT_GLYPHS } from '@/lib/story-glyphs';
 import { useCalm } from '@/lib/motion-pref';
-import { ContourField } from './fx/contour-field';
 import { FieldReel, type ReelItem } from './field-reel';
 import { FlipCard } from './flip-card';
 import { InstitutionSeal } from './institution-seal';
@@ -644,10 +643,6 @@ export default function BuildStory() {
         <div ref={stageRef} data-scene="0" className="bs-stage" style={{ '--p': 0 } as CSSProperties}>
           {/* ---------------------------------------------------------------- floor */}
           <div aria-hidden className="bs-floor absolute inset-0" />
-          {/* R26: flowing contour bands behind the title card (ShaderGradient + Vanta Topology, brutalist remix) */}
-          <div aria-hidden className="bs-seg bs-contour-layer absolute inset-0" style={seg(0.015, 0.07)}>
-            <ContourField stageRef={stageRef} />
-          </div>
           <div aria-hidden className="bs-seg bs-blueprint absolute inset-0" style={seg(0.4, 0.5)} />
           <div aria-hidden className="bs-seg bs-impact" style={seg(0.4, 0.47)} />
 

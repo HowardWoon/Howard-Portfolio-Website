@@ -8,7 +8,6 @@ import { FX, SPRING_SOFT } from '@/lib/fx';
 import { startTrail, useInteractionSelect } from '@/lib/interaction-store';
 import { projectsWithSkill, skillKey } from '@/lib/skills';
 import { ScrollInk } from './fx/scroll-ink';
-import { SectionPaper } from './fx/section-paper';
 
 const architecturePillars = [
   {
@@ -290,18 +289,6 @@ export default function AboutSection() {
       id="about"
       className="fx-tide-surface fx-dot-plane fx-sheet relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-28 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-clip border-t-3 border-ink"
     >
-      {/* R71: this section prints on its own paper */}
-      <SectionPaper stock="plot" />
-      {/* Bauhaus accents */}
-      <div
-        aria-hidden
-        className="fx-drift pointer-events-none absolute -right-20 top-24 w-64 h-64 rounded-full border-3 border-ink bg-pop-blue hidden lg:block"
-      />
-      <div
-        aria-hidden
-        className="fx-drift-rev pointer-events-none absolute right-40 top-72 w-16 h-16 border-3 border-ink bg-pop-red rotate-45 hidden lg:block"
-      />
-
       <div className="relative max-w-7xl mx-auto space-y-16">
         {/* Section Header */}
         <div className="space-y-7">

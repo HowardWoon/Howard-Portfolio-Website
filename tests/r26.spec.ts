@@ -107,29 +107,23 @@ test('dispatch rail follows the form: name, a VALID email, message', async ({ pa
   await expect(rail.locator('[aria-current="step"]')).toContainText('DISPATCH');
 });
 
-async function inkedPixels(page: Page, sel: string) {
-  return page.locator(sel).evaluate((c) => {
-    const cv = c as HTMLCanvasElement;
-    const d = cv.getContext('2d')!.getImageData(0, 0, cv.width, cv.height).data;
-    let n = 0;
-    for (let i = 3; i < d.length; i += 4) if (d[i] > 0) n++;
-    return n;
-  });
-}
-
-test('the footer dot field draws and reacts to the mouse; the story title has its contour field', async ({ page }) => {
+// R77 (owner: "make my whole website, every section background clean and tidy"): the footer dot field and the
+// contour field behind The Build title are retired; the footer and the title card sit on plain surfaces
+test('no dot field in the footer and no contour field behind the story title (R26 backgrounds retired in R77)', async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await walk(page);
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   const f = await page.locator('footer').boundingBox();
   await page.mouse.move(f!.x + f!.width - 150, f!.y + 140);
   await page.mouse.move(f!.x + f!.width - 190, f!.y + 170, { steps: 4 });
-  await expect.poll(() => inkedPixels(page, 'footer canvas.dot-field')).toBeGreaterThan(100);
+  expect(await page.locator('footer canvas, canvas.dot-field').count()).toBe(0);
   await page.evaluate(() => {
     const s = document.querySelector('.bs-section')!;
     window.scrollTo(0, s.getBoundingClientRect().top + scrollY + 2);
   });
-  await expect.poll(() => inkedPixels(page, 'canvas.bs-contour')).toBeGreaterThan(100);
+  expect(await page.locator('canvas.bs-contour, .bs-contour-layer').count()).toBe(0);
 });
 
 test('reduced motion: the living backgrounds stay empty and nothing cycles', async ({ page }) => {
@@ -138,7 +132,7 @@ test('reduced motion: the living backgrounds stay empty and nothing cycles', asy
   await walk(page);
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   await page.waitForTimeout(800);
-  expect(await inkedPixels(page, 'footer canvas.dot-field')).toBe(0);
+  expect(await page.locator('footer canvas').count()).toBe(0); // R77: no living background left in the footer
   const deck = page.locator('.cert-deck');
   const front = await deck.locator('.cert-card[aria-hidden="false"]').getAttribute('aria-label');
   await page.waitForTimeout(5200); // longer than one cycle

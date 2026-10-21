@@ -181,12 +181,6 @@ html.lenis body {
   background-image: radial-gradient(rgba(10, 10, 10, 0.14) 1.2px, transparent 1.2px);
   background-size: 22px 22px;
 }
-.bg-grid {
-  background-image:
-    linear-gradient(to right, rgba(10, 10, 10, 0.06) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(10, 10, 10, 0.06) 1px, transparent 1px);
-  background-size: 48px 48px;
-}
 
 /* ---------- Marquee ---------- */
 @keyframes marquee {
@@ -279,11 +273,6 @@ html[data-motion='calm'] *::after {
   animation-iteration-count: 1 !important;
   transition-duration: 0.001ms !important;
   scroll-behavior: auto !important;
-}
-/* scroll-driven animations ignore duration, so switch them off explicitly */
-html[data-motion='calm'] .fx-drift,
-html[data-motion='calm'] .fx-drift-rev {
-  animation: none !important;
 }
 
 @layer components {
@@ -558,74 +547,6 @@ html.hw-booted .boot-overlay {
       --fx-o: 12px;
     }
   }
-
-  /* FX-03 CSS-only 3D solids (cube / coin). Faces carry the existing ink border + pop fill. */
-  .fx-stage {
-    perspective: 520px;
-  }
-  .fx-solid {
-    position: relative;
-    width: var(--s);
-    height: var(--s);
-    transform-style: preserve-3d;
-    animation: fx-tumble var(--spin, 16s) linear infinite;
-  }
-  .fx-solid > i {
-    position: absolute;
-    inset: 0;
-    border: 3px solid #0a0a0a;
-    background: var(--c);
-  }
-  .fx-solid > i:nth-child(1) {
-    transform: translateZ(calc(var(--s) / 2));
-  }
-  .fx-solid > i:nth-child(2) {
-    transform: rotateY(180deg) translateZ(calc(var(--s) / 2));
-    filter: brightness(0.82);
-  }
-  .fx-solid > i:nth-child(3) {
-    transform: rotateY(90deg) translateZ(calc(var(--s) / 2));
-    filter: brightness(0.9);
-  }
-  .fx-solid > i:nth-child(4) {
-    transform: rotateY(-90deg) translateZ(calc(var(--s) / 2));
-    filter: brightness(0.9);
-  }
-  .fx-solid > i:nth-child(5) {
-    transform: rotateX(90deg) translateZ(calc(var(--s) / 2));
-    filter: brightness(1.08);
-  }
-  .fx-solid > i:nth-child(6) {
-    transform: rotateX(-90deg) translateZ(calc(var(--s) / 2));
-    filter: brightness(0.75);
-  }
-  .fx-solid.fx-coin > i {
-    border-radius: 9999px;
-  }
-  .fx-solid.fx-coin > i:nth-child(1) {
-    transform: translateZ(3px);
-  }
-  .fx-solid.fx-coin > i:nth-child(2) {
-    transform: rotateY(180deg) translateZ(3px);
-  }
-  .fx-solid.fx-coin {
-    animation-name: fx-coin;
-  }
-
-  /* FX-13 scroll-driven drift for background geometry: pure CSS, zero JS, progressive enhancement. */
-  @supports (animation-timeline: view()) {
-    @media (prefers-reduced-motion: no-preference) {
-      html:not(.fx-off-scrollDrift):not([data-fx-tier='lite']) .fx-drift,
-      html:not(.fx-off-scrollDrift):not([data-fx-tier='lite']) .fx-drift-rev {
-        animation: fx-drift linear both;
-        animation-timeline: view();
-        animation-range: cover 0% cover 100%;
-      }
-      html:not(.fx-off-scrollDrift):not([data-fx-tier='lite']) .fx-drift-rev {
-        animation-name: fx-drift-rev;
-      }
-    }
-  }
 }
 @layer utilities {
   /* FX-16 command palette drops in on a 3D hinge (CSS only) */
@@ -664,47 +585,6 @@ html.hw-booted .boot-overlay {
   to {
     opacity: 1;
     transform: none;
-  }
-}
-@keyframes fx-tumble {
-  from {
-    transform: rotateX(-24deg) rotateY(0deg);
-  }
-  to {
-    transform: rotateX(-24deg) rotateY(360deg);
-  }
-}
-@keyframes fx-coin {
-  0%,
-  35% {
-    transform: rotateY(0deg);
-  }
-  50%,
-  85% {
-    transform: rotateY(180deg);
-  }
-  100% {
-    transform: rotateY(360deg);
-  }
-}
-@keyframes fx-drift {
-  from {
-    translate: 0 70px;
-    rotate: -10deg;
-  }
-  to {
-    translate: 0 -70px;
-    rotate: 10deg;
-  }
-}
-@keyframes fx-drift-rev {
-  from {
-    translate: 0 -50px;
-    rotate: 12deg;
-  }
-  to {
-    translate: 0 50px;
-    rotate: -12deg;
   }
 }
 
@@ -1262,12 +1142,6 @@ html.hw-booted .boot-overlay {
   }
 }
 
-/* FX-60 ambient orbits: slow rotating rings and squares in the section margins (see components/fx/ambient-orbits.tsx).
-   They use .animate-spin-slow, so D5 already pauses them while the section is off-screen. */
-html.fx-off-ambientOrbits .fx-orbit {
-  display: none;
-}
-
 /* ===================================================================================================
    Round 14 (FX-61 … FX-70). Theme tokens only, no new copy. Motion is off for reduced motion and Calm
    Mode (scroll-driven ones explicitly, because they ignore the global duration override); each has a flag.
@@ -1303,29 +1177,6 @@ html.fx-off-ambientOrbits .fx-orbit {
   to {
     opacity: 1;
     scale: 1;
-  }
-}
-
-/* FX-62 blueprint floor: as the hero scrolls away, its grid tilts back into a drafting-table floor */
-@supports (animation-timeline: view()) {
-  /* R17 P0-01: desktop only (a 3D-transformed 1,335 px layer on every phone) */
-  @media (prefers-reduced-motion: no-preference) and (min-width: 1024px) and (pointer: fine) {
-    html:not([data-motion='calm']):not(.fx-off-blueprintFloor):not([data-fx-tier='lite']) .fx-floor-grid {
-      transform-origin: 50% 100%;
-      animation: fx-floor linear both;
-      animation-timeline: view();
-      animation-range: exit 0% exit 100%;
-    }
-  }
-}
-@keyframes fx-floor {
-  from {
-    transform: perspective(900px) rotateX(0deg);
-    opacity: 1;
-  }
-  to {
-    transform: perspective(900px) rotateX(42deg) translateY(10%);
-    opacity: 0.2;
   }
 }
 
@@ -1795,14 +1646,12 @@ html:not(.fx-off-arenaPinboard) :where(.fx-seal:nth-child(even)) {
   .site-header,
   nav[aria-label='Section navigation'],
   .fx-hud,
-  .fx-orbit,
   .fx-stamp,
   .boot-overlay,
   .fx-cursor,
   .fx-cursor-pos,
   .fx-cursor-tag,
   [data-proof-tray],
-  .fx-feed-marks,
   .bp-scan,
   canvas,
   button[aria-label='Scroll to top'],
@@ -1962,30 +1811,6 @@ html[data-tide='on'] .fx-tide-surface {
   }
 }
 
-/* FX-77 Sunset Handoff: as the hero leaves, its yellow sun sinks and swells behind the portrait while FX-76 turns the
-   desk amber for About. Driven by the hero's own exit (named view timeline), desktop only. `transform` composes with
-   the sun's FX-02 depth parallax, which uses the separate `translate` property. */
-@supports (animation-timeline: view()) {
-  @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
-    html:not([data-motion='calm']):not(.fx-off-sunsetHandoff) #hero {
-      view-timeline-name: --hero-exit;
-    }
-    html:not([data-motion='calm']):not(.fx-off-sunsetHandoff) .fx-sunset {
-      animation: fx-sunset linear both;
-      animation-timeline: --hero-exit;
-      animation-range: exit 0% exit 85%;
-    }
-  }
-}
-@keyframes fx-sunset {
-  from {
-    transform: none;
-  }
-  to {
-    transform: translateY(18%) scale(1.15);
-  }
-}
-
 /* FX-79 Dot Parallax: the section dot texture moves to its own plane (::before) that drifts against the scroll, so
    the content floats a few millimetres above the desk. Same gradient and size as .bg-dots. The plane is taller than
    the section, so the section clips it (overflow: clip is not a scroll container: sticky and Lenis are unaffected).
@@ -2032,28 +1857,6 @@ html[data-fx-tier='lite'] .fx-aberration {
 }
 
 /* ================================================================ Round 16, sessions 2-5 */
-
-/* FX-78 Grid Gravity: a second copy of the hero grid, visible only in a soft circle under the lamp (mouse). Hidden
-   until the pointer field is live, otherwise it would simply double the grid. */
-.fx-grid-lens {
-  opacity: 0;
-}
-@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  html[data-fx-pointer='on']:not([data-motion='calm']):not([data-fx-tier='lite']):not(.fx-off-gridGravity)
-    .fx-grid-lens {
-    opacity: 1;
-    -webkit-mask-image: radial-gradient(
-      240px circle at calc(50% + var(--px, 0) * 50%) calc(50% + var(--py, 0) * 50%),
-      #000 0%,
-      transparent 72%
-    );
-    mask-image: radial-gradient(
-      240px circle at calc(50% + var(--px, 0) * 50%) calc(50% + var(--py, 0) * 50%),
-      #000 0%,
-      transparent 72%
-    );
-  }
-}
 
 /* FX-80 Paper Stack: once more than 40 % of a section has scrolled above the screen, it sinks slightly (bottom edge
    fixed) as the next sheet slides over it, and the desk (FX-76) shows at its sides. `transform: none` before the
@@ -2385,24 +2188,6 @@ html[data-fx-clock='on'] .fx-tide-canvas::after {
   background: linear-gradient(to bottom, transparent, var(--tide-b, transparent) 72px);
   transform: translate3d(0, calc((1 - var(--relay, 0)) * 118%), 0) skewY(-5deg);
   will-change: transform;
-}
-/* FX-97 Material Handoff: the engineering-files desk (Projects) carries the blueprint grid (same lines as .bg-grid) */
-html:not(.fx-off-materialHandoff) .fx-tide-canvas[data-tide-key='projects']::after,
-html:not(.fx-off-materialHandoff) .fx-tide-canvas[data-relay-b='projects'] .fx-relay-b {
-  background-image:
-    linear-gradient(to right, rgba(10, 10, 10, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(10, 10, 10, 0.05) 1px, transparent 1px);
-  background-size: 48px 48px;
-}
-html:not(.fx-off-materialHandoff) .fx-tide-canvas[data-relay-b='projects'] .fx-relay-b {
-  background-image:
-    linear-gradient(to right, rgba(10, 10, 10, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(10, 10, 10, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, transparent, var(--tide-b, transparent) 72px);
-  background-size:
-    48px 48px,
-    48px 48px,
-    100% 100%;
 }
 /* FX-98 Desk Dolly: the arriving desk settles from 104 % (tablet and up) */
 @media (min-width: 768px) {
@@ -4695,32 +4480,6 @@ html[data-motion='calm'] .honors-tally .tally-trophy g:first-child {
   }
 }
 
-/* R26 contour field (components/fx/contour-field.tsx): rendered at 1/8 resolution, scaled up as hard pixels */
-.bs-contour-layer {
-  opacity: calc(1 - var(--t));
-}
-.bs-contour {
-  image-rendering: pixelated;
-}
-.bs-track[data-static] .bs-contour-layer {
-  display: none;
-}
-
-/* R27 print grain (after ShaderGradient's `grain`): a static, tiled film grain on the dark surfaces - a printed
-   texture, not a glow. One SVG noise tile, no animation, no per-frame cost. */
-.fx-grain {
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.07 0'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>");
-  background-size: 160px 160px;
-}
-.bs-floor::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.07 0'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>");
-  background-size: 160px 160px;
-}
-
 /* R27 dock magnification on the section rail (after React Bits Dock): markers near the pointer grow, neighbours
    follow; scale only (the rail never changes size). */
 .sp-mag {
@@ -5000,41 +4759,6 @@ html:not(.fx-off-cropMarks) [data-crop][data-inspect] > .fx-crop {
   }
 }
 
-/* P4 Feed Marks (>= 1536 px): printer's feed ticks in the empty left margin, one numbered strip per section, placed in
-   document coordinates (components/press/press-fx.tsx), so they scroll natively */
-.fx-feed-marks {
-  display: none;
-}
-@media (min-width: 1536px) {
-  html:not(.fx-off-feedMarks) .fx-feed-marks {
-    display: block;
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 0;
-    z-index: 5;
-    pointer-events: none;
-  }
-}
-.fx-feed {
-  position: absolute;
-  left: max(16px, var(--safe-left));
-  width: 28px;
-  border-top: 3px solid #0a0a0a;
-  background:
-    repeating-linear-gradient(to bottom, #0a0a0a 0 3px, transparent 3px 120px) left 0 / 28px 100% no-repeat,
-    repeating-linear-gradient(to bottom, rgb(10 10 10 / 0.4) 0 2px, transparent 2px 24px) left 0 / 12px 100% no-repeat;
-}
-.fx-feed-n {
-  position: absolute;
-  top: 10px;
-  left: 0;
-  padding: 1px 4px;
-  border: 2px solid #0a0a0a;
-  border-radius: 4px;
-  background: #ffffff;
-}
-
 /* T2 Odometer: digit wheels (components/animated-counter.tsx). clip-path clips the wheel without moving the baseline
    (overflow: hidden on an inline-block would) */
 .fx-odo {
@@ -5229,25 +4953,6 @@ html[data-motion='calm'] .site-mascot {
   }
 }
 
-/* ================================================================ R71 paper stocks + header ruler
-   (components/fx/section-paper.tsx; owner: "make sure my website background for every section, menu must be special
-   attractive, innovative"). Each section prints on its own paper; the header is a drawing's title strip with a
-   millimetre ruler along its bottom edge. Ink on paper only, hard lines, painted once (no per-frame work). */
-.paper-stock {
-  z-index: 0;
-}
-.paper-print {
-  background-repeat: repeat;
-  /* the paper fades out under the section title band and at the bottom edge with hard steps (no soft gradient):
-     the top 64 px and bottom 32 px are left plain, so a section boundary stays a clean 3 px ink rule */
-  clip-path: inset(88px 0 56px 0);
-}
-.paper-airmail-band {
-  height: 12px;
-  background: repeating-linear-gradient(-45deg, #0a0a0a 0 9px, transparent 9px 18px);
-  opacity: 0.85;
-  border-bottom: 3px solid #0a0a0a;
-}
 /* R75 (owner: "why the part i circled is like duplicate?"): About and Honors cards rise WITHOUT the FX-67 fade (a card
    at opacity 0.5 let whatever lay behind it show through as a faded double). R77 (owner: "remove all the object at
    background, so messy, unorganised"): the R74 flyers and the R53 backdrop pieces are gone for good; the solid rise
@@ -5277,8 +4982,9 @@ html[data-motion='calm'] .site-mascot {
     translate: 0 0;
   }
 }
+/* R71 header ruler (components/fx/header-ruler.ts): the header is a drawing's title strip with a millimetre ruler
+   along its bottom edge. R77 removed the section papers that came with it. */
 @media print {
-  .paper-stock,
   .hdr-ruler {
     display: none;
   }

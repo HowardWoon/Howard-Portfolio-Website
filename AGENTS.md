@@ -143,9 +143,16 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
    at background, so messy, unorganised"; replaces R74 "objects floating flying behind" and R53 "geometry ... floating"
    in every section):** the R74 flyers (`components/fx/flyers.tsx`) and the R53 section backdrop
    (`components/fx/section-backdrop.tsx`) are DELETED - never add floating / flying stickers, shapes or icons behind a
-   section again, and never a dense line pattern behind text either; a section's background is its R71 paper. About
-   and Honors cards keep the solid rise (no fade, R75: nothing is seen THROUGH a card). Guards: `tests/r74` (no such
-   markup, CSS, flag or import), `tests/r75`, `tests/r53`.
+   section again, and never a dense line pattern behind text either. Then (owner, Projects screenshot: "not only this
+   part, make my whole website, every section background clean and tidy"; replaces R71 "special attractive ... visual
+   effect on background", R40 P4, R26 dot / contour fields): EVERY section (hero, About, The Build, Projects,
+   Experience, Honors, logo wall, Contact, footer) sits on plain paper - no printed paper patterns (R71 papers deleted),
+   no feed ticks / numbers down the left margin, no title decorations (solids, drifting shapes, orbits, the hero sun /
+   lilac block, logo-wall shapes), no grid (hero floor, FX-78 lens, FX-97 Projects desk), no mercury blobs, no footer
+   dot field or grain, no contour field behind The Build title. Kept: the dot-grid canvas (law 0), the cat mascot, the
+   header ruler, the arena stage light. About and Honors cards keep the solid rise (no fade, R75: nothing is seen
+   THROUGH a card). Guards: `tests/r74` (no such markup, CSS, flag or import), `tests/r71`, `tests/r75`, `tests/r53`,
+   `scripts/validate-plans.mjs` R77.
 8. **Nothing on the 3D street runs on a fixed schedule (R76, owner: "walkers, cars, train like appearing in their fix
    algorithm"):** each visit rolls the fleet, the paint, the opening line-up, the light phase and the train timing; each
    respawn rolls lane / driver speed / coat; walkers roam a graph of corners with random pauses and pass each other on

@@ -25,7 +25,7 @@ const strip = <T extends { defaultBrowserType?: unknown }>(d: T) => {
 
 /* ---------------------------------------------------------------- section backdrop (retired) */
 // R53 asked for geometry floating behind every section; R77 (owner, 19 Oct 2026: "remove all the object at background,
-// so messy, unorganised") retired it. Every section's background is its paper and nothing floats in its gutters (the
+// so messy, unorganised") retired it. Every section's background is plain paper and nothing floats in its gutters (the
 // full guard is tests/r74). The page stays no wider than the screen at the three sizes R53 checked.
 for (const [name, w, h] of [
   ['desktop 1440x900', 1440, 900],
@@ -44,11 +44,12 @@ for (const [name, w, h] of [
           id,
           layers: sec.querySelectorAll('[data-section-backdrop], .sb-layer').length,
           pieces: sec.querySelectorAll('.sb-piece, .sb-float, [data-sb-solid]').length,
-          paper: sec.firstElementChild?.hasAttribute('data-paper') === true,
+          // R77: no paper pattern either (the section is plain paper)
+          paper: sec.querySelectorAll('[data-paper], .paper-stock').length,
         };
       }),
     );
-    for (const s of r) expect(s, s.id).toEqual({ id: s.id, layers: 0, pieces: 0, paper: true });
+    for (const s of r) expect(s, s.id).toEqual({ id: s.id, layers: 0, pieces: 0, paper: 0 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
   });
 }

@@ -11,7 +11,7 @@ import { ExternalLink, FileText, Search } from 'lucide-react';
 import { FX, SPRING_STAMP } from '@/lib/fx';
 import { useClockActive } from '@/lib/section-clock';
 import { SpFill } from './fx/sp-fill';
-import { HEADER_RULER } from './fx/section-paper';
+import { HEADER_RULER } from './fx/header-ruler';
 import type { PaletteWindow } from './command-palette';
 import { openResume } from '@/lib/resume';
 import { flapTo } from '@/lib/split-flap';

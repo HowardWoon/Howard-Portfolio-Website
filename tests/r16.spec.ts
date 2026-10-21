@@ -63,10 +63,13 @@ test('print restores the cream sections (FX-76)', async ({ page }) => {
 });
 
 /* ---------------------------------------------------------------- FX-77, FX-79 desktop */
-test('desktop: the hero sun and the dot plane are scroll-driven (FX-77, FX-79)', async ({ page }) => {
+test('desktop: the dot plane is scroll-driven, and the hero has no sun behind the portrait (FX-79; FX-77 retired)', async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
-  expect(await page.locator('.fx-sunset').evaluate((e) => getComputedStyle(e).animationName)).toBe('fx-sunset');
+  // R77 (owner: every section background "clean and tidy"): the FX-77 sun is gone
+  expect(await page.locator('.fx-sunset').count()).toBe(0);
   const plane = await page.locator('#about').evaluate((e) => ({
     own: getComputedStyle(e).backgroundImage,
     before: getComputedStyle(e, '::before').animationName,
@@ -79,7 +82,7 @@ test('desktop: the hero sun and the dot plane are scroll-driven (FX-77, FX-79)',
 
 test.describe('phone', () => {
   test.use((({ defaultBrowserType, ...d }) => d)(devices['iPhone 13']));
-  test('phones keep the static dots and a still sun (FX-77, FX-79)', async ({ page }) => {
+  test('phones keep the static dots and have no sun (FX-79; FX-77 retired)', async ({ page }) => {
     await home(page);
     const about = await page.locator('#about').evaluate((e) => ({
       own: getComputedStyle(e).backgroundImage,
@@ -87,16 +90,15 @@ test.describe('phone', () => {
     }));
     expect(about.own).toContain('radial-gradient');
     expect(about.before).toBe('none');
-    expect(await page.locator('.fx-sunset').evaluate((e) => getComputedStyle(e).animationName)).toBe('none');
+    expect(await page.locator('.fx-sunset').count()).toBe(0);
   });
 });
 
 /* ---------------------------------------------------------------- reduced motion / Calm */
-test('reduced motion: no sunset, no dot plane, the tint changes without a glide', async ({ page }) => {
+test('reduced motion: no dot plane, the tint changes without a glide', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
-  expect(await page.locator('.fx-sunset').evaluate((e) => getComputedStyle(e).animationName)).toBe('none');
   expect(await page.locator('#about').evaluate((e) => getComputedStyle(e, '::before').content)).toBe('none');
   const dur = await page.evaluate(
     () => getComputedStyle(document.querySelector('.fx-tide-canvas')!, '::after').transitionDuration,
@@ -108,7 +110,6 @@ test('Calm Mode switches the session-1 effects off', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
   await page.evaluate(() => (document.documentElement.dataset.motion = 'calm'));
-  expect(await page.locator('.fx-sunset').evaluate((e) => getComputedStyle(e).animationName)).toBe('none');
   expect(await page.locator('#about').evaluate((e) => getComputedStyle(e, '::before').content)).toBe('none');
 });
 

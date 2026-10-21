@@ -4,8 +4,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { m } from 'framer-motion';
 import { SplitWords } from './fx/split-words';
 import { DispatchRail } from './dispatch-rail';
-import { BauhausSolid } from './fx/bauhaus-solid';
-import dynamic from 'next/dynamic';
 import { FX } from '@/lib/fx';
 import { Mail, Copy, Check, Send, FileText, MapPin, Clock, Sparkles, CheckCircle2 } from 'lucide-react';
 import { Github, Linkedin } from './brand-icons';
@@ -18,7 +16,6 @@ import { OsWindow, WindowDesk } from '@/components/os-window';
 import { PillPit, type PitBadge } from '@/components/pill-pit';
 import { SIGNAL, type Signal } from '@/lib/signal';
 import { experiences } from '@/components/experience-section';
-import { SectionPaper } from './fx/section-paper';
 
 const ROLE_SIGNAL: Record<string, Signal | undefined> = {
   'Agentic AI Pipelines': 'ai',
@@ -58,8 +55,6 @@ const PIT_BADGES: PitBadge[] = [
 for (const e of experiences)
   for (const label of e.tags)
     if (!PIT_BADGES.some((b) => b.label === label)) PIT_BADGES.push({ label, fill: pigment(e.signal) });
-
-const MercuryField = dynamic(() => import('./fx/mercury-field').then((mod) => mod.MercuryField), { ssr: false });
 
 const quickIntents = [
   {
@@ -267,47 +262,6 @@ export default function ContactSection() {
       onPointerDownCapture={markStart}
       className="fx-tide-surface fx-dot-plane relative w-full bg-paper-cream bg-dots text-ink pt-24 sm:pt-32 pb-0 overflow-clip border-t-3 border-ink"
     >
-      {/* R71: this section prints on its own paper */}
-      <SectionPaper stock="airmail" />
-      {/* Bauhaus composition (replaces the particle canvas, which was invisible on a light canvas
-          and was also being stretched: its bitmap was viewport-sized but CSS-sized to the whole section) */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        {/* R41 (owner: "a bright spot ... so weird to see the blue circle suddenly white and bright"): no soft edge
-            fade - it turned a blob crossing it into a white-to-blue glow. The blobs now stay inside the canvas instead
-            (mercury-field.tsx), so every one is a flat colour with a hard ink outline */}
-        {FX.mercuryField ? <MercuryField className="absolute right-0 top-0 h-[440px] w-[30%] hidden xl:block" /> : null}
-        <div
-          className="fx-depth absolute -left-36 top-[38%] hidden xl:block"
-          style={{ '--depth': -20 } as React.CSSProperties}
-        >
-          {FX.solids3d ? (
-            <BauhausSolid kind="coin" size={56} color="#FFC700" />
-          ) : (
-            <div className="w-56 h-56 rounded-full bg-pop-yellow border-3 border-ink" />
-          )}
-        </div>
-        <div
-          className="fx-depth absolute right-12 top-20 hidden lg:block"
-          style={{ '--depth': 30 } as React.CSSProperties}
-        >
-          {FX.solids3d ? (
-            <BauhausSolid kind="coin" size={24} color="#454AE5" />
-          ) : (
-            <div className="w-24 h-24 rounded-full bg-pop-blue border-3 border-ink" />
-          )}
-        </div>
-        <div
-          className="fx-depth absolute right-44 top-40 hidden lg:block"
-          style={{ '--depth': 12 } as React.CSSProperties}
-        >
-          {FX.solids3d ? (
-            <BauhausSolid kind="cube" size={14} color="#FF4B2B" />
-          ) : (
-            <div className="w-14 h-14 bg-pop-red border-3 border-ink rotate-12" />
-          )}
-        </div>
-      </div>
-
       <div className="relative max-w-7xl mx-auto space-y-14 px-4 xs:px-5 sm:px-10 lg:px-16">
         {/* Section Header */}
         <div className="space-y-7">

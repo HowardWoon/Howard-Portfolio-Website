@@ -1,12 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { useEffect } from 'react';
 import { prefersReducedMotion } from '@/lib/fx';
 import { isFxLite } from '@/lib/fx-tier';
 import { scrollFrame } from '@/lib/scroll-frame';
 import { useClockActive } from '@/lib/section-clock';
-import { SECTION_IDS } from '@/lib/sections';
 import { logSection } from '@/lib/press-run';
 
 /**
@@ -17,8 +15,8 @@ import { logSection } from '@/lib/press-run';
  *   - desktop: while the page moves the plate lags by up to 6 px with the scroll speed, and springs back into
  *     register the moment it stops. One rAF that runs only while the page moves or the plate settles; it writes
  *     `--reg` (@property, inherits: false) on the visible plates only; transform (translate) only.
- * P4 Feed Marks: >= 1536 px, printer's feed ticks in the left margin, one strip per section (numbered), placed in
- *   document coordinates once per resize, so they scroll natively (zero per-frame work).
+ * P4 Feed Marks retired in R77 (owner: "make my whole website, every section background clean and tidy"): no ticks
+ *   or section numbers down the left margin.
  * C1 touch path: a tap on a card shows its crop marks (data-inspect); the next scroll clears them.
  * R3 run log: sections reached this page view (for the footer colophon).
  * Everything stands down for reduced motion / Calm (the CSS also gates it).
@@ -129,57 +127,5 @@ export function PressFx() {
     };
   }, []);
 
-  return <FeedMarks />;
-}
-
-/* ---------------------------------------------------------------- P4 feed marks */
-type Strip = { id: string; n: string; top: number; h: number };
-
-function FeedMarks() {
-  const [strips, setStrips] = useState<Strip[]>([]);
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 1536px)');
-    const measure = () => {
-      if (!mq.matches) {
-        setStrips((s) => (s.length ? [] : s));
-        return;
-      }
-      const next = SECTION_IDS.map((id, i): Strip | null => {
-        const el = document.getElementById(id);
-        if (!el) return null;
-        let top = 0;
-        for (let n: HTMLElement | null = el; n; n = n.offsetParent as HTMLElement | null) top += n.offsetTop;
-        return { id, n: String(i + 1).padStart(2, '0'), top, h: el.offsetHeight };
-      }).filter((s): s is Strip => s !== null);
-      setStrips((prev) =>
-        prev.length === next.length && prev.every((p, i) => p.top === next[i].top && p.h === next[i].h) ? prev : next,
-      );
-    };
-    let t = 0;
-    const soon = () => {
-      window.clearTimeout(t);
-      t = window.setTimeout(measure, 250);
-    };
-    measure();
-    const ro = new ResizeObserver(soon);
-    ro.observe(document.body);
-    mq.addEventListener('change', soon);
-    return () => {
-      ro.disconnect();
-      mq.removeEventListener('change', soon);
-      window.clearTimeout(t);
-    };
-  }, []);
-  if (!strips.length) return null;
-  return createPortal(
-    <div aria-hidden className="fx-feed-marks">
-      {strips.map((s) => (
-        <div key={s.id} className="fx-feed" style={{ top: s.top, height: s.h }}>
-          <span className="fx-feed-n font-mono text-xs font-extrabold tracking-[0.12em] text-ink">{s.n}</span>
-        </div>
-      ))}
-    </div>,
-    // inside the page root (its stacking context), so the header, tray and dialogs stay above the marks
-    document.querySelector('.fx-page-root') ?? document.body,
-  );
+  return null;
 }

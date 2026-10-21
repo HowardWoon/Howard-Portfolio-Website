@@ -148,7 +148,6 @@ has(
   'blueprintView:',
   'pageLift:',
   'bootShatter:',
-  'mercuryField:',
 );
 has(
   'R7',
@@ -260,14 +259,8 @@ has(
   'bootShatter()',
   'FX.bootShatter',
 );
-has(
-  'R7',
-  'S5.2',
-  'Mercury Field: dynamic, ssr:false',
-  'components/contact-section.tsx',
-  "import('./fx/mercury-field')",
-  'ssr: false',
-);
+// R77 (owner: "make my whole website, every section background clean and tidy"): the FX-34 Mercury Field is retired
+nowhere('R7', 'S5.2', 'Mercury Field retired in R77 (no import anywhere)', './fx/mercury-field');
 has('R7', 'S6.2', 'Rules say domMax (not domAnimation)', '.agents/rules/10-architecture.md', 'domMax');
 has('R7', 'S6.2b', 'MotionProvider uses domMax', 'components/motion-provider.tsx', 'domMax');
 
@@ -386,7 +379,9 @@ has(
 );
 has('R9', 'R9-07', 'Button icons never shrink to 0', 'app/globals.css', '.nb-btn > svg', 'flex-shrink: 0');
 has('R9', 'R9-08', 'Magnetic honours Calm (useMotionAllowed)', 'components/magnetic-button.tsx', 'useMotionAllowed');
-has('R9', 'R9-08b', 'Mercury Field freezes for Calm', 'components/fx/mercury-field.tsx', 'useCalm');
+custom('R9', 'R9-08b', 'Mercury Field retired in R77 (file gone)', () =>
+  existsSync('components/fx/mercury-field.tsx') ? 'components/fx/mercury-field.tsx must not exist (R77)' : true,
+);
 nowhere(
   'R9',
   'R9-08c',
@@ -433,7 +428,6 @@ has(
   ':not(.fx-off-specular)',
   ':not(.fx-off-glassHeader)',
   ':not(.fx-off-depthParallax)',
-  ':not(.fx-off-scrollDrift)',
   ':not(.fx-off-paletteDrop)',
   ':not(.fx-off-letterpress)',
   ':not(.fx-off-shadowFollow)',
@@ -459,13 +453,14 @@ has(
   'animation-play-state: paused',
 );
 has('R9', 'D6', 'Dock hides while scrolling down', 'components/section-dock.tsx', 'scrollingDown');
-custom('R9', 'R9-19', 'MercuryField dynamic() sits below the last import', () => {
-  const s = read('components/contact-section.tsx');
-  if (!s) return 'missing components/contact-section.tsx';
-  const lastImport = s.lastIndexOf('\nimport ');
-  const dyn = s.indexOf('const MercuryField = dynamic(');
-  return dyn > lastImport ? true : 'MercuryField dynamic() is above an import statement';
-});
+// R77: the Mercury Field is retired, so its dynamic() import must not come back either
+lacks(
+  'R9',
+  'R9-19',
+  'No MercuryField dynamic() left in Contact (retired in R77)',
+  'components/contact-section.tsx',
+  'MercuryField',
+);
 has(
   'R9',
   'T',
@@ -1037,7 +1032,6 @@ has(
   'sectionScan:',
   'tilt3d:',
   'titleWave:',
-  'ambientOrbits:',
 );
 has(
   'R13',
@@ -1078,15 +1072,8 @@ has(
   ':not(.fx-off-titleWave)',
   'rotate: 1 -1 0 14deg',
 );
-has(
-  'R13',
-  'FX-60',
-  'Orbits are decorative, hidden below xl, paused off-screen',
-  'components/fx/ambient-orbits.tsx',
-  'aria-hidden',
-  'hidden xl:block',
-  'animate-spin-slow',
-  'pointer-events-none',
+custom('R13', 'FX-60', 'Orbits retired in R77 (owner: every section background clean and tidy)', () =>
+  existsSync('components/fx/ambient-orbits.tsx') ? 'components/fx/ambient-orbits.tsx must not exist (R77)' : true,
 );
 has(
   'R13',
@@ -1096,7 +1083,7 @@ has(
   '(FX-55)',
   '(FX-56)',
   'FX-57, FX-58, FX-59',
-  '(FX-60)',
+  '(FX-60 retired in R77)',
   'reduced motion',
 );
 
@@ -1107,7 +1094,6 @@ has(
   'FX-61 … FX-69 flags',
   'lib/fx.ts',
   'heroCssEntrance:',
-  'blueprintFloor:',
   'progressRing:',
   'inkWipe:',
   'viewTransitions:',
@@ -1213,7 +1199,6 @@ has(
   'FX-61 … FX-67 + FX-70 CSS',
   'app/globals.css',
   '@keyframes fx-hero-in',
-  '@keyframes fx-floor',
   '@keyframes fx-ring',
   '@keyframes fx-wipe',
   '@keyframes fx-card-turn',
@@ -1348,10 +1333,9 @@ has('R17', 'P0-01', 'Kinetic weight retired', 'lib/fx.ts', 'kineticType: false')
 has(
   'R17',
   'P0-01b',
-  'Wipe + floor are desktop / fine pointer / full tier only',
+  'Wipe is desktop / fine pointer / full tier only (the FX-62 floor is retired, R77)',
   'app/globals.css',
   ":not(.fx-off-inkWipe):not([data-fx-tier='lite']) .fx-wipe",
-  ":not(.fx-off-blueprintFloor):not([data-fx-tier='lite']) .fx-floor-grid",
 );
 has(
   'R17',
@@ -1433,7 +1417,14 @@ has(
   '.fx-relay-b {',
   "html[data-motion='calm'] .fx-relay-b",
 );
-has('R18', 'FX-97', 'Projects desk carries the grid', 'app/globals.css', "[data-tide-key='projects']::after");
+// R77 (owner: every section background "clean and tidy"): the Projects desk no longer carries a grid
+lacks(
+  'R18',
+  'FX-97',
+  'Projects desk carries no grid (retired in R77)',
+  'app/globals.css',
+  "[data-tide-key='projects']::after",
+);
 has('R18', 'FX-99', 'Rail + dock progress fills', 'components/section-dock.tsx', 'SpFill');
 has('R18', 'FX-100', 'Spatial echo', 'lib/jump.ts', "classList.add('fx-echo')", "'fx-proj-hop'");
 has('R18', 'FX-101', 'Evidence wire', 'components/project-index.tsx', 'fx-wire-path', 'offsetPath');
@@ -1467,6 +1458,42 @@ has(
   '(FX-101)',
   '(FX-102)',
   '(FX-105)',
+);
+
+/* ================================================================ R77 clean backgrounds (owner: "remove all the object at
+   background, so messy, unorganised"; "make my whole website, every section background clean and tidy") */
+custom('ALL', 'R77-a', 'Retired background components are deleted', () => {
+  const gone = [
+    'components/fx/flyers.tsx',
+    'components/fx/section-backdrop.tsx',
+    'components/fx/section-paper.tsx',
+    'components/fx/ambient-orbits.tsx',
+    'components/fx/bauhaus-solid.tsx',
+    'components/fx/mercury-field.tsx',
+    'components/fx/contour-field.tsx',
+    'components/fx/dot-field.tsx',
+  ].filter((p) => existsSync(p));
+  return gone.length ? `must not exist: ${gone.join(', ')}` : true;
+});
+lacks(
+  'ALL',
+  'R77-b',
+  'Retired background flags are gone from lib/fx.ts',
+  'lib/fx.ts',
+  /^\s*(flyers|sectionBackdrop|sectionPaper|feedMarks|ambientOrbits|solids3d|scrollDrift|mercuryField|blueprintFloor|sunsetHandoff|gridGravity|materialHandoff):/m,
+);
+lacks(
+  'ALL',
+  'R77-c',
+  'No CSS for the retired background layers',
+  'app/globals.css',
+  /\.(flyers?|sb-piece|sb-layer|paper-stock|paper-print|fx-feed-marks|fx-orbit|fx-solid|fx-drift|fx-floor-grid|fx-sunset|fx-grid-lens|bs-contour|fx-grain|bg-grid)\b/,
+);
+nowhere(
+  'ALL',
+  'R77-d',
+  'No background-object component is used anywhere',
+  /<(Flyers|SectionBackdrop|SectionPaper|AmbientOrbits|BauhausSolid|MercuryField|ContourField|DotField|FeedMarks)\b/,
 );
 
 /* ================================================================================================ run */

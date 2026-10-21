@@ -7,7 +7,6 @@
 export const FX = {
   pointerField: true, // FX-01 shared cursor field (drives depth parallax + light-follow shadows)
   depthParallax: true, // FX-02 decorative Bauhaus shapes float at different depths
-  solids3d: true, // FX-03 flat square / circle accents become spinning 3D cube / coin
   shadowFollow: true, // FX-04 hard shadows lean away from the cursor ("desk lamp" light)
   headlineStamp: true, // FX-05 hero chip "stamps" onto the page after boot
   titleWipe: true, // FX-06 section titles rise line-by-line from a mask
@@ -18,7 +17,6 @@ export const FX = {
   coinFlip: true, // FX-10 honors rank stickers flip like a coin on first view
   shapeBurst: true, // FX-11 Bauhaus confetti on winner cards + successful contact send
   cursorMorph: true, // FX-12 cursor turns into a diamond on buttons, a big ring on images
-  scrollDrift: true, // FX-13 background geometry drifts/rotates with scroll (pure CSS)
   powerOn: true, // FX-14 simulator screen "powers on" like a CRT
   photoFan: true, // FX-15 project photo stack fans out in 3D on hover
   paletteDrop: true, // FX-16 command palette drops in on a 3D hinge
@@ -42,7 +40,6 @@ export const FX = {
   blueprintView: true, // FX-31 + FX-45 (R11) 3D Blueprint Inspection Bench: orbit, zoom, pan, explode, inspect layers
   pageLift: true, // FX-32 certificate modal lifts off the desk in 3D
   bootShatter: true, // FX-33 boot gate breaks into Bauhaus tiles
-  mercuryField: true, // FX-34 WebGL2 metaball "mercury" behind the contact header
   // ---- Round 8 (advisor spec) ----
   routeWipe: true, // FX-35 Bauhaus wipe between the portfolio and the simulator pages
   stackFocus: true, // FX-36 tooling-matrix legend chips highlight every skill with that status
@@ -67,10 +64,8 @@ export const FX = {
   sectionScan: true, // FX-57 a yellow/blue/red band sweeps along each section's top rule as it scrolls in
   tilt3d: true, // FX-58 project-index tiles tilt in 3D under a mouse
   titleWave: true, // FX-59 section-title words ripple on hover (mouse)
-  ambientOrbits: true, // FX-60 slow rotating Bauhaus orbits in the section margins (wide screens)
   // ---- Round 14 (docs/R14-FULL-AUDIT-AND-UIUX-PLAN.md) ----
   heroCssEntrance: true, // FX-61 hero entrance in CSS: visible in the server HTML, animates from first paint
-  blueprintFloor: true, // FX-62 the hero grid tilts back into a 3D drafting floor as the hero scrolls away
   progressRing: true, // FX-63 reading-progress ring on the back-to-top button
   inkWipe: true, // FX-64 archive / contact-sheet images wipe in diagonally as they scroll into view
   viewTransitions: true, // FX-65 honours categories + experience filters morph with the View Transitions API
@@ -87,11 +82,9 @@ export const FX = {
   // ---- Round 16 "Drafting Desk Physics" (docs/R16-DRAFTING-DESK-PHYSICS-PLAN.md), session 1 ----
   frameGovernor: true, // FX-93 heavy effects drop to a lite tier when the device can't keep scrolling smooth
   chromaticTide: true, // FX-76 the desk surface glides between the section soft tints as you scroll
-  sunsetHandoff: true, // FX-77 the hero sun sinks and swells as the hero leaves, handing its colour to About
   dotParallax: true, // FX-79 the dot texture sits on its own plane and moves slower than the content
   arenaPinboard: true, // FX-94 Arena Wall: colour-blocked tilted seals, Bauhaus backdrop, stage light, dock hover
   // ---- Round 16 sessions 2-5 ----
-  gridGravity: true, // FX-78 the hero grid darkens in a soft circle under the lamp (mouse)
   paperStack: true, // FX-80 the section being left sinks slightly as the next sheet slides over it
   deckRecede: true, // FX-81 project cards tip back and recede as they leave the top of the screen
   draftToInk: true, // FX-82 section-title words are outlined first, then fill with ink as they rise
@@ -111,7 +104,6 @@ export const FX = {
   // ---- Round 18 "Living Engineering Workspace" (docs/R18-LIVING-ENGINEERING-WORKSPACE-PLAN.md) ----
   sectionClock: true, // FX-95 one scroll engine: per-section progress, active section, relay value
   atmosphereRelay: true, // FX-96 the desk hands its tint to the next section along a sweeping diagonal seam
-  materialHandoff: true, // FX-97 the Projects desk carries the blueprint grid in with the seam
   deskDolly: true, // FX-98 the arriving desk settles from 104 % to 100 % (tablet and up)
   instrumentRail: true, // FX-99 section rail / mobile dock fill with the section's progress
   spatialEcho: true, // FX-100 index tile -> card: shared morph on long jumps, outline pulse on landing
@@ -124,7 +116,6 @@ export const FX = {
   halftoneTide: true, // P1 the next section's desk colour is screened on as growing halftone dots (desktop)
   plateRegistration: true, // P2 card colour bars land out of register and snap in; lag with scroll speed (desktop)
   inkRoller: true, // P3 an ink roller rides the halftone front between sections (desktop)
-  feedMarks: true, // P4 printer's feed ticks + section numbers in the left margin (>= 1536 px)
   movableType: true, // T1 section-title words are cast mirrored and flip readable as they rise
   odometer: true, // T2 stat numbers roll in on mechanical digit wheels
   kerningBreath: true, // T3 a focused key / chip label squeezes and springs back (keyboard focus)
@@ -142,9 +133,10 @@ export const FX = {
   reelGrab: true, // drag a reel row by hand and fling it; a short press is still a click
   ticketPunch: true, // the reel's ink tickets are punched top and bottom like admission tickets (CSS mask)
   heroMascot: true, // R49 the page-mascot cat perched on the hero ticker: follows the pointer, reacts to a boop
-  // R53 sectionBackdrop and R74 flyers retired in R77 (owner: "remove all the object at background, so messy,
-  // unorganised"): no floating shapes or stickers behind any section (components deleted; guard tests/r74)
-  sectionPaper: true, // R71 each section has its own printed paper (plot / mat / ledger / sparkle / airmail)
+  // Retired in R77 (owner: "remove all the object at background, so messy, unorganised", then "make my whole website,
+  // every section background clean and tidy"): R53 sectionBackdrop, R74 flyers, R71 sectionPaper, P4 feedMarks,
+  // FX-60 ambientOrbits, FX-03 solids3d, FX-13 scrollDrift, FX-34 mercuryField, FX-62 blueprintFloor, FX-77
+  // sunsetHandoff, FX-78 gridGravity, FX-97 materialHandoff. Plain paper behind every section (guard tests/r74).
   headerRuler: true, // R71 a printed millimetre ruler along the bottom edge of the header
   reelTape: true, // each reel print is held by the site's masking tape, which presses flat under the mouse / focus
 } as const;

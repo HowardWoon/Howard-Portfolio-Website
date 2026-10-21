@@ -137,11 +137,14 @@ test('certificate deck: a horizontal swipe deals the next card without opening t
   await expect(page.getByRole('dialog')).toHaveCount(0);
 });
 
-test('dark surfaces carry the static print grain', async ({ page }) => {
+// R77 (owner: "make my whole website, every section background clean and tidy"): the R27 print grain is retired
+test('dark surfaces are plain: no print grain on the footer or the story floor (R27 grain retired in R77)', async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/', { waitUntil: 'networkidle' });
-  expect(await page.locator('footer').evaluate((f) => getComputedStyle(f).backgroundImage)).toContain('svg');
-  expect(await page.locator('.bs-floor').evaluate((f) => getComputedStyle(f, '::after').backgroundImage)).toContain(
+  expect(await page.locator('footer').evaluate((f) => getComputedStyle(f).backgroundImage)).not.toContain('svg');
+  expect(await page.locator('.bs-floor').evaluate((f) => getComputedStyle(f, '::after').backgroundImage)).not.toContain(
     'svg',
   );
 });

@@ -128,22 +128,12 @@ test('reduced motion: no decode, no stamp, no scan, no tilt (FX-55 … FX-59)', 
   expect(await tile.evaluate((e) => getComputedStyle(e).rotate)).toBe('none');
 });
 
-test('ambient orbits decorate wide screens only and never add sideways scroll (FX-60)', async ({ page }) => {
-  for (const [w, shown] of [
-    [1440, true],
-    [1024, false],
-    [390, false],
-  ] as const) {
+// R77 (owner: "make my whole website, every section background clean and tidy"): the FX-60 orbits are retired
+test('no ambient orbits at any width, and no sideways scroll (FX-60 retired in R77)', async ({ page }) => {
+  for (const w of [1440, 1024, 390]) {
     await page.setViewportSize({ width: w, height: 900 });
     await home(page);
-    const displays = await page
-      .locator('.fx-orbit')
-      .evaluateAll((els) => els.map((e) => [getComputedStyle(e).display, e.getAttribute('aria-hidden')]));
-    expect(displays.length).toBeGreaterThan(0);
-    for (const [d, hidden] of displays) {
-      expect(d === 'none').toBe(!shown);
-      expect(hidden).toBe('true');
-    }
+    expect(await page.locator('.fx-orbit').count(), `${w}px`).toBe(0);
     const [sw, cw] = await page.evaluate(() => [
       document.documentElement.scrollWidth,
       document.documentElement.clientWidth,

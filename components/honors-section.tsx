@@ -4,7 +4,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { m, AnimatePresence } from 'framer-motion';
 import { useInteractionSelect } from '@/lib/interaction-store';
-import { BauhausSolid } from './fx/bauhaus-solid';
 import { SplitWords } from './fx/split-words';
 import { FX, SPRING_STAMP } from '@/lib/fx';
 import { SIGNAL, type Signal } from '@/lib/signal';
@@ -17,7 +16,6 @@ import { OrgLogo, orgLogoFor } from './org-logo';
 import { HonorsTally } from './honors-tally';
 import { PinKey } from './press/pin-key';
 import { HeadlineFigures, ResultsBoard, RolesGrid, Transcript } from './honors-academic';
-import { AmbientOrbits } from './fx/ambient-orbits';
 import { useFocusTrap } from '@/lib/use-focus-trap';
 import { useLatest } from '@/lib/use-latest';
 import { useScrollLock } from '@/lib/use-scroll-lock';
@@ -36,7 +34,6 @@ import {
   FileText,
   type LucideIcon,
 } from 'lucide-react';
-import { SectionPaper } from './fx/section-paper';
 
 interface HonorItem {
   id: string;
@@ -530,34 +527,6 @@ export default function HonorsSection() {
       id="honors"
       className="fx-tide-surface fx-dot-plane fx-sheet relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-clip border-t-3 border-ink flex flex-col"
     >
-      {/* R71: this section prints on its own paper */}
-      <SectionPaper stock="sparkle" />
-      {/* Structural grid + Bauhaus accents */}
-      {FX.ambientOrbits ? <AmbientOrbits side="left" square="bg-white" /> : null}
-
-      <div
-        aria-hidden
-        className="fx-depth pointer-events-none absolute -right-16 -top-16 hidden lg:block"
-        style={{ '--depth': -22 } as React.CSSProperties}
-      >
-        {FX.solids3d ? (
-          <BauhausSolid kind="coin" size={40} color="#FFFFFF" />
-        ) : (
-          <div className="w-40 h-40 rounded-full bg-white border-3 border-ink" />
-        )}
-      </div>
-      <div
-        aria-hidden
-        className="fx-depth pointer-events-none absolute right-16 top-6 hidden lg:block"
-        style={{ '--depth': 18 } as React.CSSProperties}
-      >
-        {FX.solids3d ? (
-          <BauhausSolid kind="cube" size={12} color="#FFFFFF" />
-        ) : (
-          <div className="w-12 h-12 bg-white border-3 border-ink rotate-12" />
-        )}
-      </div>
-
       <div className="relative max-w-7xl mx-auto space-y-12 w-full flex-1 flex flex-col">
         {/* Section Header */}
         <div className="space-y-7">

@@ -176,10 +176,11 @@ test('contact intent cards stamp too (B-09)', async ({ page }) => {
 });
 
 /* ---------------------------------------------------------------- FX-62 … FX-67 motion */
-test('floor, ring, wipe, card turn, lamp and CSS reveal run with motion (FX-62 … FX-67, B-12)', async ({ page }) => {
+test('ring, wipe, card turn, lamp and CSS reveal run with motion (FX-63 … FX-67, B-12)', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
-  expect(await anim(page.locator('.fx-floor-grid'))).toBe('fx-floor');
+  // R77 (owner: every section background "clean and tidy"): the FX-62 hero grid floor is gone
+  expect(await page.locator('.fx-floor-grid, .fx-grid-lens').count()).toBe(0);
   // R75 (owner: the stickers showed through fading cards as "duplicates"): in About and Honors (where the R74 flyers flew until R77) the
   // reveal rises without a fade (fx-rise-solid); every other section keeps the FX-67 fx-hero-in
   expect(await anim(page.locator('#about .fx-rise').first())).toBe('fx-rise-solid');
@@ -208,11 +209,10 @@ test('floor, ring, wipe, card turn, lamp and CSS reveal run with motion (FX-62 �
   expect(await anim(academic)).toBe('fx-card-turn');
 });
 
-test('reduced motion: no floor, no reveal, no card turn, no wipe (FX-62 … FX-66)', async ({ page }) => {
+test('reduced motion: no reveal, no card turn, no wipe (FX-63 … FX-66)', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
-  expect(await anim(page.locator('.fx-floor-grid'))).toBe('none');
   expect(await anim(page.locator('#about .fx-rise').first())).toBe('none');
   const academic = page.locator('#honors button[data-honor-category]', { hasText: 'ACADEMIC DISTINCTIONS' });
   await academic.evaluate((e) => e.scrollIntoView({ block: 'center' }));
