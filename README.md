@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://howard-woon-portfolio.vercel.app/images/howard-solid.jpeg" alt="Howard Woon" width="120" height="120" style="border-radius: 50%;" />
+  <img src="https://howard-woon-hz-06-portfolio.vercel.app/images/howard-solid.jpeg" alt="Howard Woon" width="120" height="120" style="border-radius: 50%;" />
 
   <h1 align="center">Howard Woon · Software Engineer</h1>
 
@@ -8,7 +8,7 @@
   </p>
 
   <p align="center">
-    <a href="https://howard-woon-portfolio.vercel.app">Live Portfolio</a> · 
+    <a href="https://howard-woon-hz-06-portfolio.vercel.app">Live Portfolio</a> · 
     <a href="https://www.linkedin.com/in/howard-woon-hao-zhe-730b9337a/">LinkedIn</a>
   </p>
 </div>

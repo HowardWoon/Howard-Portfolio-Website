@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | **Repository** | `HowardWoon/Howard-Portfolio-Website` (branch `main` @ `0c634b5`) |
-| **Live site** | https://howard-woon-portfolio.vercel.app |
+| **Live site** | https://howard-woon-hz-06-portfolio.vercel.app |
 | **Stack (verified from the code)** | Next.js 15.5 (App Router) · React 19.1 · TypeScript strict · Tailwind 3.4 · framer-motion 13 via `<LazyMotion strict>` + `domMax` · Lenis 1.3 · cmdk · lucide-react 0.514 · Supabase · Vercel `sin1` |
 | **Design system (keep it)** | Neo-Brutalism (structure) · Bento (layout) · Bauhaus (geometry) · Clay (tactile controls) — tokens in `tailwind.config.ts`, FX switchboard in `lib/fx.ts` |
 | **Audience of this file** | The AI agent that will do the work (Antigravity / Cursor / Claude Code / Codex), plus Howard for the approvals |

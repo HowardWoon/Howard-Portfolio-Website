@@ -6,7 +6,7 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
 ## 1. What this project is
 
 - Personal portfolio of Howard Woon. Next.js 15 (App Router) / React 19 / TypeScript (strict) / Tailwind CSS 3.4 / Framer Motion / Lenis smooth scroll / Supabase (contact inbox only) / deployed on Vercel (region sin1).
-- Live: https://howard-woon-portfolio.vercel.app / Repo: https://github.com/HowardWoon/Howard-Portfolio-Website
+- Live: https://howard-woon-hz-06-portfolio.vercel.app / Repo: https://github.com/HowardWoon/Howard-Portfolio-Website
 
 ## 2. The laws (never break them)
 

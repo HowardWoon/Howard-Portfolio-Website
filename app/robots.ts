@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
 
-const SITE = 'https://howard-woon-portfolio.vercel.app';
+const SITE = 'https://howard-woon-hz-06-portfolio.vercel.app';
 
 // Keeps /admin and the API out of search results (there was no robots.txt at all)
 export default function robots(): MetadataRoute.Robots {

@@ -6,7 +6,7 @@
  * Usage (a production server must already be running, see 06-stability B):
  *   node scripts/audit-ui.mjs                      -> audits http://localhost:3000
  *   node scripts/audit-ui.mjs --base=http://localhost:3000 --out=audit
- *   node scripts/audit-ui.mjs --base=https://howard-woon-portfolio.vercel.app
+ *   node scripts/audit-ui.mjs --base=https://howard-woon-hz-06-portfolio.vercel.app
  * Output: <out>/screens/*.png, <out>/report.md, and the same table on stdout.
  * Exit 1 if any viewport overflows, an image is broken, the page throws, or axe finds serious/critical issues.
  */

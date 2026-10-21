@@ -40,7 +40,7 @@ const DESCRIPTION =
 
 export const metadata: Metadata = {
   // Without this, OG/Twitter image URLs resolve to http://localhost:3000 outside Vercel previews
-  metadataBase: new URL('https://howard-woon-portfolio.vercel.app'),
+  metadataBase: new URL('https://howard-woon-hz-06-portfolio.vercel.app'),
   title: 'Howard Woon // Full Stack Developer',
   description: DESCRIPTION,
   alternates: { canonical: '/' },
@@ -103,7 +103,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               '@context': 'https://schema.org',
               '@type': 'Person',
               name: 'Howard Woon',
-              url: 'https://howard-woon-portfolio.vercel.app/',
+              url: 'https://howard-woon-hz-06-portfolio.vercel.app/',
               jobTitle: 'Full Stack Developer',
               worksFor: {
                 '@type': 'Organization',

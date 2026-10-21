@@ -11,7 +11,7 @@
  *
  * Usage (a production server must already be running, see 06-stability B):
  *   node scripts/device-sweep.mjs
- *   node scripts/device-sweep.mjs --base=https://howard-woon-portfolio.vercel.app
+ *   node scripts/device-sweep.mjs --base=https://howard-woon-hz-06-portfolio.vercel.app
  * Exit 1 on any problem. Chromium only: WebKit / Firefox engines are not installed here (see 20-responsive-a11y A).
  */
 import { chromium, devices } from '@playwright/test';
