@@ -44,7 +44,7 @@ let lastX = -1;
 let lastY = -1;
 let travelAt = -1e9;
 function onMove(e: PointerEvent) {
-  if (e.pointerType === 'touch') return;
+  if (!fine || e.pointerType === 'touch') return;
   const now = performance.now();
   if (now - travelAt > 250) travel = 0; // travel only counts within one gesture
   travelAt = now;
@@ -59,7 +59,11 @@ function onMove(e: PointerEvent) {
   movedAt = now; // a deliberate move: the visitor is reaching for something
   if (shield && shield.style.display === 'block') lift();
 }
-function onScroll() {
+function onScroll(e: Event) {
+  // R82: the window listens in the capture phase, so it also hears every INNER scroller (the command palette list, the
+  // proof tray, a dialog): those raised the shield over the open dialog and the first click after a wheel in a list
+  // was eaten. Only the page's own scroll counts.
+  if (e.target !== document && e.target !== window) return;
   read();
   if (!fine) return;
   // only a STREAM of scroll events (a wheel / trackpad gesture, a glide) raises the shield: a single jump (an anchor,
@@ -89,10 +93,17 @@ function install() {
   if (installed || typeof window === 'undefined') return;
   installed = true;
   read();
-  fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const mq = window.matchMedia('(hover: hover) and (pointer: fine)');
+  fine = mq.matches;
   // capture phase on window: runs before the other scroll listeners, while layout is still clean
   window.addEventListener('scroll', onScroll, { passive: true, capture: true });
-  if (fine) window.addEventListener('pointermove', onMove, { passive: true, capture: true });
+  // R82: listened for always, used only while `fine`; a mouse plugged into a tablet / a convertible folded flat
+  // changes the answer, which was read once
+  window.addEventListener('pointermove', onMove, { passive: true, capture: true });
+  mq.addEventListener?.('change', () => {
+    fine = mq.matches;
+    if (!fine) lift();
+  });
   window.addEventListener('resize', read, { passive: true });
 }
 

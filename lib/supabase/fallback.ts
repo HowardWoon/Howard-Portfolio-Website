@@ -61,6 +61,8 @@ export function createFallbackSupabaseClient() {
     auth: {
       getUser: async () => ({ data: { user: null as SupabaseAuthUser | null }, error: null }),
       signInWithPassword: async () => ({ data: null, error: { message: 'Supabase is not configured.' } }),
+      // R82: the admin Sign out button threw without it (there is no session to end)
+      signOut: async () => ({ error: null }),
     },
     from: (table: string) => createQueryBuilder(table),
     // Callers treat this exactly like the real client; the offline stand-in implements the subset the site uses.

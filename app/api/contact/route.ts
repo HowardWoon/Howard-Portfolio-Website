@@ -24,7 +24,9 @@ const ContactSchema = z.object({
   email: z.string().trim().toLowerCase().email('Invalid email address format.').max(200),
   subject: z.string().trim().max(200).optional().default(''),
   message: z.string().trim().min(1, 'Message is required.').max(5000),
-  hw_hp_field: z.string().optional().default(''), // honeypot — humans never see this field
+  // honeypot — humans never see this field. R82 accepts every shape here (a bot that sent a number got zod's 400,
+  // which named the trap); whatever is filled in is dropped silently below
+  hw_hp_field: z.unknown().optional(),
   fillMs: z.number({ required_error: 'Please reload the page and try again.' }).int().nonnegative().max(86_400_000),
 });
 
@@ -39,6 +41,31 @@ const RATE_LIMIT = 5;
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 // a full message is at most ~5.5 KB of JSON; 16 KB leaves room for UTF-8 and the other fields
 const MAX_BODY_BYTES = 16 * 1024;
+
+/** the body as text, or null once it passes `max` bytes (the rest is never read) */
+async function readCapped(request: NextRequest, max: number): Promise<string | null> {
+  if (!request.body) return '';
+  const reader = request.body.getReader();
+  const parts: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > max) {
+      await reader.cancel().catch(() => {});
+      return null;
+    }
+    parts.push(value);
+  }
+  const all = new Uint8Array(size);
+  let at = 0;
+  for (const p of parts) {
+    all.set(p, at);
+    at += p.byteLength;
+  }
+  return new TextDecoder().decode(all);
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -80,8 +107,9 @@ export async function POST(request: NextRequest) {
     if (!(request.headers.get('content-type') ?? '').toLowerCase().includes('application/json')) {
       return NextResponse.json({ error: 'Unsupported content type.' }, { status: 415 });
     }
-    const raw = await request.text();
-    if (raw.length > MAX_BODY_BYTES) {
+    // R82: read at most MAX_BODY_BYTES even without a Content-Length (a chunked body was read whole first)
+    const raw = await readCapped(request, MAX_BODY_BYTES);
+    if (raw === null) {
       return NextResponse.json({ error: 'Message is too long.' }, { status: 413 });
     }
     let body: unknown = null;

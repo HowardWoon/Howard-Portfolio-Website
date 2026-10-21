@@ -401,3 +401,89 @@ test.describe('R82 gallery', () => {
     await ctx.close();
   });
 });
+
+/* ------------------------------------------------------------------ scroll shield, contact, focus, API */
+
+async function home(page: Page) {
+  await page.goto('/');
+  await page.getByRole('button', { name: /skip intro/i }).click();
+  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 10000 });
+  await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
+}
+
+test.describe('R82 scroll, contact, focus, API', () => {
+  test('a wheel inside the command palette list never raises the scroll shield over it', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await home(page);
+    await page.waitForFunction(() => (window as unknown as { __hwPaletteReady?: boolean }).__hwPaletteReady === true);
+    await page.evaluate(() => window.dispatchEvent(new Event('open-command-palette')));
+    await expect(page.getByRole('dialog', { name: 'Command Palette' })).toBeVisible({ timeout: 20_000 });
+    const list = page.locator('[cmdk-list]');
+    await expect(list).toBeVisible();
+    // the list really scrolls (otherwise there is no inner scroll event to test)
+    expect(await list.evaluate((e) => e.scrollHeight > e.clientHeight)).toBe(true);
+    const b = (await list.boundingBox())!;
+    await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
+    await page.waitForTimeout(400); // past the 300 ms "the visitor is pointing" hold
+    for (let i = 0; i < 4; i++) await page.mouse.wheel(0, 60);
+    const shield = await page.evaluate(
+      () => (document.querySelector('[data-scroll-shield]') as HTMLElement | null)?.style.display ?? 'none',
+    );
+    expect(shield).not.toBe('block');
+  });
+
+  test('a send that stalls gives up after 15 s with the network message', async ({ page }) => {
+    test.setTimeout(90_000);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.route('**/api/contact', () => new Promise<void>(() => {})); // never answers
+    await home(page);
+    await page.locator('#contact').scrollIntoViewIfNeeded();
+    await page.locator('#contact-name').fill('Test Person');
+    await page.locator('#contact-email').fill('test@example.com');
+    await page.locator('#contact-message').fill('A message that will never arrive.');
+    await page.locator('#contact form button[type="submit"]').click();
+    await expect(page.getByText('Network error. Please check your connection.')).toBeVisible({ timeout: 30000 });
+  });
+
+  test('Dispatch pressed while the drafter types sends the whole draft', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    let sent = '';
+    await page.route('**/api/contact', async (r) => {
+      sent = (r.request().postDataJSON() as { message: string }).message;
+      await r.fulfill({ status: 200, contentType: 'application/json', body: '{"success":true}' });
+    });
+    await home(page);
+    await page.locator('#contact').scrollIntoViewIfNeeded();
+    await page.locator('#contact-name').fill('Test Person');
+    await page.locator('#contact-email').fill('test@example.com');
+    await page
+      .locator('#contact')
+      .getByRole('button', { name: /2026 SWE Role/ })
+      .click();
+    await page.locator('#contact form button[type="submit"]').click();
+    await expect
+      .poll(() => sent, { timeout: 15000 })
+      .toBe('Hi Howard, I would like to discuss a Software Engineering opportunity at our company...');
+  });
+
+  test('a maximised contact window takes the keyboard focus', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await home(page);
+    await page.locator('[data-window-desk]').scrollIntoViewIfNeeded();
+    await page.getByRole('button', { name: 'Maximise Console window' }).click();
+    const dialog = page.getByRole('dialog', { name: /console window, full screen/i });
+    await expect(dialog).toBeVisible();
+    await expect.poll(() => dialog.evaluate((d) => d.contains(document.activeElement))).toBe(true);
+  });
+
+  test('the contact API: a honeypot of any shape is dropped silently; a body over 16 KB is refused', async ({
+    request,
+  }) => {
+    const base = { name: 'Bot', email: 'bot@example.com', message: 'hello', fillMs: 9000 };
+    const trap = await request.post('/api/contact', { data: { ...base, hw_hp_field: 12345 } });
+    expect(trap.status()).toBe(200);
+    expect(await trap.json()).toMatchObject({ success: true });
+    const big = await request.post('/api/contact', { data: { ...base, message: 'x'.repeat(20000) } });
+    expect(big.status()).toBe(413);
+  });
+});

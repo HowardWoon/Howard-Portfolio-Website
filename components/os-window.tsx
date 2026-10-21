@@ -111,6 +111,8 @@ function WindowControls({
         onClick={onMaximize}
         aria-label={maximized ? `Restore ${title} window` : `Maximise ${title} window`}
         aria-pressed={maximized}
+        // R82: the maximised window is a dialog; focus goes in to its Restore key (rule 10-B), it was left behind
+        data-autofocus={maximized ? '' : undefined}
         className={btn}
       >
         {maximized ? (

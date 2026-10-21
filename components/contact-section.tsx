@@ -175,6 +175,8 @@ export default function ContactSection() {
   // R23: the chosen intent types its draft into the message box (typewriter; instant for reduced motion / Calm).
   // Only an untouched box (empty, or all / part of an intent draft) is drafted into: the visitor's words are never replaced.
   const typing = useRef<number | undefined>(undefined);
+  /** R82: the draft being typed right now (a send in the middle of it sends the whole draft, not half of it) */
+  const drafting = useRef<string | null>(null);
   useEffect(() => () => window.clearInterval(typing.current), []);
   const [drafted, setDrafted] = useState(false);
   const handleSelectIntent = (intent: (typeof quickIntents)[0]) => {
@@ -194,14 +196,19 @@ export default function ContactSection() {
     }
     let n = 0;
     setFormData((prev) => ({ ...prev, message: '' }));
+    drafting.current = intent.text;
     typing.current = window.setInterval(() => {
       n = Math.min(intent.text.length, n + 3);
       setFormData((prev) => ({ ...prev, message: intent.text.slice(0, n) }));
-      if (n >= intent.text.length) window.clearInterval(typing.current);
+      if (n >= intent.text.length) {
+        window.clearInterval(typing.current);
+        drafting.current = null;
+      }
     }, 16);
   };
   const clearDraft = () => {
     window.clearInterval(typing.current);
+    drafting.current = null;
     setActiveIntent(null);
     setDrafted(false);
     setFormData((prev) => ({ ...prev, subject: '', message: '' }));
@@ -216,19 +223,32 @@ export default function ContactSection() {
     setErrorText('');
     setFormStatus('sending');
     markStart();
+    // R82: Dispatch pressed while the drafter is still typing: send the whole draft (it sent the half typed so far)
+    let message = formData.message;
+    if (drafting.current) {
+      window.clearInterval(typing.current);
+      message = drafting.current;
+      drafting.current = null;
+      setFormData((prev) => ({ ...prev, message }));
+    }
     const started = firstInteraction.current as number;
     const elapsed = performance.now() - started;
     // fast human (autofill + chip + send): wait out the bot threshold instead of having the message dropped
     if (elapsed < 3200) await new Promise((r) => setTimeout(r, 3200 - elapsed));
+    // R82: a stalled network no longer leaves the button on "sending" for ever (AbortSignal.timeout is Safari 16+)
+    const abort = new AbortController();
+    const stall = window.setTimeout(() => abort.abort(), 15000);
     try {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
+          message,
           hw_hp_field: honeypot,
           fillMs: Math.round(performance.now() - started),
         }),
+        signal: abort.signal,
       });
 
       if (res.ok) {
@@ -244,6 +264,8 @@ export default function ContactSection() {
     } catch {
       setErrorText('Network error. Please check your connection.');
       settle('error');
+    } finally {
+      window.clearTimeout(stall);
     }
   };
 
@@ -569,6 +591,7 @@ export default function ContactSection() {
                     value={formData.message}
                     onChange={(e) => {
                       window.clearInterval(typing.current); // the visitor's typing always wins over the drafter
+                      drafting.current = null;
                       setFormData({ ...formData, message: e.target.value });
                     }}
                     className="nb-field resize-y min-h-[140px] flex-1"
