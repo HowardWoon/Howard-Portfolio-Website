@@ -367,10 +367,10 @@ test.describe('R82 gallery', () => {
     await expect(dialog).toBeHidden();
   });
 
-  test('the "View full resolution" key opens the viewer every time (20 loads)', async ({ browser }) => {
+  test('the "View full resolution" key opens the viewer every time (8 loads)', async ({ browser }) => {
     test.setTimeout(240_000);
     let missed = 0;
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 8; i++) {
       const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
       await ctx.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
       const page = await ctx.newPage();

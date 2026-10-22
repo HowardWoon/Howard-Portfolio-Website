@@ -104,7 +104,8 @@ if (!args.has('--no-build')) {
 // busy local machine (owner-approved: `CI=1 git push` must be able to finish); the normal 3-worker run keeps 15 min
 // R57: 40 -> 60 min. The suite is 461 tests now and one worker needs 35 - 40 min on this laptop: the run of 11 Oct 2026
 // was cut off at test 437 with every test passing. Only the time limit changed; no test, retry or worker setting did.
-if (args.has('--e2e')) run('e2e (playwright)', 'npm run test:e2e', { timeoutMin: process.env.CI ? 60 : 15 });
+// R82: the one-worker run passed 60 min as the suite grew (CI itself runs 4 shards, each under its own hour): 120 min
+if (args.has('--e2e')) run('e2e (playwright)', 'npm run test:e2e', { timeoutMin: process.env.CI ? 120 : 15 });
 
 // Summary table
 const line = (r) => `| ${r.name} | ${r.ok ? 'PASS' : 'FAIL'} | ${r.status} | ${r.secs}s |`;
