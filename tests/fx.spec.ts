@@ -50,7 +50,7 @@ test('section titles end fully visible with their spaces intact', async ({ page 
       { timeout: 10_000 },
     )
     .toEqual([]);
-  await expect(page.locator('#about h2')).toContainText('I ARCHITECT RESILIENT BACKENDS');
+  await expect(page.locator('#about h2')).toContainText('I BUILD FULL-STACK SYSTEMS AND GOVERNED AI AGENTS');
 });
 
 test('no hydration error with reduced motion', async ({ browser }) => {

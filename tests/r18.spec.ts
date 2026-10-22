@@ -177,11 +177,12 @@ test('focus lens: neighbours step back less than far cards (FX-102)', async ({ p
   await btn.scrollIntoViewIfNeeded();
   await btn.click();
   const lens = (id: string) => page.locator(`[data-project-shell][data-project-id="${id}"]`).getAttribute('data-lens');
-  await expect.poll(() => lens('proofpay')).toBe('near');
+  // R83: Monsun Bridge (03) and Catfish (05) are BILAHUJAN's (04) neighbours
+  await expect.poll(() => lens('monsun-bridge')).toBe('near');
   expect(await lens('catfish')).toBe('near');
   expect(await lens('zerolag')).toBe('far');
   const op = (id: string) =>
     page.locator(`[data-project-shell][data-project-id="${id}"]`).evaluate((e) => Number(getComputedStyle(e).opacity));
-  await expect.poll(() => op('proofpay')).toBeCloseTo(0.5, 1);
+  await expect.poll(() => op('monsun-bridge')).toBeCloseTo(0.5, 1);
   await expect.poll(() => op('zerolag')).toBeCloseTo(0.22, 1);
 });

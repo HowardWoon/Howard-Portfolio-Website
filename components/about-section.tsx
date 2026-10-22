@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { m, LayoutGroup } from 'framer-motion';
 import { Server, Cpu, GitBranch, ShieldCheck, Activity, Sparkles, ArrowUpRight, Layers, Code2 } from 'lucide-react';
 import { SplitWords } from './fx/split-words';
@@ -8,77 +8,197 @@ import { FX, SPRING_SOFT } from '@/lib/fx';
 import { startTrail, useInteractionSelect } from '@/lib/interaction-store';
 import { projectsWithSkill, skillKey } from '@/lib/skills';
 import { ScrollInk } from './fx/scroll-ink';
+import { flapTo } from '@/lib/split-flap';
+import { SIGNAL, type Signal } from '@/lib/signal';
 
-const architecturePillars = [
+// R83 (owner: "update all the info and content to match with my portfolio"): every line below is taken from the
+// Projects, Experience and Honours sections of this page (no invented latency, audit or thread-pool figures).
+// `signal` follows the SIGNAL KEY (lib/signal.ts): lilac = AI, pink = leadership; a pillar with no category is white.
+const architecturePillars: {
+  id: string;
+  category: string;
+  title: string;
+  icon: typeof Server;
+  signal?: Signal;
+  headline: string;
+  description: string;
+  metrics: { label: string; value: string }[];
+  telemetrySnippet: string;
+}[] = [
   {
-    id: 'backend',
-    category: '01 // DISTRIBUTED SYSTEMS',
-    title: 'High-Throughput Backends',
+    id: 'fullstack',
+    category: '01 // FULL-STACK PRODUCTS',
+    title: 'Full-Stack Products',
     icon: Server,
-    color: 'amber',
-    accentHex: '#F59E0B',
-    headline: 'Low-Latency Java 21 & Spring Boot Architecture',
+    headline: 'Java 21 · Spring Boot 3 · FastAPI · Next.js 15',
     description:
-      'Architecting concurrent, fault-tolerant backend services utilizing thread pooling and optimized REST/gRPC endpoints to handle high-throughput workloads at scale.',
+      'Typed Next.js and React front ends over Spring Boot and FastAPI services, with PostgreSQL and Firebase behind them. Slotify threads every API call through seven hand-built data structures; Sensor X Sensei feeds PIR + NFC sensor fusion into live carbon telemetry dashboards.',
     metrics: [
-      { label: 'Core Runtime', value: 'Java 21 LTS / Node.js' },
-      { label: 'Architecture', value: 'Spring Boot / Microservices / Supabase' },
-      { label: 'Throughput', value: 'Sub-50ms API Latency' },
+      { label: 'Backend', value: 'Spring Boot 3 / FastAPI' },
+      { label: 'Front end', value: 'Next.js 15 / React / TypeScript' },
+      { label: 'Data', value: 'PostgreSQL / Firebase RTDB' },
     ],
-    telemetrySnippet: 'ThreadPool[Active: 64, Idle: 16] · EventLoop: OK',
+    telemetrySnippet: 'slotify> Min-Heap · AVL BST · HashMap · Dijkstra, one API lifecycle',
   },
   {
     id: 'agents',
     category: '02 // AGENTIC AI',
-    title: 'Autonomous Multi-Agent Pipelines',
+    title: 'Governed AI Agents',
     icon: Cpu,
-    color: 'cyan',
-    accentHex: '#00E5FF',
-    headline: 'Deterministic 5-Operator Agentic Orchestration',
+    signal: 'ai',
+    headline: 'Halt states, human-in-the-loop and MCP tools',
     description:
-      'Engineering state-machine AI workflows (LangGraph, CrewAI, local Ollama) that autonomously research, synthesize, and execute end-to-end tasks with verified guardrails.',
+      'ZeroLag is a bi-modal agent workforce that resolves B2B buying groups and halts itself before a PDPA / GDPR violation: 2nd place at Supervity AutoPilot Asia 2026. In BILAHUJAN a Gemini 2.0 Flash command agent verifies floods through 7 standardised MCP tools.',
     metrics: [
-      { label: 'Track Record', value: '2nd Place @ Autopilot Asia Hackathon (ZeroLag)' },
-      { label: 'Orchestration', value: 'LangGraph + CrewAI' },
-      { label: 'Guardrails', value: 'Deterministic Tool Routing' },
+      { label: 'Track Record', value: '2nd Place @ Supervity AutoPilot Asia 2026 (ZeroLag)' },
+      { label: 'Orchestration', value: 'LangGraph + MCP' },
+      { label: 'Models', value: 'Gemini 2.5 Flash / 2.0 Flash' },
     ],
-    telemetrySnippet: 'Agent Pipeline: [Triage -> Planner -> Execution -> QA Review]',
+    telemetrySnippet: 'zerolag> deterministic halt states · zero pipeline pollution',
   },
   {
-    id: 'algorithms',
-    category: '03 // DATA STRUCTURES',
-    title: 'Algorithmic Rigor & Graphs',
+    id: 'data',
+    category: '03 // DATA, ML & ALGORITHMS',
+    title: 'Data, ML & Algorithms',
     icon: GitBranch,
-    color: 'purple',
-    accentHex: '#A855F7',
-    headline: 'Graph Traversal, Min-Heaps & Sub-MS Optimization',
+    headline: 'Scikit-Learn · SHAP · SciPy · Dijkstra',
     description:
-      "Leveraging Dijkstra's shortest path, priority queues, and dynamic programming for real-time routing engines (e.g. BILAHUJAN flood response app at V Hack 2026).",
+      'Monsun Bridge turns the monsoon window METMalaysia already publishes into a plan a district can budget: Top 5 and a consolation prize at the DOSM Datathon 2026. Catfish Detector AI reads 51 behavioural heuristics across 50,000 profiles with a SMOTE-Tomek balanced, 6-model ensemble.',
     metrics: [
-      { label: 'Complexity Focus', value: 'O(E + V log V) Routing' },
-      { label: 'PRACTICAL APPLICATION', value: 'Real-Time Pathfinding' },
-      { label: 'Optimization', value: 'Spatial Graph Heuristics' },
+      { label: 'Track Record', value: 'Top 5 Finalist @ DOSM Datathon 2026 (Monsun Bridge)' },
+      { label: 'Machine Learning', value: 'Scikit-Learn / SHAP / SMOTE' },
+      { label: 'Exposure Model', value: '13,703 workers · 4 districts' },
     ],
-    telemetrySnippet: '[Pathfinding] Dijkstra executed: Sub-1.2ms latency',
+    telemetrySnippet: 'monsun> 13,703 tourism-linked workers · 52,655 worker-months exposed',
   },
   {
-    id: 'governance',
-    category: '04 // OPERATIONS & GOVERNANCE',
-    title: 'Fiscal Governance & Security',
+    id: 'finance',
+    category: '04 // FINANCE & LEADERSHIP',
+    title: 'Finance & Leadership',
     icon: ShieldCheck,
-    color: 'emerald',
-    accentHex: '#10B981',
-    headline: 'Corporate Financial Leadership & System Auditing',
+    signal: 'leadership',
+    headline: 'Treasurer at PEKOM · finance at KRAIBURG TPE',
     description:
-      'Bridging software engineering with corporate financial stewardship, managing budgets, and executing system audits as PEKOM Finance Lead and Kraiburg TPE Finance Intern.',
+      'Finance Lead and Executive Treasurer of PEKOM, the Universiti Malaya computing society; Assistant Finance Executive & Intern at KRAIBURG TPE Technology since Nov 2025; before that Assistant Head of Subject (Computer Science) at the KMNS PAL Leader Club. ProofPay puts the same discipline into code.',
     metrics: [
-      { label: 'Leadership', value: 'Finance Lead 26/27 @ PEKOM' },
-      { label: 'Oversight', value: '100% Audit Compliance' },
-      { label: 'Corporate Exp.', value: 'Kraiburg TPE Finance' },
+      { label: 'Leadership', value: 'Finance Lead & Executive Treasurer @ PEKOM' },
+      { label: 'Industry', value: 'Assistant Finance Executive @ KRAIBURG TPE' },
+      { label: 'Track Record', value: '2nd Runner Up @ MUBA Blockchain Hackathon 2026 (ProofPay)' },
     ],
-    telemetrySnippet: 'Audit Process: Zero Discrepancies | Ledger Verified',
+    telemetrySnippet: 'proofpay> buyer funds escrow · supplier ships · evidence checked · release',
   },
 ];
+
+// R83 Build Sheet: four facts from this page, each a link to the section that proves it. tests/r83 counts them again
+// from the Projects, Honours and Experience sections, so a value cannot drift from the page.
+const LEDGER: { value: string; from: string; label: string; note: string; signal?: Signal; href: string }[] = [
+  {
+    value: '4.00',
+    from: '0.00',
+    label: 'CGPA',
+    note: "Dean's Honours List, Universiti Malaya",
+    signal: 'academic',
+    href: '#honors',
+  },
+  { value: '07', from: '00', label: 'Projects built', note: 'Agents, escrow, ML, IoT', href: '#projects' },
+  {
+    value: '04',
+    from: '00',
+    label: 'Podiums in 2026',
+    note: 'Supervity, MUBA, DOSM, UM Game Jam',
+    signal: 'podium',
+    href: '#honors',
+  },
+  {
+    value: '03',
+    from: '00',
+    label: 'Finance & lead roles',
+    note: 'KRAIBURG TPE, PEKOM, KMNS PAL',
+    signal: 'leadership',
+    href: '#experience',
+  },
+];
+
+/**
+ * R83 Build Sheet: the four facts as split-flap counters (lib/split-flap.ts). The server renders the final values; the
+ * board flips up from zero ONCE, when it is on screen and the page has stopped scrolling (a flip lays out, lesson
+ * 30-E21). Reduced motion / Calm Mode: the values simply stand.
+ */
+function BuildSheet() {
+  const listRef = useRef<HTMLUListElement>(null);
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+    const still =
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+      document.documentElement.dataset.motion === 'calm';
+    const boards = Array.from(list.querySelectorAll<HTMLElement>('[data-flap]'));
+    boards.forEach((el, i) => flapTo(el, still ? LEDGER[i].value : LEDGER[i].from, false));
+    if (still) return;
+    const timers: number[] = [];
+    let idle = 0;
+    let done = false;
+    const wait = () => {
+      window.clearTimeout(idle);
+      idle = window.setTimeout(play, 180);
+    };
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) return;
+        window.addEventListener('scroll', wait, { passive: true });
+        wait();
+      },
+      { threshold: 0.5 },
+    );
+    function play() {
+      if (done) return;
+      done = true;
+      io.disconnect();
+      window.removeEventListener('scroll', wait);
+      boards.forEach((el, i) => timers.push(window.setTimeout(() => flapTo(el, LEDGER[i].value), 120 + i * 140)));
+    }
+    io.observe(list);
+    return () => {
+      io.disconnect();
+      window.removeEventListener('scroll', wait);
+      window.clearTimeout(idle);
+      timers.forEach((t) => window.clearTimeout(t));
+    };
+  }, []);
+
+  return (
+    <ul ref={listRef} aria-label="Build sheet" className="ab-sheet fx-rise flex flex-wrap gap-4 sm:gap-5">
+      {LEDGER.map((x) => {
+        const sig = x.signal ? SIGNAL[x.signal] : null;
+        return (
+          <li key={x.label} className="flex-[1_1_220px]">
+            <a
+              href={x.href}
+              className="ab-tile nb-press group flex h-full flex-col overflow-hidden rounded-[22px] border-3 border-ink bg-white text-ink shadow-brutal focus-visible:outline focus-visible:outline-4 focus-visible:outline-pop-blue"
+            >
+              <span
+                className={`flex items-center justify-between gap-2 border-b-3 border-ink px-4 py-2 font-mono text-xs font-extrabold uppercase tracking-[0.12em] ${sig ? sig.fill : 'bg-white'}`}
+              >
+                {x.label}
+                <ArrowUpRight
+                  aria-hidden
+                  className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                  strokeWidth={3}
+                />
+              </span>
+              <span className="flex flex-1 flex-col gap-2 px-4 pb-4 pt-3">
+                <span data-flap className="ab-flap font-mono font-extrabold">
+                  {x.value}
+                </span>
+                <span className="font-mono text-xs font-bold leading-snug text-ink-soft">{x.note}</span>
+              </span>
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
 
 type SkillStatus = 'production' | 'hackathon' | 'rnd';
 
@@ -118,6 +238,8 @@ const techStackGroups: { category: string; skills: { name: string; status: Skill
       { name: 'Git / Actions', status: 'production' },
       { name: 'Vercel', status: 'production' },
       { name: 'REST / gRPC APIs', status: 'production' },
+      { name: 'Firebase', status: 'hackathon' },
+      { name: 'Power BI', status: 'hackathon' },
     ],
   },
   {
@@ -128,6 +250,9 @@ const techStackGroups: { category: string; skills: { name: string; status: Skill
       { name: 'CrewAI', status: 'hackathon' },
       { name: 'Ollama (Local LLMs)', status: 'hackathon' },
       { name: 'Prompt Engineering', status: 'production' },
+      { name: 'Gemini API', status: 'hackathon' },
+      { name: 'MCP', status: 'hackathon' },
+      { name: 'Scikit-Learn', status: 'hackathon' },
     ],
   },
   {
@@ -145,6 +270,8 @@ const techStackGroups: { category: string; skills: { name: string; status: Skill
       { name: 'ESP32', status: 'hackathon' },
       { name: 'Firmware (C/C++)', status: 'hackathon' },
       { name: 'Sensor Networks', status: 'hackathon' },
+      { name: 'MQTT', status: 'hackathon' },
+      { name: 'Sui Move', status: 'hackathon' },
     ],
   },
 ];
@@ -153,16 +280,15 @@ function PillarCard({
   pillar,
   activeCard,
   setActiveCard,
-  colorMap,
 }: {
   pillar: (typeof architecturePillars)[0];
   activeCard: string;
   setActiveCard: (id: string) => void;
-  colorMap: Record<string, { fill: string; soft: string; dot: string }>;
 }) {
   const Icon = pillar.icon;
   const isActive = activeCard === pillar.id;
-  const c = colorMap[pillar.color as keyof typeof colorMap];
+  // a pillar without a category stays white, its active state paper (the SIGNAL KEY: no colour without a meaning)
+  const c = pillar.signal ? SIGNAL[pillar.signal] : { fill: 'bg-white', soft: 'bg-paper-cream' };
 
   return (
     <m.div
@@ -187,6 +313,7 @@ function PillarCard({
       <div className="flex items-center justify-between gap-4">
         <span className={`nb-tag ${isActive ? c.fill : 'bg-white'}`}>{pillar.category}</span>
         <div
+          data-pillar-icon
           className={`w-12 h-12 rounded-2xl grid place-items-center border-3 border-ink shadow-clay transition-transform duration-300 group-hover:rotate-6 ${c.fill}`}
         >
           <Icon className="w-6 h-6 text-ink" strokeWidth={2.5} />
@@ -232,7 +359,9 @@ function PillarCard({
       <div className="terminal flex items-start justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0">
           <Activity className="w-4 h-4 text-pop-mint animate-pulse shrink-0" strokeWidth={2.5} />
-          <span className="min-w-0 [overflow-wrap:anywhere]">{pillar.telemetrySnippet}</span>
+          <span data-telemetry className="min-w-0 [overflow-wrap:anywhere]">
+            {pillar.telemetrySnippet}
+          </span>
         </div>
         {/* Always rendered so every card keeps the same height; only the active card shows it. */}
         <span
@@ -247,7 +376,7 @@ function PillarCard({
 }
 
 export default function AboutSection() {
-  const [activeCard, setActiveCard] = useState<string>('backend');
+  const [activeCard, setActiveCard] = useState<string>('fullstack');
   // P2-08: the pillars have a phone list and a masonry desktop list. Both are server-rendered (CSS picks one),
   // but after mount only the list for the current breakpoint stays mounted: half the layout-animated cards,
   // in-view observers and re-measures per click. null = not measured yet (SSR / first paint).
@@ -276,14 +405,6 @@ export default function AboutSection() {
     setEvidence(counts);
   }, []);
 
-  // Accent → Neo-brutalist colour-block mapping (fills always carry black ink text → AAA contrast)
-  const colorMap = {
-    amber: { fill: 'bg-pop-yellow', soft: 'bg-[#FFF3C4]', dot: 'bg-pop-yellow' },
-    cyan: { fill: 'bg-pop-cyan', soft: 'bg-[#D9FBFF]', dot: 'bg-pop-cyan' },
-    purple: { fill: 'bg-pop-lilac', soft: 'bg-[#EEE9FF]', dot: 'bg-pop-lilac' },
-    emerald: { fill: 'bg-pop-mint', soft: 'bg-[#DCFAEC]', dot: 'bg-pop-mint' },
-  };
-
   return (
     <section
       id="about"
@@ -294,11 +415,11 @@ export default function AboutSection() {
         <div className="space-y-7">
           <div className="nb-kicker fx-rise">
             <Sparkles className="w-4 h-4" strokeWidth={2.5} />
-            <span>ABOUT // SYSTEMS ARCHITECTURE & VISION</span>
+            <span>ABOUT // FULL STACK DEVELOPER</span>
           </div>
 
           <h2 className="fx-rise nb-title text-[clamp(1.55rem,8.2vw,2.1rem)] sm:text-5xl lg:text-6xl max-w-5xl leading-[1.02]">
-            <SplitWords text="I ARCHITECT RESILIENT BACKENDS AND AUTONOMOUS AI PIPELINES, TURNING COMPLEX IDEAS INTO PRODUCTION-READY SYSTEMS." />
+            <SplitWords text="I BUILD FULL-STACK SYSTEMS AND GOVERNED AI AGENTS, THEN SHIP THEM ON A HACKATHON CLOCK." />
           </h2>
 
           <p className="fx-rise text-ink-soft text-lg sm:text-xl max-w-3xl leading-relaxed font-sans font-medium">
@@ -309,11 +430,15 @@ export default function AboutSection() {
               <span className="inline-block bg-pop-yellow border-2 border-ink rounded-md px-1.5 text-ink font-mono font-extrabold text-[0.95em] leading-snug">
                 4.00 CGPA
               </span>
-              ). Bridging low-latency algorithmic backend performance and AI orchestration with strong technical
-              leadership and fiscal governance to deliver scalable, cost-effective solutions.
+              ), on the Dean&apos;s Honours List. In 2026 four of my builds reached the podium: Supervity AutoPilot
+              Asia, MUBA Blockchain, the DOSM Datathon and UM Game Jam. I keep the books too, as Finance Lead at PEKOM
+              and in finance at KRAIBURG TPE.
             </ScrollInk>
           </p>
         </div>
+
+        {/* R83 Build Sheet: four facts from this page as split-flap counters, each linking to its proof */}
+        <BuildSheet />
 
         {/* Core Architecture Bento Grid (4 Pillars) — True Masonry Layout */}
         {isLg !== true && (
@@ -326,7 +451,6 @@ export default function AboutSection() {
 
                   activeCard={activeCard}
                   setActiveCard={setActiveCard}
-                  colorMap={colorMap}
                 />
               ))}
             </div>
@@ -345,7 +469,6 @@ export default function AboutSection() {
 
                       activeCard={activeCard}
                       setActiveCard={setActiveCard}
-                      colorMap={colorMap}
                     />
                   ))}
               </div>
@@ -359,7 +482,6 @@ export default function AboutSection() {
 
                       activeCard={activeCard}
                       setActiveCard={setActiveCard}
-                      colorMap={colorMap}
                     />
                   ))}
               </div>

@@ -25,7 +25,7 @@ test('ScrollInk: the About words ink in with the scroll, keep the exact text, an
   await walk(page);
   const p = page.locator('.si-w').first().locator('xpath=..');
   await expect(p).toContainText(
-    'Software Engineering undergraduate at Universiti Malaya (4.00 CGPA). Bridging low-latency algorithmic backend',
+    "Software Engineering undergraduate at Universiti Malaya (4.00 CGPA), on the Dean's Honours List. In 2026 four",
   );
   // R41: the words ink in by COLOUR alpha (an opacity scroll animation kept each word on its own GPU layer)
   const op = () =>

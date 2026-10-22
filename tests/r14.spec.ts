@@ -44,8 +44,8 @@ for (const width of [640, 768, 1024, 1280, 1920]) {
     await page.setViewportSize({ width, height: 900 });
     await home(page);
     const r = await page.evaluate(() => {
-      const spans = [...document.querySelectorAll<HTMLElement>('#about .terminal span')].filter(
-        (s) => s.offsetParent && /ThreadPool|Agent Pipeline|Pathfinding|Audit Process/.test(s.textContent ?? ''),
+      const spans = [...document.querySelectorAll<HTMLElement>('#about .terminal [data-telemetry]')].filter(
+        (s) => s.offsetParent,
       );
       return { n: spans.length, cut: spans.filter((s) => s.scrollWidth > s.clientWidth + 1).length };
     });
@@ -316,16 +316,15 @@ test('print hides the header and floating UI and expands the accordions (FX-70)'
   await expect(rest).not.toHaveCount(total);
 });
 
-/* ---------------------------------------------------------------- hero news ticker (owner request, 29 Sep 2026) */
-test('hero ticker leads with MUBA and keeps Supervity, each with its own tag', async ({ page }) => {
+/* ---------------------------------------------------------------- hero news ticker (owner request, 22 Oct 2026) */
+test('hero ticker carries the DOSM Datathon result only, tagged LATEST', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await home(page);
   const first = page.locator('#hero [class*="animate-[marquee"] > div').first();
   await expect(first).not.toHaveAttribute('aria-hidden', 'true');
   const text = (await first.innerText()).replace(/\s+/g, ' ');
-  expect(text).toMatch(/^LATEST 2ND RUNNER UP \(SUI\) \+ TOP 6 \(GONKA AI\) @ MUBA BLOCKCHAIN HACKATHON 2026/);
-  expect(text).toContain('8 AUG 2026 2ND PLACE @ SUPERVITY AUTOPILOT ASIA HACKATHON');
+  expect(text).toMatch(/^LATEST TOP 5 FINALIST & CONSOLATION PRIZE @ DOSM DATATHON 2026/);
+  expect(text).not.toMatch(/MUBA|SUPERVITY/);
   const bg = (t: string) => first.getByText(t, { exact: true }).evaluate((e) => getComputedStyle(e).backgroundColor);
   expect(await bg('LATEST')).toBe('rgb(255, 199, 0)');
-  expect(await bg('8 AUG 2026')).toBe('rgb(43, 75, 255)');
 });

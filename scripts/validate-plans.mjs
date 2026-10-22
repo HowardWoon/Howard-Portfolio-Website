@@ -980,7 +980,7 @@ has(
   'P1-06',
   'Telemetry lines wrap (R14 B-02: at every width)',
   'components/about-section.tsx',
-  '<span className="min-w-0 [overflow-wrap:anywhere]">{pillar.telemetrySnippet}</span>',
+  '<span data-telemetry className="min-w-0 [overflow-wrap:anywhere]">',
 );
 lacks('R12', 'P1-06b', 'Telemetry lines are never truncated', 'components/about-section.tsx', 'sm:truncate');
 has(

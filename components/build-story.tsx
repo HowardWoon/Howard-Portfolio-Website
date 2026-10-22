@@ -444,6 +444,7 @@ export default function BuildStory() {
   const stageRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<HTMLSpanElement>(null);
   const manifestRef = useRef<HTMLOListElement>(null);
+  const diagramRef = useRef<HTMLDivElement>(null);
   const calm = useCalm();
 
   useEffect(() => {
@@ -614,6 +615,59 @@ export default function BuildStory() {
       reduce.removeEventListener('change', relayout);
       shortLandscape.removeEventListener('change', relayout);
       narrow.removeEventListener('change', relayout);
+    };
+  }, [calm]);
+
+  // R83: on a desktop with a mouse, the pointer turns the 3D board a few degrees (the CSS pose is the scroll's). It
+  // writes the element's own `rotate` (an axis and an angle), never a variable, so nothing under it is restyled, and
+  // the frame loop stops once the board has caught up with the pointer.
+  useEffect(() => {
+    const stage = stageRef.current;
+    const board = diagramRef.current;
+    if (!stage || !board || calm) return;
+    const can = window.matchMedia(
+      '(min-width: 1024px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)',
+    );
+    let raf = 0;
+    let tx = 0;
+    let ty = 0;
+    let x = 0;
+    let y = 0;
+    const draw = () => {
+      raf = 0;
+      x += (tx - x) * 0.12;
+      y += (ty - y) * 0.12;
+      if (Math.abs(tx - x) < 0.01 && Math.abs(ty - y) < 0.01) {
+        x = tx;
+        y = ty;
+      } else raf = requestAnimationFrame(draw);
+      const angle = Math.hypot(x, y);
+      board.style.rotate =
+        angle < 0.01 ? '' : `${(x / angle).toFixed(4)} ${(y / angle).toFixed(4)} 0 ${angle.toFixed(2)}deg`;
+    };
+    const go = () => {
+      if (!raf) raf = requestAnimationFrame(draw);
+    };
+    const move = (e: PointerEvent) => {
+      if (e.pointerType !== 'mouse' || !can.matches || document.documentElement.dataset.fxTier === 'lite') return;
+      const r = stage.getBoundingClientRect();
+      // up / down tips the board about its x axis, left / right about its y axis (at most 7 and 9 degrees)
+      tx = ((e.clientY - r.top) / r.height - 0.5) * -14;
+      ty = ((e.clientX - r.left) / r.width - 0.5) * 18;
+      go();
+    };
+    const leave = () => {
+      tx = 0;
+      ty = 0;
+      go();
+    };
+    stage.addEventListener('pointermove', move, { passive: true });
+    stage.addEventListener('pointerleave', leave);
+    return () => {
+      cancelAnimationFrame(raf);
+      stage.removeEventListener('pointermove', move);
+      stage.removeEventListener('pointerleave', leave);
+      board.style.rotate = '';
     };
   }, [calm]);
 
@@ -886,10 +940,12 @@ export default function BuildStory() {
           </div>
 
           {/* ---------------------------------------------------------------- 03 ARCHITECT + 04 ORCHESTRATE */}
-          <div aria-hidden className="bs-seg bs-fade-dim bs-layer" style={seg(0.8, 0.86)}>
+          <div aria-hidden className="bs-seg bs-fade-dim bs-layer bs-board-layer" style={seg(0.8, 0.86)}>
             <FieldReel items={FIELD_REEL} side="l" no={1} seg={seg} />
             <FieldReel items={BUILD_REEL} side="r" no={2} seg={seg} />
-            <div className="bs-diagram">
+            {/* R83: on desktop the diagram is a CSS-3D board (globals.css "R83 3D board"): its pose reads the playhead
+                over 03 + 04, the mouse turns it (diagramRef) */}
+            <div ref={diagramRef} className="bs-seg bs-diagram" style={seg(0.42, 0.8)}>
               {/* R31 HUD (owner: "more professional, a Tony Stark feeling"), printed not glowing: a pixel radar sweep
                   and two range rings with computed ticks around the AI hub, both turned by the scroll (transform only,
                   reversible), plus a system readout; behind the wires and boxes */}
@@ -931,6 +987,8 @@ export default function BuildStory() {
                   />
                 ))}
               </svg>
+              {/* R83: the printed scan bar that sweeps the board while ORCHESTRATE plays (desktop 3D only) */}
+              <span className="bs-sweep" />
               <div className="bs-seg bs-hud-radar" style={seg(0.44, 0.8)}>
                 <span className="bs-hud-radar-arm" />
               </div>
@@ -995,7 +1053,10 @@ export default function BuildStory() {
                 />
               ))}
 
+              {/* R83: <i>, not <span>: the plate (the block's thickness) and the socket (on the board) are not text */}
               <div className="bs-seg bs-hub" style={seg(0.44, 0.5)}>
+                <i className="bs-socket" />
+                <i className="bs-plate" />
                 <div className="bs-seg bs-hub-core" style={seg(0.6, 0.66)}>
                   <span className="font-mono text-xs font-extrabold tracking-[0.14em]">AI ORCHESTRATOR</span>
                   <span className="font-display text-[clamp(0.8rem,1.6vw,1rem)] font-extrabold leading-tight">
@@ -1012,6 +1073,8 @@ export default function BuildStory() {
                   data-side={n.x < 50 ? 'l' : n.x > 50 ? 'r' : 'c'}
                   style={seg(n.a, n.a + 0.05, { left: `${n.x}%`, top: `${n.y}%` })}
                 >
+                  <i className="bs-socket" />
+                  <i className="bs-plate" />
                   <span className="bs-node-label font-mono text-xs font-extrabold tracking-[0.14em] text-ink-muted">
                     {n.label}
                   </span>

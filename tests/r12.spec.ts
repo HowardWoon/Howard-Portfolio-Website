@@ -184,8 +184,8 @@ test.describe('phone polish', () => {
     await home(page);
     const cut = await page.evaluate(
       () =>
-        Array.from(document.querySelectorAll<HTMLElement>('#about .terminal span'))
-          .filter((s) => s.offsetParent !== null && /ThreadPool|Agent Pipeline/.test(s.textContent ?? ''))
+        Array.from(document.querySelectorAll<HTMLElement>('#about .terminal [data-telemetry]'))
+          .filter((s) => s.offsetParent !== null)
           .filter((s) => s.scrollWidth > s.clientWidth + 1).length,
     );
     expect(cut).toBe(0);

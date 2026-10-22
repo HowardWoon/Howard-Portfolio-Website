@@ -3678,6 +3678,195 @@ html[data-fx-tier='lite'] .bs-hud-radar {
   }
 }
 
+/* ---- R83 3D board (owner: "enhance and upgrade the whole frame ... 3d visual effect, animation and cool styles"):
+   on desktop the 03 / 04 diagram is a real CSS-3D board. It swings up from a desk angle as ARCHITECT prints it (scroll,
+   reversible), the boxes drop from above onto hatched sockets and float as thick blocks over their wires, the data
+   packets hop in an arc, the hub rises highest and works like a press while ORCHESTRATE plays, a printed lilac scan
+   bar sweeps the board under the blocks, and the mouse turns the board (build-story.tsx writes `rotate`, no
+   variable, so nothing below it is restyled). Hard edges, flat fills, no blur or glow; transform / opacity only.
+   Phones, tablets, the lite tier and the still (Calm / reduced motion) keep the flat diagram. */
+/* the board pose reads two private copies of its progress; registered so they never inherit (R28 B6) */
+@property --bs-u {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+@property --bs-ue {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+.bs-plate,
+.bs-socket,
+.bs-sweep {
+  display: none;
+}
+@media (min-width: 1024px) {
+  html:not([data-fx-tier='lite']) .bs-track:not([data-static]) .bs-board-layer {
+    --lift: 26px;
+    --lift-hub: 42px;
+    perspective: 1700px;
+    perspective-origin: 50% 46%;
+  }
+  html:not([data-fx-tier='lite']) .bs-track:not([data-static]) .bs-diagram {
+    --bs-u: clamp(0, var(--t) / 0.45, 1);
+    --bs-ue: calc(1 - (1 - var(--bs-u)) * (1 - var(--bs-u)));
+    transform-style: preserve-3d;
+    transform: rotateX(calc(10deg + (1 - var(--bs-ue)) * 46deg)) rotateY(calc(-6deg + var(--t) * 12deg))
+      rotateZ(calc((1 - var(--bs-ue)) * -14deg)) scale(calc(0.86 + var(--bs-ue) * 0.14));
+  }
+  html:not([data-fx-tier='lite']) .bs-track:not([data-static]) .bs-node,
+  html:not([data-fx-tier='lite']) .bs-track:not([data-static]) .bs-hub {
+    transform-style: preserve-3d;
+    opacity: 1;
+  }
+  /* the box falls from above onto its socket (a hard stamp landing), then floats at --lift */
+  html:not([data-fx-tier='lite']) .bs-track:not([data-static]) .bs-node {
+    transform: translateZ(calc(var(--lift) + (1 - var(--e)) * 220px)) scale(min(1, calc(var(--t) * 3)));
+  }
+  html:not([data-fx-tier='lite']) .bs-track:not([data-static]) .bs-hub {
+    transform: translateZ(calc(var(--lift-hub) + (1 - var(--e)) * 260px)) scale(min(1, calc(var(--t) * 2)));
+  }
+  html:not([data-fx-tier='lite']) .bs-track:not([data-static]) .bs-plate,
+  html:not([data-fx-tier='lite']) .bs-track:not([data-static]) .bs-socket {
+    --t: inherit;
+    --e: inherit;
+    display: block;
+    position: absolute;
+    inset: -3px;
+    pointer-events: none;
+  }
+  html:not([data-fx-tier='lite']) .bs-track:not([data-static]) .bs-node > .bs-plate,
+  html:not([data-fx-tier='lite']) .bs-track:not([data-static]) .bs-node > .bs-socket {
+    border-radius: 14px;
+  }
+  html:not([data-fx-tier='lite']) .bs-track:not([data-static]) .bs-hub > .bs-plate,
+  html:not([data-fx-tier='lite']) .bs-track:not([data-static]) .bs-hub > .bs-socket {
+    border-radius: 18px;
+  }
+  /* the block's own thickness: an ink slab just under the card face */
+  html:not([data-fx-tier='lite']) .bs-track:not([data-static]) .bs-plate {
+    background: var(--ink);
+    border: 2px solid rgb(255 255 255 / 0.55);
+    transform: translateZ(-9px);
+  }
+  /* the socket printed on the board: blue (structure) hatching in a hard frame, stamped as the box lands */
+  html:not([data-fx-tier='lite']) .bs-track:not([data-static]) .bs-socket {
+    border: 2px solid var(--pop-blue);
+    background: repeating-linear-gradient(135deg, rgb(43 75 255 / 0.55) 0 2px, transparent 2px 8px);
+    opacity: min(1, calc(var(--t) * 4));
+    transform: translateZ(calc(1px - var(--lift) - (1 - var(--e)) * 220px)) scale(calc(1.35 - var(--e) * 0.35));
+  }
+  html:not([data-fx-tier='lite']) .bs-track:not([data-static]) .bs-hub > .bs-socket {
+    border-color: #b8a4ff;
+    background: repeating-linear-gradient(135deg, rgb(184 164 255 / 0.5) 0 2px, transparent 2px 8px);
+    transform: translateZ(calc(1px - var(--lift-hub) - (1 - var(--e)) * 260px)) scale(calc(1.4 - var(--e) * 0.4));
+  }
+  /* a packet hops over its wire in an arc (highest halfway) instead of sliding along the board */
+  html:not([data-fx-tier='lite']) .bs-track:not([data-static]) .bs-packet {
+    transform: translate3d(
+        calc(var(--dx) * 1cqw * var(--t)),
+        calc(var(--dy) * 1cqh * var(--t)),
+        calc(6px + var(--t) * (1 - var(--t)) * 220px)
+      )
+      rotate(45deg);
+  }
+  html:not([data-fx-tier='lite']) .bs-track:not([data-static]) .bs-hud-readout {
+    transform: translateZ(8px);
+  }
+  /* ORCHESTRATE: a printed lilac scan bar sweeps the board under the blocks */
+  html:not([data-fx-tier='lite']) .bs-track:not([data-static]) .bs-sweep {
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 16%;
+    border-top: 3px solid #b8a4ff;
+    background: repeating-linear-gradient(90deg, rgb(184 164 255 / 0.4) 0 2px, transparent 2px 8px);
+    pointer-events: none;
+    opacity: 0;
+    transform: translate3d(0, -100%, 2px);
+  }
+  html:not([data-fx-tier='lite']) .bs-track:not([data-static]) .bs-stage[data-scene='4'] .bs-sweep {
+    animation: bs-sweep 3.4s linear infinite;
+  }
+  /* ORCHESTRATE: the hub works like a mechanical press - it lifts, slams down to its socket height, holds */
+  html:not([data-fx-tier='lite']) .bs-track:not([data-static]) .bs-stage[data-scene='4'] .bs-hub-core {
+    animation: bs-press 2.6s cubic-bezier(0.6, 0, 0.2, 1) infinite;
+  }
+}
+@keyframes bs-sweep {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, -100%, 2px);
+  }
+  92% {
+    opacity: 1;
+    transform: translate3d(0, 625%, 2px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, 625%, 2px);
+  }
+}
+@keyframes bs-press {
+  0%,
+  100% {
+    transform: translateZ(0);
+  }
+  45% {
+    transform: translateZ(26px);
+  }
+  58% {
+    transform: translateZ(-6px);
+  }
+  66% {
+    transform: translateZ(0);
+  }
+}
+
+/* ---- R83 About (components/about-section.tsx). The Build Sheet: four facts as big split-flap counters that flip up
+   from zero once, when the sheet is on screen and the scroll has stopped (lib/split-flap.ts). A focus card answers
+   the press: its icon tile is stamped on (one hard slam) and its terminal line prints left to right (steps, a
+   printer, not a fade). Transform / clip-path only; reduced motion and Calm end each one at its final frame. */
+.ab-flap {
+  font-size: clamp(1.7rem, 3.4vw, 2.4rem);
+  line-height: 1;
+}
+.ab-flap.sf-board {
+  gap: 3px;
+}
+.ab-flap .sf-cell {
+  border-radius: 6px;
+  box-shadow: 3px 3px 0 0 var(--pop-blue);
+}
+.ab-flap .sf-half {
+  border-radius: 6px;
+}
+.ab-flap .sf-sep {
+  margin: 0 1px;
+}
+#about [aria-pressed='true'] [data-pillar-icon] {
+  animation: ab-stamp 0.34s cubic-bezier(0.2, 0.9, 0.1, 1) backwards;
+}
+#about [aria-pressed='true'] [data-telemetry] {
+  animation: ab-print 0.9s steps(24, end) backwards;
+}
+@keyframes ab-stamp {
+  from {
+    transform: scale(1.5) rotate(-12deg);
+  }
+}
+@keyframes ab-print {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
 /* ---- R31 Honours Tally (components/honors-tally.tsx): the pixel trophy assembles in a diagonal wave, then its hard
    ink extrusion lands; the blocks drop in row by row. One-shot (data-in), transform / opacity only; the global
    reduced-motion rule and Calm end each animation at its final frame. */
@@ -4496,7 +4685,8 @@ html[data-motion='calm'] .honors-tally .tally-trophy g:first-child {
     html:not([data-motion='calm']) .si-w {
       animation: si-ink linear both;
       animation-timeline: view();
-      animation-range: entry calc(55% + var(--i) * 0.9%) cover calc(38% + var(--i) * 0.9%);
+      /* R83: the stagger stops after 28 words, so a longer paragraph is still fully inked in the reading zone */
+      animation-range: entry calc(55% + min(var(--i), 28) * 0.9%) cover calc(38% + min(var(--i), 28) * 0.9%);
     }
   }
 }
