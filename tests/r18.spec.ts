@@ -59,7 +59,9 @@ test('the desk hands its material to the next section along the relay, both dire
   await expect.poll(async () => (await desk(page)).relay).toBeCloseTo(0.5, 1);
 });
 
-test('the Projects desk carries the blueprint grid (FX-97)', async ({ page }) => {
+// R77 (owner: "make my whole website, every section background clean and tidy"): the FX-97 grid on the Projects desk is
+// retired - the desk keeps its plain tint
+test('the Projects desk is plain: no blueprint grid (FX-97 retired in R77)', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
   await page.evaluate(() => {
@@ -70,7 +72,7 @@ test('the Projects desk carries the blueprint grid (FX-97)', async ({ page }) =>
   const bg = await page.evaluate(
     () => getComputedStyle(document.querySelector('.fx-tide-canvas')!, '::after').backgroundImage,
   );
-  expect(bg).toContain('linear-gradient');
+  expect(bg).not.toContain('linear-gradient');
 });
 
 test('sections report enter / hold / exit and the rail fills with progress (FX-95, FX-99)', async ({ page }) => {

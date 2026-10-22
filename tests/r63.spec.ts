@@ -33,11 +33,14 @@ async function sample(page: Page, frame: Box, points: [number, number][], dom = 
   if (dom) await page.locator(CANVAS).evaluate((e) => ((e as HTMLElement).style.visibility = ''));
   return page.evaluate(
     async ({ b64, points, fw }) => {
-      const img = await createImageBitmap(await (await fetch(`data:image/png;base64,${b64}`)).blob());
-      const c = new OffscreenCanvas(img.width, img.height);
+      // R82: decoded through an <img> (img-src allows data:); the enforced CSP's connect-src blocks fetch('data:...')
+      const img = new Image();
+      img.src = `data:image/png;base64,${b64}`;
+      await img.decode();
+      const c = new OffscreenCanvas(img.naturalWidth, img.naturalHeight);
       const g = c.getContext('2d')!;
       g.drawImage(img, 0, 0);
-      const k = img.width / fw; // device px per CSS px
+      const k = img.naturalWidth / fw; // device px per CSS px
       return points.map(([x, y]) => {
         const d = g.getImageData(Math.round(x * k) - 4, Math.round(y * k) - 4, 9, 9).data;
         const rgb: number[] = [];
