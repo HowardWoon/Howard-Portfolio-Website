@@ -43,7 +43,8 @@ Rules:
 - Coloured strips get the quiet `.nb-hatch` texture and a white label chip saying what the colour means.
 - Grids must not leave an orphan card alone on a row at 1024 / 1280 / 1440 (see honours 12-col grid).
 - Every card header must carry information (signal chip, index, name, date); never empty colour bars.
-- No AI-generated imagery. Use Howard's real photos (`public/images/`) and vector / CSS graphics.
+- No AI-generated imagery. Use Howard's real photos (`public/images/`) and vector / CSS graphics. One owner-approved
+  exception (R83, owner upload): the chibi Doom picture `public/images/build/doom-chibi.jpg`, used only in The Build's 05 SHIP.
 
 ## C. Scroll storytelling pattern (`components/build-story.tsx`, docs/R21-BUILD-STORY.md)
 
@@ -562,6 +563,18 @@ miss (it measured 1 in 12 "dead" clicks that a normal, stability-checked click n
 as the rule itself (no car ENTERS the box while the other road is in it), not as a snapshot that a later feature makes
 wrong; a gesture test that depends on speed dispatches the gesture inside the page (mouse round trips under load made a
 "quick" flick slow); a comment like `R82: any shape` trips the B-11 "no explicit any" plan check.
+
+R83 (owner: About "update all the info and content to match with my portfolio"; The Build "3d visual effect" and the Doom
+picture "doom theme ... update all every achievements"):
+
+| Layer | Where | Rule |
+| --- | --- | --- |
+| About Build Sheet | about-section.tsx `BuildSheet` | Four facts counted from the page (tests/r83 recounts them), split-flap, flips once when the page rests on it |
+| About pillars | about-section.tsx | Every line from Projects / Experience / Honours; no invented latency, audit or thread-pool figures; `[data-telemetry]` prints on press |
+| 3D board | globals.css "R83 3D board" | Desktop only (not lite / still): scroll pose on `.bs-diagram`, mouse tilt via the element `rotate` (never a variable); its private properties are `--bs-u` / `--bs-ue`: `--u` is the R50 zoom unit and must never be registered |
+| Doom mode (05 SHIP) | build-story.tsx, globals.css "R83 05 SHIP Doom mode" | >= 1400 px: Doom behind a scroll-lifted iron gate on the left, Victor's Ledger (every honour, tests/r83 checks each issuer against #honors) on the right; narrower: a sticker on the release photo (adds no height, the phone fit stays) |
+| Seventh dock | build-story.tsx `DOCKS` | A box carries one tag per edge; Monsun Bridge on DATA's bottom edge rises from below (never crosses the box text) |
+| SIGNAL classes | tailwind.config.ts | `lib/signal.ts` is in Tailwind's content list: a component that reads SIGNAL never loses a class another file used to spell out |
 
 ## H. R24 guardrails - type floor, emblem geometry, hero water reveal, neo-brutalism only (owner complaints, tested)
 

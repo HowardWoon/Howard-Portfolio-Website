@@ -200,3 +200,7 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
     (`components/brand-icons.tsx`), never lucide brand icons; `scripts/device-sweep.mjs` covers 23 profiles (incl. Android
     landscape, a 600 px tablet, 1366 - 2560 px desktops) and the admin sign-in + 404 pages; both scripts accept
     `--base URL` and `--base=URL`. The full audit with every finding and its evidence: `docs/R82-FULL-AUDIT-AND-PLAN.md`.
+14. **R83 (owner):** About is rebuilt from the page's own facts (split-flap Build Sheet, no invented figures); The
+    Build's 03 / 04 diagram is a CSS-3D board on desktop; 05 SHIP carries the owner's chibi Doom picture (the one allowed
+    AI-art image) behind a scroll-lifted iron gate plus Victor's Ledger of every honour (a photo sticker below 1400 px);
+    all seven projects dock on the diagram. Never register `--u` (the zoom unit). Guard: `tests/r83`.

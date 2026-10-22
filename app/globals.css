@@ -3510,6 +3510,191 @@ html[data-xray-mode]
   opacity: var(--t);
   transform: translateX(calc((1 - var(--e)) * 24px));
 }
+/* ---- R83 05 SHIP Doom mode (build-story.tsx). Wide desktops (>= 1400 px, room beside the 600 px release card and
+   clear of the section rail): Doom is dealt in on the left in an ink frame behind an iron castle gate whose bars the
+   scroll lifts one after another (bar-staggered translate), and Victor's Ledger prints every honour on the right, one
+   record per step (clip wipe). Narrower: Doom is a sticker on the release photo's corner (no extra height). Hard ink edges and plates,
+   rivets, white offset shadows; no glow, no blur. */
+.bs-doom-layer {
+  display: none;
+  z-index: 14;
+}
+.bs-doom-sticker {
+  position: absolute;
+  right: -10%;
+  bottom: -8%;
+  z-index: 2;
+  width: 52%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 3px solid var(--ink);
+  border-radius: 14px;
+  background: var(--ink);
+  box-shadow: 4px 4px 0 0 var(--ink);
+  opacity: min(1, calc(var(--t) * 4));
+  transform: rotate(calc(8deg - (1 - var(--e)) * 20deg)) scale(calc(1.6 - var(--e) * 0.6));
+}
+@media (min-width: 1400px) {
+  .bs-doom-sticker {
+    display: none;
+  }
+  .bs-doom-layer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: max(32px, calc(50vw - 300px - 32px - 330px));
+    padding-right: 120px;
+  }
+}
+.bs-doom-in {
+  opacity: min(1, calc(var(--t) * 2.5));
+  transform: translateY(calc((1 - var(--e)) * 55vh)) rotate(calc((1 - var(--e)) * -7deg));
+}
+.bs-ledger-in {
+  opacity: min(1, calc(var(--t) * 2.5));
+  transform: translateX(calc((1 - var(--e)) * 30vw)) rotate(calc((1 - var(--e)) * 4deg));
+}
+.bs-doom-card {
+  width: min(300px, calc(50vw - 300px - 80px));
+  border: 3px solid var(--ink);
+  border-radius: 22px;
+  background: var(--ink);
+  box-shadow: 8px 8px 0 0 #fff;
+  overflow: hidden;
+}
+.bs-doom-frame {
+  position: relative;
+  aspect-ratio: 990 / 1240;
+  max-height: calc(100svh - var(--top) - var(--bottom) - 110px);
+  overflow: hidden;
+  border-bottom: 3px solid var(--ink);
+}
+/* the gate: seven iron bars with a pointed foot and two cross rails; each bar rises a little after the one before */
+.bs-doom-gate {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: space-around;
+  pointer-events: none;
+}
+.bs-doom-gate::before,
+.bs-doom-gate::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 10px;
+  border-block: 2px solid #fff;
+  background: var(--ink);
+  opacity: calc(1 - var(--t) * 2.2);
+}
+.bs-doom-gate::before {
+  --t: inherit;
+  top: 28%;
+}
+.bs-doom-gate::after {
+  --t: inherit;
+  top: 64%;
+}
+.bs-doom-bar {
+  --t: inherit;
+  position: relative;
+  width: 11px;
+  height: 108%;
+  background: var(--ink);
+  border-inline: 2px solid #fff;
+  clip-path: polygon(0 0, 100% 0, 100% 94%, 50% 100%, 0 94%);
+  transform: translateY(calc(clamp(0, var(--t) * 1.6 - var(--i) * 0.09, 1) * -112%));
+}
+.bs-doom-plate {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 12px;
+  color: #fff;
+  font:
+    800 0.8rem / 1.2 var(--font-mono),
+    monospace;
+  letter-spacing: 0.12em;
+  text-align: center;
+}
+.bs-doom-rivet {
+  width: 9px;
+  height: 9px;
+  flex: none;
+  border: 2px solid #fff;
+  border-radius: 50%;
+}
+.bs-ledger {
+  width: min(330px, calc(50vw - 300px - 150px));
+  max-height: calc(100svh - var(--top) - var(--bottom) - 24px);
+  overflow: hidden;
+  border: 3px solid var(--ink);
+  border-radius: 18px;
+  background: var(--paper, #fff);
+  color: var(--ink);
+  box-shadow: 8px 8px 0 0 #fff;
+}
+.bs-ledger-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 12px;
+  border-bottom: 3px solid var(--ink);
+  background: var(--ink);
+  color: #fff;
+  font:
+    800 0.8rem / 1.2 var(--font-mono),
+    monospace;
+  letter-spacing: 0.12em;
+}
+.bs-ledger-list {
+  margin: 0;
+  padding: 6px 0;
+  list-style: none;
+}
+.bs-ledger-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 12px;
+  border-bottom: 1px dashed rgb(10 10 10 / 0.25);
+  clip-path: inset(0 calc((1 - var(--t)) * 100%) 0 0);
+}
+.bs-ledger-row:last-child {
+  border-bottom: 0;
+}
+.bs-ledger-value {
+  flex: none;
+  min-width: 52px;
+  padding: 1px 6px;
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  font:
+    800 0.8rem / 1.3 var(--font-mono),
+    monospace;
+  text-align: center;
+}
+.bs-ledger-issuer {
+  min-width: 0;
+  font:
+    700 0.8rem / 1.25 var(--font-mono),
+    monospace;
+}
+/* R83: a second project tag on the bottom edge of the same box (Monsun Bridge under Catfish on DATA) */
+.bs-node[data-side] > .bs-dock[data-edge='b'] {
+  top: auto;
+  bottom: 0;
+  translate: 0 50%;
+  /* it rises from below onto the bottom edge, so it never crosses the box text on the way */
+  transform: translateY(calc((1 - var(--e)) * 16px)) scale(calc(1.25 - var(--e) * 0.25));
+}
+.bs-node:has(> .bs-dock[data-edge='b']) {
+  padding-bottom: 18px;
+}
+
 /* ---- R31 HUD on the 03 / 04 diagram (build-story.tsx): pixel radar + range rings around the AI hub + a system
    readout + targeting corners on the boxes. Printed, not glowing: hard checker pixels, hairlines, lilac = AI. The
    scroll turns the radar arm and the rings (transform only, reversible); nothing moves on its own. */
@@ -3781,9 +3966,9 @@ html[data-fx-tier='lite'] .bs-hud-radar {
     left: 0;
     right: 0;
     top: 0;
-    height: 16%;
+    height: 8%;
     border-top: 3px solid #b8a4ff;
-    background: repeating-linear-gradient(90deg, rgb(184 164 255 / 0.4) 0 2px, transparent 2px 8px);
+    background: rgb(184 164 255 / 0.14);
     pointer-events: none;
     opacity: 0;
     transform: translate3d(0, -100%, 2px);
@@ -3803,11 +3988,11 @@ html[data-fx-tier='lite'] .bs-hud-radar {
   }
   92% {
     opacity: 1;
-    transform: translate3d(0, 625%, 2px);
+    transform: translate3d(0, 1250%, 2px);
   }
   100% {
     opacity: 0;
-    transform: translate3d(0, 625%, 2px);
+    transform: translate3d(0, 1250%, 2px);
   }
 }
 @keyframes bs-press {

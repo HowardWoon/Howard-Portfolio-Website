@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { test, expect, devices, type Page } from '@playwright/test';
 
 /**
@@ -100,5 +101,52 @@ test.describe('phone', () => {
     await home(page);
     await storyAt(page, 0.81);
     expect(await page.locator('.bs-diagram').evaluate((e) => getComputedStyle(e).transform)).toBe('none');
+  });
+});
+
+test('The Build 05 SHIP: Doom behind a lifted gate and a ledger of every honour (wide desktop)', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await home(page);
+  await storyAt(page, 1);
+  const doom = page.locator('.bs-doom-card');
+  await expect(doom).toBeVisible();
+  const box = (await doom.boundingBox())!;
+  const rel = (await page.locator('.bs-release').boundingBox())!;
+  expect(box.x + box.width).toBeLessThan(rel.x); // beside the release card, never over it
+  // the gate has lifted clear of the picture
+  const frame = (await page.locator('.bs-doom-frame').boundingBox())!;
+  for (const bar of await page.locator('.bs-doom-bar').all())
+    expect((await bar.boundingBox())!.y + (await bar.boundingBox())!.height).toBeLessThanOrEqual(frame.y + 1);
+  // every honour is on the ledger, and each issuer is one the Honours section names
+  const issuers = await page.locator('.bs-ledger-issuer').allInnerTexts();
+  expect(issuers.length).toBe(12);
+  await expect(page.locator('.bs-doom-sticker')).toBeHidden();
+  // (the Honours section folds its categories, so the issuers are checked against its data, not its open cards)
+  const honours = readFileSync('components/honors-section.tsx', 'utf8').toLowerCase();
+  for (const i of issuers) {
+    const key = i
+      .replace(/\s+/g, ' ')
+      .replace(/,.*$/, '')
+      .replace(/ \(PEKOM\)$/, '')
+      .toLowerCase();
+    expect(honours, i).toContain(key);
+  }
+});
+
+test('The Build: all seven projects dock on the diagram', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await home(page);
+  await expect(page.locator('.bs-dock')).toHaveCount(7);
+  await expect(page.locator('.bs-hud-readout')).toContainText('07 BUILDS');
+});
+
+test.describe('phone Doom', () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  test.use((({ defaultBrowserType, ...d }) => d)(devices['iPhone 13']));
+  test('Doom is a sticker on the release photo, the side panels stay hidden', async ({ page }) => {
+    await home(page);
+    await storyAt(page, 1);
+    await expect(page.locator('.bs-doom-sticker')).toBeVisible();
+    await expect(page.locator('.bs-doom-card')).toBeHidden();
   });
 });
