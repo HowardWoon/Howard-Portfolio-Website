@@ -180,8 +180,17 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
     driver has a reaction, pull-away, braking, standstill gap and speed wander; nobody drives into the junction box while
     a car of the other road is in it; walkers roam 16 corners on real pavement. The street is built only after the page
     has RESTED on it 250 ms (a fling past it never builds it). Tests of the street use fixed seeds. Guard: `tests/r82`
-    (200 s on 3 seeds: no collision, red run or box entry; varied greens, launches, gaps, fleets and routes). Turning
-    cars are NOT in yet: a first version collided (482 overlaps in one 200 s run) and was held back.
+    (200 s on 3 seeds: no collision, red run or box entry; varied greens, launches, gaps, fleets and routes; both turns;
+    new people keep arriving). Owner: "make the 3d as interesting as possible ... more variety, more random, dont keep
+    the same ppl again and again": cars TURN - left (the short kerb turn) and right (across the oncoming lane), each
+    turning only when its path, the zebra and (right) the oncoming lane are clear, ending wholly inside the road it
+    left; a right-turner waits at its line while the opposite one is further in; nobody drives onto the rails without
+    room beyond them or into the junction without room past it; a car stops before a zebra someone is crossing, and
+    walkers wait for a car body in front of them (a hard rule never lets a walker step into a car). Walkers LEAVE at
+    five exits on the table's edges and new people walk in - new outfit, hair, skin, height and pace (some jog); more
+    people than walk at once; the crowd rises and falls; a "rush" street event pours everyone in. Proved first in a
+    Node harness over the real traffic code (80 seeds x 200 s: 0 collisions, 0 red runs, 0 box entries, ~1,600 turns),
+    then in the browser tests.
 12. **Photos (R82, owner: "must enhance this photo part"):** a trackpad pinch zooms the photo only (native non-passive
     wheel listener); zoom stops at 1.5x the photo's own pixels; the next photo slides in from its side over the blurred
     preview; a quick flick changes photo; 1 - 9 jump; on a phone held sideways the keys and caption sit in a column

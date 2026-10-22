@@ -117,7 +117,7 @@ test('traffic never collides and nobody runs a red light (90 simulated seconds)'
       lane: { stop: number; dir: number; signal: 'EW' | 'NS' };
       aabb(o: object): { minX: number; maxX: number; minZ: number; maxZ: number };
     };
-    type Ped = { pos: { x: number; z: number } };
+    type Ped = { pos: { x: number; z: number }; gone?: number };
     const T = d.traffic() as unknown as { cars: Car[]; peds: Ped[]; lightFor(a: 'EW' | 'NS'): string };
     d.teleport(-18, 0.15, -12);
     const ov = (a: { minX: number; maxX: number; minZ: number; maxZ: number }, b: typeof a) =>
@@ -125,6 +125,7 @@ test('traffic never collides and nobody runs a red light (90 simulated seconds)'
     let collisions = 0;
     let redRuns = 0;
     const prev = new Map<Car, number>();
+    const seen = new Map<Car, unknown>();
     for (let i = 0; i < 60 * 90; i++) {
       d.step(1 / 60, false);
       const cars = T.cars.filter((c) => c.hidden <= 0);
@@ -132,9 +133,15 @@ test('traffic never collides and nobody runs a red light (90 simulated seconds)'
         const A = cars[a].aabb({});
         for (let b = a + 1; b < cars.length; b++) if (ov(A, cars[b].aabb({}))) collisions++;
         for (const p of T.peds)
-          if (ov(A, { minX: p.pos.x - 0.2, maxX: p.pos.x + 0.2, minZ: p.pos.z - 0.2, maxZ: p.pos.z + 0.2 }))
+          if (
+            !((p.gone ?? 0) > 0) &&
+            ov(A, { minX: p.pos.x - 0.2, maxX: p.pos.x + 0.2, minZ: p.pos.z - 0.2, maxZ: p.pos.z + 0.2 })
+          )
             collisions++;
         const c = cars[a];
+        // R82: cars turn; a car that changed lane is measured against its new lane's stop line from the next step
+        if (seen.get(c) !== c.lane) prev.delete(c);
+        seen.set(c, c.lane);
         const pf = prev.get(c);
         if (
           pf !== undefined &&

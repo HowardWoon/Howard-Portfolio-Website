@@ -14,6 +14,9 @@ type Car = {
   v: number;
   s: number;
   lane: Lane;
+  turn?: string;
+  turned?: boolean;
+  turnedFrom?: Lane | null;
   car: { kind: string; length: number; paint: { color: { getHex(): number } } };
   aabb(o: object): Box;
 };
@@ -21,12 +24,14 @@ type Ped = {
   pos: { x: number; z: number };
   from: number;
   to: number;
+  gone?: number;
   person: { materials: { color?: { getHex(): number } }[] };
 };
 type Traffic = {
   cars: Car[];
   peds: Ped[];
   greens: number[];
+  arrivals: number;
   lightFor(a: 'EW' | 'NS'): string;
 };
 type Handle = {
@@ -110,7 +115,9 @@ test.describe('R82 3D street', () => {
         let collisions = 0;
         let redRuns = 0;
         let boxEntries = 0;
-        let lastBox = { EW: false, NS: false };
+        const turns = { left: 0, right: 0 };
+        const wasTurned = new Map<Car, boolean>();
+        let lastBox: Car[] = [];
         const gaps: number[] = [];
         const launches: number[] = [];
         const edges = new Set<string>();
@@ -143,17 +150,20 @@ test.describe('R82 3D street', () => {
             }
           }
           const cars = T.cars.filter((c) => c.hidden <= 0);
-          const inBox = { EW: false, NS: false };
+          const inBox: Car[] = [];
           for (let a = 0; a < cars.length; a++) {
             const A = cars[a].aabb({});
-            if (ov(A, BOX)) inBox[cars[a].lane.signal] = true;
+            if (ov(A, BOX)) inBox.push(cars[a]);
             for (let b = a + 1; b < cars.length; b++) {
               if (ov(A, cars[b].aabb({}))) collisions++;
               if (cars[a].lane === cars[b].lane && cars[a].v < 0.05 && cars[b].v < 0.05)
                 gaps.push(Math.abs(cars[a].s - cars[b].s) - (cars[a].car.length + cars[b].car.length) / 2);
             }
             for (const p of T.peds)
-              if (ov(A, { minX: p.pos.x - 0.2, maxX: p.pos.x + 0.2, minZ: p.pos.z - 0.2, maxZ: p.pos.z + 0.2 }))
+              if (
+                !((p.gone ?? 0) > 0) &&
+                ov(A, { minX: p.pos.x - 0.2, maxX: p.pos.x + 0.2, minZ: p.pos.z - 0.2, maxZ: p.pos.z + 0.2 })
+              )
                 collisions++;
             const c = cars[a];
             // a car that changed lane is measured against its new lane's stop line from the next step
@@ -172,15 +182,26 @@ test.describe('R82 3D street', () => {
               pf !== undefined &&
               (pf - c.lane.stop) * c.lane.dir < 0 &&
               (c.front - c.lane.stop) * c.lane.dir >= 0 &&
-              lastBox[c.lane.signal === 'EW' ? 'NS' : 'EW']
+              // (a car that turned out of this lane, or turned left, is not cross traffic: the engine's rule)
+              lastBox.some(
+                (o) => o.lane.signal !== c.lane.signal && o.turnedFrom !== c.lane && !(o.turned && o.turn === 'left'),
+              )
             )
               boxEntries++;
             prev.set(c, c.front);
+            if (c.turned && !wasTurned.get(c) && (c.turn === 'left' || c.turn === 'right')) turns[c.turn]++;
+            wasTurned.set(c, !!c.turned);
           }
           lastBox = inBox;
           for (const c of T.cars) if (c.hidden > 0) prev.delete(c);
           if (i % 30) continue;
           T.peds.forEach((p, k) => {
+            // R82: off the table (left the street) is not standing still
+            if ((p.gone ?? 0) > 0) {
+              still[k] = 0;
+              last[k] = { x: p.pos.x, z: p.pos.z };
+              return;
+            }
             edges.add(`${p.from}>${p.to}`);
             const moved = Math.hypot(p.pos.x - last[k].x, p.pos.z - last[k].z);
             last[k] = { x: p.pos.x, z: p.pos.z };
@@ -193,6 +214,8 @@ test.describe('R82 3D street', () => {
           collisions,
           redRuns,
           boxEntries,
+          turns,
+          arrivals: T.arrivals,
           greens: [...new Set(T.greens.map((g) => g.toFixed(1)))].length,
           launches,
           gapSpread: near.length ? Math.max(...near) - Math.min(...near) : 0,
@@ -214,6 +237,16 @@ test.describe('R82 3D street', () => {
       expect(r.edges, 'walkers reach far more than the old one-block loop').toBeGreaterThan(14);
       expect(r.longestStill, 'no walker stands still for over a minute').toBeLessThan(60);
     }
+    // R82 turning cars (left = the short kerb turn, right = across the oncoming lane) and new people walking in
+    expect(
+      results.reduce((n, r) => n + r.turns.left, 0),
+      'cars turn left',
+    ).toBeGreaterThan(0);
+    expect(
+      results.reduce((n, r) => n + r.turns.right, 0),
+      'cars turn right',
+    ).toBeGreaterThan(0);
+    for (const r of results) expect(r.arrivals, 'new people keep walking in').toBeGreaterThan(2);
     const spreads = results.flatMap((r) => r.launches).sort((a, b) => a - b);
     expect(spreads.length, 'queues were seen pulling away').toBeGreaterThan(5);
     expect(

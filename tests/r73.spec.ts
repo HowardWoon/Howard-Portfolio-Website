@@ -164,7 +164,7 @@ test('every street event runs for 20 simulated seconds without an error and puts
     const d = (window as W).__diorama!.debug;
     d.quiet();
     const before = JSON.stringify(d.info().lights);
-    const names = ['thunder', 'downpour', 'drizzle', 'gust', 'flicker', 'express', 'gift', 'zoomies'];
+    const names = ['thunder', 'downpour', 'drizzle', 'gust', 'flicker', 'express', 'gift', 'zoomies', 'rush'];
     for (const n of names) {
       d.event(n);
       d.step(3, false);

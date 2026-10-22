@@ -14,7 +14,8 @@ import { rand } from './random';
  * Reduced motion: nothing happens by itself, and the dice never flashes a light (no thunder, no flicker).
  * Flashes stay under three a second (WCAG 2.3.1): the lightning is two hard steps 0.22 s apart, the lamp blinks at 3 Hz.
  */
-export type StreetEvent = 'thunder' | 'downpour' | 'drizzle' | 'gust' | 'flicker' | 'express' | 'gift' | 'zoomies';
+export type StreetEvent =
+  'thunder' | 'downpour' | 'drizzle' | 'gust' | 'flicker' | 'express' | 'gift' | 'zoomies' | 'rush';
 export const STREET_EVENTS: StreetEvent[] = [
   'thunder',
   'downpour',
@@ -24,6 +25,7 @@ export const STREET_EVENTS: StreetEvent[] = [
   'express',
   'gift',
   'zoomies',
+  'rush',
 ];
 const FLASHY: StreetEvent[] = ['thunder', 'flicker'];
 
@@ -36,6 +38,8 @@ const LINES: Record<StreetEvent, string> = {
   express: 'An express train is coming. Mind the crossing.',
   gift: 'ガコン！ The vending machine drops a free drink.',
   zoomies: 'The cat suddenly sprints off.',
+  // R82: everyone off the table walks in at once and the parked cars come round
+  rush: 'ラッシュ！ A crowd pours onto the crossing.',
 };
 
 export interface DirectorDeps {
@@ -119,6 +123,9 @@ export class Director {
         break;
       case 'gift':
         this.d.gift();
+        break;
+      case 'rush':
+        traffic.rush();
         break;
       case 'zoomies':
         traffic.catDash(); // it meows on its own

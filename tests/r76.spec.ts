@@ -19,7 +19,7 @@ type Car = {
   car: { kind: string; paint: { color: { getHex(): number } } };
   aabb(o: object): { minX: number; maxX: number; minZ: number; maxZ: number };
 };
-type Ped = { pos: { x: number; z: number }; from: number; to: number };
+type Ped = { pos: { x: number; z: number }; from: number; to: number; gone?: number };
 type Traffic = {
   cars: Car[];
   peds: Ped[];
@@ -114,6 +114,7 @@ test.describe('3D street', () => {
       const longest = T.peds.map(() => 0);
       const last = T.peds.map((p) => ({ x: p.pos.x, z: p.pos.z }));
       const prev = new Map<Car, number>();
+      const seen = new Map<Car, Lane>();
       let collisions = 0;
       let redRuns = 0;
       for (let i = 0; i < 60 * 200; i++) {
@@ -123,9 +124,15 @@ test.describe('3D street', () => {
           const A = cars[a].aabb({});
           for (let b = a + 1; b < cars.length; b++) if (ov(A, cars[b].aabb({}))) collisions++;
           for (const p of T.peds)
-            if (ov(A, { minX: p.pos.x - 0.2, maxX: p.pos.x + 0.2, minZ: p.pos.z - 0.2, maxZ: p.pos.z + 0.2 }))
+            if (
+              !((p.gone ?? 0) > 0) &&
+              ov(A, { minX: p.pos.x - 0.2, maxX: p.pos.x + 0.2, minZ: p.pos.z - 0.2, maxZ: p.pos.z + 0.2 })
+            )
               collisions++;
           const c = cars[a];
+          // R82: cars turn; a car that changed lane is measured against its new lane's stop line from the next step
+          if (seen.get(c) !== c.lane) prev.delete(c);
+          seen.set(c, c.lane);
           const pf = prev.get(c);
           if (
             pf !== undefined &&
@@ -149,6 +156,12 @@ test.describe('3D street', () => {
           speeds.add(+T.trainCruise.toFixed(2));
         }
         T.peds.forEach((p, k) => {
+          // R82: off the table (left the street) is not standing still
+          if ((p.gone ?? 0) > 0) {
+            still[k] = 0;
+            last[k] = { x: p.pos.x, z: p.pos.z };
+            return;
+          }
           edges.add(`${p.from}>${p.to}`);
           const moved = Math.hypot(p.pos.x - last[k].x, p.pos.z - last[k].z);
           last[k] = { x: p.pos.x, z: p.pos.z };
@@ -434,7 +447,9 @@ test.describe('gallery lightbox on phones', () => {
       .getByRole('button', { name: /view full resolution/i })
       .first();
     await open.evaluate((e) => e.scrollIntoView({ block: 'center' }));
-    await open.click({ force: true });
+    // R82: a normal click waits until the card has stopped sliding in (a forced click right after the scroll could
+    // land beside the key and cycle the deck instead - 1 in 3 runs)
+    await open.click();
     const cap = page.locator('[data-lightbox-caption]');
     await expect(cap).toBeVisible();
     expect(await cap.evaluate((e) => getComputedStyle(e).webkitLineClamp)).toBe('2');

@@ -61,6 +61,40 @@ const LANES: Record<string, Lane> = {
   NB: { axis: 'z', dir: -1, fixed: 7.5, stop: 5.9, signal: 'NS', start: 42, end: -42, xing: 18.9 },
 };
 
+/* R82 (owner: "fixed algorithm"; every car used to drive straight through): cars turn. Japan drives on the left, so a
+   LEFT turn is the short one at the kerb and a RIGHT turn crosses the oncoming lane. `at` = where the car's centre
+   turns (its coordinate along its own lane), `to` = the lane it turns into. Every destination lane belongs to the
+   road that has a red light while this one has green, so nobody is coming up behind a car that turns into it. */
+type Turn = 'straight' | 'left' | 'right';
+const TURNS: Record<string, Record<'left' | 'right', { at: number; to: string }>> = {
+  EB: { left: { at: 7.5, to: 'NB' }, right: { at: 10.5, to: 'SB' } },
+  WB: { left: { at: 10.5, to: 'SB' }, right: { at: 7.5, to: 'NB' } },
+  SB: { left: { at: -1.5, to: 'EB' }, right: { at: 1.5, to: 'WB' } },
+  NB: { left: { at: 1.5, to: 'WB' }, right: { at: -1.5, to: 'EB' } },
+};
+const ONCOMING: Record<string, string> = { EB: 'WB', WB: 'EB', SB: 'NB', NB: 'SB' };
+const laneKey = (l: Lane) => (Object.keys(LANES) as (keyof typeof LANES)[]).find((k) => LANES[k] === l)!;
+const laneYaw = (l: Lane) => (l.axis === 'x' ? (l.dir === 1 ? 0 : Math.PI) : l.dir === 1 ? -Math.PI / 2 : Math.PI / 2);
+/** R82: the zebra crossings each lane drives over (their middle, along the lane; 2 m deep) */
+const ZEBRAS: Record<'x' | 'z', number[]> = { x: [4.75, 13.25], z: [-4.4, 4.4] };
+/** a walker on (or stepping onto) that zebra */
+const onZebra = (p: { pos: THREE.Vector3 }, axis: 'x' | 'z', at: number) =>
+  axis === 'x'
+    ? Math.abs(p.pos.x - at) < 1.3 && Math.abs(p.pos.z) < 3.3
+    : Math.abs(p.pos.z - at) < 1.3 && p.pos.x > 5.7 && p.pos.x < 12.3;
+/** R82: what the walkers wear and look like; every person who comes in rolls a new set */
+const TOPS = [
+  0x2b4bff, 0xff9ecf, 0x3ddc97, 0xf2f2ee, 0xffc700, 0x8e6bff, 0xb5262b, 0x3a3f48, 0x8a8f98, 0x4a6b8a, 0xc94f3d,
+  0xd8c3a5, 0x264d3b, 0x111111, 0xe8e6e0,
+];
+const BOTTOMS = [0x2b2b2b, 0x3a3f48, 0x1d2433, 0x5a4a3a, 0x111111, 0x2f4f6f, 0x6b5b45, 0xd8c3a5, 0x4a4f58];
+const HAIRS = [0x1a1a1a, 0x4a2a18, 0x111111, 0x6b4a2a, 0x2a2420, 0x8b6b4a, 0xb5b5b5, 0x3b2318, 0xc9a26b];
+const SKINS = [0xf1c9a5, 0xe8b88f, 0xd9a07a, 0xc68642, 0x9b6a43, 0x6e4a2e, 0xf6d7c3];
+const UMBRELLAS = [0xffffff, 0xff4b2b, 0x2b4bff, 0x111111, 0xffc700, 0x3ddc97, 0xff9ecf];
+const BAGS = [0x5a3a24, 0x111111, 0x2b4bff, 0x8a8f98];
+/** a turning car is this slow at the corner */
+const TURN_V = 3.5;
+
 /* R76 (owner: "all the walkers, cars, train like appearing in their fix algorithm"): nothing on the street repeats on a
    schedule any more. Each visit and each time an actor comes round again rolls its own lane, colour, speed, route,
    pause and timing. The street is never the same twice, and the rules (lights, gaps, crossings) are what keep it
@@ -87,6 +121,13 @@ class CarAgent {
   wait = 0;
   drift = 0;
   driftRate = 0.3;
+  /** R82: this run's route through the junction, and whether the turn is done */
+  turn: Turn = 'straight';
+  turned = false;
+  /** the body's swing round the corner (0 -> 1), drawn only */
+  private yawFrom = 0;
+  private yawTo = 0;
+  turnT = 1;
   collider: Box;
   constructor(
     public car: Car,
@@ -107,9 +148,38 @@ class CarAgent {
     this.drift = rand() * Math.PI * 2;
     this.driftRate = rnd(0.15, 0.4);
     this.wait = 0;
+    const r = rand();
+    this.turn = r < 0.6 ? 'straight' : r < 0.85 ? 'left' : 'right';
+    this.turned = false;
+    this.turnedFrom = null;
+    this.turnT = 1;
     if (this.car.kind !== 'taxi') this.car.paint.color.setHex(pick(PAINTS));
-    const g = this.car.group;
-    g.rotation.y = lane.axis === 'x' ? (lane.dir === 1 ? 0 : Math.PI) : lane.dir === 1 ? -Math.PI / 2 : Math.PI / 2;
+    this.car.group.rotation.y = laneYaw(lane);
+  }
+  /** the lane this run started in, once the car has turned out of it */
+  turnedFrom: Lane | null = null;
+  /** R82: into the new lane at the turn point; the body swings round over 0.7 s. The whole car ends inside the road it
+   *  left: a LEFT turn past its middle (`roadMid`, along the new lane) - turned at its centre, a long car kept its back
+   *  half in the opposite lane; a RIGHT turn inside its far kerb (3 m from the middle) - its back half sat on the zebra
+   *  behind it (measured: vans touching the cars waiting there, and walkers on the crossing) */
+  turnInto(lane: Lane, roadMid: number, left: boolean) {
+    const at = this.lane.fixed;
+    const rear = left ? roadMid : roadMid - lane.dir * 3;
+    const clear = rear + lane.dir * (this.car.length / 2 + 0.15);
+    this.s = lane.dir > 0 ? Math.max(at, clear) : Math.min(at, clear);
+    this.turnedFrom = this.lane;
+    this.lane = lane;
+    this.turned = true;
+    this.yawFrom = this.car.group.rotation.y;
+    this.yawTo = laneYaw(lane);
+    this.turnT = 0;
+  }
+  swing(dt: number) {
+    if (this.turnT >= 1) return;
+    this.turnT = Math.min(1, this.turnT + dt / 0.7);
+    const e = this.turnT * this.turnT * (3 - 2 * this.turnT);
+    const d = Math.atan2(Math.sin(this.yawTo - this.yawFrom), Math.cos(this.yawTo - this.yawFrom));
+    this.car.group.rotation.y = this.yawFrom + d * e;
   }
   get front() {
     return this.s + (this.lane.dir * this.car.length) / 2;
@@ -164,7 +234,14 @@ const CORNERS = [
   { x: -5.5, z: -7.6 }, // 13 the konbini door
   { x: -5.5, z: 4.3 }, // 14 south pavement
   { x: 14.0, z: -5.6 }, // 15 round the bench to the shops
+  // R82 exits at the edges of the table: a walker who gets here may leave the street, and new people come in here
+  { x: -21.4, z: -4.3 }, // 16 west edge, north pavement
+  { x: -21.4, z: 4.3 }, // 17 west edge, south pavement
+  { x: 21.4, z: -4.3 }, // 18 east edge, north pavement
+  { x: 21.4, z: 4.3 }, // 19 east edge, south pavement
+  { x: 4.7, z: -17.6 }, // 20 north edge, up the N-S road
 ] as const;
+const EXITS = [16, 17, 18, 19, 20];
 /** corners where a walker stands for a while (a shop, the station, the end of the street) */
 const STOPS = new Set([3, 7, 8, 9, 10, 11, 13]);
 type Edge = { to: number; cross?: 'EW' | 'NS' };
@@ -186,6 +263,11 @@ for (const [a, b, cross] of [
   [5, 1, 'NS'],
   [1, 9],
   [5, 10],
+  [0, 16],
+  [6, 17],
+  [7, 18],
+  [8, 19],
+  [9, 20],
 ] as [number, number, ('EW' | 'NS')?][]) {
   PAVEMENT[a].push({ to: b, cross });
   PAVEMENT[b].push({ to: a, cross });
@@ -205,6 +287,12 @@ class PedAgent {
   nx = 0;
   nz = 0;
   side = 0;
+  /** R82: this person's own pace (a jogger's is 2.2 - 2.7 m/s); each stretch wanders a little around it */
+  pace: number;
+  /** R82: seconds until this person (re)enters the street; > 0 = off the table */
+  gone = 0;
+  /** R82: seconds this walker has stood still mid-crossing (after 5 s it squeezes past a car corner) */
+  stuck = 0;
   collider: Box;
   constructor(
     public person: Person,
@@ -215,7 +303,8 @@ class PedAgent {
     this.pos.set(p.x, 0.15, p.z);
     this.from = start;
     this.to = start;
-    this.speed = rnd(1.0, 1.6);
+    this.pace = rnd(1.0, 1.6);
+    this.speed = this.pace;
     this.collider = world.addDynamic(box(0, 0, 0, 1.7, 0, 0, { noCam: true, tag: 'ped' }));
     this.chooseNext();
     this.pause = rnd(0, 2.5);
@@ -233,8 +322,10 @@ class PedAgent {
     this.to = e.to;
     this.cross = e.cross;
     this.crossing = false;
-    this.speed = THREE.MathUtils.clamp(this.speed + rnd(-0.1, 0.1), 1.0, 1.6);
+    this.speed = THREE.MathUtils.clamp(this.speed + rnd(-0.1, 0.1), this.pace - 0.2, this.pace + 0.2);
     this.pause = STOPS.has(here) ? rnd(1.5, 6) : chance(0.3) ? rnd(0.5, 2.5) : 0;
+    // R82: at the edge of the table most people leave the street (someone new comes in later, somewhere else)
+    if (EXITS.includes(here) && chance(0.75)) this.gone = rnd(2, 9);
   }
 }
 
@@ -255,6 +346,12 @@ export class Traffic {
   /** R82: the length of each green that has ended, newest last (tests) */
   greens: number[] = [];
   cars: CarAgent[] = [];
+  /** R82: how many people this visit has, how many should be out at once right now, and for how long */
+  pool = 0;
+  crowdTarget = 0;
+  private crowdT = 0;
+  /** R82: how many people have come in so far (tests: the faces keep changing) */
+  arrivals = 0;
   peds: PedAgent[] = [];
   train: Train;
   trainState: 'idle' | 'run' = 'idle';
@@ -283,7 +380,7 @@ export class Traffic {
   private scratch: Box[] = [];
   private tmpBox = { minX: 0, maxX: 0, minZ: 0, maxZ: 0 };
   private tmpBox2 = { minX: 0, maxX: 0, minZ: 0, maxZ: 0 };
-  private inBox = { EW: false, NS: false };
+  private inBox: CarAgent[] = [];
   private catVel = new THREE.Vector3();
   private catNear: Box[] = [];
 
@@ -298,6 +395,7 @@ export class Traffic {
   ) {
     const clipX = [new THREE.Plane(new THREE.Vector3(1, 0, 0), 22), new THREE.Plane(new THREE.Vector3(-1, 0, 0), 22)];
     const clipZ = [new THREE.Plane(new THREE.Vector3(0, 0, 1), 18), new THREE.Plane(new THREE.Vector3(0, 0, -1), 18)];
+    const clipAll = [...clipX, ...clipZ];
     // R76: a random fleet. The main road carries more cars than the side road; each car rolls its kind and its lane
     // (within its axis), and enters the street at a random moment. R82 (measured before: 8 cars and exactly 2 taxis on
     // every visit): the size of the fleet is rolled too, and a road has a taxi on about half of the visits
@@ -310,7 +408,8 @@ export class Traffic {
       for (let i = 0; i < perAxis[axis]; i++) {
         // one taxi at most per axis, so the fleet never reads as a taxi rank
         const kind: CarKind = i === 0 && taxi ? 'taxi' : pick(kinds);
-        const car = makeCar(kind, kind === 'taxi' ? 0x1f2a4d : pick(PAINTS), axis === 'x' ? clipX : clipZ);
+        // R82: all four table edges (a car that turns changes its axis)
+        const car = makeCar(kind, kind === 'taxi' ? 0x1f2a4d : pick(PAINTS), clipAll);
         root.add(car.group);
         this.cars.push(new CarAgent(car, pick(lanes), world));
       }
@@ -324,28 +423,33 @@ export class Traffic {
     this.trainCollider = world.addDynamic(box(0, 0, 0, 3.6, 15.3, 17.9, { off: true, tag: 'train' }));
 
     // R76: walkers dressed at random, each starting at its own corner of the block
-    const tops = [0x2b4bff, 0xff9ecf, 0x3ddc97, 0xf2f2ee, 0xffc700, 0x8e6bff, 0xb5262b, 0x3a3f48];
-    const bottoms = [0x2b2b2b, 0x3a3f48, 0x1d2433, 0x5a4a3a, 0x111111];
-    const hairs = [0x1a1a1a, 0x4a2a18, 0x111111, 0x6b4a2a, 0x2a2420];
-    const umbrellas = [0xffffff, 0xff4b2b, 0x2b4bff, 0x111111, 0xffc700, 0x3ddc97];
     // R82: a fair shuffle (sorting with a random comparator favours the first corners) and a rolled crowd
-    const starts = [...CORNERS.keys()];
+    const starts = [...CORNERS.keys()].filter((k) => !EXITS.includes(k));
     for (let i = starts.length - 1; i > 0; i--) {
       const j = Math.floor(rand() * (i + 1));
       [starts[i], starts[j]] = [starts[j], starts[i]];
     }
     const walkers = crowd === 'low' ? count(3, 4) : count(4, 7);
-    for (let i = 0; i < walkers; i++) {
+    /* R82 (owner: "dont keep the same ppl again and again"): more people than walk at once. Walkers leave at the edges
+       of the table and others come in a few seconds later, each with a new outfit, hair, skin, height and pace (some
+       jog). How many are out at once rises and falls too. */
+    this.pool = walkers + (crowd === 'low' ? 1 : 3);
+    this.crowdTarget = walkers;
+    for (let i = 0; i < this.pool; i++) {
       const p = makePerson({
-        top: pick(tops),
-        bottom: pick(bottoms),
-        hair: pick(hairs),
-        umbrella: pick(umbrellas),
-        bag: chance(0.5) ? 0x5a3a24 : undefined,
-        scale: rnd(0.93, 1.02),
+        top: pick(TOPS),
+        bottom: pick(BOTTOMS),
+        hair: pick(HAIRS),
+        skin: pick(SKINS),
+        umbrella: chance(0.75) ? pick(UMBRELLAS) : null,
+        bag: chance(0.5) ? pick(BAGS) : undefined,
+        scale: rnd(0.9, 1.05),
       });
       root.add(p.group);
-      this.peds.push(new PedAgent(p, starts[i % starts.length], world));
+      const a = new PedAgent(p, starts[i % starts.length], world);
+      // the extra people start off the table and walk in over the first seconds
+      if (i >= walkers) this.leave(a, rnd(2, 14));
+      this.peds.push(a);
     }
 
     this.cat = makeCat();
@@ -443,13 +547,16 @@ export class Traffic {
       // distance from our front to the near edge of [minA,maxA] in our direction (negative = overlapping)
       return L.dir === 1 ? minA - f : f - maxA;
     };
-    const lateralHit = (minL: number, maxL: number) => maxL > L.fixed - hw && minL < L.fixed + hw;
+    const lateralHit = (minL: number, maxL: number, half = hw) => maxL > L.fixed - half && minL < L.fixed + half;
+    // R82: against other cars the corridor is the car's own width + 0.15 m (the 0.55 m margin kept for people made three
+    // cars in the box block each other in a ring, with 0.1 m of real space between them)
+    const hwCar = a.car.width / 2 + 0.15;
     for (const o of this.cars) {
       if (o === a || o.hidden > 0) continue;
       const b = o.aabb(this.tmpBox);
       const [minA, maxA, minL, maxL] =
         L.axis === 'x' ? [b.minX, b.maxX, b.minZ, b.maxZ] : [b.minZ, b.maxZ, b.minX, b.maxX];
-      if (!lateralHit(minL, maxL)) continue;
+      if (!lateralHit(minL, maxL, hwCar)) continue;
       const d = along(minA, maxA);
       // an obstacle counts if it is ahead of us (and not behind our rear)
       const rearD = L.dir === 1 ? maxA - (a.s - a.car.length / 2) : a.s + a.car.length / 2 - minA;
@@ -459,9 +566,10 @@ export class Traffic {
       const [pa, pl] = L.axis === 'x' ? [x, z] : [z, x];
       if (!lateralHit(pl - r, pl + r)) return;
       const d = along(pa - r, pa + r);
-      // anyone ahead of our rear bumper counts — even someone already touching the car: it never pushes a person
-      const rearD = L.dir === 1 ? pa + r - (a.s - a.car.length / 2) : a.s + a.car.length / 2 - (pa - r);
-      if (rearD > 0 && d < look) gap = Math.min(gap, d);
+      // anyone in front of the car's nose counts - even someone already touching it: it never pushes a person. R82:
+      // someone beside the body (behind the nose) does not: the car moves away from them, and walkers now wait for a
+      // car in their way (they used to walk into its side while it waited for them: neither could go)
+      if (d > -0.1 && d < look) gap = Math.min(gap, d);
     };
     if (player.active && player.pos.y < 2.2) circle(player.pos.x, player.pos.z, player.radius);
     for (const p of this.peds) circle(p.pos.x, p.pos.z, 0.35);
@@ -509,14 +617,18 @@ export class Traffic {
   }
 
   private updateCars(dt: number, player: PlayerInfo) {
-    // R82: which road has a car inside the shared box right now
+    // R82: the cars inside the shared box right now
     const inBox = this.inBox;
-    inBox.EW = inBox.NS = false;
+    inBox.length = 0;
     for (const o of this.cars) {
       if (o.hidden > 0) continue;
       const b = o.aabb(this.tmpBox);
-      if (b.minX < BOX.maxX && b.maxX > BOX.minX && b.minZ < BOX.maxZ && b.maxZ > BOX.minZ) inBox[o.lane.signal] = true;
+      if (b.minX < BOX.maxX && b.maxX > BOX.minX && b.minZ < BOX.maxZ && b.maxZ > BOX.minZ) inBox.push(o);
     }
+    /** a car of the other road is in the box (a car that turned out of THIS lane is the one ahead, not cross traffic) */
+    // (a car that turned LEFT drives away on the near side of the road it left: it crosses nobody there)
+    const crossInBox = (a: CarAgent) =>
+      inBox.some((o) => o.lane.signal !== a.lane.signal && o.turnedFrom !== a.lane && !(o.turned && o.turn === 'left'));
     for (const a of this.cars) {
       if (a.hidden > 0) {
         a.hidden -= dt;
@@ -548,16 +660,76 @@ export class Traffic {
       }
       // R82: never into the box while a car of the other road is still in it (one that ran the amber, one held up by
       // a walker): the all-red phase alone was the only guard
-      if (toLine > -0.4 && inBox[L.signal === 'EW' ? 'NS' : 'EW']) gap = Math.min(gap, toLine - 0.15);
+      if (toLine > -0.4 && crossInBox(a)) gap = Math.min(gap, toLine - 0.15);
+      // R82: two right turns from opposite sides would each wait in the box for the other (measured: gridlock for 60 -
+      // 170 s): a car that turns right does not go past its line while the opposite right-turner is further in (the one
+      // further in goes first; level = the first in the fleet - two that crossed together each saw the other "in")
+      // (held up to 2 m past its line: a car told to wait while rolling slid 0.4 m in and then went on)
+      if (a.turn === 'right' && !a.turned && toLine > -2) {
+        const O = LANES[ONCOMING[laneKey(L)]];
+        const mine = this.cars.indexOf(a);
+        const waiting = this.cars.some((o, i) => {
+          if (o.hidden > 0 || o.lane !== O || o.turn !== 'right' || o.turned) return false;
+          const theirs = (o.lane.stop - o.front) * o.lane.dir;
+          return theirs < 0 && (theirs < toLine - 0.01 || (Math.abs(theirs - toLine) <= 0.01 && i < mine));
+        });
+        if (waiting) gap = Math.min(gap, toLine - 0.15);
+      }
+      // R82 keep clear (measured: a queue backed onto the rails, the train stopped for it for good, the barrier stayed
+      // down and the junction locked for 60 - 170 s): a car goes into the junction box, or onto the level crossing, only
+      // when the car ahead in its lane is moving or has left room for this whole car beyond the far side
+      const ahead = this.carAhead(a);
+      // (onto the rails a car needs that room even if the car ahead is moving: it may stop at the junction next)
+      const roomPast = (far: number, spare = 0.8, rails = false) =>
+        !ahead ||
+        (!rails && ahead.v > 1) ||
+        (ahead.s - (L.dir * ahead.car.length) / 2 - far) * L.dir >= a.car.length + spare;
+      if (
+        (a.turn === 'straight' || a.turned) &&
+        toLine > -0.4 &&
+        !roomPast(L.dir > 0 ? (L.axis === 'x' ? BOX.maxX : BOX.maxZ) : L.axis === 'x' ? BOX.minX : BOX.minZ)
+      )
+        gap = Math.min(gap, toLine - 0.15);
+      if (L.xing !== undefined) {
+        const toX = (L.xing - f) * L.dir;
+        if (toX > -0.4 && !roomPast(L.dir > 0 ? 18 : 15.2, 2, true)) gap = Math.min(gap, toX - 0.15);
+      }
+      // R82: a zebra ahead with someone crossing on it: stop before it (a car that had turned met walkers side-on on the
+      // crossing, and each waited for the other). A car already on the zebra goes on.
+      for (const z of ZEBRAS[L.axis]) {
+        const near = (z - L.dir * 1.0 - f) * L.dir;
+        if (near < -0.2 || near > 16) continue;
+        if (this.peds.some((p) => p.crossing && onZebra(p, L.axis, z))) gap = Math.min(gap, near - 0.3);
+      }
       if (L.xing !== undefined && (this.crossingActive || this.barrierT > 0.02)) {
         const toX = (L.xing - f) * L.dir;
         if (toX > -0.4) gap = Math.min(gap, toX - 0.15);
+      }
+      // R82: a car that turns slows to TURN_V at the corner and waits at the turn point until its way is clear (the
+      // stretch of its new lane, walkers on the crossing, and - turning right - the oncoming lane)
+      let turnAt: { at: number; to: string } | null = null;
+      let turnFree = true;
+      let turnCap = Infinity;
+      if (a.turn !== 'straight' && !a.turned) {
+        turnAt = TURNS[laneKey(L)][a.turn];
+        const toTurn = (turnAt.at - a.s) * L.dir;
+        if (toTurn < -0.5) {
+          // it could not stop at the turn point in time (it never should): it goes straight on instead
+          a.turn = 'straight';
+          turnAt = null;
+        } else {
+          if (toTurn < 20) turnCap = Math.sqrt(TURN_V * TURN_V + 2 * 3.5 * Math.max(0, toTurn));
+          if (toTurn < 12) {
+            turnFree = this.turnClear(a, turnAt, player);
+            if (!turnFree) gap = Math.min(gap, toTurn - 0.05);
+          }
+        }
       }
       // R82: the driver's own cruising speed wanders a little, and a car that has stopped moves off only after its
       // driver reacts (so a queue pulls away one car after another, not as one block)
       a.drift += a.driftRate * dt;
       const cruise = a.vmax * (1 + 0.05 * Math.sin(a.drift));
-      const target = gap <= 0.05 ? 0 : Math.min(cruise, Math.sqrt(2 * 5.5 * gap));
+      const target = gap <= 0.05 ? 0 : Math.min(cruise, turnCap, Math.sqrt(2 * 5.5 * gap));
       let held = false;
       if (a.v < 0.05) {
         if (target <= 0.05) a.wait = a.reaction;
@@ -573,9 +745,77 @@ export class Traffic {
       a.car.brake.emissiveIntensity = a.braking || a.v < 0.05 ? 3.2 : 0.8;
       a.s += a.v * dt * L.dir;
       for (const w of a.car.wheels) w.rotation.z -= (a.v * dt) / 0.32;
-      if ((a.s - L.end) * L.dir > 0) a.hidden = 1 + rand() * 5;
+      // the middle of the road being left, along the new lane: the E-W road's is z = 0, the N-S road's x = 9
+      if (turnAt && turnFree && (turnAt.at - a.s) * L.dir <= 0)
+        a.turnInto(LANES[turnAt.to], L.axis === 'x' ? 0 : 9, a.turn === 'left');
+      a.swing(dt);
+      if ((a.s - a.lane.end) * a.lane.dir > 0) a.hidden = 1 + rand() * 5;
       a.place();
     }
+  }
+
+  /** R82: how far the point (x, z) is inside any car body grown by `margin` (<= 0: clear of every car) */
+  private carDepth(x: number, z: number, margin: number) {
+    let deepest = -Infinity;
+    for (const c of this.cars) {
+      if (c.hidden > 0) continue;
+      const b = c.aabb(this.tmpBox);
+      const dx = Math.min(x - (b.minX - margin), b.maxX + margin - x);
+      const dz = Math.min(z - (b.minZ - margin), b.maxZ + margin - z);
+      deepest = Math.max(deepest, Math.min(dx, dz));
+    }
+    return deepest;
+  }
+
+  /** the nearest car ahead in the same lane (R82 keep-clear) */
+  private carAhead(a: CarAgent) {
+    let best: CarAgent | null = null;
+    let bestD = Infinity;
+    for (const o of this.cars) {
+      if (o === a || o.hidden > 0 || o.lane !== a.lane) continue;
+      const d = (o.s - a.s) * a.lane.dir;
+      if (d > 0 && d < bestD) {
+        bestD = d;
+        best = o;
+      }
+    }
+    return best;
+  }
+
+  /** R82: may this car turn now? Its next 9 m in the new lane (a car's width + 0.5 m each side) hold no car, walker or
+   *  player, and a right turn waits for any moving oncoming car within 30 m of where it crosses that lane */
+  private turnClear(a: CarAgent, T: { at: number; to: string }, player: PlayerInfo) {
+    const D = LANES[T.to];
+    const from = a.lane.fixed; // the turn point, along the new lane
+    const to = from + D.dir * 9;
+    const r = this.tmpBox2;
+    const [lo, hi] = [Math.min(from, to), Math.max(from, to)];
+    // the car's own width + 0.15 m against cars (a wider margin made two opposite right-turners, whose bodies never
+    // meet, block each other for good), + 0.5 m against people
+    const strip = (half: number) =>
+      D.axis === 'x'
+        ? Object.assign(r, { minX: lo, maxX: hi, minZ: D.fixed - half, maxZ: D.fixed + half })
+        : Object.assign(r, { minZ: lo, maxZ: hi, minX: D.fixed - half, maxX: D.fixed + half });
+    const hit = (x: number, z: number, rad: number) =>
+      x + rad > r.minX && x - rad < r.maxX && z + rad > r.minZ && z - rad < r.maxZ;
+    strip(a.car.width / 2 + 0.15);
+    for (const o of this.cars) {
+      if (o === a || o.hidden > 0) continue;
+      const b = o.aabb(this.tmpBox);
+      if (b.minX < r.maxX && b.maxX > r.minX && b.minZ < r.maxZ && b.maxZ > r.minZ) return false;
+    }
+    strip(a.car.width / 2 + 0.5);
+    for (const p of this.peds) if (hit(p.pos.x, p.pos.z, 0.4)) return false;
+    if (player.active && player.pos.y < 2.2 && hit(player.pos.x, player.pos.z, player.radius + 0.2)) return false;
+    if (a.turn === 'right') {
+      const O = LANES[ONCOMING[laneKey(a.lane)]];
+      for (const o of this.cars) {
+        if (o.hidden > 0 || o.lane !== O || o.v < 0.3) continue;
+        const d = (D.fixed - o.front) * O.dir;
+        if (d > -1 && d < 30) return false;
+      }
+    }
+    return true;
   }
 
   /* ------------------------------------------------------------ train + crossing */
@@ -656,8 +896,63 @@ export class Traffic {
   }
 
   /* ------------------------------------------------------------ pedestrians */
+  /** R82: someone leaves the street for `t` seconds (off the table: hidden, no collider) */
+  private leave(a: PedAgent, t: number) {
+    a.gone = t;
+    a.person.group.visible = false;
+    a.collider.off = true;
+  }
+
+  /** R82: someone new walks in at an edge of the table: a new outfit, hair, skin, height and pace (35 % of those
+   *  without an umbrella jog) */
+  private enter(a: PedAgent) {
+    const p = a.person;
+    const m = p.materials as THREE.MeshStandardMaterial[];
+    m[0].color.setHex(pick(TOPS));
+    m[1].color.setHex(pick(BOTTOMS));
+    m[2].color.setHex(pick(SKINS));
+    m[3].color.setHex(pick(HAIRS));
+    p.body.scale.setScalar(rnd(0.9, 1.05));
+    a.pace = !p.umbrella && chance(0.35) ? rnd(2.2, 2.7) : rnd(0.95, 1.6);
+    a.speed = a.pace;
+    const at = pick(EXITS);
+    a.pos.set(CORNERS[at].x, 0.15, CORNERS[at].z);
+    a.from = a.to = at;
+    a.chooseNext();
+    Object.assign(a, { gone: 0, pause: 0, side: 0, moving: a.pace * 0.6 });
+    p.group.visible = true;
+    a.collider.off = false;
+    this.arrivals++;
+  }
+
+  /** R82: a rush - everyone who is off the table comes in over the next seconds, and parked cars come round sooner */
+  rush() {
+    this.crowdTarget = this.pool;
+    this.crowdT = rnd(25, 35);
+    for (const a of this.peds) if (a.gone > 0) a.gone = Math.min(a.gone, rnd(0.3, 3));
+    for (const c of this.cars) if (c.hidden > 0) c.hidden = Math.min(c.hidden, rnd(0.2, 1.5));
+  }
+
   private updatePeds(dt: number, player: PlayerInfo) {
+    // R82: how many are out rises and falls; people off the table come back in as somebody new
+    this.crowdT -= dt;
+    if (this.crowdT <= 0) {
+      this.crowdTarget = Math.round(rnd(Math.max(2, this.pool - 4), this.pool));
+      this.crowdT = rnd(20, 45);
+    }
+    let out = this.peds.filter((p) => p.gone <= 0).length;
     for (const a of this.peds) {
+      if (a.gone > 0) {
+        a.gone -= dt;
+        if (a.gone > 0) continue;
+        if (out < this.crowdTarget) {
+          this.enter(a);
+          out++;
+        } else {
+          a.gone = rnd(1, 4);
+          continue;
+        }
+      }
       const t = a.target;
       const dx = t.x - a.pos.x;
       const dz = t.z - a.pos.z;
@@ -665,15 +960,28 @@ export class Traffic {
       let go = true;
       // R76: a moment at the corner first (phone, umbrella, a look round) - never in the road: a pause only starts at a
       // corner, before the walker steps off
+      const nx = dx / (dist || 1);
+      const nz = dz / (dist || 1);
+      // R82: cars turn now, across the crossings: a walker waits while a car body is right in front of them (a step of
+      // 0.75 m must stay 0.2 m - a walker's own half-width - clear of every car), before stepping off and on the way over
+      const sx = a.pos.x + nx * 0.75;
+      const sz = a.pos.z + nz * 0.75;
+      let carAhead = false;
+      for (const c of a.stuck > 5 ? [] : this.cars) {
+        if (c.hidden > 0) continue;
+        const b = c.aabb(this.tmpBox);
+        if (sx > b.minX - 0.2 && sx < b.maxX + 0.2 && sz > b.minZ - 0.2 && sz < b.maxZ + 0.2) {
+          carAhead = true;
+          break;
+        }
+      }
       if (a.pause > 0) {
         a.pause -= dt;
         go = false;
       } else if (a.cross && !a.crossing) {
-        go = (a.cross === 'EW' ? this.pedEW : this.pedNS) === 'walk';
+        go = (a.cross === 'EW' ? this.pedEW : this.pedNS) === 'walk' && !carAhead;
         if (go) a.crossing = true;
-      }
-      const nx = dx / (dist || 1);
-      const nz = dz / (dist || 1);
+      } else if (carAhead) go = false;
       // polite: wait for the player instead of walking through them
       if (player.active) {
         const px = player.pos.x - a.pos.x;
@@ -705,15 +1013,34 @@ export class Traffic {
       a.side += ds;
       const target = go ? a.speed : 0;
       a.moving += (target - a.moving) * (1 - Math.exp(-dt * 6));
+      // R82: someone frozen on a crossing (not pausing, not waiting at the kerb) for 5 s drops the side-step and the
+      // car margin above; the backstop below still never lets them touch a car
+      a.stuck = a.crossing && a.pause <= 0 && a.moving < 0.05 ? a.stuck + dt : 0;
+      if (a.stuck > 5) a.side = 0;
       const step = Math.min(dist, a.moving * dt);
       // forward, plus the sidestep (to the walker's right: (-nz, nx)); heading at the corner takes the offset back out
-      a.pos.x += nx * step - nz * ds;
-      a.pos.z += nz * step + nx * ds;
+      // R82 backstop: a step that would end within 0.2 m of a car body is not taken (whatever the rules above decided)
+      const nxp = a.pos.x + nx * step - nz * ds;
+      const nzp = a.pos.z + nz * step + nx * ds;
+      // (already that close - a car stopped beside them - a step that does not go further in is taken)
+      const inNew = this.carDepth(nxp, nzp, 0.2);
+      if (inNew <= 0 || inNew < this.carDepth(a.pos.x, a.pos.z, 0.2)) {
+        a.pos.x = nxp;
+        a.pos.z = nzp;
+      } else a.moving = 0;
       if (dist > 0.05) {
         a.nx = nx;
         a.nz = nz;
       }
-      if (dist < 0.05 || (arrived && a.pause <= 0)) a.chooseNext();
+      if (dist < 0.05 || (arrived && a.pause <= 0)) {
+        a.chooseNext();
+        // reached an edge of the table and is leaving the street
+        if (a.gone > 0) {
+          this.leave(a, a.gone);
+          out--;
+          continue;
+        }
+      }
       const gy = this.world.groundAt(a.pos.x, a.pos.z, a.pos.y + 0.4, 0.12, this.scratch);
       a.pos.y += (Math.max(0, gy) - a.pos.y) * (1 - Math.exp(-dt * 18));
       const p = a.person;
