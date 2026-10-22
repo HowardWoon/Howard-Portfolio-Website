@@ -44,7 +44,7 @@ const pressOnly = (loc: Locator) =>
     );
   });
 
-const KICKER = 'ABOUT // SYSTEMS ARCHITECTURE & VISION';
+const KICKER = 'ABOUT // FULL STACK DEVELOPER';
 
 test('kicker decodes and settles on its exact text (FX-55)', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });

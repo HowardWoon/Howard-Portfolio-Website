@@ -17,6 +17,8 @@ const config: Config = {
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
     './app/**/*.{js,ts,jsx,tsx,mdx}',
+    // R83: the SIGNAL KEY classes (lib/signal.ts) are always generated, whether or not a component spells one out
+    './lib/signal.ts',
   ],
   theme: {
     // Full list (not `extend`) so `xs` is emitted BEFORE sm/md/lg in the CSS cascade
