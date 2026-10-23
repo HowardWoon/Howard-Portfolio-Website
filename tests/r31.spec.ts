@@ -229,7 +229,7 @@ test.describe('orchestrate HUD (1920)', () => {
     }));
     expect(r.ticks).toBe(72);
     expect(r.radar).toBe('block');
-    expect(r.readout).toBe('SYS MAP · 05 NODES · 06 BUILDS');
+    expect(r.readout).toBe('SYS MAP · 05 NODES · 07 BUILDS'); // R83: all seven projects dock (Monsun Bridge on DATA)
     expect(r.ringOp).toBeGreaterThan(0.9);
   });
 });
