@@ -166,13 +166,25 @@ export default function DoomWalk() {
     const schedule = () => {
       if (!raf && (near || still())) raf = requestAnimationFrame(update);
     };
+    // the frames load only once the page has RESTED near the section for 250 ms (like the 3D street, R82): a fling
+    // past it fetches and decodes nothing, so it never steals the main thread from the sections the visitor is reaching
+    let restT = 0;
+    const rest = () => {
+      window.clearTimeout(restT);
+      if (near && !loading) restT = window.setTimeout(() => near && load(), 250);
+    };
+    const onScroll = () => {
+      schedule();
+      if (near && !loading) rest();
+    };
     const relayout = () => {
       const nextSet = tallMq.matches ? 'tall' : 'wide';
       if (nextSet !== set) {
         set = nextSet;
         loading = false;
         drawn = -1;
-        if (near || still()) load();
+        if (still()) load();
+        else rest();
       }
       measure();
       fit();
@@ -184,9 +196,9 @@ export default function DoomWalk() {
       ([e]) => {
         near = e.isIntersecting;
         if (near) {
-          load();
           measure();
-        }
+          rest();
+        } else window.clearTimeout(restT);
         schedule();
       },
       { rootMargin: '150% 0px 150% 0px' },
@@ -199,7 +211,7 @@ export default function DoomWalk() {
     });
     ro.observe(document.body);
     ro.observe(canvas);
-    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', relayout);
     reduce.addEventListener('change', relayout);
     tallMq.addEventListener('change', relayout);
@@ -212,7 +224,8 @@ export default function DoomWalk() {
       window.clearTimeout(roT);
       io.disconnect();
       ro.disconnect();
-      window.removeEventListener('scroll', schedule);
+      window.removeEventListener('scroll', onScroll);
+      window.clearTimeout(restT);
       window.removeEventListener('resize', relayout);
       reduce.removeEventListener('change', relayout);
       tallMq.removeEventListener('change', relayout);

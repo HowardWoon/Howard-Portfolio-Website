@@ -91,6 +91,9 @@ test('Dock: section-rail markers near the mouse grow, and settle when it leaves'
   await walk(page);
   // the rail steps aside at the footer (where walk() ends): come back up to the page body
   await page.evaluate(() => window.scrollTo(0, document.getElementById('experience')!.offsetTop));
+  // R83: walk() ends in a stream of scroll events, so the scroll shield (lib/scroll-frame.ts) is up until 150 ms after the
+  // last one; whether this jump still belongs to that stream depended on the page height. Point only once it has lifted.
+  await page.waitForTimeout(300);
   const nav = page.getByRole('navigation', { name: 'Section navigation' });
   await expect(nav).not.toHaveAttribute('data-at-footer', '');
   const b = (await nav.boundingBox())!;

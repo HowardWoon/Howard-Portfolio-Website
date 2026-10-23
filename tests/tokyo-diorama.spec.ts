@@ -27,10 +27,10 @@ type W = Window & { __diorama?: Handle };
 // WebGL on CI runs in software (SwiftShader): give these tests the triple budget
 test.beforeEach(() => test.slow());
 
-async function openDiorama(page: Page) {
+async function openDiorama(page: Page, query = '') {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(String(e)));
-  await page.goto('/?diorama-test');
+  await page.goto(`/?diorama-test${query}`);
   await page.getByRole('button', { name: /skip intro/i }).click();
   await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 10000 });
   await expect(async () => {
@@ -69,7 +69,9 @@ test('diorama section mounts between Honors and the logo wall, with its pins', a
 });
 
 test('walk physics: automatic door, walls, curbs, jumping onto a stool', async ({ page }) => {
-  await openDiorama(page);
+  // R83: a FIXED street (R82): on a random one a walker could be standing in the konbini doorway, and the door test
+  // then measured the walker instead of the door (1 run in 4 stopped at z -7; the konbini is a walker stop)
+  await openDiorama(page, '&street-seed=3');
   const r = await page.evaluate(() => {
     const h = (window as W).__diorama!;
     const d = h.debug;

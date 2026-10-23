@@ -58,6 +58,9 @@ test('honour emblems are stickers: a drag peels one up and it springs home', asy
   await walk(page);
   const sticker = page.locator('#honors .sticker').first();
   await sticker.scrollIntoViewIfNeeded();
+  // R83: walk() ends in a stream of scroll events, so the scroll shield (lib/scroll-frame.ts) is up until 150 ms after the
+  // last one; whether this jump still belongs to that stream depended on the page height. Point only once it has lifted.
+  await page.waitForTimeout(300);
   const b = (await sticker.boundingBox())!;
   await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
   await page.mouse.down();
