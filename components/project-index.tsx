@@ -5,13 +5,15 @@ import { Check } from 'lucide-react';
 import { FX } from '@/lib/fx';
 import { setFocus, useInteraction } from '@/lib/interaction-store';
 import { SIGNAL } from '@/lib/signal';
+import type { OrganiserId } from '@/lib/organisers';
+import { OrganiserPlate } from './organiser-plate';
 
 // R27 PixelCard (after React Bits PixelCard): a hover fills the tile with its own signal colour pixel by pixel, on a
 // diagonal wave (12 x 4 cells, CSS only, `.px-card` in globals.css). Mouse only; never on the active tile.
 const PX = Array.from({ length: 48 }, (_, k) => ((k % 12) + Math.floor(k / 12) * 2) / 18);
 const hexFor = (fill: string) => Object.values(SIGNAL).find((s) => s.fill === fill)?.hex ?? '#FFFFFF';
 
-export type ProjectIndexItem = { id: string; number: string; title: string; fill: string };
+export type ProjectIndexItem = { id: string; number: string; title: string; fill: string; organiser?: OrganiserId };
 
 /** FX-21: bento index of all projects. Reuses existing titles/numbers/colours only (no new content). */
 export function ProjectIndex({ items }: { items: readonly ProjectIndexItem[] }) {
@@ -128,6 +130,12 @@ export function ProjectIndex({ items }: { items: readonly ProjectIndexItem[] }) 
             <span className="relative font-display text-sm font-extrabold uppercase leading-tight [overflow-wrap:anywhere]">
               {p.title}
             </span>
+            {/* R83: the organiser's logo, on the same plate as on the project card */}
+            {p.organiser ? (
+              <span className="relative mt-auto block pt-1.5">
+                <OrganiserPlate id={p.organiser} size="sm" />
+              </span>
+            ) : null}
           </a>
         );
       })}

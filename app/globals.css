@@ -3510,179 +3510,277 @@ html[data-xray-mode]
   opacity: var(--t);
   transform: translateX(calc((1 - var(--e)) * 24px));
 }
-/* ---- R83 05 SHIP Doom mode (build-story.tsx). Wide desktops (>= 1400 px, room beside the 600 px release card and
-   clear of the section rail): Doom is dealt in on the left in an ink frame behind an iron castle gate whose bars the
-   scroll lifts one after another (bar-staggered translate), and Victor's Ledger prints every honour on the right, one
-   record per step (clip wipe). Narrower: Doom is a sticker on the release photo's corner (no extra height). Hard ink edges and plates,
-   rivets, white offset shadows; no glow, no blur. */
-.bs-doom-layer {
-  display: none;
-  z-index: 14;
+/* ---- R83 Doom Walk (components/doom-walk.tsx): a pinned stage after The Build. The canvas shows the frame of the
+   owner's walking clip that matches the scroll (scroll down = he walks toward the viewer, up = he walks back); the
+   honours print one by one as he approaches, the name plate stamps on at the close-up. Reads --p like The Build
+   (.bs-seg). Paper plates, ink borders, hard white shadows on the ink stage; transform / opacity / clip only. */
+.dw-track {
+  height: 320vh;
 }
-.bs-doom-sticker {
-  position: absolute;
-  right: -10%;
-  bottom: -8%;
-  z-index: 2;
-  width: 52%;
-  aspect-ratio: 1;
+.dw-stage {
+  --p: 0;
+  --top: calc(var(--header-h, 72px) + 20px);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
   overflow: hidden;
-  border: 3px solid var(--ink);
-  border-radius: 14px;
-  background: var(--ink);
-  box-shadow: 4px 4px 0 0 var(--ink);
-  opacity: min(1, calc(var(--t) * 4));
-  transform: rotate(calc(8deg - (1 - var(--e)) * 20deg)) scale(calc(1.6 - var(--e) * 0.6));
-}
-@media (min-width: 1400px) {
-  .bs-doom-sticker {
-    display: none;
-  }
-  .bs-doom-layer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-left: max(32px, calc(50vw - 300px - 32px - 330px));
-    padding-right: 120px;
-  }
-}
-.bs-doom-in {
-  opacity: min(1, calc(var(--t) * 2.5));
-  transform: translateY(calc((1 - var(--e)) * 55vh)) rotate(calc((1 - var(--e)) * -7deg));
-}
-.bs-ledger-in {
-  opacity: min(1, calc(var(--t) * 2.5));
-  transform: translateX(calc((1 - var(--e)) * 30vw)) rotate(calc((1 - var(--e)) * 4deg));
-}
-.bs-doom-card {
-  width: min(300px, calc(50vw - 300px - 80px));
-  border: 3px solid var(--ink);
-  border-radius: 22px;
-  background: var(--ink);
-  box-shadow: 8px 8px 0 0 #fff;
-  overflow: hidden;
-}
-.bs-doom-frame {
-  position: relative;
-  aspect-ratio: 990 / 1240;
-  max-height: calc(100svh - var(--top) - var(--bottom) - 110px);
-  overflow: hidden;
-  border-bottom: 3px solid var(--ink);
-}
-/* the gate: seven iron bars with a pointed foot and two cross rails; each bar rises a little after the one before */
-.bs-doom-gate {
-  position: absolute;
-  inset: 0;
+  isolation: isolate;
   display: flex;
-  justify-content: space-around;
-  pointer-events: none;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(10px, 2.2svh, 22px);
+  padding: var(--top) 16px 20px;
 }
-.bs-doom-gate::before,
-.bs-doom-gate::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 10px;
-  border-block: 2px solid #fff;
-  background: var(--ink);
-  opacity: calc(1 - var(--t) * 2.2);
-}
-.bs-doom-gate::before {
-  --t: inherit;
-  top: 28%;
-}
-.bs-doom-gate::after {
-  --t: inherit;
-  top: 64%;
-}
-.bs-doom-bar {
-  --t: inherit;
-  position: relative;
-  width: 11px;
-  height: 108%;
-  background: var(--ink);
-  border-inline: 2px solid #fff;
-  clip-path: polygon(0 0, 100% 0, 100% 94%, 50% 100%, 0 94%);
-  transform: translateY(calc(clamp(0, var(--t) * 1.6 - var(--i) * 0.09, 1) * -112%));
-}
-.bs-doom-plate {
-  position: relative;
+.dw-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 10px 12px;
-  color: #fff;
+  gap: 8px 14px;
+  opacity: min(1, calc(var(--t) * 3));
+  transform: translateY(calc((1 - var(--e)) * 18px));
+}
+.dw-kicker,
+.dw-count {
+  border: 2px solid #fff;
+  border-radius: 6px;
+  padding: 2px 8px;
   font:
     800 0.8rem / 1.2 var(--font-mono),
     monospace;
-  letter-spacing: 0.12em;
-  text-align: center;
+  letter-spacing: 0.14em;
 }
-.bs-doom-rivet {
+.dw-kicker {
+  background: #fff;
+  color: var(--ink);
+}
+.dw-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.5rem, 4.2vw, 2.6rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+.dw-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  align-content: start;
+  gap: clamp(10px, 2svh, 18px);
+  width: 100%;
+  min-height: 0;
+  flex: 1;
+}
+/* the film screen: 16:9 on wide screens, a 4:5 portrait crop on phones; sized by the height it has left */
+.dw-screen {
+  position: relative;
+  margin: 0;
+  aspect-ratio: 16 / 9;
+  width: min(92vw, 860px, calc((100svh - var(--top) - 210px) * 16 / 9));
+  padding: 0 22px;
+  border: 3px solid var(--ink);
+  border-radius: 20px;
+  background: var(--ink);
+  box-shadow:
+    0 0 0 3px #fff,
+    9px 9px 0 3px #fff;
+  opacity: min(1, calc(var(--t) * 2));
+  transform: scale(calc(0.9 + var(--e) * 0.1));
+}
+.dw-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
+  background: #15171a;
+}
+/* film sprockets down both sides of the screen: printed squares, not decoration that moves */
+.dw-sprockets {
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  width: 10px;
+  background: repeating-linear-gradient(to bottom, #fff 0 8px, transparent 8px 20px);
+}
+.dw-sprockets[data-side='l'] {
+  left: 6px;
+}
+.dw-sprockets[data-side='r'] {
+  right: 6px;
+}
+/* the close-up's name plate: slams onto the screen's bottom edge */
+.dw-plate {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+  padding: 7px 14px;
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 5px 5px 0 0 var(--ink);
+  font:
+    800 clamp(0.8rem, 1.6vw, 1rem) / 1.2 var(--font-mono),
+    monospace;
+  letter-spacing: 0.12em;
+  opacity: min(1, calc(var(--t) * 4));
+  transform: translate(-50%, 45%) scale(calc(1.6 - var(--e) * 0.6)) rotate(calc((1 - var(--e)) * -6deg));
+}
+.dw-rivet {
   width: 9px;
   height: 9px;
   flex: none;
-  border: 2px solid #fff;
+  border: 2px solid var(--ink);
   border-radius: 50%;
 }
-.bs-ledger {
-  width: min(330px, calc(50vw - 300px - 150px));
-  max-height: calc(100svh - var(--top) - var(--bottom) - 24px);
-  overflow: hidden;
-  border: 3px solid var(--ink);
-  border-radius: 18px;
-  background: var(--paper, #fff);
-  color: var(--ink);
-  box-shadow: 8px 8px 0 0 #fff;
-}
-.bs-ledger-head {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 9px 12px;
-  border-bottom: 3px solid var(--ink);
-  background: var(--ink);
-  color: #fff;
-  font:
-    800 0.8rem / 1.2 var(--font-mono),
-    monospace;
-  letter-spacing: 0.12em;
-}
-.bs-ledger-list {
+/* honours: two columns beside the screen on wide screens, subtitle cards below it elsewhere */
+.dw-col {
+  display: none;
   margin: 0;
-  padding: 6px 0;
+  padding: 0;
   list-style: none;
 }
-.bs-ledger-row {
+.dw-row,
+.dw-sub {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 3px 12px;
-  border-bottom: 1px dashed rgb(10 10 10 / 0.25);
+  gap: 10px;
+  color: var(--ink);
+}
+.dw-row {
+  padding: 8px 10px;
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 4px 4px 0 0 #fff;
+  opacity: min(1, calc(var(--t) * 3));
+  transform: translateX(calc((1 - var(--e)) * var(--from, -40px)));
   clip-path: inset(0 calc((1 - var(--t)) * 100%) 0 0);
 }
-.bs-ledger-row:last-child {
-  border-bottom: 0;
-}
-.bs-ledger-value {
+.dw-value {
   flex: none;
-  min-width: 52px;
-  padding: 1px 6px;
+  min-width: 56px;
+  padding: 2px 6px;
   border: 2px solid var(--ink);
   border-radius: 6px;
+  color: var(--ink);
   font:
-    800 0.8rem / 1.3 var(--font-mono),
+    800 0.85rem / 1.3 var(--font-mono),
     monospace;
   text-align: center;
 }
-.bs-ledger-issuer {
+.dw-issuer {
   min-width: 0;
   font:
-    700 0.8rem / 1.25 var(--font-mono),
+    700 0.8rem / 1.3 var(--font-mono),
     monospace;
 }
+.dw-subs {
+  position: relative;
+  width: min(92vw, 520px);
+  height: 64px;
+}
+.dw-sub {
+  position: absolute;
+  inset: 0;
+  padding: 8px 12px;
+  border: 3px solid var(--ink);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 5px 5px 0 0 #fff;
+  /* a hard cut, never two cards at once: shown only inside its own window, sliding up into place as it opens */
+  opacity: min(1, calc(var(--t) * 60), calc((1 - var(--t)) * 60));
+  transform: translateY(calc((1 - min(1, var(--t) * 6)) * 16px));
+}
+.dw-sub:last-child {
+  opacity: min(1, calc(var(--t) * 60));
+}
+.dw-sub-n {
+  margin-left: auto;
+  flex: none;
+  font:
+    800 0.8rem / 1.2 var(--font-mono),
+    monospace;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+}
+@media (max-width: 699px) {
+  .dw-screen {
+    aspect-ratio: 4 / 5;
+    width: min(80vw, calc((100svh - var(--top) - 200px) * 4 / 5));
+    padding: 0 16px;
+  }
+  .dw-sprockets {
+    width: 7px;
+    background: repeating-linear-gradient(to bottom, #fff 0 6px, transparent 6px 16px);
+  }
+  .dw-sprockets[data-side='l'] {
+    left: 4px;
+  }
+  .dw-sprockets[data-side='r'] {
+    right: 4px;
+  }
+}
+@media (min-width: 1280px) {
+  .dw-stage {
+    padding-right: 110px; /* clear of the section rail */
+    padding-left: 32px;
+  }
+  .dw-grid {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    align-content: center;
+    gap: 28px;
+  }
+  .dw-screen {
+    width: min(54vw, 860px, calc((100svh - var(--top) - 150px) * 16 / 9));
+  }
+  .dw-col {
+    display: grid;
+    gap: 12px;
+    width: 100%;
+    max-width: 320px;
+  }
+  .dw-col:first-child {
+    justify-self: end;
+  }
+  .dw-col:nth-child(3) {
+    --from: 40px;
+    justify-self: start;
+  }
+  .dw-subs {
+    display: none;
+  }
+}
+/* the still (reduced motion, Calm, lite tier): nothing pinned, the close-up and every record in normal flow */
+.dw-track[data-static] {
+  height: auto;
+}
+.dw-track[data-static] .dw-stage {
+  position: relative;
+  height: auto;
+  padding-bottom: 64px;
+}
+.dw-track[data-static] .dw-col {
+  display: grid;
+  gap: 10px;
+  width: min(92vw, 520px);
+}
+.dw-track[data-static] .dw-subs {
+  display: none;
+}
+@media (min-width: 1280px) {
+  .dw-track[data-static] .dw-col {
+    width: 100%;
+  }
+}
+
 /* R83: a second project tag on the bottom edge of the same box (Monsun Bridge under Catfish on DATA) */
 .bs-node[data-side] > .bs-dock[data-edge='b'] {
   top: auto;

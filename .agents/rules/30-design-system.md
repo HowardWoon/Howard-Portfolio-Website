@@ -44,7 +44,8 @@ Rules:
 - Grids must not leave an orphan card alone on a row at 1024 / 1280 / 1440 (see honours 12-col grid).
 - Every card header must carry information (signal chip, index, name, date); never empty colour bars.
 - No AI-generated imagery. Use Howard's real photos (`public/images/`) and vector / CSS graphics. One owner-approved
-  exception (R83, owner upload): the chibi Doom picture `public/images/build/doom-chibi.jpg`, used only in The Build's 05 SHIP.
+  exception (R83, owner upload): the chibi Doom walking clip, cut into the frames of `public/images/doom-walk/` and shown only
+  by `components/doom-walk.tsx`.
 
 ## C. Scroll storytelling pattern (`components/build-story.tsx`, docs/R21-BUILD-STORY.md)
 
@@ -572,8 +573,9 @@ picture "doom theme ... update all every achievements"):
 | About Build Sheet | about-section.tsx `BuildSheet` | Four facts counted from the page (tests/r83 recounts them), split-flap, flips once when the page rests on it |
 | About pillars | about-section.tsx | Every line from Projects / Experience / Honours; no invented latency, audit or thread-pool figures; `[data-telemetry]` prints on press |
 | 3D board | globals.css "R83 3D board" | Desktop only (not lite / still): scroll pose on `.bs-diagram`, mouse tilt via the element `rotate` (never a variable); its private properties are `--bs-u` / `--bs-ue`: `--u` is the R50 zoom unit and must never be registered |
-| Doom mode (05 SHIP) | build-story.tsx, globals.css "R83 05 SHIP Doom mode" | >= 1400 px: Doom behind a scroll-lifted iron gate on the left, Victor's Ledger (every honour, tests/r83 checks each issuer against #honors) on the right; narrower: a sticker on the release photo (adds no height, the phone fit stays) |
+| Doom Walk | doom-walk.tsx, globals.css "R83 Doom Walk" | A pinned stage after The Build: the frame of the owner's clip that matches the scroll is drawn on one canvas (image sequence, never a scrubbed <video>; frames load near the section, nearest first, a frame is drawn only when its index changes); scroll down he walks in, up he walks back; Victor's Ledger (lib/ledger.ts) prints beside him (>= 1280 px) or as one subtitle card at a time; the name plate stamps on at the close-up; still for reduced motion / Calm / lite |
 | Seventh dock | build-story.tsx `DOCKS` | A box carries one tag per edge; Monsun Bridge on DATA's bottom edge rises from below (never crosses the box text) |
+| Organiser plates | organiser-plate.tsx, lib/organisers.ts | Owner's logos (Supervity, MUBA, DOSM, GDG, UM), trimmed to their ink at 160 px; one white tag plate (eyelet, HOSTED BY tab on cards, hard ink shadow) at one height for every project; MUBA's lime mark on an ink chip inside the same plate; tile logo decorative (alt "") |
 | SIGNAL classes | tailwind.config.ts | `lib/signal.ts` is in Tailwind's content list: a component that reads SIGNAL never loses a class another file used to spell out |
 
 ## H. R24 guardrails - type floor, emblem geometry, hero water reveal, neo-brutalism only (owner complaints, tested)

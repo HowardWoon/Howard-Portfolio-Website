@@ -50,7 +50,9 @@ function Shape({ kind }: { kind: EmblemKind }) {
         {kind === 'star' ? (
           // R24: the star is computed, centred INSIDE the inner ring (y 53-71), clear of the ribbon (ends y 50) and of the
           // value below it (y 77-96). The old hand-typed points ran into the ribbon and over the ring: it looked broken.
-          <polygon points={starPoints(60, 62, 9, 3.8)} fill={INK} />
+          // R83 (owner: "the Top 5 medal ... is misaligned"): star raised (y 52-65.6, clear of the ribbon even with the sticker's tilt) and the value moved up and set a size
+          // smaller, so a five-character value ("Top 5") sits centred INSIDE the dashed ring instead of across its edge.
+          <polygon points={starPoints(60, 59.5, 7.5, 3.2)} fill={INK} />
         ) : null}
       </>
     );
@@ -110,7 +112,7 @@ const VALUE_AT: Record<EmblemKind, { top: string; left: string; w: string }> = {
   gold: { top: '64%', left: '50%', w: '52%' },
   silver: { top: '64%', left: '50%', w: '52%' },
   bronze: { top: '64%', left: '50%', w: '52%' },
-  star: { top: '72%', left: '50%', w: '46%' },
+  star: { top: '66%', left: '50%', w: '50%' },
   seal: { top: '53%', left: '50%', w: '48%' },
   ticket: { top: '53%', left: '50%', w: '70%' },
   finalist: { top: '32.5%', left: '45.8%', w: '58%' },
@@ -130,7 +132,7 @@ export function HonorEmblem({ kind, value, label }: { kind: EmblemKind; value: R
           <Shape kind={kind} />
         </svg>
         <span
-          className="absolute -translate-x-1/2 -translate-y-1/2 text-center font-display text-[1.05rem] font-extrabold leading-none tracking-[-0.03em] text-ink"
+          className={`absolute -translate-x-1/2 -translate-y-1/2 text-center font-display font-extrabold leading-none tracking-[-0.03em] text-ink ${kind === 'star' ? 'whitespace-nowrap text-[0.92rem]' : 'text-[1.05rem]'}`}
           style={{ top: at.top, left: at.left, width: at.w }}
         >
           {value}

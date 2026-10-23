@@ -104,26 +104,47 @@ test.describe('phone', () => {
   });
 });
 
-test('The Build 05 SHIP: Doom behind a lifted gate and a ledger of every honour (wide desktop)', async ({ page }) => {
+/** scroll to a point of the Doom Walk's track (0 = pinned start, 1 = end) */
+async function walkAt(page: Page, f: number) {
+  const at = await page.evaluate(() => {
+    const t = document.querySelector<HTMLElement>('.dw-track')!;
+    return { top: t.getBoundingClientRect().top + scrollY, len: t.offsetHeight };
+  });
+  const vh = page.viewportSize()!.height;
+  await page.evaluate((y) => window.scrollTo(0, y), at.top + (at.len - vh) * f);
+  await page.waitForTimeout(700);
+}
+const frameNow = (page: Page) => page.evaluate(() => (window as Window & { __doomFrame?: number }).__doomFrame ?? -1);
+
+test('Doom Walk: the frame follows the scroll both ways, the honours print, the plate lands (wide desktop)', async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
-  await storyAt(page, 1);
-  const doom = page.locator('.bs-doom-card');
-  await expect(doom).toBeVisible();
-  const box = (await doom.boundingBox())!;
-  const rel = (await page.locator('.bs-release').boundingBox())!;
-  expect(box.x + box.width).toBeLessThan(rel.x); // beside the release card, never over it
-  // the gate has lifted clear of the picture
-  const frame = (await page.locator('.bs-doom-frame').boundingBox())!;
-  for (const bar of await page.locator('.bs-doom-bar').all())
-    expect((await bar.boundingBox())!.y + (await bar.boundingBox())!.height).toBeLessThanOrEqual(frame.y + 1);
-  // every honour is on the ledger, and each issuer is one the Honours section names
-  const issuers = await page.locator('.bs-ledger-issuer').allInnerTexts();
-  expect(issuers.length).toBe(12);
-  await expect(page.locator('.bs-doom-sticker')).toBeHidden();
-  // (the Honours section folds its categories, so the issuers are checked against its data, not its open cards)
+  await walkAt(page, 0.02);
+  await expect.poll(() => frameNow(page), { timeout: 10_000 }).toBe(0);
+  await walkAt(page, 0.5);
+  await expect.poll(() => frameNow(page)).toBeGreaterThan(20);
+  const mid = await frameNow(page);
+  expect(mid).toBeLessThan(45);
+  await walkAt(page, 1);
+  await expect.poll(() => frameNow(page)).toBe(58);
+  // scroll back up: he walks back
+  await walkAt(page, 0.3);
+  await expect.poll(() => frameNow(page)).toBeLessThan(mid);
+  await walkAt(page, 1);
+  // every record shown, in two columns beside the screen, and each issuer is one the Honours data names
+  const rows = page.locator('.dw-row');
+  await expect(rows).toHaveCount(12);
+  for (const r of await rows.all()) await expect(r).toHaveCSS('opacity', '1');
+  const screen = (await page.locator('.dw-screen').boundingBox())!;
+  const left = (await page.locator('.dw-col').first().boundingBox())!;
+  const right = (await page.locator('.dw-col').nth(1).boundingBox())!;
+  expect(left.x + left.width).toBeLessThanOrEqual(screen.x);
+  expect(right.x).toBeGreaterThanOrEqual(screen.x + screen.width);
+  await expect(page.locator('.dw-plate')).toHaveCSS('opacity', '1');
   const honours = readFileSync('components/honors-section.tsx', 'utf8').toLowerCase();
-  for (const i of issuers) {
+  for (const i of await page.locator('.dw-row .dw-issuer').allInnerTexts()) {
     const key = i
       .replace(/\s+/g, ' ')
       .replace(/,.*$/, '')
@@ -131,6 +152,8 @@ test('The Build 05 SHIP: Doom behind a lifted gate and a ledger of every honour 
       .toLowerCase();
     expect(honours, i).toContain(key);
   }
+  // The Build's 05 SHIP no longer carries the old still picture
+  await expect(page.locator('.bs-doom-card, .bs-doom-sticker')).toHaveCount(0);
 });
 
 test('The Build: all seven projects dock on the diagram', async ({ page }) => {
@@ -140,13 +163,68 @@ test('The Build: all seven projects dock on the diagram', async ({ page }) => {
   await expect(page.locator('.bs-hud-readout')).toContainText('07 BUILDS');
 });
 
-test.describe('phone Doom', () => {
+test.describe('phone Doom Walk', () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   test.use((({ defaultBrowserType, ...d }) => d)(devices['iPhone 13']));
-  test('Doom is a sticker on the release photo, the side panels stay hidden', async ({ page }) => {
+  test('portrait frames, one subtitle record at a time, everything on screen', async ({ page }) => {
     await home(page);
-    await storyAt(page, 1);
-    await expect(page.locator('.bs-doom-sticker')).toBeVisible();
-    await expect(page.locator('.bs-doom-card')).toBeHidden();
+    await walkAt(page, 0.5);
+    await expect.poll(() => frameNow(page), { timeout: 10_000 }).toBeGreaterThan(10);
+    const src = await page.evaluate(() =>
+      performance
+        .getEntriesByType('resource')
+        .map((e) => e.name)
+        .filter((n) => n.includes('/doom-walk/')),
+    );
+    expect(src.every((n) => n.includes('/tall/'))).toBe(true);
+    await expect(page.locator('.dw-col').first()).toBeHidden();
+    const shown = await page
+      .locator('.dw-sub')
+      .evaluateAll((els) => els.filter((e) => Number(getComputedStyle(e).opacity) > 0.5).length);
+    expect(shown).toBeLessThanOrEqual(2);
+    const vw = page.viewportSize()!.width;
+    const vh = page.viewportSize()!.height;
+    for (const sel of ['.dw-screen', '.dw-subs']) {
+      const b = (await page.locator(sel).boundingBox())!;
+      expect(b.x).toBeGreaterThanOrEqual(0);
+      expect(b.x + b.width).toBeLessThanOrEqual(vw);
+      expect(b.y + b.height).toBeLessThanOrEqual(vh);
+    }
   });
+});
+
+test('organiser logos: every project and its index tile carry the same plate, logos loaded, one height', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await home(page);
+  await page.locator('#projects').scrollIntoViewIfNeeded();
+  const want: Record<string, string> = {
+    zerolag: 'supervity',
+    proofpay: 'muba',
+    'monsun-bridge': 'dosm',
+    bilahujan: 'gdg',
+    catfish: 'um',
+    slotify: 'um',
+    'sensor-x': 'gdg',
+  };
+  for (const [id, org] of Object.entries(want)) {
+    const card = page.locator(`#project-${id}`);
+    await expect(card.locator(`[data-organiser="${org}"]`)).toHaveCount(1);
+    await expect(card.locator('[data-organiser]')).toContainText('HOSTED BY');
+    const tile = page.getByRole('navigation', { name: 'Project index' }).locator(`a[href="#project-${id}"]`);
+    await expect(tile.locator(`[data-organiser="${org}"]`)).toHaveCount(1);
+  }
+  // every logo really loaded, and every card plate stands the same height (consistent set)
+  const plates = page.locator('[data-project-id] [data-organiser] img');
+  await plates.first().scrollIntoViewIfNeeded();
+  for (const img of await page.locator('[data-organiser] img').all()) {
+    await img.scrollIntoViewIfNeeded();
+    await expect.poll(() => img.evaluate((e) => (e as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+  }
+  const heights = await page
+    .locator('[id^="project-"] [data-organiser]')
+    .evaluateAll((els) => els.map((e) => (e as HTMLElement).offsetHeight)); // layout height (the cards unfold with a transform)
+  expect(heights.length).toBe(7);
+  expect(Math.max(...heights) - Math.min(...heights)).toBeLessThanOrEqual(1);
 });

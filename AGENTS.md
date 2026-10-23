@@ -34,7 +34,8 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
 
 ## 3. Start-of-task checklist (every single task)
 
-1. Read this file and ALL of `.agents/rules/*.md` (00, 05, 06, 10, 20, 30, 40). 30 = design system + SIGNAL KEY colour meanings + lessons that broke CI before. If any of them is missing or empty, STOP and tell Howard.
+1. Read this file and ALL of `.agents/rules/*.md` (00, 05, 06, 10, 20, 30, 40, 50). 50 = how to upload / update photos,
+   logos, honours, projects, experience, certificates and the CV: one procedure and one look per kind, every session. 30 = design system + SIGNAL KEY colour meanings + lessons that broke CI before. If any of them is missing or empty, STOP and tell Howard.
 2. First line of your reply: the `RULES ACK:` line defined in `.agents/rules/05-obedience.md` section A.
 3. Run `git status` and `git log --oneline -5`. You must be on `main`, up to date with `origin/main`.
 4. Restate the request in one sentence and list the exact files you expect to touch.
@@ -97,7 +98,9 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
    (`FIELD_REEL` in `build-story.tsx`, slate in the SIGNAL colour of the chapter), run
    `node scripts/gen-photo-blur.mjs` (its sources list must include every file that holds photos), and never
    leave the original upload folder in the repo root.
-3. **Crests:** institution logos only through `components/institution-seal.tsx` (Registrar Seal). Use the
+3. **Crests:** institution logos only through `components/institution-seal.tsx` (Registrar Seal), with one exception
+   (R83, owner: "showcase the organisers"): the organiser logos on the projects go through `components/organiser-plate.tsx`
+   (`lib/organisers.ts`) - the same white tag plate for every project, on its card and its index tile. Use the
    trimmed, centred HD asset (`public/images/logos/um_crest.png`, `kmns_logo_clear.png`); a logo with uneven
    transparent margins looks off-centre and blurry. Never rotate, glow, spin or put a faint logo behind text.
    The raw crest appears in The Build only inside the Crest Scan beat.
@@ -201,6 +204,7 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
     landscape, a 600 px tablet, 1366 - 2560 px desktops) and the admin sign-in + 404 pages; both scripts accept
     `--base URL` and `--base=URL`. The full audit with every finding and its evidence: `docs/R82-FULL-AUDIT-AND-PLAN.md`.
 14. **R83 (owner):** About is rebuilt from the page's own facts (split-flap Build Sheet, no invented figures); The
-    Build's 03 / 04 diagram is a CSS-3D board on desktop; 05 SHIP carries the owner's chibi Doom picture (the one allowed
-    AI-art image) behind a scroll-lifted iron gate plus Victor's Ledger of every honour (a photo sticker below 1400 px);
+    Build's 03 / 04 diagram is a CSS-3D board on desktop; after it the Doom Walk (components/doom-walk.tsx): the owner's chibi Doom clip (the one allowed AI-art source)
+    walks toward the viewer frame by frame with the scroll (back when scrolling up) while Victor's Ledger prints every
+    honour;
     all seven projects dock on the diagram. Never register `--u` (the zoom unit). Guard: `tests/r83`.

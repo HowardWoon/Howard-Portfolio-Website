@@ -44,7 +44,15 @@ const problems = [
   ...tracked
     .filter((f) => /\.(jpe?g|png|webp|gif|pdf|mp4)$/i.test(f) && !f.startsWith('public/') && !f.startsWith('app/'))
     .map((f) => `binary outside public/: ${f}`),
-  ...['00-core', '05-obedience', '06-stability', '10-architecture', '20-responsive-a11y', '40-verification']
+  ...[
+    '00-core',
+    '05-obedience',
+    '06-stability',
+    '10-architecture',
+    '20-responsive-a11y',
+    '40-verification',
+    '50-content-updates',
+  ]
     .map((r) => `.agents/rules/${r}.md`)
     .filter((f) => !existsSync(f) || statSync(f).size < 400)
     .map((f) => `rule file missing or empty: ${f}`),

@@ -291,26 +291,6 @@ const AWARDS = [
   { text: 'TOP 5 FINALIST · DOSM DATATHON 2026', fill: 'bg-pop-yellow' },
 ] as const;
 
-// R83 Victor's Ledger (owner: "update ... all every achievements in this whole scrolling"): every honour in the Honours
-// section, in its order, with its own callout value and issuer (tests/r83 checks each issuer against #honors).
-// Colour = SIGNAL: yellow podium, cyan qualifier, orange academic; the participation entry stays white.
-const LEDGER: { value: string; issuer: string; fill: string }[] = [
-  { value: '2nd', issuer: 'Supervity AutoPilot Asia Hackathon 2026', fill: 'bg-pop-yellow' },
-  { value: '3rd', issuer: 'MUBA Blockchain Hackathon 2026', fill: 'bg-pop-yellow' },
-  { value: '#1', issuer: 'UM Game Jam 2026 (PEKOM)', fill: 'bg-pop-yellow' },
-  { value: 'Top 5', issuer: 'DOSM Datathon 2026', fill: 'bg-pop-yellow' },
-  { value: 'Top 15', issuer: 'UM Technothon 2026', fill: 'bg-pop-cyan' },
-  { value: 'Gold', issuer: 'Hari Inovasi PPAL 4.0 (Kebangsaan)', fill: 'bg-pop-yellow' },
-  { value: 'Gold', issuer: 'Chemcreative-Innovation (Digital Learning)', fill: 'bg-pop-yellow' },
-  { value: 'Silver', issuer: 'Simposium Peer Assisted Learning (PAL) KPM', fill: 'bg-pop-yellow' },
-  { value: '4.00', issuer: "Dean's Honours List, Universiti Malaya", fill: 'bg-pop-orange' },
-  { value: '4.00', issuer: 'Kolej Matrikulasi Negeri Sembilan', fill: 'bg-pop-orange' },
-  { value: 'Qual', issuer: 'Varsity Hackathon (V Hack) 2026', fill: 'bg-pop-cyan' },
-  { value: '1st Yr', issuer: 'UMSIC 2025 (PEKOM)', fill: 'bg-white' },
-];
-/** R83: the iron gate in front of Doom has this many bars (each its own CSS-drawn bar, nothing hand-placed) */
-const GATE_BARS = 7;
-
 /** photo -> pixel mosaic -> glyph portrait, stacked; `photoSeg` / `mosaicSeg` wipe the top two layers away */
 function Portrait({ photoSeg, mosaicSeg }: { photoSeg: CSSProperties; mosaicSeg: CSSProperties }) {
   return (
@@ -1112,53 +1092,6 @@ export default function BuildStory() {
             </div>
           </div>
 
-          {/* ---------------------------------------------------------------- R83 05 SHIP: Doom mode
-              (owner: "include [the Doom picture] into this whole section ... doom theme ... innovative ... update all
-              every achievements"). Wide desktops: Doom is dealt in on the left behind an iron castle gate that the
-              scroll lifts bar by bar, and Victor's Ledger prints every honour on the right, one record per step.
-              Narrower screens: Doom is a sticker on the release photo's corner (.bs-doom-sticker). Transform / clip only. */}
-          <div aria-hidden className="bs-layer bs-doom-layer">
-            <div className="bs-seg bs-doom-in" style={seg(0.84, 0.91)}>
-              <div className="bs-doom-card">
-                <div className="bs-doom-frame">
-                  <Image
-                    src="/images/build/doom-chibi.jpg"
-                    alt=""
-                    fill
-                    sizes="320px"
-                    className="object-cover object-[50%_30%]"
-                  />
-                  <div className="bs-seg bs-doom-gate" style={seg(0.88, 0.95)}>
-                    {Array.from({ length: GATE_BARS }, (_, i) => (
-                      <span key={i} className="bs-doom-bar" style={{ '--i': i } as CSSProperties} />
-                    ))}
-                  </div>
-                </div>
-                <div className="bs-doom-plate">
-                  <span className="bs-doom-rivet" data-r="l" />
-                  HOWARD WOON · DOOM MODE
-                  <span className="bs-doom-rivet" data-r="r" />
-                </div>
-              </div>
-            </div>
-            <div className="bs-seg bs-ledger-in" style={seg(0.86, 0.92)}>
-              <div className="bs-ledger">
-                <div className="bs-ledger-head">
-                  <span>VICTOR&apos;S LEDGER</span>
-                  <span>{LEDGER.length} RECORDS</span>
-                </div>
-                <ol className="bs-ledger-list">
-                  {LEDGER.map((r, i) => (
-                    <li key={r.issuer} className="bs-seg bs-ledger-row" style={seg(0.885 + i * 0.006, 0.9 + i * 0.006)}>
-                      <span className={`bs-ledger-value ${r.fill}`}>{r.value}</span>
-                      <span className="bs-ledger-issuer">{r.issuer}</span>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            </div>
-          </div>
-
           {/* ---------------------------------------------------------------- 05 SHIP: the release card */}
           <div className="bs-seg bs-release-in bs-layer" style={seg(0.82, 0.9)}>
             <div className="bs-card bs-release relative overflow-hidden rounded-[26px] border-3 border-ink bg-paper text-ink">
@@ -1172,16 +1105,6 @@ export default function BuildStory() {
                     <MorphPortrait />
                   </div>
                   <PixelBurst />
-                  {/* R83: below 1400 px (no room beside the card) Doom is a sticker slapped on the photo's corner */}
-                  <span className="bs-seg bs-doom-sticker" style={seg(0.95, 0.985)}>
-                    <Image
-                      src="/images/build/doom-chibi.jpg"
-                      alt=""
-                      fill
-                      sizes="120px"
-                      className="object-cover object-[50%_22%]"
-                    />
-                  </span>
                   {/* R32: the UM Registrar Seal is pressed on the ID photo's top edge, centred, like an embossed certificate seal
                       - upright, it takes no width from the text column, and stays clear of the CTA and SHIPPED.
                       R33: it is pressed once the new portrait has developed (the "stamp" of the pixel morph) */}

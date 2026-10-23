@@ -2,6 +2,8 @@
 
 import React from 'react';
 import { ProjectIndex, type ProjectIndexItem } from './project-index';
+import { OrganiserPlate } from './organiser-plate';
+import type { OrganiserId } from '@/lib/organisers';
 import { ScrollUnfold } from './fx/scroll-unfold';
 import { TextRoll } from './fx/text-roll';
 import { WipeLink } from './fx/route-wipe';
@@ -54,12 +56,15 @@ interface ProjectData {
   simulatorId: string;
   githubUrl?: string;
   telemetryType: 'agentic' | 'flood' | 'energy' | 'catfish' | 'slotify' | 'proofpay' | 'monsun';
+  /** R83: who hosted it (owner's mapping: Supervity, MUBA, DOSM, GDG for BILAHUJAN and Sensor X Sensei, UM for the coursework) */
+  organiser: OrganiserId;
   galleryPhotos?: { src: string; alt: string; rotation: number; w: number; h: number }[];
 }
 
 export const projects: ProjectData[] = [
   {
     id: 'zerolag',
+    organiser: 'supervity',
     number: '01',
     badge: '🏆 2nd Place Winner · Supervity Asia Hackathon 2026',
     signal: 'podium',
@@ -87,6 +92,7 @@ export const projects: ProjectData[] = [
   },
   {
     id: 'proofpay',
+    organiser: 'muba',
     number: '02',
     badge: '🏅 2nd Runner Up (Sui) & Top 6 (Gonka AI) · MUBA 2026',
     signal: 'podium',
@@ -148,6 +154,7 @@ export const projects: ProjectData[] = [
   },
   {
     id: 'monsun-bridge',
+    organiser: 'dosm',
     number: '03',
     badge: '🏆 Top 5 Finalist & Consolation Prize · DOSM Datathon 2026',
     signal: 'podium',
@@ -342,6 +349,7 @@ export const projects: ProjectData[] = [
   },
   {
     id: 'bilahujan',
+    organiser: 'gdg',
     number: '04',
     badge: '🏅 V HACK 2026 QUALIFIER',
     signal: 'qualifier',
@@ -367,6 +375,7 @@ export const projects: ProjectData[] = [
   },
   {
     id: 'catfish',
+    organiser: 'um',
     number: '05',
     badge: 'WIA1006 Machine Learning • Ultimate Pipeline',
     signal: 'academic',
@@ -418,6 +427,7 @@ export const projects: ProjectData[] = [
   },
   {
     id: 'slotify',
+    organiser: 'um',
     number: '06',
     badge: 'Java Spring Boot • Data Structures',
     signal: 'academic',
@@ -449,6 +459,7 @@ export const projects: ProjectData[] = [
   },
   {
     id: 'sensor-x-sensei',
+    organiser: 'gdg',
     number: '07',
     badge: '⚡ UM Technothon 2026 Finalist · IoT Energy Grid',
     signal: 'qualifier',
@@ -528,6 +539,7 @@ const SIMULATOR_ROUTE: Partial<Record<ProjectData['telemetryType'], 'agentic' | 
 const INDEX_ITEMS: ProjectIndexItem[] = projects.map((p) => ({
   id: p.simulatorId,
   number: String(p.number),
+  organiser: p.organiser,
   title: p.title,
   fill: SIGNAL[p.signal].fill,
 }));
@@ -780,6 +792,7 @@ function ProjectCard({ project, index }: { project: ProjectData; index: number }
                       <Award className="w-4 h-4 shrink-0" strokeWidth={2.5} />
                       <span>{project.badge}</span>
                     </div>
+                    <OrganiserPlate id={project.organiser} />
                   </div>
 
                   {/* Title & Subtitle */}

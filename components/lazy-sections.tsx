@@ -11,6 +11,8 @@ installEarlyClickReplay();
 export const StackedProjects = dynamic(() => import('@/components/stacked-projects'));
 // R21 "The Build": scroll-scrubbed storyboard between About and Projects (self-contained, no section id)
 export const BuildStory = dynamic(() => import('@/components/build-story'));
+// R83: the Doom Walk (scroll-scrubbed walking clip + Victor's Ledger) right after The Build (no section id)
+export const DoomWalk = dynamic(() => import('@/components/doom-walk'));
 // R22: System Status Bar (KL clock, ping, X-ray mode) under the hero tape
 export const SystemStatusBar = dynamic(() => import('@/components/system-status-bar'));
 // R23: the resume drawer (client only; mounted right away so RESUME works before the idle mounts)
