@@ -208,3 +208,32 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
     walks toward the viewer frame by frame with the scroll (back when scrolling up) while Victor's Ledger prints every
     honour;
     all seven projects dock on the diagram. Never register `--u` (the zoom unit). Guard: `tests/r83`.
+15. **The section doors open rooms (R84 walk-in gallery, owner: "walk into the shop ... show all my achievements ...
+    instead of sending the user to the section"; replaces the R68 - R73 "every lit door leads back into this
+    portfolio"):** a sign, E at a door or the directory opens that section's ROOM (its own scene and colliders,
+    `components/tokyo-diorama/engine/rooms/**`) behind a shutter; nothing scrolls the page. Room content is built ONLY
+    from the page's own data (`components/tokyo-diorama/gallery/content.ts` reads `honorsList`, `projects`,
+    `experiences`, `LEDGER`, `personalDetails` ...), plus validated extras from `public/gallery/gallery.json` and
+    `/api/gallery` (Supabase `gallery_items`, managed at `/admin/gallery`, `sql/002_gallery.sql`). Never type an
+    award, project or role into the 3D code. Every room plan grows with its content; a section with a door and no plan
+    gets the gallery hall. Rooms: Neutral tone mapping, no bloom, exactly 1 + 1 + 4 lights, photos <= 1024 px swapped
+    into placeholder materials, two rooms cached. Guard: `tests/r84-walk-in-gallery.spec.ts`. Plan and measurements:
+    `docs/R84-WALK-IN-GALLERY.md`.
+16. **You walk in through the door (R85, owner after playing R84: "I don't want to click to go in ... the door opens
+    for me and glows and I walk in, like Roblox"; "the screen shakes when I press W or land - my eyes get tired";
+    "more life, more Japanese, a bigger map"):** every section door in `engine/doors.ts` is a real doorway (`door`:
+    centre, facade `face`, `width`); `engine/portals.ts` slides its leaves open (a spring, never a snap) and lights its
+    blue curtain as the walker comes near, and WALKING INTO the open doorway enters the room. Inside, every room is
+    reached through a 6 m corridor (`Hall.CORRIDOR`) whose far end is the lit way out: walking into it returns to the
+    same door outside, which re-arms only after 2.5 m (no in-out loop). VIEW mode: a sign click enters directly. WALK
+    mode: a sign click NEVER teleports - it guides (blue beacon over the door + the edge compass + a toast). The walk
+    camera is a critically damped spring with eased yaw / pitch, a 4-ray collision with hysteresis and a smoothed
+    floor height: no camera snap on W, strafe, curbs or landing (guard: second difference < 20 mm / frame at 60 fps;
+    R84 was 107). Street life (`engine/life.ts`): cyclists, dogs on leashes, cats, south-district strollers, short
+    JP / EN speech bubbles (DOM, max 6, hidden in rooms), horns only for a real reason (a car
+    held on green > 3.2 s, or the walker in the road ahead); a bus kind that never turns. Seasons (`engine/season.ts`,
+    rolled per visit, the season key changes them): rain / sakura petals / snow with roof snow - hard-edged GPU points
+    that never fall inside a building and fade before the lens. The map runs south to z = 40 (Yozakura park with the
+    canal and bridge, the Yosame Ginza arcade). All randomness through `random.ts`. People, bikes and dogs share
+    vertex-coloured materials and are merged per moving part (draw calls). Guards: `tests/r85-walk-in-doors.spec.ts`,
+    `tests/r70.spec.ts` (signs guide in walk), `tests/tokyo-diorama.spec.ts`. Plan: `docs/R85-WALK-IN-DOORS.md`.

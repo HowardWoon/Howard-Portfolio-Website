@@ -91,7 +91,7 @@ const architecturePillars: {
 
 // R83 Build Sheet: four facts from this page, each a link to the section that proves it. tests/r83 counts them again
 // from the Projects, Honours and Experience sections, so a value cannot drift from the page.
-const LEDGER: { value: string; from: string; label: string; note: string; signal?: Signal; href: string }[] = [
+export const LEDGER: { value: string; from: string; label: string; note: string; signal?: Signal; href: string }[] = [
   {
     value: '4.00',
     from: '0.00',

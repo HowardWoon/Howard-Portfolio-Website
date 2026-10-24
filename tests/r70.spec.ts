@@ -18,6 +18,7 @@ type Handle = {
     setMove(x: number, y: number, run?: boolean): void;
     step(s: number, draw?: boolean): void;
     camYaw(y: number): void;
+    walkIn(on: boolean): void;
   };
 };
 type W = Window & { __diorama?: Handle };
@@ -42,6 +43,9 @@ test('walking is smooth at 180 Hz: the player is drawn between physics steps and
   await openDiorama(page);
   const r = await page.evaluate(() => {
     const d = (window as W).__diorama!;
+    // R85: the walk north from the spawn reaches the konbini's walk-in doorway; this test measures the walk itself,
+    // so the doors still open but do not take the walker into the room
+    d.debug.walkIn(false);
     d.setMode('walk');
     d.debug.step(2, false);
     const home = d.debug.player().toArray();
@@ -108,7 +112,7 @@ test('in walk mode the camera stays fully in the walk camera, every frame (no fl
   expect(new Set(blends)).toEqual(new Set([1]));
 });
 
-test('the section signs stay up in walk mode, over the buildings in view, and still lead to their sections', async ({
+test('the section signs stay up in walk mode, over the buildings in view, and guide to their doors', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -133,7 +137,8 @@ test('the section signs stay up in walk mode, over the buildings in view, and st
     for (const v of await visible()) seen.add(v!);
   }
   expect([...seen].length, `signs seen while walking: ${[...seen].join(', ')}`).toBeGreaterThanOrEqual(1);
-  // a sign seen in walk mode still goes to its section
+  // R85 (owner: "in WALK mode the sign says go to the door and walk into the glowing spot"): a sign clicked while
+  // walking does not teleport - it lights that door's blue beacon and the compass, and the visitor walks in
   const label = [...seen][0];
   const target = label.replace('Go to ', '').toLowerCase();
   await page.evaluate((y) => {
@@ -144,11 +149,12 @@ test('the section signs stay up in walk mode, over the buildings in view, and st
   const pin = page.getByRole('button', { name: label });
   if (await pin.evaluate((b) => getComputedStyle(b).visibility === 'visible')) {
     await pin.dispatchEvent('click');
+    type P = { __diorama: { debug: { room(): { id: string | null }; portals(): { id: string; guided: boolean }[] } } };
     await expect
-      .poll(() =>
-        page.evaluate((id) => Math.abs(document.getElementById(id)!.getBoundingClientRect().top) < 400, target),
-      )
-      .toBe(true);
+      .poll(() => page.evaluate(() => (window as unknown as P).__diorama.debug.portals().find((p) => p.guided)?.id))
+      .toBe(target);
+    expect(await page.evaluate(() => (window as unknown as P).__diorama.debug.room().id)).toBeNull();
+    await expect(page.locator('[data-diorama-compass]')).toBeVisible();
   }
 });
 

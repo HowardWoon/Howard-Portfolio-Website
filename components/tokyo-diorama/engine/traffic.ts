@@ -4,6 +4,7 @@ import {
   makeCar,
   makeCat,
   makePerson,
+  dressPerson,
   makeTrain,
   type Car,
   type CarKind,
@@ -102,7 +103,7 @@ const TURN_V = 3.5;
    replayed. */
 const PAINTS = [0xe8e6e0, 0x7fb8a6, 0xf2f2ee, 0xffc700, 0xb5262b, 0x2b4bff, 0x3a3f48, 0xff9ecf, 0x3ddc97, 0x15161a];
 /** the usual top speed of each kind; a driver rolls 80 - 120 % of it each time round */
-const KIND_V: Record<CarKind, number> = { kei: 7, hatch: 8, taxi: 8.5, van: 7 };
+const KIND_V: Record<CarKind, number> = { kei: 7, hatch: 8, taxi: 8.5, van: 7, bus: 6 };
 
 class CarAgent {
   s = 0;
@@ -149,11 +150,12 @@ class CarAgent {
     this.driftRate = rnd(0.15, 0.4);
     this.wait = 0;
     const r = rand();
-    this.turn = r < 0.6 ? 'straight' : r < 0.85 ? 'left' : 'right';
+    // R85: the bus keeps to its route (straight along the main road)
+    this.turn = this.car.kind === 'bus' ? 'straight' : r < 0.6 ? 'straight' : r < 0.85 ? 'left' : 'right';
     this.turned = false;
     this.turnedFrom = null;
     this.turnT = 1;
-    if (this.car.kind !== 'taxi') this.car.paint.color.setHex(pick(PAINTS));
+    if (this.car.kind !== 'taxi' && this.car.kind !== 'bus') this.car.paint.color.setHex(pick(PAINTS));
     this.car.group.rotation.y = laneYaw(lane);
   }
   /** the lane this run started in, once the car has turned out of it */
@@ -217,7 +219,7 @@ class CarAgent {
    could never look new): the whole pavement network of the block, every point on paving (world.ts slabs) and clear of
    the poles, lamps and the NE bench (the old shops route walked through the bench). Dead ends are places to stop:
    the konbini door, the shops, the station and the far ends of the street. */
-const CORNERS = [
+export const CORNERS = [
   { x: -14, z: -4.3 }, // 0 west end, north pavement
   { x: 4.7, z: -4.3 }, // 1
   { x: 13.3, z: -4.3 }, // 2
@@ -241,11 +243,11 @@ const CORNERS = [
   { x: 21.4, z: 4.3 }, // 19 east edge, south pavement
   { x: 4.7, z: -17.6 }, // 20 north edge, up the N-S road
 ] as const;
-const EXITS = [16, 17, 18, 19, 20];
+export const EXITS = [16, 17, 18, 19, 20];
 /** corners where a walker stands for a while (a shop, the station, the end of the street) */
 const STOPS = new Set([3, 7, 8, 9, 10, 11, 13]);
 type Edge = { to: number; cross?: 'EW' | 'NS' };
-const PAVEMENT: Edge[][] = CORNERS.map(() => []);
+export const PAVEMENT: Edge[][] = CORNERS.map(() => []);
 for (const [a, b, cross] of [
   [0, 12],
   [12, 1],
@@ -394,7 +396,8 @@ export class Traffic {
     crowd: 'low' | 'full' = 'full',
   ) {
     const clipX = [new THREE.Plane(new THREE.Vector3(1, 0, 0), 22), new THREE.Plane(new THREE.Vector3(-1, 0, 0), 22)];
-    const clipZ = [new THREE.Plane(new THREE.Vector3(0, 0, 1), 18), new THREE.Plane(new THREE.Vector3(0, 0, -1), 18)];
+    // R85: the table now runs on to z = 40 in the south (the N-S road crosses the new south district)
+    const clipZ = [new THREE.Plane(new THREE.Vector3(0, 0, 1), 18), new THREE.Plane(new THREE.Vector3(0, 0, -1), 40)];
     const clipAll = [...clipX, ...clipZ];
     // R76: a random fleet. The main road carries more cars than the side road; each car rolls its kind and its lane
     // (within its axis), and enters the street at a random moment. R82 (measured before: 8 cars and exactly 2 taxis on
@@ -405,11 +408,13 @@ export class Traffic {
     for (const axis of ['x', 'z'] as const) {
       const lanes = Object.values(LANES).filter((l) => l.axis === axis);
       const taxi = chance(0.5);
+      const bus = chance(0.65);
       for (let i = 0; i < perAxis[axis]; i++) {
         // one taxi at most per axis, so the fleet never reads as a taxi rank
-        const kind: CarKind = i === 0 && taxi ? 'taxi' : pick(kinds);
+        // R85: a city bus runs on the main road on most visits
+        const kind: CarKind = i === 0 && taxi ? 'taxi' : i === 1 && axis === 'x' && bus ? 'bus' : pick(kinds);
         // R82: all four table edges (a car that turns changes its axis)
-        const car = makeCar(kind, kind === 'taxi' ? 0x1f2a4d : pick(PAINTS), clipAll);
+        const car = makeCar(kind, kind === 'taxi' ? 0x1f2a4d : kind === 'bus' ? 0xf2f2ee : pick(PAINTS), clipAll);
         root.add(car.group);
         this.cars.push(new CarAgent(car, pick(lanes), world));
       }
@@ -429,11 +434,12 @@ export class Traffic {
       const j = Math.floor(rand() * (i + 1));
       [starts[i], starts[j]] = [starts[j], starts[i]];
     }
-    const walkers = crowd === 'low' ? count(3, 4) : count(4, 7);
+    // R85 (owner: "more NPCs"): a bigger crowd (it was 3-4 / 4-7)
+    const walkers = crowd === 'low' ? count(3, 5) : count(6, 10);
     /* R82 (owner: "dont keep the same ppl again and again"): more people than walk at once. Walkers leave at the edges
        of the table and others come in a few seconds later, each with a new outfit, hair, skin, height and pace (some
        jog). How many are out at once rises and falls too. */
-    this.pool = walkers + (crowd === 'low' ? 1 : 3);
+    this.pool = walkers + (crowd === 'low' ? 2 : 5);
     this.crowdTarget = walkers;
     for (let i = 0; i < this.pool; i++) {
       const p = makePerson({
@@ -637,7 +643,7 @@ export class Traffic {
           // only into a free entry, else it tries again a moment later
           const lane = pick(Object.values(LANES).filter((l) => l.axis === a.lane.axis));
           const blocked = this.cars.some(
-            (o) => o !== a && o.lane === lane && o.hidden <= 0 && Math.abs(o.s - lane.start) < 9,
+            (o) => o !== a && o.lane === lane && o.hidden <= 0 && Math.abs(o.s - lane.start) < 9 + a.car.length - 4,
           );
           if (blocked) a.hidden = rnd(0.8, 2.2);
           else {
@@ -907,11 +913,7 @@ export class Traffic {
    *  without an umbrella jog) */
   private enter(a: PedAgent) {
     const p = a.person;
-    const m = p.materials as THREE.MeshStandardMaterial[];
-    m[0].color.setHex(pick(TOPS));
-    m[1].color.setHex(pick(BOTTOMS));
-    m[2].color.setHex(pick(SKINS));
-    m[3].color.setHex(pick(HAIRS));
+    dressPerson(p, { top: pick(TOPS), bottom: pick(BOTTOMS), skin: pick(SKINS), hair: pick(HAIRS) });
     p.body.scale.setScalar(rnd(0.9, 1.05));
     a.pace = !p.umbrella && chance(0.35) ? rnd(2.2, 2.7) : rnd(0.95, 1.6);
     a.speed = a.pace;
@@ -997,7 +999,9 @@ export class Traffic {
       // arrived where it queues and picks its next stretch from there, instead of waiting up to a whole signal cycle
       let arrived = false;
       for (const o of this.peds) {
-        if (o === a) continue;
+        // R85: someone who has left the street is hidden where they left; they block nobody (the bigger crowd's
+        // reserve made walkers queue behind an invisible one for minutes)
+        if (o === a || o.gone > 0) continue;
         const ox = o.pos.x - a.pos.x;
         const oz = o.pos.z - a.pos.z;
         const od = Math.hypot(ox, oz);

@@ -162,6 +162,26 @@ export class Soundscape {
   click() {
     this.tone(1200, 0.05, 'square', 0.03);
   }
+  /** R85: a car horn - two short "beep-beep" pips (vol follows distance) */
+  beep(vol: number) {
+    if (vol < 0.03) return;
+    this.tone(440, 0.14, 'square', 0.05 * vol);
+    this.tone(554, 0.14, 'square', 0.04 * vol);
+    this.tone(440, 0.2, 'square', 0.05 * vol, 0.2);
+    this.tone(554, 0.2, 'square', 0.04 * vol, 0.2);
+  }
+  /** R85: a bicycle bell: two bright rings */
+  ring(vol: number) {
+    if (vol < 0.03) return;
+    this.tone(2350, 0.22, 'sine', 0.05 * vol);
+    this.tone(2350, 0.26, 'sine', 0.05 * vol, 0.16);
+  }
+  /** R85: a dog's short bark */
+  bark(vol: number) {
+    if (vol < 0.03) return;
+    this.tone(330, 0.09, 'sawtooth', 0.07 * vol, 0, 220);
+    this.burst(0.06, 900, 0.08 * vol);
+  }
 
   dispose() {
     void this.ctx?.close().catch(() => undefined);

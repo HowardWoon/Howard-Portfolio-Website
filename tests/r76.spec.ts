@@ -191,6 +191,34 @@ test.describe('3D street', () => {
     expect(r.longestStill, 'no walker is stuck (head-on deadlock)').toBeLessThan(40);
   });
 
+  // R85: someone who has left the street stays hidden where they left; on this street a walker used to queue behind
+  // such an invisible person for 189 s (the bigger R85 crowd keeps more people in reserve)
+  test('a walker who has left the street blocks nobody (street seed 15)', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await openDiorama(page, '?diorama-test&street-seed=15');
+    const longestStill = await page.evaluate(() => {
+      const d = (window as W).__diorama!.debug;
+      d.quiet();
+      d.teleport(-18, 0.15, -12);
+      const T = d.traffic();
+      const still = T.peds.map(() => 0);
+      const last = T.peds.map((p) => ({ x: p.pos.x, z: p.pos.z }));
+      let longest = 0;
+      for (let i = 0; i < 60 * 200; i++) {
+        d.step(1 / 60, false);
+        if (i % 30) continue;
+        T.peds.forEach((p, k) => {
+          const moved = Math.hypot(p.pos.x - last[k].x, p.pos.z - last[k].z);
+          last[k] = { x: p.pos.x, z: p.pos.z };
+          still[k] = (p.gone ?? 0) > 0 || moved >= 0.05 ? 0 : still[k] + 0.5;
+          longest = Math.max(longest, still[k]);
+        });
+      }
+      return longest;
+    });
+    expect(longestStill, 'no walker waits behind someone who is not there').toBeLessThan(40);
+  });
+
   test('the active camera mode is shown (yellow key) and follows the switch', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await openDiorama(page);

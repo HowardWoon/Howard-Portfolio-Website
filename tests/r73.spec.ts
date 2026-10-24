@@ -142,7 +142,7 @@ test('every control works and nothing throws', async ({ page }) => {
   await root.getByRole('button', { name: 'Exit full screen' }).click();
   await expect(root.getByRole('button', { name: 'Full screen' })).toBeVisible();
 
-  // a section sign still leads to its section
+  // a section sign opens its section's room (R84 walk-in gallery)
   await page.evaluate(() => {
     const d = (window as W).__diorama!.debug;
     d.orbit(-0.52, 0.92, 1);
@@ -152,8 +152,16 @@ test('every control works and nothing throws', async ({ page }) => {
   const id = ((await pin.getAttribute('aria-label')) ?? '').replace('Go to ', '').toLowerCase();
   await pin.click();
   await expect
-    .poll(() => page.evaluate((s) => document.getElementById(s)!.getBoundingClientRect().top, id))
-    .toBeLessThan(200);
+    .poll(
+      () =>
+        page.evaluate(
+          () =>
+            (window as unknown as { __diorama: { debug: { room(): { id: string | null } } } }).__diorama.debug.room()
+              .id,
+        ),
+      { timeout: 120_000 },
+    )
+    .toBe(id);
 
   expect(errors, errors.join('\n')).toEqual([]);
 });

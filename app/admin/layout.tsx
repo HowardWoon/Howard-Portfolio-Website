@@ -24,6 +24,9 @@ export default function AdminLayout({ children }: Readonly<{ children: React.Rea
             <Link href="/admin/messages" className="transition hover:text-white">
               Inbox
             </Link>
+            <Link href="/admin/gallery" className="transition hover:text-white">
+              3D gallery
+            </Link>
             <SignOutButton />
             <Link href="/" className="transition hover:text-white">
               Back to site

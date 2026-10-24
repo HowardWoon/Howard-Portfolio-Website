@@ -14,10 +14,28 @@ import { Director, type StreetEvent } from './director';
 import { animatePerson, makePerson, resetActorTextures, disposePerson, type Person } from './actors';
 import { disposeTextures } from './textures';
 import { rand, seedStreet, streetSeed } from './random';
+import { Portals } from './portals';
+import { StreetLife, type Season } from './life';
+import { Seasons } from './season';
+import { buildRoomSteps } from './rooms/layouts';
+import type { Room, RoomHotspot } from './rooms/hall';
+import { resolveFonts } from './rooms/print';
+import type { GalleryContent } from '../gallery/types';
 
 export type Mode = 'view' | 'walk';
 export type Tier = 'low' | 'medium' | 'high';
-export type { Hotspot };
+export type { Hotspot, Season };
+
+/**
+ * Walk-in gallery (the rooms behind the section doors). `closing` = the shutter comes down (a room is being opened or
+ * left), `inside` = the visitor is in room `id`, `street` = back outside.
+ */
+export interface RoomState {
+  phase: 'closing' | 'inside' | 'street';
+  id: string | null;
+  label: string;
+  jp: string;
+}
 
 export interface DioramaCallbacks {
   onReady?: () => void;
@@ -29,6 +47,12 @@ export interface DioramaCallbacks {
   onToast?: (text: string) => void;
   onContextLost?: () => void;
   onContextRestored?: () => void;
+  /** R85: the season changed (rolled at the start, or the season key) */
+  onSeason?: (s: Season) => void;
+  /** walk-in gallery: a room is being entered / left (see RoomState) */
+  onRoom?: (s: RoomState) => void;
+  /** walk-in gallery: an exhibit is being inspected (its id in the current room), 'index' = the room's directory, null = closed */
+  onInspect?: (id: string | null) => void;
 }
 
 export interface DioramaOptions extends DioramaCallbacks {
@@ -42,6 +66,8 @@ export interface DioramaOptions extends DioramaCallbacks {
   modelUrl?: string;
   /** R82: replay a visit's street (its seed is in `debug.info().seed`); omitted = a new street */
   seed?: number;
+  /** walk-in gallery: what each section's room shows (gallery/content.ts); no content = the doors lead to the page */
+  content?: GalleryContent;
 }
 
 export interface DioramaHandle {
@@ -50,6 +76,9 @@ export interface DioramaHandle {
   setMode(m: Mode): void;
   getMode(): Mode;
   setRain(on: boolean): void;
+  /** R85: rain, sakura or snow */
+  setSeason(s: Season): void;
+  getSeason(): Season;
   setSound(on: boolean): Promise<void>;
   setTier(t: Tier | 'auto'): void;
   getTier(): Tier;
@@ -61,6 +90,17 @@ export interface DioramaHandle {
   resetCamera(): void;
   resize(): void;
   dispose(): void;
+  /** walk-in gallery: open the room of section `id` (from anywhere: a sign, a door, the directory) */
+  enterRoom(id: string): Promise<boolean>;
+  /** back out to the street, in front of the room's door */
+  exitRoom(): Promise<void>;
+  /** the room the visitor is in (null = the street) */
+  getRoom(): string | null;
+  /** walk to an exhibit of the current room and inspect it ('index' = the directory) */
+  inspect(id: string): void;
+  closeInspect(): void;
+  /** new content (live extras arrived): rooms not open are rebuilt on their next visit */
+  setContent(c: GalleryContent): void;
   /** debug + tests */
   debug: {
     player(): THREE.Vector3;
@@ -95,6 +135,12 @@ export interface DioramaHandle {
     model(): { loaded: boolean; colliders: number };
     /** R80: shaders are still being prepared (first build or a tier change): the street is not drawn yet */
     warming(): boolean;
+    /** R85: each doorway: how open, how bright, armed, guided */
+    portals(): { id: string; open: number; glow: number; armed: boolean; guided: boolean }[];
+    /** tests that measure walking past a door: the doorways still open, but walking in does not enter (default on) */
+    walkIn(on: boolean): void;
+    /** walk-in gallery: the open room, its hotspots and what is inspected */
+    room(): { id: string | null; hotspots: string[]; inspect: string | null; transit: boolean; cached: string[] };
   };
 }
 
@@ -113,7 +159,8 @@ const PROFILES: Record<
 > = {
   high: { dpr: 2, bloom: true, shadows: true, shadow: 2048, drops: 9000, splash: 700, lights: 14, msaa: 4 },
   // R73: MED is multisampled too (it used to render the composer target without any anti-aliasing: jagged, smeared)
-  medium: { dpr: 1.5, bloom: true, shadows: false, shadow: 1024, drops: 5200, splash: 420, lights: 8, msaa: 4 },
+  // R85 (owner: "blurry, hazy, my eyes hurt"): MED draws at up to 1.75x the CSS pixels (it was 1.5)
+  medium: { dpr: 1.75, bloom: true, shadows: false, shadow: 1024, drops: 5200, splash: 420, lights: 8, msaa: 4 },
   low: { dpr: 1, bloom: false, shadows: false, shadow: 512, drops: 2600, splash: 220, lights: 5, msaa: 0 },
 };
 
@@ -168,7 +215,7 @@ function measured<T>(name: string, run: () => T): T {
   }
 }
 
-type ProgramState = { currentProgram?: { isReady(): boolean; getUniforms(): unknown } };
+type ProgramState = { currentProgram?: { id?: number; isReady(): boolean; getUniforms(): unknown } };
 
 /**
  * R80 (owner: "when i scroll to this part ... it start lagging, crashing"): the street used to be built in ONE task of
@@ -259,12 +306,12 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
   const hemi = new THREE.HemisphereLight(0x5a74c4, 0x241a2a, 0.95);
   scene.add(hemi);
   const moon = new THREE.DirectionalLight(0xa9bcff, 0.85);
-  moon.position.set(-26, 44, -18);
-  moon.target.position.set(0, 0, 0);
-  moon.shadow.camera.left = -30;
-  moon.shadow.camera.right = 30;
-  moon.shadow.camera.top = 30;
-  moon.shadow.camera.bottom = -30;
+  moon.position.set(-26, 44, -7);
+  moon.target.position.set(0, 0, 11);
+  moon.shadow.camera.left = -36;
+  moon.shadow.camera.right = 36;
+  moon.shadow.camera.top = 36;
+  moon.shadow.camera.bottom = -36;
   moon.shadow.camera.near = 10;
   moon.shadow.camera.far = 110;
   moon.shadow.bias = -0.0006;
@@ -287,6 +334,12 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
     }
   }
   scene.add(built.root);
+  // R85: the walk-in doorways (one per section door)
+  const portals = new Portals(built.root, world, null);
+  // walk-in gallery: what is drawn and walked on right now - the street, or a room behind a section door
+  let activeScene: THREE.Scene = scene;
+  let aw: World = world;
+  let room: Room | null = null;
   await nextFrame();
 
   // R76: a lighter crowd on the low tier (phones without a strong graphics chip)
@@ -297,11 +350,41 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
   await nextFrame();
   const weather = measured('weather', () => new Weather(built, world, calm));
   scene.add(weather.group);
+  // R85: the season of this visit - rain, sakura or snow (rolled; reduced motion keeps the classic rain)
+  const seasons = measured('seasons', () => {
+    const ray = new THREE.Raycaster();
+    built.root.updateMatrixWorld(true);
+    const solids = built.root.children.filter((o) => (o as THREE.Mesh).isMesh && o.name.startsWith('batch:'));
+    return new Seasons(built, calm, (x, z) => {
+      ray.set(new THREE.Vector3(x, 60, z), new THREE.Vector3(0, -1, 0));
+      return ray.intersectObjects(solids, false)[0]?.point.y ?? -1;
+    });
+  });
+  scene.add(seasons.group);
   await nextFrame();
   const audio = new Soundscape();
   const input = new Input(container, canvas);
+  // R85: bicycles, dogs, cats, speech bubbles, beeping cars - on top of the R82 traffic
+  const life = measured(
+    'life',
+    () => new StreetLife(built.root, world, traffic, audio, container, calm, tier === 'low' ? 'low' : 'full'),
+  );
   // R73: each visit starts with its own rain, from a light drizzle to a heavy shower
   weather.baseLevel = weather.level = calm ? 1 : 0.55 + rand() * 0.75;
+  // R85: the season (rolled per visit from the street's seed); `precip` = the rain key (rain, snow or petals falling)
+  let precip = true;
+  let season: Season = 'rain';
+  const setSeason = (s: Season) => {
+    season = s;
+    seasons.set(s);
+    life.season = s;
+    weather.setRain(precip && s === 'rain');
+    opts.onSeason?.(s);
+  };
+  {
+    const r = rand();
+    setSeason(calm ? 'rain' : r < 0.45 ? 'rain' : r < 0.75 ? 'sakura' : 'snow');
+  }
   const director = new Director({
     hemi,
     moon,
@@ -362,7 +445,8 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
   controls.maxPolarAngle = 1.32;
   controls.autoRotate = !calm;
   controls.autoRotateSpeed = 0.35;
-  controls.target.set(0, -0.5, 1.5);
+  // R85: the middle of the bigger table (the south district runs to z = 40)
+  controls.target.set(0, -0.5, 9.5);
   controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_ROTATE };
   let idleTimer = 0;
   controls.addEventListener('start', () => {
@@ -386,7 +470,22 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
   };
 
   // R70: camD = how far behind the target the camera actually is (the wanted distance, shortened by walls)
-  const walkCam = { yaw: 0, pitch: 0.42, dist: 5.6, camD: 5.6, target: new THREE.Vector3(), pos: new THREE.Vector3() };
+  const walkCam = {
+    // wanted (input moves these) ...
+    yaw: 0,
+    pitch: 0.42,
+    dist: 5.6,
+    // ... and shown (eased to them)
+    yawNow: 0,
+    pitchNow: 0.42,
+    distNow: 5.6,
+    camD: 5.6,
+    groundY: 0.15,
+    floor: 0.5,
+    target: new THREE.Vector3(),
+    tv: new THREE.Vector3(),
+    pos: new THREE.Vector3(),
+  };
   let mode: Mode = 'view';
   let blend = 0; // 0 = orbit, 1 = follow camera
   const blendFrom = { pos: new THREE.Vector3(), look: new THREE.Vector3() };
@@ -398,6 +497,8 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
   /* ------------------------------------------------------------ post */
   let composer: EffectComposer | null = null;
   let bloom: UnrealBloomPass | null = null;
+  let renderPass: RenderPass | null = null;
+  let outputPass: OutputPass | null = null;
   const size = new THREE.Vector2(1, 1);
 
   // R73 (owner: "why it look so blur? make my eye fainted"): the bloom was strong (0.68) and wide (radius 0.5), so from
@@ -434,10 +535,13 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
     weather.setDensity(p.drops, p.splash);
     disposeComposer();
     bloom = null;
+    renderPass = null;
+    outputPass = null;
     if (p.bloom) {
       const rt = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: p.msaa });
       composer = new EffectComposer(renderer, rt);
-      composer.addPass(new RenderPass(scene, camera));
+      renderPass = new RenderPass(activeScene, camera);
+      composer.addPass(renderPass);
       bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), bloomView(), BLOOM_RADIUS, 0.92);
       composer.addPass(bloom);
       // R80: the defines OutputPass would set on its first frame (sRGB, ACES - fixed above), set now so the warm-up
@@ -446,10 +550,30 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
       output.material.defines = { SRGB_TRANSFER: '', ACES_FILMIC_TONE_MAPPING: '' };
       Object.assign(output, { _outputColorSpace: renderer.outputColorSpace, _toneMapping: renderer.toneMapping });
       composer.addPass(output);
+      outputPass = output;
     }
+    setLook(!!room);
     resize();
     opts.onTier?.(tier);
   };
+
+  /**
+   * Walk-in gallery: the street is graded with ACES (the night neon look); the rooms with Khronos PBR Neutral, which
+   * keeps the photos' and certificates' own colours. Both programs are compiled before they are first used (the room's
+   * warm-up runs with the room's grade), so switching costs no shader compile.
+   */
+  function setLook(indoor: boolean) {
+    const tm = indoor ? THREE.NeutralToneMapping : THREE.ACESFilmicToneMapping;
+    renderer.toneMapping = tm;
+    if (outputPass) {
+      // three 0.180.0 OutputPass internals (the version is pinned): the defines its next frame would set
+      outputPass.material.defines = indoor
+        ? { SRGB_TRANSFER: '', NEUTRAL_TONE_MAPPING: '' }
+        : { SRGB_TRANSFER: '', ACES_FILMIC_TONE_MAPPING: '' };
+      outputPass.material.needsUpdate = true;
+      Object.assign(outputPass, { _toneMapping: tm });
+    }
+  }
 
   function resize() {
     const w = Math.max(1, container.clientWidth);
@@ -468,7 +592,7 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
     const vf = THREE.MathUtils.degToRad(camera.fov);
     const hf = 2 * Math.atan(Math.tan(vf / 2) * camera.aspect);
     const prev = fit;
-    fit = (30 / Math.sin(Math.min(vf * 1.15, hf) / 2)) * (camera.aspect < 0.8 ? 0.62 : 0.74);
+    fit = (37 / Math.sin(Math.min(vf * 1.15, hf) / 2)) * (camera.aspect < 0.8 ? 0.62 : 0.74);
     controls.minDistance = fit * 0.42;
     controls.maxDistance = fit * 1.3;
     if (mode === 'view' && Math.abs(prev - fit) > 0.01) {
@@ -509,6 +633,17 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
       return;
     }
     audio.click();
+    // walk-in gallery: a section door opens its room (no jump to the page); exhibits open the inspect panel
+    if (room) {
+      const rh = room.hotspots.find((x) => x.id === h.id);
+      if (rh?.kind === 'exit') void exitRoom();
+      else if (rh) openInspect(rh);
+      return;
+    }
+    if (content?.[h.id]) {
+      void enterRoom(h.id);
+      return;
+    }
     opts.onActivate?.(h);
   };
   function dropCan() {
@@ -544,8 +679,9 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
     const my = moveOverride ? moveOverride.y : input.move.y;
     const run = moveOverride ? moveOverride.run : input.run;
     const active = mode === 'walk';
-    fwd.set(-Math.sin(walkCam.yaw), 0, -Math.cos(walkCam.yaw));
-    right.set(Math.cos(walkCam.yaw), 0, -Math.sin(walkCam.yaw));
+    // movement follows the view the visitor SEES (the eased yaw)
+    fwd.set(-Math.sin(walkCam.yawNow), 0, -Math.cos(walkCam.yawNow));
+    right.set(Math.cos(walkCam.yawNow), 0, -Math.sin(walkCam.yawNow));
     wish.set(0, 0, 0);
     if (active) wish.addScaledVector(fwd, my).addScaledVector(right, mx);
     const speed = (run ? 5.6 : 3.1) * Math.min(1, wish.length());
@@ -573,7 +709,7 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
     if (!P.grounded) P.vel.y = Math.max(-30, P.vel.y - 20 * h);
     P.pos.addScaledVector(P.vel, h);
 
-    world.query(P.pos.x, P.pos.z, RADIUS + 0.4, scratch);
+    aw.query(P.pos.x, P.pos.z, RADIUS + 0.4, scratch);
     resolveCircle(P.pos, P.vel, RADIUS, HEIGHT, STEP, scratch);
 
     // ceiling
@@ -586,7 +722,7 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
         }
       }
     }
-    const g = world.groundAt(P.pos.x, P.pos.z, P.pos.y + STEP, 0.14, scratch);
+    const g = aw.groundAt(P.pos.x, P.pos.z, P.pos.y + STEP, 0.14, scratch);
     const snap = P.grounded ? 0.26 : 0;
     if (P.vel.y <= 0 && P.pos.y <= g + snap && g > -Infinity) {
       if (!P.grounded && P.vel.y < -4) audio.land();
@@ -602,49 +738,100 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
   };
 
   const respawn = () => {
-    P.pos.copy(built.spawn);
+    P.pos.copy(room ? room.spawn : built.spawn);
     P.prev.copy(P.pos);
     P.vel.set(0, 0, 0);
     P.grounded = true;
   };
 
   /* ------------------------------------------------------------ cameras per frame */
+  /**
+   * R85 steady walk camera (owner: "the picture shakes, trembles, is blurry ... when I press W / when I land"; measured
+   * in a stepped run before the change: camera jerk up to 108 mm/frame^2 strafing, 46 mm/frame steps of the collision
+   * distance crossing a kerb, the ground clamp snapping 15 cm when the camera passed over a kerb or a step).
+   *  - mouse / touch look moves a TARGET yaw / pitch; the camera eases to it (no frame-to-frame mouse jitter)
+   *  - the camera never turns by itself while strafing or walking back (that fed back into the movement: the slow
+   *    spiral); walking forward it recentres gently behind the walker after 2.5 s without a look
+   *  - the follow point is a critically damped spring (no lurch when starting or stopping); its height follows the
+   *    ground the walker stands on, and a jump moves it only partly (no bounce on landing)
+   *  - collisions: four rays (a thin "sphere"), only walls and buildings (anything at least 1.3 m wide); in fast, out
+   *    slowly, with a dead band so it does not pump; very close to a wall the camera rises over the shoulder instead
+   *  - the floor under the camera is a smoothed minimum height, never a snap
+   */
+  const spring = (x: number, v: number, to: number, w: number, dt: number) => {
+    // critically damped: exact for any dt (stable on 30 - 240 Hz screens)
+    const e = Math.exp(-w * dt);
+    const d = x - to;
+    const t = (v + w * d) * dt;
+    return { x: to + (d + t) * e, v: (v - w * t) * e };
+  };
+  const ray4: THREE.Vector3[] = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()];
+  const camRight = new THREE.Vector3();
   const updateWalkCamera = (dt: number, instant = false) => {
     walkCam.yaw -= input.look.x;
-    walkCam.pitch = THREE.MathUtils.clamp(walkCam.pitch + input.look.y, -0.15, 1.25);
+    walkCam.pitch = THREE.MathUtils.clamp(walkCam.pitch + input.look.y, -0.1, 1.15);
     input.look.set(0, 0);
-    walkCam.dist = THREE.MathUtils.clamp(walkCam.dist + input.zoom, 2.4, 12);
+    walkCam.dist = THREE.MathUtils.clamp(walkCam.dist + input.zoom, 2.4, room ? 8 : 12);
     input.zoom = 0;
-    const sp = Math.hypot(P.vel.x, P.vel.z);
     const now = performance.now() / 1000;
-    if (sp > 0.8 && now - input.lastLook > 1.4) {
-      const want = player.yaw + Math.PI;
-      let d = want - walkCam.yaw;
+    const sp = Math.hypot(P.vel.x, P.vel.z);
+    const mv = moveOverride ?? input.move;
+    if (sp > 0.8 && mv.y > 0.5 && now - input.lastLook > 2.5 && !inspecting) {
+      let d = player.yaw + Math.PI - walkCam.yaw;
       d = Math.atan2(Math.sin(d), Math.cos(d));
-      if (Math.abs(d) < 2.2) walkCam.yaw += d * (1 - Math.exp(-dt * 0.9 * Math.min(1, sp / 3)));
+      if (Math.abs(d) < 2.0) walkCam.yaw += d * (1 - Math.exp(-dt * 0.8 * Math.min(1, sp / 3)));
     }
-    const k = instant ? 1 : 1 - Math.exp(-dt * 12);
-    const ty = P.drawn.y + 1.3;
-    walkCam.target.x += (P.drawn.x - walkCam.target.x) * k;
-    walkCam.target.z += (P.drawn.z - walkCam.target.z) * k;
-    walkCam.target.y += (ty - walkCam.target.y) * (instant ? 1 : 1 - Math.exp(-dt * 7));
-    const cp = Math.cos(walkCam.pitch);
-    tmpV.set(Math.sin(walkCam.yaw) * cp, Math.sin(walkCam.pitch), Math.cos(walkCam.yaw) * cp);
-    // R70: the camera is kept out of walls and buildings only. Cars, people and the train passing behind the player, and
-    // thin poles / posts / sign boards, used to pull it in and out several times a second (the whole scene lurched).
-    const hit = world.raycast(walkCam.target, tmpV, walkCam.dist + 0.3, true);
-    const d = Math.max(0.7, Math.min(walkCam.dist, hit - 0.3));
-    // R70: the camera sits ON the line behind the (smoothly followed) target, at a distance that eases: in quickly when a
-    // wall comes between, out gently. Its position is not chased separately any more - chasing it made the camera fall
-    // behind while walking, then lunge forward every 2 - 3 frames (a 2 -> 5 m/s sawtooth, measured: the shaking).
+    // ease the view to the wanted yaw / pitch / distance
+    if (instant) {
+      walkCam.yawNow = walkCam.yaw;
+      walkCam.pitchNow = walkCam.pitch;
+      walkCam.distNow = walkCam.dist;
+    } else {
+      const kl = 1 - Math.exp(-dt * 16);
+      let dy = walkCam.yaw - walkCam.yawNow;
+      dy = Math.atan2(Math.sin(dy), Math.cos(dy));
+      walkCam.yawNow += dy * kl;
+      walkCam.pitchNow += (walkCam.pitch - walkCam.pitchNow) * kl;
+      walkCam.distNow += (walkCam.dist - walkCam.distNow) * (1 - Math.exp(-dt * 8));
+    }
+    // follow point: xz spring on the drawn walker; y on the ground it stands on (a jump moves it 40 %)
+    if (P.grounded) walkCam.groundY = P.drawn.y;
+    const ty = walkCam.groundY + 1.3 + Math.max(0, P.drawn.y - walkCam.groundY) * 0.4;
+    if (instant) {
+      walkCam.target.set(P.drawn.x, ty, P.drawn.z);
+      walkCam.tv.set(0, 0, 0);
+    } else {
+      const sx = spring(walkCam.target.x, walkCam.tv.x, P.drawn.x, 11, dt);
+      const sz = spring(walkCam.target.z, walkCam.tv.z, P.drawn.z, 11, dt);
+      const sy = spring(walkCam.target.y, walkCam.tv.y, ty, 6, dt);
+      walkCam.target.set(sx.x, sy.x, sz.x);
+      walkCam.tv.set(sx.v, sy.v, sz.v);
+    }
+    // close to a wall the camera rises (over the shoulder) instead of hugging the walker's back
+    const close = THREE.MathUtils.clamp((1.8 - walkCam.camD) / 1.1, 0, 1);
+    const pitch = walkCam.pitchNow + close * 0.35;
+    const cp = Math.cos(pitch);
+    tmpV.set(Math.sin(walkCam.yawNow) * cp, Math.sin(pitch), Math.cos(walkCam.yawNow) * cp);
+    // four rays round the line (a thin sphere): an edge or a gap between two boxes cannot flick the distance
+    camRight.set(Math.cos(walkCam.yawNow), 0, -Math.sin(walkCam.yawNow)).multiplyScalar(0.22);
+    ray4[0].copy(walkCam.target).add(camRight);
+    ray4[1].copy(walkCam.target).sub(camRight);
+    ray4[2].copy(walkCam.target).setY(walkCam.target.y + 0.2);
+    ray4[3].copy(walkCam.target).setY(walkCam.target.y - 0.15);
+    let hit = Infinity;
+    for (const o of ray4) hit = Math.min(hit, aw.raycast(o, tmpV, walkCam.distNow + 0.4, true, 1.3));
+    const d = Math.max(0.9, Math.min(walkCam.distNow, hit - 0.35));
     if (instant) walkCam.camD = d;
-    else walkCam.camD += (d - walkCam.camD) * (1 - Math.exp(-dt * (d < walkCam.camD ? 22 : 5)));
+    else if (d < walkCam.camD) walkCam.camD += (d - walkCam.camD) * (1 - Math.exp(-dt * 14));
+    else if (d - walkCam.camD > 0.15) walkCam.camD += (d - 0.15 - walkCam.camD) * (1 - Math.exp(-dt * 2.2));
     const desired = camTmp.copy(tmpV).multiplyScalar(walkCam.camD).add(walkCam.target);
-    // keep it above the GROUND (street, curbs, pavement, steps: tops under 1.2 m). R70: it used to take any top under
-    // the camera - an awning, an eave, a sign box 3.5 m up - so walking along the street lifted and dropped the camera
-    // by ~3 cm every frame or two (measured: the vertical judder in the owner's view).
-    const gy = world.groundAt(desired.x, desired.z, Math.min(desired.y, 1.2), 0.05, scratch);
-    desired.y = Math.max(desired.y, (gy > -Infinity ? gy : 0) + 0.3);
+    // keep it above the ground (kerbs, steps, pavement: tops under the follow point), as a smoothed floor - a kerb
+    // passing under the camera used to lift it 15 cm in one frame
+    const gy = aw.groundAt(desired.x, desired.z, Math.min(desired.y, walkCam.target.y - 0.2), 0.05, scratch);
+    const floor = (gy > -Infinity ? gy : walkCam.groundY) + 0.4;
+    if (instant) walkCam.floor = floor;
+    else walkCam.floor += (floor - walkCam.floor) * (1 - Math.exp(-dt * 5));
+    desired.y = Math.max(desired.y, walkCam.floor);
     walkCam.pos.copy(desired);
   };
 
@@ -664,13 +851,21 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
   let lastNear: Hotspot | null = null;
 
   let tickCount = 0;
+  let simMs = 0;
+  let renderMs = 0;
   const tick = () => {
     tickCount++;
     const dt = Math.min(0.05, clock.getDelta());
+    const ts = performance.now();
     simulate(dt);
+    // R85: CPU cost per frame, measured (AGENTS.md "measure smoothness"), read by debug.info().ms
+    simMs += (performance.now() - ts - simMs) * 0.05;
     // R80: while new shaders compile (a tier change) the street keeps moving but is not drawn: a draw would wait for
     // them. Nor is the frame rate counted.
     if (warming > 0) return;
+    // walk-in gallery: a photo that has just arrived goes to the graphics card, one per frame
+    const up = uploads.shift();
+    if (up) renderer.initTexture(up);
     render();
     // adaptive quality: drop a tier if the device cannot hold ~40 fps
     sinceStart += dt;
@@ -687,7 +882,7 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
         slowWindows = 0;
         director.settle();
         applyTier();
-        void warmUp(); // R80: the new shaders compile without freezing the page
+        void warmUp(activeScene); // R80: the new shaders compile without freezing the page
         opts.onToast?.(`Graphics set to ${tier === 'medium' ? 'MED' : 'LOW'} to keep it smooth.`);
       }
       fpsAcc = fpsFrames = fpsTime = 0;
@@ -727,7 +922,7 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
     animatePerson(player, sp, dt, !P.grounded, calm);
     const blob = playerBlob;
     if (blob) {
-      const g = world.groundAt(P.pos.x, P.pos.z, P.pos.y + 0.05, 0.05, scratch);
+      const g = aw.groundAt(P.pos.x, P.pos.z, P.pos.y + 0.05, 0.05, scratch);
       blob.position.y = (g > -Infinity ? g : 0) - P.pos.y + 0.012;
       const s = THREE.MathUtils.clamp(1 - (P.pos.y - g) * 0.3, 0.4, 1);
       blob.scale.setScalar(s);
@@ -741,7 +936,9 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
     }
 
     // world simulation
-    traffic.update(dt, { pos: P.pos, radius: RADIUS, active: true });
+    // in a room the player is not on the street: the traffic runs on without them
+    traffic.update(dt, { pos: P.pos, radius: RADIUS, active: !room });
+    life.update(dt, camera, size.x, size.y, mode === 'walk' && !room ? P.pos : null, !!room || transit);
     if (traffic.bellTick) {
       traffic.bellTick = false;
       const L = mode === 'walk' ? P.pos : controls.target;
@@ -758,16 +955,18 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
       traffic.trainState === 'run'
         ? THREE.MathUtils.clamp(1 - Math.abs(traffic.trainX - L.x) / 40, 0, 1) * Math.min(1, traffic.trainV / 6)
         : 0;
-    audio.update(weather.intensity, trainNear);
+    // walk-in gallery: indoors the rain is heard through the walls and the train not at all
+    audio.update(room ? weather.intensity * 0.3 : weather.intensity, room ? 0 : trainNear);
+    void season;
 
     // konbini automatic doors (open for the player and for pedestrians)
     const door = built.door;
     const dc = door.center;
-    let wantOpen = Math.abs(P.pos.x - dc.x) < 1.6 && P.pos.z > dc.z - 2.4 && P.pos.z < dc.z + 2.2;
+    let wantOpen = !room && Math.abs(P.pos.x - dc.x) < 1.6 && P.pos.z > dc.z - 2.4 && P.pos.z < dc.z + 2.2;
     for (const p of traffic.peds) if (Math.abs(p.pos.x - dc.x) < 1.6 && Math.abs(p.pos.z - dc.z) < 2) wantOpen = true;
     const before = door.open;
     door.open = THREE.MathUtils.clamp(door.open + (wantOpen ? dt / 0.45 : -dt / 0.7), 0, 1);
-    if (before === 0 && door.open > 0 && wantOpen && mode === 'walk') audio.chime();
+    if (before === 0 && door.open > 0 && wantOpen && mode === 'walk' && !room) audio.chime();
     const e = door.open * door.open * (3 - 2 * door.open);
     door.left.position.x = door.closedL - e * door.travel;
     door.right.position.x = door.closedR + e * door.travel;
@@ -796,18 +995,21 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
       }
     }
 
-    weather.update(dt, camera);
+    if (!room) {
+      weather.update(dt, camera);
+      seasons.update(dt, precip && season !== 'rain', size.y * renderer.getPixelRatio(), camera.fov);
+    }
     director.update(dt);
     built.led.update(calm ? dt * 0.4 : dt);
     const t = traffic.clock;
     built.tv.emissiveIntensity = calm ? 1 : 0.8 + 0.6 * Math.abs(Math.sin(t * 2.3) * Math.sin(t * 5.1));
     built.chase.forEach((m, i) => (m.emissiveIntensity = calm ? 2.5 : Math.floor(t * 6) % 3 === i ? 4 : 0.6));
 
-    // hotspots
-    if (mode === 'walk') {
+    // hotspots (in a room: its exhibits and its exit; while the shutter moves or an exhibit is open: none)
+    if (mode === 'walk' && !transit && !inspecting) {
       let best: Hotspot | null = null;
       let bd = Infinity;
-      for (const h of built.hotspots) {
+      for (const h of room ? room.hotspots.map(roomSpot) : built.hotspots) {
         const d = Math.hypot(h.pos.x - P.pos.x, h.pos.z - P.pos.z);
         if (d < h.radius && Math.abs(h.pos.y - P.pos.y) < 1.5 && d < bd) {
           bd = d;
@@ -822,9 +1024,32 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
       lastNear = near;
       opts.onHotspot?.(near);
     }
+    room?.update(dt, near && room ? (room.hotspots.find((h) => h.id === near!.id) ?? null) : null, calm, P.pos);
+    // R85: walking INTO a glowing doorway goes through it (street -> room, room -> street)
+    {
+      const street = mode === 'walk' && !room && !transit && blend > 0.95;
+      const entered = portals.update(dt, street ? P.pos : null, P.vel, street, calm);
+      if (entered && content?.[entered]) void enterRoom(entered);
+      if (
+        room &&
+        mode === 'walk' &&
+        !transit &&
+        !inspecting &&
+        P.pos.z > room.exitZ - 0.8 &&
+        Math.abs(P.pos.x) < 1.0 &&
+        P.vel.z > 0.4
+      )
+        void exitRoom();
+    }
+    updateCompass();
 
     // cameras
     if (mode === 'walk') updateWalkCamera(dt);
+    // walk-in gallery: the inspect camera eases to frame the exhibit, and back to the walk camera on close
+    {
+      const want = inspecting ? 1 : 0;
+      inspectBlend = calm ? want : inspectBlend + THREE.MathUtils.clamp(want - inspectBlend, -dt / 0.55, dt / 0.55);
+    }
     const target = mode === 'walk' ? 1 : 0;
     const prevBlend = blend;
     // R70 (the shaking, found by logging every frame): this used to read 'target > blend ? +step : -step'. With the
@@ -851,14 +1076,27 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
       }
       camera.lookAt(lookNow);
     } else if (blend === 1) {
-      camera.position.copy(walkCam.pos);
-      camera.lookAt(walkCam.target);
+      if (inspectBlend > 0 && inspectPose) {
+        const s = inspectBlend * inspectBlend * (3 - 2 * inspectBlend);
+        framed(inspectPose);
+        camera.position.lerpVectors(walkCam.pos, inspectView, s);
+        lookNow.lerpVectors(walkCam.target, inspectFocus, s);
+        camera.lookAt(lookNow);
+      } else {
+        camera.position.copy(walkCam.pos);
+        camera.lookAt(walkCam.target);
+      }
     } else if (prevBlend > 0 && blend === 0) {
       setOrbitFromSpherical();
       controls.update(0);
     }
     // street level fills the screen with lit surfaces: bloom eases off as the camera comes down
-    if (bloom) bloom.strength = THREE.MathUtils.lerp(bloomView(), 0.22, blend);
+    if (bloom) {
+      // R85: at street level the halo is very small (0.12; was 0.22) - lit signs stay crisp
+      bloom.strength = THREE.MathUtils.lerp(bloomView(), 0.12, blend);
+      // a bright paper room would bloom from every wall: no bloom indoors (a pass toggle, no shader change)
+      bloom.enabled = !room;
+    }
     // R73: the fog began 90 m from the camera - the VIEW camera is ~70 m out, so the far half of the table was in haze.
     // Now it starts behind the table's far edge, wherever the camera is; in the street it stays as it was.
     {
@@ -867,8 +1105,11 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
       fog.near = THREE.MathUtils.lerp(out + 38, 90, blend);
       fog.far = THREE.MathUtils.lerp(out + 170, 230, blend);
     }
-    renderer.toneMappingExposure = THREE.MathUtils.lerp(1.18, 1.0, blend);
-    const fovWant = mode === 'walk' ? 50 : 32;
+    renderer.toneMappingExposure = room ? 1.0 : THREE.MathUtils.lerp(1.18, 1.0, blend);
+    // walk-in gallery: the walker steps out of the picture while an exhibit is inspected
+    player.group.visible = inspectBlend < 0.35;
+    // walk-in gallery: a wider lens indoors, wider still on a phone held upright (the room fits around the walker)
+    const fovWant = mode === 'walk' ? (room ? (camera.aspect < 0.8 ? 72 : 58) : 50) : 32;
     if (Math.abs(camera.fov - fovWant) > 0.05) {
       camera.fov += (fovWant - camera.fov) * (calm ? 1 : 1 - Math.exp(-dt * 3));
       camera.updateProjectionMatrix();
@@ -877,7 +1118,7 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
 
     // pins follow their hotspots. R70 (owner: the signs 'dissappear' after switching to walk): in walk mode too, over
     // each building that leads to a section, once the camera has finished moving into the street
-    const showPins = (mode === 'view' && blend < 0.05) || (mode === 'walk' && blend > 0.95);
+    const showPins = !room && !transit && ((mode === 'view' && blend < 0.05) || (mode === 'walk' && blend > 0.95));
     for (const slot of pinSlots) {
       const h = hotspotById.get(slot.id);
       slot.vis = false;
@@ -920,8 +1161,12 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
   }
 
   function render() {
-    if (composer) composer.render();
-    else renderer.render(scene, camera);
+    const tr = performance.now();
+    if (composer) {
+      if (renderPass) renderPass.scene = activeScene;
+      composer.render();
+    } else renderer.render(activeScene, camera);
+    renderMs += (performance.now() - tr - renderMs) * 0.05;
   }
 
   // R80: nothing is drawn while shaders compile (a tier change, see tick); the loop starts once the first build is ready
@@ -1055,6 +1300,8 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
    * vending cans are compiled too. Without KHR_parallel_shader_compile each program is linked in its own slice.
    */
   const parallel = renderer.extensions.has('KHR_parallel_shader_compile');
+  /** walk-in gallery: the tier each scene's shaders were last prepared for (a tier change re-prepares on entry) */
+  const warmedAt = new WeakMap<THREE.Scene, Tier>();
   const warmGeo = new THREE.PlaneGeometry(1, 1);
   const uploaded = new WeakSet<THREE.Texture>();
   /**
@@ -1103,7 +1350,8 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
       g2.deleteSync(sync);
     }
   }
-  async function warmUp() {
+  async function warmUp(root: THREE.Scene = scene) {
+    const street = root === scene;
     warming++;
     try {
       const t0 = performance.now();
@@ -1114,12 +1362,12 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
           for (const m of Array.isArray(v) ? v : [v])
             if (m instanceof THREE.Material) passes.add(new THREE.Mesh(warmGeo, m));
       const extras = new THREE.Scene();
-      for (const m of canMats) extras.add(new THREE.Mesh(canGeo, m));
+      if (street) for (const m of canMats) extras.add(new THREE.Mesh(canGeo, m));
       // materials cut by clipping planes (cars and walkers at the table's edge): compile() does not apply a material's
       // own planes, so they are compiled again below with the clipping state primed to their plane count
       const clipped = new Map<number, THREE.Scene>();
       const seen = new Set<THREE.Material>();
-      scene.traverse((o) => {
+      root.traverse((o) => {
         const mesh = o as THREE.Mesh;
         if (!mesh.isMesh || (o as THREE.InstancedMesh).isInstancedMesh) return;
         for (const m of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) {
@@ -1132,28 +1380,28 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
       });
       type Job = { root: THREE.Object3D; target: THREE.WebGLRenderTarget | null; lights: THREE.Scene; planes?: number };
       const jobs: Job[] = [
-        { root: scene, target: drawTarget, lights: scene },
-        { root: extras, target: drawTarget, lights: scene },
+        { root, target: drawTarget, lights: root },
+        { root: extras, target: drawTarget, lights: root },
         // the passes draw a full-screen quad with no lights, into their own targets and (the last) onto the screen
         { root: passes, target: drawTarget, lights: passes },
         { root: passes, target: null, lights: passes },
         // last: a primed clipping state stays set until the next real draw
-        ...[...clipped].map(([n, root]) => ({ root, target: drawTarget, lights: scene, planes: n })),
+        ...[...clipped].map(([n, part]) => ({ root: part, target: drawTarget, lights: root, planes: n })),
       ];
       // Without KHR_parallel_shader_compile (software WebGL, some phones) the graphics process links the queued programs
       // in order and the first query waits for ALL of them (a 5.6 s task on SwiftShader): there each material is
       // compiled alone (in a scene of its own, as a copy of an object that carries it) and used at once, a few per frame.
       // With it, the requests are split the same way: one request for the whole street was a 70 - 430 ms task.
-      const split = (root: THREE.Object3D): THREE.Object3D[] => {
+      const split = (from: THREE.Object3D): THREE.Object3D[] => {
         const parts: THREE.Object3D[] = [];
         const keys = new Set<string>();
-        root.traverse((o) => {
+        from.traverse((o) => {
           const r = o as THREE.Mesh;
           const drawn =
             r.isMesh || (o as THREE.Points).isPoints || (o as THREE.Line).isLine || (o as THREE.Sprite).isSprite;
           if (!drawn || !r.material) return;
           // a clipped material is compiled in its own job (with the clipping state primed)
-          if (root === scene && seen.has(r.material as THREE.Material)) return;
+          if (from === root && seen.has(r.material as THREE.Material)) return;
           const mat = Array.isArray(r.material) ? r.material.map((m) => m.uuid).join() : r.material.uuid;
           const key = `${o.type}|${mat}|${r.geometry?.attributes.color ? 1 : 0}|${(o as THREE.InstancedMesh).instanceColor ? 1 : 0}`;
           if (keys.has(key)) return;
@@ -1166,8 +1414,8 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
       };
       const programs = new Set<NonNullable<ProgramState['currentProgram']>>();
       let slice = performance.now();
-      for (const { root, target, lights, planes } of jobs) {
-        for (const part of split(root)) {
+      for (const { root: jobRoot, target, lights, planes } of jobs) {
+        for (const part of split(jobRoot)) {
           const before = renderer.getRenderTarget();
           renderer.setRenderTarget(target);
           if (planes) primeClipping(planes, target);
@@ -1203,7 +1451,7 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
       }
       // textures: a few per slice, and the graphics process finishes them before the next (see gpuDone)
       const textures: THREE.Texture[] = [];
-      scene.traverse((o) => {
+      root.traverse((o) => {
         const m = (o as THREE.Mesh).material;
         if (!m) return;
         for (const x of Array.isArray(m) ? m : [m])
@@ -1226,14 +1474,20 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
       const lit: THREE.Object3D[] = [];
       const reps: THREE.Object3D[] = [];
       const keys = new Set<string>();
-      scene.traverse((o) => {
+      root.traverse((o) => {
         if ((o as THREE.Light).isLight) lit.push(o);
         const r = o as THREE.Mesh;
         const drawn =
           r.isMesh || (o as THREE.Points).isPoints || (o as THREE.Line).isLine || (o as THREE.Sprite).isSprite;
         if (!drawn || !r.material) return;
         const mat = Array.isArray(r.material) ? r.material.map((m) => m.uuid).join() : r.material.uuid;
-        const key = `${o.type}|${mat}|${r.geometry?.attributes.color ? 1 : 0}|${(o as THREE.InstancedMesh).instanceColor ? 1 : 0}`;
+        // walk-in gallery: a room's many prints and photos share a handful of programs - one draw per PROGRAM there
+        // (the street keeps one per material, as R80 measured it)
+        const prog = street
+          ? undefined
+          : (renderer.properties.get(Array.isArray(r.material) ? r.material[0] : r.material) as ProgramState)
+              .currentProgram?.id;
+        const key = `${o.type}|${prog !== undefined ? `p${prog}` : mat}|${r.geometry?.attributes.color ? 1 : 0}|${(o as THREE.InstancedMesh).instanceColor ? 1 : 0}`;
         if (keys.has(key)) return;
         keys.add(key);
         reps.push(o);
@@ -1272,7 +1526,7 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
             renderer.setRenderTarget(null);
             renderer.setViewport(0, 0, 8 / renderer.getPixelRatio(), 8 / renderer.getPixelRatio());
           }
-          measured('warm-draw', () => renderer.render(scene, eye));
+          measured('warm-draw', () => renderer.render(root, eye));
           if (!had) o.layers.disable(WARM);
           hidden.forEach((a) => (a.visible = false));
           o.frustumCulled = culled;
@@ -1292,10 +1546,361 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
       }
       await gpuDone();
       performance.measure('diorama:warm', { start: t0, end: performance.now() });
+      warmedAt.set(root, tier);
     } finally {
       warming--;
     }
   }
+
+  /* ------------------------------------------------------------ walk-in gallery: the rooms behind the doors */
+  let content: GalleryContent | null = opts.content ?? null;
+  /** built rooms, most recent last; two are kept (the one you are in and the one you just left) */
+  const rooms = new Map<string, Room>();
+  const roomKey = new Map<string, string>();
+  let transit = false;
+  let inspecting: RoomHotspot | null = null;
+  let inspectPose: { view: THREE.Vector3; focus: THREE.Vector3 } | null = null;
+  let inspectBlend = 0;
+  /** where the visitor stood on the street before going in */
+  const back = { room: '', set: false };
+  /** R85: the door the visitor was guided to from a sign in WALK mode (its beacon is up, the compass points to it) */
+  let guideId: string | null = null;
+  const uploads: THREE.Texture[] = [];
+  let roomEnv: THREE.Texture | null = null;
+  const SHUTTER_MS = 520;
+  const keyOf = (id: string) => JSON.stringify(content?.[id] ?? null);
+
+  /** a bright gallery environment (white room, overhead panels) for the metals and the wet-paper floor */
+  function galleryEnv() {
+    if (roomEnv) return roomEnv;
+    const env = new THREE.Scene();
+    const shell = new THREE.Mesh(
+      new THREE.BoxGeometry(30, 12, 30),
+      new THREE.MeshBasicMaterial({ color: 0xf4eedc, side: THREE.BackSide }),
+    );
+    env.add(shell);
+    const panelGeo = new THREE.PlaneGeometry(3, 10).rotateX(Math.PI / 2);
+    const panelMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(0xffffff).multiplyScalar(5) });
+    for (const x of [-8, 0, 8]) {
+      const p = new THREE.Mesh(panelGeo, panelMat);
+      p.position.set(x, 5.8, 0);
+      env.add(p);
+    }
+    const ink = new THREE.Mesh(new THREE.PlaneGeometry(30, 1.2), new THREE.MeshBasicMaterial({ color: 0x0a0a0a }));
+    ink.position.set(0, -5, -14.9);
+    env.add(ink);
+    roomEnv = pmrem.fromScene(env, 0.02).texture;
+    shell.geometry.dispose();
+    (shell.material as THREE.Material).dispose();
+    panelGeo.dispose();
+    panelMat.dispose();
+    ink.geometry.dispose();
+    (ink.material as THREE.Material).dispose();
+    return roomEnv;
+  }
+
+  /** builds room `id` a part per frame, then prepares its shaders with the room's grade (behind the shutter) */
+  async function buildRoom(id: string): Promise<Room | null> {
+    const c = content?.[id];
+    if (!c) return null;
+    await resolveFonts();
+    const steps = buildRoomSteps(c, { photoMax: tier === 'low' ? 768 : 1024, env: galleryEnv() });
+    let r: Room;
+    for (let i = 0; ; i++) {
+      const out = measured(`room-${id}-${i}`, () => steps.next());
+      if (out.done) {
+        r = out.value;
+        break;
+      }
+      await nextFrame();
+      if (disposed) {
+        // the generator holds a half-built room: finish it to free it
+        for (let x = steps.next(); !x.done; x = steps.next());
+        return null;
+      }
+    }
+    if (disposed) {
+      r.dispose();
+      return null;
+    }
+    rooms.set(id, r);
+    roomKey.set(id, keyOf(id));
+    // keep two rooms; free the oldest one the visitor is not in
+    for (const [k, old] of rooms) {
+      if (rooms.size <= 2) break;
+      if (old === room || k === id) continue;
+      old.dispose();
+      rooms.delete(k);
+      roomKey.delete(k);
+    }
+    return r;
+  }
+
+  /** the street pose just outside a section's doorway, facing out (coming back out of its room) */
+  function doorPose(id: string) {
+    const o = portals.outside(id);
+    if (!o) return { pos: built.spawn.clone(), yaw: Math.PI };
+    o.portal.armed = false; // it re-arms once the walker is 2.5 m away
+    return { pos: o.pos, yaw: o.yaw };
+  }
+
+  function placePlayer(pos: THREE.Vector3, yaw: number) {
+    // no umbrella indoors
+    if (player.umbrella) player.umbrella.visible = !room;
+    P.pos.copy(pos);
+    P.prev.copy(pos);
+    P.drawn.copy(pos);
+    P.vel.set(0, 0, 0);
+    P.grounded = true;
+    player.yaw = yaw;
+    player.group.position.copy(pos);
+    player.group.rotation.y = yaw;
+    walkCam.yaw = yaw + Math.PI;
+    const upright = camera.aspect < 0.8;
+    walkCam.pitch = room ? (upright ? 0.42 : 0.32) : 0.42;
+    walkCam.dist = room ? (upright ? 5.8 : 4.6) : 5.6;
+    walkCam.target.copy(pos).add(new THREE.Vector3(0, 1.3, 0));
+    updateWalkCamera(0, true);
+    camera.position.copy(walkCam.pos);
+    camera.lookAt(walkCam.target);
+  }
+
+  /** walk mode, already settled (no orbit -> street glide: the shutter hides the cut) */
+  function forceWalk() {
+    if (mode !== 'walk') {
+      const off = camera.position.clone().sub(controls.target);
+      orbit.dist = off.length();
+      orbit.phi = Math.acos(THREE.MathUtils.clamp(off.y / orbit.dist, -1, 1));
+      orbit.theta = Math.atan2(off.x, off.z);
+      controls.enabled = false;
+      controls.autoRotate = false;
+      canvas.style.touchAction = 'none';
+      canvas.style.cursor = 'grab';
+      mode = 'walk';
+    }
+    input.enabled = !inspecting;
+    blend = 1;
+  }
+
+  async function enterRoom(id: string): Promise<boolean> {
+    if (transit || disposed || !content?.[id] || room?.id === id) return false;
+    transit = true;
+    closeInspect();
+    const c = content[id];
+    opts.onRoom?.({ phase: 'closing', id, label: c.label, jp: c.jp });
+    const t0 = performance.now();
+    try {
+      let r = rooms.get(id) ?? null;
+      // content changed since it was built (live extras): build it again
+      if (r && roomKey.get(id) !== keyOf(id) && r !== room) {
+        r.dispose();
+        rooms.delete(id);
+        r = null;
+      }
+      if (!r) r = await buildRoom(id);
+      if (!r || disposed) return false;
+      if (warmedAt.get(r.scene) !== tier) {
+        setLook(true);
+        await warmUp(r.scene);
+        if (!room) setLook(false);
+      }
+      const left = SHUTTER_MS - (performance.now() - t0);
+      if (!calm && left > 0) await wait(left);
+      if (disposed) return false;
+      // R85: always back out through THIS room's doorway, facing the street
+      back.room = id;
+      back.set = true;
+      portals.guide(null);
+      guideId = null;
+      room = r;
+      activeScene = r.scene;
+      aw = r.world;
+      r.scene.add(player.group);
+      forceWalk();
+      placePlayer(r.spawn, r.spawnYaw);
+      setLook(true);
+      r.loadPhotos((t) => uploads.push(t));
+      audio.chime();
+      opts.onRoom?.({ phase: 'inside', id, label: c.label, jp: c.jp });
+      return true;
+    } finally {
+      transit = false;
+      // a failed build lifts the shutter again
+      if (!room || room.id !== id) opts.onRoom?.({ phase: 'street', id: null, label: '', jp: '' });
+    }
+  }
+
+  async function exitRoom() {
+    if (!room || transit || disposed) return;
+    transit = true;
+    closeInspect();
+    opts.onRoom?.({ phase: 'closing', id: room.id, label: room.label, jp: room.jp });
+    try {
+      if (warmedAt.get(scene) !== tier) {
+        setLook(false);
+        await warmUp(scene);
+        setLook(true);
+      }
+      if (!calm) await wait(SHUTTER_MS);
+      if (disposed) return;
+      room = null;
+      activeScene = scene;
+      aw = world;
+      scene.add(player.group);
+      setLook(false);
+      const d = back.set ? doorPose(back.room) : { pos: built.spawn.clone(), yaw: Math.PI };
+      placePlayer(d.pos, d.yaw);
+      opts.onRoom?.({ phase: 'street', id: null, label: '', jp: '' });
+    } finally {
+      transit = false;
+    }
+  }
+
+  /**
+   * The inspect camera, panned so the exhibit sits in the part of the stage the card does NOT cover: left of the
+   * drawer from 640 px up (the card is min(440 px, 48 %) wide on the right), above the bottom sheet on phones (the
+   * card takes up to 74 % of the height; the camera also stands back a little there).
+   */
+  const inspectView = new THREE.Vector3();
+  const inspectFocus = new THREE.Vector3();
+  const panDir = new THREE.Vector3();
+  function framed(pose: { view: THREE.Vector3; focus: THREE.Vector3 }) {
+    inspectView.copy(pose.view);
+    inspectFocus.copy(pose.focus);
+    const dist = pose.view.distanceTo(pose.focus);
+    const tv = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
+    if (size.x >= 640) {
+      const panel = Math.min(440, size.x * 0.48) + 12;
+      const ndc = (size.x - panel) / size.x - 1; // the centre of the free part, in -1..1
+      panDir.set(-(pose.focus.z - pose.view.z), 0, pose.focus.x - pose.view.x).normalize();
+      const k = -ndc * dist * tv * camera.aspect;
+      inspectView.addScaledVector(panDir, k);
+      inspectFocus.addScaledVector(panDir, k);
+    } else {
+      const back = 1.45;
+      panDir.subVectors(pose.view, pose.focus);
+      inspectView.copy(pose.focus).addScaledVector(panDir, back);
+      const ndc = 0.74; // the centre of the free top strip (26 % of the height), in -1..1
+      const k = ndc * dist * back * tv;
+      inspectView.y -= k;
+      inspectFocus.y -= k;
+    }
+  }
+
+  /* R85: the compass - while a door is guided and off screen, an arrow on the stage edge points to it */
+  const compass = document.createElement('div');
+  compass.setAttribute('aria-hidden', 'true');
+  compass.dataset.dioramaCompass = '';
+  Object.assign(compass.style, {
+    position: 'absolute',
+    left: '0',
+    top: '0',
+    zIndex: '6',
+    display: 'none',
+    pointerEvents: 'none',
+    padding: '6px 10px',
+    background: '#FFFFFF',
+    border: '3px solid #0A0A0A',
+    borderRadius: '10px',
+    boxShadow: '3px 3px 0 0 #0A0A0A',
+    font: '800 13px/1.1 ui-monospace, monospace',
+    letterSpacing: '0.08em',
+    color: '#0A0A0A',
+    whiteSpace: 'nowrap',
+  } satisfies Partial<CSSStyleDeclaration>);
+  container.appendChild(compass);
+  let compassText = '';
+  const cv = new THREE.Vector3();
+  function updateCompass() {
+    const p = guideId ? portals.list.find((x) => x.id === guideId) : null;
+    if (!p || room || mode !== 'walk' || transit) {
+      if (compass.style.display !== 'none') compass.style.display = 'none';
+      return;
+    }
+    cv.copy(p.center)
+      .setY(p.center.y + 1.5)
+      .project(camera);
+    const behind = cv.z > 1;
+    const onScreen = !behind && Math.abs(cv.x) < 0.9 && Math.abs(cv.y) < 0.9;
+    const dist = Math.round(Math.hypot(p.center.x - P.pos.x, p.center.z - P.pos.z));
+    if (dist < 2) {
+      guideId = null;
+      portals.guide(null);
+    }
+    let ax = behind ? -cv.x : cv.x;
+    let ay = behind ? -cv.y : cv.y;
+    if (onScreen) {
+      ax = cv.x;
+      ay = cv.y + 0.12;
+    } else {
+      const k = 0.86 / Math.max(Math.abs(ax), Math.abs(ay), 1e-3);
+      ax *= k;
+      ay *= k;
+    }
+    const arrow = onScreen ? '↓' : Math.abs(ax) > Math.abs(ay) ? (ax > 0 ? '→' : '←') : ay > 0 ? '↑' : '↓';
+    const text = `${arrow} ${p.label.toUpperCase()} ${dist} m`;
+    if (text !== compassText) {
+      compassText = text;
+      compass.textContent = text;
+    }
+    const x = ((ax + 1) / 2) * size.x;
+    const y = ((1 - ay) / 2) * size.y;
+    compass.style.display = 'block';
+    compass.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -50%)`;
+  }
+
+  function openInspect(h: RoomHotspot) {
+    if (h.kind === 'exit') return;
+    inspecting = h;
+    inspectPose = { view: h.view, focus: h.focus };
+    input.enabled = false;
+    input.reset();
+    opts.onInspect?.(h.id);
+  }
+
+  function closeInspect() {
+    if (!inspecting) return;
+    inspecting = null;
+    input.enabled = mode === 'walk';
+    opts.onInspect?.(null);
+  }
+
+  /** a room hotspot as the street's Hotspot shape (the React HUD shows both the same way) */
+  const spotCache = new WeakMap<RoomHotspot, Hotspot>();
+  function roomSpot(h: RoomHotspot): Hotspot {
+    let s = spotCache.get(h);
+    if (!s) {
+      s = { id: h.id, label: h.label, jp: '', target: null, pos: h.pos, radius: h.radius };
+      spotCache.set(h, s);
+    }
+    return s;
+  }
+
+  /* click / tap on an exhibit in a room: inspect it (a drag is a look, not a click) */
+  const ray = new THREE.Raycaster();
+  const ndc = new THREE.Vector2();
+  let press: { id: number; x: number; y: number; t: number } | null = null;
+  const onDown = (e: PointerEvent) => {
+    press = { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now() };
+  };
+  const onUp = (e: PointerEvent) => {
+    const p = press;
+    press = null;
+    if (!p || p.id !== e.pointerId || !room || transit || inspecting) return;
+    if (Math.hypot(e.clientX - p.x, e.clientY - p.y) > 8 || performance.now() - p.t > 450) return;
+    const r = canvas.getBoundingClientRect();
+    ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+    ray.setFromCamera(ndc, camera);
+    const hit = ray.intersectObjects(room.pickables, false)[0];
+    const id = hit?.object.userData.hotspot as string | undefined;
+    const h = id ? room.hotspots.find((x) => x.id === id) : undefined;
+    if (h && hit && hit.distance < 16) {
+      audio.click();
+      openInspect(h);
+    }
+  };
+  canvas.addEventListener('pointerdown', onDown);
+  canvas.addEventListener('pointerup', onUp);
 
   await warmUp();
   building = false;
@@ -1305,6 +1910,11 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
   const handle: DioramaHandle = {
     randomEvent: () => director.roll(),
     setMode(m) {
+      // walk-in gallery: VIEW from inside a room = back out to the street first
+      if (room && m === 'view') {
+        void exitRoom().then(() => !disposed && handle.setMode('view'));
+        return;
+      }
       if (m === mode) return;
       if (m === 'walk') {
         // remember the orbit pose to come back to it
@@ -1333,7 +1943,12 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
       if (calm) blend = m === 'walk' ? 1 : 0;
     },
     getMode: () => mode,
-    setRain: (on) => weather.setRain(on),
+    setRain: (on) => {
+      precip = on;
+      weather.setRain(on && season === 'rain');
+    },
+    setSeason: (s) => setSeason(s),
+    getSeason: () => season,
     setSound: (on) => audio.enable(on),
     setTier(t) {
       autoTier = t === 'auto';
@@ -1341,7 +1956,7 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
       sinceStart = 0;
       director.settle();
       applyTier();
-      void warmUp(); // R80: the new shaders compile without freezing the page
+      void warmUp(activeScene); // R80: the new shaders compile without freezing the page
     },
     getTier: () => tier,
     zoom(step) {
@@ -1366,6 +1981,15 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
       if (near) activate(near);
     },
     activate(id) {
+      // R85: a sign in WALK mode GUIDES to the door (a beacon over it, a compass at the edge) - the visitor walks in;
+      // in VIEW mode (or from a room) it opens the room straight away
+      if (mode === 'walk' && !room && content?.[id]) {
+        guideId = id;
+        portals.guide(id);
+        const c = content[id];
+        opts.onToast?.(`Follow the blue light to the ${c.label.toUpperCase()} door and walk in.`);
+        return;
+      }
       const h = built.hotspots.find((x) => x.id === id);
       if (h) activate(h);
     },
@@ -1404,8 +2028,34 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
       controls.update(0);
     },
     resize,
+    enterRoom: (id) => enterRoom(id),
+    exitRoom: () => exitRoom(),
+    getRoom: () => room?.id ?? null,
+    inspect(id) {
+      if (!room || transit) return;
+      const h = room.hotspots.find((x) => x.id === id);
+      if (!h || h.kind === 'exit') return;
+      const dx = h.focus.x - h.pos.x;
+      const dz = h.focus.z - h.pos.z;
+      placePlayer(h.pos, Math.atan2(dx, dz));
+      openInspect(h);
+    },
+    closeInspect: () => closeInspect(),
+    setContent(c) {
+      content = c;
+      // rooms not open are rebuilt on their next visit (enterRoom compares the content); the open one stays as it is
+    },
     dispose() {
       disposed = true;
+      canvas.removeEventListener('pointerdown', onDown);
+      canvas.removeEventListener('pointerup', onUp);
+      for (const r of rooms.values()) r.dispose();
+      portals.dispose();
+      life.dispose();
+      seasons.dispose();
+      compass.remove();
+      rooms.clear();
+      roomEnv?.dispose();
       renderer.setAnimationLoop(null);
       io.disconnect();
       ro.disconnect();
@@ -1475,6 +2125,7 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
       },
       camYaw(y: number) {
         walkCam.yaw = y;
+        walkCam.yawNow = y;
       },
       orbit(theta: number, phi: number, k = 1) {
         orbit.theta = theta;
@@ -1497,6 +2148,22 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
       event: (name) => director.trigger(name),
       model: () => ({ loaded: !!modelGroup, colliders: modelColliders }),
       warming: () => building || warming > 0,
+      walkIn: (on) => void (portals.walkIn = on),
+      portals: () =>
+        portals.list.map((p) => ({
+          id: p.id,
+          open: +p.open.toFixed(2),
+          glow: +p.glow.toFixed(2),
+          armed: p.armed,
+          guided: p.guided,
+        })),
+      room: () => ({
+        id: room?.id ?? null,
+        hotspots: room ? room.hotspots.map((h) => h.id) : [],
+        inspect: inspecting?.id ?? null,
+        transit,
+        cached: [...rooms.keys()],
+      }),
       quiet: () => {
         director.auto = false;
       },
@@ -1519,6 +2186,7 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
         tier,
         mode,
         drawCalls: renderer.info.render.calls,
+        ms: { sim: +simMs.toFixed(2), render: +renderMs.toFixed(2) },
         triangles: renderer.info.render.triangles,
         grounded: P.grounded,
         pos: P.pos.toArray().map((v) => +v.toFixed(2)),
@@ -1528,7 +2196,11 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
         barrier: +traffic.barrierT.toFixed(2),
         door: +built.door.open.toFixed(2),
         near: near?.id ?? null,
-        rain: weather.rainOn,
+        room: room?.id ?? null,
+        input: input.enabled,
+        life: life.census(),
+        season,
+        rain: precip,
         lights: {
           hemi: +hemi.intensity.toFixed(3),
           moon: +moon.intensity.toFixed(3),

@@ -68,9 +68,9 @@ test('diorama section mounts between Honors and the logo wall, with its pins', a
   expect(errors).toEqual([]);
 });
 
-test('walk physics: automatic door, walls, curbs, jumping onto a stool', async ({ page }) => {
-  // R83: a FIXED street (R82): on a random one a walker could be standing in the konbini doorway, and the door test
-  // then measured the walker instead of the door (1 run in 4 stopped at z -7; the konbini is a walker stop)
+test('walk physics: walls, curbs, jumping onto a stool', async ({ page }) => {
+  // R83: a FIXED street (R82): on a random one a walker could be standing where the wall is measured, and the test
+  // then measured the walker instead of the wall (the konbini is a walker stop)
   await openDiorama(page, '&street-seed=3');
   const r = await page.evaluate(() => {
     const h = (window as W).__diorama!;
@@ -83,11 +83,12 @@ test('walk physics: automatic door, walls, curbs, jumping onto a stool', async (
     h.setMode('walk');
     d.step(1, false);
     const out: Record<string, number[]> = {};
-    d.teleport(-5.5, 0.15, -6);
+    // R85: the konbini's sliding doors are the way into the Projects room, so the wall is tested beside them
+    d.teleport(-3.2, 0.15, -6);
     d.camYaw(0);
     d.setMove(0, 1, true);
-    d.step(4, false);
-    out.konbini = at(); // through the sliding door, stopped by the back wall
+    d.step(3, false);
+    out.wall = at(); // stopped by the shop front, not through it
     d.teleport(-6, 0, -2);
     d.setMove(0, 1);
     d.step(1.2, false);
@@ -104,7 +105,8 @@ test('walk physics: automatic door, walls, curbs, jumping onto a stool', async (
     out.stool = at();
     return out;
   });
-  expect(r.konbini[2]).toBeCloseTo(-14.5, 1);
+  expect(r.wall[2]).toBeGreaterThan(-9);
+  expect(r.wall[2]).toBeLessThan(-7.5);
   expect(r.curb[1]).toBeCloseTo(0.15, 2);
   expect(r.stool[1]).toBeCloseTo(0.68, 1);
 });

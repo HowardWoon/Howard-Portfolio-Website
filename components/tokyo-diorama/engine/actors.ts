@@ -6,7 +6,7 @@ import { canvasTexture, JP_FONT, softDot } from './textures';
  * Collapses every static part of a vehicle into one mesh per material (a car goes from ~30 draw calls to ~8).
  * Parts in `keep` (spinning wheels, swappable lamps) stay separate.
  */
-function mergeStatic(group: THREE.Group, keep: Set<THREE.Object3D>, geos: THREE.BufferGeometry[]) {
+export function mergeStatic(group: THREE.Group, keep: Set<THREE.Object3D>, geos: THREE.BufferGeometry[]) {
   group.updateMatrixWorld(true);
   const inv = group.matrixWorld.clone().invert();
   const buckets = new Map<
@@ -20,7 +20,8 @@ function mergeStatic(group: THREE.Group, keep: Set<THREE.Object3D>, geos: THREE.
     if (!m.isMesh || kept(m) || Array.isArray(m.material)) return;
     let g = m.geometry.clone().applyMatrix4(inv.clone().multiply(m.matrixWorld));
     if (g.index) g = g.toNonIndexed();
-    for (const k of Object.keys(g.attributes)) if (!['position', 'normal', 'uv'].includes(k)) g.deleteAttribute(k);
+    for (const k of Object.keys(g.attributes))
+      if (!['position', 'normal', 'uv', 'color', 'role'].includes(k)) g.deleteAttribute(k);
     const key = `${m.material.uuid}:${m.castShadow}:${m.renderOrder}`;
     let b = buckets.get(key);
     if (!b) buckets.set(key, (b = { mat: m.material, cast: m.castShadow, order: m.renderOrder, list: [] }));
@@ -59,6 +60,43 @@ export interface Person {
 const std = (color: number, extra: THREE.MeshStandardMaterialParameters = {}) =>
   new THREE.MeshStandardMaterial({ color, roughness: 0.75, ...extra });
 
+/**
+ * R85 (owner: "more NPCs" - and no lag): every person, walker, rider and the player share ONE material whose colours
+ * come from the geometry (vertex colours). A person used to be ~18 draw calls (one per colour per part); now the body
+ * is one, each limb one, the umbrella two and the blob shadow one.
+ */
+let personMat: THREE.MeshStandardMaterial | null = null;
+const personMaterial = () => (personMat ??= new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.75 }));
+/** which outfit part a vertex belongs to (0 top, 1 bottom, 2 skin, 3 hair, 4 fixed): traffic re-dresses walkers */
+const ROLE = { top: 0, bottom: 1, skin: 2, hair: 3, fixed: 4 } as const;
+const tint = (geo: THREE.BufferGeometry, hex: number, role: number) => {
+  const g = geo.clone();
+  const c = new THREE.Color(hex);
+  const n = g.attributes.position.count;
+  const a = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) a.set([c.r, c.g, c.b], i * 3);
+  g.setAttribute('color', new THREE.BufferAttribute(a, 3));
+  g.setAttribute('role', new THREE.BufferAttribute(new Float32Array(n).fill(role), 1));
+  return g;
+};
+
+/** R85: a new outfit for a walker (its colours live in the merged geometry's vertex colours) */
+export function dressPerson(p: Person, c: { top: number; bottom: number; skin: number; hair: number }) {
+  const cols = [new THREE.Color(c.top), new THREE.Color(c.bottom), new THREE.Color(c.skin), new THREE.Color(c.hair)];
+  p.group.traverse((o) => {
+    const m = o as THREE.Mesh;
+    if (!m.isMesh || m.material !== personMat) return;
+    const role = m.geometry.attributes.role as THREE.BufferAttribute | undefined;
+    const col = m.geometry.attributes.color as THREE.BufferAttribute | undefined;
+    if (!role || !col) return;
+    for (let i = 0; i < role.count; i++) {
+      const r = role.getX(i);
+      if (r < 4) col.setXYZ(i, cols[r].r, cols[r].g, cols[r].b);
+    }
+    col.needsUpdate = true;
+  });
+}
+
 export function makePerson(opts: {
   top: number;
   bottom: number;
@@ -70,21 +108,22 @@ export function makePerson(opts: {
 }): Person {
   const mats: THREE.Material[] = [];
   const geos: THREE.BufferGeometry[] = [];
-  const m = (c: number, extra: THREE.MeshStandardMaterialParameters = {}) => {
-    const x = std(c, extra);
-    mats.push(x);
-    return x;
-  };
+  const shared = personMaterial();
+  // a "material" here is just the colour; the mesh gets the shared material and a tinted copy of its geometry
+  // `m(colour, role)` packs the role into the "material" handle the builder passes around
+  const m = (c: number, role: number = ROLE.fixed) => ({ c, role }) as unknown as THREE.Material;
   const g = <T extends THREE.BufferGeometry>(x: T) => (geos.push(x), x);
   const mesh = (geo: THREE.BufferGeometry, mat: THREE.Material) => {
-    const me = new THREE.Mesh(geo, mat);
+    const k = mat as unknown as { c: number; role: number };
+    const tinted = g(tint(geo, k.c, k.role));
+    const me = new THREE.Mesh(tinted, shared);
     me.castShadow = true;
     return me;
   };
-  const top = m(opts.top);
-  const bottom = m(opts.bottom);
-  const skin = m(opts.skin ?? 0xf1c9a5);
-  const hair = m(opts.hair);
+  const top = m(opts.top, ROLE.top);
+  const bottom = m(opts.bottom, ROLE.bottom);
+  const skin = m(opts.skin ?? 0xf1c9a5, ROLE.skin);
+  const hair = m(opts.hair, ROLE.hair);
   const shoe = m(0xf4f2ec);
   const ink = m(0x0a0a0a);
 
@@ -128,7 +167,7 @@ export function makePerson(opts: {
   head.add(hairMesh);
   const eyeGeo = g(new THREE.SphereGeometry(0.026, 6, 6));
   for (const x of [-0.075, 0.075]) {
-    const e = new THREE.Mesh(eyeGeo, ink);
+    const e = mesh(eyeGeo, ink);
     e.position.set(x, 0.0, 0.205);
     head.add(e);
   }
@@ -168,7 +207,7 @@ export function makePerson(opts: {
       canopyMat,
     );
     canopy.position.y = 1.3 - 0.66;
-    const rim = new THREE.Mesh(g(new THREE.TorusGeometry(0.645, 0.012, 4, 24)), m(0xffffff));
+    const rim = mesh(g(new THREE.TorusGeometry(0.645, 0.012, 4, 24)), m(0xffffff));
     rim.rotation.x = Math.PI / 2;
     rim.position.y = 1.3 - 0.66 + 0.66 * Math.cos(Math.PI * 0.42);
     umbrella.add(shaft, handle, canopy, rim);
@@ -212,6 +251,8 @@ function blobTexture() {
 export function resetActorTextures() {
   blob = null;
   dot = null;
+  personMat?.dispose();
+  personMat = null;
 }
 
 /** Procedural walk cycle: legs/arms swing with distance travelled, body bobs, landing squash in the air. */
@@ -348,7 +389,7 @@ export interface Car {
   dispose(): void;
 }
 
-export type CarKind = 'kei' | 'taxi' | 'hatch' | 'van';
+export type CarKind = 'kei' | 'taxi' | 'hatch' | 'van' | 'bus';
 
 /** A car pointing along local +x. clip = the base edges, so cars appear to drive in from the "table edge". */
 export function makeCar(kind: CarKind, color: number, clip: THREE.Plane[]): Car {
@@ -387,6 +428,8 @@ export function makeCar(kind: CarKind, color: number, clip: THREE.Plane[]): Car 
     taxi: { L: 4.3, W: 1.7, cabL: 2.1, cabX: -0.2, cabH: 0.62, bodyH: 0.62 },
     hatch: { L: 3.9, W: 1.7, cabL: 2.2, cabX: -0.35, cabH: 0.6, bodyH: 0.6 },
     van: { L: 4.6, W: 1.75, cabL: 3.6, cabX: -0.3, cabH: 0.95, bodyH: 0.75 },
+    // R85: a city bus on the main road (straight through, never turns)
+    bus: { L: 8.4, W: 2.3, cabL: 8.0, cabX: 0, cabH: 1.15, bodyH: 1.0 },
   }[kind];
   const group = new THREE.Group();
   const paint = m(color, { metalness: 0.45, roughness: 0.28, envMapIntensity: 1.4 });
@@ -459,6 +502,32 @@ export function makeCar(kind: CarKind, color: number, clip: THREE.Plane[]): Car 
   }
   if (kind === 'van')
     add(group, g(new THREE.BoxGeometry(dims.L * 0.7, 0.08, dims.W + 0.01)), m(0x2b4bff), -0.3, 0.7, 0);
+  if (kind === 'bus') {
+    // the destination board over the windscreen and a stripe along the body
+    const tex = canvasTexture(512, 96, (ctx, w, h) => {
+      ctx.fillStyle = '#0b0b0b';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#ffb53a';
+      ctx.font = `800 52px ${JP_FONT}`;
+      ctx.textBaseline = 'middle';
+      ctx.fillText('夜雨橋 行', 24, h / 2 + 2);
+      ctx.textAlign = 'right';
+      ctx.font = '800 34px ui-monospace, monospace';
+      ctx.fillText('YOSAME-BASHI', w - 20, h / 2 + 2);
+    });
+    const board = m(0xffffff, { map: tex, emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: 1.2 });
+    const top = 0.32 + dims.bodyH + dims.cabH;
+    const b = add(group, g(new THREE.PlaneGeometry(dims.W * 0.85, 0.3)), board, dims.L / 2 + 0.02, top - 0.2, 0, false);
+    b.rotation.y = Math.PI / 2;
+    add(
+      group,
+      g(new THREE.BoxGeometry(dims.L * 0.98, 0.12, dims.W + 0.01)),
+      m(0x3ddc97),
+      0,
+      0.32 + dims.bodyH - 0.2,
+      0,
+    );
+  }
 
   // fake headlight pool on the wet road (cheap, sells the night)
   const poolMat = new THREE.MeshBasicMaterial({

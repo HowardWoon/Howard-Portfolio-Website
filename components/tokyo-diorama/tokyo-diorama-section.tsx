@@ -1,8 +1,12 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowUpRight,
+  DoorOpen,
+  Flower2,
+  List,
+  Snowflake,
   Cloud,
   CloudRain,
   Dices,
@@ -17,10 +21,14 @@ import {
   Volume2,
   VolumeX,
 } from 'lucide-react';
-import type { DioramaHandle, Hotspot, Mode, Tier } from './engine';
+import type { DioramaHandle, Hotspot, Mode, RoomState, Season, Tier } from './engine';
 import { SECTIONS } from '@/lib/sections';
 import { SECTION_DOORS, SECTION_JP } from './engine/doors';
 import { useScrollLock } from '@/lib/use-scroll-lock';
+import { buildGalleryContent } from './gallery/content';
+import { loadExtras, mergeExtras } from './gallery/live';
+import type { GalleryContent } from './gallery/types';
+import { InspectPanel, RoomDirectory } from './gallery/inspect-panel';
 
 /**
  * 夜雨の街角 — Tokyo After Rain. A walkable 3D diorama section.
@@ -113,6 +121,21 @@ export default function TokyoDioramaSection({
   // R70: software-drawn WebGL waits for a press (START 3D); a hardware GPU starts by itself
   const [held, setHeld] = useState<false | 'soft' | 'touch'>(false);
   const [started, setStarted] = useState(false);
+  // walk-in gallery: the rooms' content (the page's own data, then the live extras on top), the room the visitor is
+  // in, the shutter, and what is open on screen
+  const baseContent = useMemo(() => buildGalleryContent(), []);
+  const [content, setContent] = useState<GalleryContent>(baseContent);
+  const contentRef = useRef(content);
+  contentRef.current = content;
+  const [roomState, setRoomState] = useState<RoomState | null>(null);
+  // R85: the season of this visit (rolled by the engine; the season key changes it)
+  const [season, setSeasonState] = useState<Season>('rain');
+  const [inspectId, setInspectId] = useState<string | null>(null);
+  const [dirOpen, setDirOpen] = useState(false);
+  const inRoom = roomState?.phase === 'inside' ? roomState.id : null;
+  const shutter = roomState?.phase === 'closing';
+  const roomContent = inRoom ? content[inRoom] : null;
+  const inspected = roomContent && inspectId ? roomContent.exhibits.find((e) => e.id === inspectId) : null;
 
   /* ---------- mount the engine only when the section is close to the viewport */
   useEffect(() => {
@@ -210,6 +233,28 @@ export default function TokyoDioramaSection({
             },
             onContextLost: () => setReady(false),
             onContextRestored: () => setMountKey((k) => k + 1),
+            content: contentRef.current,
+            onSeason: (s) => setSeasonState(s),
+            onRoom: (st) => {
+              setRoomState(st);
+              if (st.phase !== 'inside') {
+                setInspectId(null);
+                setDirOpen(false);
+              }
+              if (st.phase === 'inside') {
+                setMode('walk');
+                frameRef.current?.focus({ preventScroll: true });
+              }
+            },
+            onInspect: (id) => {
+              if (id === 'index') {
+                setDirOpen(true);
+                setInspectId(null);
+              } else {
+                setInspectId(id);
+                if (id) setDirOpen(false);
+              }
+            },
           });
           // the section went away (or the street was rebuilt) while it was being built
           if (disposed) {
@@ -240,10 +285,38 @@ export default function TokyoDioramaSection({
       setReady(false);
       setMode('view');
       setHot(null);
+      setRoomState(null);
+      setInspectId(null);
+      setDirOpen(false);
     };
     // the engine is created once per mount; later changes go through the handle
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [near, failed, mountKey, started]);
+
+  /* ---------- walk-in gallery: live extras (public/gallery/gallery.json + /api/gallery), once the street is up */
+  useEffect(() => {
+    if (!ready) return;
+    const ac = new AbortController();
+    void loadExtras(ac.signal).then((extras) => {
+      if (ac.signal.aborted || !extras.length) return;
+      const merged = mergeExtras(baseContent, extras);
+      setContent(merged);
+      handleRef.current?.setContent(merged);
+    });
+    return () => ac.abort();
+  }, [ready, baseContent]);
+
+  const closeInspect = useCallback(() => {
+    setInspectId(null);
+    handleRef.current?.closeInspect();
+    frameRef.current?.focus({ preventScroll: true });
+  }, []);
+  const closeDirectory = useCallback(() => {
+    setDirOpen(false);
+    handleRef.current?.closeInspect();
+    frameRef.current?.focus({ preventScroll: true });
+  }, []);
+  const roomList = useMemo(() => Object.values(content), [content]);
 
   /* ---------- controls */
   const chooseMode = (m: Mode) => {
@@ -257,6 +330,14 @@ export default function TokyoDioramaSection({
     const next = !rain;
     setRain(next);
     handleRef.current?.setRain(next);
+  };
+  // R85: rain -> sakura -> snow -> rain
+  const SEASONS: Season[] = ['rain', 'sakura', 'snow'];
+  const SEASON_LABEL: Record<Season, string> = { rain: 'Rain', sakura: 'Sakura', snow: 'Snow' };
+  const cycleSeason = () => {
+    const next = SEASONS[(SEASONS.indexOf(season) + 1) % SEASONS.length];
+    setSeasonState(next);
+    handleRef.current?.setSeason(next);
   };
   // R73: the dice: a random street event right now (the toast says which)
   const rollEvent = () => {
@@ -316,9 +397,13 @@ export default function TokyoDioramaSection({
     return () => window.removeEventListener('keydown', onKey);
   }, [full]);
 
-  const hint = touch
-    ? 'Left thumb: move · right thumb: look · pinch: zoom'
-    : 'WASD / arrows: move · Shift: run · Space: jump · E: enter · drag: look · wheel: zoom';
+  const hint = inRoom
+    ? touch
+      ? 'Left thumb: move · right thumb: look · tap an exhibit to inspect it'
+      : 'WASD / arrows: move · E: inspect · click an exhibit · drag: look'
+    : touch
+      ? 'Left thumb: move · right thumb: look · walk into a blue door to go in'
+      : 'WASD / arrows: move · Shift: run · Space: jump · walk into a blue door to go in · drag: look · wheel: zoom';
 
   const keyBtn =
     'nb-key inline-flex min-h-[40px] min-w-[40px] shrink-0 items-center justify-center gap-1.5 rounded-xl border-3 border-ink bg-white px-2 font-mono sm:px-2.5 text-xs font-extrabold tracking-[0.1em] text-ink focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-pop-blue';
@@ -344,7 +429,7 @@ export default function TokyoDioramaSection({
             </h2>
             <p className="max-w-md text-base font-medium leading-relaxed text-ink-soft">
               A hand-built Tokyo street corner after rain. Look around, or switch to walk and explore. Every lit door
-              leads back into this portfolio.
+              opens a room you can walk into: the awards, the projects, the story.
             </p>
           </div>
         </div>
@@ -414,6 +499,22 @@ export default function TokyoDioramaSection({
                   <CloudRain className="h-4 w-4" strokeWidth={2.5} aria-hidden />
                 ) : (
                   <Cloud className="h-4 w-4" strokeWidth={2.5} aria-hidden />
+                )}
+              </button>
+              <button
+                type="button"
+                aria-label={`Season: ${SEASON_LABEL[season]}. Change`}
+                title={`Season: ${SEASON_LABEL[season]}`}
+                onClick={cycleSeason}
+                className={keyBtn}
+                data-season={season}
+              >
+                {season === 'snow' ? (
+                  <Snowflake className="h-4 w-4" strokeWidth={2.5} aria-hidden />
+                ) : season === 'sakura' ? (
+                  <Flower2 className="h-4 w-4" strokeWidth={2.5} aria-hidden />
+                ) : (
+                  <CloudRain className="h-4 w-4" strokeWidth={2.5} aria-hidden />
                 )}
               </button>
               <button
@@ -545,7 +646,7 @@ export default function TokyoDioramaSection({
             {/* walk HUD */}
             {ready && mode === 'walk' && (
               <>
-                {hot && (
+                {hot && !inspected && !dirOpen && !shutter && (
                   <div className="absolute bottom-24 left-1/2 z-[8] -translate-x-1/2 sm:bottom-6">
                     <button
                       type="button"
@@ -553,8 +654,16 @@ export default function TokyoDioramaSection({
                       className="nb-key flex min-h-[48px] items-center gap-2 rounded-xl border-3 border-ink bg-white px-4 font-mono text-xs font-extrabold tracking-[0.1em] text-ink"
                     >
                       {!touch && <kbd className="rounded border-2 border-ink bg-pop-yellow px-1.5">E</kbd>}
-                      {hot.target ? `ENTER: ${hot.label.toUpperCase()}` : hot.label.toUpperCase()}
-                      {hot.target && <ArrowUpRight className="h-4 w-4" strokeWidth={2.75} aria-hidden />}
+                      {inRoom
+                        ? hot.id === 'exit'
+                          ? 'BACK TO THE STREET'
+                          : hot.id === 'index'
+                            ? 'OPEN THE INDEX'
+                            : `INSPECT: ${hot.label.toUpperCase()}`
+                        : hot.target
+                          ? `WALK IN: ${hot.label.toUpperCase()}`
+                          : hot.label.toUpperCase()}
+                      {(hot.target || inRoom) && <ArrowUpRight className="h-4 w-4" strokeWidth={2.75} aria-hidden />}
                     </button>
                   </div>
                 )}
@@ -592,10 +701,79 @@ export default function TokyoDioramaSection({
             {ready && mode === 'view' && (
               <p className="pointer-events-none absolute bottom-3 left-3 z-[6] max-w-[70%] rounded-lg border-2 border-ink bg-white px-2.5 py-1.5 font-mono text-xs font-bold text-ink">
                 {touch
-                  ? 'Swipe sideways to turn · tap a sign to visit'
-                  : 'Drag to turn · click a sign to visit · WALK to explore'}
+                  ? 'Swipe sideways to turn · tap a sign to go in'
+                  : 'Drag to turn · click a sign to go in · WALK to walk in through the doors'}
               </p>
             )}
+
+            {/* walk-in gallery: the room plate (where you are), the way out and the room's index */}
+            {ready && inRoom && roomContent && !shutter && (
+              <div
+                data-room-hud={inRoom}
+                className={`absolute left-3 top-3 z-[7] max-w-[calc(100%-1.5rem)] flex-wrap items-center gap-2 ${inspected || dirOpen ? 'hidden sm:flex' : 'flex'}`}
+              >
+                <span className="rounded-xl border-3 border-ink bg-white px-3 py-2 font-mono text-xs font-extrabold tracking-[0.1em] text-ink shadow-brutal-sm">
+                  {roomContent.label.toUpperCase()} · {roomContent.jp}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => void handleRef.current?.exitRoom()}
+                  className={keyBtn}
+                  aria-label="Back to the street"
+                >
+                  <DoorOpen className="h-4 w-4" strokeWidth={2.5} aria-hidden />
+                  <span className="hidden xs:inline">STREET</span>
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={dirOpen}
+                  onClick={() => {
+                    if (dirOpen) closeDirectory();
+                    else {
+                      setInspectId(null);
+                      setDirOpen(true);
+                    }
+                  }}
+                  className={keyBtn}
+                  aria-label="Everything on show in this room"
+                >
+                  <List className="h-4 w-4" strokeWidth={2.5} aria-hidden />
+                  <span className="hidden xs:inline">INDEX</span>
+                </button>
+              </div>
+            )}
+            {inspected && roomContent && <InspectPanel exhibit={inspected} room={roomContent} onClose={closeInspect} />}
+            {dirOpen && roomContent && (
+              <RoomDirectory
+                room={roomContent}
+                rooms={roomList}
+                onPick={(eid) => {
+                  setDirOpen(false);
+                  handleRef.current?.inspect(eid);
+                }}
+                onRoom={(rid) => {
+                  setDirOpen(false);
+                  void handleRef.current?.enterRoom(rid);
+                }}
+                onClose={closeDirectory}
+              />
+            )}
+            {/* the shutter (シャッター): comes down while a room is opened or left; reduced motion: no slide */}
+            <div
+              aria-hidden={!shutter}
+              data-room-shutter={shutter ? 'down' : 'up'}
+              className={`pointer-events-none absolute inset-0 z-[10] grid place-items-center motion-safe:transition-transform motion-safe:duration-500 motion-safe:ease-[cubic-bezier(0.7,0,0.3,1)] ${shutter ? 'translate-y-0' : '-translate-y-[101%]'}`}
+              style={{ backgroundImage: 'repeating-linear-gradient(180deg, #0A0A0A 0 22px, #2B2B2B 22px 26px)' }}
+            >
+              {shutter && roomState && (
+                <div className="rounded-xl border-3 border-ink bg-white px-4 py-3 text-center text-ink shadow-brutal">
+                  <p className="font-display text-2xl font-extrabold leading-none">
+                    {roomState.id ? roomState.label : 'Street'}
+                  </p>
+                  <p className="mt-1 text-base font-bold">{roomState.id ? roomState.jp : '出口'}</p>
+                </div>
+              )}
+            </div>
 
             {/* zoom + recentre */}
             {ready && (
@@ -641,9 +819,13 @@ export default function TokyoDioramaSection({
           </div>
         </div>
         <p className="sr-only" aria-live="polite">
-          {mode === 'walk' && hot
-            ? `${hot.label} is in reach. Press E or the button to ${hot.target ? 'open it' : 'use it'}.`
-            : ''}
+          {shutter
+            ? ''
+            : inRoom && roomContent && !hot
+              ? `You are in the ${roomContent.label} room. ${roomContent.exhibits.length} exhibits. The INDEX key lists them all.`
+              : mode === 'walk' && hot
+                ? `${hot.label} is in reach. Press E or the button to ${hot.target || inRoom ? 'open it' : 'use it'}.`
+                : ''}
         </p>
       </div>
     </section>

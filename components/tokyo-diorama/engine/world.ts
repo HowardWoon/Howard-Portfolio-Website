@@ -59,7 +59,10 @@ export interface Built {
   bounds: { minX: number; maxX: number; minZ: number; maxZ: number };
 }
 
-export const BASE = { minX: -22, maxX: 22, minZ: -18, maxZ: 18 };
+/** R85: the table runs on south of the railway (the park and the shopping street): z up to 40 (it ended at 18) */
+export const BASE = { minX: -22, maxX: 22, minZ: -18, maxZ: 40 };
+/** where the old block ends and the R85 south district begins (just south of the railway) */
+export const SOUTH_Z = 18;
 export const CURB = 0.15;
 
 /**
@@ -349,11 +352,12 @@ export function* buildWorldSteps(mats: Materials, world: World): Generator<void,
 
   yield; // R80: a frame for the page between parts of the build
   /* ============================================================ the plinth (diorama base) */
-  B.add('wood', 'boxBottom', mtx(0, -1.55, 0, 0, 46.4, 0.66, 38.4));
-  B.add('woodEdge', 'boxBottom', mtx(0, -0.92, 0, 0, 45.4, 0.08, 37.4));
-  bx('soil', 44, 0.62, 36, 0, -0.9, 0);
-  bx('slabCut', 44, 0.27, 36, 0, -0.28, 0);
-  plane('plaque', 8.4, 1.3, 0, -1.22, 19.205);
+  // R85: the plinth runs from z = -18 to z = 40 (centre 11, 58 m deep)
+  B.add('wood', 'boxBottom', mtx(0, -1.55, 11, 0, 46.4, 0.66, 60.4));
+  B.add('woodEdge', 'boxBottom', mtx(0, -0.92, 11, 0, 45.4, 0.08, 59.4));
+  bx('soil', 44, 0.62, 58, 0, -0.9, 11);
+  bx('slabCut', 44, 0.27, 58, 0, -0.28, 11);
+  plane('plaque', 8.4, 1.3, 0, -1.22, 41.205);
   // asphalt is its own mesh (colour + wet roughness map with puddles)
   const asphalt = TX.asphaltMaps();
   const road = new THREE.Mesh(
@@ -370,13 +374,19 @@ export function* buildWorldSteps(mats: Materials, world: World): Generator<void,
   road.receiveShadow = true;
   road.name = 'asphalt';
   root.add(road);
-  collider(-22, 22, -2, 0, -18, 18, { noCam: true });
+  // R85: the south district's road surface (the same wet asphalt, its own plane so the puddles keep their scale)
+  const road2 = new THREE.Mesh(new THREE.PlaneGeometry(44, 22).rotateX(-Math.PI / 2), road.material);
+  road2.position.set(0, -0.01, 29);
+  road2.receiveShadow = true;
+  road2.name = 'asphalt';
+  root.add(road2);
+  collider(-22, 22, -2, 0, -18, 40, { noCam: true });
   // invisible walls at the edge of the base (the camera may look past them)
   const wallOpt = { noCam: true, tag: 'edge' } as const;
-  collider(-23, -21.85, -1, 6, -19, 19, wallOpt);
-  collider(21.85, 23, -1, 6, -19, 19, wallOpt);
+  collider(-23, -21.85, -1, 6, -19, 41, wallOpt);
+  collider(21.85, 23, -1, 6, -19, 41, wallOpt);
   collider(-23, 23, -1, 6, -19, -17.85, wallOpt);
-  collider(-23, 23, -1, 6, 17.85, 19, wallOpt);
+  collider(-23, 23, -1, 6, 39.85, 41, wallOpt);
 
   /* ============================================================ pavements, lots, curbs */
   const slabs: [number, number, number, number, string][] = [
@@ -885,12 +895,8 @@ export function* buildWorldSteps(mats: Materials, world: World): Generator<void,
     bx('woodDark', 2.9, 0.06, 1.1, -19.9, CURB + 3.0, z1 + 0.55, 0, 0.15); // awning
     // blade sign
     plane('cafe', 1.3, 0.33, -21.6, CURB + 2.6, z1 + 0.6, Math.PI / 2);
-    // entrance
+    // entrance - R85: the About doorway (engine/portals.ts) stands here; its name plate replaces the canopy sign
     plane('winCool', 1.0, 2.1, -17.4, CURB + 1.05, z1 + 0.02);
-    bx('metal', 1.2, 0.1, 0.5, -17.4, CURB + 2.2, z1 + 0.25);
-    centred('lampHead', 0.3, 0.06, 0.3, -17.4, CURB + 2.17, z1 + 0.3);
-    plane('heights', 1.2, 0.3, -16.55, CURB + 1.7, z1 + 0.02);
-    bx('metalDark', 0.5, 0.6, 0.25, -16.5, CURB + 0.6, z1 + 0.12);
     // floors 2–4: balconies, windows, AC units, laundry
     let w = 0;
     const litPick = ['winLit', 'winDark', 'winLit', 'winTV', 'winCool', 'winDark', 'winLit', 'winLit', 'winDark'];
@@ -1005,12 +1011,13 @@ export function* buildWorldSteps(mats: Materials, world: World): Generator<void,
     centred('woodDark', 0.08, 0.9, 0.08, cx + 2.25, 4.3, -15.5, 0, -0.5);
     collider(cx - 2.4, cx + 2.4, 3.0, 4.2, -17.4, -13.6);
     roof(cx - 2.4, cx + 2.4, -17.4, -13.6, 3.0);
-    // offering box, bell + rope
-    solid('woodMid', 1.2, 0.6, 0.6, cx, 0.75, -13.85);
-    for (let i = -2; i <= 2; i++) bx('woodDark', 0.04, 0.03, 0.62, cx + i * 0.22, 1.35, -13.85);
-    sphere('yellow', 0.16, cx, 2.6, -14.05);
-    cyl('rope', 0.04, 1.5, cx, 1.05, -14.05, 'cyl8');
-    cyl('red', 0.05, 0.4, cx, 1.6, -14.05, 'cyl8');
+    // offering box, bell + rope - R85: to one side, so the hall's doorway (the Honors room) can be walked into
+    const ob = cx + 1.45;
+    solid('woodMid', 1.0, 0.6, 0.6, ob, 0.75, -13.85);
+    for (let i = -2; i <= 2; i++) bx('woodDark', 0.04, 0.03, 0.62, ob + i * 0.18, 1.35, -13.85);
+    sphere('yellow', 0.16, ob, 2.6, -14.05);
+    cyl('rope', 0.04, 1.5, ob, 1.05, -14.05, 'cyl8');
+    cyl('red', 0.05, 0.4, ob, 1.6, -14.05, 'cyl8');
     // guardian foxes (stylised)
     for (const x of [16.6, 19.8]) {
       bx('stone', 0.6, 0.6, 0.6, x, CURB, -12.6);
@@ -1071,8 +1078,9 @@ export function* buildWorldSteps(mats: Materials, world: World): Generator<void,
     // lit sliding doors + noren
     plane('shoji', 3.0, 2.1, -17, CURB + 1.05, z0 - 0.08, Math.PI);
     for (const x of [-18.25, -17.5, -16.75, -16, -15.75]) bx('woodDark', 0.05, 2.1, 0.04, x, CURB, z0 - 0.1);
-    plane('norenIzakaya', 3.0, 0.85, -17, CURB + 1.75, z0 - 0.35, Math.PI);
-    bx('woodDark', 3.2, 0.05, 0.05, -17, CURB + 2.18, z0 - 0.35);
+    // R85: the noren hangs a little further out, in front of the Experience doorway's frame
+    plane('norenIzakaya', 3.0, 0.85, -17, CURB + 1.95, z0 - 0.52, Math.PI);
+    bx('woodDark', 3.2, 0.05, 0.05, -17, CURB + 2.38, z0 - 0.52);
     // eave
     centred('roofTile', x1 - x0 + 0.4, 0.12, 1.4, (x0 + x1) / 2, 3.05, z0 - 0.55, 0, -0.32);
     bx('woodDark', x1 - x0, 0.25, 0.2, (x0 + x1) / 2, 2.7, z0 - 0.1);
@@ -1375,6 +1383,196 @@ export function* buildWorldSteps(mats: Materials, world: World): Generator<void,
   plane('roofIza', 4.2, 1.5, -17.2, 8.3, 13.9);
   plane('roofIza', 4.2, 1.5, -17.2, 8.3, 13.7, Math.PI);
   light(0xffc700, 18, 10, 18.3, 12.3, 15.4, 14);
+
+  yield; // R80: a frame for the page between parts of the build
+  /* ============================================================ R85 SOUTH DISTRICT: 夜桜公園 park + 夜雨銀座 shopping street
+     (owner: "make the map bigger, more Japanese - sakura, winter ..."). South of the railway: the N-S road runs on to the
+     table's new edge; to its west a park on a canal (a bridge, a row of cherry trees, benches, stone lanterns, a taiyaki
+     cart), to its east a covered shopping street (shopfronts under an ink-ribbed arcade roof). */
+  {
+    const S0 = 18.2;
+    // pavements, park ground and the shopping street floor (raised kerbs, like the old block)
+    const slabs2: [number, number, number, number, string][] = [
+      [3.5, 6, S0, 40, 'paving'],
+      [12, 14.5, S0, 40, 'paving'],
+      [-22, 3.5, S0, 29, 'gravelLight'],
+      [-22, 3.5, 32.4, 40, 'gravelLight'],
+      [14.5, 22, S0, 40, 'paving'],
+    ];
+    for (const [x0, x1, z0, z1, key] of slabs2) {
+      bx('curb', x1 - x0, CURB - 0.005, z1 - z0, (x0 + x1) / 2, 0, (z0 + z1) / 2);
+      top(key, x0, x1, z0, z1, CURB);
+      collider(x0, x1, -1, CURB, z0, z1, { noCam: true });
+    }
+    // road markings down to the edge
+    for (let z = 20; z < 39; z += 3) bx('paint', 0.13, 0.012, 1.6, 9, 0, z + 0.8);
+    bx('paint', 0.1, 0.012, 21.5, 6.15, 0, 29.1);
+    bx('paint', 0.1, 0.012, 21.5, 11.85, 0, 29.1);
+    // the fence on the south side of the tracks (the level crossing stays open)
+    for (const [x0, x1] of [
+      [-22, 5.3],
+      [12.7, 22],
+    ] as const) {
+      for (let x = x0 + 0.1; x <= x1; x += 2) cyl('metal', 0.04, 1.25, x, CURB, S0 + 0.12, 'cyl8');
+      bx('metal', x1 - x0, 0.05, 0.05, (x0 + x1) / 2, 1.3, S0 + 0.12);
+      bx('metal', x1 - x0, 0.05, 0.05, (x0 + x1) / 2, 0.7, S0 + 0.12);
+      collider(x0, x1, 0, 1.4, S0, S0 + 0.24, { noCam: true });
+    }
+    // street lamps along the road
+    for (const z of [24, 34]) {
+      cyl('pole', 0.08, 4.6, 5.3, CURB, z, 'cyl8');
+      bx('lampHead', 0.9, 0.12, 0.3, 5.75, 4.7, z);
+      world.addStatic(box(5.15, 5.45, 0, 4.6, z - 0.15, z + 0.15, { noCam: true }));
+    }
+
+    /* ---------------------------------------- the canal and its bridge */
+    const cz0 = 29;
+    const cz1 = 32.4;
+    // stone banks, the water, and a railing along both banks (open only at the bridge)
+    bx('stone', 25.5, 0.9, 0.3, -9.25, -0.75, cz0 + 0.15);
+    bx('stone', 25.5, 0.9, 0.3, -9.25, -0.75, cz1 - 0.15);
+    const waterMat = new THREE.MeshStandardMaterial({
+      color: 0x0d1830,
+      roughness: 0.06,
+      metalness: 0.35,
+      envMapIntensity: 1.6,
+    });
+    const water = new THREE.Mesh(new THREE.PlaneGeometry(25.5, cz1 - cz0 - 0.6).rotateX(-Math.PI / 2), waterMat);
+    water.position.set(-9.25, -0.45, (cz0 + cz1) / 2);
+    water.receiveShadow = true;
+    water.name = 'canal';
+    root.add(water);
+    collider(-22, 3.5, -2, -0.4, cz0, cz1, { noCam: true });
+    const bx0 = -10.6;
+    const bx1 = -7.6;
+    for (const z of [cz0 - 0.05, cz1 + 0.05]) {
+      for (const [x0, x1] of [
+        [-22, bx0 - 0.1],
+        [bx1 + 0.1, 3.5],
+      ] as const) {
+        for (let x = x0 + 0.4; x < x1; x += 1.6) bx('stone', 0.2, 0.75, 0.2, x, CURB, z);
+        bx('stone', x1 - x0, 0.12, 0.22, (x0 + x1) / 2, CURB + 0.75, z);
+        // taller than it looks: nobody hops over it into the canal
+        collider(x0, x1, 0, 1.8, z - 0.15, z + 0.15, { noCam: true });
+      }
+    }
+    // the bridge: a low wooden deck with vermilion rails (a step up, then over)
+    bx('woodMid', bx1 - bx0, 0.16, cz1 - cz0 + 1.2, (bx0 + bx1) / 2, CURB, (cz0 + cz1) / 2);
+    collider(bx0, bx1, -1, CURB + 0.16, cz0 - 0.6, cz1 + 0.6, { noCam: true });
+    for (const x of [bx0 + 0.05, bx1 - 0.05]) {
+      for (let z = cz0 - 0.5; z <= cz1 + 0.55; z += 1.1) cyl('vermilion', 0.06, 0.95, x, CURB + 0.16, z, 'cyl8');
+      bx('vermilion', 0.12, 0.1, cz1 - cz0 + 1.2, x, CURB + 1.1, (cz0 + cz1) / 2);
+      collider(x - 0.1, x + 0.1, 0, 1.8, cz0 - 0.6, cz1 + 0.6, { noCam: true });
+    }
+
+    /* ---------------------------------------- cherry trees, benches, lanterns */
+    const tree = (x: number, z: number, s = 1) => {
+      cyl('trunk', 0.18 * s, 2.2 * s, x, CURB, z, 'cyl8', 0, -0.12);
+      cyl('trunk', 0.1 * s, 1.3 * s, x - 0.3 * s, 1.9 * s, z + 0.2 * s, 'cyl8', 0.3, 0.6);
+      for (const [dx, dy, dz, r, k] of [
+        [-0.2, 3.1, 0, 1.3, 'sakura'],
+        [-1.0, 2.7, 0.5, 0.9, 'sakuraDeep'],
+        [0.6, 2.8, -0.6, 0.9, 'sakura'],
+        [0.3, 3.6, 0.6, 0.8, 'sakuraDeep'],
+      ] as const)
+        sphere(k, r * s, x + dx * s, dy * s, z + dz * s, 0.8, 'ico');
+      world.addStatic(box(x - 0.25, x + 0.25, 0, 2.4 * s, z - 0.25, z + 0.25));
+    };
+    for (const x of [-19.5, -15.5, -4.5, 0.5]) tree(x, 27.4, 1);
+    for (const [x, z, k] of [
+      [-18, 36.5, 1.15],
+      [-12.5, 38, 0.9],
+      [-3, 37, 1.1],
+      [1.5, 34.5, 0.85],
+    ] as const)
+      tree(x, z, k);
+    // benches facing the canal
+    for (const x of [-17.5, -2.5]) {
+      bx('woodMid', 1.6, 0.08, 0.45, x, CURB + 0.42, 26.2);
+      bx('woodMid', 1.6, 0.4, 0.06, x, CURB + 0.46, 25.98);
+      for (const dx of [-0.65, 0.65]) bx('metalDark', 0.06, 0.42, 0.4, x + dx, CURB, 26.2);
+      collider(x - 0.8, x + 0.8, 0, 0.9, 25.9, 26.45);
+    }
+    // stone lanterns (tōrō) by the bridge, lit
+    for (const [x, z] of [
+      [bx0 - 0.8, cz0 - 1.0],
+      [bx1 + 0.8, cz0 - 1.0],
+      [bx0 - 0.8, cz1 + 1.0],
+      [bx1 + 0.8, cz1 + 1.0],
+    ] as const) {
+      bx('stone', 0.5, 0.15, 0.5, x, CURB, z);
+      bx('stone', 0.16, 0.7, 0.16, x, CURB + 0.15, z);
+      bx('stone', 0.42, 0.34, 0.42, x, CURB + 0.85, z);
+      bx('lightPanel', 0.3, 0.2, 0.3, x, CURB + 0.92, z);
+      centred('roofTile', 0.62, 0.14, 0.62, x, CURB + 1.27, z, Math.PI / 4);
+      world.addStatic(box(x - 0.3, x + 0.3, 0, 1.4, z - 0.3, z + 0.3, { noCam: true }));
+    }
+    light(0xff9fca, 12, 11, -9.1, 2.6, cz0 - 2.2, 5.5);
+    // the park's sign
+    sign('parkSign', TX.plateTexture('夜桜公園  YOZAKURA PARK', '#f4eedc', '#0a0a0a', 1024, 128), 0.6);
+    bx('woodDark', 0.14, 2.0, 0.14, 2.3, CURB, S0 + 1.2);
+    bx('woodDark', 0.14, 2.0, 0.14, -2.3, CURB, S0 + 1.2);
+    plane('parkSign', 4.6, 0.58, 0, CURB + 2.15, S0 + 1.2, Math.PI);
+    plane('parkSign', 4.6, 0.58, 0, CURB + 2.15, S0 + 1.21);
+    world.addStatic(box(2.15, 2.45, 0, 2.0, S0 + 1.05, S0 + 1.35, { noCam: true }));
+    world.addStatic(box(-2.45, -2.15, 0, 2.0, S0 + 1.05, S0 + 1.35, { noCam: true }));
+    // a taiyaki cart (たい焼き)
+    {
+      const x = -16;
+      const z = 21.2;
+      solid('woodMid', 1.8, 0.95, 0.9, x, CURB, z);
+      bx('woodDark', 1.9, 0.08, 1.0, x, CURB + 0.95, z);
+      for (const dx of [-0.85, 0.85]) bx('woodDark', 0.07, 1.2, 0.07, x + dx, CURB + 1.03, z - 0.4);
+      plane('lanternYaki', 1.0, 0.5, x, CURB + 2.05, z - 0.42, Math.PI);
+      bx('red', 2.1, 0.12, 1.2, x, CURB + 2.25, z - 0.1);
+      steam.push(new THREE.Vector3(x - 0.3, CURB + 1.1, z));
+    }
+
+    yield; // R80
+    /* ---------------------------------------- 夜雨銀座: the covered shopping street */
+    {
+      const gx0 = 14.6;
+      const gx1 = 21.9;
+      const walk0 = 16.5;
+      const walk1 = 20.0;
+      const z0 = 19.4;
+      const z1 = 39.6;
+      const fronts = ['norenRamen', 'shelfA', 'lanternYaki', 'norenIzakaya', 'shelfB', 'cooler', 'lanternIza'];
+      let f = 0;
+      for (const [x0, x1, face] of [
+        [gx0, walk0, 1],
+        [walk1, gx1, -1],
+      ] as const) {
+        // shop blocks, 3.4 m each, a shopfront + awning on the walkway side
+        for (let z = z0; z < z1 - 0.5; z += 3.4) {
+          const zc = z + 1.7;
+          solid(f % 2 ? 'wallTan' : 'wallWhite', x1 - x0, 3.6 - CURB, 3.3, (x0 + x1) / 2, CURB, zc);
+          const fx = face === 1 ? x1 + 0.02 : x0 - 0.02;
+          plane(fronts[f % fronts.length], 2.6, 2.0, fx, CURB + 1.2, zc, face === 1 ? Math.PI / 2 : -Math.PI / 2);
+          bx('black', 0.5, 0.08, 3.3, face === 1 ? x1 + 0.25 : x0 - 0.25, 3.0, zc);
+          f++;
+        }
+        roof(x0, x1, z0, z1, 3.6);
+      }
+      // the arcade roof: ink ribs over the walkway, frosted panels between
+      for (let z = z0; z <= z1; z += 2.4) {
+        bx('black', walk1 - walk0 + 0.4, 0.22, 0.22, (walk0 + walk1) / 2, 4.6, z);
+        for (const x of [walk0 - 0.1, walk1 + 0.1]) bx('black', 0.22, 1.0, 0.22, x, 3.6, z);
+      }
+      bx('glassFrost', walk1 - walk0, 0.04, z1 - z0, (walk0 + walk1) / 2, 4.82, (z0 + z1) / 2);
+      roof(walk0, walk1, z0, z1, 4.8);
+      // the gate sign at the north end
+      sign('ginza', TX.plateTexture('夜雨銀座  YOSAME GINZA', '#0a0a0a', '#ffffff', 1024, 128), 0.9);
+      plane('ginza', walk1 - walk0 + 0.6, 0.55, (walk0 + walk1) / 2, 5.25, z0 - 0.12, Math.PI);
+      bx('black', walk1 - walk0 + 0.8, 0.7, 0.2, (walk0 + walk1) / 2, 4.9, z0 - 0.02);
+      // paper lanterns down the street
+      for (let z = z0 + 1.2; z < z1; z += 2.4) {
+        cyl('red', 0.16, 0.36, (walk0 + walk1) / 2, 3.6, z, 'cyl12');
+        bx('black', 0.02, 0.6, 0.02, (walk0 + walk1) / 2, 3.96, z);
+      }
+      light(0xffd59a, 14, 12, (walk0 + walk1) / 2, 3.8, 28, 7.5);
+    }
+  }
 
   /* ============================================================ hotspots → portfolio sections */
   // R73 (owner: "section must not hardcode, must be dynamic"): one lit door per section of the site's registry

@@ -255,39 +255,43 @@ export class World {
    * actors (cars, people, the train) and thin things (poles, posts, sign boards: under 0.7 m across in BOTH directions)
    * are let through, so a passing car or a pole no longer pulls the camera in and out.
    */
-  raycast(o: THREE.Vector3, d: THREE.Vector3, len: number, cameraOnly = false) {
+  raycast(o: THREE.Vector3, d: THREE.Vector3, len: number, cameraOnly = false, minSpan = 0.7) {
     let best = len;
-    const all = cameraOnly ? this.statics : this.statics.concat(this.dynamics);
-    for (const b of all) {
-      if (b.off || b.noCam) continue;
-      if (cameraOnly && b.maxX - b.minX < 0.7 && b.maxZ - b.minZ < 0.7) continue;
-      let t0 = 0;
-      let t1 = best;
-      let ok = true;
-      for (const axis of ['x', 'y', 'z'] as const) {
-        const min = axis === 'x' ? b.minX : axis === 'y' ? b.minY : b.minZ;
-        const max = axis === 'x' ? b.maxX : axis === 'y' ? b.maxY : b.maxZ;
-        const od = o[axis];
-        const dd = d[axis];
-        if (Math.abs(dd) < 1e-8) {
-          if (od < min || od > max) {
-            ok = false;
-            break;
-          }
-        } else {
-          let a = (min - od) / dd;
-          let c = (max - od) / dd;
-          if (a > c) [a, c] = [c, a];
-          if (a > t0) t0 = a;
-          if (c < t1) t1 = c;
-          if (t0 > t1) {
-            ok = false;
-            break;
+    // R85: the camera ignores moving boxes (cars, walkers) - except the train, which is far too big to fly through
+    for (let n = 0, all = this.statics; n < 2; n++, all = this.dynamics)
+      for (const b of all) {
+        if (b.off || b.noCam) continue;
+        if (cameraOnly && n === 1 && b.tag !== 'train') continue;
+        // R85: the walk camera passes through anything narrower than `minSpan` in BOTH directions (poles, vending
+        // machines, pillars, sign posts): from inside a box its faces are culled, so it simply is not seen
+        if (cameraOnly && b.maxX - b.minX < minSpan && b.maxZ - b.minZ < minSpan) continue;
+        let t0 = 0;
+        let t1 = best;
+        let ok = true;
+        for (const axis of ['x', 'y', 'z'] as const) {
+          const min = axis === 'x' ? b.minX : axis === 'y' ? b.minY : b.minZ;
+          const max = axis === 'x' ? b.maxX : axis === 'y' ? b.maxY : b.maxZ;
+          const od = o[axis];
+          const dd = d[axis];
+          if (Math.abs(dd) < 1e-8) {
+            if (od < min || od > max) {
+              ok = false;
+              break;
+            }
+          } else {
+            let a = (min - od) / dd;
+            let c = (max - od) / dd;
+            if (a > c) [a, c] = [c, a];
+            if (a > t0) t0 = a;
+            if (c < t1) t1 = c;
+            if (t0 > t1) {
+              ok = false;
+              break;
+            }
           }
         }
+        if (ok && t0 > 0.0001 && t0 < best) best = t0;
       }
-      if (ok && t0 > 0.0001 && t0 < best) best = t0;
-    }
     return best;
   }
 }

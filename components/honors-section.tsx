@@ -319,7 +319,7 @@ export const honorsList: HonorItem[] = [
 
 /** R52: picture previews of the PDF certificates' pages (real pixel sizes), so the deck can show every certificate.
  *  Rendered from the published PDFs, which were checked for identity numbers (none shown, none in their text). */
-const CERT_PREVIEW: Record<string, { src: string; w: number; h: number }> = {
+export const CERT_PREVIEW: Record<string, { src: string; w: number; h: number }> = {
   '/certificates/UM_TECHNOTHON_2026.pdf': { src: '/certificates/previews/um_technothon_2026.png', w: 1200, h: 847 },
   '/certificates/V_HACK_2026_QUALIFIER_HOWARD_WOON_HAO_ZHE.pdf': {
     src: '/certificates/previews/v_hack_2026.png',

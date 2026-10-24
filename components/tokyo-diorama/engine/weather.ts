@@ -3,7 +3,7 @@ import { rng, softDot, streakTexture } from './textures';
 import type { World } from './kit';
 import type { Built } from './world';
 
-const MAX_ROOFS = 12;
+const MAX_ROOFS = 16;
 
 /**
  * Rain is fully GPU-animated: every streak's position is a function of time in the vertex shader, so 9,000 drops
@@ -63,8 +63,9 @@ export class Weather {
       depthWrite: false,
       uniforms: {
         uTime: { value: 0 },
+        // R85: the whole table, the south district included
         uMin: { value: new THREE.Vector3(-23, 0, -19) },
-        uSize: { value: new THREE.Vector3(46, 24, 38) },
+        uSize: { value: new THREE.Vector3(46, 24, 60) },
         uSpeed: { value: calm ? 7 : 19 },
         uLen: { value: calm ? 0.25 : 0.55 },
         uWind: { value: new THREE.Vector2(-0.9, 0.5) },
@@ -96,6 +97,8 @@ export class Weather {
             if (p.x > r.x && p.x < r.z && p.z > r.y && p.z < r.w && head < uRoofH[i]) a = 0.0;
           }
           a *= 1.0 - smoothstep(uSize.y - 4.0, uSize.y, y);
+          // R85: no streaks right in front of the lens (they read as a blur over the whole view)
+          a *= smoothstep(1.6, 4.5, distance(p, cameraPosition));
           vA = a * uIntensity * mix(0.35, 1.0, seed.w);
           gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
         }`,
@@ -125,7 +128,7 @@ export class Weather {
     let guard = 0;
     while (n < this.maxSplash && guard++ < this.maxSplash * 6) {
       const x = -21.6 + R() * 43.2;
-      const z = -17.6 + R() * 35.2;
+      const z = -17.6 + R() * 57.2;
       let covered = false;
       for (let i = 0; i < built.roofs.length; i++) {
         const r = built.roofs[i];
