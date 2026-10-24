@@ -27,7 +27,10 @@ test.beforeEach(() => test.slow()); // software WebGL on CI
 
 async function openDiorama(page: Page) {
   await page.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
-  await page.goto('/?diorama-test', { waitUntil: 'networkidle' });
+  // R85: a FIXED street (R82): on a random one a walker heading south on the same line can meet the player head on in
+  // the konbini doorway (street seeds 6 and 8): the walker waits for the player, the player is blocked by the walker,
+  // and the walk measured a standstill instead of the camera
+  await page.goto('/?diorama-test&street-seed=1', { waitUntil: 'networkidle' });
   await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
   await expect(async () => {
     await page.evaluate(() => document.getElementById('diorama')?.scrollIntoView({ block: 'start' }));
