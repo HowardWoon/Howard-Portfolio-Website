@@ -533,8 +533,9 @@ has(
   'InteractionHud code-split from a CLIENT module',
   'components/lazy-sections.tsx',
   "'use client'",
-  'export const InteractionHud = dynamic(',
-  "import('@/components/interaction-hud')",
+  // R86: every lazy export is wrapped in its own error boundary: guard(dynamic(...), name)
+  'export const InteractionHud = guard(',
+  "dynamic(() => import('@/components/interaction-hud')",
   'ssr: false',
 );
 has(
@@ -1038,8 +1039,8 @@ has(
   'LAZY',
   'AmbientFx is code-split from the client module',
   'components/lazy-sections.tsx',
-  'export const AmbientFx = dynamic(',
-  "import('@/components/fx/ambient-fx')",
+  'export const AmbientFx = guard(',
+  "dynamic(() => import('@/components/fx/ambient-fx')",
 );
 has(
   'R13',
@@ -1382,7 +1383,8 @@ has(
   'P2-07',
   'Client widgets split out of First Load',
   'components/lazy-sections.tsx',
-  'export const CommandPalette = dynamic(',
+  'export const CommandPalette = guard(',
+  "dynamic(() => import('@/components/command-palette')",
 );
 has('R17', 'P2-10', 'Install icons', 'app/manifest.ts', "'/pwa-icon/512'");
 has(
@@ -1406,7 +1408,8 @@ has(
   'FX-95b',
   'Clock mounted after first paint',
   'components/lazy-sections.tsx',
-  'export const SectionClock = dynamic(',
+  'export const SectionClock = guard(',
+  "dynamic(() => import('@/components/fx/section-clock')",
 );
 has('R18', 'FX-96', 'Atmosphere relay layer', 'components/fx/tide-canvas.tsx', 'fx-relay-b');
 has(

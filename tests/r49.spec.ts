@@ -37,8 +37,16 @@ for (const [name, w, h] of [
     await page.waitForTimeout(700); // pop-in
     const box = () =>
       page.evaluate(() => {
-        const cats = document.querySelectorAll('[data-site-mascot]');
+        const cats = document.querySelectorAll<HTMLElement>('[data-site-mascot]');
+        // R86: at rest over a control the cat tucks into the edge (a translate); its corner is where it stands out
+        const shown = cats[0].getBoundingClientRect();
+        const tucked = cats[0].hasAttribute('data-tucked');
+        cats[0].style.transition = 'none';
+        cats[0].style.translate = 'none';
         const c = cats[0].getBoundingClientRect();
+        cats[0].style.translate = '';
+        void cats[0].offsetWidth;
+        cats[0].style.transition = '';
         const dock = document.querySelector<HTMLElement>('button[aria-label*="section" i].fixed, [data-section-dock]');
         const hits = (r: DOMRect) => c.left < r.right && r.left < c.right && c.top < r.bottom && r.top < c.bottom;
         // every other fixed control that is on screen (dock, back-to-top, rail): the cat must not sit on any of them
@@ -58,6 +66,8 @@ for (const [name, w, h] of [
           fromBottom: Math.round(innerHeight - c.bottom),
           size: Math.round(Math.min(c.width, c.height)),
           inWindow: c.left >= 0 && c.right <= innerWidth && c.top >= 0 && c.bottom <= innerHeight,
+          // a tucked cat still shows a strip (it can be found and tapped); an untucked one stands at its corner
+          peek: tucked ? shown.right > 0 && shown.right <= 14 : shown.left === c.left,
           onControl: fixed
             .filter((e) => hits(e.getBoundingClientRect()))
             .map((e) => e.tagName + '.' + e.className.slice(0, 30)),
@@ -83,6 +93,10 @@ for (const [name, w, h] of [
       expect(at.count, `${f}: one cat`).toBe(1);
       expect([at.left, at.fromBottom], `${f}: same corner`).toEqual([top.left, top.fromBottom]);
       expect(at.onControl, `${f}`).toEqual([]);
+      // the tuck is a 220 ms slide that starts 180 ms after the page rests
+      await expect
+        .poll(async () => (await box()).peek, { message: `${f}: out at its corner, or tucked with a strip showing` })
+        .toBe(true);
     }
     // both sheets really load
     const sheets = await cat.evaluate((b) =>

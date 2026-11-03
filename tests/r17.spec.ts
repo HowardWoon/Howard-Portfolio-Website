@@ -74,7 +74,10 @@ test.describe('phone', () => {
       expect(n).not.toContain('fx-wipe');
       expect(n).not.toContain('fx-floor');
     }
-    // settle pass first: lazy sections, images and fonts lay out once while they arrive (not scroll cost)
+    // settle pass first: lazy sections, images and fonts lay out once while they arrive (not scroll cost). The layers
+    // that mount one per idle moment after the gate are part of that arrival: on a slow runner they were still
+    // mounting inside the measured fling (2x CPU: html[data-after-boot] not yet "done")
+    await expect(page.locator('html[data-after-boot="done"]')).toHaveCount(1, { timeout: 30_000 });
     await page.evaluate(async () => {
       const total = document.documentElement.scrollHeight;
       for (let y = 0; y < total; y += innerHeight) {
@@ -98,6 +101,81 @@ test.describe('phone', () => {
     });
     // R17 baseline: 68-70 layouts per fling with the phone-heavy effects on, 13 in Calm Mode
     expect((await metric('LayoutCount')) - before).toBeLessThan(45);
+  });
+
+  // CI runs 135 / 136 (59 - 78 layouts per fling): the first-view effects of a visitor's first fling ran DURING it - each
+  // kicker scrambled its text (~15 layouts), each card plate took and dropped its impression class (2 layouts), and the
+  // About Build Sheet flipped once the page stopped even with About far off screen (30-design-system E21). They now
+  // wait until the page is still, and only for what is on screen.
+  test('first-view effects wait for a still page: nothing scrambles, impresses or flips mid-fling or off screen (P0-01)', async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    await page.goto('/?fxtier=full', { waitUntil: 'networkidle' });
+    await expect(page.locator('html[data-after-boot="done"]')).toHaveCount(1, { timeout: 30_000 });
+    await expect(page.locator('html[data-fx-ambient="on"]')).toHaveCount(1);
+    const sheet = page.getByRole('list', { name: 'Build sheet' }).locator('[data-flap]');
+    const shown = () => sheet.evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.text));
+    const zero = await shown();
+    // record every kicker text write, plate impression and board flip, with the last scroll event's time
+    await page.evaluate(() => {
+      const w = window as unknown as { __fx: { what: string; t: number; lastScroll: number; onScreen: boolean }[] };
+      w.__fx = [];
+      let lastScroll = -1e9;
+      addEventListener('scroll', () => (lastScroll = performance.now()), { passive: true });
+      const onScreen = (n: Node) => {
+        const el = n instanceof Element ? n : n.parentElement!;
+        const r = el.getBoundingClientRect();
+        return r.bottom > 0 && r.top < innerHeight;
+      };
+      new MutationObserver((ms) => {
+        for (const m of ms) {
+          const t = performance.now();
+          const el = m.target instanceof Element ? m.target : m.target.parentElement;
+          let what = '';
+          if (m.type === 'characterData' && el?.closest('.nb-kicker')) what = 'kicker';
+          else if (m.attributeName === 'class' && (m.target as Element).classList.contains('fx-plate-in'))
+            what = 'plate';
+          else if (m.attributeName === 'data-text' && el?.closest('.ab-sheet')) what = 'flap';
+          if (what) w.__fx.push({ what, t, lastScroll, onScreen: onScreen(m.target) });
+        }
+      }).observe(document.querySelector('main')!, {
+        subtree: true,
+        characterData: true,
+        attributes: true,
+        attributeFilter: ['class', 'data-text'],
+      });
+    });
+    // a first fling from the top to the bottom, then the page rests at the bottom
+    const flingEnd = await page.evaluate(async () => {
+      const total = document.documentElement.scrollHeight - innerHeight;
+      for (let y = 0; y < total; y += 60) {
+        scrollTo(0, y);
+        await new Promise(requestAnimationFrame);
+      }
+      return performance.now();
+    });
+    await page.waitForTimeout(1500);
+    const log = await page.evaluate(
+      () => (window as unknown as { __fx: { what: string; t: number; lastScroll: number; onScreen: boolean }[] }).__fx,
+    );
+    const midFling = log.filter((e) => e.t <= flingEnd && e.t - e.lastScroll < 100).map((e) => e.what);
+    expect(midFling, 'first-view effects that ran while the page was moving').toEqual([]);
+    const offScreen = log.filter((e) => e.t > flingEnd && !e.onScreen).map((e) => e.what);
+    expect(offScreen, 'first-view effects that ran off screen after the page stopped').toEqual([]);
+    expect(await shown(), 'the Build Sheet waits for its own visit').toEqual(zero);
+    // they still play: on the next visit, once the page rests on them
+    await sheet.first().evaluate((e) => e.scrollIntoView({ block: 'center' }));
+    await expect.poll(shown, { timeout: 8000 }).toEqual(['4.00', '07', '04', '03']);
+    const kicker = page.locator('#about .nb-kicker');
+    await kicker.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () => (window as unknown as { __fx: { what: string }[] }).__fx.filter((e) => e.what === 'kicker').length,
+        ),
+      )
+      .toBeGreaterThan(0);
   });
 
   test('no tall element carries a 3D transform on a phone (P0-02)', async ({ page }) => {

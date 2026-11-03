@@ -330,6 +330,9 @@ export function ArenaRow({ row }: { row: number }) {
         copy: track.scrollWidth / 2,
       };
       last = { x: e.clientX, at: e.timeStamp, v: 0 };
+      // a hand on the row holds it from the press, not from the first 6 px of drag: the row kept rolling under a resting
+      // finger and the drag then pulled it back to where the press was (2x CPU: a 9 - 10 px jump; 11.9 px on CI)
+      rowEl.dataset.held = '';
     };
     const move = (e: PointerEvent) => {
       if (!start || e.pointerId !== start.id) return;
@@ -349,6 +352,7 @@ export function ArenaRow({ row }: { row: number }) {
       if (!start || e.pointerId !== start.id) return;
       const s = start;
       start = null;
+      delete rowEl.dataset.held;
       if (!dragging) return;
       dragging = false;
       // the click that ends a mouse drag opens nothing. A touch drag ends with no click at all, so the flag is dropped

@@ -11,7 +11,8 @@ import { logSection } from '@/lib/press-run';
  * R40 "Press Run" client layer (docs/R40-PRESS-RUN-UIUX-PLAN.md), one lazy chunk mounted after the boot gate.
  *
  * P2 Plate Registration: the coloured top bar of a card ([data-plate]) is the colour plate, the card the key plate.
- *   - first view (every tier): one impression, the plate lands 6 px out of register and snaps in (.fx-plate-in);
+ *   - first view (every tier): one impression, the plate lands 6 px out of register and snaps in (.fx-plate-in),
+ *     once the page is still (never mid-fling);
  *   - desktop: while the page moves the plate lags by up to 6 px with the scroll speed, and springs back into
  *     register the moment it stops. One rAF that runs only while the page moves or the plate settles; it writes
  *     `--reg` (@property, inherits: false) on the visible plates only; transform (translate) only.
@@ -28,24 +29,43 @@ export function PressFx() {
   /* ---------------------------------------------------------------- P2 plates */
   useEffect(() => {
     const visible = new Set<HTMLElement>();
+    // CI (r17 P0-01, 2x CPU): the first impression is a class added on entry and removed 340 ms later, two layouts per
+    // plate, and in a fling they all landed mid-scroll (36 of 68 layouts). Like the kicker decode (30-design-system
+    // E21) it now plays once the page has been still for QUIET_MS, on the plates still on screen; a plate flung past
+    // keeps its impression for its next visit.
+    const QUIET_MS = 150;
+    const due = new Set<HTMLElement>();
+    let quiet = 0;
+    const impress = () => {
+      due.forEach((el) => {
+        el.dataset.plateIn = '';
+        el.classList.add('fx-plate-in');
+        el.addEventListener('animationend', () => el.classList.remove('fx-plate-in'), { once: true });
+      });
+      due.clear();
+    };
+    const arm = () => {
+      window.clearTimeout(quiet);
+      if (due.size) quiet = window.setTimeout(impress, QUIET_MS);
+    };
     const io = new IntersectionObserver(
-      (entries) =>
+      (entries) => {
         entries.forEach((e) => {
           const el = e.target as HTMLElement;
           if (!e.isIntersecting) {
             visible.delete(el);
+            due.delete(el);
             el.style.removeProperty('translate');
             return;
           }
           visible.add(el);
-          if (el.dataset.plateIn === undefined && !prefersReducedMotion()) {
-            el.dataset.plateIn = '';
-            el.classList.add('fx-plate-in');
-            el.addEventListener('animationend', () => el.classList.remove('fx-plate-in'), { once: true });
-          }
-        }),
+          if (el.dataset.plateIn === undefined && !prefersReducedMotion()) due.add(el);
+        });
+        arm();
+      },
       { rootMargin: '0px 0px -8% 0px' },
     );
+    window.addEventListener('scroll', arm, { passive: true });
     const seen = new WeakSet<Element>();
     const scan = () =>
       document.querySelectorAll('[data-plate]').forEach((el) => {
@@ -93,6 +113,8 @@ export function PressFx() {
       io.disconnect();
       mo.disconnect();
       window.clearTimeout(t);
+      window.clearTimeout(quiet);
+      window.removeEventListener('scroll', arm);
       cancelAnimationFrame(raf);
       window.removeEventListener('scroll', onScroll);
       visible.forEach((el) => el.style.removeProperty('translate'));

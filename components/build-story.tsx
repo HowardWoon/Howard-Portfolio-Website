@@ -688,7 +688,12 @@ export default function BuildStory() {
   };
 
   return (
-    <section aria-labelledby="build-story-title" className="bs-section relative w-full bg-ink text-white">
+    <section
+      aria-labelledby="build-story-title"
+      // R86: its scroll cue and REC dot pause while The Build is off screen (no section id: OffscreenPause skipped it)
+      data-offscreen-pause
+      className="bs-section relative w-full bg-ink text-white"
+    >
       {/* Screen readers get the story as text; the stage below is visual only */}
       <ol className="sr-only">
         {SCENES.map((s) => (

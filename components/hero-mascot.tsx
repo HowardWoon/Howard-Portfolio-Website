@@ -36,6 +36,70 @@ export default function HeroMascot() {
   const wrapRef = useRef<HTMLSpanElement>(null);
   const on = FX.heroMascot && booted;
 
+  /* R86 (measured: the cat sat on a button, link or chip at 6 - 16 % of the scroll stops on phones and tablets, e.g.
+     EXPLORE PROJECTS, CONTROLS, the skill chips, the project index tiles; R52: "make sure it wont block my website
+     content"): once the page is at rest, if a control lies under the cat it tucks into the window edge (translate
+     only, a strip stays visible and tappable) and comes back when the spot is clear. Wide screens (>= 1536 px) have a
+     real gutter and never need it. Nothing runs while the page moves: one check per rest. */
+  useEffect(() => {
+    if (!on) return;
+    const wrap = wrapRef.current;
+    if (!wrap) return;
+    const wide = window.matchMedia('(min-width: 1536px)');
+    const PEEK = 12;
+    let timer = 0;
+    const check = () => {
+      if (wide.matches) {
+        delete wrap.dataset.tucked;
+        return;
+      }
+      // where the cat stands when it is out. The tuck is a transitioned translate: switch both off for this one read
+      // (a read mid-transition measured the half-tucked cat), read the style once more with the tuck back so the
+      // restore does not animate, then give the transition back.
+      const was = wrap.style.translate;
+      wrap.style.transition = 'none';
+      wrap.style.translate = 'none';
+      const b = wrap.getBoundingClientRect();
+      wrap.style.translate = was;
+      void wrap.offsetWidth;
+      wrap.style.transition = '';
+      // the leftmost control under the cat: the strip left showing must end before it
+      // 3 x 3 points (each is a full hit test: 7 x 7 cost 8 s of hit testing per phone scroll at 4x CPU)
+      let edge = Infinity;
+      const xs = [b.left + 3, (b.left + b.right) / 2, b.right - 3];
+      const ys = [b.top + 3, (b.top + b.bottom) / 2, b.bottom - 3];
+      for (const x of xs)
+        for (const y of ys) {
+          const under = document.elementsFromPoint(x, y).find((e) => !wrap.contains(e));
+          const c = under?.closest('a[href], button, input, textarea, select, label, [role="button"], [tabindex="0"]');
+          if (c && !wrap.contains(c)) edge = Math.min(edge, c.getBoundingClientRect().left);
+        }
+      const peek = Math.max(0, Math.min(PEEK, Math.floor(edge) - 2));
+      wrap.style.setProperty('--tuck', `${Math.max(0, Math.round(b.right - peek))}px`);
+      if (edge < Infinity) wrap.dataset.tucked = '';
+      else delete wrap.dataset.tucked;
+    };
+    const rest = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(check, 300);
+    };
+    // the cat pops in (a scale animation): measure once it stands at its full size
+    wrap.addEventListener('animationend', rest);
+    rest();
+    window.addEventListener('scroll', rest, { passive: true });
+    window.addEventListener('resize', rest);
+    // a panel that opens or closes under the cat (accordion, gallery) changes what lies there without a scroll
+    window.addEventListener('pointerup', rest, { passive: true });
+    return () => {
+      window.clearTimeout(timer);
+      wrap.removeEventListener('animationend', rest);
+      window.removeEventListener('scroll', rest);
+      window.removeEventListener('resize', rest);
+      window.removeEventListener('pointerup', rest);
+      delete wrap.dataset.tucked;
+    };
+  }, [on]);
+
   useEffect(() => {
     if (!on) return;
     // the package already follows a mouse on these devices

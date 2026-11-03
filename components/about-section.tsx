@@ -152,6 +152,13 @@ function BuildSheet() {
     );
     function play() {
       if (done) return;
+      // the page stopped somewhere else (a fling past About): the flip waits for the board's next visit, so it never
+      // plays off screen and lands in the reader's next scroll (r17 P0-01 on CI)
+      const r = list!.getBoundingClientRect();
+      if (r.bottom <= 0 || r.top >= window.innerHeight) {
+        window.removeEventListener('scroll', wait);
+        return;
+      }
       done = true;
       io.disconnect();
       window.removeEventListener('scroll', wait);

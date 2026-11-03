@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */ // `defaultBrowserType` is stripped from device descriptors
 import { test, expect, devices, type Page } from '@playwright/test';
+import { reactLive } from './react-live';
 
 test.beforeEach(async ({ context }) => {
   await context.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
@@ -252,6 +253,9 @@ test('lightbox: thumbnails, Home/End, keyboard zoom and reset (R12 §8.4)', asyn
     .getByRole('button', { name: /view full resolution/i })
     .first();
   await expand.scrollIntoViewIfNeeded();
+  // networkidle comes long before the code-split Projects section hydrates on a slow runner (4x CPU: 3.6 s vs 8 - 9 s);
+  // a click before that is held and replayed late (lib/early-clicks, guarded by tests/r24). This test is about the viewer.
+  await expect.poll(() => reactLive(expand), { timeout: 30_000 }).toBe(true);
   await expand.click();
   const dialog = page.getByRole('dialog').filter({ has: page.getByRole('button', { name: 'Next photo' }) });
   await expect(dialog).toBeVisible();

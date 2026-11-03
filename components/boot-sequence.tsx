@@ -159,9 +159,11 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
       if (gatePassed()) {
         document.documentElement.classList.add('hw-booted');
         setShowBoot(false);
-      } else {
+      } else if (window.__hwBoot !== 'skip') {
         // R35: an in-site navigation back to the home page keeps <html> (and its hw-booted class from the last gate),
-        // which would hide this new gate (html.hw-booted .boot-overlay { display: none }): the gate is up again
+        // which would hide this new gate (html.hw-booted .boot-overlay { display: none }): the gate is up again.
+        // Not after a Skip pressed before hydration: the head script lifted the gate in THIS document, and the visitor
+        // may already be reading (finish() below must still see it as lifted).
         document.documentElement.classList.remove('hw-booted');
       }
     } catch {}
@@ -260,7 +262,9 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
       console.error(e);
     }
     document.documentElement.classList.add('hw-booted');
-    justBooted.current = true;
+    // a lifted gate already put the page at the top (head script); by now the visitor may have scrolled on, and the
+    // jump to the top would pull them back (6x CPU: from y = 14,681 to 0, seconds after the Skip)
+    justBooted.current = !lifted;
     setShowBoot(false);
   }
 

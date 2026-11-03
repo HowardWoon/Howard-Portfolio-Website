@@ -709,6 +709,8 @@ function ProjectCard({ project, index }: { project: ProjectData; index: number }
       data-lens={lens}
       data-trail-hit={trailHit ? '' : undefined}
       data-blueprint-open={blueprint ? '' : undefined}
+      // R86: Projects is 18,000 px tall on a phone, so pausing per section left 15 pulses running on cards far away
+      data-offscreen-pause
       className="fx-project-shell scroll-mt-[calc(var(--header-h,5rem)+1.5rem)]"
     >
       <ScrollUnfold className="w-full group">

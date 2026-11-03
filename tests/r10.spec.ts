@@ -1,4 +1,5 @@
 import { test, expect, devices } from '@playwright/test';
+import { reactLive } from './react-live';
 
 // Round 10 "Interactive Engineering Desk" (FX-38 … FX-44). Each test covers one viewer-facing feature.
 
@@ -26,6 +27,9 @@ test('evidence trail also starts from a project tag chip (FX-38)', async ({ page
   await page.goto('/', { waitUntil: 'networkidle' });
   const tag = page.getByRole('button', { name: /trace postgresql across projects/i }).first();
   await tag.scrollIntoViewIfNeeded();
+  // networkidle comes long before the code-split Projects section hydrates on a slow runner (4x CPU: 3.6 s vs 8 - 9 s);
+  // a click before that is held and replayed late (lib/early-clicks, guarded by tests/r24). This test is about the trail.
+  await expect.poll(() => reactLive(tag), { timeout: 30_000 }).toBe(true);
   await tag.click();
   await expect(page.getByRole('region', { name: /evidence trail for postgresql/i })).toContainText('/ 2');
 });

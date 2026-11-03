@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { Inter, Bricolage_Grotesque, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { ErrorScreen } from '@/components/error-screen';
+import { reportError } from '@/lib/report-error';
 
 // global-error replaces the root layout (it only shows when the layout itself fails), so it loads the same three
 // families with the same settings as app/layout.tsx (next/font serves one copy)
@@ -15,6 +16,7 @@ const mono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono', displ
 export default function GlobalError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   useEffect(() => {
     console.error(error);
+    reportError('layout', error);
   }, [error]);
   return (
     <html lang="en" className={`${sans.variable} ${display.variable} ${mono.variable} hw-booted`}>

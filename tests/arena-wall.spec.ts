@@ -362,11 +362,20 @@ test.describe('touch', () => {
       cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y }] });
     const box = (await page.locator('.fx-wall-row').nth(0).boundingBox())!;
     const y = box.y + box.height / 2;
-    const x0 = await trackX(page, 0);
     const copy = await page.evaluate(() => document.querySelectorAll('.fx-wall-track')[0].scrollWidth / 2);
     const around = (d: number) => Math.abs(((((d + copy / 2) % copy) + copy) % copy) - copy / 2);
-    const top = await page.evaluate(() => scrollY);
+    // where the wall sits on screen, not scrollY: when the frame governor drops to the lite tier the Doom Walk far above
+    // becomes its still (2,701 -> 1,363 px) and scroll anchoring moves scrollY by -1,337 while the view stays put
+    // (CI: "Received 55129" = the swipe's +205 minus that)
+    const wallTop = () => page.locator(WALL).evaluate((e) => e.getBoundingClientRect().top);
+    const top = await wallTop();
     await touch('touchStart', 320, y);
+    // the finger holds the row from the press (it used to roll on until the drag began, then jump back): measure from
+    // where the held row stands, not from where it was rolling before the finger landed (a slow runner's gap)
+    await expect(page.locator('.fx-wall-row').nth(0)).toHaveAttribute('data-held', '');
+    const x0 = await trackX(page, 0);
+    await page.waitForTimeout(300);
+    expect(Math.abs((await trackX(page, 0)) - x0), 'a resting finger holds the row').toBeLessThan(1);
     for (let x = 300; x >= 120; x -= 20) {
       await touch('touchMove', x, y);
       await page.waitForTimeout(16);
@@ -374,7 +383,7 @@ test.describe('touch', () => {
     await page.waitForTimeout(200);
     expect(around((await trackX(page, 0)) - x0 + 200), 'the row follows the finger').toBeLessThan(6);
     await touch('touchEnd');
-    expect(await page.evaluate(() => scrollY)).toBe(top); // a sideways drag does not scroll the page
+    expect(await wallTop()).toBeCloseTo(top, 0); // a sideways drag does not scroll the page
     await page.waitForTimeout(700); // any coast is over
     const [px, py] = await page.evaluate(() => {
       const r = [...document.querySelectorAll('.fx-wall-row')[0].querySelectorAll('.fx-print')]
@@ -387,13 +396,14 @@ test.describe('touch', () => {
     await page.keyboard.press('Escape');
     await expect(page.getByRole('dialog')).toHaveCount(0);
     // a vertical swipe that starts on the wall scrolls the page
+    const before = await wallTop();
     await touch('touchStart', 200, y);
     for (let yy = y - 20; yy >= y - 220; yy -= 20) {
       await touch('touchMove', 200, yy);
       await page.waitForTimeout(16);
     }
     await touch('touchEnd');
-    await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(top + 100);
+    await expect.poll(wallTop).toBeLessThan(before - 100);
   });
 });
 

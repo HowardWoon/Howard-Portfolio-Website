@@ -12,7 +12,8 @@ import { FX, prefersReducedMotion } from '@/lib/fx';
  *   and the final text is the original string, restored exactly.
  * (FX-56 Press stamp lives in components/fx/press-stamp.tsx since R37: it is mounted from the root layout.)
  *
- * The decode does nothing for reduced motion / Calm Mode, and nothing runs per scroll or pointer-move frame.
+ * The decode does nothing for reduced motion / Calm Mode, and nothing runs per scroll or pointer-move frame (a
+ * scroll only restarts the quiet timer that holds a first-view decode until the page is still).
  * FX-71: keeps a keyboard-focused Arena Wall seal in view (see the last effect).
  */
 const GLYPHS = '#%&*+=<>/_01';
@@ -59,19 +60,41 @@ export function AmbientFx() {
   useEffect(() => {
     if (!FX.kickerDecode || prefersReducedMotion()) return;
     const cancels: (() => void)[] = [];
+    // CI (r17 P0-01, 2x CPU): a kicker met mid-fling decoded DURING the fling, ~15 text writes = 15 layouts each (39 of
+    // 94 in one fling). Like the footer flaps (30-design-system E21) the first view waits until the page has been
+    // still for QUIET_MS and the kicker is still on screen; one that was flung past waits for its next visit.
+    const QUIET_MS = 150;
+    const waiting = new Set<Element>();
+    let quiet = 0;
+    const start = () => {
+      for (const k of waiting) {
+        const r = k.getBoundingClientRect();
+        if (r.bottom <= 0 || r.top >= window.innerHeight * 0.9) {
+          io.observe(k); // gone past: decode on its next visit
+          continue;
+        }
+        const node = Array.from(k.children).find((c) => c.tagName === 'SPAN')?.firstChild;
+        if (node && node.nodeType === Node.TEXT_NODE && (node as Text).data.trim().length > 3)
+          cancels.push(decode(node as Text));
+      }
+      waiting.clear();
+    };
+    const arm = () => {
+      window.clearTimeout(quiet);
+      if (waiting.size) quiet = window.setTimeout(start, QUIET_MS);
+    };
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
           if (!e.isIntersecting) continue;
           io.unobserve(e.target);
-          const span = Array.from(e.target.children).find((c) => c.tagName === 'SPAN');
-          const node = span?.firstChild;
-          if (node && node.nodeType === Node.TEXT_NODE && (node as Text).data.trim().length > 3)
-            cancels.push(decode(node as Text));
+          waiting.add(e.target);
         }
+        arm();
       },
       { rootMargin: '0px 0px -10% 0px' },
     );
+    window.addEventListener('scroll', arm, { passive: true });
     // R14 B-10: section kickers only; the hero kicker (hero <section> has id="hero") is part of the first paint
     const kickers = document.querySelectorAll<HTMLElement>('main section[id]:not(#hero) .nb-kicker');
     kickers.forEach((k) => {
@@ -95,6 +118,8 @@ export function AmbientFx() {
     kickers.forEach((k) => k.addEventListener('pointerenter', shuffle));
     return () => {
       io.disconnect();
+      window.removeEventListener('scroll', arm);
+      window.clearTimeout(quiet);
       kickers.forEach((k) => k.removeEventListener('pointerenter', shuffle));
       cancels.forEach((c) => c());
     };

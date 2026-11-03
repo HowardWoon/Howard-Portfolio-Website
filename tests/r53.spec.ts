@@ -1,4 +1,5 @@
 import { test, expect, devices, type Page } from '@playwright/test';
+import { reactLive } from './react-live';
 
 // Round 53 (owner requests of 11 Oct 2026): geometry behind every section, whole thumbnails, galleries that stay inside
 // their panel, a badge pit that never rests one badge on top of another, a focus ring that only the keyboard draws,
@@ -60,6 +61,9 @@ test('opening a proof card does not move the page under the mouse', async ({ pag
   await page.setViewportSize({ width: 1280, height: 800 });
   await gate(page);
   const chip = page.locator('#contact').getByRole('button', { name: 'Java 21 / Spring Boot', exact: true });
+  await chip.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+  // a hover is not replayed like an early tap: wait until React owns the chip (code-split Contact, slow runner)
+  await expect.poll(() => reactLive(chip), { timeout: 30_000 }).toBe(true);
   await chip.evaluate((e) => e.scrollIntoView({ block: 'center' }));
   await page.waitForTimeout(400);
   const top = () => chip.evaluate((e) => Math.round(e.getBoundingClientRect().top));
@@ -264,6 +268,9 @@ for (const [name, w, h] of [
   test(`the reading-progress ring runs exactly on the back-to-top button's border (${name})`, async ({ page }) => {
     await page.setViewportSize({ width: w, height: h });
     await gate(page);
+    // the page has finished building: a section that grows above the reader while it hydrates makes the browser
+    // anchor the view lower, which the button rightly takes as reading on (2x CPU: +379 px, button gone again)
+    await expect(page.locator('html[data-after-boot="done"]')).toHaveCount(1, { timeout: 30_000 });
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight * 0.4));
     await page.waitForTimeout(500);
     await page.mouse.wheel(0, -400); // the floating controls come back when the visitor scrolls up
@@ -555,6 +562,8 @@ test('contact desk still works after the reorganisation: intent drafts, roles pr
   const con = page.locator('[data-os-window="console"]');
   await con.evaluate((e) => e.scrollIntoView({ block: 'center' }));
   const intent = con.getByRole('button', { name: /Hackathon Team/ });
+  // an early click is held and replayed once Contact hydrates (tests/r24); this test is about the desk
+  await expect.poll(() => reactLive(intent), { timeout: 30_000 }).toBe(true);
   await intent.click();
   await expect(intent).toHaveAttribute('aria-pressed', 'true');
   await expect(page.locator('#contact-message')).toHaveValue(/technical hackathon.$/, { timeout: 15_000 });

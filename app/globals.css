@@ -925,6 +925,12 @@ html.hw-booted .boot-overlay {
 [data-offscreen] :is(.animate-pulse, .animate-ping, .animate-spin-slow, .animate-wobble, [class*='animate-[marquee']) {
   animation-play-state: paused !important;
 }
+/* R86: The Build's scroll cue and REC dot ran on with The Build thousands of px away (it has no section id) */
+/* (a pseudo-element inside :is() voids the whole rule, so it has its own selector) */
+[data-offscreen] :is(.bs-scroll-cue, .bs-rec),
+[data-offscreen] .bs-scroll-cue::after {
+  animation-play-state: paused !important;
+}
 
 /* ===================================================================================================
    Round 10 "Interactive Engineering Desk" (FX-38 … FX-44). Tokens only: ink, paper, pop colours,
@@ -1285,7 +1291,8 @@ html.hw-booted .boot-overlay {
 .fx-wall-row[data-dragging] {
   cursor: grabbing;
 }
-.fx-wall-row[data-dragging] .fx-wall-track {
+.fx-wall-row[data-dragging] .fx-wall-track,
+.fx-wall-row[data-held] .fx-wall-track {
   animation-play-state: paused;
 }
 /* keyboard: a row holding focus stops rolling and becomes a plain scroller, so the browser brings the focused
@@ -5400,6 +5407,22 @@ nav[data-scrubbing] {
 .site-mascot-key:focus-visible {
   outline: 4px solid var(--pop-blue);
   outline-offset: 2px;
+}
+/* R86: a control under the cat at rest: it tucks into the window edge, a 12 px strip stays (components/hero-mascot.tsx
+   writes --tuck); a keyboard focus brings it out */
+.site-mascot {
+  transition: translate 220ms var(--ease-snap);
+}
+.site-mascot[data-tucked]:not(:focus-within) {
+  translate: calc(var(--tuck, 32px) * -1) 0;
+}
+html[data-motion='calm'] .site-mascot {
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-mascot {
+    transition: none;
+  }
 }
 /* the pop-in animates `transform`, so the sizes above (the `scale` property) are left alone */
 @keyframes site-mascot-in {

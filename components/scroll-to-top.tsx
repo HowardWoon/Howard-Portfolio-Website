@@ -60,6 +60,13 @@ export function ScrollToTop() {
 
     document.addEventListener('focusin', onFocus);
     document.addEventListener('focusout', onBlur);
+    // a visitor who scrolled before this hydrated (a slow phone: seconds after the Skip) is already far down, and no
+    // scroll event may follow. The first reading after hydration ran against the default anchor 0 and counted the
+    // whole way down as a scroll DOWN, so the button stayed away until the next scroll up (2x CPU: every time).
+    // Start from where the page is, with no direction yet.
+    flags.current.past = window.scrollY > 500;
+    flags.current.anchor = window.scrollY;
+    flags.current.down = false;
     recompute();
 
     return () => {

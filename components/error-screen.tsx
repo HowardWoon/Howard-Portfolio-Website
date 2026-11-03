@@ -14,21 +14,34 @@ export function ErrorScreen({
   title,
   detail,
   onRetry,
+  compact = false,
 }: {
   code: string;
   title: string;
   detail: string;
   /** shown as "Try again" (re-renders the broken part without a reload) */
   onRetry?: () => void;
+  /** R86: the same card in place of ONE section (components/section-boundary.tsx): no page <main>, no <h1> */
+  compact?: boolean;
 }) {
+  const Wrap = compact ? 'div' : 'main';
+  const Title = compact ? 'p' : 'h1';
   return (
-    <main
-      id="main"
-      className="min-h-screen-safe grid place-items-center bg-paper bg-dots px-4 py-16 text-ink"
-      style={{
-        paddingTop: 'max(4rem, var(--safe-top, 0px))',
-        paddingBottom: 'max(4rem, var(--safe-bottom, 0px))',
-      }}
+    <Wrap
+      id={compact ? undefined : 'main'}
+      className={
+        compact
+          ? 'grid place-items-center px-4 py-12 text-ink'
+          : 'min-h-screen-safe grid place-items-center bg-paper bg-dots px-4 py-16 text-ink'
+      }
+      style={
+        compact
+          ? undefined
+          : {
+              paddingTop: 'max(4rem, var(--safe-top, 0px))',
+              paddingBottom: 'max(4rem, var(--safe-bottom, 0px))',
+            }
+      }
     >
       <div
         role="alert"
@@ -39,9 +52,9 @@ export function ErrorScreen({
           <span className="font-mono text-xs font-extrabold tracking-[0.14em] text-ink">HOWARD WOON</span>
         </div>
         <div className="space-y-4 p-5 sm:p-6">
-          <h1 className="font-display text-[clamp(1.5rem,6vw,2rem)] font-extrabold leading-tight tracking-[-0.02em]">
+          <Title className="font-display text-[clamp(1.5rem,6vw,2rem)] font-extrabold leading-tight tracking-[-0.02em]">
             {title}
-          </h1>
+          </Title>
           <p className="font-mono text-sm font-semibold leading-relaxed text-ink">{detail}</p>
           <div className="flex flex-wrap gap-3 pt-1">
             {onRetry ? (
@@ -49,12 +62,23 @@ export function ErrorScreen({
                 Try again
               </button>
             ) : null}
-            <Link href="/" className="nb-btn nb-btn-white min-h-[44px] px-5 py-2.5 text-sm">
-              Reload the portfolio
-            </Link>
+            {compact ? (
+              // already on the page: a link to "/" would be a soft navigation that keeps the broken state
+              <button
+                type="button"
+                onClick={() => location.reload()}
+                className="nb-btn nb-btn-white min-h-[44px] px-5 py-2.5 text-sm"
+              >
+                Reload the portfolio
+              </button>
+            ) : (
+              <Link href="/" className="nb-btn nb-btn-white min-h-[44px] px-5 py-2.5 text-sm">
+                Reload the portfolio
+              </Link>
+            )}
           </div>
         </div>
       </div>
-    </main>
+    </Wrap>
   );
 }
