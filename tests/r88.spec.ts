@@ -106,32 +106,41 @@ test('P8: a phone keeps few composited layers while scrolling (was 85 - 120)', a
   await ctx.close();
 });
 
-test('P8: animated jumps across skipped sections never crash the tab (desktop with Lenis, 1024 px touch tablet)', async ({
+test('P8: the skip is for touch-primary devices only; a desktop never skips (Lenis jumps crashed Chrome 156)', async ({
   browser,
 }) => {
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  await ctx.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
+  const page = await ctx.newPage();
+  await page.goto('/', { waitUntil: 'networkidle' });
+  await page.waitForTimeout(2500);
+  expect(await page.evaluate(() => document.documentElement.dataset.skip ?? 'off')).toBe('off');
+  expect(await page.locator('#projects > *').evaluate((e) => getComputedStyle(e).contentVisibility)).toBe('visible');
+  await ctx.close();
+});
+
+test('P8: animated jumps across skipped sections never crash the tab (1024 px touch tablet)', async ({ browser }) => {
   test.setTimeout(120_000);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { defaultBrowserType: _tablet, ...tablet } = devices['iPad Mini landscape'];
-  for (const opts of [{ viewport: { width: 1440, height: 900 } }, tablet]) {
-    const ctx = await browser.newContext(opts);
-    await ctx.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
-    const page = await ctx.newPage();
-    let crashed = false;
-    page.on('crash', () => (crashed = true));
-    await page.goto('/', { waitUntil: 'networkidle' });
-    await expect(page.locator('html[data-skip="on"]')).toHaveCount(1, { timeout: 15_000 });
-    // before the fix: the first jump (top -> Contact, through every skipped section) killed the tab, 2 of 2
-    for (const id of ['contact', 'about', 'honors', 'projects', 'experience', 'about']) {
-      await page.evaluate((id) => {
-        const a = document.createElement('a');
-        a.href = '#' + id;
-        document.body.append(a);
-        a.click();
-        a.remove();
-      }, id);
-      await page.waitForTimeout(1500).catch(() => undefined);
-      expect(crashed, `crashed after the jump to #${id}`).toBe(false);
-    }
-    await ctx.close();
+  const ctx = await browser.newContext(tablet);
+  await ctx.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
+  const page = await ctx.newPage();
+  let crashed = false;
+  page.on('crash', () => (crashed = true));
+  await page.goto('/', { waitUntil: 'networkidle' });
+  await expect(page.locator('html[data-skip="on"]')).toHaveCount(1, { timeout: 15_000 });
+  // before the fix: the first jump (top -> Contact, through every skipped section) killed the tab, 2 of 2
+  for (const id of ['contact', 'about', 'honors', 'projects', 'experience', 'about']) {
+    await page.evaluate((id) => {
+      const a = document.createElement('a');
+      a.href = '#' + id;
+      document.body.append(a);
+      a.click();
+      a.remove();
+    }, id);
+    await page.waitForTimeout(1500).catch(() => undefined);
+    expect(crashed, `crashed after the jump to #${id}`).toBe(false);
   }
+  await ctx.close();
 });

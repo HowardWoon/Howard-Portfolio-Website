@@ -40,9 +40,12 @@ export function OffscreenPause() {
     // phone the compositor walked every paint chunk of the 58,000 px page on every scroll frame (Layerize 7.8 s per
     // scroll at 4x CPU, 3.3 s with the skip). A skipped section keeps the size it was LAST RENDERED at, so the skip is
     // armed only after every section has rendered once with the web fonts in (page height and section tops exactly as
-    // before), and anything that changes section heights (width, a desktop window's height, Calm / lite / X-ray / skim)
-    // lets them all render once more first.
+    // before), and anything that changes section heights (width, Calm / lite / X-ray / skim) lets them all render once
+    // more first. Touch-primary devices only - the same test that keeps Lenis off them (smooth-scroll-provider.tsx):
+    // with Lenis's animated jumps (header links, command palette) Chrome 156 still crashed the tab on desktop, and a
+    // desktop window's height change moved the page (r53 keep my place).
     const root = document.documentElement;
+    const touch = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
     let raf = 0;
     let alive = true;
     const arm = () => {
@@ -59,21 +62,20 @@ export function OffscreenPause() {
       arm();
     };
     let w = window.innerWidth;
-    let h = window.innerHeight;
-    const fine = window.matchMedia('(pointer: fine)');
     const onResize = () => {
-      // a phone's toolbar changes the height on every scroll; vh there is the large viewport and does not change
-      const changed = window.innerWidth !== w || (fine.matches && window.innerHeight !== h);
+      // the toolbar changes a phone's height on every scroll; vh there is the large viewport and does not change
+      if (window.innerWidth === w) return;
       w = window.innerWidth;
-      h = window.innerHeight;
-      if (changed) rewarm();
+      rewarm();
     };
     const modes = new MutationObserver(rewarm);
-    modes.observe(root, { attributeFilter: ['data-motion', 'data-fx-tier', 'data-xray-mode', 'data-skim'] });
-    window.addEventListener('resize', onResize);
-    document.fonts.ready.then(() => {
-      if (alive) arm();
-    });
+    if (touch) {
+      modes.observe(root, { attributeFilter: ['data-motion', 'data-fx-tier', 'data-xray-mode', 'data-skim'] });
+      window.addEventListener('resize', onResize);
+      document.fonts.ready.then(() => {
+        if (alive) arm();
+      });
+    }
     return () => {
       alive = false;
       cancelAnimationFrame(raf);

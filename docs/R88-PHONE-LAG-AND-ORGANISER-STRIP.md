@@ -74,6 +74,17 @@ their pseudo-elements) and skip only their wrapper. After the fix: 0 crashes in 
 Pixel 7, Galaxy S9+, iPad Mini both ways, Galaxy Tab S4 landscape: 10 anchor jumps, 10 smooth scrolls, a fling down and
 up, a rotation) and 12 desktop runs (Chrome, Edge, Playwright shell; 800 / 1024 / 1440 / 1920 px; 11 anchor jumps each).
 
+### Touch-primary devices only (after the first pre-push run)
+
+The first push was blocked: in the full single-worker suite (and alone) the desktop command palette's section jumps
+(Lenis) still crashed the tab (r36: 2 of 2 in the suite, 1 of 3 alone), and a desktop window height change moved the page
+by 529 px (r53 "keep my place", 3 of 3 alone: the re-render of the skipped sections after the height change). The lag
+complaint is about phones, and Lenis never runs on touch-primary devices, so the skip is now armed only where
+`(hover: none) and (pointer: coarse)` matches - the same test smooth-scroll-provider.tsx uses to keep Lenis off. Desktops
+render exactly as before (no skip, no change). The phone numbers above were measured on the iPhone 13 profile, a touch
+device, so they stand; desktops get no gain from P8 this round. The r83 "About pillars" failure (it reads `innerText`, which is
+empty for a skipped section) is gone with it: that test runs at 1440. Tests that read text on a phone use `textContent`.
+
 ### Same look
 
 Viewport screenshots at 13 scroll positions, 390 and 1440, `?fxtier=full` (the baseline's own frame governor dropped
@@ -86,10 +97,9 @@ it to the lite tier half-way through one run), time animations frozen, 5 s settl
 
 ### Guard
 
-`tests/r88.spec.ts`: the skipped elements compute `content-visibility: auto`, the hero / 3D / Contact and the four
+`tests/r88.spec.ts`: a 1440 desktop never skips; on a phone the skipped elements compute `content-visibility: auto`, the hero / 3D / Contact and the four
 sections themselves `visible`; section tops, heights and the page height equal the fully rendered page (<= 2 px), also
-after a rotation; a phone has <= 70 composited layers at 0 / 30 / 60 % of the page; anchor jumps on a 1440 desktop
-(Lenis) and a 1024 touch tablet never crash the tab. Proved to fail: baseline layers 116 / 98 / 86; with the re-warm
+after a rotation; a phone has <= 70 composited layers at 0 / 30 / 60 % of the page; anchor jumps on a 1024 touch tablet never crash the tab. Proved to fail: baseline layers 116 / 98 / 86; with the re-warm
 blocked the rotated page height is off by 11,990 px; on the first build the crash test failed at the first jump.
 
 ## P4 - organiser logos on the project cards

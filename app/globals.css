@@ -5947,6 +5947,8 @@ html[data-motion='calm'] .sp-branch-reach {
 }
 
 /* ================================================================ R88 P8 skip (components/fx/offscreen-pause.tsx)
+   Armed on touch-primary devices only (no Lenis there): on desktop the command palette's Lenis jumps still crashed
+   Chrome 156 with the skip on, and a window height change moved the page.
    Off-screen sections skip style, layout and paint. Measured (iPhone 13, 4x CPU, whole page, same session as a HEAD
    build): Layerize 7.8 s -> 3.3 s, composited layers 96 -> 42 on average, long tasks 195 -> 79. `auto` keeps each section's last rendered
    size, and the flag is set only after every section has rendered once, so the page height never changes. Containment
