@@ -87,7 +87,7 @@ export function SiteFooter() {
                 Howard Woon Hao Zhe
               </h3>
               <p className="mt-3 inline-block rounded-md border-2 border-white bg-white px-2 py-0.5 text-sm font-mono font-extrabold text-ink uppercase tracking-[0.12em]">
-                Software Engineer · AI Engineer · AI Architect
+                Software Engineer
               </p>
             </div>
 

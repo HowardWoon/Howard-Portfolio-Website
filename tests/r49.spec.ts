@@ -279,9 +279,11 @@ test.describe('desktop 1440', () => {
     await page.context().addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
     await page.goto('/', { waitUntil: 'networkidle' });
     await expect(page.locator('header').getByText('SOFTWARE ENGINEER', { exact: true })).toBeVisible();
-    await expect(
-      page.locator('footer').getByText('Software Engineer · AI Engineer · AI Architect', { exact: true }),
-    ).toHaveCount(1);
+    // the footer chip has no room for three roles (it wrapped and pushed the footer past 85 % of the window: r21)
+    await expect(page.locator('footer').getByText('Software Engineer', { exact: true })).toHaveCount(1);
+    // the contact tape does: the three roles
+    // (the source text: the tape draws it in capitals with CSS)
+    expect(html).toContain('Software Engineer · AI Engineer · AI Architect');
     expect(await page.locator('#hero img[alt="Howard Woon - Software Engineer"]').count()).toBe(1);
     const manifest = await (await request.get('/manifest.webmanifest')).json();
     expect(manifest.name).toBe('Howard Woon // Software Engineer');

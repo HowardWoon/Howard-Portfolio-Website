@@ -311,7 +311,8 @@ test('about pillars are mounted once per breakpoint (P2-08)', async ({ page }) =
 test('the tech marquee pauses while off-screen (P2-12)', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await home(page);
-  const wrap = page.locator('[data-offscreen-pause]');
+  // R86: project cards and The Build carry the attribute too; the marquee's wrapper is the one that is neither
+  const wrap = page.locator('[data-offscreen-pause]:not([data-project-shell]):not(.bs-section)');
   await expect(wrap).toHaveCount(1);
   await page.locator('#contact').evaluate((e) => e.scrollIntoView());
   await expect(wrap).toHaveAttribute('data-offscreen', '');
