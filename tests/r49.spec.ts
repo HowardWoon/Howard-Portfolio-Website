@@ -268,19 +268,23 @@ test.describe('desktop 1440', () => {
   });
 
   /* -------------------------------------------------------------- role title */
-  test('the role reads Full Stack Developer everywhere it was Systems & AI Architect', async ({ page, request }) => {
+  // R86 (owner, 3 Nov 2026): 'Software Engineer' everywhere; the three roles where there is room (footer, contact tape)
+  test('the role reads Software Engineer everywhere it was Full Stack Developer', async ({ page, request }) => {
     const html = await (await request.get('/')).text();
     expect(html).not.toMatch(/Systems (&amp;|&) AI Architect/i);
     expect(html).not.toMatch(/Systems Architect/);
-    expect(html).toContain('<title>Howard Woon // Full Stack Developer</title>');
-    expect(html).toMatch(/"jobTitle":"Full Stack Developer"/);
+    expect(html).not.toMatch(/Full Stack Developer/i);
+    expect(html).toContain('<title>Howard Woon // Software Engineer</title>');
+    expect(html).toMatch(/"jobTitle":"Software Engineer"/);
     await page.context().addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
     await page.goto('/', { waitUntil: 'networkidle' });
-    await expect(page.locator('header').getByText('FULL STACK DEVELOPER', { exact: true })).toBeVisible();
-    await expect(page.locator('footer').getByText('Full Stack Developer', { exact: true })).toHaveCount(1);
-    expect(await page.locator('#hero img[alt="Howard Woon - Full Stack Developer"]').count()).toBe(1);
+    await expect(page.locator('header').getByText('SOFTWARE ENGINEER', { exact: true })).toBeVisible();
+    await expect(
+      page.locator('footer').getByText('Software Engineer · AI Engineer · AI Architect', { exact: true }),
+    ).toHaveCount(1);
+    expect(await page.locator('#hero img[alt="Howard Woon - Software Engineer"]').count()).toBe(1);
     const manifest = await (await request.get('/manifest.webmanifest')).json();
-    expect(manifest.name).toBe('Howard Woon // Full Stack Developer');
+    expect(manifest.name).toBe('Howard Woon // Software Engineer');
   });
 });
 

@@ -53,7 +53,7 @@ const SCENES = [
     n: '05',
     key: 'SHIP',
     swatch: 'bg-pop-mint',
-    caption: 'From UM lecture halls to hackathon podiums and production: a Full Stack Developer.',
+    caption: 'From UM lecture halls to hackathon podiums and production: a Software Engineer.',
   },
 ] as const;
 
@@ -1125,7 +1125,7 @@ export default function BuildStory() {
                     Howard Woon Hao Zhe
                   </p>
                   <p className="inline-block rounded-md border-2 border-ink bg-white px-2 py-0.5 font-mono text-[clamp(0.8rem,1.8vw,0.9rem)] font-extrabold tracking-[0.1em]">
-                    FULL STACK DEVELOPER
+                    SOFTWARE ENGINEER
                   </p>
                   <p className="font-mono text-[clamp(0.8rem,1.8vw,0.9rem)] font-bold text-ink-soft">
                     B.Comp.Sc. (Software Engineering) · Universiti Malaya

@@ -422,7 +422,7 @@ export default function AboutSection() {
         <div className="space-y-7">
           <div className="nb-kicker fx-rise">
             <Sparkles className="w-4 h-4" strokeWidth={2.5} />
-            <span>ABOUT // FULL STACK DEVELOPER</span>
+            <span>ABOUT // SOFTWARE ENGINEER</span>
           </div>
 
           <h2 className="fx-rise nb-title text-[clamp(1.55rem,8.2vw,2.1rem)] sm:text-5xl lg:text-6xl max-w-5xl leading-[1.02]">

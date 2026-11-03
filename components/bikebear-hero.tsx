@@ -10,69 +10,91 @@ import { TextRoll } from './fx/text-roll';
 import { TiltCard } from './tilt-card';
 import { toLocal } from '@/lib/to-local';
 import { SpiderReveal } from './spider-reveal';
-import { createLiquid } from '@/lib/liquid';
 import { FX } from '@/lib/fx';
 
 /**
- * Hero headline with the R63 water reveal.
- * Perf fix: the water's outline is written straight into two clip paths
+ * Hero headline with the torch (R86).
+ * Perf fix: the beam's centre and size are written straight into the clip path and the lens transform from one rAF
  * (no React state → no re-render on every mousemove).
  * A11y fix: the duplicated overlay copy is aria-hidden so screen readers read the headline once.
  */
-// nothing shows until the first frame of water (every browser understands this one)
+// nothing shows until the beam opens (every browser understands this one)
 const HEADLINE_CLOSED = 'circle(0px at 0px 0px)';
 
 function MagnifiedHeadline() {
   const containerRef = React.useRef<HTMLDivElement>(null);
-  const waterRef = React.useRef<HTMLDivElement>(null);
-  const rimRef = React.useRef<HTMLDivElement>(null);
+  const beamRef = React.useRef<HTMLDivElement>(null);
+  const lensRef = React.useRef<HTMLDivElement>(null);
 
-  // R63 (owner: the dimmed headline looked "so blur, like haze", and the round lens "like a torchlight ... i want
-  // water, with ripples, like swimming"). The headline no longer dims. A body of water follows the mouse over it
-  // (lib/liquid.ts: it swims after the pointer, drags a tail, leaves rings) and the headline reads through it in
-  // white on the interactive blue, inside a hard ink rim. Mouse / pen only: on phones a tap fires a synthetic move
-  // with no leave, which used to leave a lens frozen on screen.
+  // R86 (owner, 3 Nov 2026, after R63's water: "the water with the black edge is disgusting and blocks it ... make it a
+  // torch like the version long ago, cleaner, and 3D when it shines"; R63's water is gone, lib/liquid.ts with it).
+  // While the mouse is on the headline it dims and a razor-edged round beam (clip-path circle, no rim, no blur) lights
+  // the words under it: magnified 1.12x and lifted off the page in the interactive blue with a hard ink extrusion.
+  // The beam glides after the pointer and opens / closes on a short ease; Calm / reduced motion: it sits exactly
+  // under the pointer, no magnification. Mouse / pen only: on phones a tap fires a synthetic move with no leave.
   React.useEffect(() => {
     const el = containerRef.current;
-    const water = waterRef.current;
-    const rim = rimRef.current;
-    if (!el || !water || !rim) return;
+    const beam = beamRef.current;
+    const lens = lensRef.current;
+    if (!el || !beam || !lens) return;
     const still =
       window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
       document.documentElement.dataset.motion === 'calm';
-    const paths = typeof CSS !== 'undefined' && CSS.supports('clip-path', "path('M0 0L1 1')");
-    const liquid = createLiquid(({ inner, outer, radius, x, y }) => {
-      if (radius <= 0) water.style.clipPath = rim.style.clipPath = HEADLINE_CLOSED;
-      else if (paths) {
-        water.style.clipPath = `path('${inner}')`;
-        rim.style.clipPath = `path('${outer}')`;
-      } else {
-        water.style.clipPath = `circle(${radius.toFixed(1)}px at ${x.toFixed(1)}px ${y.toFixed(1)}px)`;
-        rim.style.clipPath = `circle(${(radius + 3).toFixed(1)}px at ${x.toFixed(1)}px ${y.toFixed(1)}px)`;
+    const size = () => Math.round(Math.min(110, Math.max(64, el.clientWidth * 0.13)));
+    let raf = 0;
+    let tx = 0;
+    let ty = 0;
+    let x = 0;
+    let y = 0;
+    let r = 0;
+    let tr = 0;
+    const draw = () => {
+      raf = 0;
+      const k = still ? 1 : 0.28;
+      x += (tx - x) * k;
+      y += (ty - y) * k;
+      r += (tr - r) * (still ? 1 : 0.3);
+      if (r < 0.5 && tr === 0) {
+        r = 0;
+        beam.style.clipPath = HEADLINE_CLOSED;
+        return;
       }
-    }, still);
-    const size = () => Math.round(Math.min(96, Math.max(58, el.clientWidth * 0.115)));
+      beam.style.clipPath = `circle(${r.toFixed(1)}px at ${x.toFixed(1)}px ${y.toFixed(1)}px)`;
+      lens.style.transformOrigin = `${x.toFixed(1)}px ${y.toFixed(1)}px`;
+      if (Math.abs(tx - x) > 0.3 || Math.abs(ty - y) > 0.3 || Math.abs(tr - r) > 0.3) raf = requestAnimationFrame(draw);
+    };
+    const kick = () => {
+      if (!raf) raf = requestAnimationFrame(draw);
+    };
     const on = (e: PointerEvent) => {
       if (e.pointerType === 'touch') return;
       const p = toLocal(el, e.clientX, e.clientY);
-      liquid.point(p.x, p.y);
+      tx = p.x;
+      ty = p.y;
       if (el.dataset.hover !== 'true') {
         el.dataset.hover = 'true';
-        liquid.show(size());
+        // the beam opens where the pointer came in, not where it last closed
+        if (r === 0) {
+          x = tx;
+          y = ty;
+        }
+        tr = size();
       }
+      kick();
     };
     const off = () => {
       if (el.dataset.hover !== 'true') return;
       el.dataset.hover = 'false';
-      liquid.hide();
+      tr = 0;
+      kick();
     };
-    // Scrolling moves the text under a still cursor: the water would sit in the wrong place. It drains on scroll;
-    // the next mouse move brings it back at the right spot.
+    // Scrolling moves the text under a still cursor: the beam would sit in the wrong place. It closes on scroll;
+    // the next mouse move opens it again at the right spot.
     el.addEventListener('pointermove', on, { passive: true });
     el.addEventListener('pointerleave', off);
     window.addEventListener('scroll', off, { passive: true });
     return () => {
-      liquid.destroy();
+      cancelAnimationFrame(raf);
       el.removeEventListener('pointermove', on);
       el.removeEventListener('pointerleave', off);
       window.removeEventListener('scroll', off);
@@ -86,7 +108,10 @@ function MagnifiedHeadline() {
   return (
     <div ref={containerRef} data-hover="false" className="group/headline relative space-y-2">
       {/* Base Normal Text */}
-      <h2 className={`${headlineClass} text-ink fx-letterpress fx-aberration`}>
+      {/* dims while the torch is on it (a flat 35 %, instant: no fade that reads as haze) */}
+      <h2
+        className={`${headlineClass} text-ink fx-letterpress fx-aberration group-data-[hover=true]/headline:opacity-35`}
+      >
         ENGINEERING <br />
         {FX.headlineStamp ? (
           // FX-05 stamp, in CSS since R14 (.fx-stamp-in): the words are in the server HTML from the first paint
@@ -98,28 +123,31 @@ function MagnifiedHeadline() {
         STAND OUT IN <br />A NOISY WORLD.
       </h2>
 
-      {/* The water (decorative): its hard ink rim, then the same headline in white on blue, both cut to the water's
-          shape. Nothing is drawn until the mouse is on the headline. */}
+      {/* The torch beam (decorative): a hard round cut of the paper, no rim. Inside it the same headline, magnified
+          and lifted in the interactive blue with a hard ink extrusion (the "3D" of the beam). Closed until the mouse
+          is on the headline. */}
       <div
-        ref={rimRef}
+        ref={beamRef}
         aria-hidden="true"
-        data-liquid-rim
-        className="absolute inset-0 !mt-0 pointer-events-none bg-ink"
+        data-torch
+        className="absolute inset-0 !mt-0 pointer-events-none overflow-hidden bg-paper"
         style={{ clipPath: HEADLINE_CLOSED }}
-      />
-      <div
-        ref={waterRef}
-        aria-hidden="true"
-        data-liquid
-        className={`${headlineClass} absolute inset-0 !mt-0 pointer-events-none bg-pop-blue text-white`}
-        style={{ WebkitTextStroke: '2px #0a0a0a', clipPath: HEADLINE_CLOSED }}
       >
-        ENGINEERING <br />
-        <span className={`${chipClass} bg-white border-ink text-ink`} style={{ WebkitTextStroke: '0' }}>
-          SYSTEMS TO
-        </span>{' '}
-        <br />
-        STAND OUT IN <br />A NOISY WORLD.
+        <div
+          ref={lensRef}
+          className={`${headlineClass} motion-safe:scale-[1.12] text-pop-blue`}
+          style={{ WebkitTextStroke: '2px #0a0a0a', textShadow: '4px 4px 0 #0a0a0a' }}
+        >
+          ENGINEERING <br />
+          <span
+            className={`${chipClass} bg-pop-yellow border-ink text-ink`}
+            style={{ WebkitTextStroke: '0', textShadow: 'none' }}
+          >
+            SYSTEMS TO
+          </span>{' '}
+          <br />
+          STAND OUT IN <br />A NOISY WORLD.
+        </div>
       </div>
 
       {/* Decorative squiggle */}
@@ -260,7 +288,7 @@ export default function BikebearHero() {
                 >
                   <Image
                     src="/images/howard-solid.jpeg"
-                    alt="Howard Woon - Full Stack Developer"
+                    alt="Howard Woon - Software Engineer"
                     fill
                     sizes="(max-width: 640px) 350px, (max-width: 1280px) 460px, 520px"
                     className="object-cover object-top saturate-[1.15] contrast-[1.05]"

@@ -609,7 +609,7 @@ export default function ContactSection() {
           slogan="ENGINEERING SYSTEMS TO STAND OUT IN A NOISY WORLD"
           facts={[
             { label: 'Available for 2026 roles', kind: 'live' },
-            { label: 'Full Stack Developer' },
+            { label: 'Software Engineer · AI Engineer · AI Architect' },
             { label: 'Software Engineering @ Universiti Malaya', kind: 'academic' },
             { label: 'Kajang, Selangor · Kuala Lumpur · GMT+8' },
           ]}

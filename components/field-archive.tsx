@@ -62,6 +62,8 @@ export function FieldArchive({ archiveId }: FieldArchiveProps) {
 
   if (!records || records.length === 0) return null;
 
+  // R86 (owner circled a half-cropped photo: 'if it can not be cropped, do not crop it'): every tile shows the WHOLE
+  // photo (object-contain) on the paper ground; no hover zoom (it cropped the edges too)
   const tileBase =
     'group relative bg-paper-deep rounded-2xl overflow-hidden cursor-pointer border-3 border-ink shadow-brutal-sm transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-brutal focus-visible:-translate-y-1';
 
@@ -122,7 +124,7 @@ export function FieldArchive({ archiveId }: FieldArchiveProps) {
                   alt={record.caption}
                   fill
                   sizes="(max-width: 640px) 78vw, 34vw"
-                  className="fx-wipe object-cover"
+                  className="fx-wipe object-contain"
                 />
                 {/* film perforations */}
                 <span aria-hidden className="absolute inset-x-0 top-0 h-3 fx-perf" />
@@ -177,7 +179,7 @@ export function FieldArchive({ archiveId }: FieldArchiveProps) {
                 alt={records[0].caption}
                 fill
                 sizes="(max-width: 768px) 100vw, 60vw"
-                className="fx-wipe object-cover transition-transform duration-700 group-hover:scale-105"
+                className="fx-wipe object-contain"
               />
               {/* Hero Label (sticker) */}
               <div className="absolute left-4 bottom-4 right-4 flex flex-col items-start gap-1.5">
@@ -203,7 +205,7 @@ export function FieldArchive({ archiveId }: FieldArchiveProps) {
                   alt={record.caption}
                   fill
                   sizes="(max-width: 768px) 50vw, 30vw"
-                  className="fx-wipe object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="fx-wipe object-contain"
                 />
                 <div className="absolute left-3 bottom-3 right-3">
                   <div className="nb-tag bg-white text-xs max-w-full">
@@ -236,7 +238,7 @@ export function FieldArchive({ archiveId }: FieldArchiveProps) {
                     alt={record.caption}
                     fill
                     sizes="(max-width: 640px) 100vw, 50vw"
-                    className="fx-wipe object-cover object-[50%_28%] transition-transform duration-500 group-hover:scale-105"
+                    className="fx-wipe object-contain"
                   />
                   <div className="absolute left-3 bottom-3 right-3">
                     {/* full caption only where the square tiles are wide enough (it was cropped on phones/tablets) */}

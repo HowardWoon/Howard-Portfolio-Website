@@ -259,7 +259,8 @@ test.describe('phone', () => {
     const hb = (await h.boundingBox())!;
     await page.touchscreen.tap(hb.x + hb.width * 0.4, hb.y + hb.height * 0.5);
     await page.waitForTimeout(400);
-    expect(await clip(page, '#hero .group\\/headline > [data-liquid]')).toMatch(/^circle\(0px/);
+    // R86: the headline's torch (it replaced the water) stays closed on touch
+    expect(await clip(page, '#hero .group\\/headline > [data-torch]')).toMatch(/^circle\(0px/);
     expect(Math.max(0, await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth))).toBe(0);
   });
 });

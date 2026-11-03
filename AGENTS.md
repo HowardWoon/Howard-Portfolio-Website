@@ -26,8 +26,10 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
 5. **Readable neo-brutalism, always (R24).** No reading text under 0.8rem (`text-xs`), nothing under 13 px lighter
    than weight 600, only Inter / Bricolage Grotesque / JetBrains Mono; icons are computed, never hand-typed points;
    no glass, blur panels, soft shadows, glows or soft gradients. Guarded by `tests/r24.spec.ts`
-   (`.agents/rules/30-design-system.md` section H). The hero headline never dims under the mouse and
-   the hero reveals (headline, portrait) are water, not a round torchlight lens (owner, R63). The portrait is CALM
+   (`.agents/rules/30-design-system.md` section H). The hero HEADLINE is a TORCH again (owner, R86, 3 Nov 2026: the
+   water "with the black edge is disgusting ... make it a torch like the version long ago, cleaner, 3D when it shines";
+   replaces R63's headline water): a flat instant dim (35 %, never a fade), a razor-edged round beam with NO rim / ring,
+   the words in it magnified 1.12x in blue with a hard ink extrusion (`tests/r15`). The PORTRAIT stays water. It is CALM
    water (owner, R78: "i am very hate the wave effect as shown, i want like very water wave clean, asmr, smooth"):
    `lib/water.ts`, a raw-WebGL2 remix of React Bits PatternWaves - a still pond the pointer opens, a soft wake that
    bends the photo, a click splash, a few halftone glints; never rings, outlines or a rim drawn on the photo again.
@@ -237,3 +239,31 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
     canal and bridge, the Yosame Ginza arcade). All randomness through `random.ts`. People, bikes and dogs share
     vertex-coloured materials and are merged per moving part (draw calls). Guards: `tests/r85-walk-in-doors.spec.ts`,
     `tests/r70.spec.ts` (signs guide in walk), `tests/tokyo-diorama.spec.ts`. Plan: `docs/R85-WALK-IN-DOORS.md`.
+
+## 8. Owner standing rules added R86 - R87 (3 Nov 2026)
+
+1. **Research before every change (owner: "everything you do, take the browser as a reference ... every chat, every
+   upgrade, every bug fix, research and compare: GitHub, other people's demos").** Before building a feature, a
+   redesign or a fix that changes what the visitor sees, search the web / GitHub / Codrops / Awwwards / CodePen for how
+   others built the same thing, and write the references (links) and what was taken from each into that round's plan
+   doc (`docs/R<n>-*.md`, section "Research"). A plan without a research section is not ready.
+2. **Neo-brutalism first, brutalism as the fallback (R87).** Every section must read as neo-brutalism: paper, 3 px ink,
+   hard offset shadows, flat SIGNAL fills, mono labels, mechanical motion (stamps, presses, shutters, slats, tickers,
+   stepped timing). Never "vibe-coded" / AI-looking: no glowing dark dashboards, thin glowing lines, radar dials, soft
+   fades from fragments. When neo-brutalism runs out of ideas, raw brutalism (exposed grids, oversized type, hard cuts)
+   is allowed. Motion is a TRANSITION the scroll drives and reverses, not a fade-in.
+3. **Visuals and labels before paragraphs (R87).** Show a fact as a label, chip, icon, number or picture first; the
+   long text sits behind it word for word. Never invent wording to do it.
+4. **Never crop a photo when it can be shown whole (R86, owner circled a half-cropped photo).** Galleries and tiles
+   use `object-contain` on the paper / ink ground; no hover zoom that crops. Cropping is allowed only for a frame that
+   cannot hold the whole photo (a 56 px thumbnail) - and then the full photo is one tap away.
+5. **One registry, every place, automatically (R87, owner: "whenever I upload a project / gallery / achievement it
+   must update in EVERY section ... including the 3D diorama, without me telling you").** A project lives only in
+   `projects` (stacked-projects.tsx), a photo only in its gallery list / `ARCHIVE_DATA`, an honour only in `honorsList`.
+   Every other place (The Build docks and reels, Doom Walk ledger, About counts, Arena Wall rows above Contact,
+   highlight tape, command palette, 3D rooms) READS those registries; a hand-kept second list is a bug. When adding
+   content, follow 50-content-updates and then check every consumer listed there; plan P7 in
+   `docs/R87-NEO-BRUTALIST-REDESIGN-PLAN.md` adds the test that proves it.
+6. **The hero headline is a torch (R86)** - see law 5.
+7. **One crashing section never takes the page down (R86):** every lazy section is `guard()`-ed
+   (components/section-boundary.tsx), crashes reach `/api/client-error`. Guard: `tests/r86.spec.ts`.

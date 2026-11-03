@@ -20,6 +20,11 @@ in the same commit (AGENTS.md 7.2).
 3. **The owner's files are facts, the site's words are his.** Copy facts (names, dates, placements, numbers) exactly as
    the owner's source states them. When a source disagrees with the site (the CV says one date, Experience another),
    do not pick one: list the differences and ask.
+4. **Automatic, not on request (R87).** The owner never has to point out a place that missed an update: after adding
+   an item, open every consumer listed for its kind (section D) on the built site and confirm it is there, including the
+   Arena Wall rows above Contact and the 3D rooms. A consumer that keeps its own copy of the list is fixed to read the
+   registry in the same round (AGENTS.md 8.5).
+5. **Photos are shown whole (R86).** `object-contain`, never a crop that cuts people or text; see AGENTS.md 8.4.
 
 ## B. Intake: every file the owner drops
 
@@ -39,19 +44,19 @@ The owner drops uploads in the repo root (often with spaces, `.ico` / `.webp` / 
 
 ## C. Where each kind of file lives (new files go ONLY here)
 
-| Kind                                   | Folder / file                                  | Format                                                                        | Registered in                                           |
-| -------------------------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------- |
-| Project photo / screen                 | `public/images/projects/<project-id>/`         | JPEG q86, long edge <= 1600 px (screens: PNG if text is small)                | the project's `galleryPhotos` (stacked-projects.tsx)    |
-| Experience photo                       | `public/images/experiences/<experience-id>/`   | JPEG q86, long edge <= 1600 px                                                | the role's `galleryPhotos` (experience-section.tsx)     |
-| Project organiser logo                 | `public/images/logos/organisers/<id>.png`      | trimmed to its ink, 160 px tall, PNG                                          | `lib/organisers.ts`                                     |
-| Experience organisation wordmark       | `public/images/logos/<org>_logo.png`           | trimmed, white or transparent ground                                          | `ORG_LOGOS` (components/org-logo.tsx)                   |
-| Institution crest (UM, KMNS)           | `public/images/logos/<name>_crest.png`         | trimmed, centred, HD                                                          | `components/institution-seal.tsx` only                  |
-| Certificate                            | `public/certificates/<kebab-name>.png`         | PNG picture, long edge <= 2000 px                                             | `certificateUrl` + `CERT_SIZE` (honors-section.tsx)     |
-| Certificate PDF (text layer verified)  | `public/certificates/<kebab-name>.pdf`         | PDF + a preview PNG in `public/certificates/previews/`                        | `certificateUrl`                                        |
-| CV                                     | `public/resume.pdf` (this exact name, always)  | the owner's PDF, unmodified                                                   | `RESUME_URL` (lib/resume.ts) - every control reads it   |
-| Pitch deck / document                  | `public/documents/<kebab-name>.pdf`            | PDF                                                                           | the project's `deckUrl`                                 |
-| The Build story art                    | `public/images/build/`, `public/images/story/` | JPEG / PNG                                                                    | build-story.tsx                                         |
-| Scroll-scrubbed clip (Doom Walk)       | `public/images/doom-walk/{wide,tall}/NN.webp`  | ffmpeg: every frame, wide 960x540 + tall 432x540 crop, WebP q72               | `FRAMES` in doom-walk.tsx                               |
+| Kind                                  | Folder / file                                  | Format                                                          | Registered in                                         |
+| ------------------------------------- | ---------------------------------------------- | --------------------------------------------------------------- | ----------------------------------------------------- |
+| Project photo / screen                | `public/images/projects/<project-id>/`         | JPEG q86, long edge <= 1600 px (screens: PNG if text is small)  | the project's `galleryPhotos` (stacked-projects.tsx)  |
+| Experience photo                      | `public/images/experiences/<experience-id>/`   | JPEG q86, long edge <= 1600 px                                  | the role's `galleryPhotos` (experience-section.tsx)   |
+| Project organiser logo                | `public/images/logos/organisers/<id>.png`      | trimmed to its ink, 160 px tall, PNG                            | `lib/organisers.ts`                                   |
+| Experience organisation wordmark      | `public/images/logos/<org>_logo.png`           | trimmed, white or transparent ground                            | `ORG_LOGOS` (components/org-logo.tsx)                 |
+| Institution crest (UM, KMNS)          | `public/images/logos/<name>_crest.png`         | trimmed, centred, HD                                            | `components/institution-seal.tsx` only                |
+| Certificate                           | `public/certificates/<kebab-name>.png`         | PNG picture, long edge <= 2000 px                               | `certificateUrl` + `CERT_SIZE` (honors-section.tsx)   |
+| Certificate PDF (text layer verified) | `public/certificates/<kebab-name>.pdf`         | PDF + a preview PNG in `public/certificates/previews/`          | `certificateUrl`                                      |
+| CV                                    | `public/resume.pdf` (this exact name, always)  | the owner's PDF, unmodified                                     | `RESUME_URL` (lib/resume.ts) - every control reads it |
+| Pitch deck / document                 | `public/documents/<kebab-name>.pdf`            | PDF                                                             | the project's `deckUrl`                               |
+| The Build story art                   | `public/images/build/`, `public/images/story/` | JPEG / PNG                                                      | build-story.tsx                                       |
+| Scroll-scrubbed clip (Doom Walk)      | `public/images/doom-walk/{wide,tall}/NN.webp`  | ffmpeg: every frame, wide 960x540 + tall 432x540 crop, WebP q72 | `FRAMES` in doom-walk.tsx                             |
 
 Legacy folders (`images/muba/`, `images/experience/mhw|mytech/`, certificate names in UPPER_CASE) stay where they are:
 moving them breaks paths and tests for no visitor gain. Never add new files to them.

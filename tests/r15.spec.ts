@@ -118,9 +118,12 @@ test('reduced motion: no curtains over the Arena Wall title (FX-75)', async ({ p
 
 /* ---------------------------------------------------------------- owner feedback: hero lens + cursor */
 // R24: the owner asked for the torchlight back (headline dims to 25 %, a round lens is the bright beam).
-// R63: the owner reversed it again: the dimmed headline looked "so blur, like haze" and the lens "like a torchlight";
-// he asked for water instead. The headline now stays full ink and a body of water (lib/liquid.ts) follows the mouse.
-test('hero headline never dims under the mouse; a body of water shows it and follows the mouse', async ({ page }) => {
+// R63: the owner reversed it: the dimmed headline looked "so blur, like haze"; he asked for water.
+// R86 (3 Nov 2026): the water "with the black edge is disgusting" - the torch is back, cleaner: a flat instant dim (no
+// fade), a razor-edged round beam with no rim, the words in it magnified and lifted in blue with a hard ink extrusion.
+test('hero headline: the torch dims it flat, a hard round beam with no rim follows the mouse, and closes on leave', async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
   const h = page.locator('#hero h2').first();
@@ -128,17 +131,36 @@ test('hero headline never dims under the mouse; a body of water shows it and fol
   await page.mouse.move(box.x + 120, box.y + 40);
   await page.mouse.move(box.x + 200, box.y + 60, { steps: 3 });
   await expect(page.locator('#hero [data-hover="true"]')).toHaveCount(1);
-  await page.waitForTimeout(350);
-  expect(await h.evaluate((e) => getComputedStyle(e).opacity)).toBe('1'); // no haze: the headline is never dimmed
-  const water = page.locator('#hero .hero-title[data-liquid]');
-  // a hard clip (a path), never a blurred or faded mask, and never a CSS transition on it (the water is drawn per frame)
-  await expect.poll(() => water.evaluate((e) => (e as HTMLElement).style.clipPath)).toMatch(/^path\(/);
-  expect(await water.evaluate((e) => getComputedStyle(e).transitionProperty)).not.toContain('clip-path');
-  expect(await water.evaluate((e) => getComputedStyle(e).maskImage)).toBe('none');
-  expect(await water.evaluate((e) => getComputedStyle(e).opacity)).toBe('1');
-  // leaving the headline drains the water
+  const beam = page.locator('#hero [data-torch]');
+  // a hard circle (never a blurred or faded mask, never a rim layer), no CSS transition on the clip (drawn per frame)
+  await expect
+    .poll(() => beam.evaluate((e) => (e as HTMLElement).style.clipPath))
+    .toMatch(/^circle\((6[4-9]|[7-9]\d|10\d|110)(\.\d)?px at /);
+  expect(await beam.evaluate((e) => getComputedStyle(e).transitionProperty)).not.toContain('clip-path');
+  expect(await beam.evaluate((e) => getComputedStyle(e).maskImage)).toBe('none');
+  // no water layer or rim on the headline (the portrait keeps its own water)
+  expect(await page.locator('#hero .group\\/headline :is([data-liquid], [data-liquid-rim])').count()).toBe(0);
+  // the dim is flat and instant: no opacity transition that reads as haze
+  expect(await h.evaluate((e) => getComputedStyle(e).opacity)).toBe('0.35');
+  // (the default is "all 0s": what matters is that nothing transitions opacity over a real duration)
+  const fades = await h.evaluate((e) => {
+    const cs = getComputedStyle(e);
+    const props = cs.transitionProperty.split(',').map((s) => s.trim());
+    const durs = cs.transitionDuration.split(',').map((s) => parseFloat(s));
+    return props.filter((p, i) => /^(opacity|all)$/.test(p) && durs[i % durs.length] > 0);
+  });
+  expect(fades).toEqual([]);
+  // the beam follows: its centre ends under the pointer
+  await page.mouse.move(box.x + 420, box.y + 120, { steps: 4 });
+  await expect
+    .poll(async () => {
+      const m = (await beam.evaluate((e) => (e as HTMLElement).style.clipPath)).match(/at ([\d.]+)px ([\d.]+)px/);
+      return m ? Math.round(Math.hypot(+m[1] - 420, +m[2] - 120)) : 999;
+    })
+    .toBeLessThan(3);
+  // leaving the headline closes the beam and lifts the dim
   await page.mouse.move(box.x + box.width + 300, box.y + box.height + 200);
-  await expect.poll(() => water.evaluate((e) => (e as HTMLElement).style.clipPath)).toMatch(/^circle\(0px/);
+  await expect.poll(() => beam.evaluate((e) => (e as HTMLElement).style.clipPath)).toMatch(/^circle\(0px/);
   expect(await h.evaluate((e) => getComputedStyle(e).opacity)).toBe('1');
 });
 
