@@ -130,7 +130,7 @@ export function ProjectIndex({ items }: { items: readonly ProjectIndexItem[] }) 
             <span className="relative font-display text-sm font-extrabold uppercase leading-tight [overflow-wrap:anywhere]">
               {p.title}
             </span>
-            {/* R83: the organiser's logo, on the same plate as on the project card */}
+            {/* R83 / R88: the organiser's plate, the card's strip scaled (name bar over the same fixed logo window) */}
             {p.organiser ? (
               <span className="relative mt-auto block pt-1.5">
                 <OrganiserPlate id={p.organiser} size="sm" />

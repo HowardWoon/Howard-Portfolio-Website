@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { test, expect, devices, type Page } from '@playwright/test';
+import { ORGANISERS, type OrganiserId } from '../lib/organisers';
 
 /**
  * R83 (owner): the About section's content is rebuilt from the page's own Projects / Experience / Honours, with a
@@ -228,3 +229,98 @@ test('organiser logos: every project and its index tile carry the same plate, lo
   expect(heights.length).toBe(7);
   expect(Math.max(...heights) - Math.min(...heights)).toBeLessThanOrEqual(1);
 });
+
+// R88 P4 (owner: "right of the badge tag on one card, under it on another, colliding; left-aligned; no organiser
+// names"): one HOSTED BY strip in the same place on every card, the organiser's name printed, the badge row left alone
+for (const width of [280, 390, 1440]) {
+  test(`organiser strip at ${width}: same size and place under the title on all seven cards, named, clear of the badge row`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await home(page);
+    const cards = await page.locator('[id^="project-"][data-crop]').evaluateAll((els) =>
+      els.map((card) => {
+        // layout boxes relative to the card (the cards unfold / rise with transforms)
+        const box = (el: Element | null) => {
+          if (!el) return null;
+          let x = 0;
+          let y = 0;
+          for (let e = el as HTMLElement | null; e && e !== card; e = e.offsetParent as HTMLElement | null) {
+            x += e.offsetLeft;
+            y += e.offsetTop;
+          }
+          const h = el as HTMLElement;
+          return { x, y, w: h.offsetWidth, h: h.offsetHeight };
+        };
+        const badgeRow = card.querySelector('[data-bp-label^="L1"]');
+        return {
+          id: card.id,
+          org: card.querySelector('[data-organiser]')?.getAttribute('data-organiser') ?? '',
+          text: card.querySelector('[data-organiser]')?.textContent ?? '',
+          inBadgeRow: badgeRow?.querySelectorAll('[data-organiser]').length ?? -1,
+          plates: card.querySelectorAll('[data-organiser]').length,
+          strip: box(card.querySelector('[data-organiser]')),
+          name: box(card.querySelector('[data-organiser] [data-org-name]')),
+          logo: box(card.querySelector('[data-organiser] [data-org-logo]')),
+          title: box(card.querySelector('h3')),
+          subtitle: box(card.querySelector('h3 + p')),
+          badge: box(badgeRow),
+        };
+      }),
+    );
+    expect(cards.length).toBe(7);
+    for (const c of cards) {
+      expect(c.plates, c.id).toBe(1);
+      expect(c.inBadgeRow, c.id).toBe(0);
+      // the organiser's own name from the registry, printed next to the logo
+      expect(c.text.toUpperCase(), c.id).toContain('HOSTED BY');
+      expect(c.text.toUpperCase(), c.id).toContain(ORGANISERS[c.org as OrganiserId].name.toUpperCase());
+      const s = c.strip!;
+      const b = c.badge!;
+      // never overlapping the badge row: it starts below the whole title block
+      expect(s.y, c.id).toBeGreaterThanOrEqual(b.y + b.h);
+      expect(s.y, c.id).toBeGreaterThanOrEqual(c.subtitle!.y + c.subtitle!.h);
+      // the whole name is inside the plate (the Galaxy Fold clipped it once)
+      expect(c.name!.y + c.name!.h, c.id).toBeLessThanOrEqual(s.y + s.h);
+      expect(c.name!.x + c.name!.w, c.id).toBeLessThanOrEqual(s.x + s.w);
+      // full width of the title block, left edges aligned
+      expect(Math.abs(s.x - c.title!.x), c.id).toBeLessThanOrEqual(1);
+    }
+    const spread = (f: (c: (typeof cards)[number]) => number) => {
+      const v = cards.map(f);
+      return Math.max(...v) - Math.min(...v);
+    };
+    expect(spread((c) => c.strip!.w)).toBeLessThanOrEqual(1);
+    expect(spread((c) => c.strip!.h)).toBeLessThanOrEqual(1);
+    expect(spread((c) => c.logo!.w)).toBeLessThanOrEqual(1);
+    expect(spread((c) => c.logo!.h)).toBeLessThanOrEqual(1);
+    // the same gap under the subtitle on every card
+    expect(spread((c) => c.strip!.y - (c.subtitle!.y + c.subtitle!.h))).toBeLessThanOrEqual(1);
+    // the logo is centred in its window, not pushed to the left
+    for (const img of await page.locator('[id^="project-"] [data-org-logo] img').all())
+      expect(await img.evaluate((e) => getComputedStyle(e).objectPosition)).toBe('50% 50%');
+
+    // the index tiles: the same plate scaled, every logo window the same size at the same height in the tile
+    const tiles = await page
+      .getByRole('navigation', { name: 'Project index' })
+      .locator('a')
+      .evaluateAll((as) =>
+        as.map((a) => {
+          const w = a.querySelector('[data-org-logo]') as HTMLElement;
+          const r = w.getBoundingClientRect();
+          const t = a.getBoundingClientRect();
+          return { w: w.offsetWidth, h: w.offsetHeight, fromBottom: Math.round(t.bottom - r.bottom), top: t.top };
+        }),
+      );
+    expect(tiles.length).toBe(7);
+    const rows = new Map<number, typeof tiles>();
+    for (const t of tiles) rows.set(Math.round(t.top), [...(rows.get(Math.round(t.top)) ?? []), t]);
+    for (const row of rows.values()) {
+      expect(Math.max(...row.map((t) => t.w)) - Math.min(...row.map((t) => t.w))).toBeLessThanOrEqual(1);
+      expect(Math.max(...row.map((t) => t.fromBottom)) - Math.min(...row.map((t) => t.fromBottom))).toBeLessThanOrEqual(
+        1,
+      );
+    }
+    expect(Math.max(...tiles.map((t) => t.h)) - Math.min(...tiles.map((t) => t.h))).toBeLessThanOrEqual(1);
+  });
+}

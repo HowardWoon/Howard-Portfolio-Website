@@ -104,7 +104,9 @@ moving them breaks paths and tests for no visitor gain. Never add new files to t
 - [ ] Intake (B); trim to the ink; 160 px tall PNG in `public/images/logos/organisers/`; entry in `lib/organisers.ts`
       with the real size. A mark drawn for a dark ground gets `dark: true` (it sits on an ink chip INSIDE the same
       white plate) - never a different plate.
-- [ ] Shown ONLY through `<OrganiserPlate>`: `md` on the project card (HOSTED BY tab), `sm` on the project index tile.
+- [ ] Shown ONLY through `<OrganiserPlate>`: `md` on the project card (the R88 HOSTED BY strip under the title block, with
+      the organiser's `name` printed - every entry needs its full name; ask Howard if it is missing), `sm` on the project
+      index tile.
       Every project has one; projects that share an organiser share the entry.
 
 ### D6. Certificate

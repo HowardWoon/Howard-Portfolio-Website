@@ -75,6 +75,8 @@ badge row), a white plate with the logo centred in a fixed-height box AND the or
 mono (names from `lib/organisers.ts`; a missing name is asked from Howard, never guessed). Same plate on the index
 tile, scaled. A hover / focus prints the plate (ink offset snaps in). Guard: same box size, same position relative
 to the title on all seven cards; nothing overlaps the badge row (r83 extended).
+**Done in R88** (docs/R88-PHONE-LAG-AND-ORGANISER-STRIP.md): HOSTED BY strip under the title on every card, names
+printed, logos centred; the tile plate scaled. Guard: tests/r83 "organiser strip" at 280 / 390 / 1440.
 
 ### P5. Light-blue taglines and long text - "the light blue font is not obvious and boring; use visuals and labels"
 

@@ -794,7 +794,6 @@ function ProjectCard({ project, index }: { project: ProjectData; index: number }
                       <Award className="w-4 h-4 shrink-0" strokeWidth={2.5} />
                       <span>{project.badge}</span>
                     </div>
-                    <OrganiserPlate id={project.organiser} />
                   </div>
 
                   {/* Title & Subtitle */}
@@ -809,6 +808,10 @@ function ProjectCard({ project, index }: { project: ProjectData; index: number }
                     <p className="text-sm sm:text-base font-mono text-pop-blue font-bold tracking-[0.01em]">
                       {project.subtitle}
                     </p>
+                    {/* R88 P4: the organiser has ONE slot on every card, a full-width strip under the title block */}
+                    <div className="!mt-4">
+                      <OrganiserPlate id={project.organiser} />
+                    </div>
                   </div>
 
                   {/* Narrative Description */}

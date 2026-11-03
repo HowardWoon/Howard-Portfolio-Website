@@ -91,3 +91,47 @@ sections themselves `visible`; section tops, heights and the page height equal t
 after a rotation; a phone has <= 70 composited layers at 0 / 30 / 60 % of the page; anchor jumps on a 1440 desktop
 (Lenis) and a 1024 touch tablet never crash the tab. Proved to fail: baseline layers 116 / 98 / 86; with the re-warm
 blocked the rotated page height is off by 11,990 px; on the first build the crash test failed at the first jump.
+
+## P4 - organiser logos on the project cards
+
+Owner, with screenshots: "logo inconsistent - right of the badge tag on one card, under it on another, colliding with
+it; left-aligned; no organiser names; just a logo for the sake of a logo; layout is ugly". Cause: the R83 plate sat in
+the badge row (a wrapping flex row), so where it landed depended on the badge's length, and the logo was
+`object-left` with no name.
+
+### Research
+
+| Reference                                                                                                                                                                                       | What we took from it                                                                                                                                         |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| superdesign.dev "Brutalism website" style guide (https://www.superdesign.dev/styles/brutalism/website)                                                                                          | Visible structure: every cell of a grid has its own border; mono for labels. The strip is three ruled cells (HOSTED BY / logo / name), not a floating badge. |
+| superdesign.dev "Hardu - Brutalist Tech Edition" (https://superdesign.dev/library/hardu-brutalist-tech-edition)                                                                                 | A mono meta band running edge to edge with rules above and below: the strip spans the whole title block.                                                     |
+| Quackit "Brutalist style footer" template (https://www.quackit.com/html/templates/footers/brutalist_style_footer.cfm)                                                                           | Credits as small uppercase tracked mono: the organiser's name is printed that way beside the logo.                                                           |
+| shadcn.io logo blocks, "featured focal hub" and "dark inset compact strip" (https://www.shadcn.io/blocks/logos-featured-focal-hub, https://www.shadcn.io/blocks/logos-dark-inset-compact-strip) | A labelled divider above / beside a row of logos; logos in equal boxes. We keep the label (HOSTED BY) as its own ink cell.                                   |
+| CentOS sponsor-logo issue (https://git.stg.centos.org/centos/centos.org/issue/2)                                                                                                                | Forcing one height distorts logos of different aspect ratios; give each logo the same BOX and fit it inside (contain, centred), never stretch.               |
+| Bratislava frontend "Cards" guidelines (https://bratislava.github.io/frontend/components/cards)                                                                                                 | Fixed-size blocks for images inside cards so a row of cards lines up.                                                                                        |
+
+Searched 3 Nov 2026 (web search, standard mode): no neo-brutalist reference shows a "hosted by" credit on a project
+card, so the strip combines the brutalist ruled-cell and mono credit patterns with the fixed logo box above.
+
+### Change
+
+- `components/organiser-plate.tsx` rewritten. `md`: a full-width white strip, 3 px ink border, `rounded-xl`: an ink
+  HOSTED BY cell | the logo centred (`object-contain object-center`) in a fixed 112 x 44 px window | a 3 px ink rule |
+  the organiser's name from `lib/organisers.ts` in tracked uppercase mono. Phones stack the HOSTED BY cell on top; under
+  375 px (Galaxy Fold) the name goes under the logo. The body has one fixed height per breakpoint, so every card's
+  strip is the same size. Hover (fine pointers) or keyboard focus anywhere in the card prints it: a 3 px hard ink
+  offset snaps in with no transition; nothing transforms at rest. The logo image is decorative (`alt=""`): the
+  printed name says who it is, so a screen reader hears "HOSTED BY Supervity" once.
+- `sm` (project index tile): the same plate scaled - the name bar over the same fixed logo window, anchored to the
+  tile's bottom, so the logos in a row sit at one height (still `aria-hidden`; the tile names the project).
+- `components/stacked-projects.tsx`: the plate left the badge row; it is the last line of the title block (L2).
+- Every name comes from `lib/organisers.ts`; all five organisers already had their full name, nothing was guessed.
+- Colours: ink / white only (no SIGNAL colour: an organiser is a neutral fact).
+
+### Guard
+
+`tests/r83.spec.ts` "organiser strip at 280 / 390 / 1440": one plate per card, none in the badge row; the strip starts
+below the badge row and the subtitle, left-aligned with the title; the same strip width / height and logo window on all
+seven cards; the same gap under the subtitle; the registry name and HOSTED BY printed; the whole name inside the plate;
+the logo centred (`object-position: 50% 50%`); the tiles' logo windows equal in size and at the same height per row.
+Proved to fail on the old layout (the plate was in the badge row on every card).
