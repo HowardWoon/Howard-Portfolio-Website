@@ -111,7 +111,8 @@ remove the server/client difference.
 
 **B7. Content question (not changed):** `components/honors-section.tsx:111` statCallout label is
 `'Sui Foundation track Track'` - the word "Track" twice, shown on the 3rd-place emblem as "SUI FOUNDATION TRACK TRACK".
-Content is frozen: Howard decides the wording.
+Content is frozen: Howard decides the wording. **Fixed** (owner, 3 Nov 2026: "yes put one track only"):
+`'Sui Foundation Track'`.
 
 **B8. Uploads in the repo root** (not committed, must stay out of git): `CV HOWARD WOON.pdf`,
 `Doctor_Doom_walking_forward_1080p_20261023112200.mp4`, `doctor doom.png`, `logo/`. Ask before moving them.

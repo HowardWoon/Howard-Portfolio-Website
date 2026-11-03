@@ -108,7 +108,7 @@ export const honorsList: HonorItem[] = [
     title: '2ND RUNNER UP (PAYMENTS & STABLECOINS)',
     issuingBody: 'MUBA Blockchain Hackathon 2026',
     period: '2026',
-    statCallout: { value: '3rd', label: 'Sui Foundation track Track' },
+    statCallout: { value: '3rd', label: 'Sui Foundation Track' },
     description:
       'Developed ProofPay, a delivery-linked B2B escrow and settlement platform built on Sui. Addressed B2B trust deadlocks using smart contract milestone releases and AI-driven evidence verification via Gonka Router.',
     highlights: [
