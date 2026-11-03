@@ -5945,3 +5945,33 @@ html[data-motion='calm'] .sp-branch-reach {
     transform: none;
   }
 }
+
+/* ================================================================ R88 P8 skip (components/fx/offscreen-pause.tsx)
+   Off-screen sections skip style, layout and paint. Measured (iPhone 13, 4x CPU, whole page, same session as a HEAD
+   build): Layerize 7.8 s -> 3.3 s, composited layers 96 -> 42 on average, long tasks 195 -> 79. `auto` keeps each section's last rendered
+   size, and the flag is set only after every section has rendered once, so the page height never changes. Containment
+   also clips a section's paint to its box and makes it the containing block of fixed children: the hero, the 3D street
+   (its pseudo-fullscreen frame is fixed) and Contact (its slogan tape crosses the edge) stay out.
+   CRASH (Chrome 156 / Edge, reproduced 2 of 2): a skipped element's OWN ::before / ::after running a view() animation
+   on itself (FX-57 section scan on section[id]::after, FX-79 dot plane on .fx-dot-plane::before) kills the tab on an
+   animated jump (Lenis) or on a 1024 px tablet. So the sections that carry them (About, Projects, Experience, Honours)
+   skip their one wrapper child instead, and keep their pseudo-elements; The Build, the Doom Walk and the Arena Wall
+   have neither and skip whole. The wrapper's paint keeps a 24 px margin for hard shadows on its edge.
+   The browser records the "last rendered size" only while `contain-intrinsic-size: auto` applies, so that part is
+   always on (it changes nothing until the skip is armed). */
+:is(.bs-section, .dw-section, .fx-wall),
+:is(#about, #projects, #experience, #honors) > * {
+  contain-intrinsic-size: auto 1500px;
+}
+html[data-skip='on'] :is(.bs-section, .dw-section, .fx-wall),
+html[data-skip='on'] :is(#about, #projects, #experience, #honors) > * {
+  content-visibility: auto;
+  overflow-clip-margin: 24px;
+}
+/* a printout shows every section, whatever is on screen */
+@media print {
+  html[data-skip='on'] :is(.bs-section, .dw-section, .fx-wall),
+  html[data-skip='on'] :is(#about, #projects, #experience, #honors) > * {
+    content-visibility: visible;
+  }
+}

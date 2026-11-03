@@ -132,6 +132,9 @@ for (const path of PATHS) {
     });
 
     const slug = `${path === '/' ? 'home' : path.replace(/\//g, '_').replace(/^_/, '')}-${key}`;
+    // R88: off-screen sections skip rendering (html[data-skip]); a full-page capture paints only what is rendered, so
+    // the skip is lifted for the shot (each section then renders at its remembered size, nothing moves)
+    await page.addStyleTag({ content: 'html[data-skip] * { content-visibility: visible !important; }' });
     await page.screenshot({ path: `${OUT}/screens/${slug}.png`, fullPage: true });
 
     if (AXE_AT.has(key)) {

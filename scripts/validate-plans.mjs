@@ -474,7 +474,32 @@ has(
   'command palette can reach every section',
   'dock hides while scrolling down',
 );
-nowhere('R9', 'NO-CV', 'content-visibility is never used (breaks anchors + Lenis)', /content-visibility/);
+// R9 declined content-visibility: guessed sizes sent the Honours link ~10,500 px off. R88 (P8 phone lag) brings it back
+// ONLY as the armed skip in globals.css - every size remembered before it is armed (tests/r88 checks the geometry), and
+// never on an element that owns a view() ::before / ::after (Chrome 156 crashed the tab, 30-design-system E52).
+nowhere('R9', 'NO-CV', 'content-visibility only in the R88 skip (globals.css)', /content-visibility/, [
+  'app/globals.css',
+  'components/fx/offscreen-pause.tsx',
+]);
+custom(
+  'R9',
+  'P8-CV',
+  'every content-visibility rule is the armed R88 skip, never on About / Projects / Experience / Honours themselves',
+  () => {
+    const css = read('app/globals.css') ?? '';
+    const rules = [...css.matchAll(/([^{}]*)\{[^{}]*content-visibility[^{}]*\}/g)].map((m) => m[1].trim());
+    if (rules.length === 0) return 'app/globals.css: the R88 skip rule is missing';
+    for (const sel of rules) {
+      const parts = sel.split(/,(?![^(]*\))/).map((s) => s.trim());
+      for (const p of parts) {
+        if (!p.startsWith("html[data-skip='on']")) return `ungated content-visibility on "${p}"`;
+        if (/#(about|projects|experience|honors)\)\s*$/.test(p))
+          return `"${p}" skips a section that owns view() pseudo-elements`;
+      }
+    }
+    return css.includes('contain-intrinsic-size: auto') ? true : 'contain-intrinsic-size: auto is missing';
+  },
+);
 
 /* ================================================================================================ R10 */
 has(

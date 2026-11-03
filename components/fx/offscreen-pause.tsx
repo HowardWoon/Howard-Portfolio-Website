@@ -35,7 +35,51 @@ export function OffscreenPause() {
     const main = document.querySelector('main');
     const mo = new MutationObserver(scan);
     if (main) mo.observe(main, { childList: true, subtree: false });
+
+    // R88 P8: off-screen sections skip style, layout and paint (globals.css "R88 skip": content-visibility auto). On a
+    // phone the compositor walked every paint chunk of the 58,000 px page on every scroll frame (Layerize 7.8 s per
+    // scroll at 4x CPU, 3.3 s with the skip). A skipped section keeps the size it was LAST RENDERED at, so the skip is
+    // armed only after every section has rendered once with the web fonts in (page height and section tops exactly as
+    // before), and anything that changes section heights (width, a desktop window's height, Calm / lite / X-ray / skim)
+    // lets them all render once more first.
+    const root = document.documentElement;
+    let raf = 0;
+    let alive = true;
+    const arm = () => {
+      cancelAnimationFrame(raf);
+      // frame 1 lays the sections out and records their size; frame 2 arms the skip
+      raf = requestAnimationFrame(() => {
+        raf = requestAnimationFrame(() => {
+          root.dataset.skip = 'on';
+        });
+      });
+    };
+    const rewarm = () => {
+      delete root.dataset.skip;
+      arm();
+    };
+    let w = window.innerWidth;
+    let h = window.innerHeight;
+    const fine = window.matchMedia('(pointer: fine)');
+    const onResize = () => {
+      // a phone's toolbar changes the height on every scroll; vh there is the large viewport and does not change
+      const changed = window.innerWidth !== w || (fine.matches && window.innerHeight !== h);
+      w = window.innerWidth;
+      h = window.innerHeight;
+      if (changed) rewarm();
+    };
+    const modes = new MutationObserver(rewarm);
+    modes.observe(root, { attributeFilter: ['data-motion', 'data-fx-tier', 'data-xray-mode', 'data-skim'] });
+    window.addEventListener('resize', onResize);
+    document.fonts.ready.then(() => {
+      if (alive) arm();
+    });
     return () => {
+      alive = false;
+      cancelAnimationFrame(raf);
+      modes.disconnect();
+      window.removeEventListener('resize', onResize);
+      delete root.dataset.skip;
       mo.disconnect();
       io.disconnect();
       watched.forEach((t) => delete t.dataset.offscreen);

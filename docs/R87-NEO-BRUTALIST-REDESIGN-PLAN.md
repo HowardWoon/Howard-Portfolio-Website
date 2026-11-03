@@ -101,6 +101,8 @@ Add a test that adds a fake item to each registry (in a test build) and checks i
 Layerize is the biggest cost (8 s per phone scroll at 4x CPU): 105 - 181 layers promoted by "overlaps other composited
 content". Find the composited element under the page (dot-grid canvas / fixed layers), stop the overlap promotion,
 measure layers and long tasks before / after on the same session's baseline.
+**Done in R88** (docs/R88-PHONE-LAG-AND-ORGANISER-STRIP.md): the overlap layers were not the cost; off-screen sections now
+skip rendering (content-visibility). Layerize 7.8 -> 3.3 s, layers 96 -> 42, long tasks 195 -> 79. Guard: tests/r88.
 
 ## 3. Order
 

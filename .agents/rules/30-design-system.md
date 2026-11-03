@@ -233,6 +233,18 @@ Rules:
     18,000 px Projects). A pseudo-element inside `:is()` voids the whole selector list - give it its own selector. The
     cat tucks into the edge when a control lies under it at rest; its check is 3 x 3 hit tests (7 x 7 cost 8 s of
     HitTest per phone scroll at 4x CPU) - measure any per-rest work with a CDP trace before and after.
+52. R88 (P8 phone lag, docs/R88-PHONE-LAG-AND-ORGANISER-STRIP.md): Layerize walks EVERY paint chunk of the
+    page on every frame, on screen or not; the overlap layers were not the cost (hiding the fixed tide desk that promotes
+    the page root changed Layerize by 0 %). Off-screen sections skip style / layout / paint (`html[data-skip='on']`,
+    `content-visibility: auto`, armed by components/fx/offscreen-pause.tsx): Layerize 7.8 -> 3.3 s, layers 96 -> 42,
+    long tasks 195 -> 79 per phone scroll at 4x CPU. Rules: (a) `contain-intrinsic-size: auto` must apply BEFORE the
+    skip is armed (the size is remembered only while it applies; gated, the page fell from 59,396 to 20,052 px);
+    (b) anything that changes section heights while skipped (width, desktop height, Calm / lite / X-ray / skim) renders
+    them once first; (c) NEVER skip an element whose own ::before / ::after runs a view() animation (FX-57 section scan,
+    FX-79 dot plane): Chrome 156 and Edge kill the tab on a Lenis jump or a 1024 px tablet - those sections skip their
+    wrapper child instead; (d) a section with a `position: fixed` child (the 3D street) or paint over its edge (Contact)
+    is never skipped. A new section joins the list only after the fixed / overflow audit and the r88 crash test.
+    Guards: tests/r88, validate-plans NO-CV + P8-CV.
 
 ## F. Definition of done additions
 
