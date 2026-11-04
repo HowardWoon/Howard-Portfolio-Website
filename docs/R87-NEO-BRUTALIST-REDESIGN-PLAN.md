@@ -59,6 +59,9 @@ frame and a frame counter. The ledger leaves the left / right columns: it become
 (printed receipt that feeds out with the scroll, one row per honour, medal value in its SIGNAL chip), so the clip
 keeps the full width. Reversible on scroll up. Content: the honours list as it is (`LEDGER`).
 
+Status: built in R89 (roller gate of paper slats + one receipt fed by a print head beside the screen from 1024 px,
+under it on narrower screens); plan, research and guards in `docs/R89-DOOM-WALK-REDESIGN.md`.
+
 ### P3. Boot screen - "childish and boring" (owner confirmed this is the yellow boot screen)
 
 Proposal: keep the words; make it a mechanical print job: a paper sheet feeds up from the bottom edge, each

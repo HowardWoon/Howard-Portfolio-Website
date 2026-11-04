@@ -78,7 +78,7 @@ moving them breaks paths and tests for no visitor gain. Never add new files to t
 - [ ] `honorsList` (honors-section.tsx): copy the nearest sibling. `signal` by SIGNAL KEY (podium = won, qualifier =
       finalist / qualified, academic = grades); `emblem` by kind (gold / silver / bronze / star / finalist / seal /
       ticket / badge); `statCallout.value` <= 6 characters (it is drawn on the emblem); certificate per D6.
-- [ ] Every place that repeats honours: Victor's Ledger `LEDGER` (lib/ledger.ts, shown by the Doom Walk, same order as Honours), the release
+- [ ] Every place that repeats honours: Victor's Ledger `LEDGER` (lib/ledger.ts, printed row by row on the Doom Walk receipt, same order as Honours; a new row needs no other change), the release
       card `AWARDS` (max three rows, the newest podiums), the About Build Sheet podium counter (about-section.tsx, this
       year's podiums), the hero ticker (bikebear-hero.tsx: ONLY the newest result, tagged LATEST), the logo wall
       `REEL_ROWS` ticket (arena-reel.tsx), the highlight tape (portfolio-page.tsx), and the project's `badge` when the

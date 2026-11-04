@@ -4,6 +4,7 @@ import { useEffect, useRef, type CSSProperties } from 'react';
 import { useCalm } from '@/lib/motion-pref';
 import { LEDGER } from '@/lib/ledger';
 import { rereadScroll, scrollFrame } from '@/lib/scroll-frame';
+import '@/app/doom-walk.css';
 
 /**
  * R83 Doom Walk (owner: "the character walks toward the viewer as I scroll down, walks back when I scroll up, and my
@@ -13,24 +14,32 @@ import { rereadScroll, scrollFrame } from '@/lib/scroll-frame';
  * sequence technique (Apple product pages, GSAP ScrollTrigger demos): a <video> scrubbed by currentTime decodes to the
  * nearest keyframe and stutters, worst on iOS. The frames load only when the section is near (nearest-first order,
  * the canvas draws the closest frame already decoded), and a frame is drawn only when its index changes.
- * Everything else reads the playhead like The Build (.bs-seg, --p written only to the layers whose window it crossed):
- * the honours print one by one as he approaches (two columns on wide screens, one subtitle card at a time below the
- * screen elsewhere), and the name plate stamps on at the close-up. Transform / opacity / clip only; no layout per frame.
- * Reduced motion / Calm / the lite tier: no pinning, the close-up frame and every record shown as a still.
+ *
+ * R89 (owner: the clip "just slowly floats in ... childish", the honour cards left and right "awkward"; "transition is
+ * the most important"; docs/R89-DOOM-WALK-REDESIGN.md): nothing fades. The screen stands solid behind a ROLLER GATE of
+ * paper slats that roll up bottom first with the scroll (each slat its own .dw-seg window, --dw-p written only to the
+ * layers whose window it crossed, like The Build); the film gate HUD (frame counter + tick strip) is drawn INTO the
+ * canvas with the frame, so it costs no DOM write. Victor's Ledger is ONE receipt that a print head feeds out row by
+ * row as he walks: its transform is written only when the number of printed rows changes, in px measured on resize,
+ * and the CSS steps it like a motor. Transform only; no layout per frame. Scroll up rewinds all of it.
+ * Reduced motion / Calm / the lite tier / landscape phones under 480 px tall: no pinning, the gate open, the close-up
+ * frame and the whole receipt as a still.
  */
 
 const FRAMES = 59;
 const frameSrc = (set: 'wide' | 'tall', i: number) => `/images/doom-walk/${set}/${String(i).padStart(2, '0')}.webp`;
-/** the walk runs over this part of the playhead (the intro before it, the name plate after it) */
-const WALK = [0.04, 0.88] as const;
-/** a layer's window on the playhead, read by .bs-seg in globals.css */
-const seg = (a: number, b: number) => ({ '--a': a, '--b': b }) as CSSProperties;
-/** record i prints while he walks: the twelve windows share the walk evenly */
-const rowSeg = (i: number) => {
-  const step = (0.8 - 0.12) / LEDGER.length;
-  return seg(0.12 + i * step, 0.12 + (i + 1) * step);
-};
-const half = Math.ceil(LEDGER.length / 2);
+/** the walk runs over this part of the playhead (the gate before it, the name plate after it) */
+const WALK = [0.12, 0.9] as const;
+/** the receipt prints its rows over this part of the walk, one mark per honour */
+const PRINT = [0.16, 0.86] as const;
+const SLATS = 8;
+/** a layer's window on the playhead, read by .dw-seg in app/doom-walk.css */
+const seg = (a: number, b: number) => ({ '--dw-a': a, '--dw-b': b }) as CSSProperties;
+/** slat k (0 = the bottom one) rolls up in its own short window: a hard, constant-speed slam, bottom first */
+const slatSeg = (k: number) =>
+  ({ ...seg(0.01 + k * 0.0145, 0.04 + k * 0.0145), '--i': SLATS - 1 - k }) as CSSProperties;
+/** the playhead at which honour i is printed */
+const mark = (i: number) => PRINT[0] + (i * (PRINT[1] - PRINT[0])) / LEDGER.length;
 
 /** load order: the two ends first, then ever finer passes, so a fast scroll always has a near frame to draw */
 const ORDER = (() => {
@@ -39,23 +48,32 @@ const ORDER = (() => {
   return out;
 })();
 
+type DoomWindow = Window & { __doomFrame?: number; __doomFed?: number; __doomFeeds?: number };
+
 export default function DoomWalk() {
   const trackRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const winRef = useRef<HTMLDivElement>(null);
+  const paperRef = useRef<HTMLOListElement>(null);
   const calm = useCalm();
 
   useEffect(() => {
     const track = trackRef.current;
     const stage = stageRef.current;
     const canvas = canvasRef.current;
-    if (!track || !stage || !canvas) return;
+    const win = winRef.current;
+    const paper = paperRef.current;
+    if (!track || !stage || !canvas || !win || !paper) return;
     const ctx = canvas.getContext('2d', { alpha: false });
     if (!ctx) return;
+    const w = window as DoomWindow;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
     const tallMq = window.matchMedia('(max-width: 699px)');
+    // 20-H: a landscape phone has no room for a pinned stage - it gets the readable still
+    const shortMq = window.matchMedia('(orientation: landscape) and (max-height: 480px)');
     const lite = () => document.documentElement.dataset.fxTier === 'lite';
-    const still = () => calm || reduce.matches || lite();
+    const still = () => calm || reduce.matches || shortMq.matches || lite();
 
     let set: 'wide' | 'tall' = tallMq.matches ? 'tall' : 'wide';
     let imgs: (HTMLImageElement | null)[] = [];
@@ -65,22 +83,60 @@ export default function DoomWalk() {
     let raf = 0;
     let last = -1;
     let near = false;
+    let mono = 'monospace';
 
-    const segs = Array.from(stage.querySelectorAll<HTMLElement>('.bs-seg'), (el) => ({
+    const segs = Array.from(stage.querySelectorAll<HTMLElement>('.dw-seg'), (el) => ({
       el,
-      a: parseFloat(el.style.getPropertyValue('--a')) || 0,
-      b: parseFloat(el.style.getPropertyValue('--b')) || 1,
+      a: parseFloat(el.style.getPropertyValue('--dw-a')) || 0,
+      b: parseFloat(el.style.getPropertyValue('--dw-b')) || 1,
     }));
 
     const fit = () => {
       const r = canvas.getBoundingClientRect();
       const dpr = Math.min(2, window.devicePixelRatio || 1);
-      const w = Math.max(1, Math.round(r.width * dpr));
-      const h = Math.max(1, Math.round(r.height * dpr));
-      if (canvas.width !== w || canvas.height !== h) {
-        canvas.width = w;
-        canvas.height = h;
+      const cw = Math.max(1, Math.round(r.width * dpr));
+      const ch = Math.max(1, Math.round(r.height * dpr));
+      if (canvas.width !== cw || canvas.height !== ch) {
+        canvas.width = cw;
+        canvas.height = ch;
         drawn = -1;
+      }
+      mono = getComputedStyle(canvas).getPropertyValue('--font-mono').trim() || 'monospace';
+    };
+    /** the film gate HUD, burned into the frame: a FRAME NN / 59 chip and one tick per frame along the bottom edge */
+    const hud = (pick: number) => {
+      const cw = canvas.width;
+      const ch = canvas.height;
+      const u = cw / Math.max(1, canvas.getBoundingClientRect().width || cw);
+      const fs = Math.round(Math.max(13, Math.min(16, (cw / u) * 0.024)) * u);
+      const pad = Math.round(8 * u);
+      const label = `FRAME ${String(pick + 1).padStart(2, '0')} / ${FRAMES}`;
+      ctx.font = `800 ${fs}px ${mono}`;
+      ctx.textBaseline = 'middle';
+      const tw = ctx.measureText(label).width;
+      const bx = pad;
+      const by = pad;
+      const bw = Math.round(tw + pad * 1.5);
+      const bh = Math.round(fs * 1.7);
+      const sh = Math.round(3 * u);
+      ctx.fillStyle = '#0a0a0a';
+      ctx.fillRect(bx + sh, by + sh, bw, bh);
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(bx, by, bw, bh);
+      ctx.fillStyle = '#0a0a0a';
+      ctx.fillText(label, bx + pad * 0.75, by + bh / 2 + u);
+      // tick strip: played frames are tall white bars, the rest short ones
+      const x0 = pad;
+      const span = cw - pad * 2;
+      const step = span / FRAMES;
+      const bar = Math.max(u, Math.floor(step * 0.5));
+      const base = ch - pad;
+      ctx.fillStyle = '#0a0a0a';
+      ctx.fillRect(0, base - Math.round(12 * u), cw, Math.round(12 * u) + pad);
+      ctx.fillStyle = '#fff';
+      for (let i = 0; i < FRAMES; i++) {
+        const h = Math.round((i <= pick ? 8 : 3) * u);
+        ctx.fillRect(Math.round(x0 + i * step), base - h, bar, h);
       }
     };
     const draw = () => {
@@ -95,12 +151,13 @@ export default function DoomWalk() {
       const cw = canvas.width;
       const ch = canvas.height;
       const s = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
-      const w = img.naturalWidth * s;
-      const h = img.naturalHeight * s;
-      ctx.drawImage(img, (cw - w) / 2, (ch - h) / 2, w, h);
+      const iw = img.naturalWidth * s;
+      const ih = img.naturalHeight * s;
+      ctx.drawImage(img, (cw - iw) / 2, (ch - ih) / 2, iw, ih);
+      hud(pick);
       drawn = pick;
       // read by tests; a JS property, not an attribute (an attribute write restyles the stage on every frame)
-      (window as Window & { __doomFrame?: number }).__doomFrame = pick;
+      w.__doomFrame = pick;
     };
     const load = () => {
       if (loading) return;
@@ -129,6 +186,43 @@ export default function DoomWalk() {
       for (let k = 0; k < 4; k++) pump();
     };
 
+    // the receipt: where the paper must stand for each number of printed rows (px, measured on resize, never per frame)
+    let feedAt: number[] = [];
+    let cutAt: number[] = [];
+    let fed = -1;
+    const rows = Array.from(paper.querySelectorAll<HTMLElement>('.dw-row'));
+    const measureFeed = () => {
+      // phones show the two newest rows: the window is as tall as the two tallest rows
+      if (!track.dataset.static && tallLedger()) {
+        const hs = rows.map((r) => r.offsetHeight).sort((a, b) => b - a);
+        win.style.setProperty('--win', `${(hs[0] ?? 0) + (hs[1] ?? 0)}px`);
+      } else win.style.removeProperty('--win');
+      const wh = win.clientHeight;
+      feedAt = [wh];
+      for (const r of rows) feedAt.push(wh - (r.offsetTop + r.offsetHeight));
+      // the last row brings the tear with it
+      feedAt[rows.length] = Math.min(feedAt[rows.length], wh - paper.offsetHeight);
+      // a row the window's top edge would cut is blanked (paper, no sliced words): how many for each feed position
+      cutAt = feedAt.map((y) => rows.filter((r) => r.offsetTop + y < -1).length);
+      fed = -1;
+    };
+    const ledgerMq = window.matchMedia('(max-width: 1023px)');
+    const tallLedger = () => ledgerMq.matches;
+    const feed = (p: number) => {
+      let n = 0;
+      if (track.dataset.static) n = LEDGER.length;
+      else while (n < LEDGER.length && p >= mark(n)) n++;
+      if (n === fed) return;
+      fed = n;
+      paper.style.transform = track.dataset.static ? '' : `translateY(${feedAt[n] ?? 0}px)`;
+      const cut = track.dataset.static ? 0 : (cutAt[n] ?? 0);
+      rows.forEach((r, i) => {
+        if (r.hasAttribute('data-cut') !== i < cut) r.toggleAttribute('data-cut', i < cut);
+      });
+      w.__doomFed = n;
+      w.__doomFeeds = (w.__doomFeeds ?? 0) + 1;
+    };
+
     let trackTop = 0;
     let trackH = 0;
     const measure = () => {
@@ -136,29 +230,38 @@ export default function DoomWalk() {
       const r = track.getBoundingClientRect();
       trackTop = r.top + scrollFrame().y;
       trackH = r.height;
+      measureFeed();
     };
     const setP = (p: number) => {
       if (Math.abs(p - last) < 0.0004) return;
       const prev = last < 0 ? -1 : last;
       last = p;
       const v = p.toFixed(4);
-      stage.style.setProperty('--p', v);
+      stage.style.setProperty('--dw-p', v);
       for (const s of segs) {
         if ((p <= s.a && prev <= s.a) || (p >= s.b && prev >= s.b)) continue;
-        s.el.style.setProperty('--p', v);
+        s.el.style.setProperty('--dw-p', v);
       }
-      const w = Math.min(1, Math.max(0, (p - WALK[0]) / (WALK[1] - WALK[0])));
-      want = Math.round(w * (FRAMES - 1));
+      const k = Math.min(1, Math.max(0, (p - WALK[0]) / (WALK[1] - WALK[0])));
+      want = Math.round(k * (FRAMES - 1));
       draw();
+      feed(p);
     };
     const update = () => {
       raf = 0;
       if (still()) {
-        track.dataset.static = 'on';
+        if (!track.dataset.static) {
+          track.dataset.static = 'on';
+          measureFeed();
+        }
         setP(1);
+        feed(1);
         return;
       }
-      delete track.dataset.static;
+      if (track.dataset.static) {
+        delete track.dataset.static;
+        measure();
+      }
       const { y, vh } = scrollFrame();
       const span = trackH - vh;
       setP(span > 0 ? Math.min(1, Math.max(0, (y - trackTop) / span)) : 1);
@@ -186,10 +289,13 @@ export default function DoomWalk() {
         if (still()) load();
         else rest();
       }
+      if (still()) track.dataset.static = 'on';
+      else delete track.dataset.static;
       measure();
       fit();
       drawn = -1;
       draw();
+      last = -1;
       schedule();
     };
     const io = new IntersectionObserver(
@@ -211,15 +317,27 @@ export default function DoomWalk() {
     });
     ro.observe(document.body);
     ro.observe(canvas);
+    const mqs = [reduce, tallMq, shortMq, ledgerMq];
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', relayout);
-    reduce.addEventListener('change', relayout);
-    tallMq.addEventListener('change', relayout);
-    if (still()) load();
+    for (const mq of mqs) mq.addEventListener('change', relayout);
+    // the HUD is drawn in the site's mono face: draw again once it has loaded
+    let alive = true;
+    void document.fonts?.ready.then(() => {
+      if (!alive) return;
+      fit();
+      drawn = -1;
+      draw();
+    });
+    if (still()) {
+      track.dataset.static = 'on';
+      load();
+    }
     measure();
     fit();
     update();
     return () => {
+      alive = false;
       cancelAnimationFrame(raf);
       window.clearTimeout(roT);
       io.disconnect();
@@ -227,25 +345,17 @@ export default function DoomWalk() {
       window.removeEventListener('scroll', onScroll);
       window.clearTimeout(restT);
       window.removeEventListener('resize', relayout);
-      reduce.removeEventListener('change', relayout);
-      tallMq.removeEventListener('change', relayout);
+      for (const mq of mqs) mq.removeEventListener('change', relayout);
       set = tallMq.matches ? 'tall' : 'wide';
       imgs = [];
     };
   }, [calm]);
 
-  const row = (r: (typeof LEDGER)[number], i: number) => (
-    <li key={r.issuer} className="bs-seg dw-row" style={rowSeg(i)}>
-      <span className={`dw-value ${r.fill}`}>{r.value}</span>
-      <span className="dw-issuer">{r.issuer}</span>
-    </li>
-  );
-
   return (
     <section aria-labelledby="doom-walk-title" className="dw-section relative w-full bg-ink text-white">
       <div ref={trackRef} className="dw-track relative">
-        <div ref={stageRef} className="dw-stage" style={{ '--p': 0 } as CSSProperties}>
-          <div className="bs-seg dw-head" style={seg(0, 0.06)}>
+        <div ref={stageRef} className="dw-stage" style={{ '--dw-p': 0 } as CSSProperties}>
+          <div className="dw-head">
             <span className="dw-kicker">DOOM MODE</span>
             <h2 id="doom-walk-title" className="dw-title">
               Victor&apos;s Ledger
@@ -254,41 +364,52 @@ export default function DoomWalk() {
           </div>
 
           <div className="dw-grid">
-            <ol aria-label="Honours, part 1" className="dw-col">
-              {LEDGER.slice(0, half).map((r, i) => row(r, i))}
-            </ol>
-
-            <figure className="bs-seg dw-screen" style={seg(0, 0.08)}>
+            <figure className="dw-screen">
+              {(['tl', 'tr', 'bl', 'br'] as const).map((c) => (
+                <span key={c} aria-hidden className="dw-reg" data-c={c} />
+              ))}
               <span aria-hidden className="dw-sprockets" data-side="l" />
-              <canvas
-                ref={canvasRef}
-                role="img"
-                aria-label="Howard as a chibi Doctor Doom, walking toward the viewer"
-                className="dw-canvas"
-              />
+              <div className="dw-film">
+                <canvas
+                  ref={canvasRef}
+                  role="img"
+                  aria-label="Howard as a chibi Doctor Doom, walking toward the viewer"
+                  className="dw-canvas"
+                />
+                {/* the roller gate: paper slats over the film, rolled up bottom first by the scroll */}
+                <span aria-hidden className="dw-gate">
+                  {Array.from({ length: SLATS }, (_, k) => (
+                    <span key={k} className="dw-seg dw-slat" data-k={k} style={slatSeg(k)} />
+                  ))}
+                </span>
+              </div>
               <span aria-hidden className="dw-sprockets" data-side="r" />
-              <span aria-hidden className="bs-seg dw-plate" style={seg(0.86, 0.95)}>
+              <span aria-hidden className="dw-seg dw-plate" style={seg(0.9, 0.96)}>
                 <span className="dw-rivet" />
                 HOWARD WOON · DOOM MODE
                 <span className="dw-rivet" />
               </span>
             </figure>
 
-            <ol aria-label="Honours, part 2" className="dw-col" start={half + 1}>
-              {LEDGER.slice(half).map((r, i) => row(r, i + half))}
-            </ol>
-
-            {/* narrower screens: one record at a time under the screen, like a subtitle */}
-            <div aria-hidden className="dw-subs">
-              {LEDGER.map((r, i) => (
-                <div key={r.issuer} className="bs-seg dw-sub" style={rowSeg(i)}>
-                  <span className={`dw-value ${r.fill}`}>{r.value}</span>
-                  <span className="dw-issuer">{r.issuer}</span>
-                  <span className="dw-sub-n">
-                    {String(i + 1).padStart(2, '0')} / {LEDGER.length}
-                  </span>
-                </div>
-              ))}
+            {/* Victor's Ledger: ONE receipt fed out of a print head, one row per honour as he walks */}
+            <div className="dw-printer">
+              <div ref={winRef} className="dw-window">
+                <ol ref={paperRef} aria-label="Victor's Ledger" className="dw-paper">
+                  {LEDGER.map((r, i) => (
+                    <li key={r.issuer} className="dw-row">
+                      <span className="dw-n">{String(i + 1).padStart(2, '0')}</span>
+                      <span className="dw-issuer">{r.issuer}</span>
+                      <span aria-hidden className="dw-lead" />
+                      <span className={`dw-seg dw-value ${r.fill}`} style={seg(mark(i), mark(i) + 0.02)}>
+                        {r.value}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              <span aria-hidden className="dw-head-bar">
+                <span className="dw-slot" />
+              </span>
             </div>
           </div>
         </div>
