@@ -84,6 +84,7 @@ export default function DoomWalk() {
     let last = -1;
     let near = false;
     let mono = 'monospace';
+    let zoom = 1;
 
     const segs = Array.from(stage.querySelectorAll<HTMLElement>('.dw-seg'), (el) => ({
       el,
@@ -102,12 +103,15 @@ export default function DoomWalk() {
         drawn = -1;
       }
       mono = getComputedStyle(canvas).getPropertyValue('--font-mono').trim() || 'monospace';
+      // the R50 zoom unit: a zoomed-out window draws the HUD at the same scale as the type around it
+      zoom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--u')) || 1;
     };
     /** the film gate HUD, burned into the frame: a FRAME NN / 59 chip and one tick per frame along the bottom edge */
     const hud = (pick: number) => {
       const cw = canvas.width;
       const ch = canvas.height;
-      const u = cw / Math.max(1, canvas.getBoundingClientRect().width || cw);
+      const dpr = cw / Math.max(1, canvas.getBoundingClientRect().width || cw);
+      const u = dpr * zoom;
       const fs = Math.round(Math.max(13, Math.min(16, (cw / u) * 0.024)) * u);
       const pad = Math.round(8 * u);
       const label = `FRAME ${String(pick + 1).padStart(2, '0')} / ${FRAMES}`;

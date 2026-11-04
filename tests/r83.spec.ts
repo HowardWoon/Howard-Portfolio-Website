@@ -225,6 +225,8 @@ for (const [width, height] of [
   [768, 1024],
   [1440, 900],
   [1920, 960],
+  // R89: a browser zoom-out (R50 --u = 2): the receipt column grows with the type, no word splits (tests/r62)
+  [3840, 1900],
 ] as const) {
   test(`Doom Walk at ${width}x${height}: title, screen, plate and receipt never overlap and stay on screen`, async ({
     page,
