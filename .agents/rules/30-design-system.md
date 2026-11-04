@@ -245,7 +245,9 @@ Rules:
     wrapper child instead; (d) a section with a `position: fixed` child (the 3D street) or paint over its edge (Contact)
     is never skipped; (e) touch-primary devices only (`(hover: none) and (pointer: coarse)`, where Lenis never runs):
     on desktop the command palette's Lenis jumps still crashed Chrome 156 and a window height change moved the page
-    529 px (r36, r53 in the pre-push suite). A new section joins the list only after the fixed / overflow audit and the
+    529 px (r36, r53 in the pre-push suite); (f) a skipped subtree is not restyled: arm the skip only after the
+    off-screen pause marks (`data-offscreen`) are styled, or a section skipped first keeps its pulses "running" (r86 B3).
+    A new section joins the list only after the fixed / overflow audit and the
     r88 crash test.
     Guards: tests/r88, validate-plans NO-CV + P8-CV.
 

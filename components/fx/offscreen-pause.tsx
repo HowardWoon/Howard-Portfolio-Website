@@ -12,8 +12,11 @@ export function OffscreenPause() {
     // sections, the hero (ticker, sticker, triangle) and the tech marquee wrapper (P2-12); .fx-wall: FX-71 Arena Wall
     const SELECTOR = 'main section[id], main > div > section, [data-offscreen-pause], .fx-wall, footer';
     const watched = new Set<HTMLElement>();
+    let seen: () => void = () => undefined;
+    const firstMarks = new Promise<void>((resolve) => (seen = resolve));
     const io = new IntersectionObserver(
       (entries) => {
+        seen();
         for (const e of entries) {
           const el = e.target as HTMLElement;
           if (e.isIntersecting) delete el.dataset.offscreen;
@@ -72,7 +75,9 @@ export function OffscreenPause() {
     if (touch) {
       modes.observe(root, { attributeFilter: ['data-motion', 'data-fx-tier', 'data-xray-mode', 'data-skim'] });
       window.addEventListener('resize', onResize);
-      document.fonts.ready.then(() => {
+      // R88: and only after the first off-screen marks are styled - a skipped subtree is not restyled, so a section
+      // skipped before its mark kept its infinite pulses "running" (r86 B3)
+      Promise.all([document.fonts.ready, firstMarks]).then(() => {
         if (alive) arm();
       });
     }

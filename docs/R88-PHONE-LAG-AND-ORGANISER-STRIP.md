@@ -85,6 +85,15 @@ render exactly as before (no skip, no change). The phone numbers above were meas
 device, so they stand; desktops get no gain from P8 this round. The r83 "About pillars" failure (it reads `innerText`, which is
 empty for a skipped section) is gone with it: that test runs at 1440. Tests that read text on a phone use `textContent`.
 
+### Second pre-push run
+
+Blocked by 6 tests. Each rerun alone 3x on R88 and on the HEAD baseline: r53 badge pit (R88 1, baseline 2 fails),
+r62 contact heading (2 / 1), r63 water splash (0 / 1), r16b new tab (0 / 0) and smoke "Return to Portfolio" (1 of 6 on
+each) fail on both builds - load / timing flakes that were there before. One was R88's: r86 B3 on a phone (3 of 3, 0 on
+the baseline). The skip was armed before the pause layer's IntersectionObserver had marked The Build `data-offscreen`;
+a skipped subtree is not restyled, so its infinite pulses kept reporting "running". The skip now waits for the first
+marks (and the web fonts), then two frames: 3 of 3 pass.
+
 ### Same look
 
 Viewport screenshots at 13 scroll positions, 390 and 1440, `?fxtier=full` (the baseline's own frame governor dropped
