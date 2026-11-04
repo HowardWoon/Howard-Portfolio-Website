@@ -294,8 +294,9 @@ for (const width of [280, 390, 1440]) {
     expect(spread((c) => c.strip!.h)).toBeLessThanOrEqual(1);
     expect(spread((c) => c.logo!.w)).toBeLessThanOrEqual(1);
     expect(spread((c) => c.logo!.h)).toBeLessThanOrEqual(1);
-    // the same gap under the subtitle on every card
-    expect(spread((c) => c.strip!.y - (c.subtitle!.y + c.subtitle!.h))).toBeLessThanOrEqual(1);
+    // the same gap under the subtitle on every card (offsetTop and offsetHeight are each rounded to a whole pixel, so
+    // their sum differs by up to 2 px between cards whose subtitles wrap differently - CI's Linux fonts showed 2)
+    expect(spread((c) => c.strip!.y - (c.subtitle!.y + c.subtitle!.h))).toBeLessThanOrEqual(2);
     // the logo is centred in its window, not pushed to the left
     for (const img of await page.locator('[id^="project-"] [data-org-logo] img').all())
       expect(await img.evaluate((e) => getComputedStyle(e).objectPosition)).toBe('50% 50%');
