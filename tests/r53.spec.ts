@@ -220,6 +220,13 @@ for (const [name, w, h] of [
     const t0 = Date.now();
     while (Date.now() - t0 < 25_000 && same < 4) {
       await page.waitForTimeout(300);
+      // the pit pauses while it is off the screen; under load a late layout above it once carried the window 1392 px
+      // away mid-drop and the frozen pile failed this guard, so aim at it again (a pile at rest stays still across it)
+      await page.evaluate(() => {
+        const e = document.querySelector<HTMLElement>('[data-pill-pit]')!;
+        const top = e.getBoundingClientRect().top;
+        if (top < -10 || top > 200) window.scrollTo(0, top + window.scrollY - 80);
+      });
       r = await snap();
       same = r.key === prev && !r.tilted ? same + 1 : 0;
       prev = r.key;
