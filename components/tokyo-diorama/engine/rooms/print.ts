@@ -339,24 +339,89 @@ export function doorSign(label: string, jp: string, sub: string) {
   });
 }
 
-/** the paper floor: the page's own dot grid, one dot every 25 cm */
-export function dotFloor() {
-  return printed(
-    256,
-    256,
-    (ctx, w, h) => {
-      ctx.fillStyle = '#F7F3EA';
-      ctx.fillRect(0, 0, w, h);
-      ctx.fillStyle = 'rgba(10,10,10,0.55)';
-      for (let y = 0; y < 4; y++)
-        for (let x = 0; x < 4; x++) {
-          ctx.beginPath();
-          ctx.arc(x * 64 + 32, y * 64 + 32, 3.2, 0, Math.PI * 2);
-          ctx.fill();
-        }
-    },
-    8,
-  );
+/** the size of one concrete tile in metres (the textures below repeat every CONCRETE_TILE m) */
+export const CONCRETE_TILE = 1.2;
+
+/** a small fixed hash, so the plank tones are the same on every visit (no Math.random in a print) */
+const hash = (n: number) => {
+  const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
+  return x - Math.floor(x);
+};
+
+/**
+ * R93 brutalism: board-marked concrete (Breuer's Whitney, the Hayward). Eight 15 cm planks per 1.2 m tile, each a FLAT
+ * grey from four hard steps, a printed seam between planks, tie holes on a 60 cm grid. No noise, no gradient: the
+ * texture is printed like everything else in the rooms, so it stays sharp up close and tiles without a seam.
+ */
+export function concreteTexture() {
+  const tones = ['#B9B5AC', '#C3BFB6', '#AEAAA1', '#B4B0A7'];
+  return printed(512, 512, (ctx, w, h) => {
+    const plank = h / 8;
+    for (let i = 0; i < 8; i++) {
+      ctx.fillStyle = tones[Math.floor(hash(i) * tones.length)];
+      ctx.fillRect(0, i * plank, w, plank);
+      // a board joint every plank (long boards: a butt joint per plank read as brick)
+      ctx.fillStyle = '#8E8A82';
+      ctx.fillRect(0, i * plank, w, 3);
+    }
+    // tie holes: a 2 x 2 grid per tile (60 cm), an ink pit with a pale rim
+    for (const x of [w / 4, (3 * w) / 4])
+      for (const y of [h / 4, (3 * h) / 4]) {
+        ctx.fillStyle = '#D2CEC6';
+        ctx.beginPath();
+        ctx.arc(x, y, 13, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#3A3834';
+        ctx.beginPath();
+        ctx.arc(x, y, 8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+  });
+}
+
+/**
+ * The poured floor slab with its exposed grid (the brutalist "raw grid"): flat concrete, an ink joint on every 2.4 m
+ * (two tiles), a thinner saw cut at 1.2 m. Repeat it every 2.4 m.
+ */
+export function slabTexture() {
+  return printed(512, 512, (ctx, w, h) => {
+    ctx.fillStyle = '#C9C5BC';
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#A9A59C';
+    ctx.fillRect(w / 2 - 2, 0, 4, h);
+    ctx.fillRect(0, h / 2 - 2, w, 4);
+    ctx.fillStyle = INK;
+    ctx.fillRect(0, 0, 8, h);
+    ctx.fillRect(0, 0, w, 8);
+  });
+}
+
+/**
+ * A label painted on the floor in front of a bay (R93: giant mono labels): the exhibit's own number or kicker, big, and
+ * - when it has a SIGNAL meaning - the white chip that names the meaning beside its colour square (30-design-system B:
+ * a colour always carries its label). Transparent around the paint, so the slab shows through.
+ */
+export function floorLabel(big: string, chip?: { label: string; hex: string }) {
+  const f = getFonts();
+  return printed(1024, 384, (ctx, w, h) => {
+    ctx.clearRect(0, 0, w, h);
+    let size = 210;
+    ctx.font = `800 ${size}px ${f.display}`;
+    while (ctx.measureText(big).width > w - 40 && size > 90) {
+      size -= 10;
+      ctx.font = `800 ${size}px ${f.display}`;
+    }
+    ctx.fillStyle = INK;
+    ctx.fillText(big, 20, chip ? 220 : 260);
+    if (chip) {
+      ctx.font = `800 52px ${f.mono}`;
+      const tw = ctx.measureText(chip.label).width;
+      inkBox(ctx, 20, 262, 90, 90, chip.hex, 8);
+      inkBox(ctx, 122, 262, tw + 56, 90, PAPER, 8);
+      ctx.fillStyle = INK;
+      ctx.fillText(chip.label, 150, 326);
+    }
+  });
 }
 
 /** the placeholder on a frame while its photo loads: paper with a printed "loading" mark, never a grey void */

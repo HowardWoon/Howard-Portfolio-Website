@@ -9,7 +9,10 @@ import {
   onFill,
   wrap,
   disposePrinted,
-  dotFloor,
+  CONCRETE_TILE,
+  concreteTexture,
+  floorLabel,
+  slabTexture,
   placeholderTexture,
   printed,
   doorSign,
@@ -23,10 +26,12 @@ import { JP_FONT } from '../textures';
  * colliders), entered through the street door of its section. Coordinates: metres, the floor at y = 0, the room centred
  * on x = 0 / z = 0, the entrance in the south wall (+z) and the visitor walking north (-z).
  *
- * The look is the page's: a paper floor with the page's dot grid, cream walls, thick ink baseboards and frames, and the
- * site's hard offset shadow made real - every frame and card has an ink slab 5 cm down and to the right behind it.
- * Colour only where the exhibit has a SIGNAL meaning; the blue floor mark is the interactive one (SIGNAL: blue =
- * controls only).
+ * R93 (owner: "very ugly, very monotonous ... combine neo-brutalism with brutalism"): the BUILDING is brutalist -
+ * board-marked concrete walls and columns, a coffered concrete ceiling, a poured slab with an exposed ink grid - and
+ * everything that carries Howard's content is neo-brutalist: each exhibit stands in a full-height bay of ITS SIGNAL
+ * colour (lib/signal.ts; no meaning = paper) with the chip naming the meaning painted on the floor, every block has ink
+ * edges (the page's 3 px border at room scale), every frame and card its hard ink offset shadow, and the big labels are
+ * painted on the floor and walls. The blue floor mark is the interactive one (SIGNAL: blue = controls only).
  */
 
 export interface RoomHotspot {
@@ -137,30 +142,32 @@ export class Hall {
     readonly jp: string,
     size: { w: number; d: number; h: number },
     readonly opts: BuildOptions,
-    wall = 0xfff7e0,
   ) {
     this.W = size.w;
     this.D = size.d;
     this.H = size.h;
     this.scene.name = `room:${id}`;
-    this.scene.background = new THREE.Color(0xf4eedc);
+    this.scene.background = new THREE.Color(0xc9c5bc);
     this.scene.environment = opts.env;
     this.scene.environmentIntensity = 0.6;
     const M = (k: string, s: Parameters<Materials['define']>[1]) => this.mats.define(k, s);
-    M('wall', { color: wall, rough: 0.92 });
-    M('ceiling', { color: 0xffffff, rough: 0.95, cast: false });
+    // board-marked concrete: one tiled print whose UVs count tiles (see concrete()), shared by every wall and block
+    const conc = concreteTexture();
+    conc.wrapS = conc.wrapT = THREE.RepeatWrapping;
+    this.textures.push(conc);
+    M('concrete', { color: 0xffffff, rough: 0.9, map: conc, env: 0.4 });
     M('ink', { color: 0x0a0a0a, rough: 0.55 });
     M('paper', { color: 0xffffff, rough: 0.8 });
     M('deep', { color: 0xf4eedc, rough: 0.85 });
     M('wood', { color: 0x8f6a45, rough: 0.6 });
-    M('woodDark', { color: 0x4a3122, rough: 0.55 });
     M('metal', { color: 0x9aa0aa, metal: 0.8, rough: 0.3 });
-    M('panel', { color: 0xffffff, emissive: 0xfff6e8, ei: 1.4, cast: false });
+    M('panel', { color: 0xffffff, emissive: 0xffffff, ei: 1.4, cast: false });
     M('red', { color: 0xd8291c, rough: 0.45 });
-    M('leaf', { color: 0x2e5e3a, rough: 0.8 });
-    M('pot', { color: 0x2b2b2b, rough: 0.7 });
     // every signal fill, for stripes and plinth caps (one material each, made only when used)
     for (const [k, v] of Object.entries(SIGNAL)) M(`sig:${k}`, { color: new THREE.Color(v.hex).getHex(), rough: 0.6 });
+    // R93: the bay walls - the same SIGNAL fills, matte (a flat colour field, not shiny plastic)
+    for (const [k, v] of Object.entries(SIGNAL))
+      M(`bay:${k}`, { color: new THREE.Color(v.hex).getHex(), rough: 0.95, env: 0.2 });
 
     this.placeholder = placeholderTexture();
     this.textures.push(this.placeholder);
@@ -172,8 +179,9 @@ export class Hall {
     // shader programs (a different light count is a different program = a compile on entry)
     // R85: a lower fill and a stronger key light that casts HARD shadows on the HIGH tier (neo-brutalism: the site's
     // hard offset shadow, as light)
-    this.scene.add(new THREE.HemisphereLight(0xffffff, 0xd9cfbd, 0.95));
-    const key = new THREE.DirectionalLight(0xfff4e6, 1.9);
+    // R93: neutral white light, no warm pools - the colour in a room is the SIGNAL bays, never the light
+    this.scene.add(new THREE.HemisphereLight(0xffffff, 0xbdb9b0, 1.05));
+    const key = new THREE.DirectionalLight(0xffffff, 1.9);
     key.position.set(-6, 14, 5);
     key.castShadow = true;
     key.shadow.mapSize.set(2048, 2048);
@@ -211,6 +219,11 @@ export class Hall {
   /** a batched box that also blocks the walker (an axis-aligned collider around its rotated footprint) */
   solid(key: string, p: Place, lx: number, ly: number, lz: number, w: number, h: number, d: number) {
     this.box(key, p, lx, ly, lz, w, h, d);
+    this.collide(p, lx, ly, lz, w, h, d);
+  }
+
+  /** an axis-aligned collider around a rotated (w x d) box at local coords of p */
+  private collide(p: Place, lx: number, ly: number, lz: number, w: number, h: number, d: number) {
     const c = Math.abs(Math.cos(p.ry));
     const s = Math.abs(Math.sin(p.ry));
     const hw = (w * c + d * s) / 2;
@@ -218,6 +231,71 @@ export class Hall {
     const o = this.at(p, lx, 0, lz);
     this.world.addStatic(box(o.x - hw, o.x + hw, ly, ly + h, o.z - hd, o.z + hd));
   }
+
+  /**
+   * R93: a board-marked concrete block (bottom-centred at local coords of p), batched into the one concrete mesh. Its
+   * UVs count concrete TILES face by face, so the 15 cm planks stay 15 cm on a 30 cm column and on a 17 m wall alike.
+   * `block` = the walker cannot pass it.
+   */
+  concrete(p: Place, lx: number, ly: number, lz: number, w: number, h: number, d: number, block = true) {
+    const geo = new THREE.BoxGeometry(w, h, d).translate(0, h / 2, 0);
+    const uv = geo.attributes.uv as THREE.BufferAttribute;
+    // BoxGeometry faces in order: +x, -x (d x h), +y, -y (w x d), +z, -z (w x h); four vertices each
+    const dims = [
+      [d, h],
+      [d, h],
+      [w, d],
+      [w, d],
+      [w, h],
+      [w, h],
+    ];
+    for (let i = 0; i < uv.count; i++) {
+      const [du, dv] = dims[Math.floor(i / 4)];
+      uv.setXY(i, (uv.getX(i) * du) / CONCRETE_TILE, (uv.getY(i) * dv) / CONCRETE_TILE);
+    }
+    const m = new THREE.Matrix4()
+      .makeRotationY(p.ry)
+      .setPosition(p.x, 0, p.z)
+      .multiply(new THREE.Matrix4().makeTranslation(lx, ly, lz));
+    this.B.addGeo('concrete', geo, m);
+    geo.dispose();
+    if (block) this.collide(p, lx, ly, lz, w, h, d);
+  }
+
+  /**
+   * R93: a block with INK EDGES - the page's 3 px border at room scale: an ink bar `e` m thick on each of its 12 edges
+   * (half outside, so no face fights it), and when it stands on the floor its hard offset shadow (an ink slab 8 cm to
+   * the right and back). `key` 'concrete' = board-marked concrete; any other key = that batched material.
+   */
+  inked(key: string, p: Place, lx: number, ly: number, lz: number, w: number, h: number, d: number, e = 0.05) {
+    if (key === 'concrete') this.concrete(p, lx, ly, lz, w, h, d);
+    else this.solid(key, p, lx, ly, lz, w, h, d);
+    for (const sx of [-1, 1])
+      for (const sz of [-1, 1]) this.box('ink', p, lx + (sx * w) / 2, ly, lz + (sz * d) / 2, e, h, e);
+    for (const y of [ly - e / 2, ly + h - e / 2])
+      for (const s of [-1, 1]) {
+        this.box('ink', p, lx, y, lz + (s * d) / 2, w + e, e, e);
+        this.box('ink', p, lx + (s * w) / 2, y, lz, e, e, d + e);
+      }
+    if (ly < 0.01) this.box('ink', p, lx + 0.08, 0.001, lz + 0.08, w, 0.004, d);
+  }
+
+  /**
+   * R93: the bay an exhibit stands in - a full-height panel of the exhibit's SIGNAL colour (paper when it has no
+   * meaning) on the wall behind place p, framed in ink, and in front of it the label painted on the floor: the
+   * exhibit's own figure (its number, value or first stat) and the chip that names the colour's meaning. Nothing is
+   * typed here: every word is the exhibit's.
+   */
+  bay(e: Exhibit, p: Place, w: number, labelAt = 3.4) {
+    const h = this.H - 2.08; // up to just under the frieze
+    this.box(e.signal ? `bay:${e.signal}` : 'paper', p, 0, 0.18, 0.03, w, h, 0.04);
+    for (const s of [-1, 1]) this.box('ink', p, (s * w) / 2, 0.18, 0.04, 0.08, h, 0.06);
+    this.box('ink', p, 0, 0.1 + h, 0.04, w + 0.08, 0.08, 0.06);
+    this.floorMark(e, p, labelAt);
+  }
+
+  /** how far in front of the wall a piece hung in a bay sits (the bay panel is 1 - 5 cm off the wall) */
+  static readonly BAY = 0.06;
 
   cyl(
     key: string,
@@ -246,9 +324,9 @@ export class Hall {
     return mesh;
   }
 
-  /** a print lying on the floor (a painted label), its top edge towards -z rotated by ry */
-  decal(tex: THREE.Texture, x: number, z: number, w: number, h: number, ry = 0) {
-    const mat = new THREE.MeshBasicMaterial({ map: tex });
+  /** a print lying on the floor (a painted label), its top edge towards -z rotated by ry; `paint` = no ground of its own */
+  decal(tex: THREE.Texture, x: number, z: number, w: number, h: number, ry = 0, paint = false) {
+    const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: paint, depthWrite: !paint });
     const geo = new THREE.PlaneGeometry(w, h).rotateX(-Math.PI / 2);
     const mesh = new THREE.Mesh(geo, mat);
     mesh.position.set(x, 0.004, z);
@@ -289,10 +367,10 @@ export class Hall {
     const CW = 3.2; // corridor width
     const CH = 3.4; // corridor height
     const O: Place = { x: 0, z: 0, ry: 0 };
-    // paper floor with the page's dot grid (4 dots a metre), room + corridor
-    const tex = dotFloor();
+    // R93: the poured slab with its exposed ink grid (a joint every 2.4 m), room + corridor
+    const tex = slabTexture();
     tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(W, D + L);
+    tex.repeat.set(W / (2 * CONCRETE_TILE), (D + L) / (2 * CONCRETE_TILE));
     this.textures.push(tex);
     const floorMat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.55, envMapIntensity: 0.5 });
     const floorGeo = new THREE.PlaneGeometry(W, D + L).rotateX(-Math.PI / 2).translate(0, 0, L / 2);
@@ -311,15 +389,15 @@ export class Hall {
       [CW / 2 + (W - CW) / 4 - 0.3, hd - 0.6, (W - CW) / 2 - 0.6, 0.1],
     ] as const)
       this.box('ink', O, x, 0.002, z, w, 0.01, d);
-    // walls
+    // walls: board-marked concrete
     const T = 0.3;
-    this.solid('wall', O, -hw - T / 2, 0, 0, T, H, D + 2 * T);
-    this.solid('wall', O, hw + T / 2, 0, 0, T, H, D + 2 * T);
-    this.solid('wall', O, 0, 0, -hd - T / 2, W + 2 * T, H, T);
+    this.concrete(O, -hw - T / 2, 0, 0, T, H, D + 2 * T);
+    this.concrete(O, hw + T / 2, 0, 0, T, H, D + 2 * T);
+    this.concrete(O, 0, 0, -hd - T / 2, W + 2 * T, H, T);
     const side = (W - CW) / 2;
-    this.solid('wall', O, -(CW / 2 + side / 2), 0, hd + T / 2, side, H, T);
-    this.solid('wall', O, CW / 2 + side / 2, 0, hd + T / 2, side, H, T);
-    this.box('wall', O, 0, CH, hd + T / 2, CW, H - CH, T);
+    this.concrete(O, -(CW / 2 + side / 2), 0, hd + T / 2, side, H, T);
+    this.concrete(O, CW / 2 + side / 2, 0, hd + T / 2, side, H, T);
+    this.concrete(O, 0, CH, hd + T / 2, CW, H - CH, T, false);
     // the portal into the room: a thick ink frame with hazard stripes (ink / paper) on its face
     const stripes = this.print(512, 64, (ctx, w, h) => {
       ctx.fillStyle = '#FFFFFF';
@@ -341,9 +419,9 @@ export class Hall {
     this.plane(stripes, { x: 0, z: hd - 0.31, ry: Math.PI }, 0, CH + 0.2, 0, CW + 0.8, 0.3);
     // the corridor: walls, ceiling, the room's name running along it, and the doorway out at its end
     const cz = hd + L / 2;
-    this.solid('wall', O, -CW / 2 - T / 2, 0, cz, T, CH, L);
-    this.solid('wall', O, CW / 2 + T / 2, 0, cz, T, CH, L);
-    this.box('ceiling', O, 0, CH, cz, CW + 0.6, 0.2, L);
+    this.concrete(O, -CW / 2 - T / 2, 0, cz, T, CH, L);
+    this.concrete(O, CW / 2 + T / 2, 0, cz, T, CH, L);
+    this.concrete(O, 0, CH, cz, CW + 0.6, 0.2, L, false);
     this.world.addStatic(box(-CW / 2 - 1, CW / 2 + 1, CH, CH + 0.5, hd, hd + L + 1));
     this.solid('ink', O, 0, 0, hd + L + T / 2, CW + 2 * T, CH, T);
     for (const s of [-1, 1]) {
@@ -387,43 +465,69 @@ export class Hall {
     const exitTex = doorSign('Street', '出口', 'walk in to leave');
     this.textures.push(exitTex);
     this.plane(exitTex, out, 0, 3.05, 0.42, 2.3, 2.3 * (320 / 1024));
-    // supergraphics: the room's name printed huge along both side walls, above the exhibits
-    const frieze = this.print(2048, 256, (ctx, w, h) => {
+    // supergraphics: the room's name printed huge along both side walls, above the bays. R93: one repeat of the words
+    // (EN, JP, EN outlined, JP) is printed at its own width and tiled along the wall, so the letters keep their shape in
+    // a 13 m room and a 40 m one (a single print stretched over the wall made them wider the longer the room)
+    const words: [string, string, boolean][] = [
+      [this.label.toUpperCase(), `800 190px ${f.display}`, false],
+      [this.jp, `800 150px ${JP_FONT}`, false],
+      [this.label.toUpperCase(), `800 190px ${f.display}`, true],
+      [this.jp, `800 150px ${JP_FONT}`, false],
+    ];
+    const probe = document.createElement('canvas').getContext('2d')!;
+    const widths = words.map(([t, font]) => ((probe.font = font), probe.measureText(t).width + 70));
+    const fw = Math.min(4096, Math.ceil(widths.reduce((a, b) => a + b, 0)));
+    const frieze = this.print(fw, 256, (ctx, w, h) => {
       ctx.fillStyle = '#FFF7E0';
       ctx.fillRect(0, 0, w, h);
       ctx.fillStyle = '#0A0A0A';
       ctx.fillRect(0, 0, w, 14);
       ctx.fillRect(0, h - 14, w, 14);
-      ctx.font = `800 200px ${f.display}`;
       ctx.lineWidth = 8;
       ctx.strokeStyle = '#0A0A0A';
-      let x = 30;
-      let i = 0;
-      while (x < w) {
-        const word = i % 2 === 0 ? this.label.toUpperCase() : this.jp;
-        ctx.font = i % 2 === 0 ? `800 190px ${f.display}` : `800 150px ${JP_FONT}`;
-        if (i % 4 === 2) ctx.strokeText(word, x, 200);
-        else ctx.fillText(word, x, 200);
-        x += ctx.measureText(word).width + 70;
-        i++;
-      }
+      let x = 35;
+      words.forEach(([t, font, outline], i) => {
+        ctx.font = font;
+        if (outline) ctx.strokeText(t, x, 200);
+        else ctx.fillText(t, x, 200);
+        x += widths[i];
+      });
     });
-    const fy = H - 0.95;
-    this.plane(frieze, { x: -hw + 0.02, z: 0, ry: Math.PI / 2 }, 0, fy, 0, D - 0.6, 1.1);
-    this.plane(frieze, { x: hw - 0.02, z: 0, ry: -Math.PI / 2 }, 0, fy, 0, D - 0.6, 1.1);
-    // exposed ink beams across the ceiling, and ink pilasters down the side walls (each with its hard shadow)
-    this.box('ceiling', O, 0, H, 0, W + 0.6, 0.2, D + 0.6);
+    frieze.wrapS = THREE.RepeatWrapping;
+    const FH = 1.1;
+    const run = D - 1.4; // between the corner columns
+    frieze.repeat.x = run / (FH * (fw / 256));
+    const fy = H - 1.3;
+    this.plane(frieze, { x: -hw + 0.02, z: 0, ry: Math.PI / 2 }, 0, fy, 0, run, FH);
+    this.plane(frieze, { x: hw - 0.02, z: 0, ry: -Math.PI / 2 }, 0, fy, 0, run, FH);
+    // R93: a coffered concrete ceiling (Breuer's Whitney, the Barbican): deep ribs on a grid that fits the room, ink
+    // on each rib's underside, and in every coffer one flat white panel - the lights you see are the coffers
+    this.concrete(O, 0, H, 0, W + 0.6, 0.3, D + 0.6, false);
     this.world.addStatic(box(-hw - 1, hw + 1, H, H + 0.5, -hd - 1, hd + 1));
-    for (let z = -hd + 1.5; z <= hd - 1; z += 3) this.box('ink', O, 0, H - 0.35, z, W, 0.35, 0.28);
-    for (let z = -hd + 3; z <= hd - 2; z += 3) {
-      for (const x of [-hw + 2.2, 0, hw - 2.2]) this.box('panel', O, x, H - 0.08, z - 1.5 + 0.75, 1.2, 0.06, 0.6);
+    const RIB = 0.55;
+    const nx = Math.max(2, Math.round(W / 3.4));
+    const nz = Math.max(2, Math.round(D / 3.4));
+    const cx = W / nx;
+    const czs = D / nz;
+    for (let i = 1; i < nx; i++) {
+      const x = -hw + i * cx;
+      this.concrete(O, x, H - RIB, 0, 0.3, RIB, D, false);
+      this.box('ink', O, x, H - RIB - 0.04, 0, 0.3, 0.04, D);
     }
-    for (let z = -hd + 0.15; z <= hd - 0.1; z += Math.max(4, D / Math.max(1, Math.round(D / 6)))) {
-      for (const s of [-1, 1]) {
-        this.box('ink', O, s * (hw - 0.1), 0, z, 0.2, H, 0.36);
-        this.box('ink', O, s * (hw - 0.03), 0, z + 0.07, 0.06, H - 0.07, 0.36);
-      }
+    for (let j = 1; j < nz; j++) {
+      const z = -hd + j * czs;
+      this.concrete(O, 0, H - RIB, z, W, RIB, 0.3, false);
+      this.box('ink', O, 0, H - RIB - 0.04, z, W, 0.04, 0.3);
     }
+    for (let i = 0; i < nx; i++)
+      for (let j = 0; j < nz; j++)
+        this.box('panel', O, -hw + (i + 0.5) * cx, H - 0.06, -hd + (j + 0.5) * czs, cx * 0.5, 0.05, czs * 0.5);
+    // four concrete corner columns with ink edges (the structure is the decoration)
+    for (const sx of [-1, 1])
+      for (const sz of [-1, 1]) this.inked('concrete', O, sx * (hw - 0.3), 0, sz * (hd - 0.3), 0.6, H, 0.6);
+    // the room's name painted 2 m tall on the slab at the corridor mouth, read walking in
+    const name = this.keep(floorLabel(this.label.toUpperCase()));
+    this.decal(name, 0, hd - 1.9, Math.min(5.2, W - 4), Math.min(5.2, W - 4) * (384 / 1024), 0, true);
     // ink baseboards (the site's 3px border, at room scale)
     this.box('ink', O, -hw + 0.03, 0, 0, 0.06, 0.18, D);
     this.box('ink', O, hw - 0.03, 0, 0, 0.06, 0.18, D);
@@ -434,13 +538,14 @@ export class Hall {
     const sign = doorSign(this.label, this.jp, `${count} on show`);
     this.textures.push(sign);
     const north: Place = { x: 0, z: -hd, ry: 0 };
-    this.box('ink', north, 0.08, this.H - 1.72, 0.01, 3.6, 1.16, 0.05);
-    this.plane(sign, north, 0, this.H - 1.2, 0.07, 3.6, 3.6 * (320 / 1024));
+    // (between the bays' tops and the ceiling ribs)
+    this.box('ink', north, 0.08, this.H - 1.8, 0.01, 3.6, 1.16, 0.05);
+    this.plane(sign, north, 0, this.H - 1.28, 0.07, 3.6, 3.6 * (320 / 1024));
     void inward;
-    // light: three pools down the room, one in the corridor
-    this.light(0xfff1dc, 18, 14, 0, H - 0.8, -hd + 2.5);
-    this.light(0xfff1dc, 14, 12, 0, H - 0.8, 0);
-    this.light(0xfff1dc, 10, 9, 0, CH - 0.4, hd + L / 2);
+    // light: three neutral pools down the room, one in the corridor
+    this.light(0xffffff, 18, 14, 0, H - 0.8, -hd + 2.5);
+    this.light(0xffffff, 14, 12, 0, H - 0.8, 0);
+    this.light(0xffffff, 10, 9, 0, CH - 0.4, hd + L / 2);
     // the exit (E / the STREET key / walking into the doorway)
     this.exitZ = ez;
     this.hotspot({
@@ -528,7 +633,7 @@ export class Hall {
     const mat = Math.max(0.05, Math.min(w, h) * 0.05);
     const ow = w + 2 * (b + mat);
     const oh = h + 2 * (b + mat);
-    this.box('ink', p, lx + 0.06, cy - oh / 2 - 0.06, lz + 0.005, ow, oh, 0.012); // shadow
+    this.box('ink', p, lx + 0.08, cy - oh / 2 - 0.08, lz + 0.005, ow, oh, 0.012); // shadow
     this.box('ink', p, lx, cy - oh / 2, lz + 0.02, ow, oh, 0.06); // frame
     this.box('paper', p, lx, cy - oh / 2 + b, lz + 0.075, ow - 2 * b, oh - 2 * b, 0.012); // mat
     const photoMat = new THREE.MeshBasicMaterial({ map: this.placeholder });
@@ -544,30 +649,41 @@ export class Hall {
     return { mesh, w: ow, h: oh };
   }
 
-  /** a free-standing project kiosk: ink plinth, paper pillar, a 16:9 screen with the first photo, a header card */
+  /**
+   * R93: a free-standing project easel (Lina Bo Bardi's MASP easels: the picture held by a raw concrete block) - an
+   * ink-edged concrete block, rising from it a slab in the project's SIGNAL colour (paper when it has no meaning) with
+   * ink edges, on the slab the 16:9 screen with the first photo and the header card, and the project's number painted
+   * on the floor in front.
+   */
   kiosk(e: Exhibit, p: Place) {
     const band = SIG(e);
-    this.solid('ink', p, 0, 0, 0, 1.5, 0.14, 0.9);
-    this.box('paper', p, 0, 0.14, 0, 1.3, 2.05, 0.36);
-    this.box('ink', p, 0, 0.14, 0.181, 1.3, 0.05, 0.01);
-    if (band) this.box(`sig:${e.signal}`, p, 0, 2.19, 0, 1.36, 0.08, 0.42);
-    else this.box('ink', p, 0, 2.19, 0, 1.36, 0.08, 0.42);
-    this.box('ink', p, 0, 2.27, 0, 0.34, 0.12, 0.22); // the neck
-    // the screen: a wide frame above the pillar; a project without photos shows a printed title screen
-    const screen = this.screen(e.image, p, 0, 2.95, 1.9, 1.07, 0.05, e.image ? undefined : this.titleScreen(e));
+    this.inked('concrete', p, 0, 0, 0, 1.7, 0.55, 0.9);
+    this.inked(e.signal ? `bay:${e.signal}` : 'paper', p, 0, 0.55, -0.1, 2.3, 2.9, 0.14);
+    // the screen: a project without photos shows a printed title screen
+    const screen = this.screen(e.image, p, 0, 2.55, 1.9, 1.07, -0.03, e.image ? undefined : this.titleScreen(e));
     this.pick(screen, e.id);
-    // header card above the screen: number + title
+    // header card under the screen: number + title
     const head = this.card(
       { number: e.number, kicker: e.kicker, title: e.title, band, scale: 0.9 },
       p,
       0,
-      2.25,
-      0.19,
+      1.86,
+      -0.015,
       1.18,
       0.75,
     );
     this.pick(head.mesh, e.id);
-    return this.exhibitHotspot(e, p, 2.4, 1.55, 3.6, 1.9);
+    this.floorMark(e, p, 2.7);
+    return this.exhibitHotspot(e, p, 2.3, 1.55, 3.6, 1.9);
+  }
+
+  /** R93: the exhibit's figure and its SIGNAL chip painted on the floor, `at` m in front of place p (read facing p) */
+  floorMark(e: Exhibit, p: Place, at: number) {
+    const big = e.number ?? e.value ?? e.stats?.[0]?.value ?? e.kicker;
+    if (!big && !e.signal) return;
+    const tex = this.keep(floorLabel(big ?? '', e.signal ? SIGNAL[e.signal] : undefined));
+    const o = this.at(p, 0, 0, at);
+    this.pick(this.decal(tex, o.x, o.z, 2.4, 0.9, p.ry, true), e.id);
   }
 
   /** a 16:9 title screen: the exhibit's number and title on its SIGNAL fill (ink when it has no meaning) */
@@ -633,11 +749,10 @@ export class Hall {
     return [front, back];
   }
 
-  /** a plinth with a trophy on a slow turntable and a caption card on its front face */
+  /** a plinth - R93: an ink-edged concrete monolith - with a trophy on a slow turntable and a caption card on its face */
   plinth(e: Exhibit, p: Place) {
     const band = SIG(e);
-    this.solid('paper', p, 0, 0, 0, 0.9, 1.0, 0.9);
-    this.box('ink', p, 0, 0, 0, 0.96, 0.1, 0.96);
+    this.inked('concrete', p, 0, 0, 0, 0.9, 1.0, 0.9);
     if (band) this.box(`sig:${e.signal}`, p, 0, 1.0, 0, 0.96, 0.06, 0.96);
     else this.box('ink', p, 0, 1.0, 0, 0.96, 0.06, 0.96);
     const trophy = this.trophy(e.emblem ?? (e.signal === 'podium' ? 'gold' : 'badge'));
@@ -742,27 +857,6 @@ export class Hall {
     return g;
   }
 
-  /** a potted plant (a few leaf blobs on a stem in an ink pot) */
-  plant(p: Place, scale = 1) {
-    this.cyl('pot', p, 0, 0, 0, 0.28 * scale, 0.5 * scale);
-    this.box('ink', p, 0, 0.5 * scale, 0, 0.6 * scale, 0.05, 0.6 * scale);
-    this.cyl('woodDark', p, 0, 0.5 * scale, 0, 0.03, 0.8 * scale, 'cyl8');
-    for (let i = 0; i < 6; i++) {
-      const a = (i / 6) * Math.PI * 2;
-      const r = 0.2 * scale;
-      this.B.add(
-        'leaf',
-        'ico',
-        new THREE.Matrix4().compose(
-          this.at(p, Math.cos(a) * r, (1.1 + (i % 3) * 0.18) * scale, Math.sin(a) * r),
-          new THREE.Quaternion(),
-          new THREE.Vector3(0.22 * scale, 0.3 * scale, 0.22 * scale),
-        ),
-      );
-    }
-    this.world.addStatic(this.footprint(p, 0.6 * scale, 0.6 * scale, 1.4 * scale));
-  }
-
   /** a bench (ink legs, wood seat) */
   bench(p: Place, w = 2.4) {
     this.box('wood', p, 0, 0.42, 0, w, 0.07, 0.5);
@@ -797,8 +891,13 @@ export class Hall {
     return wallSlots(this.W, this.D, pitch, margin, skipNorthCentre);
   }
 
-  /** a framed exhibit on a wall: picture (or a big card when there is none) + its caption card beside it */
-  wallExhibit(e: Exhibit, p: Place, maxW = 1.7, maxH = 1.9) {
+  /**
+   * A framed exhibit on a wall: picture (or a big card when there is none) + its caption card beside it. R93: hung in
+   * its SIGNAL bay (`bayW` m wide), the figure painted on the floor in front.
+   */
+  wallExhibit(e: Exhibit, p: Place, maxW = 1.7, maxH = 1.9, bayW = 3.2) {
+    this.bay(e, p, bayW);
+    const z = Hall.BAY;
     const band = SIG(e);
     const spec: CardSpec = {
       kicker: e.kicker,
@@ -811,12 +910,13 @@ export class Hall {
     };
     const pic = e.image ?? e.logo;
     if (pic) {
-      const f = this.frame(pic, p, -0.55, 2.35, maxW, maxH);
+      const f = this.frame(pic, p, -0.55, 2.35, maxW, maxH, z);
       this.pick(f.mesh, e.id);
-      const c = this.card(spec, p, -0.55 + f.w / 2 + 0.62, 2.35 + 0.6, 0.02, 1.0, 1.4);
+      const c = this.card(spec, p, -0.55 + f.w / 2 + 0.62, 2.35 + 0.6, z + 0.02, 1.0, 1.4);
       this.pick(c.mesh, e.id);
     } else {
-      const c = this.card({ ...spec, body: e.body?.slice(0, 1), scale: 1 }, p, 0, 3.4, 0.02, 1.6, 1.3);
+      const top = Math.min(3.4, this.H - 2.05);
+      const c = this.card({ ...spec, body: e.body?.slice(0, 1), scale: 1 }, p, 0, top, z + 0.02, 1.6, 1.3);
       this.pick(c.mesh, e.id);
     }
     return this.exhibitHotspot(e, p, 2.3);

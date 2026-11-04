@@ -26,13 +26,23 @@ const about: RoomBuilder = function* (room, o) {
   const facts = ex.filter((e) => e.kind === 'fact');
   const used = new Set<Exhibit>([...(portrait ? [portrait] : []), ...facts]);
   const pairs = Math.ceil(facts.length / 2);
-  const D = Math.max(15, 10 + pairs * 3.4);
-  const h = new Hall(room.id, room.label, room.jp, { w: 16, d: D, h: 6 }, o, 0xfff7e0);
+  let D = Math.max(15, 10 + pairs * 3.4);
+  // R93: the side walls grow too, until everything else has a slot (an added exhibit was dropped before)
+  const rest = ex.length - used.size;
+  while (wallSlots(16, D, 3.8, 2.2).filter((s) => s.ry !== 0).length < rest && D < 120) D += 3.8;
+  const h = new Hall(room.id, room.label, room.jp, { w: 16, d: D, h: 6 }, o);
   h.shell(ex.length);
   yield;
   const north: Place = { x: 0, z: -D / 2, ry: 0 };
   // the portrait, its name card to the right, the statement to the left
   if (portrait) {
+    // R93: the portrait stands over a stepped concrete podium (three ink-nosed steps)
+    for (const [w, d, ht] of [
+      [7, 1.2, 0.2],
+      [6, 0.8, 0.4],
+      [5, 0.4, 0.6],
+    ] as const)
+      h.inked('concrete', north, 0, 0, d / 2, w, ht, d);
     const f = h.frame(portrait.image, north, 0, 2.55, 2.4, 3.1);
     h.pick(f.mesh, portrait.id);
     const c = h.card(
@@ -63,6 +73,8 @@ const about: RoomBuilder = function* (room, o) {
     const left = i % 2 === 0;
     const z = -D / 2 + 5.4 + row * 3.4;
     const p: Place = { x: left ? -2.9 : 2.9, z, ry: left ? Math.PI / 2 : -Math.PI / 2 };
+    // R93: each banner hangs in front of a raw concrete column (the Barbican's exposed structure)
+    h.inked('concrete', p, 0, 0, -0.42, 0.5, 6, 0.5);
     const [a, b] = h.banner(bannerTexture(e.value ?? '', e.title, e.subtitle ?? '', sig(e)), p, 1.3, 3.25, 1.05);
     h.pick(a, e.id);
     h.pick(b, e.id);
@@ -81,14 +93,7 @@ const about: RoomBuilder = function* (room, o) {
     h.wallExhibit(e, p);
     yield;
   }
-  for (const [x, z] of [
-    [-7.2, -D / 2 + 0.8],
-    [7.2, -D / 2 + 0.8],
-    [-7.2, D / 2 - 0.8],
-    [7.2, D / 2 - 0.8],
-  ] as const)
-    h.plant({ x, z, ry: 0 });
-  h.light(0xffe6c4, 22, 9, 0, 4.6, -D / 2 + 2.2);
+  h.light(0xffffff, 22, 9, 0, 4.6, -D / 2 + 2.2);
   return h.build(spawnOf(h), Math.PI);
 };
 
@@ -99,7 +104,7 @@ const projects: RoomBuilder = function* (room, o) {
   const PITCH = 3.8;
   const D = Math.max(14, 5.2 + (rows - 1) * PITCH + 7);
   const W = 14;
-  const h = new Hall(room.id, room.label, room.jp, { w: W, d: D, h: 5.6 }, o, 0xffffff);
+  const h = new Hall(room.id, room.label, room.jp, { w: W, d: D, h: 5.6 }, o);
   h.shell(ex.length);
   yield;
   const f = getFonts();
@@ -127,9 +132,10 @@ const projects: RoomBuilder = function* (room, o) {
       ctx.fillText(text, w / 2, 116);
     });
     const p: Place = { x: 0, z, ry: 0 };
-    for (const sx of [-0.9, 0.9]) h.box('ink', p, sx, 5.0, 0, 0.025, 0.6, 0.025);
-    h.plane(tex, p, 0, 4.75, 0.01, 2.2, 0.69);
-    h.plane(tex, { ...p, ry: Math.PI }, 0, 4.75, 0.01, 2.2, 0.69);
+    // R93: hung below the coffer ribs (H - 0.55), on rods up into them
+    for (const sx of [-0.9, 0.9]) h.box('ink', p, sx, 4.55, 0, 0.025, 0.6, 0.025);
+    h.plane(tex, p, 0, 4.25, 0.01, 2.2, 0.69);
+    h.plane(tex, { ...p, ry: Math.PI }, 0, 4.25, 0.01, 2.2, 0.69);
     yield;
   }
   // the index board on the far wall: every project, number and title (inspect = the directory)
@@ -180,30 +186,30 @@ const experience: RoomBuilder = function* (room, o) {
   const PITCH = 3.6;
   const D = Math.max(15, 5 + (ex.length - 1) * PITCH + 6);
   const W = 11;
-  const h = new Hall(room.id, room.label, room.jp, { w: W, d: D, h: 5.4 }, o, 0xfff7e0);
+  const h = new Hall(room.id, room.label, room.jp, { w: W, d: D, h: 6.2 }, o);
   h.shell(ex.length);
   yield;
   const f = getFonts();
   const firstZ = D / 2 - 5;
   const lastZ = firstZ - (ex.length - 1) * PITCH;
-  // the timeline painted down the corridor, from the door to the far wall
-  h.box('ink', { x: 0, z: 0, ry: 0 }, 0, 0, (firstZ + 1.5 + (lastZ - 2)) / 2, 0.12, 0.012, firstZ + 1.5 - (lastZ - 2));
+  // R93: the timeline is a raised concrete spine with ink edges, from the door to the far wall (low enough to step on)
+  const run = firstZ + 1.5 - (lastZ - 2);
+  h.inked('concrete', { x: 0, z: 0, ry: 0 }, 0, 0, (firstZ + 1.5 + (lastZ - 2)) / 2, 0.5, 0.06, run, 0.03);
+  const Z = Hall.BAY;
   ex.forEach((e, i) => {
     const left = i % 2 === 0;
     const z = firstZ - i * PITCH;
     const p: Place = { x: left ? -W / 2 : W / 2, z, ry: left ? Math.PI / 2 : -Math.PI / 2 };
-    // the booth: a deep paper panel, a SIGNAL stripe at its edge, the photo, the logo plate, the caption
-    h.box('deep', p, 0, 0.16, 0.02, 3.3, 3.9, 0.04);
-    h.box('ink', p, 0, 0.16, 0.01, 3.42, 4.02, 0.02);
-    if (e.signal) h.box(`sig:${e.signal}`, p, -1.62, 0.16, 0.05, 0.14, 3.9, 0.02);
-    const fr = h.frame(e.image ?? e.logo, p, -0.55, 2.55, 1.75, 1.5, 0.05);
+    // the booth: the role's SIGNAL bay, the photo, the logo plate, more photos above, the caption
+    h.bay(e, p, 3.42);
+    const fr = h.frame(e.image ?? e.logo, p, -0.55, 2.55, 1.75, 1.5, Z);
     h.pick(fr.mesh, e.id);
     if (e.logo && e.image) {
-      const lf = h.frame(e.logo, p, -0.55, 1.15, 1.1, 0.42, 0.05);
+      const lf = h.frame(e.logo, p, -0.55, 1.15, 1.1, 0.42, Z);
       h.pick(lf.mesh, e.id);
     }
     (e.images ?? []).slice(1, 4).forEach((im, k) => {
-      const tf = h.frame(im, p, -1.2 + k * 0.66, 3.95, 0.56, 0.42, 0.05);
+      const tf = h.frame(im, p, -1.2 + k * 0.66, 3.8, 0.56, 0.42, Z);
       h.pick(tf.mesh, e.id);
     });
     const c = h.card(
@@ -219,15 +225,15 @@ const experience: RoomBuilder = function* (room, o) {
       p,
       0.98,
       3.75,
-      0.06,
+      Z + 0.02,
       1.15,
       2.4,
     );
     h.pick(c.mesh, e.id);
     h.exhibitHotspot(e, p, 2.4, 1.7, 4.4, 1.9);
-    // the date on the floor beside the timeline dot
-    h.cyl('ink', { x: 0, z, ry: 0 }, 0, 0, 0, 0.22, 0.016, 'cyl20');
-    if (e.signal) h.cyl(`sig:${e.signal}`, { x: 0, z, ry: 0 }, 0, 0, 0, 0.15, 0.02, 'cyl20');
+    // the date on the floor beside the timeline stud (on top of the spine)
+    h.cyl('ink', { x: 0, z, ry: 0 }, 0, 0.06, 0, 0.22, 0.016, 'cyl20');
+    if (e.signal) h.cyl(`sig:${e.signal}`, { x: 0, z, ry: 0 }, 0, 0.06, 0, 0.15, 0.02, 'cyl20');
     if (e.period) {
       const tex = h.print(768, 160, (ctx, w, hh) => {
         inkBox(ctx, 0, 0, w, hh, PAPER, 10);
@@ -235,12 +241,12 @@ const experience: RoomBuilder = function* (room, o) {
         ctx.font = `800 64px ${f.mono}`;
         ctx.fillText(wrap(ctx, e.period!.toUpperCase(), w - 70, 1)[0] ?? '', 36, 104);
       });
-      // read from the corridor: the label lies beside the dot, its text running along the walker's view
-      h.decal(tex, left ? 1.25 : -1.25, z, 1.8, 0.375, 0);
+      // read from the corridor: the label lies beside the stud, its text running along the walker's view
+      h.decal(tex, left ? 1.45 : -1.45, z, 2.2, 0.46, 0);
     }
   });
   yield;
-  h.light(0xfff1dc, 14, 12, 0, 4.6, lastZ);
+  h.light(0xffffff, 14, 12, 0, 5.2, lastZ);
   return h.build(spawnOf(h), Math.PI);
 };
 
@@ -250,19 +256,24 @@ const honors: RoomBuilder = function* (room, o) {
   const W = 17;
   const PITCH = 3.7;
   let D = 14;
+  // R93: 3.2 m clear of each corner, so a side bay and a far-wall bay never share a corner (with 2.1 their stand marks
+  // were 0.72 m apart once the hall grew; tests/r93-rooms)
+  const MARGIN = 3.2;
   // grow the hall until every honour has a bay
-  while (wallSlots(W, D, PITCH, 2.1).length < ex.length && D < 120) D += PITCH;
-  const h = new Hall(room.id, room.label, room.jp, { w: W, d: D, h: 6 }, o, 0xfff7e0);
+  while (wallSlots(W, D, PITCH, MARGIN).length < ex.length && D < 120) D += PITCH;
+  const h = new Hall(room.id, room.label, room.jp, { w: W, d: D, h: 6 }, o);
   h.shell(ex.length);
   yield;
   const f = getFonts();
-  const slots = h.wallSlots(PITCH, 2.1);
+  const slots = h.wallSlots(PITCH, MARGIN);
   for (const e of ex) {
     const p = slots.shift();
     if (!p) break;
     const band = sig(e);
+    // R93: every honour in its SIGNAL bay, its stat painted on the floor beyond the monolith
+    h.bay(e, p, PITCH - 0.4, 3.5);
     if (e.image) {
-      const fr = h.frame(e.image, p, 0, 2.75, 2.3, 2.0);
+      const fr = h.frame(e.image, p, 0, 2.75, 2.3, 2.0, Hall.BAY);
       h.pick(fr.mesh, e.id);
     } else {
       const c = h.card(
@@ -270,7 +281,7 @@ const honors: RoomBuilder = function* (room, o) {
         p,
         0,
         3.8,
-        0.02,
+        Hall.BAY + 0.02,
         1.7,
         1.0,
       );
@@ -304,12 +315,13 @@ const honors: RoomBuilder = function* (room, o) {
         ctx.textAlign = 'left';
       });
     });
+    // R93: a raw concrete column with ink edges carries the tally on both faces
     const c: Place = { x: 0, z: 0, ry: 0 };
-    h.solid('ink', c, 0, 0, 0, 1.3, 2.6, 1.3);
+    h.inked('concrete', c, 0, 0, 0, 1.3, 2.6, 1.3);
     h.plane(tex, { x: 0, z: 0.66, ry: 0 }, 0, 1.7, 0, 1.1, 1.65);
     h.plane(tex, { x: 0, z: -0.66, ry: Math.PI }, 0, 1.7, 0, 1.1, 1.65);
   }
-  h.light(0xffe6c4, 18, 12, 0, 5, -D / 2 + 3);
+  h.light(0xffffff, 18, 12, 0, 5, -D / 2 + 3);
   return h.build(spawnOf(h), Math.PI);
 };
 
@@ -321,13 +333,13 @@ const contact: RoomBuilder = function* (room, o) {
   const W = 13;
   let D = 13;
   while (wallSlots(W, D, 3.6, 2.2).filter((s) => s.ry !== 0).length < rest.length && D < 120) D += 3.6;
-  const h = new Hall(room.id, room.label, room.jp, { w: W, d: D, h: 5 }, o, 0xffffff);
+  const h = new Hall(room.id, room.label, room.jp, { w: W, d: D, h: 5 }, o);
   h.shell(ex.length);
   yield;
   const f = getFonts();
   const north: Place = { x: 0, z: -D / 2, ry: 0 };
-  // the counter and the pigeonholes behind it
-  h.solid('wood', north, 0, 0, 1.5, 8.2, 1.05, 0.8);
+  // the counter (R93: a poured concrete counter with ink edges and an ink top) and the pigeonholes behind it
+  h.inked('concrete', north, 0, 0, 1.5, 8.2, 1.05, 0.8);
   h.box('ink', north, 0, 1.05, 1.5, 8.4, 0.08, 0.96);
   for (let r = 0; r < 3; r++)
     for (let c = 0; c < 10; c++)
@@ -383,8 +395,6 @@ const contact: RoomBuilder = function* (room, o) {
     h.wallExhibit(e, p);
     yield;
   }
-  h.plant({ x: -W / 2 + 0.8, z: D / 2 - 0.9, ry: 0 });
-  h.plant({ x: W / 2 - 0.8, z: D / 2 - 0.9, ry: 0 });
   return h.build(spawnOf(h), Math.PI);
 };
 
@@ -394,7 +404,7 @@ const hall: RoomBuilder = function* (room, o) {
   const W = 14;
   let D = 13;
   while (wallSlots(W, D, 3.8, 2).length < ex.length && D < 120) D += 3.8;
-  const h = new Hall(room.id, room.label, room.jp, { w: W, d: D, h: 5.4 }, o, 0xfff7e0);
+  const h = new Hall(room.id, room.label, room.jp, { w: W, d: D, h: 5.4 }, o);
   h.shell(ex.length);
   yield;
   const slots = h.wallSlots(3.8, 2);

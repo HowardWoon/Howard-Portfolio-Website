@@ -139,8 +139,23 @@ export interface DioramaHandle {
     portals(): { id: string; open: number; glow: number; armed: boolean; guided: boolean }[];
     /** tests that measure walking past a door: the doorways still open, but walking in does not enter (default on) */
     walkIn(on: boolean): void;
-    /** walk-in gallery: the open room, its hotspots and what is inspected */
-    room(): { id: string | null; hotspots: string[]; inspect: string | null; transit: boolean; cached: string[] };
+    /**
+     * walk-in gallery: the open room, its hotspots and what is inspected. R93 (tests/r93-rooms): the exhibit ids and
+     * SIGNAL meanings of its content, its size, where each hotspot stands, its batched meshes and its lights
+     */
+    room(): {
+      id: string | null;
+      hotspots: string[];
+      inspect: string | null;
+      transit: boolean;
+      cached: string[];
+      content: string[];
+      signals: string[];
+      size: { w: number; d: number; h: number } | null;
+      spots: { id: string; x: number; z: number }[];
+      batches: string[];
+      lights: { hemi: number; dir: number; point: number };
+    };
   };
 }
 
@@ -2163,6 +2178,22 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
         inspect: inspecting?.id ?? null,
         transit,
         cached: [...rooms.keys()],
+        content: room ? (content?.[room.id]?.exhibits ?? []).map((e) => e.id) : [],
+        signals: room
+          ? [...new Set((content?.[room.id]?.exhibits ?? []).flatMap((e) => (e.signal ? [e.signal] : [])))]
+          : [],
+        size: room ? room.size : null,
+        spots: room ? room.hotspots.map((h) => ({ id: h.id, x: +h.pos.x.toFixed(2), z: +h.pos.z.toFixed(2) })) : [],
+        batches: room ? room.scene.children.filter((o) => o.name.startsWith('batch:')).map((o) => o.name) : [],
+        lights: (() => {
+          const l = { hemi: 0, dir: 0, point: 0 };
+          room?.scene.traverse((o) => {
+            if (o instanceof THREE.HemisphereLight) l.hemi++;
+            else if (o instanceof THREE.DirectionalLight) l.dir++;
+            else if (o instanceof THREE.PointLight) l.point++;
+          });
+          return l;
+        })(),
       }),
       quiet: () => {
         director.auto = false;
