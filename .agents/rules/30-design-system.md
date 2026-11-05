@@ -70,7 +70,8 @@ Rules:
 
 1. CI runners report <= 4 CPU cores: an emulated phone starts in the FX-93 `lite` tier. Phone tests of effects
    that lite disables must load `/?fxtier=full` and wait for `html[data-fx-desk="on"]` (lazy DeskFx).
-2. The pre-push hook runs the FULL suite on the working tree (45-60 min with `CI=1`, AGENTS.md 3.8). Do not create or edit files while it
+2. The pre-push hook runs the build and this push's tests on the working tree (5 - 15 min, R94; `FULL=1` = all, 80 min;
+   AGENTS.md 3.8). Do not create or edit files while it
    runs, or it tests half-written code and blocks the push. `git status` "ahead N" after a push = it was blocked.
 3. Locally, `/_vercel/insights` and `/_vercel/speed-insights` return 404. That is expected (Vercel-only scripts).
 4. Playwright cannot `.click()` / `.tap()` / `scrollIntoViewIfNeeded()` an element that is always animating

@@ -51,24 +51,28 @@ trigger: always_on
 
 ## E. Git safety
 
-1. Commit on `main` only after `node scripts/verify.mjs --e2e` passes.
+1. Commit on `main` only after `node scripts/verify.mjs` and the Playwright files of the change pass (R94: the full
+   suite runs on GitHub CI after the push, section G).
 2. Before commit: `node scripts/verify.mjs --no-build` must print `RESULT: ALL PASS`.
    The pre-commit hook enforces this. NEVER use `git commit --no-verify`.
 3. Never `git push --force`, `git reset --hard`, `git clean -fd` or `git rebase` on main without Howard's written OK.
 4. Never commit: .env*, .next/, node_modules/, test-results/, playwright-report/, *.log, files you did not intend to change.
-5. Push the branch after each commit so the work is verifiable: stop the :3000 server, then `CI=1 git push origin main`
-   as a background command (45-60 min; AGENTS.md section 3.8). Several commits may go in one push when the next change
+5. Push the branch after each commit so the work is verifiable: stop the :3000 server, then `git push origin main`
+   as a background command (5 - 15 min; AGENTS.md section 3.8). Several commits may go in one push when the next change
    is already being made - a push that is running when new bugs are reported can be aborted and redone (safe).
 
 ## G. Reading CI and Vercel after a push
 
+0. R94: `node scripts/ci-status.mjs <hash> --wait` reads every CI job and the Vercel status of one commit (2 calls
+   every 3 min, at most 45 min) and exits 0 only when CI is green and Vercel deployed. CI is the full-suite gate now:
+   a red shard is read (its failures are in `check-runs/<id>/annotations`) and fixed in the next commit.
 1. The public GitHub API rate-limits this machine's IP after a few dozen calls (HTTP 403 "rate limit exceeded");
-   never poll it in a loop. Read the run page instead: `github.com/HowardWoon/Howard-Portfolio-Website/actions` and
+   never poll it in a tight loop. Read the run page instead: `github.com/HowardWoon/Howard-Portfolio-Website/actions` and
    `.../actions/runs/<id>` (built-in browser `get_page_text`, or curl the HTML). A `grep` for "Failure" in that HTML
    is not a verdict - read the Status field.
-2. Every CI job has a 1-hour limit. R77: the suite took ~52 min in one job, so it runs as 4 Playwright shards
-   (`e2e (1/4)` ... `e2e (4/4)`, one worker each) next to `check` (static checks, build, motion audit); `e2e-report`
-   merges the shards into the `playwright-report` artifact. Shard 4 holds the 3D files. Anything that makes every test
+2. Every CI job has a 1-hour limit. R77: the suite took ~52 min in one job, so it runs as Playwright shards (R94: 8,
+   `e2e (1/8)` ... `e2e (8/8)`, one worker each; 4 took ~32 min) next to `check` (static checks, build, motion audit);
+   `e2e-report` merges the shards into the `playwright-report` artifact. The last shards hold the 3D files. Anything that makes every test
    slower (R68: the 3D street built on every scroll past it, on software WebGL) gets a job CANCELLED, not failed - read
    the duration of the longest shard.
 3. Vercel: confirm the commit's deployment, then fetch the live HTML and look for the new markup. The built-in browser

@@ -4,6 +4,7 @@
  * Usage:
  *   node scripts/verify.mjs            -> encoding + typecheck + lint + format + build
  *   node scripts/verify.mjs --e2e      -> also runs Playwright (needs a production build)
+ *   node scripts/verify.mjs --e2e-changed -> Playwright for the core guards + this push's tests only (pre-push)
  *   node scripts/verify.mjs --no-build -> skip the production build (quick pre-commit style run)
  * Exit code 0 only when every executed step passed. Prints a table the AI must paste into its report.
  */
@@ -114,6 +115,12 @@ if (!args.has('--no-build')) {
 // was cut off at test 437 with every test passing. Only the time limit changed; no test, retry or worker setting did.
 // R82: the one-worker run passed 60 min as the suite grew (CI itself runs 4 shards, each under its own hour): 120 min
 if (args.has('--e2e')) run('e2e (playwright)', 'npm run test:e2e', { timeoutMin: process.env.CI ? 120 : 15 });
+// R94: the pre-push hook runs only the core guards and the tests of the pushed commits (scripts/push-tests.mjs), on
+// one worker with CI's retry; the full suite runs on GitHub CI in parallel shards after the push
+else if (args.has('--e2e-changed')) {
+  const picked = spawnSync('node scripts/push-tests.mjs', { shell: true, encoding: 'utf8' }).stdout.trim().split(/\s+/);
+  run(`e2e (${picked.length} files of this push)`, `npx playwright test ${picked.join(' ')}`, { timeoutMin: 45 });
+}
 
 // Summary table
 const line = (r) => `| ${r.name} | ${r.ok ? 'PASS' : 'FAIL'} | ${r.status} | ${r.secs}s |`;

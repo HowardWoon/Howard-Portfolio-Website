@@ -45,13 +45,15 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
 5. Read every file you will edit in full before editing it.
 6. Make the smallest correct change.
 7. Run `node scripts/verify.mjs` (add `--e2e` for UI changes) and, for any UI change, `node scripts/audit-ui.mjs` AND `node scripts/device-sweep.mjs`. Paste both summary tables.
-8. Commit (the pre-commit hook re-checks), stop the :3000 server, then push with `CI=1 git push origin main` as a
-   BACKGROUND command (Bash; PowerShell: `$env:CI='1'; git push origin main`). The pre-push hook runs the full suite
-   with one worker: 45-60 min for 550+ tests (without `CI=1` it uses 3 workers and a 15-min e2e timeout and times
-   out). Do not touch files meanwhile; if `git status` still says "ahead", the push was blocked. Aborting a push
-   (kill its node / git processes) is safe: the commits stay local. Then confirm GitHub CI is green and Vercel shows
-   `success` for that hash (06-stability G), and report in the format of `00-core.md` section F,
-   with evidence per `05-obedience.md` section D and the "SELF-CHECK" line.
+8. Commit (the pre-commit hook re-checks), stop the :3000 server, then `git push origin main` as a BACKGROUND
+   command. R94 (owner: "too slow and i need to wait so long"): the pre-push hook runs the static checks, the build and
+   only the Playwright files of this push plus the core guards (`node scripts/push-tests.mjs --why` lists them), one
+   worker, about 5 - 15 min; `FULL=1 git push origin main` still runs all 600+ tests first (80 min). Do not touch files
+   meanwhile; if `git status` still says "ahead", the push was blocked. Aborting a push is safe: the commits stay local.
+   The FULL suite runs on GitHub CI in 8 parallel shards: run `node scripts/ci-status.mjs <hash> --wait` (CI and
+   Vercel for that hash, ~20 min). A push is done only when it prints PASSED; a red CI test is fixed in the next
+   commit, before any other work (06-stability G). Report in the format of `00-core.md` section F, with evidence per
+   `05-obedience.md` section D and the "SELF-CHECK" line.
 
 ## 4. Commands
 
@@ -65,7 +67,8 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
 | Type check / lint / format                 | `npm run typecheck` / `npm run lint` / `npx prettier --write <files you changed>`          |
 | E2E tests                                  | `npm run test:e2e`                                                                         |
 | Every device (23 profiles, 6 pages, R82)   | server running, then `node scripts/device-sweep.mjs`                                       |
-| Push (full suite runs first, 45-60 min)    | stop :3000, then `CI=1 git push origin main` in the background                             |
+| Push (this push's tests first, 5-15 min)   | stop :3000, then `git push origin main` in the background (`FULL=1` = all tests, 80 min)   |
+| After a push: CI + Vercel for one commit   | `node scripts/ci-status.mjs <hash> --wait` (exit 0 = CI green and deployed)                |
 | Rerun failures alone (load or real?)       | `npx playwright test <file>:<line> --workers 1 --repeat-each 3`                            |
 
 ## 5. Where things live

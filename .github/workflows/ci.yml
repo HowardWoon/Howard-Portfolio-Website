@@ -62,10 +62,11 @@ jobs:
           retention-days: 7
 
   # R77: the full suite (601 tests, one worker) took ~52 min in one job against the 60-min limit (run 39008258839).
-  # It is split into 4 shards on 4 runners; every test still runs, one worker per shard (playwright.config.ts).
+  # It is split into 8 shards on 8 runners (R94: 4 shards took ~32 min each); every test still runs, one worker per
+  # shard (playwright.config.ts).
   # Each shard builds the site itself (the build is ~30 s) and runs its own `npm run start` via the webServer config.
   e2e:
-    name: e2e (${{ matrix.shard }}/4)
+    name: e2e (${{ matrix.shard }}/8)
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     env:
@@ -74,7 +75,7 @@ jobs:
       # Every shard reports its own result, so one failing shard does not hide the others.
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4]
+        shard: [1, 2, 3, 4, 5, 6, 7, 8]
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -90,7 +91,7 @@ jobs:
           key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - run: npx playwright install --with-deps chromium
       # The blob reporter replaces the per-shard html report; the "e2e-report" job merges the blobs into one.
-      - run: npx playwright test --shard=${{ matrix.shard }}/4 --reporter=github,list,blob
+      - run: npx playwright test --shard=${{ matrix.shard }}/8 --reporter=github,list,blob
       - name: Upload blob report
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7

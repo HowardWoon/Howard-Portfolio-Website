@@ -30,6 +30,10 @@ A task is DONE only when every applicable item below has actually been executed 
   stepped run looked fine, the real-time log showed the camera blend flicking 1.000 -> 0.985 every 2 - 3 frames).
 - A test that fails only inside the full suite but passes 3x alone is a load flake: re-run it, report it honestly,
   and never commit around it. If it fails twice in a row in the full suite it is a real bug.
+- R94: the full suite runs on GitHub CI after each push (8 shards, `node scripts/ci-status.mjs <hash> --wait`); the
+  pre-push hook runs the core guards and the files `scripts/push-tests.mjs` picks for the pushed commits. A CI test
+  that fails AND fails its retry is treated like a blocked push: diagnosed and fixed in the next commit. A guard for a
+  new change goes in a test file the change touches or names (`tests/r<round>*.spec.ts`), so the hook runs it.
 - Before trusting a new guard test, prove it can fail (it must flag the defect it was written for).
 - Mojibake detectors must build their patterns from numeric code points (`String.fromCodePoint(0xc3)`), never literal characters or \u escapes, because tools "normalise" them. Never flag the plain middle dot (U+00B7): the site legitimately uses it. Copy the pattern from scripts/check-encoding.mjs.
 

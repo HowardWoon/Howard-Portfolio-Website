@@ -1,12 +1,21 @@
 #!/bin/sh
-# Blocks pushes that would turn CI red: runs exactly what CI runs (plan checks, typecheck, lint, format,
-# build and the full Playwright suite). Enabled by `git config core.hooksPath .githooks` (same as pre-commit).
-# Takes 45-60 minutes (550+ tests). Push with CI=1 (one worker, 60-min e2e limit; AGENTS.md 3.8).
-# Never bypass with --no-verify.
-echo "pre-push: running full verification (build + e2e), 45-60 minutes..."
-node scripts/verify.mjs --e2e
+# Blocks pushes that would break the site. Enabled by `git config core.hooksPath .githooks` (same as pre-commit).
+# R94 (owner: "too slow and i need to wait so long"): static checks, build, and only the Playwright files that belong
+# to the pushed commits plus the core guards (scripts/push-tests.mjs), about 5-15 minutes. The FULL suite runs on
+# GitHub CI in parallel shards after the push: confirm it with `node scripts/ci-status.mjs <sha> --wait`.
+# CI=1 is set here (one worker, the CI retry, no second build). FULL=1 git push runs the whole suite here first
+# (80 min). Never bypass with --no-verify.
+if [ -n "$FULL" ]; then
+  echo "pre-push: FULL=1, running the full suite (build + every e2e test, about 80 minutes)..."
+  CI=1 node scripts/verify.mjs --e2e
+else
+  echo "pre-push: build + the tests of this push (node scripts/push-tests.mjs --why):"
+  node scripts/push-tests.mjs --why
+  CI=1 node scripts/verify.mjs --e2e-changed
+fi
 status=$?
 if [ $status -ne 0 ]; then
-  echo "pre-push: BLOCKED. CI would fail. Fix the failures above, commit, and push again."
+  echo "pre-push: BLOCKED. Fix the failures above, commit, and push again."
   exit 1
 fi
+echo "pre-push: passed. The full suite now runs on GitHub CI: node scripts/ci-status.mjs HEAD --wait"
