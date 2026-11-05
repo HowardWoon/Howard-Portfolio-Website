@@ -103,6 +103,53 @@
   position: relative;
   border-radius: 8px;
   box-shadow: 8px 8px 0 0 #ff9f1c;
+  /* R96: the real matric card is portrait (54 x 85.6 mm), so it is narrower than the R21 landscape card */
+  width: min(var(--card-w), 300px);
+}
+/* the card's own order: photo | CGPA, then name, programme, faculty, KL / session */
+.bs-matric-body {
+  display: grid;
+  grid-template-columns: 52% 1fr;
+  grid-template-areas:
+    'photo cgpa'
+    'info info';
+  gap: 12px;
+  padding: 12px;
+}
+.bs-matric-photo {
+  grid-area: photo;
+}
+.bs-matric-cgpa {
+  grid-area: cgpa;
+}
+.bs-matric-info {
+  grid-area: info;
+}
+/* the ENROLLED stamp lands in the free corner beside the photo, above CGPA: it never covers a word (R77) */
+.bs-section .bs-matric .bs-stamp {
+  top: 30%;
+  right: 4%;
+  bottom: auto;
+}
+/* a phone or a short window stacks the card over the terminal: a portrait card is too tall for that, so the same card
+   lies wide - the photo on the left, CGPA under it, the printed lines beside them - and the stamp hits the photo */
+@media (max-width: 1023px), (max-height: 760px) {
+  .bs-section .bs-idcard {
+    width: var(--card-w);
+  }
+  .bs-matric-body {
+    grid-template-columns: 34% 1fr;
+    grid-template-areas:
+      'photo info'
+      'cgpa info';
+    align-items: start;
+  }
+  .bs-section .bs-matric .bs-stamp {
+    top: auto;
+    bottom: 5%;
+    right: 3%;
+    font-size: 0.9rem;
+  }
 }
 .bs-section .bs-id-drop {
   opacity: min(1, calc(var(--t) * 4));
@@ -145,6 +192,9 @@
   border-bottom: 0;
 }
 .bs-section .bs-code .bs-type {
+  /* R96: a long line wraps inside its lane at every width (it was cut at the card edge: "SQL ·", "System Archi") */
+  white-space: normal;
+  overflow-wrap: anywhere;
   opacity: 1;
   clip-path: none;
   transform: translate3d(calc((1 - var(--e)) * -104%), 0, 0);
@@ -347,5 +397,16 @@
       calc(var(--dy) * 1cqh * clamp(0, var(--t) * 2 - 1, 1)),
       6px
     );
+  }
+}
+
+/* R96: the portrait matric card parks as a narrower label over the left reel (90 x 137 px at 0.3, the R24 landscape
+   card was 143 x 87 at 0.34): centred on the 148 px reel and 14 px under the HUD as before, and the reel gives up the
+   extra 50 px of label height */
+@media (min-width: 1024px) and (min-height: 761px) {
+  .bs-section .bs-stage {
+    --id3s: 0.3;
+    --id3y: calc(var(--top) / 2 + var(--bottom) / 2 + 83px - 50svh);
+    --reel-h: calc(100svh - var(--top) - var(--bottom) - 202px);
   }
 }

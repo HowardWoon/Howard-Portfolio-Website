@@ -101,12 +101,19 @@ test.describe('KMNS gallery desk (1440)', () => {
     await expect(card.locator('[data-org-plate] [data-org-logo="kmns"] img')).toHaveCount(1);
 
     // the filmstrip jumps straight to photo 4 of the owner's 20 (R57 order; the portrait one): the print takes its real 960x1280 shape
+    // (CI: a click before hydration did nothing, and the size was read before the photo had loaded - NaN)
+    await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
     await card.getByRole('button', { name: 'Go to photo 4 of 20' }).click();
     await page.waitForTimeout(700);
     await expect(card.getByRole('button', { name: 'Go to photo 4 of 20' })).toHaveAttribute('aria-current', 'true');
     await expect(card.locator('[data-photo-caption]')).toHaveText(
       'On stage with medals at the Simposium Peer Assisted Learning (PAL)',
     );
+    await expect
+      .poll(() => card.evaluate((el) => el.querySelector<HTMLImageElement>('img[src*="kmns_03"]')?.naturalWidth ?? 0), {
+        timeout: 15_000,
+      })
+      .toBeGreaterThan(0);
     const ratio = await card.evaluate((el) => {
       const img = el.querySelector<HTMLImageElement>('img[src*="kmns_03"]')!;
       const frame = img.parentElement!.getBoundingClientRect();

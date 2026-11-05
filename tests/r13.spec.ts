@@ -87,6 +87,9 @@ test('pressing a button stamps a shape that cleans itself up (FX-56)', async ({ 
 test('section scan and 3D tiles run with motion (FX-57, FX-58, FX-59)', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
+  // R95: a section far off screen drops its scroll-driven animations (tests/r95): read them with Projects on screen
+  await page.locator('#projects').evaluate((e) => e.scrollIntoView({ block: 'start' }));
+  await expect(page.locator('#projects[data-offscreen]')).toHaveCount(0);
   expect(
     await page.evaluate(() => getComputedStyle(document.querySelector('#projects')!, '::after').animationName),
   ).toBe('fx-section-scan');
@@ -95,6 +98,8 @@ test('section scan and 3D tiles run with motion (FX-57, FX-58, FX-59)', async ({
   await tile.hover();
   await expect.poll(() => tile.evaluate((e) => getComputedStyle(e).rotate)).not.toBe('none');
   const title = page.locator('#projects .nb-title');
+  await title.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+  await expect(page.locator('#projects[data-offscreen]')).toHaveCount(0);
   await title.hover();
   await expect
     .poll(() =>

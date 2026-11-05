@@ -4,6 +4,7 @@
  * push, so a push is finished only when this prints CI green and Vercel success.
  * Usage: node scripts/ci-status.mjs [sha] [--wait]   (sha defaults to HEAD; --wait checks every 3 min, up to 45 min)
  * Exit 0 = CI passed and Vercel deployed, 1 = something failed, 2 = still running (without --wait) or timed out.
+ * With --wait it returns only when every job has finished, so a red shard is listed with all the others.
  * Without a GITHUB_TOKEN the API allows 60 requests an hour: one check is 2 requests.
  */
 import { spawnSync } from 'node:child_process';
@@ -30,14 +31,26 @@ async function check() {
   const failed = runs.some((c) => c.conclusion && !['success', 'skipped', 'neutral'].includes(c.conclusion));
   const running = !runs.length || runs.some((c) => c.status !== 'completed') || !vercel || vercel.state === 'pending';
   const vercelFailed = vercel && ['failure', 'error'].includes(vercel.state);
-  return { rows, state: failed || vercelFailed ? 'failed' : running ? 'running' : 'passed', runs };
+  return { rows, state: failed || vercelFailed ? 'failed' : running ? 'running' : 'passed', running, runs };
 }
 
+// a network timeout or a 5xx is not a verdict: try again (3 times now, every 3 min while waiting)
+const tryCheck = async () => {
+  for (let i = 0; ; i++) {
+    try {
+      return await check();
+    } catch (e) {
+      if (i >= 2 || /\b403\b/.test(String(e))) throw e;
+      await new Promise((done) => setTimeout(done, 20_000));
+    }
+  }
+};
 const t0 = Date.now();
-let r = await check();
-while (wait && r.state === 'running' && Date.now() - t0 < 45 * 60_000) {
+let r = await tryCheck();
+// --wait reads the whole run: a red shard is reported with all the others, not as soon as it fails
+while (wait && r.running && Date.now() - t0 < 45 * 60_000) {
   await new Promise((done) => setTimeout(done, 180_000));
-  r = await check();
+  r = await tryCheck();
 }
 console.log(`${sha.slice(0, 7)}: ${r.state.toUpperCase()}\n${r.rows.join('\n')}`);
 const run = r.runs.find((c) => c.html_url)?.html_url;

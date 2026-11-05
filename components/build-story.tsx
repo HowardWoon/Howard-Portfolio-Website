@@ -686,45 +686,51 @@ export default function BuildStory() {
               <div className="bs-seg bs-id-shift" style={seg(0.2, 0.27)}>
                 <div className="bs-seg bs-id-drop" style={seg(0.03, 0.15)}>
                   <div className="bs-seg bs-id-press" style={seg(0.13, 0.19)}>
+                    {/* R96 (owner, with a photo of the real UM matric card: "must be similar and perfect"): the card's own
+                        layout in the site's ink - portrait, photo top left, crest and UNIVERSITI MALAYA top right, the
+                        name and the programme lines as printed on the card, KL / session bottom left. Left out on
+                        purpose (owner's choice): the bank / payment marks, the government crest and MySISWA, and the
+                        matric number. The photo stays the pixel portrait. */}
                     <div className="bs-idcard">
-                      <div className="relative overflow-hidden rounded-lg border-3 border-ink bg-paper text-ink">
-                        <div className="flex items-center justify-between gap-2 border-b-3 border-ink bg-pop-orange px-4 py-2">
-                          <div className="flex min-w-0 items-center gap-2">
+                      <div className="bs-matric relative overflow-hidden rounded-lg border-3 border-ink bg-paper text-ink">
+                        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 border-b-3 border-ink bg-pop-orange px-3 py-2">
+                          <span className="shrink-0 whitespace-nowrap rounded border-2 border-ink bg-paper px-1.5 py-0.5 font-mono text-xs font-extrabold tracking-[0.06em]">
+                            STUDENT ID
+                          </span>
+                          <div className="flex shrink-0 items-center gap-2">
                             <InstitutionSeal crest="um" size="badge" stampIn={false} />
-                            <span className="font-display text-[clamp(0.8rem,2.6vw,0.95rem)] font-extrabold tracking-[0.02em]">
-                              UNIVERSITI MALAYA
+                            <span className="font-display text-[clamp(0.8rem,6cqw,0.95rem)] font-extrabold uppercase leading-[1.05] tracking-[0.04em]">
+                              Universiti
+                              <br />
+                              Malaya
                             </span>
                           </div>
-                          <span className="font-mono text-xs font-extrabold tracking-[0.14em]">STUDENT ID</span>
                         </div>
-                        <div className="grid grid-cols-[34%_1fr] gap-3 p-3 sm:gap-4 sm:p-4">
-                          <div className="bs-photo relative aspect-[413/591] overflow-hidden rounded-md border-3 border-ink">
+                        {/* portrait on a desktop: photo | CGPA over the text; a phone lays the same card out wide (build-story.css) */}
+                        <div className="bs-matric-body">
+                          <div className="bs-matric-photo bs-photo relative aspect-[413/591] overflow-hidden rounded-md border-3 border-ink">
                             <Portrait photoSeg={seg(0.22, 0.32)} mosaicSeg={seg(0.27, 0.37)} />
                             <span className="bs-seg bs-scan" style={seg(0.22, 0.37)} />
                           </div>
-                          <dl className="min-w-0 space-y-1.5 font-mono text-[clamp(0.8rem,1.9vw,0.85rem)] leading-tight">
-                            <div>
-                              <dt className="font-bold text-ink-muted">NAME</dt>
-                              <dd className="font-display text-[clamp(0.8rem,2.6vw,1rem)] font-extrabold">
-                                HOWARD WOON HAO ZHE
-                              </dd>
-                            </div>
-                            <div>
-                              <dt className="font-bold text-ink-muted">FACULTY</dt>
-                              <dd className="font-extrabold">COMPUTER SCIENCE & IT</dd>
-                            </div>
-                            <div>
-                              <dt className="font-bold text-ink-muted">PROGRAMME</dt>
-                              <dd className="font-extrabold">B.COMP.SC. (SOFTWARE ENGINEERING)</dd>
-                            </div>
-                            <div className="flex items-end justify-between gap-2 pt-1">
-                              <div>
-                                <dt className="font-bold text-ink-muted">CGPA</dt>
-                                <dd className="font-display text-[clamp(0.9rem,3vw,1.3rem)] font-extrabold">4.00</dd>
-                              </div>
+                          <div className="bs-matric-cgpa flex min-w-0 flex-col justify-end gap-1 font-mono">
+                            <span className="text-xs font-bold text-ink-muted">CGPA</span>
+                            <span className="font-display text-[clamp(1rem,9cqw,1.5rem)] font-extrabold leading-none">
+                              4.00
+                            </span>
+                          </div>
+                          <div className="bs-matric-info space-y-1.5 font-mono text-[clamp(0.8rem,4.4cqw,0.85rem)] font-extrabold uppercase leading-tight">
+                            <p className="font-display text-[clamp(0.85rem,6cqw,1.05rem)]">HOWARD WOON HAO ZHE</p>
+                            <p>BACHELOR OF COMPUTER SCIENCE (SOFTWARE ENGINEERING)</p>
+                            <p>FACULTY OF COMPUTER SCIENCE AND INFORMATION TECHNOLOGY</p>
+                            <div className="flex items-end justify-between gap-3 pt-1">
+                              <p className="leading-snug">
+                                KL
+                                <br />
+                                2025/2026
+                              </p>
                               <span className="bs-barcode h-7 w-[46%] shrink-0" />
                             </div>
-                          </dl>
+                          </div>
                         </div>
                         <span className="bs-seg bs-stamp bs-stamp-orange" style={seg(0.13, 0.19)}>
                           ENROLLED
