@@ -17,16 +17,27 @@ const animName = (page: Page, sel: string, pseudo?: string) =>
     .locator(sel)
     .first()
     .evaluate((e, p) => getComputedStyle(e, p ?? null).animationName, pseudo);
+/** R95: a section far off screen drops its scroll-driven animations (tests/r95): read them on screen */
+const onScreen = async (page: Page, sel: string) => {
+  const el = page.locator(sel).first();
+  await el.evaluate((e) => e.scrollIntoView({ block: 'start' }));
+  await expect.poll(() => el.evaluate((e) => !!e.closest('[data-offscreen]')), { timeout: 5000 }).toBe(false);
+};
 
 /* ---------------------------------------------------------------- S2: scroll choreography */
 test('desktop: sections sink, cards recede, titles ink in (FX-80, FX-81, FX-82)', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
-  for (const id of ['about', 'projects', 'experience', 'honors'])
+  for (const id of ['about', 'projects', 'experience', 'honors']) {
+    await onScreen(page, `#${id}`);
     expect(await animName(page, `#${id}`)).toBe('fx-sheet-sink');
+  }
+  await onScreen(page, '#contact');
   expect(await animName(page, '#contact')).not.toContain('fx-sheet-sink'); // the page comes to rest at Contact
+  await onScreen(page, '.fx-project-shell');
   expect(await animName(page, '.fx-project-shell')).toBe('fx-deck-recede');
   await expect(page.locator('#projects h2 .fx-ink-word')).toHaveCount(5); // SCALABLE SYSTEMS & AUTONOMOUS ARCHITECTURES.
+  await onScreen(page, '#projects h2');
   expect(await animName(page, '#projects h2 .fx-ink-word')).toBe('fx-ink-fill');
   // the words are the same text, in the same order (content untouched)
   expect(await page.locator('#projects h2').innerText()).toBe('SCALABLE SYSTEMS & AUTONOMOUS ARCHITECTURES.');

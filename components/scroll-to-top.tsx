@@ -84,10 +84,11 @@ export function ScrollToTop() {
 
   return (
     <>
-      {/* Reading-progress bar sits just under the header's bottom border */}
+      {/* Reading-progress bar sits just under the header's bottom border. R95: its own layer, so the scaleX written
+          on every scroll frame is a compositor update, not a repaint of the page */}
       <m.div
         aria-hidden
-        className="fixed left-0 right-0 h-[5px] bg-pop-blue origin-left z-[9998] border-b-2 border-ink"
+        className="fixed left-0 right-0 h-[5px] bg-pop-blue origin-left z-[9998] border-b-2 border-ink will-change-transform"
         style={{ scaleX, top: 'var(--header-h)' }}
       />
       <AnimatePresence>

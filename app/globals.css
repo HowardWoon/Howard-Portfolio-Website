@@ -931,6 +931,30 @@ html.hw-booted .boot-overlay {
 [data-offscreen] .bs-scroll-cue::after {
   animation-play-state: paused !important;
 }
+/* R95 (owner: "the whole scrolling part in this whole transition is so laggy"): a scroll-driven animation
+   (animation-timeline: view()) with fill: both keeps its element a GPU layer for good, and everything painted above
+   it becomes a layer too ("overlap"). At the Doom Walk on a 1920 x 1080 desktop that was 401 layers, among them the
+   whole Projects section; Chrome rebuilt the list on every scroll frame. Off-screen (200 px margin, so they are back
+   before they can be seen) these elements drop the animation: 401 -> ~200 layers, main thread -20 % per scroll.
+   Paused is not enough (a paused animation keeps its layer). Only scroll-driven ones: a time-based entrance would
+   replay. Their value is the scroll position, so nothing jumps when they come back. */
+:is([data-offscreen], [data-offscreen] *):is(
+  .fx-sheet,
+  .fx-project-shell,
+  .fx-rise,
+  .fx-rise-card,
+  [data-unfold='css'],
+  .fx-wipe,
+  .fx-wall-row,
+  .fx-ink-word,
+  .si-w
+),
+[data-offscreen] .fx-print .tape,
+:is([data-offscreen], [data-offscreen] *).fx-dot-plane::before,
+:is([data-offscreen], [data-offscreen] *).fx-curtain::after,
+section[id][data-offscreen]::after {
+  animation: none !important;
+}
 
 /* ===================================================================================================
    Round 10 "Interactive Engineering Desk" (FX-38 … FX-44). Tokens only: ink, paper, pop colours,

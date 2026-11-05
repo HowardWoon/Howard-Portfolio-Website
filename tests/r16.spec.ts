@@ -70,6 +70,9 @@ test('desktop: the dot plane is scroll-driven, and the hero has no sun behind th
   await home(page);
   // R77 (owner: every section background "clean and tidy"): the FX-77 sun is gone
   expect(await page.locator('.fx-sunset').count()).toBe(0);
+  // R95: off screen the plane drops its scroll-driven animation (tests/r95), so read it with About on screen
+  await page.locator('#about').evaluate((e) => e.scrollIntoView({ block: 'start' }));
+  await expect(page.locator('#about[data-offscreen]')).toHaveCount(0);
   const plane = await page.locator('#about').evaluate((e) => ({
     own: getComputedStyle(e).backgroundImage,
     before: getComputedStyle(e, '::before').animationName,

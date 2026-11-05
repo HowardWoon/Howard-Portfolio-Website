@@ -73,7 +73,10 @@ export default function DoomWalk() {
     // 20-H: a landscape phone has no room for a pinned stage - it gets the readable still
     const shortMq = window.matchMedia('(orientation: landscape) and (max-height: 480px)');
     const lite = () => document.documentElement.dataset.fxTier === 'lite';
-    const still = () => calm || reduce.matches || shortMq.matches || lite();
+    // R95: the governor (FX-93) can switch to lite in the middle of a visit. A lite tier set before the walk is near
+    // gives the still; switched on while the walk is near, the pinned walk stays until it is off screen - collapsing
+    // its 320vh track under the reader moved the page by ~2,400 px and left the canvas black
+    const still = () => calm || reduce.matches || shortMq.matches || (lite() && (!!track.dataset.static || !near));
 
     let set: 'wide' | 'tall' = tallMq.matches ? 'tall' : 'wide';
     let imgs: (HTMLImageElement | null)[] = [];
@@ -257,6 +260,8 @@ export default function DoomWalk() {
         if (!track.dataset.static) {
           track.dataset.static = 'on';
           measureFeed();
+          // the still shows the close-up frame: a switch to the still after mount still has to fetch it (R95)
+          load();
         }
         setP(1);
         feed(1);
@@ -273,12 +278,12 @@ export default function DoomWalk() {
     const schedule = () => {
       if (!raf && (near || still())) raf = requestAnimationFrame(update);
     };
-    // the frames load only once the page has RESTED near the section for 250 ms (like the 3D street, R82): a fling
-    // past it fetches and decodes nothing, so it never steals the main thread from the sections the visitor is reaching
-    let restT = 0;
+    // R95: the frames load as soon as the walk is near (1.5 screens ahead), before it starts, like the OPTIKKA frame
+    // sequence (Codrops, 2025). R89 waited for the page to REST near it for 250 ms, but every scroll event restarted
+    // that wait: a visitor scrolling steadily into the walk got a black screen for all 59 frames (measured: 0 loaded
+    // after 4,500 px). The fetch and the async decode run off the main thread (~1.2 MB of WebP).
     const rest = () => {
-      window.clearTimeout(restT);
-      if (near && !loading) restT = window.setTimeout(() => near && load(), 250);
+      if (near && !loading) load();
     };
     const onScroll = () => {
       schedule();
@@ -308,7 +313,7 @@ export default function DoomWalk() {
         if (near) {
           measure();
           rest();
-        } else window.clearTimeout(restT);
+        }
         schedule();
       },
       { rootMargin: '150% 0px 150% 0px' },
@@ -347,7 +352,6 @@ export default function DoomWalk() {
       io.disconnect();
       ro.disconnect();
       window.removeEventListener('scroll', onScroll);
-      window.clearTimeout(restT);
       window.removeEventListener('resize', relayout);
       for (const mq of mqs) mq.removeEventListener('change', relayout);
       set = tallMq.matches ? 'tall' : 'wide';
