@@ -99,16 +99,8 @@ test.describe('phone', () => {
         await new Promise(requestAnimationFrame);
       }
     });
-    // R17 baseline: 68-70 layouts per fling with the phone-heavy effects on, 13 in Calm Mode. R88's phone skip
-    // (content-visibility: auto, Layerize 7.8 -> 3.3 s per scroll) renders each skipped block once as the fling reaches
-    // it and once more when it is skipped again behind it: two layouts per block are allowed on top of the 45 for scroll
-    // effects (measured R96: 41 with the skip off, 51 - 56 with it on, 7 blocks), so an effect that lays out per frame
-    // still fails
-    const skipped = await page.evaluate(
-      () => [...document.querySelectorAll('*')].filter((e) => getComputedStyle(e).contentVisibility === 'auto').length,
-    );
-    expect(skipped).toBeLessThan(30);
-    expect((await metric('LayoutCount')) - before).toBeLessThan(45 + 2 * skipped);
+    // R17 baseline: 68-70 layouts per fling with the phone-heavy effects on, 13 in Calm Mode
+    expect((await metric('LayoutCount')) - before).toBeLessThan(45);
   });
 
   // CI runs 135 / 136 (59 - 78 layouts per fling): the first-view effects of a visitor's first fling ran DURING it - each

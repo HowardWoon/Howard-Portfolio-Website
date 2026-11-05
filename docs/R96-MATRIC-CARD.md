@@ -42,7 +42,8 @@ screen under the HUD, the parked label under the HUD).
   waits for React to own the fields.
 - `tests/r95.spec.ts` lite switch: Lenis's glide pulled the jump back to the walk on a slow runner; it waits for a still
   page.
-- `tests/r17.spec.ts` P0-01 (red since CI #137): 41 layouts per phone fling with R88's skip off, 51 - 56 with it on
-  (7 blocks, each laid out on arrival and again when skipped behind the fling). The guard allows two per skipped block
-  on top of the 45 for scroll effects. **Still open:** the count varies between identical runs (one local run: 79),
-  so the next step is to find what else lays out in such a run.
+- `tests/r17.spec.ts` P0-01 (red since CI #137) - **still open, unchanged**. Measured: 41 layouts per phone fling with
+  R88's skip off, 51 with it on (a trace gives exactly 51 on 6 of 6 runs), but the test's own counter (Chrome's
+  `LayoutCount` metric) reads 56 - 80 for the same scroll: extra forced layouts the trace does not attribute. Raising the
+  limit by two per skipped block still failed 1 run in 3, so that change was taken back out; the next step is to find
+  the unattributed layouts, not to move the limit.
