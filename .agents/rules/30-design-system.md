@@ -247,8 +247,12 @@ Rules:
     is never skipped; (e) touch-primary devices only (`(hover: none) and (pointer: coarse)`, where Lenis never runs):
     on desktop the command palette's Lenis jumps still crashed Chrome 156 and a window height change moved the page
     529 px (r36, r53 in the pre-push suite); (f) a skipped subtree is not restyled: arm the skip only after the
-    off-screen pause marks (`data-offscreen`) are styled, or a section skipped first keeps its pulses "running" (r86 B3).
-    A new section joins the list only after the fixed / overflow audit and the
+    off-screen pause marks (`data-offscreen`) are styled, or a section skipped first keeps its pulses "running" (r86 B3);
+    (g) a section a jump passed over renders only on ARRIVAL, so a late change there moves the target after it landed
+    (the Doom Walk turning into its lite still: 823 px, 84 px left after scroll anchoring - CI phone #139): `jumpTo`
+    re-aims at 300 / 900 / 2000 ms unless the reader touched, wheeled or pressed a key (lib/jump.ts `reaim`; guard:
+    r36 "section links on a slow lite-tier phone", 2 cores + 4x CPU). A new section joins the list only after the fixed /
+    overflow audit and the
     r88 crash test.
     Guards: tests/r88, validate-plans NO-CV + P8-CV.
 

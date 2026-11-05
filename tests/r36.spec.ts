@@ -169,6 +169,34 @@ for (const [name, size, touch] of [
   });
 }
 
+// R88 (CI #139, Linux runner): on a slow phone the palette landed #projects 84 px off. With off-screen sections
+// skipped (R88 content-visibility), the Doom Walk the jump passed over rendered only on arrival and turned into its
+// lite still there (823 px shorter); scroll anchoring made up all but 84 px and nothing re-aimed the jump (lib/jump.ts
+// reaim). A phone like the CI runner's (<= 4 cores, so the FX-93 lite tier, 30-design-system E1) at 4x CPU: every
+// section link lands under the header. Before the fix: About -> Projects landed 84 px off, 3 of 3.
+test.describe('section links on a slow lite-tier phone (390x664, 4x CPU)', () => {
+  test.use(strip(devices['iPhone 13']));
+  test('every section lands under the header, also after a long jump down', async ({ page }) => {
+    test.setTimeout(180000);
+    await page.addInitScript(() => Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 2 }));
+    await home(page);
+    await expect(page.locator('html[data-skip="on"]')).toHaveCount(1, { timeout: 60000 });
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+    for (const id of ['contact', 'about', 'projects', 'honors', 'experience', 'projects']) {
+      await page.evaluate((id) => {
+        const a = document.createElement('a');
+        a.href = `#${id}`;
+        document.body.append(a);
+        a.click();
+        a.remove();
+      }, id);
+      await page.waitForTimeout(2500); // the late change lands after the jump: judge the settled page
+      await landed(page, id);
+    }
+  });
+});
+
 // R37 (owner: "sometimes the place I click shows a triangle, rectangle ... but sometimes no ... on every device"):
 // the FX-56 press stamp fires for EVERY press, wherever it lands, from the first click on every page. It only stayed
 // silent for four button classes before, could be swallowed by a stopPropagation, and mounted late.

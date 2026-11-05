@@ -34,6 +34,30 @@ function land(el: HTMLElement, immediate: boolean, done?: () => void) {
 }
 
 /**
+ * R88: aim again once the page has settled. With off-screen sections skipped (phones, html[data-skip='on']), a section
+ * the jump passed over renders only on arrival, and a late change there (the Doom Walk turning into its lite still:
+ * 823 px) moved the target after it had landed - CI phone: #projects 84 px under the header. A reader who touches,
+ * wheels or presses a key in the meantime is never pulled back.
+ */
+const REAIM_MS = [300, 900, 2000];
+const HANDS = ['touchstart', 'wheel', 'pointerdown', 'keydown'] as const;
+function reaim(el: HTMLElement) {
+  if (document.documentElement.dataset.skip !== 'on') return;
+  let moved = false;
+  const hand = () => (moved = true);
+  HANDS.forEach((t) => window.addEventListener(t, hand, { passive: true, capture: true }));
+  REAIM_MS.forEach((ms, i) =>
+    window.setTimeout(() => {
+      if (!moved) {
+        const off = el.getBoundingClientRect().top - (parseFloat(getComputedStyle(el).scrollMarginTop) || 0);
+        if (Math.abs(off) > 4) land(el, true);
+      }
+      if (i === REAIM_MS.length - 1) HANDS.forEach((t) => window.removeEventListener(t, hand, { capture: true }));
+    }, ms),
+  );
+}
+
+/**
  * FX-100 Spatial Echo: a landed project card pulses its outline once, so the eye finds what it just asked for.
  * Only for project jumps; restarted cleanly when jumps follow each other.
  */
@@ -63,7 +87,10 @@ export function willFlip(el: HTMLElement): boolean {
 export function jumpTo(target: HTMLElement, source?: HTMLElement | null): void {
   const el = jumpTarget(target);
   if (!willFlip(el)) {
-    land(el, false, () => echo(el));
+    land(el, false, () => {
+      echo(el);
+      reaim(el);
+    });
     return;
   }
   const root = document.documentElement;
@@ -88,5 +115,6 @@ export function jumpTo(target: HTMLElement, source?: HTMLElement | null): void {
     if (hop) hop.style.viewTransitionName = '';
     focusTarget(el);
     echo(el);
+    reaim(el);
   });
 }
