@@ -251,7 +251,11 @@ Rules:
     (g) a section a jump passed over renders only on ARRIVAL, so a late change there moves the target after it landed
     (the Doom Walk turning into its lite still: 823 px, 84 px left after scroll anchoring - CI phone #139): `jumpTo`
     re-aims at 300 / 900 / 2000 ms unless the reader touched, wheeled or pressed a key (lib/jump.ts `reaim`; guard:
-    r36 "section links on a slow lite-tier phone", 2 cores + 4x CPU). A new section joins the list only after the fixed /
+    r36 "section links on a slow lite-tier phone", 2 cores + 4x CPU). (h) The cat (E51, components/hero-mascot.tsx) is 44
+    px on a phone, so its 3 x 3 hit points are 19 px apart: once per rest it ALSO reads the rectangles of the controls of
+    the nearest block that holds the whole cat (<= 300, no extra hit tests; +4 % HitTest, ~4 ms per rest at 4x) - CI
+    showed it settled on "Show all 23 photos". Guards: r86 B5 (a 10 px button between the points), B4 (judged once the
+    cat has checked and finished its 220 ms tuck). A new section joins the list only after the fixed /
     overflow audit and the
     r88 crash test.
     Guards: tests/r88, validate-plans NO-CV + P8-CV.

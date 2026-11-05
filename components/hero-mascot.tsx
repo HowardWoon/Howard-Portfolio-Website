@@ -12,6 +12,8 @@ const CELL_OF_SECTOR = [5, 8, 7, 6, 3, 0, 1, 2]; // right, down-right, down, dow
 const CENTER = 4;
 const DEAD_ZONE = 70;
 const cellPos = (i: number) => `${(i % 3) * 50}% ${Math.floor(i / 3) * 50}%`;
+const CONTROL = 'a[href], button, input, textarea, select, label, [role="button"], [tabindex="0"]';
+const MAX_CONTROLS = 300;
 
 /**
  * R49 mascot (owner: "i want this to be implemented into my website ... i want the cat", koboyo.com/page-mascot):
@@ -68,12 +70,36 @@ export default function HeroMascot() {
       let edge = Infinity;
       const xs = [b.left + 3, (b.left + b.right) / 2, b.right - 3];
       const ys = [b.top + 3, (b.top + b.bottom) / 2, b.bottom - 3];
+      let centre: Element | undefined;
       for (const x of xs)
         for (const y of ys) {
           const under = document.elementsFromPoint(x, y).find((e) => !wrap.contains(e));
-          const c = under?.closest('a[href], button, input, textarea, select, label, [role="button"], [tabindex="0"]');
+          if (x === xs[1] && y === ys[1]) centre = under;
+          const c = under?.closest(CONTROL);
           if (c && !wrap.contains(c)) edge = Math.min(edge, c.getBoundingClientRect().left);
         }
+      // R88 (CI: the cat sat on "Show all 23 photos as a contact sheet" once settled): on a phone the nine points are
+      // 19 px apart, so a control overlapping the cat between them was never seen. The controls of the nearest block
+      // that holds the whole cat are also tested for any overlap with its box - rectangle reads, no hit tests, at most
+      // MAX_CONTROLS, once per rest.
+      let block = centre ?? null;
+      while (block && block !== document.body) {
+        const r = block.getBoundingClientRect();
+        if (r.left <= b.left && r.top <= b.top && r.right >= b.right && r.bottom >= b.bottom) break;
+        block = block.parentElement;
+      }
+      if (block && block !== document.body) {
+        const controls = block.querySelectorAll(CONTROL);
+        for (let i = 0; i < controls.length && i < MAX_CONTROLS; i++) {
+          const c = controls[i];
+          if (wrap.contains(c)) continue;
+          const r = c.getBoundingClientRect();
+          if (r.width === 0 || r.height === 0) continue;
+          if (r.right <= b.left || r.left >= b.right || r.bottom <= b.top || r.top >= b.bottom) continue;
+          if (getComputedStyle(c).visibility === 'hidden') continue;
+          edge = Math.min(edge, r.left);
+        }
+      }
       const peek = Math.max(0, Math.min(PEEK, Math.floor(edge) - 2));
       wrap.style.setProperty('--tuck', `${Math.max(0, Math.round(b.right - peek))}px`);
       if (edge < Infinity) wrap.dataset.tucked = '';

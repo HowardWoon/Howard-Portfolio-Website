@@ -91,6 +91,56 @@ test.describe('phone', () => {
     await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
     await catWalk(page);
   });
+
+  // R88 (CI #138 - 29ed50f: the cat sat on "Show all 23 photos as a contact sheet" at y = 22,800 even once settled):
+  // the cat (44 px on a phone) hit-tests 3 x 3 points 19 px apart, so a control overlapping it between those points was
+  // never seen. A real button, 10 x 10 px, placed in the block under the cat wholly between the nine points: it must tuck.
+  test('B5: the cat sees a control that overlaps it between its nine test points', async ({ page }) => {
+    await gate(page);
+    await expect(page.locator('[data-site-mascot]')).toBeVisible({ timeout: 15_000 });
+    const cat = page.locator('.site-mascot');
+    // a spot where the cat is out (nothing under it yet)
+    let placed = false;
+    for (const y of [900, 1500, 2100, 2700, 3300, 3900, 4500]) {
+      await page.evaluate((v) => window.scrollTo(0, v), y);
+      await page.waitForTimeout(900);
+      if ((await cat.getAttribute('data-tucked')) !== null) continue;
+      placed = await page.evaluate(() => {
+        const wrap = document.querySelector<HTMLElement>('.site-mascot')!;
+        const b = wrap.getBoundingClientRect();
+        const mid = { x: (b.left + b.right) / 2, y: (b.top + b.bottom) / 2 };
+        const under = document.elementsFromPoint(mid.x, mid.y).find((e) => !wrap.contains(e));
+        // the nearest block that holds the whole cat
+        let box = under ?? null;
+        while (box && box !== document.body) {
+          const r = box.getBoundingClientRect();
+          if (r.left <= b.left && r.top <= b.top && r.right >= b.right && r.bottom >= b.bottom) break;
+          box = box.parentElement;
+        }
+        if (!box) return false;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.setAttribute('aria-label', 'r88 corner probe');
+        btn.style.cssText = 'position:absolute;width:10px;height:10px;margin:0;padding:0;border:0;left:0;top:0;';
+        box.append(btn);
+        // between the points: left + 3 < x < mid, top + 3 < y < mid
+        const want = { left: b.left + 7, top: b.top + 7 };
+        const now = btn.getBoundingClientRect();
+        btn.style.left = `${want.left - now.left}px`;
+        btn.style.top = `${want.top - now.top}px`;
+        const r = btn.getBoundingClientRect();
+        const xs = [b.left + 3, mid.x, b.right - 3];
+        const ys = [b.top + 3, mid.y, b.bottom - 3];
+        const onPoint = xs.some((x) => ys.some((y) => x >= r.left && x <= r.right && y >= r.top && y <= r.bottom));
+        return !onPoint && r.right > b.left && r.bottom > b.top;
+      });
+      if (placed) break;
+    }
+    expect(placed, 'a spot with the cat out and the probe between its points').toBe(true);
+    // a rest re-checks what lies under the cat
+    await page.evaluate(() => window.dispatchEvent(new Event('pointerup')));
+    await expect(cat).toHaveAttribute('data-tucked', '', { timeout: 3_000 });
+  });
 });
 
 /** scroll a phone down the whole page in 600 px steps; at each rest no control may lie under the cat */
