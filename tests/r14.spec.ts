@@ -12,6 +12,12 @@ async function home(page: Page, path = '/') {
   await page.evaluate(() => (window as unknown as { __lenis?: { stop: () => void } }).__lenis?.stop());
 }
 const anim = (loc: Locator) => loc.evaluate((e) => getComputedStyle(e).animationName);
+/** R95: scroll-driven animations are `none` while their section is off screen; read one after bringing it in */
+async function animOnScreen(loc: Locator) {
+  await loc.evaluate((e) => e.scrollIntoView({ block: 'start' }));
+  await expect.poll(() => loc.evaluate((e) => !e.closest('[data-offscreen]'))).toBe(true);
+  return anim(loc);
+}
 
 /* ---------------------------------------------------------------- B-01 / B-01c first paint */
 test('server HTML shows the hero and flat project cards (B-01)', async ({ request }) => {
@@ -67,6 +73,10 @@ test.describe('phone', () => {
 
   test('back-to-top steps aside while scrolling down and returns on scroll up (B-04)', async ({ page }) => {
     await home(page);
+    // R88 (CI f03fef5, both tries): a slow runner hydrated the button AFTER the two scroll steps; it then starts from
+    // where the page is with no direction yet (R86, 30-design-system E50b) and rightly shows. Reproduced every time by
+    // holding the page's JS until after the steps. Scroll only once the page is live (E50).
+    await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
     const fab = page.getByRole('button', { name: 'Scroll to top' });
     const scrollTo = async (y: number) => {
       await page.evaluate((v) => window.scrollTo(0, v), y);
@@ -183,8 +193,10 @@ test('ring, wipe, card turn, lamp and CSS reveal run with motion (FX-63 … FX-6
   expect(await page.locator('.fx-floor-grid, .fx-grid-lens').count()).toBe(0);
   // R75 (owner: the stickers showed through fading cards as "duplicates"): in About and Honors (where the R74 flyers flew until R77) the
   // reveal rises without a fade (fx-rise-solid); every other section keeps the FX-67 fx-hero-in
-  expect(await anim(page.locator('#about .fx-rise').first())).toBe('fx-rise-solid');
-  expect(await anim(page.locator('#experience .fx-rise').first())).toMatch(/^fx-hero-in/);
+  // R95: an off-screen scroll-driven animation is `none` (no GPU layer for nothing); read each one on screen
+  expect(await animOnScreen(page.locator('#about .fx-rise').first())).toBe('fx-rise-solid');
+  expect(await animOnScreen(page.locator('#experience .fx-rise').first())).toMatch(/^fx-hero-in/);
+  await page.evaluate(() => scrollTo(0, 0));
   expect(
     await page.evaluate(() => getComputedStyle(document.querySelector('footer')!, '::after').backgroundImage),
   ).toContain('radial-gradient');
