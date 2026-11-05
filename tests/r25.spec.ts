@@ -125,9 +125,9 @@ test('desktop story layers are compositor layers (scroll steps move layers, not 
 }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/', { waitUntil: 'networkidle' });
-  // exactly the five big layers: more layers cost CPU with software rendering (measured in R25)
+  // exactly the big layers (R90: no blueprint): more layers cost CPU with software rendering (measured in R25)
   const wc = await page.evaluate(() => {
-    const big = '.bs-layer, .bs-title, .bs-blueprint, .bs-id-move, .bs-reel-track';
+    const big = '.bs-layer, .bs-title, .bs-id-move, .bs-reel-track';
     const all = [...document.querySelectorAll<HTMLElement>('.bs-stage .bs-seg')];
     return {
       big: all.filter((e) => e.matches(big)).map((e) => getComputedStyle(e).willChange),

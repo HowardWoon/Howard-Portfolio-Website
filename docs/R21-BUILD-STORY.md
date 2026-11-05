@@ -12,14 +12,14 @@ projects). It is a _compile_ metaphor, native to software engineering, not a cos
 
 ## Storyboard
 
-| #   | Scroll   | Scene       | Frame (what the visitor sees)                                                                                                                                                         | Colour (SIGNAL KEY)                 |
-| --- | -------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| 0   | 0-6 %    | Title       | "FROM STUDENT ID TO SHIPPED SYSTEM." on a dark studio desk, scroll cue                                                                                                                | orange underline                    |
-| 1   | 3-20 %   | ENROL       | The UM student ID drops in, rotating, and lands; an ENROLLED stamp hits                                                                                                               | orange = academic                   |
-| 2   | 20-40 %  | PARSE       | The ID slides aside; a scan line sweeps the photo: photo -> pixel mosaic -> glyph portrait (generated from the real photo's pixels); a terminal types the stack                       | cyan terminal                       |
-| 3   | 40-60 %  | ARCHITECT   | The ID becomes the "SOURCE" (desktop corner) or hands over (phone); a blueprint grid floods from the centre with one ring pulse; architecture blocks extrude; wires draw from the hub | blue = structure                    |
-| 4   | 60-80 %  | ORCHESTRATE | The hub turns AI-lilac and sends a ring; packets run every wire; the six projects dock onto the part of the system each one proves                                                    | lilac = AI; chips by project signal |
-| 5   | 80-100 % | SHIP        | The diagram dims; a release card rises; the portrait recompiles (glyphs -> mosaic -> photo); real awards attach; SHIPPED stamp; "See the systems" CTA becomes live                    | mint = shipped                      |
+| #   | Scroll   | Scene       | Frame (what the visitor sees)                                                                                                                                                                      | Colour (SIGNAL KEY)                 |
+| --- | -------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| 0   | 0-6 %    | Title       | "FROM STUDENT ID TO SHIPPED SYSTEM." on plain paper (R90), scroll cue                                                                                                                              | orange underline                    |
+| 1   | 3-20 %   | ENROL       | The UM student ID drops straight in and lands; an ENROLLED stamp hits and the card dips (R90)                                                                                                      | orange = academic                   |
+| 2   | 20-40 %  | PARSE       | The ID slides aside; a scan line sweeps the photo: photo -> pixel mosaic -> glyph portrait (generated from the real photo's pixels); each terminal line slides into its ruled lane (R90 type case) | cyan terminal                       |
+| 3   | 40-60 %  | ARCHITECT   | The ID becomes the "SOURCE" (desktop corner) or hands over (phone); ink architecture blocks land; thick right-angled ink wires grow from the hub (R90)                                             | blue = structure                    |
+| 4   | 60-80 %  | ORCHESTRATE | The hub turns AI-lilac and an ink frame steps out; a square packet rides every wire; the seven projects dock onto the part of the system each one proves                                           | lilac = AI; chips by project signal |
+| 5   | 80-100 % | SHIP        | The diagram dims; a shipping label slams down (R90); the portrait recompiles (glyphs -> mosaic -> photo); real awards attach; SHIPPED stamp; "See the systems" CTA becomes live                    | mint = shipped                      |
 
 Every text in the scenes is already on the site (hero, about, projects, honours, footer).
 

@@ -113,13 +113,11 @@ for (const [name, size] of [
 test('source: nothing in the crest scan / HUD lays out per scroll frame', () => {
   const css = readFileSync('app/globals.css', 'utf8');
   const scan = css.slice(css.indexOf('R31 CREST SCAN'), css.indexOf('R30 Registrar Seal'));
-  const hud = css.slice(css.indexOf('R31 HUD on the 03 / 04 diagram'), css.indexOf('R31 Honours Tally'));
   // a scroll-driven top / left / counter re-lays out the page every frame (+layouts per phone fling, r17 P0-01)
   expect(scan).not.toMatch(/top:\s*calc\(var\(--t\)/);
   expect(scan).not.toMatch(/counter-reset/);
-  expect(hud).not.toMatch(/\.bs-hud-rings g\b/); // rotate the ring <svg> boxes, never an SVG <g>
-  // R32: per-frame SVG stroke offsets re-lay out the SVG: below 1024 px the circuit is printed whole, no pulses
-  expect(hud).toMatch(/@media \(max-width: 1023px\) \{\s*\.bs-trace \{\s*stroke-dashoffset: 0;/);
+  // R90: the diagram's wires are HTML bars scaled by transform; no per-frame SVG stroke offset is left in the story
+  expect(readFileSync('app/build-story.css', 'utf8')).not.toMatch(/stroke-dashoffset/);
 });
 
 test('source: the pit sleeps settled badges and never kicks them at random', () => {
@@ -218,19 +216,16 @@ test.describe('honours tally (1440)', () => {
 
 test.describe('orchestrate HUD (1920)', () => {
   test.use({ viewport: { width: 1920, height: 900 } });
-  test('rings with computed ticks, the radar and the system readout are on the diagram', async ({ page }) => {
+  // R90: the radar and the range rings are gone (the owner's "dark dashboard"); the printed readout stays
+  test('the system readout is on the diagram, with no radar or range rings', async ({ page }) => {
     await open(page, '/?fxtier=full');
     await playhead(page, (0.72 + 0.3) / 1.3); // story time 0.72 (lib/story-progress.ts storyTime)
     const r = await page.evaluate(() => ({
-      ticks: document.querySelectorAll('.bs-hud-ring-out line').length,
-      radar: getComputedStyle(document.querySelector('.bs-hud-radar')!).display,
       readout: document.querySelector('.bs-hud-readout')!.textContent?.replace(/\s+/g, ' ').trim(),
-      ringOp: parseFloat(getComputedStyle(document.querySelector('.bs-hud-rings')!).opacity),
+      radar: document.querySelectorAll('.bs-hud-radar, .bs-hud-rings').length,
     }));
-    expect(r.ticks).toBe(72);
-    expect(r.radar).toBe('block');
     expect(r.readout).toBe('SYS MAP · 05 NODES · 07 BUILDS'); // R83: all seven projects dock (Monsun Bridge on DATA)
-    expect(r.ringOp).toBeGreaterThan(0.9);
+    expect(r.radar).toBe(0);
   });
 });
 

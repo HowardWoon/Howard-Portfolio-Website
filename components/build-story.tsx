@@ -5,10 +5,10 @@ import { useEffect, useRef, type CSSProperties } from 'react';
 import { PORTRAIT_GLYPHS } from '@/lib/story-glyphs';
 import { useCalm } from '@/lib/motion-pref';
 import { FieldReel, type ReelItem } from './field-reel';
-import { FlipCard } from './flip-card';
 import { InstitutionSeal } from './institution-seal';
-import { gapTime, publishStoryProgress, STORY_GAP_AT, storyTime } from '@/lib/story-progress';
+import { gapTime, publishStoryProgress, storyTime } from '@/lib/story-progress';
 import { rereadScroll, scrollFrame } from '@/lib/scroll-frame';
+import '@/app/build-story.css';
 
 /**
  * R21 "The Build": a scroll-scrubbed storyboard between About and Projects. A Universiti Malaya student ID compiles
@@ -103,72 +103,6 @@ const DOCKS: { name: string; fill: string; on: string; a: number; edge?: 'b' }[]
   { name: 'ZEROLAG', fill: 'bg-pop-yellow', on: 'guard', a: 0.72 },
   { name: 'MONSUN BRIDGE', fill: 'bg-pop-yellow', on: 'data', a: 0.73, edge: 'b' },
 ];
-
-// R31 HUD range rings, computed (never hand-typed points): 72 ticks every 5 deg on the outer ring (long + lilac every
-// 30 deg), and four lilac arcs on the inner ring (AI = lilac, the hub's own colour)
-const HUD_TICKS = Array.from({ length: 72 }, (_, i) => {
-  const deg = i * 5;
-  const a = (deg * Math.PI) / 180;
-  const major = deg % 30 === 0;
-  const r1 = 96;
-  const r2 = major ? 86 : 91;
-  const r = (v: number) => Number(v.toFixed(2));
-  return {
-    deg,
-    major,
-    x1: r(r1 * Math.cos(a)),
-    y1: r(r1 * Math.sin(a)),
-    x2: r(r2 * Math.cos(a)),
-    y2: r(r2 * Math.sin(a)),
-  };
-});
-const HUD_ARCS = [0, 90, 180, 270].map((start) => {
-  const R = 74;
-  const p = (deg: number) => {
-    const a = (deg * Math.PI) / 180;
-    return `${(R * Math.cos(a)).toFixed(2)} ${(R * Math.sin(a)).toFixed(2)}`;
-  };
-  return `M ${p(start + 12)} A ${R} ${R} 0 0 1 ${p(start + 58)}`;
-});
-
-// R32 circuit traces behind the diagram (owner: "the background is empty, add effects"): a printed-circuit layer,
-// COMPUTED from the node positions plus a seeded generator (same layout every load, never hand-typed): every side
-// node runs an orthogonal trace with one jog to its own edge, the bottom node to the floor, and short stubs with
-// pads run in from the top and bottom edges. viewBox 160 x 90 = the diagram's 16:9.
-const TRACES = (() => {
-  let seed = 20260;
-  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  const r1 = (v: number) => Math.round(v * 10) / 10;
-  const out: { d: string; end: [number, number] }[] = [];
-  for (const n of NODES) {
-    const x = n.x * 1.6;
-    const y = n.y * 0.9;
-    const dir = n.x < 50 ? -1 : n.x > 50 ? 1 : 0;
-    if (!dir) {
-      out.push({ d: `M${r1(x)} ${r1(y)} V90`, end: [x, 90] });
-      continue;
-    }
-    for (const lane of [-1, 1]) {
-      const k = x + dir * (12 + rnd() * 10);
-      const y2 = y + lane * (4 + rnd() * 7);
-      const edge = dir < 0 ? 0 : 160;
-      out.push({ d: `M${r1(x)} ${r1(y + lane * 2)} H${r1(k)} V${r1(y2)} H${edge}`, end: [k, y2] });
-    }
-  }
-  for (let i = 0; i < 12; i++) {
-    const x0 = 6 + i * 13 + rnd() * 5;
-    const top = i % 2 === 0;
-    const len = 6 + rnd() * 12;
-    const jog = (rnd() < 0.5 ? -1 : 1) * (3 + rnd() * 5);
-    const y1 = top ? len : 90 - len;
-    const y2 = top ? y1 + 3 + rnd() * 5 : y1 - 3 - rnd() * 5;
-    out.push({
-      d: `M${r1(x0)} ${top ? 0 : 90} V${r1(y1)} H${r1(x0 + jog)} V${r1(y2)}`,
-      end: [x0 + jog, y2],
-    });
-  }
-  return out;
-})();
 
 function Dock({ on }: { on: string }) {
   return DOCKS.filter((d) => d.on === on).map((d) => (
@@ -271,17 +205,8 @@ const CODE = [
   ['✓', 'parse complete · 0 warnings'],
 ] as const;
 
-/** the window in which the terminal types line `i` (the back of the ID prints the same line in the same window) */
+/** the window in which the terminal types line `i` (R90: the line slides into its ruled lane) */
 const typeSeg = (i: number) => seg(0.24 + i * 0.018, 0.255 + i * 0.018);
-// R64 turn-over ID. Scroll: it arrives back side up and turns to its face while it falls (story time). Hand: it can be
-// turned from the moment it has landed until the crest scan's paper lid starts to close over it (playhead).
-const ID_TURN = [0.08, 0.145] as const;
-const ID_LIVE = [storyTime(0.15), storyTime(STORY_GAP_AT)] as const;
-// The back of the ID carries the two list lines the terminal parses, split into their own words (no new text)
-const ID_FIELDS = [3, 4].map((line) => {
-  const [key, value] = CODE[line][1].split(/\s{2,}/);
-  return { line, key: key.toUpperCase(), items: value.split(' · ') };
-});
 
 const AWARDS = [
   { text: '2ND PLACE · SUPERVITY AUTOPILOT ASIA HACKATHON', fill: 'bg-pop-yellow' },
@@ -692,7 +617,7 @@ export default function BuildStory() {
       aria-labelledby="build-story-title"
       // R86: its scroll cue and REC dot pause while The Build is off screen (no section id: OffscreenPause skipped it)
       data-offscreen-pause
-      className="bs-section relative w-full bg-ink text-white"
+      className="bs-section relative w-full bg-paper text-ink"
     >
       {/* Screen readers get the story as text; the stage below is visual only */}
       <ol className="sr-only">
@@ -707,12 +632,10 @@ export default function BuildStory() {
         <div ref={stageRef} data-scene="0" className="bs-stage" style={{ '--p': 0 } as CSSProperties}>
           {/* ---------------------------------------------------------------- floor */}
           <div aria-hidden className="bs-floor absolute inset-0" />
-          <div aria-hidden className="bs-seg bs-blueprint absolute inset-0" style={seg(0.4, 0.5)} />
-          <div aria-hidden className="bs-seg bs-impact" style={seg(0.4, 0.47)} />
 
           {/* ---------------------------------------------------------------- title card (fades as the ID drops) */}
           <div className="bs-seg bs-title absolute inset-x-0 z-20 px-5 text-center" style={seg(0.015, 0.07)}>
-            <p className="bs-kicker inline-flex items-center gap-2 rounded-md border-2 border-white bg-pop-orange px-2.5 py-1 font-mono text-xs font-extrabold uppercase tracking-[0.14em] text-ink">
+            <p className="bs-kicker inline-flex items-center gap-2 rounded-md border-2 border-ink bg-pop-orange px-2.5 py-1 font-mono text-xs font-extrabold uppercase tracking-[0.14em] text-ink">
               THE BUILD // SCROLL TO COMPILE
             </p>
             <h2
@@ -721,13 +644,10 @@ export default function BuildStory() {
             >
               From student ID to <span className="bs-underline">shipped system.</span>
             </h2>
-            <p className="mx-auto mt-4 max-w-xl font-mono text-sm font-semibold text-white/80">
+            <p className="mx-auto mt-4 max-w-xl font-mono text-sm font-semibold text-ink-soft">
               A five-scene build log. Scroll down to compile, scroll up to rewind.
             </p>
-            <span
-              aria-hidden
-              className="bs-scroll-cue mx-auto mt-6 block h-10 w-6 rounded-full border-2 border-white"
-            />
+            <span aria-hidden className="bs-scroll-cue mx-auto mt-6 block h-10 w-6 rounded-full border-2 border-ink" />
             {/* R24 Build Manifest: the five scenes as a storyboard (owner: "fantastic, many details and info"). Each
                 cell = scene colour, number, name, its frame range on the 1200-frame playhead and its caption (the same
                 words the caption bar shows). A click plays the story to that scene. */}
@@ -759,20 +679,15 @@ export default function BuildStory() {
           </div>
 
           {/* ---------------------------------------------------------------- 01 ENROL + 02 PARSE: the student ID */}
-          {/* R64: the ID is a turn-over card (components/flip-card.tsx). It arrives back side up and turns to its face
-              as it lands (scroll), and once it has landed a visitor can turn it by hand until the story moves it on.
-              Only then is it a control; the rest of the time it is hidden from assistive technology like the stage. */}
-          <div className="bs-seg bs-fade-out bs-layer" style={seg(0.8, 0.86)}>
+          {/* R90: the student ID drops straight down (no turn), the ENROLLED stamp hits and the card dips under it
+              (.bs-id-press, the stamp's own window). Visual only, like the rest of the stage. */}
+          <div aria-hidden className="bs-seg bs-fade-out bs-layer" style={seg(0.8, 0.86)}>
             <div className="bs-seg bs-id-move" style={seg(0.4, 0.5)}>
               <div className="bs-seg bs-id-shift" style={seg(0.2, 0.27)}>
                 <div className="bs-seg bs-id-drop" style={seg(0.03, 0.15)}>
-                  <FlipCard
-                    className="bs-idcard"
-                    ariaLabel="Flip student ID"
-                    turn={seg(...ID_TURN)}
-                    live={ID_LIVE}
-                    front={
-                      <div className="relative overflow-hidden rounded-[22px] border-3 border-ink bg-paper text-ink">
+                  <div className="bs-seg bs-id-press" style={seg(0.13, 0.19)}>
+                    <div className="bs-idcard">
+                      <div className="relative overflow-hidden rounded-lg border-3 border-ink bg-paper text-ink">
                         <div className="flex items-center justify-between gap-2 border-b-3 border-ink bg-pop-orange px-4 py-2">
                           <div className="flex min-w-0 items-center gap-2">
                             <InstitutionSeal crest="um" size="badge" stampIn={false} />
@@ -783,7 +698,7 @@ export default function BuildStory() {
                           <span className="font-mono text-xs font-extrabold tracking-[0.14em]">STUDENT ID</span>
                         </div>
                         <div className="grid grid-cols-[34%_1fr] gap-3 p-3 sm:gap-4 sm:p-4">
-                          <div className="bs-photo relative aspect-[413/591] overflow-hidden rounded-xl border-3 border-ink">
+                          <div className="bs-photo relative aspect-[413/591] overflow-hidden rounded-md border-3 border-ink">
                             <Portrait photoSeg={seg(0.22, 0.32)} mosaicSeg={seg(0.27, 0.37)} />
                             <span className="bs-seg bs-scan" style={seg(0.22, 0.37)} />
                           </div>
@@ -815,49 +730,8 @@ export default function BuildStory() {
                           ENROLLED
                         </span>
                       </div>
-                    }
-                    back={
-                      // The machine side. Its fields are the terminal's own lines, and each one is printed on the card
-                      // in the same window in which the terminal types it: turn the card early and the fields are
-                      // empty, turn it after the parse and they are filled.
-                      <div className="flex h-full flex-col overflow-hidden rounded-[22px] border-3 border-ink bg-paper text-ink">
-                        <div className="flex items-center justify-between gap-2 border-b-3 border-ink bg-ink px-4 py-2 text-white">
-                          <span className="font-mono text-xs font-extrabold tracking-[0.14em]">STUDENT ID</span>
-                          <span className="font-mono text-xs font-extrabold tracking-[0.14em]">HWZ-2026</span>
-                        </div>
-                        <dl className="min-h-0 flex-1 space-y-2 p-3 font-mono text-xs leading-tight sm:p-4">
-                          {ID_FIELDS.map((f) => (
-                            <div key={f.key}>
-                              <dt className="font-bold text-ink-muted">{f.key}</dt>
-                              <dd className="bs-id-slot mt-1">
-                                <span className="bs-seg bs-type flex flex-wrap gap-1" style={typeSeg(f.line)}>
-                                  {f.items.map((t) => (
-                                    <span
-                                      key={t}
-                                      className="rounded-md border-2 border-ink bg-white px-1.5 py-0.5 font-extrabold"
-                                    >
-                                      {t}
-                                    </span>
-                                  ))}
-                                </span>
-                              </dd>
-                            </div>
-                          ))}
-                        </dl>
-                        <div className="flex items-end gap-3 px-3 pb-3 sm:px-4 sm:pb-4">
-                          <span
-                            className="bs-seg bs-type shrink-0 font-mono text-xs font-extrabold"
-                            // starts with the terminal's last line and ends before the crest-scan gap (the terminal's
-                            // own window runs on across the gap, where the card can no longer be turned)
-                            style={seg(0.24 + (CODE.length - 1) * 0.018, STORY_GAP_AT)}
-                          >
-                            {CODE[CODE.length - 1][0]} {CODE[CODE.length - 1][1]}
-                          </span>
-                          <span className="bs-barcode h-6 min-w-0 flex-1" />
-                        </div>
-                      </div>
-                    }
-                  />
+                    </div>
+                  </div>
                   <div aria-hidden className="bs-seg bs-source-tag" style={seg(0.46, 0.52)}>
                     SOURCE · UM
                   </div>
@@ -869,22 +743,20 @@ export default function BuildStory() {
           {/* ---------------------------------------------------------------- 02 PARSE: the terminal */}
           <div aria-hidden className="bs-seg bs-fade-out bs-layer" style={seg(0.39, 0.45)}>
             <div className="bs-seg bs-code" style={seg(0.2, 0.27)}>
-              <div className="bs-card overflow-hidden rounded-[18px] border-3 border-ink bg-paper text-ink">
+              {/* R90: a type case, not a dark terminal: every line slides into its own ink-ruled lane */}
+              <div className="bs-card overflow-hidden rounded-lg border-3 border-ink bg-paper text-ink">
                 <div className="flex items-center gap-2 border-b-3 border-ink bg-pop-cyan px-3 py-2">
-                  <span className="h-3 w-3 rounded-full border-2 border-ink bg-pop-red" />
-                  <span className="h-3 w-3 rounded-full border-2 border-ink bg-pop-yellow" />
-                  <span className="h-3 w-3 rounded-full border-2 border-ink bg-pop-mint" />
-                  <span className="ml-2 font-mono text-xs font-extrabold tracking-[0.08em]">howard@um:~/build</span>
+                  <span className="font-mono text-xs font-extrabold tracking-[0.08em]">howard@um:~/build</span>
                 </div>
-                <div className="space-y-1 bg-ink p-3 font-mono text-[clamp(0.8rem,1.9vw,0.9rem)] leading-snug text-white sm:p-4">
+                <div className="font-mono text-[clamp(0.8rem,1.9vw,0.9rem)] leading-snug">
                   {CODE.map(([mark, line], i) => (
-                    <div key={line} className="bs-seg bs-type whitespace-nowrap" style={typeSeg(i)}>
-                      <span
-                        className={mark === '✓' ? 'text-pop-mint' : mark === '$' ? 'text-pop-yellow' : 'text-pop-cyan'}
-                      >
-                        {mark}
-                      </span>{' '}
-                      {line}
+                    <div key={line} className="bs-lane px-3 py-1 sm:px-4">
+                      <div className="bs-seg bs-type whitespace-nowrap font-semibold" style={typeSeg(i)}>
+                        <span className="bs-mark" data-ok={mark === '✓' ? '' : undefined}>
+                          {mark}
+                        </span>
+                        {line}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -956,101 +828,39 @@ export default function BuildStory() {
             {/* R83: on desktop the diagram is a CSS-3D board (globals.css "R83 3D board"): its pose reads the playhead
                 over 03 + 04, the mouse turns it (diagramRef) */}
             <div ref={diagramRef} className="bs-seg bs-diagram" style={seg(0.42, 0.8)}>
-              {/* R31 HUD (owner: "more professional, a Tony Stark feeling"), printed not glowing: a pixel radar sweep
-                  and two range rings with computed ticks around the AI hub, both turned by the scroll (transform only,
-                  reversible), plus a system readout; behind the wires and boxes */}
-              {/* R32 circuit layer: the traces print in during 03 ARCHITECT, then lilac data pulses run along them
-                  while 04 ORCHESTRATE plays (AI = lilac). Stroke offsets only: paint, never layout. */}
-              <svg
-                className="bs-seg bs-hud-traces"
-                style={seg(0.42, 0.6)}
-                viewBox="0 0 160 90"
-                preserveAspectRatio="none"
-              >
-                {TRACES.map((t) => (
-                  <path key={t.d} className="bs-trace" d={t.d} pathLength={1} />
-                ))}
-                {TRACES.map((t) => (
-                  <rect
-                    key={`p${t.d}`}
-                    className="bs-pad"
-                    x={t.end[0] - 0.8}
-                    y={t.end[1] - 0.8}
-                    width={1.6}
-                    height={1.6}
-                  />
-                ))}
-              </svg>
-              <svg
-                className="bs-seg bs-hud-pulses"
-                style={seg(0.58, 0.8)}
-                viewBox="0 0 160 90"
-                preserveAspectRatio="none"
-              >
-                {TRACES.map((t, i) => (
-                  <path
-                    key={t.d}
-                    className="bs-pulse"
-                    d={t.d}
-                    pathLength={1}
-                    style={{ '--k': (i % 4) * 0.25 } as CSSProperties}
-                  />
-                ))}
-              </svg>
-              {/* R83: the printed scan bar that sweeps the board while ORCHESTRATE plays (desktop 3D only) */}
-              <span className="bs-sweep" />
-              <div className="bs-seg bs-hud-radar" style={seg(0.44, 0.8)}>
-                <span className="bs-hud-radar-arm" />
-              </div>
-              {/* each ring is its own <svg> box turned by a CSS transform (compositor only): rotating an SVG <g> made
-                  Chrome re-lay out the SVG on every scroll frame (+20 layouts per phone fling, tests/r17 P0-01) */}
-              <div className="bs-seg bs-hud-rings" style={seg(0.44, 0.8)}>
-                <svg className="bs-hud-ring bs-hud-ring-out" viewBox="-100 -100 200 200">
-                  <circle r={96} fill="none" stroke="rgb(255 255 255 / 0.35)" strokeWidth={0.8} />
-                  {HUD_TICKS.map((t) => (
-                    <line
-                      key={t.deg}
-                      x1={t.x1}
-                      y1={t.y1}
-                      x2={t.x2}
-                      y2={t.y2}
-                      stroke={t.major ? '#B8A4FF' : 'rgb(255 255 255 / 0.45)'}
-                      strokeWidth={t.major ? 1.6 : 0.8}
-                    />
-                  ))}
-                </svg>
-                <svg className="bs-hud-ring bs-hud-ring-in" viewBox="-100 -100 200 200">
-                  <circle r={74} fill="none" stroke="rgb(255 255 255 / 0.25)" strokeWidth={0.8} strokeDasharray="2 3" />
-                  {HUD_ARCS.map((d) => (
-                    <path key={d} d={d} fill="none" stroke="#B8A4FF" strokeWidth={2.4} />
-                  ))}
-                </svg>
-              </div>
+              {/* R90: no radar, rings, circuit traces or sweep (the "dark dashboard" the owner rejected): a printed
+                  system readout, ink boxes and thick right-angled ink wires */}
               <div className="bs-seg bs-hud-readout" style={seg(0.47, 0.52)}>
-                <span className="bs-hud-dot" />
                 SYS MAP · {String(NODES.length).padStart(2, '0')} NODES · {String(DOCKS.length).padStart(2, '0')} BUILDS
               </div>
 
-              <svg
-                className="absolute inset-0 h-full w-full overflow-visible"
-                viewBox="0 0 100 100"
-                preserveAspectRatio="none"
-              >
-                {NODES.map((n) => (
-                  <line
-                    key={n.id}
-                    className="bs-seg bs-wire"
-                    style={seg(n.a - 0.02, n.a + 0.05)}
-                    x1={50}
-                    y1={50}
-                    x2={n.x}
-                    y2={n.y}
-                    pathLength={1}
-                  />
+              {/* R90: each wire is two ink bars, hub -> along the hub's row -> up / down into its box. Each bar is a
+                  .bs-seg of the same window and grows by scale from the hub's side (compositor only). */}
+              <div className="bs-wires">
+                {NODES.map((n, i) => (
+                  <div key={n.id} className="bs-wire" data-node={i}>
+                    <span
+                      className="bs-seg bs-wire-h"
+                      style={seg(n.a - 0.02, n.a + 0.05, {
+                        left: `${Math.min(50, n.x)}%`,
+                        width: `${Math.abs(n.x - 50)}%`,
+                        transformOrigin: n.x < 50 ? '100% 50%' : '0 50%',
+                      })}
+                    />
+                    <span
+                      className="bs-seg bs-wire-v"
+                      style={seg(n.a - 0.02, n.a + 0.05, {
+                        left: `${n.x}%`,
+                        top: `${Math.min(50, n.y)}%`,
+                        height: `${Math.abs(n.y - 50)}%`,
+                        transformOrigin: n.y < 50 ? '50% 100%' : '50% 0',
+                      })}
+                    />
+                  </div>
                 ))}
-              </svg>
+              </div>
 
-              {/* R30: ONE data packet runs hub -> node per wire while ORCHESTRATE plays (three per wire read as a
+              {/* R30: ONE data packet runs hub -> node per wire while ORCHESTRATE plays (R90: a square riding the wire's right angle) (three per wire read as a
                   cluttered, duplicated line; it also cuts the per-frame segment writes by 10) */}
               {NODES.map((n) => (
                 <span
@@ -1098,61 +908,65 @@ export default function BuildStory() {
           </div>
 
           {/* ---------------------------------------------------------------- 05 SHIP: the release card */}
+          {/* R90: a shipping label slams down from above and dips at the hit (no rotation); a tear line under its header */}
           <div className="bs-seg bs-release-in bs-layer" style={seg(0.82, 0.9)}>
-            <div className="bs-card bs-release relative overflow-hidden rounded-[26px] border-3 border-ink bg-paper text-ink">
-              <div className="flex items-center justify-between gap-2 border-b-3 border-ink bg-pop-mint px-4 py-2">
-                <span className="font-mono text-xs font-extrabold tracking-[0.14em]">RELEASE · v2026 · MAIN</span>
-                <span className="font-mono text-xs font-extrabold tracking-[0.14em]">✓ DEPLOYED</span>
-              </div>
-              <div className="grid grid-cols-[30%_1fr] items-start gap-3 p-3 sm:grid-cols-[34%_1fr] sm:gap-5 sm:p-5">
-                <div className="relative" aria-hidden>
-                  <div className="relative aspect-[413/591] overflow-hidden rounded-xl border-3 border-ink">
-                    <MorphPortrait />
-                  </div>
-                  <PixelBurst />
-                  {/* R32: the UM Registrar Seal is pressed on the ID photo's top edge, centred, like an embossed certificate seal
+            <div className="bs-seg bs-release-press" style={seg(0.88, 0.92)}>
+              <div className="bs-card bs-release relative overflow-hidden rounded-lg border-3 border-ink bg-paper text-ink">
+                <div className="flex items-center justify-between gap-2 border-b-3 border-ink bg-pop-mint px-4 py-2">
+                  <span className="font-mono text-xs font-extrabold tracking-[0.14em]">RELEASE · v2026 · MAIN</span>
+                  <span className="font-mono text-xs font-extrabold tracking-[0.14em]">✓ DEPLOYED</span>
+                </div>
+                <span aria-hidden className="bs-tear block" />
+                <div className="grid grid-cols-[30%_1fr] items-start gap-3 p-3 sm:grid-cols-[34%_1fr] sm:gap-5 sm:p-5">
+                  <div className="relative" aria-hidden>
+                    <div className="relative aspect-[413/591] overflow-hidden rounded-xl border-3 border-ink">
+                      <MorphPortrait />
+                    </div>
+                    <PixelBurst />
+                    {/* R32: the UM Registrar Seal is pressed on the ID photo's top edge, centred, like an embossed certificate seal
                       - upright, it takes no width from the text column, and stays clear of the CTA and SHIPPED.
                       R33: it is pressed once the new portrait has developed (the "stamp" of the pixel morph) */}
-                  <span
-                    className="bs-seg bs-crest absolute left-1/2 -top-5 z-10 -ml-7 sm:-top-7 sm:-ml-[38px]"
-                    style={seg(0.93, 0.96)}
-                  >
-                    <InstitutionSeal crest="um" size="stamp" stampIn={false} />
-                  </span>
+                    <span
+                      className="bs-seg bs-crest absolute left-1/2 -top-5 z-10 -ml-7 sm:-top-7 sm:-ml-[38px]"
+                      style={seg(0.93, 0.96)}
+                    >
+                      <InstitutionSeal crest="um" size="stamp" stampIn={false} />
+                    </span>
+                  </div>
+                  <div className="min-w-0 space-y-2">
+                    <p className="font-display text-[clamp(1rem,3.6vw,1.9rem)] font-extrabold uppercase leading-[0.95] tracking-[-0.02em]">
+                      Howard Woon Hao Zhe
+                    </p>
+                    <p className="inline-block rounded-md border-2 border-ink bg-white px-2 py-0.5 font-mono text-[clamp(0.8rem,1.8vw,0.9rem)] font-extrabold tracking-[0.1em]">
+                      SOFTWARE ENGINEER
+                    </p>
+                    <p className="font-mono text-[clamp(0.8rem,1.8vw,0.9rem)] font-bold text-ink-soft">
+                      B.Comp.Sc. (Software Engineering) · Universiti Malaya
+                    </p>
+                    <ul className="space-y-1.5 pt-1">
+                      {AWARDS.map((w, i) => (
+                        <li
+                          key={w.text}
+                          aria-hidden
+                          className={`bs-seg bs-award rounded-lg border-2 border-ink px-2 py-1 font-mono text-xs font-extrabold leading-tight ${w.fill}`}
+                          style={seg(0.9 + i * 0.02, 0.93 + i * 0.02)}
+                        >
+                          {w.text}
+                        </li>
+                      ))}
+                    </ul>
+                    <a
+                      href="#projects"
+                      className="bs-cta nb-btn nb-btn-ink nb-press mt-2 inline-flex px-4 py-2.5 text-xs"
+                    >
+                      SEE THE SYSTEMS ↓
+                    </a>
+                  </div>
                 </div>
-                <div className="min-w-0 space-y-2">
-                  <p className="font-display text-[clamp(1rem,3.6vw,1.9rem)] font-extrabold uppercase leading-[0.95] tracking-[-0.02em]">
-                    Howard Woon Hao Zhe
-                  </p>
-                  <p className="inline-block rounded-md border-2 border-ink bg-white px-2 py-0.5 font-mono text-[clamp(0.8rem,1.8vw,0.9rem)] font-extrabold tracking-[0.1em]">
-                    SOFTWARE ENGINEER
-                  </p>
-                  <p className="font-mono text-[clamp(0.8rem,1.8vw,0.9rem)] font-bold text-ink-soft">
-                    B.Comp.Sc. (Software Engineering) · Universiti Malaya
-                  </p>
-                  <ul className="space-y-1.5 pt-1">
-                    {AWARDS.map((w, i) => (
-                      <li
-                        key={w.text}
-                        aria-hidden
-                        className={`bs-seg bs-award rounded-lg border-2 border-ink px-2 py-1 font-mono text-xs font-extrabold leading-tight ${w.fill}`}
-                        style={seg(0.9 + i * 0.02, 0.93 + i * 0.02)}
-                      >
-                        {w.text}
-                      </li>
-                    ))}
-                  </ul>
-                  <a
-                    href="#projects"
-                    className="bs-cta nb-btn nb-btn-ink nb-press mt-2 inline-flex px-4 py-2.5 text-xs"
-                  >
-                    SEE THE SYSTEMS ↓
-                  </a>
-                </div>
+                <span aria-hidden className="bs-seg bs-stamp bs-stamp-mint" style={seg(0.93, 0.98)}>
+                  SHIPPED
+                </span>
               </div>
-              <span aria-hidden className="bs-seg bs-stamp bs-stamp-mint" style={seg(0.93, 0.98)}>
-                SHIPPED
-              </span>
             </div>
           </div>
 
@@ -1164,18 +978,18 @@ export default function BuildStory() {
             <div className="flex shrink-0 items-center gap-2 whitespace-nowrap font-mono text-xs font-extrabold tracking-[0.06em] sm:tracking-[0.14em]">
               <span className="bs-rec h-2.5 w-2.5 rounded-full bg-pop-red" />
               BUILD LOG
-              <span className="hidden text-white/60 sm:inline">· FRAME</span>
+              <span className="hidden text-ink-muted sm:inline">· FRAME</span>
               <span ref={frameRef} className="hidden tabular-nums sm:inline">
                 0000
               </span>
-              <span className="hidden text-white/60 sm:inline">/ {FRAMES}</span>
+              <span className="hidden text-ink-muted sm:inline">/ {FRAMES}</span>
             </div>
             <ol className="flex items-center gap-1 sm:gap-1.5">
               {SCENES.map((s, i) => (
                 <li
                   key={s.n}
                   data-n={i + 1}
-                  className="bs-pill flex items-center gap-1 sm:gap-1.5 rounded-md border-2 border-white/40 px-1 py-0.5 font-mono text-xs font-extrabold tracking-[0.06em] sm:px-2 sm:tracking-[0.1em]"
+                  className="bs-pill flex items-center gap-1 sm:gap-1.5 rounded-md border-2 border-ink px-1 py-0.5 font-mono text-xs font-extrabold tracking-[0.06em] sm:px-2 sm:tracking-[0.1em]"
                 >
                   <span className={`h-2 w-2 rounded-[2px] border border-ink ${s.swatch}`} />
                   <span>{s.n}</span>
@@ -1184,7 +998,7 @@ export default function BuildStory() {
               ))}
             </ol>
           </div>
-          <div aria-hidden className="bs-progress absolute inset-x-0 z-30 h-1.5 bg-white/10">
+          <div aria-hidden className="bs-progress absolute inset-x-0 z-30 h-1.5 bg-paper">
             <span className="bs-progress-bar block h-full origin-left" />
           </div>
 

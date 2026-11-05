@@ -2598,47 +2598,9 @@ html[data-xray-mode]
   --e: calc(1 - (1 - var(--t)) * (1 - var(--t)));
 }
 
-/* ---- floor */
+/* ---- floor: plain paper (R90, R77) */
 .bs-floor {
-  background:
-    radial-gradient(ellipse 60% 50% at 50% 55%, rgb(255 255 255 / 0.07), transparent 70%),
-    linear-gradient(to right, rgb(255 255 255 / 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(255 255 255 / 0.05) 1px, transparent 1px), #0a0a0a;
-  background-size:
-    100% 100%,
-    40px 40px,
-    40px 40px,
-    auto;
-}
-.bs-blueprint {
-  opacity: calc(var(--e) * 0.9);
-  transform: scale(calc(0.6 + var(--e) * 0.4));
-  background:
-    linear-gradient(to right, rgb(43 75 255 / 0.55) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(43 75 255 / 0.55) 1px, transparent 1px),
-    linear-gradient(to right, rgb(43 75 255 / 0.25) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(43 75 255 / 0.25) 1px, transparent 1px);
-  background-size:
-    120px 120px,
-    120px 120px,
-    24px 24px,
-    24px 24px;
-  background-position: center;
-  -webkit-mask-image: radial-gradient(ellipse 55% 55% at 50% 55%, #000 30%, transparent 75%);
-  mask-image: radial-gradient(ellipse 55% 55% at 50% 55%, #000 30%, transparent 75%);
-}
-/* the blueprint "lands": one ring pulse from the centre */
-.bs-impact {
-  position: absolute;
-  left: 50%;
-  top: 55%;
-  width: 40vmin;
-  height: 40vmin;
-  margin: -20vmin 0 0 -20vmin;
-  border: 3px solid var(--pop-blue);
-  border-radius: 999px;
-  opacity: calc((1 - var(--t)) * min(1, var(--t) * 12));
-  transform: scale(calc(0.2 + var(--e) * 2.6));
+  background: var(--paper);
 }
 
 /* ---- layers */
@@ -2853,13 +2815,13 @@ html[data-xray-mode]
     display: block;
   }
 }
-/* R25 smoothness: on desktop the five big moving story layers (scene layers, title, blueprint, the parked ID card,
+/* R25 smoothness: on desktop the big moving story layers (scene layers, title, the parked ID card,
    the reel tracks) get their own compositor layers, so a scroll step moves them instead of repainting the 1920 px
    stage. Measured A/B, same conditions: GPU slow frames 39-42 -> 27-28 per pass. Promoting EVERY .bs-seg was no
    better on a GPU and worse with software rendering (62-65 vs 47-49): many layers cost CPU when there is no GPU
    raster, so keep this list short. */
 @media (min-width: 1024px) {
-  .bs-track:not([data-static]) .bs-stage :is(.bs-layer, .bs-title, .bs-blueprint, .bs-id-move, .bs-reel-track) {
+  .bs-track:not([data-static]) .bs-stage :is(.bs-layer, .bs-title, .bs-id-move, .bs-reel-track) {
     will-change: transform, opacity;
   }
 }
@@ -2892,73 +2854,8 @@ html[data-xray-mode]
   width: var(--card-w);
   container-type: inline-size;
 }
-/* R64 turn-over ID (components/flip-card.tsx, after React Bits FlipCard). The scroll turns .bs-flip-turn from the
-   card's back to its face inside its own story window; a hand turns .bs-flip-rotor (inline transform, only while it is
-   off its face). The hard slab under the card is the same 8 px offset block every .bs-card has, as an element, so it
-   can narrow while the card is edge on (cos(), with the full slab as the fallback). No blur, no glare. */
-.bs-flip {
-  position: relative;
-  perspective: 1100px;
-  border-radius: 22px;
-  touch-action: pan-y;
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
-  -webkit-tap-highlight-color: transparent;
-}
-.bs-flip[data-live] {
-  pointer-events: auto;
-}
-.bs-flip:focus-visible {
-  outline: 3px solid var(--pop-blue, #2b4bff);
-  outline-offset: 12px;
-}
-.bs-flip-shadow {
-  position: absolute;
-  inset: 0;
-  border-radius: 22px;
-  background: var(--shadow, #ffc700);
-  translate: 8px 8px;
-  pointer-events: none;
-}
-@supports (transform: scaleX(calc(cos(10deg) * 1))) {
-  .bs-flip-shadow {
-    --turned: calc((1 - var(--e)) * 180deg + var(--hand, 0deg));
-    transform: scaleX(calc(0.05 + 0.95 * cos(var(--turned)) * cos(var(--turned))));
-  }
-}
-.bs-flip-turn {
-  position: relative;
-  transform-style: preserve-3d;
-  rotate: y calc((1 - var(--e)) * 180deg);
-}
-.bs-flip-rotor {
-  position: relative;
-  transform-style: preserve-3d;
-}
-.bs-flip-face {
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-.bs-flip-front {
-  position: relative;
-  transform: rotateY(0deg);
-}
-.bs-flip-back {
-  position: absolute;
-  inset: 0;
-  transform: rotateY(180deg);
-}
-/* an empty field on the back: a ruled line the parse prints on */
-.bs-id-slot {
-  min-height: 1.75rem;
-  border-bottom: 2px dashed var(--ink);
-  padding-bottom: 4px;
-}
 .bs-id-drop {
   position: relative;
-  opacity: min(1, calc(var(--t) * 3));
-  transform: translate3d(0, calc((1 - var(--e)) * -95vh), 0) rotate(calc(-9deg + var(--e) * 7deg));
 }
 .bs-id-shift {
   transform: translate3d(calc(var(--e) * var(--id2x)), calc(var(--e) * var(--id2y)), 0);
@@ -3086,13 +2983,6 @@ html[data-xray-mode]
   translate: var(--diag-x) 0;
   container-type: size;
 }
-.bs-wire {
-  fill: none;
-  stroke: #fff;
-  stroke-width: 0.45;
-  stroke-dasharray: 1;
-  stroke-dashoffset: calc(1 - var(--e));
-}
 .bs-hub,
 .bs-node {
   position: absolute;
@@ -3172,7 +3062,6 @@ html[data-xray-mode]
   border: 2px solid var(--ink);
   background: #b8a4ff;
   opacity: calc(min(1, var(--t) * 10) * min(1, (1 - var(--t)) * 10));
-  transform: translate(calc(var(--dx) * 1cqw * var(--t)), calc(var(--dy) * 1cqh * var(--t))) rotate(45deg);
 }
 /* the project tag sits ON its box's top edge (half above, half on the padding), never over the box's label */
 .bs-dock {
@@ -3505,8 +3394,6 @@ html[data-xray-mode]
 /* ---- 05 SHIP */
 .bs-release-in {
   z-index: 15;
-  opacity: min(1, calc(var(--t) * 2.5));
-  transform: translateY(calc((1 - var(--e)) * 55vh)) rotate(calc((1 - var(--e)) * 6deg));
 }
 .bs-release {
   --shadow: #3ddc97;
@@ -3529,125 +3416,8 @@ html[data-xray-mode]
   padding-bottom: 18px;
 }
 
-/* ---- R31 HUD on the 03 / 04 diagram (build-story.tsx): pixel radar + range rings around the AI hub + a system
-   readout + targeting corners on the boxes. Printed, not glowing: hard checker pixels, hairlines, lilac = AI. The
-   scroll turns the radar arm and the rings (transform only, reversible); nothing moves on its own. */
-/* R32 circuit layer: hairline traces + square pads (printed, white on ink), drawn in by stroke offset; then short lilac
-   pulses travel along them, offset per trace (--k) so the board reads busy, never in lock-step */
-.bs-hud-traces,
-.bs-hud-pulses {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  pointer-events: none;
-}
-.bs-hud-traces {
-  opacity: min(1, calc(var(--t) * 6));
-}
-.bs-trace,
-.bs-pad,
-.bs-pulse {
-  --t: inherit;
-  --e: inherit;
-}
-.bs-trace {
-  fill: none;
-  stroke: rgb(255 255 255 / 0.24);
-  stroke-width: 0.32;
-  stroke-dasharray: 1;
-  stroke-dashoffset: calc(1 - var(--e));
-}
-.bs-pad {
-  fill: rgb(255 255 255 / 0.4);
-  opacity: min(1, calc(var(--t) * 3 - 1.5));
-}
-.bs-hud-pulses {
-  opacity: calc(min(1, var(--t) * 12) * min(1, (1 - var(--t)) * 6));
-}
-.bs-pulse {
-  fill: none;
-  stroke: #b8a4ff;
-  stroke-width: 0.7;
-  stroke-dasharray: 0.07 0.93;
-  stroke-dashoffset: calc(var(--k) - var(--t) * 3);
-}
-html[data-fx-tier='lite'] .bs-hud-pulses {
-  display: none;
-}
-/* below 1024 px the board is printed whole and only fades in (opacity on the <svg>): a per-frame stroke offset made
-   Chrome re-lay out the SVG every frame (+15 layouts per phone fling at 6x CPU, tests/r17 P0-01) */
-@media (max-width: 1023px) {
-  .bs-trace {
-    stroke-dashoffset: 0;
-  }
-  .bs-hud-pulses {
-    display: none;
-  }
-}
-.bs-hud-radar {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  --radar: min(84cqh, 62cqw);
-  width: var(--radar);
-  height: var(--radar);
-  margin: calc(var(--radar) / -2) 0 0 calc(var(--radar) / -2);
-  border-radius: 50%;
-  border: 1px solid rgb(255 255 255 / 0.18);
-  overflow: hidden;
-  opacity: min(1, calc(var(--t) * 8));
-  display: none;
-}
-.bs-hud-radar-arm {
-  --t: inherit;
-  position: absolute;
-  inset: 0;
-  /* 8 px checker pixels, only inside a hard 32-degree wedge */
-  background: repeating-conic-gradient(rgb(184 164 255 / 0.34) 0 25%, transparent 0 50%) 0 0 / 16px 16px;
-  -webkit-mask-image: conic-gradient(from 0deg, #000 0deg 32deg, transparent 32deg 360deg);
-  mask-image: conic-gradient(from 0deg, #000 0deg 32deg, transparent 32deg 360deg);
-  transform: rotate(calc(var(--t) * 300deg));
-}
-@media (min-width: 640px) {
-  .bs-hud-radar {
-    display: block;
-  }
-}
-@media (min-width: 1024px) {
-  .bs-track:not([data-static]) .bs-hud-radar-arm {
-    will-change: transform;
-  }
-}
-html[data-fx-tier='lite'] .bs-hud-radar {
-  display: none;
-}
-.bs-hud-rings {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  --hud: min(56cqh, 44cqw);
-  width: var(--hud);
-  height: var(--hud);
-  margin: calc(var(--hud) / -2) 0 0 calc(var(--hud) / -2);
-  overflow: visible;
-  opacity: min(1, calc(var(--t) * 8));
-}
-.bs-hud-ring {
-  --t: inherit;
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-.bs-hud-ring-out {
-  transform: rotate(calc(var(--t) * 90deg));
-}
-.bs-hud-ring-in {
-  transform: rotate(calc(var(--t) * -140deg));
-}
+/* ---- R31 HUD on the 03 / 04 diagram: the system readout (R90: the radar, range rings, circuit traces, pulses and
+   targeting corners are gone - the owner's "dark dashboard") */
 .bs-hud-readout {
   position: absolute;
   left: 50%;
@@ -3668,40 +3438,16 @@ html[data-fx-tier='lite'] .bs-hud-radar {
   white-space: nowrap;
   opacity: var(--t);
 }
-.bs-hud-dot {
-  width: 8px;
-  height: 8px;
-  border: 1px solid var(--ink);
-  background: #b8a4ff;
-}
 @media (min-width: 1024px) {
   .bs-hud-readout {
     display: inline-flex;
-  }
-  /* targeting corners on every box: four white hairline brackets just outside its border */
-  .bs-node::after {
-    content: '';
-    position: absolute;
-    inset: -9px;
-    pointer-events: none;
-    background:
-      linear-gradient(#fff, #fff) top left / 12px 2px no-repeat,
-      linear-gradient(#fff, #fff) top left / 2px 12px no-repeat,
-      linear-gradient(#fff, #fff) top right / 12px 2px no-repeat,
-      linear-gradient(#fff, #fff) top right / 2px 12px no-repeat,
-      linear-gradient(#fff, #fff) bottom left / 12px 2px no-repeat,
-      linear-gradient(#fff, #fff) bottom left / 2px 12px no-repeat,
-      linear-gradient(#fff, #fff) bottom right / 12px 2px no-repeat,
-      linear-gradient(#fff, #fff) bottom right / 2px 12px no-repeat;
-    opacity: 0.75;
   }
 }
 
 /* ---- R83 3D board (owner: "enhance and upgrade the whole frame ... 3d visual effect, animation and cool styles"):
    on desktop the 03 / 04 diagram is a real CSS-3D board. It swings up from a desk angle as ARCHITECT prints it (scroll,
    reversible), the boxes drop from above onto hatched sockets and float as thick blocks over their wires, the data
-   packets hop in an arc, the hub rises highest and works like a press while ORCHESTRATE plays, a printed lilac scan
-   bar sweeps the board under the blocks, and the mouse turns the board (build-story.tsx writes `rotate`, no
+   packets ride their wires, the hub rises highest and works like a press while ORCHESTRATE plays, and the mouse turns the board (build-story.tsx writes `rotate`, no
    variable, so nothing below it is restyled). Hard edges, flat fills, no blur or glow; transform / opacity only.
    Phones, tablets, the lite tier and the still (Calm / reduced motion) keep the flat diagram. */
 /* the board pose reads two private copies of its progress; registered so they never inherit (R28 B6) */
@@ -3716,8 +3462,7 @@ html[data-fx-tier='lite'] .bs-hud-radar {
   initial-value: 0;
 }
 .bs-plate,
-.bs-socket,
-.bs-sweep {
+.bs-socket {
   display: none;
 }
 @media (min-width: 1024px) {
@@ -3781,52 +3526,12 @@ html[data-fx-tier='lite'] .bs-hud-radar {
     background: repeating-linear-gradient(135deg, rgb(184 164 255 / 0.5) 0 2px, transparent 2px 8px);
     transform: translateZ(calc(1px - var(--lift-hub) - (1 - var(--e)) * 260px)) scale(calc(1.4 - var(--e) * 0.4));
   }
-  /* a packet hops over its wire in an arc (highest halfway) instead of sliding along the board */
-  html:not([data-fx-tier='lite']) .bs-track:not([data-static]) .bs-packet {
-    transform: translate3d(
-        calc(var(--dx) * 1cqw * var(--t)),
-        calc(var(--dy) * 1cqh * var(--t)),
-        calc(6px + var(--t) * (1 - var(--t)) * 220px)
-      )
-      rotate(45deg);
-  }
   html:not([data-fx-tier='lite']) .bs-track:not([data-static]) .bs-hud-readout {
     transform: translateZ(8px);
-  }
-  /* ORCHESTRATE: a printed lilac scan bar sweeps the board under the blocks */
-  html:not([data-fx-tier='lite']) .bs-track:not([data-static]) .bs-sweep {
-    display: block;
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    height: 8%;
-    border-top: 3px solid #b8a4ff;
-    background: rgb(184 164 255 / 0.14);
-    pointer-events: none;
-    opacity: 0;
-    transform: translate3d(0, -100%, 2px);
-  }
-  html:not([data-fx-tier='lite']) .bs-track:not([data-static]) .bs-stage[data-scene='4'] .bs-sweep {
-    animation: bs-sweep 3.4s linear infinite;
   }
   /* ORCHESTRATE: the hub works like a mechanical press - it lifts, slams down to its socket height, holds */
   html:not([data-fx-tier='lite']) .bs-track:not([data-static]) .bs-stage[data-scene='4'] .bs-hub-core {
     animation: bs-press 2.6s cubic-bezier(0.6, 0, 0.2, 1) infinite;
-  }
-}
-@keyframes bs-sweep {
-  0% {
-    opacity: 1;
-    transform: translate3d(0, -100%, 2px);
-  }
-  92% {
-    opacity: 1;
-    transform: translate3d(0, 1250%, 2px);
-  }
-  100% {
-    opacity: 0;
-    transform: translate3d(0, 1250%, 2px);
   }
 }
 @keyframes bs-press {

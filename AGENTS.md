@@ -78,7 +78,7 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
 - R21: `build-story` (scroll storyboard between About and Projects, docs/R21-BUILD-STORY.md), `signal-key` (colour legend), `honor-emblem` (medal / seal / ticket emblems), `marquees` (two-deck highlight tape + crossing slogan tapes).
 - R63-R70 layers: `spider-reveal` + `lib/water.ts` (the portrait's calm WebGL2 water, R78) and `lib/liquid.ts` (the
   headline's water, R63),
-  `flip-card` (the turn-over student ID in The Build), `tear-stub` (footer Document Metadata counterfoil -> resume),
+  `app/build-story.css` (R90: The Build as a paper spec sheet; the R64 `flip-card` is deleted), `tear-stub` (footer Document Metadata counterfoil -> resume),
   `spine-branches` (section rail panels listing each section's headings), `tokyo-diorama/**` (R68 walkable 3D
   section `#diorama`: three.js 0.180.0, owner-approved; the kit's source stays OUTSIDE the repo in
   `Documents/tokyo-diorama-kit`; R70 engine fixes are listed in 30-design-system), `input-modality` (keyboard ring
