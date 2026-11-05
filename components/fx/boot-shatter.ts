@@ -1,122 +1,111 @@
 /**
- * FX-33 Boot Shatter. Imperative on purpose: it runs once, outside React, on a layer appended to <body>.
+ * FX-33 boot exit. Imperative on purpose: it runs once, outside React, on a layer appended to <body>.
  * The overlay itself is hidden instantly by `html.hw-booted .boot-overlay { display:none }`, so this layer is what the
  * visitor sees while the page appears. pointer-events: none -> it can never block a click or a test.
  * Always removed: at the end of the animation AND by a safety timeout.
  *
- * R41 (owner: "the page broken become pixel then showing my website, it is so lag, slow"): the old version re-drew
- * ~780 tiles on a full-screen canvas at 2x every frame on the main thread, in the same frames as the page reveal.
- * It became a few big slabs that fell away: Web Animations on transform / opacity only, so the compositor plays it and
- * the main thread is free to show the page.
+ * History: R41 turned a per-frame canvas into compositor slabs; R55 made them a rippling wall of up to 170 tiles, a few
+ * of them in blue / red / white accents.
  *
- * R55 (owner, with a screenshot of the 18 slabs mid-fall: "make this break part ... more amazing, ASMR, chill, relax
- * viewing, this is so boring and not creative at all"): eighteen slabs dropping at once in 0.8 s read as a crash, not
- * as something to watch. The gate is now a wall of small tiles that lets go in ONE ordered movement:
- *   - a ripple from the middle of the screen (where the Initialize key was) to the corners, ring after ring
- *   - each tile does the same three things, like a split-flap board: it is pressed in (the ink seams open and the
- *     page shows through them), it turns over on its own axis - neighbours turn opposite ways, a checkerboard - and
- *     it is gone edge-on
- *   - one calm curve for every tile, no bounce, no random spin, no falling debris; a few tiles carry the gate's
- *     accent colours so the eye can follow the ring
- * The page is uncovered from the centre outwards in about 1.4 s. Still transform / opacity only (one composited
- * layer per tile, the sum of them is one screen of texture), fewer and larger tiles on a phone, and never more than
- * MAX_TILES on any screen.
+ * R91 (owner: the boot screen was "quite childish and boring ... some smooth transition ... that suit this page and
+ * neo-brutalism"; R87 plan P3, docs/R91-BOOT-SCREEN.md): the boot log is a print job, so the gate leaves the way a
+ * printed sheet does - it is TORN OFF. A copy of the gate as it is at this moment (the sheet, the LIVE chip, or the bare
+ * key after Skip intro) gets a perforation-tooth edge along its bottom (yellow teeth over an ink copy 3 px lower, so
+ * every tooth has an ink rim; conic-gradient, no mask, no image), is tugged down a few px as the paper catches on the
+ * perforation, then ripped upward out of the screen with a slight turn from one corner. ONE layer, ONE transform
+ * animation (compositor only), no pop colour as decoration, no tile wall.
  */
-const MAX_TILES = 170;
-/** the ripple takes this long to travel from the centre to the far corner */
-const SPREAD = 780;
-/** press, turn, gone: one tile's whole movement */
-const DURATION = 580;
-/** how long the whole effect is on screen (read by components/after-boot.tsx, which waits for it) */
-export const BOOT_SHATTER_MS = SPREAD + DURATION + 60;
+/** the tug, then the rip: the whole exit (read by components/after-boot.tsx, which waits for it) */
+const DURATION = 660;
+/** a tooth of the torn edge (px): width, and height = half the width */
+const TOOTH = 18;
+export const BOOT_SHATTER_MS = DURATION + 40;
 
 export function bootShatter(base = '#FFC700'): void {
   if (typeof window === 'undefined') return;
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-  const small = w < 640;
-  // the side of a tile: larger tiles = fewer layers on a phone
-  let side = small ? 84 : 128;
-  while (Math.ceil(w / side) * Math.ceil(h / side) > MAX_TILES) side += 16;
-  const cols = Math.ceil(w / side);
-  const rows = Math.ceil(h / side);
+  const gate = document.querySelector<HTMLElement>('.boot-overlay');
 
   const layer = document.createElement('div');
   layer.setAttribute('aria-hidden', 'true');
   layer.setAttribute('data-fx-shatter', '');
+  layer.inert = true;
   Object.assign(layer.style, {
     position: 'fixed',
     inset: '0',
     zIndex: '100000',
     pointerEvents: 'none',
-    overflow: 'hidden',
+    willChange: 'transform',
+    // the corner that lets go last: the rip starts at the left edge and turns about the top right
+    transformOrigin: '100% 0',
   });
 
-  const accents = ['#2B4BFF', '#FF4B2B', '#FFFFFF'] as const;
-  const cw = w / cols;
-  const rh = h / rows;
-  const cx = w / 2;
-  const cy = h / 2;
-  const maxD = Math.hypot(cx, cy) || 1;
-  const anims: Animation[] = [];
-
-  for (let j = 0; j < rows; j++) {
-    for (let i = 0; i < cols; i++) {
-      const slab = document.createElement('div');
-      const x = i * cw;
-      const y = j * rh;
-      Object.assign(slab.style, {
-        position: 'absolute',
-        left: `${x}px`,
-        top: `${y}px`,
-        width: `${Math.ceil(cw) + 1}px`,
-        height: `${Math.ceil(rh) + 1}px`,
-        // about one tile in sixteen carries an accent colour of the gate
-        background: Math.random() < 0.06 ? accents[Math.floor(Math.random() * 3)] : base,
-        // 2 px on each tile: neighbours overlap by a pixel, so the seam between two is the 3 px ink line
-        border: '2px solid #0A0A0A',
-        boxSizing: 'border-box',
-        willChange: 'transform, opacity',
-        backfaceVisibility: 'hidden',
-      });
-      layer.appendChild(slab);
-      const d = Math.hypot(x + cw / 2 - cx, y + rh / 2 - cy);
-      // neighbours turn opposite ways (a checkerboard), top edge away or bottom edge away
-      const turn = (i + j) % 2 ? 1 : -1;
-      const p = 'perspective(900px)';
-      anims.push(
-        slab.animate(
-          [
-            { transform: `${p} translate3d(0, 0, 0) rotateX(0deg) scale(1)`, opacity: 1 },
-            // pressed in: the seams open
-            { transform: `${p} translate3d(0, 0, 0) rotateX(0deg) scale(0.86)`, opacity: 1, offset: 0.26 },
-            // turning over
-            { transform: `${p} translate3d(0, 0, 0) rotateX(${turn * 68}deg) scale(0.86)`, opacity: 1, offset: 0.7 },
-            // edge-on, and gone
-            { transform: `${p} translate3d(0, ${turn * -10}px, 0) rotateX(${turn * 90}deg) scale(0.8)`, opacity: 0 },
-          ],
-          {
-            duration: DURATION,
-            // ring after ring from the centre; a few ms of scatter so a ring patters instead of clicking as one
-            delay: (d / maxD) * SPREAD + Math.random() * 40,
-            easing: 'cubic-bezier(0.45, 0, 0.2, 1)', // one calm curve: no bounce, no snap
-            fill: 'both',
-          },
-        ),
-      );
-    }
+  // the gate as it is now. The copy loses the class that hides the gate (html.hw-booted .boot-overlay) and every
+  // data-boot-* hook, so nothing that looks for the live gate (tests, the head script) ever finds this picture of it.
+  const sheet = document.createElement('div');
+  if (gate) {
+    sheet.className = gate.className.replace(/\bboot-overlay\b/, '').trim();
+    gate.childNodes.forEach((n) => sheet.appendChild(n.cloneNode(true)));
+    // a picture is still: no exhaust canvas, no parked print heads, and no CSS animation or transition replays in the
+    // copy (a fresh element starts its leader / blink / slam keyframes again)
+    sheet.querySelectorAll('canvas, .boot-head').forEach((c) => c.remove());
+    sheet.querySelectorAll<HTMLElement>('*').forEach((el) => {
+      el.style.animation = 'none';
+      el.style.transition = 'none';
+      for (const a of [...el.attributes]) if (a.name.startsWith('data-boot')) el.removeAttribute(a.name);
+      el.removeAttribute('id');
+    });
+  } else {
+    sheet.style.background = base;
   }
+  Object.assign(sheet.style, { position: 'absolute', inset: '0' });
+  layer.appendChild(sheet);
+
+  // the torn edge: perforation teeth hanging from the bottom of the copy, ink first (3 px lower), paper on top
+  const teeth = (color: string, drop: number) => {
+    const t = document.createElement('div');
+    Object.assign(t.style, {
+      position: 'absolute',
+      left: '0',
+      right: '0',
+      top: `calc(100% + ${drop - 1}px)`,
+      height: `${TOOTH / 2}px`,
+      background: `conic-gradient(from -45deg at 50% 100%, ${color} 90deg, transparent 0) 0 0 / ${TOOTH}px 100%`,
+    });
+    layer.appendChild(t);
+  };
+  teeth('#0A0A0A', 3);
+  teeth(base, 0);
+  // the ink line the paper tears along (the teeth stand on it)
+  const seam = document.createElement('div');
+  Object.assign(seam.style, {
+    position: 'absolute',
+    left: '0',
+    right: '0',
+    top: 'calc(100% - 3px)',
+    height: '3px',
+    background: '#0A0A0A',
+  });
+  layer.appendChild(seam);
+
   document.body.appendChild(layer);
+  const anim = layer.animate(
+    [
+      // the tug: the paper catches on the perforation
+      { transform: 'translate3d(0, 0, 0) rotate(0deg)', easing: 'cubic-bezier(0.3, 0, 0.3, 1)' },
+      // the rip: out of the top, the free (left) corner leading
+      { transform: 'translate3d(0, 10px, 0) rotate(-0.6deg)', offset: 0.18, easing: 'cubic-bezier(0.5, 0, 0.2, 1)' },
+      { transform: `translate3d(0, calc(-100% - ${TOOTH + 24}px), 0) rotate(5deg)` },
+    ],
+    { duration: DURATION, fill: 'both' },
+  );
 
   let done = false;
   const cleanup = () => {
     if (done) return;
     done = true;
-    anims.forEach((a) => a.cancel());
+    anim.cancel();
     layer.remove();
   };
-  Promise.all(anims.map((a) => a.finished))
-    .then(cleanup)
-    .catch(cleanup);
+  anim.finished.then(cleanup).catch(cleanup);
   window.setTimeout(cleanup, BOOT_SHATTER_MS + 600);
 }

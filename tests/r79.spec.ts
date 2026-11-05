@@ -34,14 +34,15 @@ type Rec = {
   okOutside: boolean;
   vw: number;
   vh: number;
-  /** R81: print heads on the leaders, the sprocket feed (shown? how far it advanced), the LIVE 100 % chip, and the
-   * most shapes seen hopping at once while the log runs / flung off at the hand-off */
+  /** R81: print heads on the leaders, the sprocket feed (shown? how far it advanced), the LIVE 100 % chip. R91: the
+   * R81 shape hop / fling went with the shapes (R77 / R87 P3): the most shapes ever seen on the gate, and the printer
+   * mouth's chatter with each printed line */
   heads: number;
   feedShown: boolean;
   feedMax: number;
   pctLive: boolean;
-  shapesHopping: number;
-  shapesFlung: number;
+  shapes: number;
+  chatter: number;
 };
 /**
  * Everything the gate shows is recorded IN the page, every frame, until the gate is gone. A loaded CI runner can run
@@ -71,11 +72,10 @@ const record = (page: Page) =>
       feedShown: false,
       feedMax: 0,
       pctLive: false,
-      shapesHopping: 0,
-      shapesFlung: 0,
+      shapes: 0,
+      chatter: 0,
     };
     (window as unknown as { __rec: Rec }).__rec = r;
-    let logSince = 0;
     const tick = () => {
       const k = document.querySelector<HTMLElement>('[data-boot-action="init"]');
       if (k) {
@@ -127,14 +127,10 @@ const record = (page: Page) =>
           r.feedMax = Math.max(r.feedMax, Number(f.style.getPropertyValue('--feed')) || 0);
         }
         if (log.querySelector('[data-boot-pct][data-live]')) r.pctLive = true;
-        const moving = [...document.querySelectorAll('[data-boot-shape]')].filter((s) =>
-          s.getAnimations().some((a) => a.playState === 'running'),
-        ).length;
-        // (the lift-off blast still runs for the log's first ~0.3 s: hops count only from 0.6 s in)
-        logSince ||= performance.now();
-        if (log.dataset.state === 'complete') r.shapesFlung = Math.max(r.shapesFlung, moving);
-        else if (performance.now() - logSince > 600) r.shapesHopping = Math.max(r.shapesHopping, moving);
+        const mouth = document.querySelector('[data-boot-mouth]');
+        if (mouth?.getAnimations().some((a) => a.playState === 'running')) r.chatter++;
       }
+      r.shapes = Math.max(r.shapes, document.querySelectorAll('[data-boot-shape]').length);
       if (document.querySelector('.boot-overlay')) requestAnimationFrame(tick);
     };
     tick();
@@ -203,8 +199,9 @@ test('the boot log keeps every word: the header and one typed mount line per sec
 });
 
 // R81 (owner, the old SYSTEM BOOT card: "too boring, add more some features and animations, visual style effect"):
-// the log prints like a dot-matrix job and the gate's shapes take part
-test('R81: print heads run the leaders, the sprocket paper feeds, shapes hop on each OK and fly off, 100 % is stamped LIVE', async ({
+// the log prints like a dot-matrix job. R91 (owner: "quite childish and boring"; R87 P3): the shapes that hopped on each
+// OK and flew off at 100 % are gone (R77: no objects behind; blue / red were decoration); the printer mouth chatters
+test('R81: print heads run the leaders, the sprocket paper feeds, the printer chatters, 100 % is stamped LIVE, no shapes', async ({
   page,
 }) => {
   const errors = watchErrors(page);
@@ -218,8 +215,8 @@ test('R81: print heads run the leaders, the sprocket paper feeds, shapes hop on 
   expect(r.heads, 'one print head per mounted line').toBe(5);
   expect(r.feedShown, 'sprocket strips on a desktop card').toBe(true);
   expect(r.feedMax, 'the paper fed one hole per section').toBe(5);
-  expect(r.shapesHopping, 'the shapes hop with the OK stamps').toBeGreaterThanOrEqual(3);
-  expect(r.shapesFlung, 'the shapes are flung off at the hand-off').toBeGreaterThanOrEqual(3);
+  expect(r.shapes, 'R91: no shapes behind the gate').toBe(0);
+  expect(r.chatter, 'R91: the printer mouth chatters as the lines print').toBeGreaterThan(0);
   expect(r.pctLive, 'the 100 % chip is stamped LIVE').toBe(true);
   expect(errors).toEqual([]);
 });

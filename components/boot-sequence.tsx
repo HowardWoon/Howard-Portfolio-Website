@@ -5,11 +5,12 @@ const BootedContext = createContext(true);
 export const useBooted = () => useContext(BootedContext);
 import { m, AnimatePresence } from 'framer-motion';
 import { useLatest } from '@/lib/use-latest';
-import { FX, prefersReducedMotion, SPRING_STAMP, EASE_SNAP } from '@/lib/fx';
+import { FX, prefersReducedMotion, EASE_SNAP } from '@/lib/fx';
 import { SECTIONS } from '@/lib/sections';
 import { bootShatter } from './fx/boot-shatter';
 import { useScrollLock } from '@/lib/use-scroll-lock';
 import type { Jet } from './fx/boot-exhaust';
+import '@/app/boot-screen.css';
 
 /** boot log (owner R43): one line per home-page section, mounted one at a time, then the shatter (~2.5 s in all) */
 const LINE_MS = 380;
@@ -28,6 +29,9 @@ const IGNITE_S = 0.34;
 const CLIMB_S = 0.8;
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+/** R91: the sheet comes up out of the printer mouth in this many line feeds (a hard step each, no spring) */
+const FEEDS = 6;
+const feedSteps = (t: number) => Math.floor(clamp01(t) * FEEDS) / FEEDS;
 const smooth = (t: number) => {
   const s = clamp01(t);
   return s * s * (3 - 2 * s);
@@ -176,7 +180,7 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
   const craftRef = useRef<HTMLButtonElement>(null);
   const groundRef = useRef<HTMLSpanElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const shapesRef = useRef<HTMLDivElement>(null);
+  const mouthRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   /** 'running' from the press until every line is OK: only then does a key or tap jump ahead */
   const phase = useRef<'idle' | 'running' | 'done'>('idle');
@@ -284,29 +288,6 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
     );
   }
 
-  /** the gate's shapes are blown back by the lift-off and swing home (transform on their wrappers only) */
-  function blastShapes(cx: number, cy: number) {
-    shapesRef.current?.querySelectorAll<HTMLElement>('[data-boot-shape]').forEach((el, i) => {
-      const r = el.getBoundingClientRect();
-      const dx = r.left + r.width / 2 - cx;
-      const dy = r.top + r.height / 2 - cy;
-      const d = Math.hypot(dx, dy) || 1;
-      const k = 44 * Math.min(1.4, Math.max(0.5, 520 / d));
-      const turn = (i % 2 ? 1 : -1) * 9;
-      el.animate(
-        [
-          { transform: 'none' },
-          {
-            transform: `translate(${((dx / d) * k).toFixed(1)}px, ${((dy / d) * k).toFixed(1)}px) rotate(${turn}deg)`,
-            offset: 0.28,
-          },
-          { transform: 'none' },
-        ],
-        { duration: 1150, delay: IGNITE_S * 1000 - 60, easing: 'cubic-bezier(0.2, 0.9, 0.1, 1)' },
-      );
-    });
-  }
-
   /** R79 lift-off: one rAF loop writes the key's translate / rotate / thrust and the nozzles for the exhaust */
   function liftOff(done: () => void) {
     const el = craftRef.current;
@@ -318,7 +299,6 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
     const seed = Math.random() * 100;
     const wind = (Math.random() < 0.5 ? -1 : 1) * (0.6 + Math.random() * 0.6);
     el.dataset.flying = '';
-    blastShapes(cx, cy);
     if (!liteTier()) {
       loadExhaust()
         .then((mod) => {
@@ -421,9 +401,8 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
     };
   }, [fastForwardRef]);
 
-  // R79: each OK stamp lands with a jolt through the card (its own `translate`, so framer's transform is untouched)
-  // R81: ... and the thump carries into the Bauhaus shapes, which hop and settle (added on top of whatever they are
-  // doing, so a stamp during the lift-off blast still reads)
+  // R79: each OK stamp lands with a jolt through the card (its own `translate`, so framer's transform is untouched).
+  // R91: the printer mouth chatters 1 px with each printed line (the R81 shape hop / fling went with the shapes)
   useEffect(() => {
     if (step === 0 || prefersReducedMotion()) return;
     const ease = 'cubic-bezier(0.2, 0.9, 0.1, 1)';
@@ -432,37 +411,15 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
       delay: 70,
       easing: ease,
     });
-    shapesRef.current?.querySelectorAll<HTMLElement>('[data-boot-shape]').forEach((el, i) => {
-      const hop = `translateY(${8 + (i % 2) * 4}px) rotate(${(i % 2 ? 1 : -1) * 4}deg)`;
-      el.animate([{ transform: 'none' }, { transform: hop, offset: 0.3 }, { transform: 'none' }], {
-        duration: 300,
-        delay: 70 + i * 25,
-        easing: ease,
-        composite: 'add',
-      });
-    });
+    mouthRef.current?.animate(
+      [{ translate: '0 0' }, { translate: '0 1px' }, { translate: '0 -1px' }, { translate: '0 0' }],
+      {
+        duration: 120,
+        delay: 70,
+        easing: 'steps(3, end)',
+      },
+    );
   }, [step]);
-
-  // R81 hand-off: when every section is up the shapes are flung off towards the screen edges (the shatter follows)
-  useEffect(() => {
-    if (bootState !== 'complete' || prefersReducedMotion()) return;
-    const cx = window.innerWidth / 2;
-    const cy = window.innerHeight / 2;
-    shapesRef.current?.querySelectorAll<HTMLElement>('[data-boot-shape]').forEach((el, i) => {
-      const r = el.getBoundingClientRect();
-      const dx = r.left + r.width / 2 - cx;
-      const dy = r.top + r.height / 2 - cy;
-      const d = Math.hypot(dx, dy) || 1;
-      const out = `translate(${((dx / d) * 140).toFixed(1)}px, ${((dy / d) * 140).toFixed(1)}px) rotate(${(i % 2 ? 1 : -1) * 24}deg)`;
-      el.animate([{ transform: 'none' }, { transform: out }], {
-        duration: 420,
-        delay: 60,
-        easing: 'cubic-bezier(0.5, 0, 0.9, 0.4)',
-        fill: 'forwards',
-        composite: 'add',
-      });
-    });
-  }, [bootState]);
 
   const pct = Math.round((step / SECTIONS.length) * 100);
   const atGate = bootState === 'idle' || bootState === 'launch';
@@ -483,46 +440,19 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
             exit={{ opacity: 0, scale: 1.04 }}
             transition={{ duration: 0.7, ease: 'easeInOut' }}
           >
-            {/* Bauhaus composition. R79: each shape leans with the mouse (FX-02 depth, the one shared pointer loop)
-                and is blown back by the lift-off */}
-            <div ref={shapesRef} aria-hidden className="pointer-events-none absolute inset-0">
-              <div
-                data-boot-shape
-                className="fx-depth absolute -left-24 -top-24 w-80 h-80"
-                style={{ '--depth': 14 } as React.CSSProperties}
-              >
-                <div className="w-full h-full rounded-full bg-pop-blue border-3 border-ink" />
-              </div>
-              <div
-                data-boot-shape
-                className="fx-depth absolute right-[8%] top-[14%] w-24 h-24"
-                style={{ '--depth': -22 } as React.CSSProperties}
-              >
-                <div className="w-full h-full bg-pop-red border-3 border-ink rotate-12" />
-              </div>
-              <div
-                data-boot-shape
-                className="fx-depth absolute left-[12%] bottom-[12%] w-28 h-28"
-                style={{ '--depth': 26 } as React.CSSProperties}
-              >
-                <svg className="w-full h-full animate-wobble" viewBox="0 0 100 100">
-                  <polygon
-                    points="50,6 96,92 4,92"
-                    fill="#FFFFFF"
-                    stroke="#0A0A0A"
-                    strokeWidth="6"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-              <div
-                data-boot-shape
-                className="fx-depth absolute -right-20 -bottom-20 w-72 h-72"
-                style={{ '--depth': -12 } as React.CSSProperties}
-              >
-                <div className="w-full h-full rounded-full bg-white border-3 border-ink" />
-              </div>
+            {/* R91 (owner: "quite childish and boring"; R87 P3): the four Bauhaus shapes are gone (R77: no objects
+                behind a section; blue / red were decoration, SIGNAL KEY rule 1). The gate is a printer: an ink mouth on
+                its bottom edge with the torn stub of the last job in its slot; the boot log feeds out of it. */}
+            <div
+              ref={mouthRef}
+              aria-hidden
+              data-boot-mouth
+              data-busy={bootState === 'launch' || bootState === 'booting' ? '' : undefined}
+              className="boot-mouth"
+            >
+              <span className="boot-led" />
             </div>
+            {atGate && <div aria-hidden data-boot-stub className="boot-stub boot-paper" />}
 
             {/* R79 halftone exhaust (WebGL, drawn only during the lift-off and the drift after it) */}
             <canvas
@@ -532,7 +462,7 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
               className="boot-exhaust pointer-events-none absolute inset-0 h-full w-full"
             />
 
-            <div className="relative flex justify-center flex-col items-center gap-8 px-6">
+            <div className="relative flex justify-center flex-col items-center gap-8 px-6 pb-[calc(30px+var(--safe-bottom,0px))] landscape-short:pb-0">
               {atGate && (
                 <div key="idle" className="flex flex-col items-center gap-6">
                   <div className="w-full flex flex-col items-center gap-6">
@@ -584,10 +514,11 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
                   ref={cardRef}
                   data-boot-log
                   data-state={bootState}
-                  initial={{ y: -56, rotate: -2 }}
-                  animate={{ y: 0, rotate: 0 }}
-                  transition={SPRING_STAMP}
-                  className="boot-card nb-card w-[min(26rem,calc(100vw-3rem))] p-3 xs:p-4 sm:p-5 flex flex-col gap-4 landscape-short:gap-2 font-mono text-ink"
+                  // R91: the sheet comes UP out of the printer mouth in hard line feeds (it used to drop from above)
+                  initial={{ y: typeof window === 'undefined' ? 600 : Math.round(window.innerHeight * 0.75) }}
+                  animate={{ y: 0 }}
+                  transition={{ duration: 0.36, ease: feedSteps }}
+                  className="boot-card nb-card w-[min(26rem,calc(100vw-3rem))] p-3 xs:p-4 sm:p-5 [--pad:0.75rem] xs:[--pad:1rem] sm:[--pad:1.25rem] flex flex-col gap-4 landscape-short:gap-2 font-mono text-ink"
                 >
                   {/* R81: continuous printer paper - a column of sprocket holes down each edge advances one hole per
                       mounted section (from 640 px; phones keep the card's full width for the lines) */}
@@ -616,12 +547,15 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
                           <span data-boot-head className="boot-head" />
                         </span>
                         {i < step ? (
+                          // R91: a rubber stamp - a white ring inside the ink rim, slammed in hard, resting at a
+                          // hand-stamped angle (alternating) on the paper
                           <m.span
                             data-boot-ok
-                            initial={{ scale: 2.4, rotate: -16, opacity: 0 }}
-                            animate={{ scale: 1, rotate: 0, opacity: 1 }}
-                            transition={SPRING_STAMP}
-                            className="nb-tag bg-pop-mint py-0.5 shrink-0 whitespace-nowrap"
+                            data-tilt={i % 2 ? 'r' : undefined}
+                            initial={{ scale: 2.4, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ duration: 0.14, ease: EASE_SNAP }}
+                            className="boot-ok nb-tag bg-pop-mint py-0.5 shrink-0 whitespace-nowrap"
                           >
                             OK
                           </m.span>
@@ -633,9 +567,12 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
                       </li>
                     ))}
                   </ol>
-                  <div className="flex items-center gap-3">
+                  {/* R91: the bar is a square tear strip - five cells split by perforations - under the dashed line the
+                      sheet is torn along (in the gap above it, so the sheet is no taller) */}
+                  <div className="relative flex items-center gap-3">
+                    <span aria-hidden data-boot-tearline className="boot-tearline" />
                     <div
-                      className="flex-1 flex gap-1 h-7 p-1 bg-white border-3 border-ink rounded-full overflow-hidden"
+                      className="flex-1 flex h-7 bg-white border-3 border-ink overflow-hidden"
                       role="progressbar"
                       aria-label="System boot"
                       aria-valuemin={0}
@@ -643,7 +580,10 @@ export function BootSequence({ children }: { children: React.ReactNode }) {
                       aria-valuenow={pct}
                     >
                       {SECTIONS.map((s, i) => (
-                        <span key={s.id} className="flex-1 overflow-hidden first:rounded-l-full last:rounded-r-full">
+                        <span
+                          key={s.id}
+                          className="flex-1 overflow-hidden p-[3px] border-l-2 border-dashed border-ink first:border-l-0"
+                        >
                           {/* R79: a segment fills in four mechanical clicks */}
                           <span
                             className={`block h-full bg-ink origin-left transition-transform duration-[240ms] [transition-timing-function:steps(4,end)] ${i < step ? 'scale-x-100' : 'scale-x-0'}`}

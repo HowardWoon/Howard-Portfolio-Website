@@ -433,15 +433,16 @@ has(
   ':not(.fx-off-shadowFollow)',
 );
 // R41: the canvas shatter (780 tiles re-drawn per frame on the main thread) became GPU slabs - fewer on phones
-// R55: the slabs are now a rippling wall of tiles (larger, so fewer, on a phone; capped by MAX_TILES)
+// R55: the slabs became a rippling wall of tiles. R91 (owner: the boot screen was "childish and boring"; R87 P3): the gate
+// is torn off - ONE layer (a copy of the gate with a perforation edge), ONE transform animation on the compositor
 has(
   'R9',
   'D3',
-  'Lighter boot shatter: compositor slabs, fewer on phones',
+  'Lighter boot exit: one torn-off layer, one compositor animation',
   'components/fx/boot-shatter.ts',
-  'small ? 84 : 128',
-  'MAX_TILES',
-  'slab.animate(',
+  'layer.animate(',
+  "willChange: 'transform'",
+  'conic-gradient(',
 );
 has('R9', 'D5', 'Off-screen pause for infinite animations', 'components/fx/offscreen-pause.tsx', 'data-offscreen');
 has(
