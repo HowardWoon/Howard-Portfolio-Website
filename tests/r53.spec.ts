@@ -381,9 +381,34 @@ for (const [name, w, h] of [
     await expect(page.locator('[data-site-mascot]')).toBeVisible({ timeout: 15_000 });
     await page.waitForTimeout(700); // the pop-in (a scale) has finished
     const total = await page.evaluate(() => document.documentElement.scrollHeight);
+    // the cat's rest check always writes its own inline style: the sign it has looked at the new spot (r86 B4)
+    await page.evaluate(() => {
+      const w = document.querySelector<HTMLElement>('.site-mascot')!;
+      const win = window as unknown as { __catChecked?: boolean };
+      new MutationObserver(() => (win.__catChecked = true)).observe(w, {
+        attributes: true,
+        attributeFilter: ['style'],
+      });
+    });
     for (const y of [0, total * 0.3, total * 0.6, total * 0.3]) {
-      await page.evaluate((v) => window.scrollTo(0, v), y);
+      await page.evaluate((v) => {
+        const win = window as unknown as { __catChecked?: boolean };
+        const before = window.scrollY;
+        window.scrollTo(0, v);
+        win.__catChecked = Math.round(window.scrollY) === Math.round(before);
+      }, y);
       await page.waitForTimeout(450);
+      // judge the spot once the cat has checked it and finished its 220 ms tuck
+      await page.waitForFunction(
+        () =>
+          (window as unknown as { __catChecked?: boolean }).__catChecked === true &&
+          document
+            .querySelector('.site-mascot')!
+            .getAnimations()
+            .every((a) => !(a instanceof CSSTransition) || a.playState !== 'running'),
+        null,
+        { timeout: 5_000 },
+      );
       const r = await page.evaluate(() => {
         const c = document.querySelector('[data-site-mascot]')!.getBoundingClientRect();
         const hit = (e: Element) => {
@@ -403,14 +428,38 @@ for (const [name, w, h] of [
         const fixed = [...document.querySelectorAll<HTMLElement>('.fixed')].filter(
           (e) => !e.closest('[data-site-mascot]') && e.querySelector('button, a') && hit(e),
         ).length;
+        // R86 / R88: over a control the cat tucks into the edge and leaves a 12 px strip; what stays visible of it
+        // never covers a control (r86 B4's grid). CI f03fef5: a drifting Arena Wall ticket lay under the cat, fully
+        // visible (121 of 121 points), and the cat rightly tucked - this test still demanded x = 0.
+        const m = document.querySelector<HTMLElement>('[data-site-mascot]')!;
+        let covered: string | null = null;
+        for (let x = c.left + 2; x < c.right - 1 && !covered; x += 6)
+          for (let y = c.top + 2; y < c.bottom - 1; y += 6) {
+            if (x < 0) continue;
+            const el = document.elementsFromPoint(x, y).find((e) => !m.contains(e));
+            const ctl = el?.closest('a[href], button, input, textarea, select, [role="button"]');
+            if (ctl && !m.contains(ctl)) {
+              covered = ctl.getAttribute('aria-label') || ctl.textContent?.trim().slice(0, 30) || ctl.tagName;
+              break;
+            }
+          }
         return {
           cats: document.querySelectorAll('[data-site-mascot]').length,
-          box: [Math.round(c.left), Math.round(c.width), Math.round(c.height)],
+          size: [Math.round(c.width), Math.round(c.height)],
+          // out in the corner, or tucked with its strip at the edge
+          placed: Math.round(c.left) === 0 || (m.closest('.site-mascot')!.hasAttribute('data-tucked') && c.right <= 13),
+          covered,
           fromBottom: Math.round(window.innerHeight - c.bottom),
           fixed,
         };
       });
-      expect(r, `scroll ${Math.round(y)}`).toMatchObject({ cats: 1, box: [0, 44, 44], fixed: 0 });
+      expect(r, `scroll ${Math.round(y)}`).toMatchObject({
+        cats: 1,
+        size: [44, 44],
+        placed: true,
+        covered: null,
+        fixed: 0,
+      });
       expect(r.fromBottom).toBeLessThanOrEqual(16);
     }
   });
