@@ -639,6 +639,9 @@ for (const [name, w, h, min] of [
       });
       mo.observe(document.body, { childList: true });
     });
+    // a Skip pressed before hydration lifts the gate at once with no ripple (R26, guarded by tests/hotfix); on CI's
+    // runners networkidle comes before hydration, so this test of the ripple itself waits for React (red since CI #137)
+    await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
     await page.getByRole('button', { name: /skip intro/i }).click();
     await expect
       .poll(() => page.evaluate(() => !!(window as unknown as { __shatter?: unknown }).__shatter), { timeout: 8000 })
