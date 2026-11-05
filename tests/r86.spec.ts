@@ -80,12 +80,55 @@ test.describe('phone', () => {
   test('B4: the cat never rests on a control', async ({ page }) => {
     test.setTimeout(180_000); // ~100 rests down a 58,000 px phone page
     await gate(page);
+    await catWalk(page);
+  });
+
+  test('B4: the cat never rests on a control, on a slow lite-tier phone (2 cores, 4x CPU)', async ({ page }) => {
+    test.setTimeout(300_000);
+    await page.addInitScript(() => Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 2 }));
+    await gate(page);
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+    await catWalk(page);
+  });
+});
+
+/** scroll a phone down the whole page in 600 px steps; at each rest no control may lie under the cat */
+async function catWalk(page: Page) {
+  {
     await expect(page.locator('[data-site-mascot]')).toBeVisible({ timeout: 15_000 });
     const total = await page.evaluate(() => document.documentElement.scrollHeight);
     const covered: string[] = [];
+    // the cat's rest check always writes its own inline style: that is the sign it has looked at this spot
+    await page.evaluate(() => {
+      const w = document.querySelector<HTMLElement>('.site-mascot')!;
+      const win = window as unknown as { __catChecked?: boolean };
+      new MutationObserver(() => (win.__catChecked = true)).observe(w, {
+        attributes: true,
+        attributeFilter: ['style'],
+      });
+    });
     for (let y = 0; y < total; y += 600) {
-      await page.evaluate((v) => window.scrollTo(0, v), y);
+      await page.evaluate((v) => {
+        const win = window as unknown as { __catChecked?: boolean };
+        const before = window.scrollY;
+        window.scrollTo(0, v);
+        win.__catChecked = window.scrollY === before; // no scroll (top / bottom of the page): nothing to re-check
+      }, y);
       await page.waitForTimeout(450); // the page is at rest
+      // R88 (CI #138 - 9fee46c, y = 22,800): the cat checks 300 ms after the page rests and then tucks with a 220 ms
+      // transition; on a slow runner a fixed 450 ms caught it mid-tuck. Judge the spot once its check has run and the
+      // tuck has finished.
+      await page.waitForFunction(
+        () =>
+          (window as unknown as { __catChecked?: boolean }).__catChecked === true &&
+          document
+            .querySelector('.site-mascot')!
+            .getAnimations()
+            .every((a) => !(a instanceof CSSTransition) || a.playState !== 'running'),
+        null,
+        { timeout: 5_000 },
+      );
       const hit = await page.evaluate(() => {
         const m = document.querySelector<HTMLElement>('[data-site-mascot]')!;
         const b = m.getBoundingClientRect();
@@ -101,5 +144,5 @@ test.describe('phone', () => {
       if (hit) covered.push(`${y}: ${hit}`);
     }
     expect(covered).toEqual([]);
-  });
-});
+  }
+}
