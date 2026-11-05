@@ -19,6 +19,7 @@ import { HeadlineFigures, ResultsBoard, RolesGrid, Transcript } from './honors-a
 import { useFocusTrap } from '@/lib/use-focus-trap';
 import { useLatest } from '@/lib/use-latest';
 import { useScrollLock } from '@/lib/use-scroll-lock';
+import { LabelFirst, Marked } from './label-first';
 import { useViewTransitions, withViewTransition } from '@/lib/view-transition';
 import {
   Trophy,
@@ -49,6 +50,8 @@ interface HonorItem {
   period: string;
   statCallout: { value: string; label: string };
   description: React.ReactNode;
+  /** R92: the description's labels, each copied word for word from it (a text description only) */
+  descriptionLabels?: string[];
   highlights: string[];
   certificateUrl?: string;
   icon: LucideIcon;
@@ -90,6 +93,12 @@ export const honorsList: HonorItem[] = [
     statCallout: { value: '2nd', label: 'Out of 55+ APAC Teams' },
     description:
       'Architected ZeroLag, an autonomous 5-agent sales intelligence command center. Outperformed over 55 enterprise and university teams across the Asia-Pacific region with sub-second lead scoring pipelines.',
+    descriptionLabels: [
+      'Architected ZeroLag',
+      '5-agent sales intelligence command center',
+      '55 enterprise and university teams',
+      'sub-second lead scoring pipelines',
+    ],
     highlights: [
       'Built deterministic HubSpot orchestrating 5 AI agent operators',
       'Awarded 2nd Place in the competitive Sales Intelligence Track',
@@ -111,6 +120,12 @@ export const honorsList: HonorItem[] = [
     statCallout: { value: '3rd', label: 'Sui Foundation Track' },
     description:
       'Developed ProofPay, a delivery-linked B2B escrow and settlement platform built on Sui. Addressed B2B trust deadlocks using smart contract milestone releases and AI-driven evidence verification via Gonka Router.',
+    descriptionLabels: [
+      'Developed ProofPay',
+      'B2B escrow and settlement platform built on Sui',
+      'smart contract milestone releases',
+      'AI-driven evidence verification',
+    ],
     highlights: [
       'Awarded 2nd Runner Up out of global participants in the Sui Foundation track',
       'Ranked Top 6 in the AI For Society track (Gonka Router AI)',
@@ -130,6 +145,12 @@ export const honorsList: HonorItem[] = [
     statCallout: { value: '#1', label: 'Public Choice Nationwide' },
     description:
       "Engineered 'The Goofy Experience'-a psychological comedy/horror game themed around 'Losing Control'. Implemented real-time UI hijacking and cursor manipulation mechanics with 100% custom audio.",
+    descriptionLabels: [
+      "'The Goofy Experience'",
+      'psychological comedy/horror game',
+      'real-time UI hijacking',
+      '100% custom audio',
+    ],
     highlights: [
       'Voted #1 Public Choice winner among 39 universities nationwide',
       'Engineered procedural UI hijacking & auditory disorientation systems',
@@ -150,6 +171,11 @@ export const honorsList: HonorItem[] = [
     statCallout: { value: 'Top 5', label: 'DOSM Datathon 2026 Grand Final' },
     description:
       'Lead builder and pitcher of Monsun Bridge, a planning tool for state and district planners. It turns the monsoon window METMalaysia already publishes into a plan a district can budget.',
+    descriptionLabels: [
+      'Lead builder and pitcher of Monsun Bridge',
+      'a planning tool for state and district planners',
+      'a plan a district can budget',
+    ],
     highlights: [
       'Top 10 finalists selected after shortlisting; live pitching at Auditorium Tun Azizan Zainul Abidin (TAZA), Kompleks Perbadanan Putrajaya',
       'Team DATAVENGERS (IPTA-093), Universiti Malaya',
@@ -169,6 +195,11 @@ export const honorsList: HonorItem[] = [
     statCallout: { value: 'Top 15', label: 'Innovation Track Finalist' },
     description:
       "Engineered 'Sensor X Sensei', a smart lecture hall energy management IoT system. Utilized ESP32 microcontrollers and dynamic web dashboards to optimize university power grids.",
+    descriptionLabels: [
+      "'Sensor X Sensei'",
+      'smart lecture hall energy management IoT system',
+      'ESP32 microcontrollers',
+    ],
     highlights: [
       'Engineered low-power ESP32 + MQTT sensor fusion firmware',
       'Ranked Top 15 among national university teams',
@@ -188,6 +219,7 @@ export const honorsList: HonorItem[] = [
     statCallout: { value: 'Gold', label: 'National Champion' },
     description:
       'Achieved the Gold Medal (Emas) at the national-level Hari Inovasi PPAL 4.0, demonstrating exceptional problem-solving and technical innovation among top matriculation cohorts nationwide.',
+    descriptionLabels: ['Gold Medal (Emas)', 'national-level Hari Inovasi PPAL 4.0', 'technical innovation'],
     highlights: [
       'Awarded National Gold Medal for technical excellence',
       'Recognized for outstanding presentation and innovative methodologies',
@@ -207,6 +239,11 @@ export const honorsList: HonorItem[] = [
     statCallout: { value: 'Gold', label: 'State Champion' },
     description:
       'Secured the Gold Medal at the state-level Chemcreative-Innovation competition, engineering advanced digital learning methodologies and interactive frameworks for scientific education.',
+    descriptionLabels: [
+      'Gold Medal',
+      'state-level Chemcreative-Innovation competition',
+      'digital learning methodologies',
+    ],
     highlights: [
       'Awarded State Gold Medal for Digital Learning Innovation',
       'Pioneered interactive and highly effective digital education frameworks',
@@ -226,6 +263,7 @@ export const honorsList: HonorItem[] = [
     statCallout: { value: 'Silver', label: 'National Podium' },
     description:
       'Awarded the Silver Medal (Perak) at the prestigious national Simposium Peer Assisted Learning (PAL) organized by the Ministry of Education (KPM), showcasing exemplary peer-mentorship strategies.',
+    descriptionLabels: ['Silver Medal (Perak)', 'Ministry of Education (KPM)', 'peer-mentorship strategies'],
     highlights: [
       'Awarded National Silver Medal by the Ministry of Education (KPM)',
       'Presented highly effective academic mentorship and leadership frameworks',
@@ -293,6 +331,11 @@ export const honorsList: HonorItem[] = [
     statCallout: { value: 'Qual', label: 'AI First Responder' },
     description:
       'Architected BILAHUJAN, a decentralised swarm intelligence platform for flood response. Fused Gemini 2.5 Flash image triage with an MCP-orchestrated command agent.',
+    descriptionLabels: [
+      'Architected BILAHUJAN',
+      'decentralised swarm intelligence platform for flood response',
+      'MCP-orchestrated command agent',
+    ],
     highlights: [
       'Engineered decentralised swarm architecture with real-time Firebase syncing',
       'Qualified in the Preliminary Round via the Case Study 3 track',
@@ -311,6 +354,7 @@ export const honorsList: HonorItem[] = [
     statCallout: { value: '1st Yr', label: 'Initiation Competition' },
     description:
       'Participated in the Universiti Malaya Student Initiation Competition (UMSIC) 2025, engaging in technical challenges organized by PEKOM.',
+    descriptionLabels: ['Universiti Malaya Student Initiation Competition (UMSIC) 2025', 'organized by PEKOM'],
     highlights: ['Collaborated in foundational software engineering problem-solving'],
     certificateUrl: '/certificates/UMSIC_HOWARD_WOON_HAO_ZHE.pdf',
     icon: Shield,
@@ -708,7 +752,7 @@ export default function HonorsSection() {
                             <h3 className="font-display text-2xl font-extrabold uppercase tracking-[-0.02em] leading-[1.05] text-ink">
                               {item.title}
                             </h3>
-                            <p className="text-sm font-mono font-bold text-pop-blue">{item.issuingBody}</p>
+                            <p className="text-sm font-mono font-extrabold text-ink">{item.issuingBody}</p>
                             {/* R48: the academic cards fill the band beside their seal with their own figures */}
                             <HeadlineFigures id={item.id} />
                           </div>
@@ -726,9 +770,19 @@ export default function HonorsSection() {
                           ) : null}
                         </div>
 
-                        <div className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium mb-6">
-                          {item.description}
-                        </div>
+                        {/* R92: a text description shows its labels first, the sentence word for word behind READ
+                            MORE; the two academic awards keep their paragraph with its transcript / results board */}
+                        {typeof item.description === 'string' && item.descriptionLabels ? (
+                          <LabelFirst labels={item.descriptionLabels} source={item.description} className="mb-6">
+                            <p className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium">
+                              <Marked text={item.description} keys={item.descriptionLabels} />
+                            </p>
+                          </LabelFirst>
+                        ) : (
+                          <div className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium mb-6">
+                            {item.description}
+                          </div>
+                        )}
 
                         <div className="space-y-2.5 mb-8">
                           {item.highlights.map((hl, hlIdx) => (

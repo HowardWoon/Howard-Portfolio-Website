@@ -8,6 +8,7 @@ import { FX, SPRING_SOFT } from '@/lib/fx';
 import { startTrail, useInteractionSelect } from '@/lib/interaction-store';
 import { projectsWithSkill, skillKey } from '@/lib/skills';
 import { ScrollInk } from './fx/scroll-ink';
+import { Marked, Tagline } from './label-first';
 import { flapTo } from '@/lib/split-flap';
 import { SIGNAL, type Signal } from '@/lib/signal';
 
@@ -22,6 +23,8 @@ const architecturePillars: {
   signal?: Signal;
   headline: string;
   description: string;
+  /** R92: phrases of the description set in extra-bold ink, copied word for word from it */
+  keyPhrases: string[];
   metrics: { label: string; value: string }[];
   telemetrySnippet: string;
 }[] = [
@@ -33,6 +36,12 @@ const architecturePillars: {
     headline: 'Java 21 · Spring Boot 3 · FastAPI · Next.js 15',
     description:
       'Typed Next.js and React front ends over Spring Boot and FastAPI services, with PostgreSQL and Firebase behind them. Slotify threads every API call through seven hand-built data structures; Sensor X Sensei feeds PIR + NFC sensor fusion into live carbon telemetry dashboards.',
+    keyPhrases: [
+      'Typed Next.js and React front ends',
+      'Spring Boot and FastAPI services',
+      'seven hand-built data structures',
+      'live carbon telemetry dashboards',
+    ],
     metrics: [
       { label: 'Backend', value: 'Spring Boot 3 / FastAPI' },
       { label: 'Front end', value: 'Next.js 15 / React / TypeScript' },
@@ -49,6 +58,7 @@ const architecturePillars: {
     headline: 'Halt states, human-in-the-loop and MCP tools',
     description:
       'ZeroLag is a bi-modal agent workforce that resolves B2B buying groups and halts itself before a PDPA / GDPR violation: 2nd place at Supervity AutoPilot Asia 2026. In BILAHUJAN a Gemini 2.0 Flash command agent verifies floods through 7 standardised MCP tools.',
+    keyPhrases: ['bi-modal agent workforce', '2nd place at Supervity AutoPilot Asia 2026', '7 standardised MCP tools'],
     metrics: [
       { label: 'Track Record', value: '2nd Place @ Supervity AutoPilot Asia 2026 (ZeroLag)' },
       { label: 'Orchestration', value: 'LangGraph + MCP' },
@@ -64,6 +74,11 @@ const architecturePillars: {
     headline: 'Scikit-Learn · SHAP · SciPy · Dijkstra',
     description:
       'Monsun Bridge turns the monsoon window METMalaysia already publishes into a plan a district can budget: Top 5 and a consolation prize at the DOSM Datathon 2026. Catfish Detector AI reads 51 behavioural heuristics across 50,000 profiles with a SMOTE-Tomek balanced, 6-model ensemble.',
+    keyPhrases: [
+      'a plan a district can budget',
+      'Top 5 and a consolation prize at the DOSM Datathon 2026',
+      '51 behavioural heuristics across 50,000 profiles',
+    ],
     metrics: [
       { label: 'Track Record', value: 'Top 5 Finalist @ DOSM Datathon 2026 (Monsun Bridge)' },
       { label: 'Machine Learning', value: 'Scikit-Learn / SHAP / SMOTE' },
@@ -80,6 +95,11 @@ const architecturePillars: {
     headline: 'Treasurer at PEKOM · finance at KRAIBURG TPE',
     description:
       'Finance Lead and Executive Treasurer of PEKOM, the Universiti Malaya computing society; Assistant Finance Executive & Intern at KRAIBURG TPE Technology since Nov 2025; before that Assistant Head of Subject (Computer Science) at the KMNS PAL Leader Club. ProofPay puts the same discipline into code.',
+    keyPhrases: [
+      'Finance Lead and Executive Treasurer of PEKOM',
+      'Assistant Finance Executive & Intern at KRAIBURG TPE Technology',
+      'Assistant Head of Subject (Computer Science)',
+    ],
     metrics: [
       { label: 'Leadership', value: 'Finance Lead & Executive Treasurer @ PEKOM' },
       { label: 'Industry', value: 'Assistant Finance Executive @ KRAIBURG TPE' },
@@ -342,8 +362,12 @@ function PillarCard({
             strokeWidth={3}
           />
         </h3>
-        <p className="text-sm font-mono font-bold text-pop-blue">{pillar.headline}</p>
-        <p className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium pt-1">{pillar.description}</p>
+        {/* R92: the pillar is itself a button, so its paragraph stays visible with its key phrases set in ink;
+            the headline is an ink label on the pillar's signal stripe (blue = controls only) */}
+        <Tagline signal={pillar.signal}>{pillar.headline}</Tagline>
+        <p className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium pt-1">
+          <Marked text={pillar.description} keys={pillar.keyPhrases} />
+        </p>
       </div>
       {/* R65 zoom: a row that wraps, not a 3-column grid. A grid column can be squeezed below its longest word (at
           175 % zoom the tiles were 90 px and "Architecture" broke in two); a flex tile never goes below it, so when
@@ -500,7 +524,7 @@ export default function AboutSection() {
         <div className="fx-rise nb-card-lg p-4 xs:p-6 sm:p-8 lg:p-10 space-y-8 lg:mt-10">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-b-3 border-ink pb-6">
             <div className="space-y-2">
-              <div className="flex items-center gap-2 text-xs font-mono font-extrabold text-pop-blue tracking-[0.12em] uppercase">
+              <div className="flex items-center gap-2 text-xs font-mono font-extrabold text-ink tracking-[0.12em] uppercase">
                 <Code2 className="w-4 h-4" strokeWidth={2.75} />
                 <span>TECHNICAL TOOLING MATRIX</span>
               </div>

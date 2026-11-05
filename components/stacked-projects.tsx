@@ -3,6 +3,7 @@
 import React from 'react';
 import { ProjectIndex, type ProjectIndexItem } from './project-index';
 import { OrganiserPlate } from './organiser-plate';
+import { LabelFirst, Marked, Tagline, pointLabel } from './label-first';
 import type { OrganiserId } from '@/lib/organisers';
 import { ScrollUnfold } from './fx/scroll-unfold';
 import { TextRoll } from './fx/text-roll';
@@ -45,6 +46,10 @@ interface ProjectData {
   subtitle: string;
   description: string;
   architecturePoints: string[];
+  /** R92: the description's labels, each copied word for word from it (components/label-first.tsx) */
+  descriptionLabels: string[];
+  /** R92: a highlight's label when it has no "Label:" prefix of its own (a phrase copied from that highlight) */
+  pointLabels?: (string | undefined)[];
   metrics: { label: string; value: string }[];
   tags: string[];
   deckUrl?: string;
@@ -77,6 +82,14 @@ export const projects: ProjectData[] = [
       'Layer 2 Governance Node: Dynamic ICP Thresholding & Human-in-the-loop Exception Workbench',
       'Compute-Optimized Logic Gates executing hard halts and raw PostgreSQL SQL Write-Backs',
     ],
+    descriptionLabels: [
+      'Bi-Modal AI Agent Architecture',
+      'B2B buying groups',
+      'PDPA/GDPR compliance',
+      'deterministic halt states',
+      'zero pipeline pollution',
+    ],
+    pointLabels: [undefined, undefined, 'Compute-Optimized Logic Gates'],
     metrics: [
       { label: 'Compliance', value: '100% PDPA/GDPR' },
       { label: 'Agent Operators', value: '5 Autonomous Nodes' },
@@ -104,6 +117,12 @@ export const projects: ProjectData[] = [
       'Sui Move Smart Contract: Non-custodial programmable escrow with atomic PTB funding and milestone-based releases.',
       'Gonka Router AI Verification: Multi-model AI validation (consistency, credibility, completeness) of delivery evidence.',
       'Dispute Resolution: AI generates cited, non-binding mediation proposals grounded in legal and commercial sources.',
+    ],
+    descriptionLabels: [
+      'B2B Transaction Truth Engine',
+      'built on Sui',
+      'non-custodial smart contract',
+      'Gonka-powered AI validates evidence',
     ],
     metrics: [
       { label: 'Sui Track', value: '3rd Place' },
@@ -169,6 +188,13 @@ export const projects: ProjectData[] = [
       // a word joiner after the dash: the range never breaks over two lines (tests/r65)
       `Besut pilot of 100 participants, RM 266,200, scale gate ≥ 43 of 100 placed; break-even placement 30–${String.fromCodePoint(0x2060)}35%`,
     ],
+    descriptionLabels: [
+      'A planning tool for state and district planners',
+      'a plan a district can budget',
+      'Team DATAVENGERS (IPTA-093)',
+      'DOSM Datathon 2026',
+    ],
+    pointLabels: [undefined, undefined, 'East-coast fish landings retention gap', 'Besut pilot of 100 participants'],
     metrics: [
       { label: 'Worker-Months Exposed', value: '52,655' },
       { label: 'Cost per Worker-Month', value: 'RM 887' },
@@ -362,6 +388,18 @@ export const projects: ProjectData[] = [
       '12-pass vision pipeline enforcing unbypassable physical anchor guardrails (e.g., Rooftop = Severity 9)',
       'Decentralised MCP Swarm architecture with real-time Firebase syncing and hardcoded offline-first fallbacks',
     ],
+    descriptionLabels: [
+      'edge-ready civic intelligence platform',
+      'every civilian acts as a sensor node',
+      'Gemini 2.5 Flash 12-pass image triage',
+      '7 standardised MCP tools',
+      'zero human intervention',
+    ],
+    pointLabels: [
+      'Autonomous Command Agent (Gemini 2.0 Flash)',
+      '12-pass vision pipeline',
+      'Decentralised MCP Swarm architecture',
+    ],
     metrics: [
       { label: 'Agent Tool Calls', value: '7 MCP Tools' },
       { label: 'Vision Pipeline', value: '12-Pass (Sub-35s)' },
@@ -387,6 +425,12 @@ export const projects: ProjectData[] = [
       'Layer 1 Heuristic Engine: Dynamic Z-Score mathematical baseline evaluating engagement density and match conversion anomalies.',
       'Layer 2 ML Vote: 6 independently-tuned models (GMM, SVM, NN, etc.) fused via a dynamic probability threshold.',
       'Explainable AI (SHAP): Fully auditable decision trees breaking down the exact marginal contribution of each behavioral signal.',
+    ],
+    descriptionLabels: [
+      'exposes romance scammers',
+      '51 behavioral heuristics',
+      '50,000 raw dating profiles',
+      '6-model ensemble engine',
     ],
     metrics: [
       { label: 'Features', value: '51 Signals' },
@@ -440,6 +484,12 @@ export const projects: ProjectData[] = [
       'Priority Engine: A zero-dependency Min-Heap orchestrates O(log n) physical parking slot assignments.',
       "Algorithmic Pathing: Graph adjacency lists compute optimal node-to-node pathways via Dijkstra's Algorithm.",
     ],
+    descriptionLabels: [
+      'Spring Boot backend architecture',
+      'seven manually implemented data structures',
+      "Dijkstra's Shortest Path routing",
+      'optimal Big O time complexities',
+    ],
     metrics: [
       { label: 'Algorithms', value: '7 Custom Structures' },
       { label: 'Routing', value: 'Dijkstra (O((V+E)logV))' },
@@ -471,6 +521,17 @@ export const projects: ProjectData[] = [
       'Low-power ESP32 firmware communicating via lightweight MQTT brokers',
       'Next.js 15 telemetry dashboard streaming real-time kilowatt loads',
       'Automated load-shedding algorithms cutting idle energy consumption by -60.8%',
+    ],
+    descriptionLabels: [
+      'IoT-mediated building automation system',
+      'university lecture halls',
+      'dual-sensor fusion (PIR + NFC)',
+      'live carbon emission telemetry dashboards',
+    ],
+    pointLabels: [
+      'Low-power ESP32 firmware',
+      'Next.js 15 telemetry dashboard',
+      'cutting idle energy consumption by -60.8%',
     ],
     metrics: [
       { label: 'Energy Reduction', value: '38.2% Idle Saved' },
@@ -805,37 +866,50 @@ function ProjectCard({ project, index }: { project: ProjectData; index: number }
                         strokeWidth={3}
                       />
                     </h3>
-                    <p className="text-sm sm:text-base font-mono text-pop-blue font-bold tracking-[0.01em]">
-                      {project.subtitle}
-                    </p>
+                    {/* R92: the tagline is an ink label on the project's own signal stripe (blue = controls only) */}
+                    <Tagline signal={project.signal}>{project.subtitle}</Tagline>
                     {/* R88 P4: the organiser has ONE slot on every card, a full-width strip under the title block */}
                     <div className="!mt-4">
                       <OrganiserPlate id={project.organiser} />
                     </div>
                   </div>
 
-                  {/* Narrative Description */}
-                  <p
-                    className="text-ink-soft text-base leading-relaxed font-sans font-medium fx-layer"
+                  {/* Narrative Description (R92: its labels first, the paragraph word for word behind READ MORE) */}
+                  <LabelFirst
+                    labels={project.descriptionLabels}
+                    source={project.description}
+                    className="fx-layer"
                     data-bp-label={`L3 · ${BP_LAYERS[2]}`}
                   >
-                    {project.description}
-                  </p>
+                    <p className="text-ink-soft text-base leading-relaxed font-sans font-medium">
+                      <Marked text={project.description} keys={project.descriptionLabels} />
+                    </p>
+                  </LabelFirst>
 
-                  {/* Key Architectural Highlights */}
+                  {/* Key Architectural Highlights (R92: one numbered label per point, the points in full behind READ MORE) */}
                   <div className="space-y-3 nb-inset p-4 sm:p-5 fx-layer" data-bp-label={`L4 · ${BP_LAYERS[3]}`}>
                     <span className="text-xs font-mono font-extrabold text-ink uppercase tracking-[0.12em] block mb-1">
                       KEY ARCHITECTURAL HIGHLIGHTS:
                     </span>
-                    {project.architecturePoints.map((point, pIdx) => (
-                      <div
-                        key={pIdx}
-                        className="flex items-start gap-2.5 text-sm font-sans font-medium text-ink-soft leading-snug"
-                      >
-                        <CheckCircle2 className="w-5 h-5 text-ink fill-pop-mint shrink-0" strokeWidth={2.25} />
-                        <span>{point}</span>
+                    <LabelFirst
+                      numbered
+                      labels={project.architecturePoints.map((pt, i) => pointLabel(pt, project.pointLabels?.[i]))}
+                      source={project.architecturePoints.join('\n')}
+                    >
+                      <div className="space-y-3">
+                        {project.architecturePoints.map((point, pIdx) => (
+                          <div
+                            key={pIdx}
+                            className="flex items-start gap-2.5 text-sm font-sans font-medium text-ink-soft leading-snug"
+                          >
+                            <CheckCircle2 className="w-5 h-5 text-ink fill-pop-mint shrink-0" strokeWidth={2.25} />
+                            <span>
+                              <Marked text={point} keys={[pointLabel(point, project.pointLabels?.[pIdx])]} />
+                            </span>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    </LabelFirst>
                   </div>
 
                   {/* Live Benchmarks & Metric Chips (bento) */}

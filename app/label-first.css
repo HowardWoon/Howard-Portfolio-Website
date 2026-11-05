@@ -1,0 +1,176 @@
+/* R92 label-first (components/label-first.tsx, docs/R92-LABEL-FIRST.md). Site tokens only: paper / ink, 2 - 3 px ink
+   borders, hard offset shadows, mono tracked labels; a colour only where it carries its SIGNAL meaning. */
+
+/* ---- taglines: an ink label on the item's own signal stripe (hard stops, like .nb-marker) ---- */
+.lf-tag {
+  font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 1.0625rem;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+  color: #0a0a0a;
+}
+@media (min-width: 640px) {
+  .lf-tag {
+    font-size: 1.25rem;
+  }
+}
+.lf-tag > span {
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  padding-inline: 0.2em;
+}
+.lf-tag[data-mark='stripe'] > span {
+  background: linear-gradient(transparent 50%, var(--lf-mark) 50%, var(--lf-mark) 94%, transparent 94%);
+}
+.lf-tag[data-mark='rule'] > span {
+  padding-inline: 0;
+  text-decoration: underline;
+  text-decoration-color: #0a0a0a;
+  text-decoration-thickness: 4px;
+  text-underline-offset: 5px;
+  text-decoration-skip-ink: none;
+}
+
+/* ---- labels ---- */
+.lf {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-width: 0;
+}
+.lf-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.55rem;
+  max-width: 100%;
+}
+.lf-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+.lf-label {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+  min-width: 0;
+  max-width: 100%;
+}
+.lf-idx {
+  display: grid;
+  place-items: center;
+  flex: none;
+  min-width: 2.1rem;
+  border: 2px solid #0a0a0a;
+  border-radius: 0.375rem;
+  background: #0a0a0a;
+  color: #fff;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+.lf-chip {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  border: 2px solid #0a0a0a;
+  border-radius: 0.375rem;
+  background: #fff;
+  box-shadow: 2px 2px 0 0 #0a0a0a;
+  padding: 0.3rem 0.6rem;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1.35;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #0a0a0a;
+}
+/* a leading figure: SIGNAL rule 7, a headline figure is ink with white text */
+.lf-fig {
+  flex: none;
+  white-space: nowrap;
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  margin: -0.3rem 0.5rem -0.3rem -0.6rem;
+  padding: 0 0.5rem;
+  background: #0a0a0a;
+  color: #fff;
+  font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+.lf-rows .lf-chip {
+  flex: 0 1 auto;
+}
+
+/* ---- READ MORE key: a control (blue = interactive), never a category ---- */
+.lf-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  border: 2px solid #0a0a0a;
+  border-radius: 9999px;
+  background: #fff;
+  box-shadow: 2px 2px 0 0 #0a0a0a;
+  padding: 0.3rem 0.95rem 0.3rem 0.35rem;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: #0a0a0a;
+  cursor: pointer;
+}
+.lf-more-key {
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border: 2px solid #0a0a0a;
+  border-radius: 9999px;
+  background: var(--pop-blue);
+  color: #fff;
+  transition: rotate 0.15s steps(2, end);
+}
+.lf[data-lf-open] .lf-more-key {
+  rotate: 180deg;
+}
+.lf-more:focus-visible {
+  outline: 3px solid var(--pop-blue);
+  outline-offset: 3px;
+}
+
+/* ---- the full text, word for word (open) ---- */
+.lf-full {
+  width: 100%;
+  min-width: 0;
+}
+.lf-key {
+  color: #0a0a0a;
+  font-weight: 800;
+}
+
+@media print {
+  .lf-chips,
+  .lf-rows,
+  .lf-more {
+    display: none !important;
+  }
+  .lf-full.sr-only {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+  }
+}

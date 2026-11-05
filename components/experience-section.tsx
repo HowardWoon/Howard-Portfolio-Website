@@ -15,6 +15,7 @@ import { InstitutionSeal } from './institution-seal';
 import { LocationMap } from './location-map';
 import { OrgLogo, type OrgLogoKey } from './org-logo';
 import { PinKey } from './press/pin-key';
+import { LabelFirst, Marked, Tagline, pointLabel } from './label-first';
 import {
   Building2,
   Landmark,
@@ -47,6 +48,8 @@ interface ExperienceItem {
   signal: Signal;
   headline: string;
   bullets: string[];
+  /** R92: a bullet's label when it has no "Label:" prefix of its own (a phrase copied from that bullet) */
+  bulletLabels?: (string | undefined)[];
   metrics: { label: string; value: string }[];
   tags: string[];
   galleryPhotos?: { src: string; alt: string; rotation: number; w: number; h: number }[];
@@ -80,6 +83,11 @@ export const experiences: ExperienceItem[] = [
       'Executed full-cycle Accounts Payable (AP) and Accounts Receivable (AR) operations within the SAP ERP environment, managing high-volume invoice clearing and ledger reconciliations.',
       'Spearheaded vendor and customer master data migrations in SAP to ensure strict compliance with federal E-Invoice regulatory standards and data accuracy protocols.',
       'Compiled and audited statutory financial records, including LMW (Licensed Manufacturing Warehouse) listings and customer tax exemptions to support rigorous SST submissions.',
+    ],
+    bulletLabels: [
+      'Accounts Payable (AP) and Accounts Receivable (AR)',
+      'vendor and customer master data migrations',
+      'statutory financial records',
     ],
     metrics: [
       { label: 'Enterprise Stack', value: 'SAP ERP' },
@@ -373,7 +381,7 @@ function PekomTreasurerDashboard() {
       desc: (
         <div className="space-y-6 pt-2">
           <div className="flex flex-col gap-1">
-            <div className="text-pop-blue font-mono text-xs font-extrabold uppercase tracking-[0.1em]">Duration</div>
+            <div className="text-ink font-mono text-xs font-extrabold uppercase tracking-[0.1em]">Duration</div>
             <div className="text-ink-soft font-mono text-xs font-semibold">February – June 2026</div>
           </div>
 
@@ -448,7 +456,7 @@ function PekomTreasurerDashboard() {
       desc: (
         <div className="space-y-6 pt-2">
           <div className="flex flex-col gap-1">
-            <div className="text-pop-blue font-mono text-xs font-extrabold uppercase tracking-[0.1em]">Duration</div>
+            <div className="text-ink font-mono text-xs font-extrabold uppercase tracking-[0.1em]">Duration</div>
             <div className="text-ink-soft font-mono text-xs font-semibold">2025</div>
           </div>
 
@@ -513,7 +521,7 @@ function PekomTreasurerDashboard() {
       desc: (
         <div className="space-y-6 pt-2">
           <div className="flex flex-col gap-1">
-            <div className="text-pop-blue font-mono text-xs font-extrabold uppercase tracking-[0.1em]">Duration</div>
+            <div className="text-ink font-mono text-xs font-extrabold uppercase tracking-[0.1em]">Duration</div>
             <div className="text-ink-soft font-mono text-xs font-semibold">2025</div>
           </div>
 
@@ -559,7 +567,7 @@ function PekomTreasurerDashboard() {
       desc: (
         <div className="space-y-6 pt-2">
           <div className="flex flex-col gap-1">
-            <div className="text-pop-blue font-mono text-xs font-extrabold uppercase tracking-[0.1em]">Duration</div>
+            <div className="text-ink font-mono text-xs font-extrabold uppercase tracking-[0.1em]">Duration</div>
             <div className="text-ink-soft font-mono text-xs font-semibold">September 2025 – June 2026</div>
           </div>
 
@@ -930,16 +938,19 @@ export default function ExperienceSection() {
                               {item.role}
                             </h3>
                             {/* Long narrative headlines are set in sentence-case sans (uppercase mono paragraphs were unreadable) */}
-                            <p
-                              className={
-                                longHeadline
-                                  ? 'text-base font-sans font-semibold text-ink-soft leading-relaxed border-l-4 border-pop-blue pl-4'
-                                  : 'text-sm font-mono font-extrabold text-pop-blue uppercase tracking-[0.06em]'
-                              }
-                            >
-                              {'// '}
-                              {item.headline}
-                            </p>
+                            {/* R92: blue is for controls only - the short headline is an ink label on the role's
+                                signal stripe, the long one keeps its rule in ink */}
+                            {longHeadline ? (
+                              <p className="text-base font-sans font-semibold text-ink-soft leading-relaxed border-l-4 border-ink pl-4">
+                                {'// '}
+                                {item.headline}
+                              </p>
+                            ) : (
+                              <Tagline signal={item.signal}>
+                                {'// '}
+                                {item.headline}
+                              </Tagline>
+                            )}
                           </div>
                           {/* R48 organisation plate (owner: "you must have a standard when designing this whole section,
                               make sure all card must have the same function"). Every card carries the same three
@@ -980,21 +991,31 @@ export default function ExperienceSection() {
                       <div className={g ? 'grid gap-8 lg:grid-cols-12 lg:items-start' : 'contents'}>
                         <div className={g ? 'lg:col-span-7 min-w-0' : 'contents'}>
                           {/* Description Bullets */}
-                          <div className="space-y-3.5 mb-8">
-                            {item.bullets.map((bullet, bIdx) => (
-                              <div
-                                key={bIdx}
-                                className="flex items-start gap-3 text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium max-w-4xl"
-                              >
+                          {/* R92: one numbered label per bullet, the bullets word for word behind READ MORE */}
+                          <LabelFirst
+                            numbered
+                            labels={item.bullets.map((b, i) => pointLabel(b, item.bulletLabels?.[i]))}
+                            source={item.bullets.join('\n')}
+                            className="mb-8"
+                          >
+                            <div className="space-y-3.5">
+                              {item.bullets.map((bullet, bIdx) => (
                                 <div
-                                  className={`w-6 h-6 rounded-full grid place-items-center shrink-0 mt-0.5 border-2 border-ink ${a.fill}`}
+                                  key={bIdx}
+                                  className="flex items-start gap-3 text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium max-w-4xl"
                                 >
-                                  <CheckCircle2 className={`w-3.5 h-3.5 ${onFill}`} strokeWidth={3} />
+                                  <div
+                                    className={`w-6 h-6 rounded-full grid place-items-center shrink-0 mt-0.5 border-2 border-ink ${a.fill}`}
+                                  >
+                                    <CheckCircle2 className={`w-3.5 h-3.5 ${onFill}`} strokeWidth={3} />
+                                  </div>
+                                  <p>
+                                    <Marked text={bullet} keys={[pointLabel(bullet, item.bulletLabels?.[bIdx])]} />
+                                  </p>
                                 </div>
-                                <p>{bullet}</p>
-                              </div>
-                            ))}
-                          </div>
+                              ))}
+                            </div>
+                          </LabelFirst>
 
                           {/* Metrics & Impact Grid (beside a gallery the column is too narrow for three: they stack) */}
                           {/* R65 zoom: a wrapping row (see about-section.tsx): a tile is never narrower than its longest word */}

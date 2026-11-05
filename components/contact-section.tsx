@@ -12,6 +12,7 @@ import { SloganTape } from '@/components/marquees';
 import { ShapeBurst } from '@/components/fx/shape-burst';
 import { RoleProof } from '@/components/role-proof';
 import { openResume } from '@/lib/resume';
+import { Tagline } from '@/components/label-first';
 import { OsWindow, WindowDesk } from '@/components/os-window';
 import { PillPit, type PitBadge } from '@/components/pill-pit';
 import { SIGNAL, type Signal } from '@/lib/signal';
@@ -306,9 +307,8 @@ export default function ContactSection() {
                   <h3 className="font-display text-[clamp(1.5rem,7.5vw,1.875rem)] font-extrabold uppercase text-ink tracking-[-0.02em] leading-none">
                     Howard Woon Hao Zhe
                   </h3>
-                  <p className="text-sm font-mono text-pop-blue font-bold">
-                    Software Engineering @ Universiti Malaya (4.00 CGPA)
-                  </p>
+                  {/* R92: an ink label (blue = controls only; Contact shows no signal legend, so a rule, not a stripe) */}
+                  <Tagline>Software Engineering @ Universiti Malaya (4.00 CGPA)</Tagline>
                   <p className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium pt-1">
                     Open to full-time roles, high-impact backend engineering, distributed systems architecture, and AI
                     agent research collaborations.
@@ -447,7 +447,7 @@ export default function ContactSection() {
 
               {/* Quick Intent Pre-Fill Chips */}
               <div className="space-y-2.5">
-                <span className="text-xs font-mono font-bold text-pop-blue">{'// Select a conversation intent:'}</span>
+                <span className="text-xs font-mono font-bold text-ink">{'// Select a conversation intent:'}</span>
                 <div className="grid grid-cols-1 gap-2 min-[480px]:grid-cols-2">
                   {quickIntents.map((intent) => (
                     <button
