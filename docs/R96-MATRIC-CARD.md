@@ -35,3 +35,14 @@ must be similar and perfect".
 
 Guard: `tests/r96.spec.ts` (the card's lines present, the left-out marks absent, nothing under the stamp, the card on
 screen under the HUD, the parked label under the HUD).
+
+## 4. CI reds fixed in the same round (on 7cc841a)
+
+- `tests/smoke.spec.ts` contact form (red since CI #137): typed before the code-split Contact section hydrated; it now
+  waits for React to own the fields.
+- `tests/r95.spec.ts` lite switch: Lenis's glide pulled the jump back to the walk on a slow runner; it waits for a still
+  page.
+- `tests/r17.spec.ts` P0-01 (red since CI #137): 41 layouts per phone fling with R88's skip off, 51 - 56 with it on
+  (7 blocks, each laid out on arrival and again when skipped behind the fling). The guard allows two per skipped block
+  on top of the 45 for scroll effects. **Still open:** the count varies between identical runs (one local run: 79),
+  so the next step is to find what else lays out in such a run.

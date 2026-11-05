@@ -61,8 +61,17 @@ test('lite switched on while the walk is on screen: it stays pinned, the page do
   expect(after.h, 'the page keeps its height under the reader').toBe(before.h);
   expect(Math.abs(after.y - before.y - 120)).toBeLessThan(200);
   // once the walk is off screen it becomes the still, and the still has its close-up frame
+  // Lenis is still gliding from the wheel above on a slow runner and would pull a jump straight back to the walk (the
+  // CI flake): wait until the page stands still, then leave
+  await expect
+    .poll(async () => {
+      const a = await page.evaluate(() => window.scrollY);
+      await page.waitForTimeout(200);
+      return (await page.evaluate(() => window.scrollY)) - a;
+    })
+    .toBe(0);
   await page.evaluate((y) => window.scrollTo(0, y), top - 4 * 900);
-  await expect(page.locator('.dw-track[data-static]')).toHaveCount(1, { timeout: 5000 });
+  await expect(page.locator('.dw-track[data-static]')).toHaveCount(1, { timeout: 15_000 });
   await page.locator('.dw-section').scrollIntoViewIfNeeded();
   await expect.poll(() => frameNow(page), { timeout: 10_000 }).toBe(58);
 });

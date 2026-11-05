@@ -1,3 +1,4 @@
+import { reactLive } from './react-live';
 import { test, expect, devices } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 
@@ -140,6 +141,11 @@ test('contact form sends fillMs and passes validation', async ({ page }) => {
   await page.waitForLoadState('networkidle');
   await page.getByRole('button', { name: /skip intro/i }).click();
   await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 5000 });
+  // Contact is a code-split section: on a slow CI runner it hydrated after the fields were typed into, React reset them
+  // and the empty form never sent (red since CI #137). Type only once React owns the fields.
+  const name = page.locator('#contact-name');
+  await name.scrollIntoViewIfNeeded();
+  await expect.poll(() => reactLive(name), { timeout: 30_000 }).toBe(true);
   await page.fill('#contact-name', 'Test');
   await page.fill('#contact-email', 't@example.com');
   await page.fill('#contact-message', 'Hello');
