@@ -5,22 +5,17 @@ import { test, expect, devices } from '@playwright/test';
 
 const { defaultBrowserType, ...phone } = devices['Pixel 7'];
 
-test.describe('first visit (boot gate up)', () => {
-  test('a ?photo= deep link waits for the gate and leaves the page scrollable after closing (P0-05)', async ({
-    page,
-  }) => {
-    await page.goto('/?photo=zerolag:2', { waitUntil: 'load' });
-    await page.waitForTimeout(1200);
-    await expect(page.locator('.boot-overlay')).toBeVisible();
-    await expect(page.getByRole('dialog')).toHaveCount(0); // nothing opens behind the gate
-    await page.locator('[data-boot-action="skip"]').click();
-    const dialog = page.getByRole('dialog');
-    await expect(dialog).toBeVisible({ timeout: 6000 });
-    await expect(dialog).toHaveAttribute('aria-label', /2 of 11/);
-    await page.keyboard.press('Escape');
-    await expect(dialog).toHaveCount(0);
-    await expect.poll(() => page.evaluate(() => document.body.style.overflow)).toBe('');
-  });
+// R98: the boot gate is gone, so a ?photo= deep link opens the photo straight away
+test('a ?photo= deep link opens the photo at once and leaves the page scrollable after closing (P0-05)', async ({
+  page,
+}) => {
+  await page.goto('/?photo=zerolag:2', { waitUntil: 'load' });
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible({ timeout: 10_000 });
+  await expect(dialog).toHaveAttribute('aria-label', /2 of 11/);
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+  await expect.poll(() => page.evaluate(() => document.body.style.overflow)).toBe('');
 });
 
 test.describe('phone', () => {
@@ -166,7 +161,7 @@ test.describe('phone', () => {
     expect(await shown(), 'the Build Sheet waits for its own visit').toEqual(zero);
     // they still play: on the next visit, once the page rests on them
     await sheet.first().evaluate((e) => e.scrollIntoView({ block: 'center' }));
-    await expect.poll(shown, { timeout: 8000 }).toEqual(['4.00', '07', '04', '03']);
+    await expect.poll(shown, { timeout: 8000 }).toEqual(['4.00', '07', '05', '03']);
     const kicker = page.locator('#about .nb-kicker');
     await kicker.evaluate((e) => e.scrollIntoView({ block: 'center' }));
     await expect

@@ -178,7 +178,7 @@ export const experiences: ExperienceItem[] = [
     role: 'Assistant Finance Executive & Intern',
     organization: 'KRAIBURG TPE Technology (M) Sdn Bhd',
     location: 'Kuala Lumpur, Malaysia',
-    period: 'Nov 2025 – Present',
+    period: 'Mar 2024 – Jun 2024 · Jun 2025 – Sep 2025',
     category: 'Corporate Experience',
     description: [
       'Architected automated reconciliation scripts for high-volume enterprise financial ledgers, eliminating manual data entry bottlenecks.',

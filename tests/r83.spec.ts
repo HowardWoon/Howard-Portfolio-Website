@@ -23,7 +23,7 @@ test('About Build Sheet: counted from the page, flips up from zero once it is on
   await expect.poll(shown).toEqual(['0.00', '00', '00', '00']);
   await sheet.scrollIntoViewIfNeeded();
   // ... and flips to the values once the page rests on it
-  await expect.poll(shown, { timeout: 8000 }).toEqual(['4.00', '07', '04', '03']);
+  await expect.poll(shown, { timeout: 8000 }).toEqual(['4.00', '07', '05', '03']);
   await expect(sheet).toContainText('4.00');
   // the tiles link to their proof
   expect(await sheet.locator('a').evaluateAll((as) => as.map((a) => a.getAttribute('href')))).toEqual([
@@ -55,7 +55,7 @@ test('About Build Sheet stands still with reduced motion', async ({ browser }) =
   const boards = page.getByRole('list', { name: 'Build sheet' }).locator('[data-flap]');
   await expect
     .poll(() => boards.evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.text)))
-    .toEqual(['4.00', '07', '04', '03']);
+    .toEqual(['4.00', '07', '05', '03']);
   await context.close();
 });
 
@@ -165,7 +165,7 @@ test('Doom Walk: the gate rolls up and back, the frame follows the scroll, the r
   expect(midFed).toBeLessThan(9);
   await walkAt(page, 1);
   await expect.poll(() => frameNow(page)).toBe(58);
-  expect(await fedNow(page)).toBe(12);
+  expect(await fedNow(page)).toBe(LEDGER.length);
   // scroll back up: he walks back, the paper is pulled back in, the gate comes down again
   await walkAt(page, 0.3);
   await expect.poll(() => frameNow(page)).toBeLessThan(mid);
@@ -362,8 +362,8 @@ test.describe('phone Doom Walk', () => {
     }, span);
     const layouts = (await metric('LayoutCount')) - before;
     const feeds = (await page.evaluate(() => (window as DoomWindow).__doomFeeds ?? 0)) - feeds0;
-    expect(await fedNow(page)).toBe(12);
-    expect(feeds).toBeLessThanOrEqual(12);
+    expect(await fedNow(page)).toBe(LEDGER.length);
+    expect(feeds).toBeLessThanOrEqual(LEDGER.length);
     expect(layouts).toBeLessThan(BUDGET);
   });
 });

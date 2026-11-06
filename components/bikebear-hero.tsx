@@ -11,6 +11,7 @@ import { TiltCard } from './tilt-card';
 import { toLocal } from '@/lib/to-local';
 import { SpiderReveal } from './spider-reveal';
 import { FX } from '@/lib/fx';
+import '@/app/hero-forme.css';
 
 /**
  * Hero headline with the torch (R86).
@@ -107,20 +108,36 @@ function MagnifiedHeadline() {
 
   return (
     <div ref={containerRef} data-hover="false" className="group/headline relative space-y-2">
-      {/* Base Normal Text */}
-      {/* dims while the torch is on it (a flat 35 %, instant: no fade that reads as haze) */}
-      <h2
-        className={`${headlineClass} text-ink fx-letterpress fx-aberration group-data-[hover=true]/headline:opacity-35`}
-      >
-        ENGINEERING <br />
-        {FX.headlineStamp ? (
-          // FX-05 stamp, in CSS since R14 (.fx-stamp-in): the words are in the server HTML from the first paint
-          <span className={`${chipClass} fx-stamp-in bg-pop-yellow border-ink shadow-brutal text-ink`}>SYSTEMS TO</span>
-        ) : (
-          <span className={`${chipClass} bg-pop-yellow border-ink shadow-brutal text-ink`}>SYSTEMS TO</span>
-        )}{' '}
-        <br />
-        STAND OUT IN <br />A NOISY WORLD.
+      {/* R98 forme (app/hero-forme.css): cast block letters - paper faces, an ink rim and a solid ink extrusion that
+          falls away from the pointer; on load each line drops into its slot as a slug, then the type rises off the
+          paper. Replaces the FX-29 blue lamp shadow and the FX-30 RGB fringes on this headline. Dims while the torch
+          is on it (a flat 35 %, instant: no fade that reads as haze). */}
+      <h2 className={`${headlineClass} hx-forme group-data-[hover=true]/headline:opacity-35`}>
+        <span className="hx-line">
+          <span className="hx-slug" style={{ '--i': 0 } as React.CSSProperties}>
+            ENGINEERING
+          </span>
+        </span>{' '}
+        <span className="hx-line">
+          <span className="hx-slug" style={{ '--i': 1 } as React.CSSProperties}>
+            {/* FX-05 stamp, in CSS since R14 (.fx-stamp-in): the words are in the server HTML from the first paint */}
+            <span
+              className={`${chipClass} hx-chip ${FX.headlineStamp ? 'fx-stamp-in ' : ''}bg-pop-yellow border-ink shadow-brutal`}
+            >
+              SYSTEMS TO
+            </span>
+          </span>
+        </span>{' '}
+        <span className="hx-line">
+          <span className="hx-slug" style={{ '--i': 2 } as React.CSSProperties}>
+            STAND OUT IN
+          </span>
+        </span>{' '}
+        <span className="hx-line">
+          <span className="hx-slug" style={{ '--i': 3 } as React.CSSProperties}>
+            A NOISY WORLD.
+          </span>
+        </span>
       </h2>
 
       {/* The torch beam (decorative): a hard round cut of the paper, no rim. Inside it the same headline, magnified
@@ -183,7 +200,6 @@ export default function BikebearHero() {
     mq.addEventListener('change', set);
     return () => mq.removeEventListener('change', set);
   }, [gate]);
-  const opacity = useTransform(() => 1 - gate.get() * Math.min(1, scrollYProgress.get() / 0.8));
   const scale = useTransform(() => 1 - gate.get() * 0.05 * Math.min(1, scrollYProgress.get() / 0.8));
   const yTranslate = useTransform(() => gate.get() * 50 * Math.min(1, scrollYProgress.get() / 0.8));
 
@@ -191,7 +207,8 @@ export default function BikebearHero() {
     <m.section
       id="hero"
       ref={containerRef}
-      style={{ opacity, scale, y: yTranslate }}
+      // R98: the hero sinks as the page scrolls on; it no longer fades (R87: motion is a transition, not a fade)
+      style={{ scale, y: yTranslate }}
       className="hero-fit relative min-h-screen-safe bg-paper text-ink flex flex-col justify-between overflow-hidden"
     >
       {/* Main Hero Body */}
@@ -199,22 +216,22 @@ export default function BikebearHero() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center w-full">
           {/* Left Column: Vision & Narrative (7 cols) */}
           <div className="lg:col-span-7 flex flex-col items-start space-y-7 lg:space-y-[clamp(0.9rem,3.2svh,1.75rem)] relative z-30 pointer-events-auto">
-            {/* Brand Pill Badge. FX-61: the hero entrance is CSS (.fx-hero-in, keyed off html.hw-booted), so the
+            {/* Brand Pill Badge. FX-61 / R98: the hero entrance is CSS (a stepped print-head wipe, .hx-wipe), so the
                 server HTML is visible and the entrance starts at first paint instead of after hydration. */}
-            <div className="nb-kicker fx-hero-in" style={{ '--d': 1 } as React.CSSProperties}>
+            <div className="nb-kicker hx-wipe" style={{ '--d': 1 } as React.CSSProperties}>
               <Sparkles className="w-4 h-4" strokeWidth={2.5} />
               <span>ABOUT // VISION & SYSTEMS ARCHITECTURE</span>
             </div>
 
             {/* Kinetic Typography Headline */}
-            <div className="relative space-y-2 fx-hero-in" style={{ '--d': 2 } as React.CSSProperties}>
+            <div className="relative space-y-2">
               <MagnifiedHeadline />
             </div>
 
             {/* Sub-narrative Bio Copy */}
             <p
               style={{ '--d': 3 } as React.CSSProperties}
-              className="fx-hero-in text-ink-soft text-lg sm:text-xl lg:text-[clamp(1.0625rem,2.6svh,1.25rem)] max-w-xl leading-relaxed font-sans font-medium [overflow-wrap:anywhere]"
+              className="hx-wipe text-ink-soft text-lg sm:text-xl lg:text-[clamp(1.0625rem,2.6svh,1.25rem)] max-w-xl leading-relaxed font-sans font-medium [overflow-wrap:anywhere]"
             >
               Architecting robust,{' '}
               <span className="nb-marker font-bold text-ink">low-latency distributed backends</span> and{' '}
@@ -225,7 +242,7 @@ export default function BikebearHero() {
             {/* Call to Action Buttons */}
             <div
               style={{ '--d': 4 } as React.CSSProperties}
-              className="fx-hero-in flex flex-wrap items-center gap-3 xs:gap-4 pt-2 w-full"
+              className="hx-wipe flex flex-wrap items-center gap-3 xs:gap-4 pt-2 w-full"
             >
               <Magnetic strength={0.3} stretch>
                 <a href="#projects" className="group nb-btn nb-btn-ink px-7 py-4 fx-specular nb-press">
@@ -252,7 +269,7 @@ export default function BikebearHero() {
           <div className="lg:col-span-5 flex justify-center lg:justify-end w-full relative">
             <div
               style={{ '--d': 2 } as React.CSSProperties}
-              className="fx-hero-in fx-hero-pop relative group flex flex-col items-center lg:items-end z-40 pointer-events-auto w-full sm:w-auto px-1 sm:px-0"
+              className="hx-wipe-down relative group flex flex-col items-center lg:items-end z-40 pointer-events-auto w-full sm:w-auto px-1 sm:px-0"
             >
               {/* News Ticker (Above Photo) */}
               <div

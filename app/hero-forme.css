@@ -1,0 +1,122 @@
+/* ---- R98 hero forme (components/bikebear-hero.tsx, docs/R98-HERO-FORME.md). Owner, 6 Nov 2026: "improve the hero
+   section, must be astonishing, cool effect ... avoid all ai slop, must be neo brutalism style". The headline is cast
+   type locked in a forme: paper-faced block letters with an ink rim and a SOLID ink extrusion of 1 px slices that falls
+   away from the pointer like light raking across a press bed (mouse; touch and Calm keep a fixed angle). On load the
+   four lines drop into their slots as slugs in hard steps, then the type rises off the paper in six steps, then
+   SYSTEMS TO is stamped (FX-05). The kicker, the bio, the keys and the portrait arrive as a stepped print-head wipe.
+   No fade, no blur, no glow: transform / clip-path / one registered number. */
+
+@property --hx-depth {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
+
+.hx-forme {
+  /* --px / --py: -1 .. 1 across the window, written by components/fx/pointer-field.tsx (mouse only) */
+  --hx-max: 9px;
+  /* the type always stands off the page (5 - 13 px; 7.5 px with the pointer in the middle): the pointer turns and lengthens the extrusion, it
+     never flattens it into plain outlines */
+  --hx-dx: calc(clamp(0.55, 0.85 - var(--px, 0) * 0.6, 1.45) * var(--hx-max) * var(--hx-depth));
+  --hx-dy: calc(clamp(0.55, 0.85 - var(--py, 0) * 0.6, 1.45) * var(--hx-max) * var(--hx-depth));
+  /* the letters' contrast is their 2 px ink rim; `color` stays ink for assistive tech and contrast checks, the paper
+     face is the fill */
+  color: var(--ink);
+  -webkit-text-fill-color: var(--paper, #ffffff);
+  -webkit-text-stroke: 2px var(--ink);
+  paint-order: stroke fill;
+  /* eight evenly spaced slices make the extrusion solid (a single offset copy reads as a print shadow, not depth) */
+  text-shadow:
+    calc(var(--hx-dx) * 0.125) calc(var(--hx-dy) * 0.125) 0 var(--ink),
+    calc(var(--hx-dx) * 0.25) calc(var(--hx-dy) * 0.25) 0 var(--ink),
+    calc(var(--hx-dx) * 0.375) calc(var(--hx-dy) * 0.375) 0 var(--ink),
+    calc(var(--hx-dx) * 0.5) calc(var(--hx-dy) * 0.5) 0 var(--ink),
+    calc(var(--hx-dx) * 0.625) calc(var(--hx-dy) * 0.625) 0 var(--ink),
+    calc(var(--hx-dx) * 0.75) calc(var(--hx-dy) * 0.75) 0 var(--ink),
+    calc(var(--hx-dx) * 0.875) calc(var(--hx-dy) * 0.875) 0 var(--ink),
+    var(--hx-dx) var(--hx-dy) 0 var(--ink);
+}
+/* small type: a deep extrusion closes the counters of e / a / R, so phones get a shallower one */
+@media (max-width: 639px) {
+  .hx-forme {
+    --hx-max: 5px;
+    -webkit-text-stroke-width: 1.5px;
+  }
+}
+/* the stamped chip keeps its own look: ink letters on yellow, its own hard shadow */
+.hx-forme .hx-chip {
+  color: var(--ink);
+  -webkit-text-fill-color: var(--ink);
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+}
+.hx-line {
+  display: block;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion='calm']) .hx-forme {
+    animation: hx-rise 0.42s steps(6, end) 0.62s both;
+  }
+  /* each line drops from above into its own slot (the slot clips only while it drops: the extrusion is free after) */
+  html:not([data-motion='calm']) .hx-line {
+    animation: hx-slot 0.62s linear backwards;
+  }
+  html:not([data-motion='calm']) .hx-slug {
+    display: inline-block;
+    animation: hx-drop 0.26s steps(5, end) calc(var(--i, 0) * 0.11s) backwards;
+  }
+  /* stepped print-head wipe for the rest of the hero, in reading order (--d) */
+  html:not([data-motion='calm']) .hx-wipe {
+    animation: hx-wipe 0.36s steps(6, end) calc(0.5s + var(--d, 0) * 0.09s) backwards;
+  }
+  html:not([data-motion='calm']) .hx-wipe-down {
+    animation: hx-wipe-down 0.42s steps(7, end) 0.3s backwards;
+  }
+}
+@keyframes hx-rise {
+  from {
+    --hx-depth: 0;
+  }
+  to {
+    --hx-depth: 1;
+  }
+}
+@keyframes hx-slot {
+  from,
+  to {
+    clip-path: inset(0 -60px -60px -60px);
+  }
+}
+@keyframes hx-drop {
+  from {
+    translate: 0 -110%;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+@keyframes hx-wipe {
+  from {
+    clip-path: inset(-12px 100% -12px -12px);
+  }
+  to {
+    clip-path: inset(-12px -12px -12px -12px);
+  }
+}
+@keyframes hx-wipe-down {
+  from {
+    clip-path: inset(-24px -24px 100% -24px);
+  }
+  to {
+    clip-path: inset(-24px -24px -24px -24px);
+  }
+}
+@media print {
+  .hx-forme {
+    color: var(--ink);
+    -webkit-text-fill-color: var(--ink);
+    -webkit-text-stroke: 0;
+    text-shadow: none;
+  }
+}

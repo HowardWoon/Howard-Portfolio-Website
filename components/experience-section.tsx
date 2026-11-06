@@ -75,7 +75,8 @@ export const experiences: ExperienceItem[] = [
     map: 'KRAIBURG TPE Technology (M) Sdn Bhd',
     logo: 'kraiburg',
     location: 'Kuala Lumpur, Malaysia',
-    period: 'Nov 2025 - Present',
+    // R98 (owner's CV, confirmed 6 Nov 2026): Finance Intern Mar - Jun 2024, Assistant Finance Executive Jun - Sep 2025
+    period: 'Mar 2024 - Jun 2024 · Jun 2025 - Sep 2025',
     icon: Building2,
     signal: 'industry',
     headline: 'Enterprise SAP Financial Operations & Statutory Compliance',

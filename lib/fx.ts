@@ -39,7 +39,6 @@ export const FX = {
   aberration: true, // FX-30 marquee colour fringes at high scroll speed
   blueprintView: true, // FX-31 + FX-45 (R11) 3D Blueprint Inspection Bench: orbit, zoom, pan, explode, inspect layers
   pageLift: true, // FX-32 certificate modal lifts off the desk in 3D
-  bootShatter: true, // FX-33 boot gate exit: torn off upward like a printed sheet (R91)
   // ---- Round 8 (advisor spec) ----
   routeWipe: true, // FX-35 Bauhaus wipe between the portfolio and the simulator pages
   stackFocus: true, // FX-36 tooling-matrix legend chips highlight every skill with that status

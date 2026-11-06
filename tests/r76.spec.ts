@@ -45,8 +45,7 @@ type Handle = {
 type W = Window & { __diorama?: Handle };
 
 async function skipGate(page: Page) {
-  await page.getByRole('button', { name: /skip intro/i }).click();
-  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 10000 });
+  await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
 }
 
 async function openDiorama(page: Page, query = '?diorama-test') {

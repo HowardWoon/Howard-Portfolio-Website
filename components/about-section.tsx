@@ -94,7 +94,7 @@ const architecturePillars: {
     signal: 'leadership',
     headline: 'Treasurer at PEKOM · finance at KRAIBURG TPE',
     description:
-      'Finance Lead and Executive Treasurer of PEKOM, the Universiti Malaya computing society; Assistant Finance Executive & Intern at KRAIBURG TPE Technology since Nov 2025; before that Assistant Head of Subject (Computer Science) at the KMNS PAL Leader Club. ProofPay puts the same discipline into code.',
+      'Finance Lead and Executive Treasurer of PEKOM, the Universiti Malaya computing society; Assistant Finance Executive & Intern at KRAIBURG TPE Technology (Mar - Jun 2024, Jun - Sep 2025); before that Assistant Head of Subject (Computer Science) at the KMNS PAL Leader Club. ProofPay puts the same discipline into code.',
     keyPhrases: [
       'Finance Lead and Executive Treasurer of PEKOM',
       'Assistant Finance Executive & Intern at KRAIBURG TPE Technology',
@@ -122,10 +122,10 @@ export const LEDGER: { value: string; from: string; label: string; note: string;
   },
   { value: '07', from: '00', label: 'Projects built', note: 'Agents, escrow, ML, IoT', href: '#projects' },
   {
-    value: '04',
+    value: '05',
     from: '00',
     label: 'Podiums in 2026',
-    note: 'Supervity, MUBA, DOSM, UM Game Jam',
+    note: 'Supervity, MUBA, DOSM, UM Game Jam, Water Nexus',
     signal: 'podium',
     href: '#honors',
   },

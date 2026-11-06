@@ -571,6 +571,9 @@ Guard: tests/r63.spec.ts. Measured (R78, 1440 x 900, RTX laptop GPU, `--use-angl
 and without the water gives the same frame times (p50 16.7 ms, p95 33.3 ms both; the 33 ms frames are the test's
 mouse flood). On software WebGL (SwiftShader, CI) the water runs at ~20 fps while it moves and stops when still.
 
+**RETIRED in R98** (owner: "remove the initialize page"): the boot gate, its lift-off key, exhaust, boot log, printer
+and tear-off below are deleted; these R79 / R91 rows are history only (AGENTS.md 8.8).
+
 R79 (owner, the two boot gate screens: "this both part so boring, not user friendly ... add some features ... more
 effects, animations ... must be perfectly enhanced", with the React Bits FlyingButton source), same rule - a layer, a
 brutalist remix, no new dependency, no new word, no new colour meaning:

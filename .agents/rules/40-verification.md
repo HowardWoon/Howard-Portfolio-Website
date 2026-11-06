@@ -57,7 +57,7 @@ Playwright's Chromium is already installed (the e2e tests use it), so screenshot
 
 ## 4. Real-device checks (report as "not verified" if you could not do them)
 
-- iOS Safari: boot gate, photo lightbox (open, swipe, close, page scrolls again), certificate PDF button, contact form.
+- iOS Safari: the hero forme on first load (R98, no gate), photo lightbox (open, swipe, close, page scrolls again), certificate PDF button, contact form.
 - Android Chrome: same flow.
 
 ## 5. Before pushing

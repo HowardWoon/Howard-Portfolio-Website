@@ -50,8 +50,7 @@ async function openStreet(page: Page, seed: number) {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(String(e)));
   await page.goto(`/?diorama-test&street-seed=${seed}`);
-  await page.getByRole('button', { name: /skip intro/i }).click();
-  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 10000 });
+  await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
   await expect(async () => {
     await page.evaluate(() => document.getElementById('diorama')?.scrollIntoView({ block: 'start' }));
     await page.waitForTimeout(250);
@@ -262,8 +261,7 @@ test.describe('R82 3D street', () => {
   test('a fling past the street does not build it; resting on it does', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto('/?diorama-test');
-    await page.getByRole('button', { name: /skip intro/i }).click();
-    await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 10000 });
+    await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
     await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
     const top = await page.evaluate(() => document.getElementById('diorama')!.getBoundingClientRect().top + scrollY);
     // a steady stream of scroll steps (one every frame) from above the street to below it
@@ -309,8 +307,7 @@ const dev = (name: string): BrowserContextOptions => {
 
 async function openLightbox(page: Page) {
   await page.goto('/');
-  await page.getByRole('button', { name: /skip intro/i }).click();
-  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 10000 });
+  await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
   const key = page
     .locator('#project-zerolag')
     .getByRole('button', { name: /view full resolution/i })
@@ -471,8 +468,7 @@ test.describe('R82 gallery', () => {
 
 async function home(page: Page) {
   await page.goto('/');
-  await page.getByRole('button', { name: /skip intro/i }).click();
-  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 10000 });
+  await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
   await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
 }
 
@@ -587,7 +583,7 @@ test.describe('R82 rules', () => {
 
   test('the GitHub and LinkedIn marks are drawn (owned SVGs, not lucide brand icons)', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: /skip intro/i }).click();
+    await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
     const footer = page.locator('footer');
     for (const name of [/github/i, /linkedin/i]) {
       const link = footer.getByRole('link', { name }).first();

@@ -31,8 +31,7 @@ async function openDiorama(page: Page, query = '') {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(String(e)));
   await page.goto(`/?diorama-test${query}`);
-  await page.getByRole('button', { name: /skip intro/i }).click();
-  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 10000 });
+  await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
   await expect(async () => {
     await page.evaluate(() => document.getElementById('diorama')?.scrollIntoView({ block: 'start' }));
     await page.waitForTimeout(250);

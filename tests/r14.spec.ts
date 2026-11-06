@@ -23,7 +23,8 @@ async function animOnScreen(loc: Locator) {
 test('server HTML shows the hero and flat project cards (B-01)', async ({ request }) => {
   const html = await (await request.get('/')).text();
   const hero = html.slice(html.indexOf('id="hero"'), html.indexOf('id="about"'));
-  expect(hero).toContain('fx-hero-in');
+  expect(hero).toContain('hx-forme'); // R98: the forme drop / rise and the stepped wipe are CSS too
+  expect(hero).toContain('hx-wipe');
   expect(hero).not.toMatch(/style="opacity:0/); // the hero never waits for JS to become visible
   expect(html).not.toContain('rotateX(14deg)'); // project cards are flat until the unfold is allowed
 });
@@ -31,7 +32,7 @@ test('server HTML shows the hero and flat project cards (B-01)', async ({ reques
 test('hero becomes fully visible with every JS file blocked (B-01)', async ({ page }) => {
   await page.route('**/*.js', (r) => r.abort());
   await page.goto('/', { waitUntil: 'domcontentloaded' });
-  const headline = page.locator('#hero .fx-hero-in').nth(1);
+  const headline = page.locator('#hero h2').first();
   await expect
     .poll(() =>
       headline.evaluate((e) => {

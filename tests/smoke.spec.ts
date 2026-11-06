@@ -2,79 +2,32 @@ import { reactLive } from './react-live';
 import { test, expect, devices } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 
-// R34 (owner): the gate shows on EVERY full load (first visit, refresh, opened link) and the page then starts at the
-// top (hero), never where the last visit was scrolled to, and never at a #section from the URL
-test('gate shows again on every refresh and the page then starts at the hero', async ({ page }) => {
+// R34 (owner): every full load (first visit, refresh, opened link) starts at the top (hero), never where the last visit
+// was scrolled to. R98 (owner: "remove the initialize page ... straight away see my hero section"): with no gate at all
+test('no boot gate: every load lands on the hero at the top, also a refresh after scrolling down', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: /initialize system/i }).click();
-  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 10000 });
-  // (the post-gate jump to the top runs right after the gate lifts: scroll until the visit is really down the page)
+  await expect(page.locator('#hero h1, #hero h2').first()).toBeInViewport();
+  await expect(page.locator('html')).toHaveClass(/hw-booted/);
+  await expect(page.locator('.boot-overlay, [data-boot-action]')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /initialize system|skip intro/i })).toHaveCount(0);
+  await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
   await expect(async () => {
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight / 2));
     await page.waitForTimeout(300);
     expect(await page.evaluate(() => scrollY)).toBeGreaterThan(500);
   }).toPass({ timeout: 10000 });
   await page.reload();
-  await expect(page.locator('.boot-overlay')).toBeVisible();
-  await page.getByRole('button', { name: /initialize system/i }).click();
-  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 10000 });
   await page.waitForTimeout(400);
   expect(await page.evaluate(() => scrollY)).toBe(0);
   await expect(page.locator('#hero h1, #hero h2').first()).toBeInViewport();
 });
 
-// R43 (owner: the two gate buttons "function the same"): Initialize runs a boot log, one [OK] line per home-page
-// section on a segmented bar; any key or tap fast-forwards it; Skip intro goes straight in with no log
-test('Initialize runs the boot log: every section mounts [OK], the bar fills, then the site', async ({ page }) => {
-  await page.goto('/');
-  await page.getByRole('button', { name: /initialize system/i }).click();
-  const log = page.locator('[data-boot-log]');
-  await expect(log).toBeVisible();
-  await expect(log.locator('[data-boot-line]').first()).toHaveAttribute('data-boot-line', 'about');
-  await expect(log.locator('[data-boot-ok]')).toHaveCount(5, { timeout: 5000 });
-  expect(
-    await log.locator('[data-boot-line]').evaluateAll((l) => l.map((e) => e.getAttribute('data-boot-line'))),
-  ).toEqual(['about', 'projects', 'experience', 'honors', 'contact']);
-  await expect(log.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '100');
-  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 5000 });
-});
-
-test('a key or tap during the boot log jumps ahead; Skip intro never shows the log', async ({ page }) => {
-  await page.goto('/');
-  await page.getByRole('button', { name: /initialize system/i }).click();
-  await expect(page.locator('[data-boot-log]')).toBeVisible();
-  const t0 = Date.now();
-  await page.keyboard.press('Space');
-  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 5000 });
-  expect(Date.now() - t0, 'fast-forward beats the ~2.5 s full log').toBeLessThan(1800);
-
-  await page.reload();
-  await page.mouse.click(5, 5); // a stray tap on the idle gate does nothing
-  await expect(page.locator('.boot-overlay')).toBeVisible();
-  await page.getByRole('button', { name: /initialize system/i }).click();
-  await expect(page.locator('[data-boot-log]')).toBeVisible();
-  await page.mouse.click(20, 20);
-  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 2000 });
-
-  await page.reload();
-  await page.getByRole('button', { name: /skip intro/i }).click();
-  await expect(page.locator('[data-boot-log]')).toHaveCount(0);
-  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 5000 });
-});
-
-// R35: at 4x CPU the tap lands before hydration and the browser's own jump to #contact used to arrive after the jump
-// to the top (the page ended at Contact); the head script now drops the hash before the browser can scroll to it
-test('a /#contact link still shows the gate first, then the hero at the top (slow phone, 4x CPU)', async ({
-  page,
-  context,
-}) => {
+// R35: the head script drops the hash before the browser can scroll to it, so a /#contact link opens on the hero
+test('a /#contact link opens on the hero at the top, with no gate (slow phone, 4x CPU)', async ({ page, context }) => {
   test.setTimeout(90_000);
   const cdp = await context.newCDPSession(page);
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
   await page.goto('/#contact', { waitUntil: 'domcontentloaded' });
-  await expect(page.locator('.boot-overlay')).toBeVisible();
-  await page.getByRole('button', { name: /skip intro/i }).click();
-  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 30000 });
   await page.waitForLoadState('load');
   await page.waitForTimeout(2000);
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: 1 });
@@ -118,8 +71,7 @@ test.describe('mobile regressions', () => {
   test('photo lightbox is full-screen, closable and restores scroll', async ({ page }) => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-    await page.getByRole('button', { name: /skip intro/i }).click();
-    await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 5000 });
+    await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
     const expand = page.getByRole('button', { name: /view full resolution/i }).nth(1);
     await expand.scrollIntoViewIfNeeded();
     await expand.tap();
@@ -139,8 +91,7 @@ test.describe('mobile regressions', () => {
 test('contact form sends fillMs and passes validation', async ({ page }) => {
   await page.goto('/');
   await page.waitForLoadState('networkidle');
-  await page.getByRole('button', { name: /skip intro/i }).click();
-  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 5000 });
+  await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
   // Contact is a code-split section: on a slow CI runner it hydrated after the fields were typed into, React reset them
   // and the empty form never sent (red since CI #137). Type only once React owns the fields.
   const name = page.locator('#contact-name');
@@ -205,24 +156,21 @@ test('academic distinctions: structured transcript, results and roles', async ({
   expect(cw).toBeLessThanOrEqual(390);
 });
 
-// R35 (owner "yes do all"): "Return to Portfolio" from a simulator also opens the home page behind the gate, then the
-// hero at the top (no test hook here: this is what a real visitor gets)
-test('Return to Portfolio shows the gate again, then the hero at the top', async ({ page }) => {
+// R35 / R98: "Return to Portfolio" from a simulator brings the visitor back to the project they launched it from
+// (FX-85 "you were here"; the boot gate used to force the top over it), with no gate and a scrollable page
+test('Return to Portfolio lands back on the project it was launched from, with no gate', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
-  await page.getByRole('button', { name: /skip intro/i }).click();
-  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 10000 });
+  await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
   const run = page.locator('#projects a[href="/simulators/flood"]');
   await run.scrollIntoViewIfNeeded();
+  await expect.poll(() => reactLive(run), { timeout: 30_000 }).toBe(true);
   await run.click();
   await expect(page).toHaveURL(/\/simulators\/flood$/);
   await page.getByRole('link', { name: /return to portfolio/i }).click();
   await expect(page).toHaveURL(/\/(#projects)?$/);
-  await expect(page.locator('.boot-overlay')).toBeVisible({ timeout: 10000 });
-  await page.getByRole('button', { name: /initialize system/i }).click();
-  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 10000 });
-  await page.waitForTimeout(800);
-  expect(await page.evaluate(() => scrollY)).toBe(0);
+  await expect(page.locator('.boot-overlay, [data-boot-action]')).toHaveCount(0);
+  await expect(page.locator('#projects a[href="/simulators/flood"]')).toBeInViewport({ timeout: 10_000 });
   await expect(page.locator('html')).toHaveClass(/hw-booted/);
   expect(await page.evaluate(() => document.body.style.overflow)).toBe('');
 });

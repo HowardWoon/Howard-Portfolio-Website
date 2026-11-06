@@ -295,9 +295,8 @@ test.describe('press stamp everywhere (desktop 1440x900)', () => {
     expect(Math.abs(s.y - at.y)).toBeLessThanOrEqual(1);
   });
 
-  test('live from the first click: the boot gate and a simulator page stamp too', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'domcontentloaded' }); // no hw-booted: the gate is up
-    await expect(page.locator('.boot-overlay')).toBeVisible();
+  test('live from the first click: the home page and a simulator page stamp too', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
     await recordStamps(page);
     await page.mouse.click(200, 200);
     await expect.poll(() => stamps(page).then((s) => s.length)).toBe(1);
@@ -309,7 +308,7 @@ test.describe('press stamp everywhere (desktop 1440x900)', () => {
       s.remove();
       return v;
     });
-    expect(z).toBeGreaterThan(99999); // above the boot gate, so the shape is actually seen
+    expect(z).toBeGreaterThan(99999); // above every layer (dialogs, toasts), so the shape is actually seen
 
     await page.goto('/simulators/flood', { waitUntil: 'domcontentloaded' });
     await recordStamps(page);

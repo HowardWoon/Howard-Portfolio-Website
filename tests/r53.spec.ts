@@ -7,8 +7,7 @@ import { reactLive } from './react-live';
 
 async function gate(page: Page, path = '/') {
   await page.goto(path, { waitUntil: 'networkidle' });
-  await page.getByRole('button', { name: /skip intro/i }).click();
-  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 10_000 });
+  await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
 }
 /** the page is built lazily: walk it once so every section has mounted */
 async function walk(page: Page) {
@@ -240,19 +239,16 @@ for (const [name, w, h] of [
 
 /* ---------------------------------------------------------------- blue rings */
 // owner: "i quite hate the bluering in every button ... messy, awkward, unorganised, not align and so random"
-test('the focus ring belongs to the keyboard: the gate button has none on load, Tab draws it, a click removes it', async ({
-  page,
-}) => {
+test('the focus ring belongs to the keyboard: none on load, Tab draws it, a click removes it', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/', { waitUntil: 'networkidle' });
-  const init = page.locator('[data-boot-action="init"]');
-  await expect(init).toBeFocused();
   const outline = () =>
     page.evaluate(() => {
       const cs = getComputedStyle(document.activeElement!);
       return `${cs.outlineStyle} ${cs.outlineWidth}`;
     });
-  expect(await outline(), 'auto-focused by script: no ring').toMatch(/^none/);
+  // R98: no gate button is auto-focused any more; nothing shows a ring before the keyboard is used
+  await expect(page.locator('html[data-kbd]')).toHaveCount(0);
   await page.keyboard.press('Tab');
   expect(await outline(), 'keyboard: the ring').toBe('solid 3px');
   await page.keyboard.press('Shift+Tab');
@@ -260,8 +256,7 @@ test('the focus ring belongs to the keyboard: the gate button has none on load, 
   await page.mouse.click(5, 5);
   await expect(page.locator('html[data-kbd]')).toHaveCount(0);
   // text fields always show where the caret is
-  await page.getByRole('button', { name: /skip intro/i }).click();
-  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 10_000 });
+  await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
   const name = page.locator('#contact-name');
   await name.evaluate((e) => e.scrollIntoView({ block: 'center' }));
   await name.click();
@@ -313,7 +308,7 @@ for (const device of ['iPhone 13', 'Pixel 7', 'iPad (gen 7)'] as const) {
       page,
     }) => {
       await page.goto('/', { waitUntil: 'networkidle' });
-      await page.getByRole('button', { name: /skip intro/i }).tap();
+      await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
       await expect(page.locator('[data-site-mascot]')).toBeVisible({ timeout: 15_000 });
       const vp = page.viewportSize()!;
       const head = () =>
@@ -639,71 +634,6 @@ test('contact desk still works after the reorganisation: intent drafts, roles pr
   await expect(page.getByRole('button', { name: 'Trace Fiscal Governance' })).toBeVisible();
 });
 
-/* ---------------------------------------------------------------- R55 / R91 the gate lets go */
-// owner (R55, a screenshot of 18 slabs mid-fall): "make this break part ... more amazing, ASMR, chill, relax viewing,
-// this is so boring and not creative at all" -> a ripple of up to 170 tiles. R91 (owner, the boot screen: "quite
-// childish and boring ... some smooth transition ... that suit this page and neo-brutalism"; R87 P3) replaces the tile
-// wall: the boot log is a print job, and the gate is TORN OFF upward - one layer (a copy of the gate with a perforation
-// edge), one transform animation. Full guard: tests/r91.spec.ts.
-for (const [name, w, h] of [
-  ['desktop 1440x900', 1440, 900],
-  ['phone 390x844', 390, 844],
-] as const) {
-  test(`the gate is torn off in one move, on the compositor only, and leaves nothing behind (${name})`, async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: w, height: h });
-    await page.goto('/', { waitUntil: 'networkidle' });
-    await page.evaluate(() => {
-      const win = window as unknown as { __shatter?: unknown };
-      const mo = new MutationObserver(() => {
-        const layer = document.querySelector<HTMLElement>('[data-fx-shatter]');
-        if (!layer || win.__shatter) return;
-        const anims = layer.getAnimations({ subtree: true });
-        const timing = anims[0]?.effect?.getTiming();
-        win.__shatter = {
-          count: anims.length,
-          tiles: layer.querySelectorAll(':scope > div').length,
-          pointer: getComputedStyle(layer).pointerEvents,
-          props: [
-            ...new Set(
-              anims.flatMap((a) =>
-                (a.effect as KeyframeEffect)
-                  .getKeyframes()
-                  .flatMap((k) =>
-                    Object.keys(k).filter((x) => !['offset', 'easing', 'composite', 'computedOffset'].includes(x)),
-                  ),
-              ),
-            ),
-          ].sort(),
-          last: Number(timing?.delay ?? 0) + Number(timing?.duration ?? 0),
-        };
-      });
-      mo.observe(document.body, { childList: true });
-    });
-    // a Skip pressed before hydration lifts the gate at once with no exit effect (R26, guarded by tests/hotfix); on CI's
-    // runners networkidle comes before hydration, so this test of the exit itself waits for React (red since CI #137)
-    await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
-    await page.getByRole('button', { name: /skip intro/i }).click();
-    await expect
-      .poll(() => page.evaluate(() => !!(window as unknown as { __shatter?: unknown }).__shatter), { timeout: 8000 })
-      .toBe(true);
-    const s = (await page.evaluate(() => (window as unknown as { __shatter?: unknown }).__shatter)) as {
-      count: number;
-      tiles: number;
-      pointer: string;
-      props: string[];
-      last: number;
-    };
-    expect(s.count, 'one animation, not a wall of tiles').toBe(1);
-    expect(s.tiles, 'the copy of the gate, two tooth strips and the seam').toBeLessThanOrEqual(4);
-    expect(s.pointer).toBe('none');
-    expect(s.props, 'compositor only').toEqual(['transform']);
-    expect(s.last, 'the page is clear within 1.2 s').toBeLessThanOrEqual(1200);
-    await expect(page.locator('[data-fx-shatter]')).toHaveCount(0, { timeout: 4000 });
-  });
-}
-
 /* ---------------------------------------------------------------- R58 no bare corners */
 // owner (R58): "i dont want the side i circled to be so empty ... make sure no blank and empty space in this part" (the
 // last row of a 5-record Field Archive) and "must align the part i mention with the border below of my gallery" (the
@@ -910,7 +840,7 @@ test.describe('keep my place on a phone', () => {
   test('turning the phone on its side keeps the same card on screen', async ({ page }) => {
     test.setTimeout(120_000);
     await page.goto('/', { waitUntil: 'networkidle' });
-    await page.getByRole('button', { name: /skip intro/i }).tap();
+    await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
     await expect(page.locator('html[data-keep-place="on"]')).toHaveCount(1, { timeout: 20_000 });
     await expect(page.locator('html[data-after-boot="done"]')).toHaveCount(1, { timeout: 30_000 });
     await walk(page);

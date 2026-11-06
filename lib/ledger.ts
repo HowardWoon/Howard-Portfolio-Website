@@ -9,6 +9,7 @@ export const LEDGER: { value: string; issuer: string; fill: string }[] = [
   { value: '3rd', issuer: 'MUBA Blockchain Hackathon 2026', fill: 'bg-pop-yellow' },
   { value: '#1', issuer: 'UM Game Jam 2026 (PEKOM)', fill: 'bg-pop-yellow' },
   { value: 'Top 5', issuer: 'DOSM Datathon 2026', fill: 'bg-pop-yellow' },
+  { value: '1st', issuer: 'Water Nexus Symposium 2026', fill: 'bg-pop-yellow' },
   { value: 'Top 15', issuer: 'UM Technothon 2026', fill: 'bg-pop-cyan' },
   { value: 'Gold', issuer: 'Hari Inovasi PPAL 4.0 (Kebangsaan)', fill: 'bg-pop-yellow' },
   { value: 'Gold', issuer: 'Chemcreative-Innovation (Digital Learning)', fill: 'bg-pop-yellow' },

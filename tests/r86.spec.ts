@@ -5,8 +5,7 @@ import { test, expect, devices, type Page } from '@playwright/test';
 
 async function gate(page: Page, path = '/') {
   await page.goto(path, { waitUntil: 'networkidle' });
-  await page.getByRole('button', { name: /skip intro/i }).click();
-  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 10_000 });
+  await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
 }
 
 test('B1: a section that crashes is replaced alone; the rest of the page works and the crash is reported', async ({

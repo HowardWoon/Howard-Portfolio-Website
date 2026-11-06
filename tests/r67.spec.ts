@@ -11,8 +11,8 @@ test('a Tab pressed before the page has hydrated still draws the focus ring (6x 
   const cdp = await context.newCDPSession(page);
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: 6 });
   await page.goto('/', { waitUntil: 'networkidle' });
-  // (at 6x the gate's button may not have been focused by script yet: the Tab then lands on the first control)
-  await page.locator('[data-boot-action="init"]').waitFor();
+  // R98: no boot gate - the Tab lands on the first control of the page (the skip link / header)
+  await page.locator('#hero h2').first().waitFor();
   await page.keyboard.press('Tab');
   const r = await page.evaluate(() => {
     const a = document.activeElement!;

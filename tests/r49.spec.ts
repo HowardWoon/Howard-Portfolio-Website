@@ -6,8 +6,7 @@ import { test, expect, type Page } from '@playwright/test';
 
 async function gate(page: Page, path = '/') {
   await page.goto(path, { waitUntil: 'networkidle' });
-  await page.getByRole('button', { name: /skip intro/i }).click();
-  await expect(page.locator('.boot-overlay')).toBeHidden({ timeout: 10_000 });
+  await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
 }
 
 /* ---------------------------------------------------------------- mascot */
@@ -31,7 +30,7 @@ for (const [name, w, h] of [
     await page.goto('/', { waitUntil: 'networkidle' });
     // it is not there (and its sheets are not requested) while the gate is up
     await expect(page.locator('[data-site-mascot]')).toHaveCount(0);
-    await page.getByRole('button', { name: /skip intro/i }).click();
+    await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
     const cat = page.getByRole('button', { name: 'Boop the cat' });
     await expect(cat).toBeVisible({ timeout: 15_000 });
     await page.waitForTimeout(700); // pop-in
@@ -174,7 +173,7 @@ test('the section rail is on screen before the rest of the after-boot queue has 
     });
     mo.observe(document.documentElement, { attributes: true, childList: true, subtree: true });
   });
-  await page.getByRole('button', { name: /skip intro/i }).click();
+  await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
   await expect(page.getByRole('navigation', { name: 'Section navigation' })).toBeVisible({ timeout: 10_000 });
   await expect(page.locator('html[data-after-boot="done"]')).toHaveCount(1, { timeout: 15_000 });
   expect(await page.evaluate(() => (window as unknown as { __railFirst?: boolean }).__railFirst)).toBe(true);
@@ -184,7 +183,7 @@ test('the section rail is on screen before the rest of the after-boot queue has 
 test('the section rail draws no playhead bar behind its keys', async ({ page }) => {
   await page.setViewportSize({ width: 1600, height: 900 });
   await page.goto('/', { waitUntil: 'networkidle' });
-  await page.getByRole('button', { name: /skip intro/i }).click();
+  await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
   await expect(page.getByRole('navigation', { name: 'Section navigation' })).toBeVisible({ timeout: 10_000 });
   const head = await page.locator('.fx-lever-head').evaluate((e) => {
     const s = getComputedStyle(e);

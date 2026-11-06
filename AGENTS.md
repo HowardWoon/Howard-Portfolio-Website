@@ -270,3 +270,11 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
 6. **The hero headline is a torch (R86)** - see law 5.
 7. **One crashing section never takes the page down (R86):** every lazy section is `guard()`-ed
    (components/section-boundary.tsx), crashes reach `/api/client-error`. Guard: `tests/r86.spec.ts`.
+8. **No boot gate; the hero is the first screen (R98, owner, 6 Nov 2026: "remove the initialize page ... so user click
+   my link website straight away see my hero section"; replaces R34 - R91 "the gate shows on every load").** `<html>` is
+   `hw-booted` in the server HTML; there is no overlay, boot log, Skip / Initialize key or pre-gate cover - never add a
+   loading or intro screen in front of the hero again. The hero is a letterpress forme (`app/hero-forme.css`, owner:
+   "astonishing ... avoid all ai slop ... neo brutalism"): paper-faced block letters with an ink rim and a solid ink
+   extrusion that falls away from the pointer; on load the lines drop into their slots in hard steps, the type rises off
+   the paper, SYSTEMS TO is stamped; the rest of the hero arrives as a stepped wipe; no fade on scroll. Guards:
+   `tests/smoke.spec.ts` (no gate), `tests/r98.spec.ts` (the forme), `scripts/validate-plans.mjs` R98.

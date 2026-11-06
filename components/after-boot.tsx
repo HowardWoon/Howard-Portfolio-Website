@@ -12,7 +12,9 @@ import { useBooted } from './boot-sequence';
  *  - returning visitors (no gate) get them one per idle callback right away.
  * The server and the first client render both output nothing here, so hydration never differs.
  */
-const SETTLE_MS = 1500; // the boot exit (fx/boot-shatter.ts BOOT_SHATTER_MS = 700 since the R91 tear-off) + a margin
+// R98: the gate is gone, so every visit takes the "returning visitor" path below; SETTLE_MS only guards a page that
+// still has a shatter layer (none since R98)
+const SETTLE_MS = 1500;
 
 type IdleWindow = Window & {
   requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number;

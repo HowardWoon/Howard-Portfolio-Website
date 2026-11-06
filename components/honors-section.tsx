@@ -183,6 +183,24 @@ export const honorsList: HonorItem[] = [
     ],
     icon: Trophy,
   },
+  // R98 (owner's CV, 6 Nov 2026, "Champion - Smart Water Utilities Track, Water Nexus Symposium 2026"; added on the
+  // owner's yes). Every word below is the CV's; month and organiser not given yet (owner to send), so period is 2026.
+  {
+    id: 'water-nexus',
+    signal: 'podium',
+    emblem: 'gold',
+    isFeatured: true,
+    badge: 'CHAMPION',
+    badgeColor: 'gold',
+    title: 'CHAMPION - SMART WATER UTILITIES TRACK',
+    issuingBody: 'Water Nexus Symposium 2026',
+    period: '2026',
+    statCallout: { value: '1st', label: 'Smart Water Utilities Track' },
+    description: 'Champion of the Smart Water Utilities Track at the Water Nexus Symposium 2026.',
+    descriptionLabels: ['Champion of the Smart Water Utilities Track'],
+    highlights: ['Champion - Smart Water Utilities Track'],
+    icon: Trophy,
+  },
   {
     id: 'technothon',
     signal: 'qualifier',

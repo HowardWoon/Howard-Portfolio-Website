@@ -60,6 +60,9 @@ test('section titles rise but never animate their weight, and are extra-bold thr
   await page.setViewportSize({ width: 1280, height: 900 });
   await home(page);
   const title = page.locator('#experience h2.nb-title');
+  // R95: a section far off screen drops its scroll-driven animations (tests/r95): read the rise with it on screen
+  await title.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+  await expect(page.locator('#experience[data-offscreen]')).toHaveCount(0);
   const anim = await title.evaluate((e) => getComputedStyle(e).animationName);
   expect(anim).not.toContain('fx-weight');
   expect(anim).toContain('fx-hero-in'); // the rise (FX-B12) stays

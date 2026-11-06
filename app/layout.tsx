@@ -82,18 +82,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${sans.variable} ${display.variable} ${mono.variable} ${FX_OFF_CLASSES}`}
+      // R98: no boot gate - the page is booted from the first paint (components/boot-sequence.tsx)
+      className={`hw-booted ${sans.variable} ${display.variable} ${mono.variable} ${FX_OFF_CLASSES}`}
       suppressHydrationWarning
     >
       <head>
-        {/* R34 / R35 (owner): every load of the home page shows the gate, then the hero at the top - so no restored
-            scroll position, no #section jump (the hash is dropped before the browser can scroll to it), no gate skip
-            from storage (only automated tests may pre-pass it), and a back-forward cache restore reloads.
+        {/* R34 / R35 (owner): every load of the home page starts on the hero at the top - so no restored scroll
+            position, no #section jump (the hash is dropped before the browser can scroll to it), and a back-forward
+            cache restore reloads. R98: the boot gate is gone, so nothing here waits for it any more.
             R67: the keyboard-ring mark (<html data-kbd>, components/input-modality.tsx) is also set here, so a Tab
             pressed before the page has hydrated draws the ring (measured at 6x CPU: it never did). */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{if('scrollRestoration' in history)history.scrollRestoration='manual'}catch(e){}try{if(location.pathname==='/'&&location.hash)history.replaceState(history.state,'',location.pathname+location.search)}catch(e){}try{if(navigator.webdriver&&sessionStorage.getItem('hw-booted')==='1')document.documentElement.classList.add('hw-booted')}catch(e){}try{if(localStorage.getItem('hw-motion')==='calm')document.documentElement.dataset.motion='calm'}catch(e){}window.addEventListener('pageshow',function(e){if(e.persisted)location.reload()});document.addEventListener('click',function(e){var t=e.target,b=t&&t.closest?t.closest('[data-boot-action]'):null;if(b&&!window.__hwHydrated){var a=b.getAttribute('data-boot-action');window.__hwBoot=a;if(a==='skip'){document.documentElement.classList.add('hw-booted');window.scrollTo(0,0)}}},true);window.addEventListener('keydown',function(e){var k=e.key;if(k!=='Shift'&&k!=='Control'&&k!=='Alt'&&k!=='Meta')document.documentElement.setAttribute('data-kbd','')},true);window.addEventListener('pointerdown',function(){document.documentElement.removeAttribute('data-kbd')},true);`,
+            __html: `try{if('scrollRestoration' in history)history.scrollRestoration='manual'}catch(e){}try{if(location.pathname==='/'&&location.hash)history.replaceState(history.state,'',location.pathname+location.search)}catch(e){}try{if(localStorage.getItem('hw-motion')==='calm')document.documentElement.dataset.motion='calm'}catch(e){}window.addEventListener('pageshow',function(e){if(e.persisted)location.reload()});window.addEventListener('keydown',function(e){var k=e.key;if(k!=='Shift'&&k!=='Control'&&k!=='Alt'&&k!=='Meta')document.documentElement.setAttribute('data-kbd','')},true);window.addEventListener('pointerdown',function(){document.documentElement.removeAttribute('data-kbd')},true);`,
           }}
         />
         <script
@@ -115,10 +116,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="font-sans font-medium bg-paper text-ink">
-        {/* If JavaScript is off or fails to load, the "Initialize System" gate could never be dismissed
-            and the whole portfolio stayed hidden behind it. */}
+        {/* If JavaScript is off or fails to load, nothing may stay hidden behind an entrance effect. */}
         <noscript>
-          <style>{`.boot-overlay{display:none!important}body{overflow:auto!important}[style*="opacity:0"]{opacity:1!important;transform:none!important}[data-fx]{opacity:1!important;transform:none!important;filter:none!important}html:not(#_) .fx-page-root{visibility:visible!important}html:not(#_) .fx-page-root::before{display:none!important}`}</style>
+          <style>{`body{overflow:auto!important}[style*="opacity:0"]{opacity:1!important;transform:none!important}[data-fx]{opacity:1!important;transform:none!important;filter:none!important}html:not(#_) .fx-page-root{visibility:visible!important}`}</style>
         </noscript>
         <MotionProvider>
           <SmoothScrollProvider>{children}</SmoothScrollProvider>

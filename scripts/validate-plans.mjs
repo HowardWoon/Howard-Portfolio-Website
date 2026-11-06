@@ -147,7 +147,6 @@ has(
   'aberration:',
   'blueprintView:',
   'pageLift:',
-  'bootShatter:',
 );
 has(
   'R7',
@@ -251,14 +250,6 @@ has(
   'FX.pageLift',
   'transformPerspective: 1200',
 );
-has(
-  'R7',
-  'S5.1',
-  'Boot Shatter called when the gate finishes',
-  'components/boot-sequence.tsx',
-  'bootShatter()',
-  'FX.bootShatter',
-);
 // R77 (owner: "make my whole website, every section background clean and tidy"): the FX-34 Mercury Field is retired
 nowhere('R7', 'S5.2', 'Mercury Field retired in R77 (no import anywhere)', './fx/mercury-field');
 has('R7', 'S6.2', 'Rules say domMax (not domAnimation)', '.agents/rules/10-architecture.md', 'domMax');
@@ -267,28 +258,11 @@ has('R7', 'S6.2b', 'MotionProvider uses domMax', 'components/motion-provider.tsx
 /* ================================================================================================ R8 */
 has(
   'R8',
-  'A.1',
-  'Boot gate works before hydration (click captured by the head script)',
-  'app/layout.tsx',
-  'window.__hwBoot',
-  '__hwHydrated',
-);
-has(
-  'R8',
-  'A.1b',
-  'Boot sequence consumes the early click',
-  'components/boot-sequence.tsx',
-  '__hwBoot',
-  '__hwHydrated = true',
-);
-has(
-  'R8',
   'A.2',
-  'Hotfix regression tests (throttled gate, flat cards, no shatter canvas)',
+  'Hotfix regression tests (a reader is never pulled back to the top, flat cards; R98: no gate to test)',
   'tests/hotfix.spec.ts',
-  'boot gate works even when clicked before React has hydrated',
+  'is not pulled back to the top when React arrives',
   'project cards are flat until BLUEPRINT is pressed',
-  'boot shatter leaves no canvas behind',
 );
 has('R8', 'B.1', 'FX-35 Route Wipe (WipeLink)', 'components/fx/route-wipe.tsx', 'export function WipeLink');
 has('R8', 'B.1b', 'RUN SIMULATOR uses WipeLink', 'components/stacked-projects.tsx', '<WipeLink');
@@ -435,15 +409,6 @@ has(
 // R41: the canvas shatter (780 tiles re-drawn per frame on the main thread) became GPU slabs - fewer on phones
 // R55: the slabs became a rippling wall of tiles. R91 (owner: the boot screen was "childish and boring"; R87 P3): the gate
 // is torn off - ONE layer (a copy of the gate with a perforation edge), ONE transform animation on the compositor
-has(
-  'R9',
-  'D3',
-  'Lighter boot exit: one torn-off layer, one compositor animation',
-  'components/fx/boot-shatter.ts',
-  'layer.animate(',
-  "willChange: 'transform'",
-  'conic-gradient(',
-);
 has('R9', 'D5', 'Off-screen pause for infinite animations', 'components/fx/offscreen-pause.tsx', 'data-offscreen');
 has(
   'R9',
@@ -1132,10 +1097,10 @@ has(
 has(
   'R14',
   'B-01',
-  'Hero entrance is CSS (visible server HTML)',
+  'Hero entrance is CSS (visible server HTML; R98: the forme drop, rise and stepped wipe)',
   'components/bikebear-hero.tsx',
-  'fx-hero-in',
-  'fx-hero-pop',
+  'hx-forme',
+  'hx-wipe',
 );
 lacks(
   'R14',
@@ -1335,13 +1300,17 @@ has(
   "@media (min-width: 1024px) and (pointer: fine) and (prefers-reduced-motion: no-preference) {\n    html:not([data-motion='calm']) [data-unfold='css'] {",
 );
 has('R17', 'P0-02b', 'TiltCard tilts only on a hovering pointer', 'components/tilt-card.tsx', 'allowed && hover ?');
-has(
-  'R17',
-  'P0-05',
-  'Boot gate uses the shared scroll lock',
+// R98 (owner: "remove the initialize page ... user ... straight away see my hero section"): the gate is gone for good
+has('R98', 'G1', 'The page is booted from the first paint (no gate)', 'app/layout.tsx', 'className={`hw-booted ');
+lacks(
+  'R98',
+  'G2',
+  'No boot gate overlay or early-click capture',
   'components/boot-sequence.tsx',
-  'useScrollLock(mounted && showBoot)',
+  'boot-overlay',
+  '__hwBoot',
 );
+lacks('R98', 'G3', 'No gate click capture in the head script', 'app/layout.tsx', 'data-boot-action');
 has(
   'R17',
   'P0-05b',

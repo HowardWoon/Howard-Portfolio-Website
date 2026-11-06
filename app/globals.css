@@ -499,11 +499,6 @@ html[data-motion='calm'] *::after {
   }
 }
 
-/* B-01 Boot Gate */
-html.hw-booted .boot-overlay {
-  display: none !important;
-}
-
 /* =====================================================================
    FX: motion & 3D add-ons (flags in lib/fx.ts). Additive only:
    no colour, font, border or layout token is changed here.
@@ -1682,7 +1677,6 @@ html:not(.fx-off-arenaPinboard) :where(.fx-seal:nth-child(even)) {
   nav[aria-label='Section navigation'],
   .fx-hud,
   .fx-stamp,
-  .boot-overlay,
   .fx-cursor,
   .fx-cursor-pos,
   .fx-cursor-tag,
@@ -1802,20 +1796,6 @@ html:not(.fx-off-arenaPinboard) :where(.fx-seal:nth-child(even)) {
    55 % over the cream. */
 .fx-page-root {
   isolation: isolate;
-}
-/* R41 pre-gate cover (owner video: on refresh the hero flashed for a frame before the gate). The gate is drawn by React
-   after hydration, so from the first paint until then the page needs a cover. R19 hid the whole page with an inherited
-   visibility:hidden, which re-styled all ~8,000 elements at the reveal (70 ms); this is ONE fixed pseudo-element in the
-   gate's own yellow + dots (home page only: .fx-page-root), above the page and below the gate (z 99999), gone the moment
-   html.hw-booted is set. Removing it re-styles that pseudo-element only. No-JS visitors: hidden by <noscript> (layout). */
-html:not(.hw-booted) .fx-page-root::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 99998;
-  background-color: #ffc700;
-  background-image: radial-gradient(rgba(10, 10, 10, 0.14) 1.2px, transparent 1.2px);
-  background-size: 22px 22px;
 }
 .fx-tide-canvas {
   position: fixed;
@@ -5243,168 +5223,6 @@ html[data-motion='calm'] .sp-branch-reach {
   /* --header-h stays as measured: the hero's top padding still clears the header at the top of the page */
   .site-header {
     position: absolute;
-  }
-}
-
-/* R79 boot-gate lift-off (components/boot-sequence.tsx; React Bits FlyingButton, remixed brutalist). The key's hard
-   shadow is a separate ink slab (the launch pad) that stays on the ground while the key flies. Landing pods fold out
-   on hover / keyboard focus / launch; the jets are printed white flames with an ink rim (decoration = ink / paper).
-   --thrust (0..1) is written per frame by the flight loop; the flight itself moves the key with the individual
-   `translate` / `rotate` properties, so the button's own hover / press transforms still compose. */
-.boot-pad {
-  position: relative;
-  display: inline-flex;
-  max-width: 100%;
-}
-.boot-ground {
-  position: absolute;
-  inset: 0;
-  border-radius: 9999px;
-  background: #0a0a0a;
-  translate: 6px 6px;
-  transform-origin: 50% 100%;
-  pointer-events: none;
-}
-.boot-craft {
-  --thrust: 0;
-}
-.boot-pod {
-  position: absolute;
-  top: 100%;
-  width: 18px;
-  height: 10px;
-  margin-left: -9px;
-  background: #fff;
-  border: 3px solid #0a0a0a;
-  border-top: 0;
-  border-radius: 0 0 6px 6px;
-  transform: scaleY(0);
-  transform-origin: 50% 0;
-  transition: transform 0.18s cubic-bezier(0.2, 0.9, 0.1, 1);
-  pointer-events: none;
-}
-.boot-flame {
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  width: 14px;
-  height: 34px;
-  margin-left: -7px;
-  transform: scaleY(var(--thrust));
-  transform-origin: 50% 0;
-  transition: transform 0.12s ease-out;
-}
-.boot-flame svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  transform-origin: 50% 0;
-  animation: boot-flicker 0.09s steps(2, end) infinite alternate;
-}
-@keyframes boot-flicker {
-  from {
-    transform: scale(1, 1);
-  }
-  to {
-    transform: scale(0.8, 1.24);
-  }
-}
-.boot-craft[data-flying] .boot-pod,
-.boot-craft:focus-visible .boot-pod {
-  transform: scaleY(1);
-}
-.boot-craft:focus-visible {
-  --thrust: 0.3;
-}
-@media (hover: hover) and (pointer: fine) {
-  .boot-craft:hover {
-    --thrust: 0.3;
-  }
-  .boot-craft:hover .boot-pod {
-    transform: scaleY(1);
-  }
-}
-/* the exhaust canvas is drawn at <= 2x and must stay hard-edged when the browser scales it */
-.boot-exhaust {
-  image-rendering: pixelated;
-}
-/* boot log: the leader dots run out behind the typed line; a waiting chip blinks like a terminal; when every section
-   is up the whole card is pressed flat into the page like a key (translate = shadow, shadow -> 0), then the shatter */
-.boot-leader {
-  transform-origin: 0 50%;
-  animation: boot-leader 0.26s 0.1s cubic-bezier(0.2, 0.9, 0.1, 1) both;
-}
-@keyframes boot-leader {
-  from {
-    transform: scaleX(0);
-  }
-}
-.boot-wait {
-  animation: boot-blink 0.5s steps(1, end) infinite;
-}
-@keyframes boot-blink {
-  50% {
-    color: transparent;
-  }
-}
-.boot-card[data-state='complete'] {
-  translate: 5px 5px;
-  box-shadow: 0 0 0 0 #0a0a0a;
-  transition:
-    translate 0.14s cubic-bezier(0.2, 0.9, 0.1, 1),
-    box-shadow 0.14s cubic-bezier(0.2, 0.9, 0.1, 1);
-}
-/* R81 (owner: the SYSTEM BOOT card was still "too boring"): the log is printed like a dot-matrix job.
-   Sprocket holes: punched ink rings in the card's side margins (decoration = ink); --feed (sections mounted) pulls the
-   paper up one hole per section in three clicks. Hard-stop rings, the same technique as .bg-dots: no soft edge. */
-.boot-feed {
-  position: absolute;
-  top: 1.25rem;
-  bottom: 1.25rem;
-  width: 10px;
-  pointer-events: none;
-  background-image: radial-gradient(circle, transparent 2.5px, #0a0a0a 2.5px 4px, transparent 4px);
-  background-size: 10px 18px;
-  background-position: 50% calc(var(--feed, 0) * -18px);
-  transition: background-position 0.2s steps(3, end);
-}
-/* the print head: an ink carriage that runs along the dot leader while it is printed, then parks out of sight */
-.boot-head {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: 7px;
-  height: 13px;
-  margin-top: -6.5px;
-  background: #0a0a0a;
-  border-radius: 1px;
-  pointer-events: none;
-  animation: boot-head 0.3s 0.1s cubic-bezier(0.2, 0.9, 0.1, 1) both;
-}
-@keyframes boot-head {
-  from {
-    left: 0;
-  }
-  97% {
-    left: calc(100% - 7px);
-    visibility: visible;
-  }
-  to {
-    left: calc(100% - 7px);
-    visibility: hidden;
-  }
-}
-/* the closing stamp: the 100 % chip turns LIVE mint with one hard slam */
-.boot-pct[data-live] {
-  animation: boot-slam 0.24s cubic-bezier(0.2, 0.9, 0.1, 1) both;
-}
-@keyframes boot-slam {
-  from {
-    transform: scale(1.6) rotate(-8deg);
-  }
-  to {
-    transform: none;
   }
 }
 
