@@ -938,22 +938,26 @@ html.hw-booted .boot-overlay {
    before they can be seen) these elements drop the animation: 401 -> ~200 layers, main thread -20 % per scroll.
    Paused is not enough (a paused animation keeps its layer). Only scroll-driven ones: a time-based entrance would
    replay. Their value is the scroll position, so nothing jumps when they come back. */
-:is([data-offscreen], [data-offscreen] *):is(
-  .fx-sheet,
-  .fx-project-shell,
-  .fx-rise,
-  .fx-rise-card,
-  [data-unfold='css'],
-  .fx-wipe,
-  .fx-wall-row,
-  .fx-ink-word,
-  .si-w
-),
-[data-offscreen] .fx-print .tape,
-:is([data-offscreen], [data-offscreen] *).fx-dot-plane::before,
-:is([data-offscreen], [data-offscreen] *).fx-curtain::after,
-section[id][data-offscreen]::after {
-  animation: none !important;
+/* R97: mouse devices only. On a phone R88's skip already stops rendering what is off screen, and removing a rise's
+   animation flips it between translate and none - a layout each time a section crossed the margin (r17 P0-01) */
+@media (hover: hover) and (pointer: fine) {
+  :is([data-offscreen], [data-offscreen] *):is(
+    .fx-sheet,
+    .fx-project-shell,
+    .fx-rise,
+    .fx-rise-card,
+    [data-unfold='css'],
+    .fx-wipe,
+    .fx-wall-row,
+    .fx-ink-word,
+    .si-w
+  ),
+  [data-offscreen] .fx-print .tape,
+  :is([data-offscreen], [data-offscreen] *).fx-dot-plane::before,
+  :is([data-offscreen], [data-offscreen] *).fx-curtain::after,
+  section[id][data-offscreen]::after {
+    animation: none !important;
+  }
 }
 
 /* ===================================================================================================
