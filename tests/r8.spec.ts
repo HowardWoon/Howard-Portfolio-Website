@@ -1,3 +1,4 @@
+import { reactLive } from './react-live';
 import { test, expect, devices } from '@playwright/test';
 
 // Round-8 features: route wipe (FX-35), stack focus (FX-36), section dock (FX-37).
@@ -10,6 +11,9 @@ test.describe('after boot', () => {
   test('RUN SIMULATOR wipes to the simulator and leaves no overlay behind', async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
     const link = page.locator('a', { hasText: 'RUN SIMULATOR' }).first();
+    // R97 (CI flake): the wipe is React's; a click before the card hydrated left the page where it was
+    await link.scrollIntoViewIfNeeded();
+    await expect.poll(() => reactLive(link), { timeout: 30_000 }).toBe(true);
     const href = await link.getAttribute('href');
     await link.scrollIntoViewIfNeeded();
     await link.click();

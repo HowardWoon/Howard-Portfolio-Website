@@ -1,3 +1,4 @@
+import { reactLive } from './react-live';
 import { test, expect, devices, type Page, type BrowserContextOptions } from '@playwright/test';
 
 // Round 82 (owner: "audit now, fix after"; the 3D street still looked like a "fixed algorithm" and "not very stable,
@@ -410,6 +411,9 @@ test.describe('R82 gallery', () => {
       await page.goto('/', { waitUntil: 'networkidle' });
       const key = page.getByRole('button', { name: /view full resolution/i }).first();
       await key.scrollIntoViewIfNeeded();
+      // R97: CI missed 1 of 8 on two tries - a click before the gallery hydrated does nothing; the key is what this
+      // test is about, not an early tap (tests/react-live.ts)
+      await expect.poll(() => reactLive(key), { timeout: 30_000 }).toBe(true);
       await key.click();
       const open = await page
         .locator('[role="dialog"][aria-modal="true"]')
