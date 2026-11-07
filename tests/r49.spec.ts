@@ -28,8 +28,6 @@ for (const [name, w, h] of [
       if (r.url().includes('/mascots/') && r.status() >= 400) failed.push(`${r.status()} ${r.url()}`);
     });
     await page.goto('/', { waitUntil: 'networkidle' });
-    // it is not there (and its sheets are not requested) while the gate is up
-    await expect(page.locator('[data-site-mascot]')).toHaveCount(0);
     await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
     const cat = page.getByRole('button', { name: 'Boop the cat' });
     await expect(cat).toBeVisible({ timeout: 15_000 });
@@ -163,16 +161,29 @@ test('source: the section rail and the dock are the first things mounted after t
 // What must hold on any machine: the rail is on screen BEFORE the settled, one-per-idle queue behind it has finished.
 test('the section rail is on screen before the rest of the after-boot queue has mounted', async ({ page }) => {
   await page.setViewportSize({ width: 1600, height: 900 });
-  await page.goto('/', { waitUntil: 'networkidle' });
-  await page.evaluate(() => {
+  // R98: with no boot gate the queue can finish before networkidle, so the watcher is in place before the page loads
+  // (record by record, in order: on a slow cold load one callback can carry both changes, so the page's state at the
+  // callback cannot tell which came first)
+  await page.addInitScript(() => {
     const w = window as unknown as { __railFirst?: boolean };
-    const seen = () => !!document.querySelector('nav[aria-label="Section navigation"]');
-    const done = () => document.documentElement.dataset.afterBoot === 'done';
-    const mo = new MutationObserver(() => {
-      if (w.__railFirst === undefined && (seen() || done())) w.__railFirst = seen() && !done();
+    const isRail = (n: Node) =>
+      n instanceof Element &&
+      (n.matches('nav[aria-label="Section navigation"]') || !!n.querySelector('nav[aria-label="Section navigation"]'));
+    const mo = new MutationObserver((records) => {
+      for (const r of records) {
+        if (w.__railFirst !== undefined) return;
+        if (r.type === 'childList' && [...r.addedNodes].some(isRail)) w.__railFirst = true;
+        else if (
+          r.type === 'attributes' &&
+          r.attributeName === 'data-after-boot' &&
+          document.documentElement.dataset.afterBoot === 'done'
+        )
+          w.__railFirst = false;
+      }
     });
-    mo.observe(document.documentElement, { attributes: true, childList: true, subtree: true });
+    mo.observe(document, { attributes: true, childList: true, subtree: true });
   });
+  await page.goto('/', { waitUntil: 'networkidle' });
   await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
   await expect(page.getByRole('navigation', { name: 'Section navigation' })).toBeVisible({ timeout: 10_000 });
   await expect(page.locator('html[data-after-boot="done"]')).toHaveCount(1, { timeout: 15_000 });
