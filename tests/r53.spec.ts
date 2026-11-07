@@ -251,6 +251,10 @@ test('the focus ring belongs to the keyboard: none on load, Tab draws it, a clic
   await expect(page.locator('html[data-kbd]')).toHaveCount(0);
   await page.keyboard.press('Tab');
   expect(await outline(), 'keyboard: the ring').toBe('solid 3px');
+  // (R98: with no gate the first Tab lands on the page's first control; Shift+Tab from there would leave the page,
+  // so step one further and come back - the ring stays on the way back too)
+  await page.keyboard.press('Tab');
+  expect(await outline()).toBe('solid 3px');
   await page.keyboard.press('Shift+Tab');
   expect(await outline()).toBe('solid 3px');
   await page.mouse.click(5, 5);
