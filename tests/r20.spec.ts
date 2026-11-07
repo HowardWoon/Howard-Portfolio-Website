@@ -65,6 +65,9 @@ test('project cards unfold on a CSS view timeline: tilted as they enter, flat by
   await home(page);
   const card = page.locator('#projects [data-fx].group').first();
   await expect(card).toHaveAttribute('data-unfold', 'css');
+  // R95: a section far off screen drops its scroll-driven animations (tests/r95): read the unfold with it on screen
+  await card.evaluate((e) => e.scrollIntoView({ block: 'center' }));
+  await expect(page.locator('#projects[data-offscreen]')).toHaveCount(0);
   expect(await card.evaluate((e) => getComputedStyle(e).animationName)).toBe('fx-unfold');
   expect(await card.evaluate((e) => (e as HTMLElement).style.transform)).toBe(''); // no per-frame inline writes
 
