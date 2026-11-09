@@ -18,6 +18,10 @@
     --pop-blue: #2b4bff;
     --pop-red: #ff4b2b;
     --pop-mint: #3ddc97;
+    /* R111 section grounds (decoration only, never a SIGNAL meaning) */
+    --ground-lilac: #c9bcff;
+    --ground-lime: #d4ff3a;
+    --ground-yellow: #ffe45c;
     /* Fallback only — <SiteHeader/> measures itself and overwrites this on every resize */
     --header-h: 88px;
     color-scheme: only light;

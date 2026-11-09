@@ -147,7 +147,7 @@ function MagnifiedHeadline() {
         ref={beamRef}
         aria-hidden="true"
         data-torch
-        className="absolute inset-0 !mt-0 pointer-events-none overflow-hidden bg-paper"
+        className="absolute inset-0 !mt-0 pointer-events-none overflow-hidden bg-ground-lilac"
         style={{ clipPath: HEADLINE_CLOSED }}
       >
         <div
@@ -184,6 +184,53 @@ function MagnifiedHeadline() {
   );
 }
 
+/**
+ * R111 (owner, Pinterest references: the round "AVAILABLE FROM OCTOBER" sticker): a lime sticker with its words set on a
+ * circle (SVG textPath), stuck on the portrait's top-left corner with a hard ink offset. The words are the Contact
+ * card's own ("AVAILABLE FOR 2026 ROLES"). Decoration for the eye, read once by screen readers.
+ */
+function HireSticker() {
+  return (
+    <div
+      data-hire-sticker
+      role="img"
+      aria-label="Available for 2026 roles"
+      className="pointer-events-none absolute -left-3 top-16 z-50 h-28 w-28 sm:-left-10 sm:top-20 sm:h-32 sm:w-32"
+    >
+      <svg viewBox="0 0 120 120" className="h-full w-full -rotate-12 drop-shadow-[4px_4px_0_#0a0a0a]" aria-hidden>
+        <defs>
+          <path id="hire-ring" d="M60,60 m-44,0 a44,44 0 1,1 88,0 a44,44 0 1,1 -88,0" />
+        </defs>
+        <circle cx="60" cy="60" r="57" fill="#D4FF3A" stroke="#0a0a0a" strokeWidth="3" />
+        <circle cx="60" cy="60" r="31" fill="#0a0a0a" />
+        <text
+          fill="#0a0a0a"
+          style={{
+            fontFamily: 'var(--font-mono), monospace',
+            fontSize: '11.5px',
+            fontWeight: 800,
+            letterSpacing: '1.6px',
+          }}
+        >
+          {/* the words run once round the whole ring (textLength = the circle's length, 2 x pi x 44) */}
+          <textPath href="#hire-ring" startOffset="0" textLength="276" lengthAdjust="spacing">
+            AVAILABLE FOR 2026 ROLES ·
+          </textPath>
+        </text>
+        <text
+          x="60"
+          y="66"
+          textAnchor="middle"
+          fill="#D4FF3A"
+          style={{ fontFamily: 'var(--font-display), sans-serif', fontSize: '19px', fontWeight: 800 }}
+        >
+          2026
+        </text>
+      </svg>
+    </div>
+  );
+}
+
 export default function BikebearHero() {
   const containerRef = useRef<HTMLElement>(null);
 
@@ -209,7 +256,7 @@ export default function BikebearHero() {
       ref={containerRef}
       // R98: the hero sinks as the page scrolls on; it no longer fades (R87: motion is a transition, not a fade)
       style={{ scale, y: yTranslate }}
-      className="hero-fit relative min-h-screen-safe bg-paper text-ink flex flex-col justify-between overflow-hidden"
+      className="hero-fit relative min-h-screen-safe bg-ground-lilac text-ink flex flex-col justify-between overflow-hidden"
     >
       {/* Main Hero Body */}
       <div className="hero-wrap relative flex-1 flex items-center w-full max-w-[1440px] mx-auto px-4 xs:px-5 sm:px-10 lg:px-16 pt-[calc(var(--header-h)+1.75rem)] sm:pt-[calc(var(--header-h)+3rem)] pb-14 lg:pt-[calc(var(--header-h)+clamp(1rem,3.6svh,2.75rem))] lg:pb-[clamp(1.25rem,5svh,3.5rem)] z-10">
@@ -292,6 +339,8 @@ export default function BikebearHero() {
                 </div>
               </div>
 
+              {/* R111: the round availability sticker on the portrait's corner (the words of the Contact card) */}
+              <HireSticker />
               {/* Main Portrait Frame – hover (or tap) reveals Spider-Man under the cursor, see spider-reveal.tsx */}
               <TiltCard
                 maxTilt={6}

@@ -30,6 +30,7 @@ import {
 import { SiteFooter } from '@/components/site-footer';
 import { AfterBoot } from '@/components/after-boot';
 import { LogoWall } from '@/components/logo-wall';
+import { FigureBand } from '@/components/figure-band';
 import dynamic from 'next/dynamic';
 import { RouteWipeClear } from '@/components/fx/route-wipe';
 import { Colophon } from '@/components/press/colophon';
@@ -59,7 +60,8 @@ export function PortfolioPage() {
             so screen-reader "jump to main" skipped the headline and the call-to-action buttons). */}
         <main id="main-content" tabIndex={-1} className="w-full outline-none">
           {/* Hero */}
-          <div className="w-full relative z-10">
+          {/* R111: an ink ground behind the hero: as it sinks on scroll it lifts off like a card (paper showed round it) */}
+          <div className="w-full relative z-10 bg-ink">
             <BikebearInspiredHero />
           </div>
 
@@ -90,6 +92,9 @@ export function PortfolioPage() {
               ]}
             />
           </VelocitySkew>
+
+          {/* R111: the four Build Sheet figures on a lime band (Pinterest-reference stat band) */}
+          <FigureBand />
 
           {/* R22: hardware-style status strip (clock, ping, X-ray mode); adds controls, changes no content */}
           <SystemStatusBar />

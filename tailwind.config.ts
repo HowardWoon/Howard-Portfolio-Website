@@ -56,6 +56,13 @@ const config: Config = {
           cream: '#FFF7E0', // alternate section band
           deep: '#F4EEDC', // inset panels inside white cards
         },
+        // R111 (owner, Pinterest references: "bold colour blocks"): section GROUNDS - decoration only, never a SIGNAL
+        // meaning (a meaning is always a labelled chip / strip). Lime is also the decoration CTA colour.
+        ground: {
+          lilac: '#C9BCFF',
+          lime: '#D4FF3A',
+          yellow: '#FFE45C',
+        },
         pop: {
           yellow: '#FFC700',
           blue: '#2B4BFF', // Bauhaus blue – also used for accent text (6.3:1)

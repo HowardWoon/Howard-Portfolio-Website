@@ -147,7 +147,11 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
 6. **3D must look sharp (R73, owner: "why it look so blur?"):** no soft point sprites near the camera, a tight low bloom,
    fog behind the scene, MSAA on every composer tier (30-design-system E45). Every scene control is clicked in a test
    that fails on any page error (`tests/r73`).
-7. **Backgrounds are clean: no objects behind sections (R77, owner, About / Honors screenshots: "remove all the object
+7. **R111 (owner, 9 Nov 2026, Pinterest references: "bold colour blocks"; replaces the "plain paper" half of R77 below):**
+   a section may sit on ONE flat ground colour (`ground.lilac` / `ground.lime` / `ground.yellow` in tailwind.config.ts, or
+   paper). Grounds and lime CTAs are decoration, never a SIGNAL meaning. Everything else in R77 stands: no objects,
+   patterns, grids, gradients or textures behind a section. Guard: `tests/r111`. docs/R111-COLOUR-BLOCKS-HERO.md.
+   **Backgrounds are clean: no objects behind sections (R77, owner, About / Honors screenshots: "remove all the object
    at background, so messy, unorganised"; replaces R74 "objects floating flying behind" and R53 "geometry ... floating"
    in every section):** the R74 flyers (`components/fx/flyers.tsx`) and the R53 section backdrop
    (`components/fx/section-backdrop.tsx`) are DELETED - never add floating / flying stickers, shapes or icons behind a
