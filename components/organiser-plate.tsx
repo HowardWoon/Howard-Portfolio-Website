@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { ORGANISERS, type OrganiserId } from '@/lib/organisers';
+import { SIGNAL, type Signal } from '@/lib/signal';
 
 /**
  * R88 P4 organiser plate (owner: "logo inconsistent - right of the badge tag on one card, under it on another,
@@ -12,7 +13,16 @@ import { ORGANISERS, type OrganiserId } from '@/lib/organisers';
  * hover - or keyboard focus anywhere in the card - prints the plate: the hard ink offset snaps in (no transition, no
  * resting transform). A mark drawn for a dark ground (`dark`) sits on an ink chip inside the same window.
  */
-export function OrganiserPlate({ id, size = 'md' }: { id: OrganiserId; size?: 'sm' | 'md' }) {
+export function OrganiserPlate({
+  id,
+  size = 'md',
+  signal,
+}: {
+  id: OrganiserId;
+  size?: 'sm' | 'md';
+  /** R103: the card's SIGNAL; its soft tint is the plate's ground (like the Experience company card) */
+  signal?: Signal;
+}) {
   const o = ORGANISERS[id];
   const md = size === 'md';
   const logo = (
@@ -56,22 +66,35 @@ export function OrganiserPlate({ id, size = 'md' }: { id: OrganiserId; size?: 's
       </span>
     );
 
+  // R103 (owner: "the HOSTED BY strip is ugly ... redo the logo placement, like my Experience company card"): a
+  // company card - the logo on its own white tile, an ink HOSTED BY tag over the organiser's printed name - on the
+  // project's soft SIGNAL tint, hard shadow. Same size and place on every card (tests/r83).
   return (
     <div
       data-organiser={id}
-      className="org-strip flex w-full min-w-0 flex-col overflow-hidden rounded-xl border-3 border-ink bg-white sm:flex-row hover:-translate-x-[3px] hover:-translate-y-[3px] hover:shadow-brutal-sm group-focus-within:-translate-x-[3px] group-focus-within:-translate-y-[3px] group-focus-within:shadow-brutal-sm"
+      className={`org-card flex w-full min-w-0 items-center gap-3 rounded-xl border-3 border-ink p-2.5 shadow-brutal-sm xs:gap-4 xs:p-3 ${
+        signal ? SIGNAL[signal].soft : 'bg-white'
+      }`}
     >
-      <span className="flex shrink-0 items-center whitespace-nowrap bg-ink px-3 py-1 font-mono text-xs font-extrabold tracking-[0.14em] text-white">
-        HOSTED BY
+      <span
+        data-org-logo
+        className="relative grid h-14 w-24 shrink-0 place-items-center rounded-lg border-2 border-ink bg-white xs:h-16 xs:w-32"
+      >
+        {o.dark ? (
+          <span className="relative h-[78%] aspect-square rounded-[6px] bg-ink">
+            <span className="absolute inset-0.5">{logo}</span>
+          </span>
+        ) : (
+          <span className="absolute inset-2">{logo}</span>
+        )}
       </span>
-      {/* flex-1 only in the row layout: in the phone column its zero basis would override the fixed height. Under
-          375 px (Galaxy Fold) the name has no room beside the logo, so it sits under it, at one height for every card */}
-      <span className="flex h-[5.75rem] min-w-0 flex-col justify-center gap-1.5 px-3 xs:h-[4.25rem] xs:flex-row xs:items-center xs:gap-3 sm:flex-1">
-        {frame}
-        <span aria-hidden className="hidden h-full w-0 shrink-0 border-l-3 border-ink xs:block" />
+      <span className="flex min-w-0 flex-col items-start gap-1.5">
+        <span className="rounded-md bg-ink px-2 py-0.5 font-mono text-xs font-extrabold tracking-[0.16em] text-white">
+          HOSTED BY
+        </span>
         <span
           data-org-name
-          className="min-w-0 text-center font-mono text-xs font-extrabold uppercase leading-tight tracking-[0.06em] text-ink xs:text-left sm:text-sm"
+          className="min-w-0 font-display text-base font-extrabold leading-tight text-ink [overflow-wrap:anywhere] sm:text-lg"
         >
           {o.name}
         </span>

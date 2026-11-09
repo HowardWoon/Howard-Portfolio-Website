@@ -46,11 +46,11 @@ test('every label is copied from its own text, and the text is read in full whil
   await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
   const blocks = page.locator('[data-lf]');
-  // every project: its description + its highlights; every role: its bullets; every honour card shown with a text
-  // description (Honours shows its first cards until its own filter opens the rest)
-  await expect(page.locator('#projects [data-lf]')).toHaveCount(14);
+  // every role: its bullets. R103 / R106 (owner: "rather show more words ... the whole product"): the project cards
+  // and the honour cards print their text in full, no labels-first blocks (tests/r103)
+  await expect(page.locator('#projects [data-lf]')).toHaveCount(0);
   await expect(page.locator('#experience [data-lf]')).toHaveCount(3);
-  expect(await page.locator('#honors [data-lf]').count()).toBeGreaterThanOrEqual(6);
+  await expect(page.locator('#honors [data-lf]')).toHaveCount(0);
   const report = await blocks.evaluateAll((els) =>
     els.map((b) => {
       const full = b.querySelector<HTMLElement>('[data-lf-full]')!;
@@ -78,7 +78,8 @@ for (const width of [390, 1440]) {
   test(`READ MORE opens the text in place, by keyboard and by tap (${width})`, async ({ page }) => {
     await page.setViewportSize({ width, height: width < 800 ? 844 : 900 });
     await home(page);
-    const block = page.locator('#project-proofpay [data-lf]').first();
+    // R103: the project cards print their text in full; READ MORE lives on the Experience roles
+    const block = page.locator('#experience [data-lf]').first();
     const more = block.locator('[data-lf-more]');
     const full = block.locator('[data-lf-full]');
     await more.evaluate((e) => e.scrollIntoView({ block: 'center' }));
@@ -90,7 +91,7 @@ for (const width of [390, 1440]) {
     await expect(more).toHaveAttribute('aria-expanded', 'true');
     await expect(more).toHaveText(/READ LESS/);
     await expect(full).not.toHaveClass(/sr-only/);
-    await expect(full).toContainText('Gonka-powered AI validates evidence.');
+    await expect(full).not.toBeEmpty();
     // the key did not move (the text opens below it)
     expect(Math.abs((await more.boundingBox())!.y - before)).toBeLessThan(2);
     const size = await more.boundingBox();

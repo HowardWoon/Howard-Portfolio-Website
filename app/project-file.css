@@ -1,0 +1,135 @@
+/* R103 project card text (components/stacked-projects.tsx, docs/R103-PROJECT-FILE.md). Owner: "the key architecture
+   chips are too thin ... show more words, the whole product, real technical info". A role line, the build points in
+   full as a numbered ledger, and the technical file: a ruled sheet (heading cell | facts), its source printed under
+   it. Ink / paper only (no colour without a meaning), 3 px rules, hard offset shadow, mono labels. */
+.pj-role {
+  border-left: 6px solid #0a0a0a;
+  padding: 2px 0 2px 10px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  color: #0a0a0a;
+}
+
+.pj-built {
+  border: 3px solid #0a0a0a;
+  border-radius: 10px;
+  background: #fff;
+  overflow: clip;
+}
+.pj-built-head,
+.pj-file-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #0a0a0a;
+  color: #fff;
+  padding: 8px 14px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.pj-built-list > li {
+  display: grid;
+  grid-template-columns: 2.25rem 1fr;
+  gap: 12px;
+  align-items: start;
+  padding: 12px 14px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.55;
+  color: var(--ink-soft, #2b2b2b);
+}
+.pj-built-list > li + li {
+  border-top: 2px solid #0a0a0a;
+}
+.pj-built-n {
+  display: grid;
+  place-items: center;
+  height: 1.9rem;
+  border-radius: 6px;
+  background: #0a0a0a;
+  color: var(--pop-yellow);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.pj-file {
+  border: 3px solid #0a0a0a;
+  border-radius: 10px;
+  background: var(--paper-cream);
+  box-shadow: 5px 5px 0 0 #0a0a0a;
+  overflow: clip;
+}
+.pj-file-count {
+  border: 2px solid #fff;
+  border-radius: 4px;
+  padding: 1px 6px;
+  letter-spacing: 0.1em;
+}
+.pj-file-row {
+  display: grid;
+  grid-template-columns: minmax(8rem, 11rem) 1fr;
+  border-top: 2px solid #0a0a0a;
+}
+.pj-file-bar + .pj-file-row {
+  border-top: 0;
+}
+.pj-file-head {
+  border-right: 2px solid #0a0a0a;
+  background: #fff;
+  padding: 12px 14px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1.35;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #0a0a0a;
+}
+.pj-file-lines {
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+}
+.pj-file-lines > li {
+  position: relative;
+  padding-left: 16px;
+  font-size: 0.92rem;
+  font-weight: 500;
+  line-height: 1.55;
+  color: #0a0a0a;
+  overflow-wrap: anywhere;
+}
+.pj-file-lines > li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 7px;
+  height: 7px;
+  background: #0a0a0a;
+}
+.pj-file-source {
+  border-top: 2px dashed #0a0a0a;
+  padding: 8px 14px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #0a0a0a;
+}
+@media (max-width: 639px) {
+  .pj-file-row {
+    grid-template-columns: 1fr;
+  }
+  .pj-file-head {
+    border-right: 0;
+    border-bottom: 2px solid #0a0a0a;
+  }
+}

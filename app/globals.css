@@ -5284,3 +5284,26 @@ html[data-skip='on'] :is(#about, #projects, #experience, #honors) > * {
     content-visibility: visible;
   }
 }
+
+/* R105 Contact credential (components/contact-section.tsx): three printed keys instead of a thick underline that broke
+   over two lines (owner circled it). Each key keeps its own 2 px ink edge and hard shadow, so a wrap stays tidy. */
+.ct-cred {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 4px;
+}
+.ct-cred-key {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  border: 2px solid #0a0a0a;
+  border-radius: 6px;
+  padding: 4px 10px;
+  box-shadow: 3px 3px 0 0 #0a0a0a;
+  font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}

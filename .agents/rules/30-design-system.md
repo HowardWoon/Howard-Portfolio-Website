@@ -52,6 +52,13 @@ Rules:
 - R101 About is a data plate (docs/R101-ABOUT-PLATE.md): one plate holds the label bar, the claim, the paragraph and
   the Build Sheet counters as a ruled 2 x 2 subgrid; a counter sizes to its cell (container query on `.ab-cell`, never
   on the subgrid link). Never split it back into a tilted tag + headline + separate cards. Guard: `tests/r101`.
+- R103 - R106 (owner, docs/R103-R106-PROJECTS-HONOURS-EXPERIENCE-CONTACT.md; replaces the R92 labels-first rule on
+  projects and honours): project and honour cards print their text IN FULL - no label chips + READ MORE there (READ
+  MORE stays on the Experience bullets). Every project has a role line and a TECHNICAL FILE of real facts with its
+  source printed (its deck, README or site - never invented). The organiser is a company card (logo tile + HOSTED BY +
+  name, project tint). Honours results are a ticket wall of balanced columns, each card as tall as its content. On the
+  LEADERSHIP track each PEKOM treasurer role is its own card with a ledger (ALL keeps the summary). No thick drawn
+  underline under a phrase: a phrase that needs weight becomes printed keys. Guard: `tests/r103`.
 - No AI-generated imagery. Use Howard's real photos (`public/images/`) and vector / CSS graphics. One owner-approved
   exception (R83, owner upload): the chibi Doom walking clip, cut into the frames of `public/images/doom-walk/` and shown only
   by `components/doom-walk.tsx`.

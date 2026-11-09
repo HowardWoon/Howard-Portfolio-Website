@@ -19,7 +19,7 @@ import { HeadlineFigures, ResultsBoard, RolesGrid, Transcript } from './honors-a
 import { useFocusTrap } from '@/lib/use-focus-trap';
 import { useLatest } from '@/lib/use-latest';
 import { useScrollLock } from '@/lib/use-scroll-lock';
-import { LabelFirst, Marked } from './label-first';
+import { Marked } from './label-first';
 import { useViewTransitions, withViewTransition } from '@/lib/view-transition';
 import {
   Trophy,
@@ -689,9 +689,15 @@ export default function HonorsSection() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={vt ? undefined : { opacity: 0, y: -20, position: 'absolute', inset: 0 }}
                 transition={{ duration: 0.4, type: 'spring', bounce: 0.2 }}
-                // R21: no orphan card. Many items: featured wins 3 per row, the rest 4 per row (12-col grid); on 2 columns
-                // the first win spans the row so the rest pair up.
-                className={`grid grid-cols-1 lg:grid-cols-2 ${activeItems.length > 2 ? 'xl:grid-cols-12' : 'items-start'} gap-7`}
+                // R106 (owner: "a big empty space ... not organised, plan it like a complete thing"): a ticket wall -
+                // balanced columns where every card is exactly as tall as its content (the 12-col grid stretched each
+                // card to the tallest one in its row and left white holes). Two cards or fewer: a plain 2-up row.
+                data-honor-wall
+                className={
+                  activeItems.length > 2
+                    ? 'columns-1 md:columns-2 xl:columns-3 gap-7'
+                    : 'grid grid-cols-1 lg:grid-cols-2 items-start gap-7'
+                }
               >
                 {activeItems.map((item, itemIdx) => {
                   const Icon = item.icon;
@@ -706,13 +712,6 @@ export default function HonorsSection() {
                           ? 'monsun-bridge'
                           : undefined;
                   const hit = !!trail && trail.ids.some((id) => linked === id);
-                  // featured wins fill their rows: 3 per row, or 2 per row when their count does not divide by 3
-                  const featuredSpan =
-                    activeItems.filter((i) => i.isFeatured).length % 3 === 0 ? 'xl:col-span-4' : 'xl:col-span-6';
-                  const span =
-                    activeItems.length > 2
-                      ? `${isFeatured ? featuredSpan : 'xl:col-span-3'} ${itemIdx === 0 && activeItems.length % 2 === 1 ? 'lg:col-span-2 xl:col-span-4' : ''}`
-                      : '';
 
                   return (
                     <m.div
@@ -723,7 +722,7 @@ export default function HonorsSection() {
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.4, delay: itemIdx * 0.08 }}
-                      className={`relative group rounded-2xl border-3 border-ink bg-white overflow-hidden flex flex-col ${span} ${activeItems.length > 2 ? 'h-full' : ''} transition-[transform,box-shadow] duration-200 hover:-translate-x-1 hover:-translate-y-1 ${
+                      className={`relative group rounded-2xl border-3 border-ink bg-white overflow-hidden flex flex-col w-full ${activeItems.length > 2 ? 'mb-7 break-inside-avoid' : ''} transition-[transform,box-shadow] duration-200 hover:-translate-x-1 hover:-translate-y-1 ${
                         isFeatured
                           ? `shadow-brutal-lg hover:shadow-brutal-xl ${FX.podiumGlint ? 'fx-glint' : ''}`
                           : 'shadow-brutal hover:shadow-brutal-lg'
@@ -788,28 +787,27 @@ export default function HonorsSection() {
                           ) : null}
                         </div>
 
-                        {/* R92: a text description shows its labels first, the sentence word for word behind READ
-                            MORE; the two academic awards keep their paragraph with its transcript / results board */}
-                        {typeof item.description === 'string' && item.descriptionLabels ? (
-                          <LabelFirst labels={item.descriptionLabels} source={item.description} className="mb-6">
-                            <p className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium">
-                              <Marked text={item.description} keys={item.descriptionLabels} />
-                            </p>
-                          </LabelFirst>
+                        {/* R106 (owner: more information, not hidden): the description is printed in full (the R92
+                            labels + READ MORE are retired here, as on the project cards); the two academic awards keep
+                            their paragraph with its transcript / results board */}
+                        {typeof item.description === 'string' ? (
+                          <p className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium mb-6">
+                            <Marked text={item.description} keys={item.descriptionLabels ?? []} />
+                          </p>
                         ) : (
                           <div className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium mb-6">
                             {item.description}
                           </div>
                         )}
 
-                        <div className="space-y-2.5 mb-8">
+                        <div className="space-y-2.5 mb-6">
                           {item.highlights.map((hl, hlIdx) => (
                             <div
                               key={hlIdx}
                               className="flex items-start gap-2.5 text-sm text-ink-soft font-sans font-medium"
                             >
                               <div
-                                className={`w-5 h-5 rounded-full grid place-items-center shrink-0 mt-0.5 border-2 border-ink ${c.fill}`}
+                                className={`w-5 h-5 rounded-[4px] grid place-items-center shrink-0 mt-0.5 border-2 border-ink ${c.fill}`}
                               >
                                 <CheckCircle2 className="w-3 h-3 text-ink" strokeWidth={3} />
                               </div>
@@ -818,10 +816,9 @@ export default function HonorsSection() {
                           ))}
                         </div>
 
-                        <div className="flex-1" />
-
-                        {/* Footer: Stat Callout & Certificate Link */}
-                        <div className="mt-auto pt-6 border-t-2 border-dashed border-ink flex flex-col items-start gap-5">
+                        {/* Footer (R106: the ticket stub, right under the text - no stretched gap above it): the
+                            emblem and the certificate key side by side, wrapping on a narrow card */}
+                        <div className="pt-5 border-t-2 border-dashed border-ink flex flex-wrap items-center justify-between gap-4">
                           {/* Big Stat Callout (sticker) */}
                           <HonorEmblem
                             kind={item.emblem}

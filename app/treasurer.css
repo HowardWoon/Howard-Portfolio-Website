@@ -1,0 +1,88 @@
+/* R104 treasurer cards (components/experience-section.tsx, LEADERSHIP track; docs/R104-TREASURER-SPLIT.md). One record
+   per PEKOM treasurer role: pink LEADERSHIP plate (the SIGNAL meaning), the event as the title, the role's own text,
+   and a ruled ledger of its figures. 3 px ink, hard offset shadows, square keys, mono labels. */
+.tr-card {
+  border: 3px solid #0a0a0a;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 8px 8px 0 0 #0a0a0a;
+  overflow: clip;
+}
+.tr-plate {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  border-bottom: 3px solid #0a0a0a;
+  padding: 12px 20px;
+}
+.tr-num {
+  display: grid;
+  place-items: center;
+  min-width: 3rem;
+  height: 2.25rem;
+  padding: 0 8px;
+  border-radius: 6px;
+  background: #0a0a0a;
+  color: var(--pop-yellow);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+.tr-role {
+  border-left: 6px solid #0a0a0a;
+  padding-left: 10px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.5;
+  color: #0a0a0a;
+}
+.tr-ledger {
+  border: 3px solid #0a0a0a;
+  border-radius: 10px;
+  background: var(--paper-cream);
+  box-shadow: 4px 4px 0 0 #0a0a0a;
+  overflow: clip;
+}
+.tr-ledger-head {
+  background: #0a0a0a;
+  color: #fff;
+  padding: 8px 14px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.tr-ledger-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+  padding: 12px 14px;
+}
+.tr-ledger-row + .tr-ledger-row {
+  border-top: 2px solid #0a0a0a;
+}
+.tr-ledger-row dt {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #0a0a0a;
+}
+.tr-ledger-row dd {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0a0a0a;
+}
+@media (max-width: 639px) {
+  .tr-plate {
+    padding: 10px 14px;
+  }
+}

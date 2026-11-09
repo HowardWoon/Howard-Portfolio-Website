@@ -12,7 +12,6 @@ import { SloganTape } from '@/components/marquees';
 import { ShapeBurst } from '@/components/fx/shape-burst';
 import { RoleProof } from '@/components/role-proof';
 import { openResume } from '@/lib/resume';
-import { Tagline } from '@/components/label-first';
 import { OsWindow, WindowDesk } from '@/components/os-window';
 import { PillPit, type PitBadge } from '@/components/pill-pit';
 import { SIGNAL, type Signal } from '@/lib/signal';
@@ -307,8 +306,14 @@ export default function ContactSection() {
                   <h3 className="font-display text-[clamp(1.5rem,7.5vw,1.875rem)] font-extrabold uppercase text-ink tracking-[-0.02em] leading-none">
                     Howard Woon Hao Zhe
                   </h3>
-                  {/* R92: an ink label (blue = controls only; Contact shows no signal legend, so a rule, not a stripe) */}
-                  <Tagline>Software Engineering @ Universiti Malaya (4.00 CGPA)</Tagline>
+                  {/* R105 (owner, circled: "the drawn line under these words is ugly, messy, not brutalist"): the
+                      thick underline broke over two lines; the credential is now three printed keys - the field in
+                      ink, the university on paper, the CGPA on the ACADEMIC orange (SIGNAL KEY: grades, university) */}
+                  <p data-credential className="ct-cred">
+                    <span className="ct-cred-key bg-ink text-white">Software Engineering</span>
+                    <span className="ct-cred-key bg-white text-ink">@ Universiti Malaya</span>
+                    <span className={`ct-cred-key text-ink ${SIGNAL.academic.fill}`}>4.00 CGPA</span>
+                  </p>
                   <p className="text-[0.95rem] text-ink-soft leading-relaxed font-sans font-medium pt-1">
                     Open to full-time roles, high-impact backend engineering, distributed systems architecture, and AI
                     agent research collaborations.

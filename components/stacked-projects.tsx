@@ -3,7 +3,8 @@
 import React from 'react';
 import { ProjectIndex, type ProjectIndexItem } from './project-index';
 import { OrganiserPlate } from './organiser-plate';
-import { LabelFirst, Marked, Tagline, pointLabel } from './label-first';
+import { Marked, Tagline, pointLabel } from './label-first';
+import '@/app/project-file.css';
 import type { OrganiserId } from '@/lib/organisers';
 import { ScrollUnfold } from './fx/scroll-unfold';
 import { TextRoll } from './fx/text-roll';
@@ -30,7 +31,6 @@ import {
   ArrowUpRight,
   Sparkles,
   Layers,
-  CheckCircle2,
   Network,
   Focus,
 } from 'lucide-react';
@@ -64,6 +64,12 @@ interface ProjectData {
   /** R83: who hosted it (owner's mapping: Supervity, MUBA, DOSM, GDG for BILAHUJAN and Sensor X Sensei, UM for the coursework) */
   organiser: OrganiserId;
   galleryPhotos?: { src: string; alt: string; rotation: number; w: number; h: number }[];
+  /** R103 (owner: "put more real technical info ... not fake"): the team / role line, read from `source` */
+  role: string;
+  /** R103: where every line of `file` comes from (the project's own pitch deck, README or website) */
+  source: string;
+  /** R103 technical file: sections of real facts from `source`, shown in full on the card */
+  file: { head: string; lines: string[] }[];
 }
 
 export const projects: ProjectData[] = [
@@ -96,6 +102,45 @@ export const projects: ProjectData[] = [
       { label: 'Wasted Compute', value: 'Zero' },
     ],
     tags: ['FastAPI', 'LangGraph', 'PostgreSQL', 'HubSpot API', 'React', 'Python'],
+    role: 'Co-engineer, Team LEARNERS (lead engineer Wong En Sheng) · Track 04 Sales Intelligence',
+    source: 'ZeroLag pitch deck (AutoPilot Asia 2026, Round 2)',
+    file: [
+      {
+        head: 'The problem',
+        lines: [
+          '45% of inbound traffic is duplicate data or unqualified noise.',
+          'AI agents blindly processing bad data drain API budgets.',
+          'Automated outreach without native PDPA / GDPR checks creates enterprise liability.',
+          'SDRs filter bottlenecks by hand instead of closing revenue.',
+        ],
+      },
+      {
+        head: 'The five operators',
+        lines: [
+          '01 Identity Resolution: domain extraction and HubSpot mapping.',
+          '02 Dedupe Engine: exact / fuzzy matching and suppression-list enforcement.',
+          '03 Compliance Firewall: PDPA 2024 and GDPR legal validation.',
+          '04 Signal Scoring: firmographic ICP weighting.',
+          '05 Payload Generation: VIP fast-track email drafting.',
+        ],
+      },
+      {
+        head: 'Deterministic halt states',
+        lines: [
+          'Operators 02 and 03 are strict logic gates: a lead on the dedupe blocklist or failing the PDPA 2024 regional check is dropped before steps 04 and 05.',
+          'Result: zero wasted LLM compute, zero legal liability.',
+        ],
+      },
+      {
+        head: 'Governance node',
+        lines: [
+          'Dynamic thresholding: ICP scoring tolerances are set live from UI dials and re-route how the Orchestrator ranks leads.',
+          'Exception Workbench: every hard halt is routed to a human-in-the-loop queue.',
+          'Hard SQL write-backs: a resolved buying group is INSERTed into a custom PostgreSQL buying_group schema.',
+          'Telemetry: a FastAPI engine pushes live operational insight and SDR capacity metrics.',
+        ],
+      },
+    ],
     deckUrl: '/documents/supervity-pitchdeck.pdf',
     simulatorId: 'zerolag',
     orchestratorUrl:
@@ -130,6 +175,42 @@ export const projects: ProjectData[] = [
       { label: 'Escrow Logic', value: 'Partial Settlement' },
     ],
     tags: ['Sui Move', 'Next.js', 'USDC Stablecoin', 'TypeScript', 'Gonka Router'],
+    role: 'Team Chain Reaction · Sui Track 01: Payments & Stablecoins',
+    source: 'ProofPay pitch deck (MUBA Blockchain Hackathon 2026, Sui Track 01)',
+    file: [
+      {
+        head: 'The problem',
+        lines: [
+          'Buyers will not release cash before goods are verified; suppliers will not ship before payment is secured.',
+          'The result: slow trade, frozen invoices and working capital trapped on both sides.',
+          'Beachhead: repeat B2B trade inspected after shipment - food distributors, ingredient suppliers, packaging vendors and central kitchens in Malaysia and Southeast Asia.',
+        ],
+      },
+      {
+        head: 'Settlement flow',
+        lines: [
+          '1 Escrow, 2 Details, 3 Delivery, 4 Settle: one purchase order, one enforceable state.',
+          'The supplier confirms before funding, so the buyer only funds a version already agreed.',
+          'Delivery evidence is anchored on-chain by cryptographic hash; the files stay private off-chain.',
+          'Accepted quantities release automatically; only the disputed value stays locked.',
+        ],
+      },
+      {
+        head: 'Trust mechanism',
+        lines: [
+          'Non-custodial Sui smart escrow: ProofPay coordinates funds and rules but holds no administrator withdrawal path.',
+          'Milestone-based partial release: working capital flows as checkpoints pass, not only after full inspection.',
+        ],
+      },
+      {
+        head: 'Business model',
+        lines: [
+          '1.5% escrow fee and 1.25% FX / conversion fee (2.75% in total).',
+          'Market: TAM RM 225.5B, SAM RM 69.04B, SOM RM 1.32B (year 5).',
+          'Conservative break-even: month 4 - 6.',
+        ],
+      },
+    ],
     prototypeUrl: 'https://proofpay-choong-zhuo-lins-projects.vercel.app/',
     deckUrl: '/proofpay_pitch_deck.pdf',
     galleryPhotos: [
@@ -201,6 +282,42 @@ export const projects: ProjectData[] = [
       { label: 'Power BI Dashboard', value: '8 Pages · 114 Visuals' },
     ],
     tags: ['Python', 'Scikit-Learn', 'SciPy', 'NumPy', 'Power BI', 'Tailwind CSS'],
+    role: 'Dashboard and Product Lead, Team DATAVENGERS (Leow Shen En, Wong En Sheng, Ling Jing Jie) · advisor Assoc. Prof. Dr Norjihan binti Abdul Ghani',
+    source: 'Monsun Bridge website edition (DOSM Datathon 2026 final round)',
+    file: [
+      {
+        head: 'The problem',
+        lines: [
+          'The Northeast Monsoon closes the east-coast islands from about 9 Nov to 22 Mar; tourism work stops for about four months.',
+          'District planners have no list of who is affected, so support arrives late and unbudgeted.',
+        ],
+      },
+      {
+        head: 'Exposure by district',
+        lines: [
+          'Besut (Pulau Perhentian): 4,944 workers, 21,603 worker-months.',
+          'Marang (Pulau Kapas): 3,276 workers, 12,168 worker-months.',
+          'Rompin (Pulau Tioman): 2,418 workers, 9,509 worker-months.',
+          'Kuala Nerus (Pulau Redang, Lang Tengah): 3,065 workers, 9,375 worker-months.',
+        ],
+      },
+      {
+        head: 'Data',
+        lines: [
+          '118 official records across seven open datasets (DOSM, METMalaysia, DOF, MASCO 2020, Tourism Satellite Account 2024).',
+          'The three downloaded datasets carry a SHA-256 and a retrieval date; 0 fabricated values.',
+          'A four-grade evidence ledger: every figure is Observed, Derived, Modelled or Scenario.',
+        ],
+      },
+      {
+        head: 'Method',
+        lines: [
+          'Monsoon Share = days of a quarter inside the published window (Q4 2024: 0.53, Q1 2025: 0.93).',
+          'Worker-month exposure = employment x tourism planning share x dependency weight x exposure months.',
+          'Skill matching: MASCO task text, TF-IDF, Truncated SVD, cosine score (boat operator to marine operations: 0.96).',
+        ],
+      },
+    ],
     // owner: "this is the website and dashboard for this monsun bridge" (the website edition; the 8-page Power BI
     // dashboard is its #dashboard section)
     prototypeUrl: 'https://shenenleow10521.github.io/monsun-bridge/web.html',
@@ -406,6 +523,34 @@ export const projects: ProjectData[] = [
       { label: 'Swarm Scale', value: '150+ Pre-seeded Towns' },
     ],
     tags: ['React', 'TypeScript', 'Firebase RTDB', 'Gemini 2.5 Flash', 'MCP Architecture', 'Google Maps'],
+    role: 'V Hack 2026 · Universiti Sains Malaysia · Case Study 3: First Responder of the Future',
+    source: 'BILAHUJAN GitHub README (V Hack 2026)',
+    file: [
+      {
+        head: 'Citizen to authority',
+        lines: [
+          'Ten automated steps turn a citizen photo and location into an alert for JPS / NADMA / APM within 60 seconds, with no manual step.',
+          'Command Agent: phase 1 mission planning (chain-of-thought), phase 2 MCP tool execution (800 ms between steps), phase 3 summary saved to Firebase.',
+          'The seven MCP tools: scan_flood_zone, get_zone_status, update_zone_severity, get_active_nodes, dispatch_alert, get_system_health, thermal_scan (Haversine).',
+        ],
+      },
+      {
+        head: 'Severity guardrails',
+        lines: [
+          'Physical anchors in every Gemini prompt: knee-deep 0.2 - 0.5 m scores 5 - 6, a submerged car bonnet at least 7, a rooftop rescue at least 9 (unbypassable), buildings under more than 3 m score 10.',
+          'Guardrails in both directions: no missed floods and no false alarms (a normal river is capped at 2).',
+          '14 validated test cases, from an ankle-deep puddle to a rejected selfie.',
+        ],
+      },
+      {
+        head: 'Live data',
+        lines: [
+          'Firebase Realtime Database: liveZones, liveReports, missionLogs, agentAlerts, sensorNodes, an analysis cache (DJB2 hash, 10-minute TTL) and a 60-second system heartbeat.',
+          '37 pre-seeded flood zones across all 16 states and 150+ monitored towns.',
+          'Runs on the Firebase Spark free tier: RM 0 a month at MVP.',
+        ],
+      },
+    ],
     simulatorId: 'bilahujan',
     prototypeUrl: 'https://bilahujan-vhack.web.app/',
     githubUrl: 'https://github.com/HowardWoon/BILAHUJAN-VHack2026',
@@ -438,6 +583,36 @@ export const projects: ProjectData[] = [
       { label: 'Model Bundle', value: '6-Model (58MB)' },
     ],
     tags: ['Python', 'Scikit-Learn', 'SHAP', 'SMOTE', 'Flask'],
+    role: 'WIA1006 Machine Learning · Universiti Malaya',
+    source: 'Catfish Detector AI GitHub README (WIA1006 Machine Learning)',
+    file: [
+      {
+        head: 'Behavioural features',
+        lines: [
+          '51 engineered features over 50,000 behavioural profiles.',
+          'Engagement Score = messages_sent / (app_usage_time + 1) catches message-blasting bots.',
+          'Swipe Intensity = swipe_right_ratio / (app_usage_time + e) catches auto-swiping.',
+          'Match Conversion Rate = likes_received / mutual_matches catches spam-like profiles.',
+        ],
+      },
+      {
+        head: 'Pipeline',
+        lines: [
+          'Cleaning: RobustScaler (IQR), features with Pearson > 0.95 dropped, VarianceThreshold.',
+          'SMOTE-Tomek for a 93% genuine / 7% scammer imbalance.',
+          'PCA keeping 95% of the variance for the neural components.',
+          'Six models tuned with RandomizedSearchCV on stratified K-fold: Gaussian Mixture, KMeans, SVM, Decision Tree, Logistic Regression, Neural Network; per-model F1-optimised thresholds from 0.10 to 0.90.',
+        ],
+      },
+      {
+        head: 'Verdict',
+        lines: [
+          'A profile is flagged if the ensemble is extremely confident OR the Z-score engine finds a physically impossible anomaly (e.g. swipe speed beyond 4 sigma).',
+          "SHAP breaks every verdict into each feature's contribution.",
+          'Two Flask interfaces: a Live Profile Scanner for raw vectors and a Profile Risk Simulator for plain-English profiles.',
+        ],
+      },
+    ],
     githubUrl: 'https://github.com/HowardWoon/Catfish-Detector-ML-Models',
     colabUrl: 'https://colab.research.google.com/drive/1AR7Mv0Eg1iGw2IWA1pB_Xt9RZHPHeLCx',
     galleryPhotos: [
@@ -496,6 +671,35 @@ export const projects: ProjectData[] = [
       { label: 'Data Cache', value: 'AVL BST & HashMap' },
     ],
     tags: ['Java 21', 'Spring Boot', 'Data Structures', 'Dijkstra', 'Min-Heap', 'AVL BST'],
+    role: 'Java Spring Boot · Data Structures · Universiti Malaya',
+    source: 'Slotify GitHub README',
+    file: [
+      {
+        head: 'The structures',
+        lines: [
+          'GateManager: entrance queue plus an undo stack.',
+          'VehicleLinkedList: doubly linked list in arrival order.',
+          'SlotAssigner: hand-built min-heap, nearest free slot in O(log n).',
+          'RouteGraph: weighted graph with Dijkstra, O((V + E) log V), exported as Graphviz DOT.',
+          'SystemDatabase: HashMap for O(1) plate lookup plus an AVL BST for ordered search.',
+        ],
+      },
+      {
+        head: 'One arrival, every structure',
+        lines: [
+          'Queue, linked list, hash map, AVL tree, heap assignment, route, undo stack - in that order.',
+          'Undo pops the last action and reverses it everywhere, returning the slot to the heap.',
+        ],
+      },
+      {
+        head: 'API and dashboard',
+        lines: [
+          'POST /api/arrive, /api/process, /api/undo, /api/exit; GET /api/search, /api/sorted, /api/slots, /api/mapdot.',
+          'Java 21 with the Maven wrapper; a CommandLineRunner boot demo runs the whole pipeline on start.',
+          'A dashboard on port 8081 animates each structure: heap re-heapification, Dijkstra paths, AVL traversal.',
+        ],
+      },
+    ],
     githubUrl: 'https://github.com/HowardWoon/Slotify',
     galleryPhotos: [
       { src: '/images/projects/slotify/01.png', alt: 'Slotify Interface', rotation: -4, w: 862, h: 732 },
@@ -539,6 +743,35 @@ export const projects: ProjectData[] = [
       { label: 'Protocol', value: 'MQTT / WebSockets' },
     ],
     tags: ['ESP32', 'C++', 'Next.js 15', 'MQTT', 'PostgreSQL', 'Tailwind CSS'],
+    role: 'UM Technothon 2026 · Smart Micro-Climate Energy Management System',
+    source: 'Sensor X Sensei GitHub README (UM Technothon 2026)',
+    file: [
+      {
+        head: 'The problem',
+        lines: [
+          'Large lecture halls keep lighting and ventilation at 100% whatever the occupancy.',
+          'Sensor X Sensei powers HVAC and lights only for the occupied rows.',
+        ],
+      },
+      {
+        head: 'Hardware',
+        lines: [
+          'ESP32 DOIT DevKit V1.',
+          'MFRC522 NFC "Energy Passport" check-in at the podium.',
+          'HC-SR501 PIR and a VL53L0X time-of-flight array map the occupied zone.',
+          'IRF520 MOSFETs route power to the fans and E10 lamps; SG90 servos aim the airflow.',
+          'Dual rail: 5 V logic and 15 V load; three zones (A, B, C).',
+        ],
+      },
+      {
+        head: 'Software',
+        lines: [
+          'C++ (Arduino core) firmware with a web server for real-time telemetry over I2C and hardware interrupts.',
+          'A digital-twin dashboard with energy-saving metrics and occupancy trends.',
+          'CO2 reduction at the Malaysian grid factor of 0.785 kg CO2 per kWh.',
+        ],
+      },
+    ],
     simulatorId: 'sensor-x',
     githubUrl: 'https://github.com/HowardWoon/Sensor-X-Sensei---UM-Technothon-2026',
     // R61 (owner: "add the gallery part for this sensor x sensei ... always arrange the picture according to the file
@@ -870,47 +1103,56 @@ function ProjectCard({ project, index }: { project: ProjectData; index: number }
                     <Tagline signal={project.signal}>{project.subtitle}</Tagline>
                     {/* R88 P4: the organiser has ONE slot on every card, a full-width strip under the title block */}
                     <div className="!mt-4">
-                      <OrganiserPlate id={project.organiser} />
+                      <OrganiserPlate id={project.organiser} signal={project.signal} />
                     </div>
                   </div>
 
-                  {/* Narrative Description (R92: its labels first, the paragraph word for word behind READ MORE) */}
-                  <LabelFirst
-                    labels={project.descriptionLabels}
-                    source={project.description}
-                    className="fx-layer"
-                    data-bp-label={`L3 · ${BP_LAYERS[2]}`}
-                  >
+                  {/* R103 (owner: "the highlights are too thin ... rather show more words, explain the whole product,
+                      real technical info, not fake"): the description and the build points are printed IN FULL (the
+                      R92 label chips + READ MORE are retired here), then the technical file from the project's own
+                      deck / README / site, with the role line and the source named. */}
+                  <div className="space-y-3 fx-layer" data-bp-label={`L3 · ${BP_LAYERS[2]}`}>
+                    <p data-project-role className="pj-role">
+                      {project.role}
+                    </p>
                     <p className="text-ink-soft text-base leading-relaxed font-sans font-medium">
                       <Marked text={project.description} keys={project.descriptionLabels} />
                     </p>
-                  </LabelFirst>
-
-                  {/* Key Architectural Highlights (R92: one numbered label per point, the points in full behind READ MORE) */}
-                  <div className="space-y-3 nb-inset p-4 sm:p-5 fx-layer" data-bp-label={`L4 · ${BP_LAYERS[3]}`}>
-                    <span className="text-xs font-mono font-extrabold text-ink uppercase tracking-[0.12em] block mb-1">
-                      KEY ARCHITECTURAL HIGHLIGHTS:
-                    </span>
-                    <LabelFirst
-                      numbered
-                      labels={project.architecturePoints.map((pt, i) => pointLabel(pt, project.pointLabels?.[i]))}
-                      source={project.architecturePoints.join('\n')}
-                    >
-                      <div className="space-y-3">
-                        {project.architecturePoints.map((point, pIdx) => (
-                          <div
-                            key={pIdx}
-                            className="flex items-start gap-2.5 text-sm font-sans font-medium text-ink-soft leading-snug"
-                          >
-                            <CheckCircle2 className="w-5 h-5 text-ink fill-pop-mint shrink-0" strokeWidth={2.25} />
-                            <span>
-                              <Marked text={point} keys={[pointLabel(point, project.pointLabels?.[pIdx])]} />
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </LabelFirst>
                   </div>
+
+                  <div className="pj-built fx-layer" data-bp-label={`L4 · ${BP_LAYERS[3]}`}>
+                    <span className="pj-built-head">How it is built</span>
+                    <ol className="pj-built-list">
+                      {project.architecturePoints.map((point, pIdx) => (
+                        <li key={pIdx}>
+                          <span aria-hidden className="pj-built-n">
+                            {String(pIdx + 1).padStart(2, '0')}
+                          </span>
+                          <span>
+                            <Marked text={point} keys={[pointLabel(point, project.pointLabels?.[pIdx])]} />
+                          </span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+
+                  <section data-tech-file aria-label={`${project.title} technical file`} className="pj-file fx-layer">
+                    <header className="pj-file-bar">
+                      <span>Technical file</span>
+                      <span className="pj-file-count">{String(project.file.length).padStart(2, '0')} sections</span>
+                    </header>
+                    {project.file.map((sec) => (
+                      <div key={sec.head} className="pj-file-row">
+                        <h4 className="pj-file-head">{sec.head}</h4>
+                        <ul className="pj-file-lines">
+                          {sec.lines.map((line) => (
+                            <li key={line}>{line}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                    <p className="pj-file-source">Source: {project.source}</p>
+                  </section>
 
                   {/* Live Benchmarks & Metric Chips (bento) */}
                   <div

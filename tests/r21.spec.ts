@@ -147,17 +147,21 @@ test('marquees: each highlight carries its signal chip, and the stack tape runs 
 });
 
 /* ---------------------------------------------------------------- honours */
-test('honours: every card has an emblem that says what it is, and no card is left alone on a row', async ({ page }) => {
+test('honours: every card has an emblem that says what it is, and no card is left alone in a column', async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
   await expect(page.locator('[data-honor-category]').first()).toHaveAttribute('aria-expanded', 'true');
   const grid = page.locator('#honors [style*="honors-results"] > div').first();
   await grid.scrollIntoViewIfNeeded();
-  const boxes = await grid.evaluate((g) => [...g.children].map((c) => (c as HTMLElement).offsetTop));
+  const boxes = await grid.evaluate((g) => [...g.children].map((c) => (c as HTMLElement).offsetLeft));
   expect(boxes.length).toBe(9); // + DOSM Datathon 2026, + Water Nexus Symposium 2026 (R98)
-  const rows = new Map<number, number>();
-  boxes.forEach((t) => rows.set(t, (rows.get(t) ?? 0) + 1));
-  expect([...rows.values()].every((n) => n > 1)).toBe(true); // no orphan (offsetTop = layout row, unaffected by the entrance scale)
+  // R106 ticket wall: balanced columns (no row to orphan a card in) - three columns, none holding a lone card
+  const cols = new Map<number, number>();
+  boxes.forEach((x) => cols.set(Math.round(x), (cols.get(Math.round(x)) ?? 0) + 1));
+  expect(cols.size).toBe(3);
+  expect([...cols.values()].every((n) => n > 1)).toBe(true);
   expect(await grid.locator('svg[viewBox="0 0 120 120"]').count()).toBe(9);
 });
 

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import '@/app/treasurer.css';
 import { FieldArchive } from './field-archive';
 import { TraceRail } from './fx/trace-rail';
 import { SplitWords } from './fx/split-words';
@@ -364,7 +365,281 @@ export const experiences: ExperienceItem[] = [
   },
 ];
 
-function PekomTreasurerDashboard() {
+/**
+ * R104 (owner: "keep the treasurer work summarised in ALL, but when I choose the LEADERSHIP track every treasurer
+ * experience must stand on its own"): the four PEKOM treasurer roles, read by the summary accordion (ALL) and by one
+ * card each on the LEADERSHIP track. Every word and figure is the role's own (unchanged); `figures` repeats numbers
+ * already in its text, as the ledger beside it.
+ */
+type TreasurerEvent = {
+  id: string;
+  /** the event, as named in `name` */
+  event: string;
+  name: string;
+  period: string;
+  figures: { label: string; value: string }[];
+  desc: React.ReactNode;
+};
+
+const TREASURER_EVENTS: TreasurerEvent[] = [
+  {
+    id: 'mytech',
+    event: 'MYTECH Career Fair 2026',
+    period: 'February – June 2026',
+    figures: [
+      { label: 'Budget', value: 'RM50,200' },
+      { label: 'Revenue', value: 'RM46,200' },
+      { label: 'Sponsors', value: '30' },
+      { label: 'Surplus', value: 'RM9,287.00' },
+    ],
+    name: 'Treasurer | MYTECH Career Fair 2026',
+    desc: (
+      <div className="space-y-6 pt-2">
+        <div className="space-y-2">
+          <h5 className="font-display text-ink font-extrabold text-base uppercase tracking-[-0.01em] border-b-2 border-ink pb-1.5">
+            Executive Summary
+          </h5>
+          <p className="text-ink-soft">
+            Directed financial planning, budget execution, and reporting for the MYTECH Career Fair 2026. Managed an
+            unprecedented RM50,200 budget and implemented strict financial governance, successfully securing 30
+            corporate sponsors and RM46,200 in revenue. By enforcing an 79.9% spending cap, the event generated a
+            record-breaking RM9,287.00 pure surplus for Persatuan Komputer Universiti Malaya (PEKOM).
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <h5 className="font-display text-ink font-extrabold text-base uppercase tracking-[-0.01em] border-b-2 border-ink pb-1.5">
+            Key Achievements & Metrics
+          </h5>
+          <ul className="space-y-2 text-ink-soft list-disc list-outside ml-5 marker:text-ink">
+            <li>
+              <strong className="text-ink font-extrabold">Budget Oversight:</strong> Managed an unprecedented total
+              budget of RM50,200.
+            </li>
+            <li>
+              <strong className="text-ink font-extrabold">Revenue Generation:</strong> Secured RM46,200 in revenue
+              through 30 corporate sponsorships (including partners like Garmin).
+            </li>
+            <li>
+              <strong className="text-ink font-extrabold">Cost Control:</strong> Successfully enforced an 81.5% spending
+              cap across all event operations.
+            </li>
+            <li>
+              <strong className="text-ink font-extrabold">Profitability:</strong> Generated a record-breaking RM9,287.00
+              pure surplus for PEKOM.
+            </li>
+          </ul>
+        </div>
+
+        <div className="space-y-2">
+          <h5 className="font-display text-ink font-extrabold text-base uppercase tracking-[-0.01em] border-b-2 border-ink pb-1.5">
+            Financial Governance & Operations
+          </h5>
+          <ul className="space-y-2 text-ink-soft list-disc list-outside ml-5 marker:text-ink">
+            <li>
+              <strong className="text-ink font-extrabold">Financial Compliance:</strong> Managed tax compliance for a
+              student-led initiative, handling declarations of exemption for e-invoice issuance.
+            </li>
+            <li>
+              <strong className="text-ink font-extrabold">Ledger Management:</strong> Established and maintained a
+              comprehensive master ledger to track all expenditures, internal budgets, and receipts.
+            </li>
+            <li>
+              <strong className="text-ink font-extrabold">Sponsor Relations:</strong> Coordinated settlement details
+              with corporate sponsors, managed vendor data requests, and established specific payment guidelines and
+              verification requirements to ensure smooth transactions.
+            </li>
+            <li>
+              <strong className="text-ink font-extrabold">Committee Coordination:</strong> Directed financial planning
+              and executed budget strategies across committee meetings to ensure all departments operated within their
+              allocated funds.
+            </li>
+          </ul>
+        </div>
+        <FieldArchive archiveId="mytech" />
+      </div>
+    ),
+  },
+  {
+    id: 'alphathon',
+    event: 'UM Alphathon 2025',
+    period: '2025',
+    figures: [
+      { label: 'Budget', value: 'RM14,150 (USD 3,369)' },
+      { label: 'Prize pool', value: 'USD 3,000' },
+      { label: 'To the prize pool', value: '89.05%' },
+      { label: 'Budget accuracy', value: '99.87%' },
+    ],
+    name: 'Treasurer | UM Alphathon 2025',
+    desc: (
+      <div className="space-y-6 pt-2">
+        <div className="space-y-2">
+          <h5 className="font-display text-ink font-extrabold text-base uppercase tracking-[-0.01em] border-b-2 border-ink pb-1.5">
+            Executive Summary
+          </h5>
+          <p className="text-ink-soft">
+            Directed the financial operations and budget allocations for UM Alphathon 2025, a competitive event
+            featuring a Quantitative Finance Workshop and a major prize pool funded entirely by international partner
+            WorldQuant. Oversaw comprehensive expenditure tracking of a RM14,150 (USD 3,369) budget, committee
+            reimbursements, and ledger maintenance to ensure strict financial compliance and seamless event execution.
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <h5 className="font-display text-ink font-extrabold text-base uppercase tracking-[-0.01em] border-b-2 border-ink pb-1.5">
+            Key Achievements & Metrics
+          </h5>
+          <ul className="space-y-2 text-ink-soft list-disc list-outside ml-5 marker:text-ink">
+            <li>
+              <strong className="text-ink font-extrabold">Prize Pool Administration:</strong> Facilitated the financial
+              oversight and planning surrounding a substantial USD 3,000 total prize pool for event participants,
+              successfully distributing 89.05% of all funds directly into the student prize pool.
+            </li>
+            <li>
+              <strong className="text-ink font-extrabold">Budget Oversight:</strong> Managed shared operational costs in
+              conjunction with PEKOM CodeFest, tracking event expenditures effectively across both events and achieving
+              an exceptional 99.87% budget accuracy rating.
+            </li>
+          </ul>
+        </div>
+
+        <div className="space-y-2">
+          <h5 className="font-display text-ink font-extrabold text-base uppercase tracking-[-0.01em] border-b-2 border-ink pb-1.5">
+            Financial Governance & Operations
+          </h5>
+          <ul className="space-y-2 text-ink-soft list-disc list-outside ml-5 marker:text-ink">
+            <li>
+              <strong className="text-ink font-extrabold">Expense Management:</strong> Processed and documented
+              committee expenditures, including large-scale logistics and hospitality allocations (such as RM443.55 for
+              committee meals), as well as printing and refreshments.
+            </li>
+            <li>
+              <strong className="text-ink font-extrabold">Ledger Maintenance:</strong> Maintained a highly detailed
+              master ledger to record all transaction histories, ensuring complete transparency for audit and review
+              purposes.
+            </li>
+            <li>
+              <strong className="text-ink font-extrabold">Financial Reporting:</strong> Reviewed and finalized the
+              &quot;UM Alphathon 2025 Financial Implication&quot; document to establish clear budgetary baselines and
+              reporting standards for the organizing committee.
+            </li>
+          </ul>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 'codefest',
+    event: 'PEKOM CodeFest 2025',
+    period: '2025',
+    figures: [
+      { label: 'Operational fund', value: 'RM2,700' },
+      { label: 'CodeFest spend', value: 'RM1,531.77' },
+      { label: 'Paid as cash rewards', value: '66.7%' },
+      { label: 'Reconciliation', value: '100%' },
+    ],
+    name: 'Treasurer | PEKOM CodeFest 2025',
+    desc: (
+      <div className="space-y-6 pt-2">
+        <div className="space-y-2">
+          <h5 className="font-display text-ink font-extrabold text-base uppercase tracking-[-0.01em] border-b-2 border-ink pb-1.5">
+            Executive Summary
+          </h5>
+          <p className="text-ink-soft">
+            Directed the financial operations and budget management for PEKOM CodeFest (in conjunction with UM Alphathon
+            2025). Balanced a RM2,700 operational fund and oversaw all event-related expenses, achieving 100% financial
+            reconciliation with zero deficit while ensuring streamlined reimbursement processes for the organizing
+            committee.
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <h5 className="font-display text-ink font-extrabold text-base uppercase tracking-[-0.01em] border-b-2 border-ink pb-1.5">
+            Key Responsibilities & Achievements
+          </h5>
+          <ul className="space-y-2 text-ink-soft list-disc list-outside ml-5 marker:text-ink">
+            <li>
+              <strong className="text-ink font-extrabold">Budget Management & Optimization:</strong> Managed total event
+              expenditures amounting to RM1,531.77 (CodeFest Spend), optimizing operational overhead to ensure exactly
+              66.7% of the budget was paid out as direct cash rewards to participants.
+            </li>
+            <li>
+              <strong className="text-ink font-extrabold">Expense Tracking:</strong> Monitored operational costs across
+              multiple categories, including roll-up bunting, certificate printing, meals, and transportation.
+            </li>
+            <li>
+              <strong className="text-ink font-extrabold">Financial Documentation:</strong> Developed and maintained a
+              master reimbursement spreadsheet to compile all costs, ensuring absolute transparency and efficient
+              financial settlement.
+            </li>
+          </ul>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 'mhw',
+    event: 'Mental Health Week & Share Your Love',
+    period: 'September 2025 – June 2026',
+    figures: [
+      { label: 'Multi-event fund', value: 'RM5,830' },
+      { label: 'Surplus', value: 'RM346' },
+      { label: 'Charity cost', value: 'RM11.68/pax' },
+      { label: 'Reconciled', value: '100%' },
+    ],
+    name: 'Treasurer | Mental Health Week & Share Your Love',
+    desc: (
+      <div className="space-y-6 pt-2">
+        <div className="space-y-2">
+          <h5 className="font-display text-ink font-extrabold text-base uppercase tracking-[-0.01em] border-b-2 border-ink pb-1.5">
+            Executive Summary
+          </h5>
+          <p className="text-ink-soft">
+            Directed the financial operations and budget allocations for Mental Health Week 2025 and its associated
+            &quot;Share Your Love&quot; outreach initiative. Established rigorous treasury protocols to maintain
+            accurate transaction histories, directing a RM5,830 multi-event fund to ensure complete transparency and
+            accountability across all organizing committees.
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <h5 className="font-display text-ink font-extrabold text-base uppercase tracking-[-0.01em] border-b-2 border-ink pb-1.5">
+            Key Responsibilities & Governance
+          </h5>
+          <ul className="space-y-2 text-ink-soft list-disc list-outside ml-5 marker:text-ink">
+            <li>
+              <strong className="text-ink font-extrabold">Budget Allocation:</strong> Managed and distributed event
+              funding across various outreach activities, outperforming merchandise sales targets to secure a RM346
+              surplus.
+            </li>
+            <li>
+              <strong className="text-ink font-extrabold">Charity Execution:</strong> Executed the charity outreach
+              effectively at RM11.68/pax, responsibly adjusting donations to match actual available funds.
+            </li>
+            <li>
+              <strong className="text-ink font-extrabold">Audit Compliance:</strong> Enforced strict documentation
+              policies, verifying that every receipt was properly accounted for to maintain a 100%-reconciled budget.
+            </li>
+            <li>
+              <strong className="text-ink font-extrabold">Reporting Standards:</strong> Standardized the financial
+              report formats used by the committee to maintain transparency and streamline the final administrative
+              review process.
+            </li>
+            <li>
+              <strong className="text-ink font-extrabold">Reimbursement Policy Management:</strong> Administered
+              transport reimbursement guidelines for event planning, deliberately excluding the 20% penalty deduction
+              clause to ensure fair and complete compensation for committee members&apos; travel expenses.
+            </li>
+          </ul>
+        </div>
+        <FieldArchive archiveId="mhw" />
+      </div>
+    ),
+  },
+];
+
+/** R104: `split` (LEADERSHIP track) keeps the portfolio's totals here; each role then has its own card below */
+function PekomTreasurerDashboard({ split = false }: { split?: boolean }) {
   const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
   const printing = usePrinting(); // FX-70: every event prints expanded
 
@@ -373,251 +648,6 @@ function PekomTreasurerDashboard() {
     { label: 'Sponsorships', value: 'RM 62,550', icon: BarChart3 },
     { label: 'Net Surplus', value: 'RM9,287.00', icon: TrendingUp },
     { label: 'Leverage Ratio', value: '16.46x', icon: Receipt },
-  ];
-
-  const events = [
-    {
-      id: 'mytech',
-      name: 'Treasurer | MYTECH Career Fair 2026',
-      desc: (
-        <div className="space-y-6 pt-2">
-          <div className="flex flex-col gap-1">
-            <div className="text-ink font-mono text-xs font-extrabold uppercase tracking-[0.1em]">Duration</div>
-            <div className="text-ink-soft font-mono text-xs font-semibold">February – June 2026</div>
-          </div>
-
-          <div className="space-y-2">
-            <h5 className="font-display text-ink font-extrabold text-base uppercase tracking-[-0.01em] border-b-2 border-ink pb-1.5">
-              Executive Summary
-            </h5>
-            <p className="text-ink-soft">
-              Directed financial planning, budget execution, and reporting for the MYTECH Career Fair 2026. Managed an
-              unprecedented RM50,200 budget and implemented strict financial governance, successfully securing 30
-              corporate sponsors and RM46,200 in revenue. By enforcing an 79.9% spending cap, the event generated a
-              record-breaking RM9,287.00 pure surplus for Persatuan Komputer Universiti Malaya (PEKOM).
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <h5 className="font-display text-ink font-extrabold text-base uppercase tracking-[-0.01em] border-b-2 border-ink pb-1.5">
-              Key Achievements & Metrics
-            </h5>
-            <ul className="space-y-2 text-ink-soft list-disc list-outside ml-5 marker:text-ink">
-              <li>
-                <strong className="text-ink font-extrabold">Budget Oversight:</strong> Managed an unprecedented total
-                budget of RM50,200.
-              </li>
-              <li>
-                <strong className="text-ink font-extrabold">Revenue Generation:</strong> Secured RM46,200 in revenue
-                through 30 corporate sponsorships (including partners like Garmin).
-              </li>
-              <li>
-                <strong className="text-ink font-extrabold">Cost Control:</strong> Successfully enforced an 81.5%
-                spending cap across all event operations.
-              </li>
-              <li>
-                <strong className="text-ink font-extrabold">Profitability:</strong> Generated a record-breaking
-                RM9,287.00 pure surplus for PEKOM.
-              </li>
-            </ul>
-          </div>
-
-          <div className="space-y-2">
-            <h5 className="font-display text-ink font-extrabold text-base uppercase tracking-[-0.01em] border-b-2 border-ink pb-1.5">
-              Financial Governance & Operations
-            </h5>
-            <ul className="space-y-2 text-ink-soft list-disc list-outside ml-5 marker:text-ink">
-              <li>
-                <strong className="text-ink font-extrabold">Financial Compliance:</strong> Managed tax compliance for a
-                student-led initiative, handling declarations of exemption for e-invoice issuance.
-              </li>
-              <li>
-                <strong className="text-ink font-extrabold">Ledger Management:</strong> Established and maintained a
-                comprehensive master ledger to track all expenditures, internal budgets, and receipts.
-              </li>
-              <li>
-                <strong className="text-ink font-extrabold">Sponsor Relations:</strong> Coordinated settlement details
-                with corporate sponsors, managed vendor data requests, and established specific payment guidelines and
-                verification requirements to ensure smooth transactions.
-              </li>
-              <li>
-                <strong className="text-ink font-extrabold">Committee Coordination:</strong> Directed financial planning
-                and executed budget strategies across committee meetings to ensure all departments operated within their
-                allocated funds.
-              </li>
-            </ul>
-          </div>
-          <FieldArchive archiveId="mytech" />
-        </div>
-      ),
-    },
-    {
-      id: 'alphathon',
-      name: 'Treasurer | UM Alphathon 2025',
-      desc: (
-        <div className="space-y-6 pt-2">
-          <div className="flex flex-col gap-1">
-            <div className="text-ink font-mono text-xs font-extrabold uppercase tracking-[0.1em]">Duration</div>
-            <div className="text-ink-soft font-mono text-xs font-semibold">2025</div>
-          </div>
-
-          <div className="space-y-2">
-            <h5 className="font-display text-ink font-extrabold text-base uppercase tracking-[-0.01em] border-b-2 border-ink pb-1.5">
-              Executive Summary
-            </h5>
-            <p className="text-ink-soft">
-              Directed the financial operations and budget allocations for UM Alphathon 2025, a competitive event
-              featuring a Quantitative Finance Workshop and a major prize pool funded entirely by international partner
-              WorldQuant. Oversaw comprehensive expenditure tracking of a RM14,150 (USD 3,369) budget, committee
-              reimbursements, and ledger maintenance to ensure strict financial compliance and seamless event execution.
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <h5 className="font-display text-ink font-extrabold text-base uppercase tracking-[-0.01em] border-b-2 border-ink pb-1.5">
-              Key Achievements & Metrics
-            </h5>
-            <ul className="space-y-2 text-ink-soft list-disc list-outside ml-5 marker:text-ink">
-              <li>
-                <strong className="text-ink font-extrabold">Prize Pool Administration:</strong> Facilitated the
-                financial oversight and planning surrounding a substantial USD 3,000 total prize pool for event
-                participants, successfully distributing 89.05% of all funds directly into the student prize pool.
-              </li>
-              <li>
-                <strong className="text-ink font-extrabold">Budget Oversight:</strong> Managed shared operational costs
-                in conjunction with PEKOM CodeFest, tracking event expenditures effectively across both events and
-                achieving an exceptional 99.87% budget accuracy rating.
-              </li>
-            </ul>
-          </div>
-
-          <div className="space-y-2">
-            <h5 className="font-display text-ink font-extrabold text-base uppercase tracking-[-0.01em] border-b-2 border-ink pb-1.5">
-              Financial Governance & Operations
-            </h5>
-            <ul className="space-y-2 text-ink-soft list-disc list-outside ml-5 marker:text-ink">
-              <li>
-                <strong className="text-ink font-extrabold">Expense Management:</strong> Processed and documented
-                committee expenditures, including large-scale logistics and hospitality allocations (such as RM443.55
-                for committee meals), as well as printing and refreshments.
-              </li>
-              <li>
-                <strong className="text-ink font-extrabold">Ledger Maintenance:</strong> Maintained a highly detailed
-                master ledger to record all transaction histories, ensuring complete transparency for audit and review
-                purposes.
-              </li>
-              <li>
-                <strong className="text-ink font-extrabold">Financial Reporting:</strong> Reviewed and finalized the
-                &quot;UM Alphathon 2025 Financial Implication&quot; document to establish clear budgetary baselines and
-                reporting standards for the organizing committee.
-              </li>
-            </ul>
-          </div>
-        </div>
-      ),
-    },
-    {
-      id: 'codefest',
-      name: 'Treasurer | PEKOM CodeFest 2025',
-      desc: (
-        <div className="space-y-6 pt-2">
-          <div className="flex flex-col gap-1">
-            <div className="text-ink font-mono text-xs font-extrabold uppercase tracking-[0.1em]">Duration</div>
-            <div className="text-ink-soft font-mono text-xs font-semibold">2025</div>
-          </div>
-
-          <div className="space-y-2">
-            <h5 className="font-display text-ink font-extrabold text-base uppercase tracking-[-0.01em] border-b-2 border-ink pb-1.5">
-              Executive Summary
-            </h5>
-            <p className="text-ink-soft">
-              Directed the financial operations and budget management for PEKOM CodeFest (in conjunction with UM
-              Alphathon 2025). Balanced a RM2,700 operational fund and oversaw all event-related expenses, achieving
-              100% financial reconciliation with zero deficit while ensuring streamlined reimbursement processes for the
-              organizing committee.
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <h5 className="font-display text-ink font-extrabold text-base uppercase tracking-[-0.01em] border-b-2 border-ink pb-1.5">
-              Key Responsibilities & Achievements
-            </h5>
-            <ul className="space-y-2 text-ink-soft list-disc list-outside ml-5 marker:text-ink">
-              <li>
-                <strong className="text-ink font-extrabold">Budget Management & Optimization:</strong> Managed total
-                event expenditures amounting to RM1,531.77 (CodeFest Spend), optimizing operational overhead to ensure
-                exactly 66.7% of the budget was paid out as direct cash rewards to participants.
-              </li>
-              <li>
-                <strong className="text-ink font-extrabold">Expense Tracking:</strong> Monitored operational costs
-                across multiple categories, including roll-up bunting, certificate printing, meals, and transportation.
-              </li>
-              <li>
-                <strong className="text-ink font-extrabold">Financial Documentation:</strong> Developed and maintained a
-                master reimbursement spreadsheet to compile all costs, ensuring absolute transparency and efficient
-                financial settlement.
-              </li>
-            </ul>
-          </div>
-        </div>
-      ),
-    },
-    {
-      id: 'mhw',
-      name: 'Treasurer | Mental Health Week & Share Your Love',
-      desc: (
-        <div className="space-y-6 pt-2">
-          <div className="flex flex-col gap-1">
-            <div className="text-ink font-mono text-xs font-extrabold uppercase tracking-[0.1em]">Duration</div>
-            <div className="text-ink-soft font-mono text-xs font-semibold">September 2025 – June 2026</div>
-          </div>
-
-          <div className="space-y-2">
-            <h5 className="font-display text-ink font-extrabold text-base uppercase tracking-[-0.01em] border-b-2 border-ink pb-1.5">
-              Executive Summary
-            </h5>
-            <p className="text-ink-soft">
-              Directed the financial operations and budget allocations for Mental Health Week 2025 and its associated
-              &quot;Share Your Love&quot; outreach initiative. Established rigorous treasury protocols to maintain
-              accurate transaction histories, directing a RM5,830 multi-event fund to ensure complete transparency and
-              accountability across all organizing committees.
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <h5 className="font-display text-ink font-extrabold text-base uppercase tracking-[-0.01em] border-b-2 border-ink pb-1.5">
-              Key Responsibilities & Governance
-            </h5>
-            <ul className="space-y-2 text-ink-soft list-disc list-outside ml-5 marker:text-ink">
-              <li>
-                <strong className="text-ink font-extrabold">Budget Allocation:</strong> Managed and distributed event
-                funding across various outreach activities, outperforming merchandise sales targets to secure a RM346
-                surplus.
-              </li>
-              <li>
-                <strong className="text-ink font-extrabold">Charity Execution:</strong> Executed the charity outreach
-                effectively at RM11.68/pax, responsibly adjusting donations to match actual available funds.
-              </li>
-              <li>
-                <strong className="text-ink font-extrabold">Audit Compliance:</strong> Enforced strict documentation
-                policies, verifying that every receipt was properly accounted for to maintain a 100%-reconciled budget.
-              </li>
-              <li>
-                <strong className="text-ink font-extrabold">Reporting Standards:</strong> Standardized the financial
-                report formats used by the committee to maintain transparency and streamline the final administrative
-                review process.
-              </li>
-              <li>
-                <strong className="text-ink font-extrabold">Reimbursement Policy Management:</strong> Administered
-                transport reimbursement guidelines for event planning, deliberately excluding the 20% penalty deduction
-                clause to ensure fair and complete compensation for committee members&apos; travel expenses.
-              </li>
-            </ul>
-          </div>
-          <FieldArchive archiveId="mhw" />
-        </div>
-      ),
-    },
   ];
 
   return (
@@ -654,64 +684,129 @@ function PekomTreasurerDashboard() {
           ))}
         </div>
 
-        {/* Interactive Event Accordion
+        {split ? null : (
+          <>
+            {/* Interactive Event Accordion
             Bug fix: only the header toggles now. Previously the whole card was the click target,
             so clicking a photo in the Field Archive (or anywhere inside the open panel) collapsed it. */}
-        <div className="space-y-3">
-          {events.map((event) => {
-            const isExpanded = printing || expandedEvent === event.id;
-            const panelId = `pekom-event-${event.id}`;
-            return (
-              <div
-                key={event.id}
-                data-pekom-event
-                className={`relative rounded-2xl border-3 border-ink transition-[box-shadow,transform,background-color] duration-200 ${
-                  isExpanded
-                    ? 'bg-white shadow-brutal'
-                    : 'bg-white shadow-brutal-xs hover:-translate-y-0.5 hover:shadow-brutal-sm'
-                }`}
-              >
-                <button
-                  type="button"
-                  aria-expanded={isExpanded}
-                  aria-controls={isExpanded ? panelId : undefined}
-                  onClick={() => setExpandedEvent(expandedEvent === event.id ? null : event.id)}
-                  className={`w-full text-left p-4 flex items-center justify-between gap-3 rounded-[9px] ${isExpanded ? 'bg-[#FFE3F1] border-b-3 border-ink rounded-b-none' : ''}`}
-                >
-                  <span className="font-mono text-xs sm:text-sm font-extrabold tracking-[0.02em] text-ink">
-                    {event.name}
-                  </span>
-                  <span className="grid place-items-center w-8 h-8 shrink-0 rounded-full border-2 border-ink bg-white">
-                    {/* FX-72: one chevron that turns, instead of two icons swapping */}
-                    <ChevronDown
-                      className={`fx-morph w-4 h-4 text-ink ${isExpanded ? 'rotate-180' : ''}`}
-                      strokeWidth={3}
-                      aria-hidden
-                    />
-                  </span>
-                </button>
-
-                <AnimatePresence initial={false}>
-                  {isExpanded && (
-                    <m.div
-                      id={panelId}
-                      initial={printing ? false : { height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden"
+            <div className="space-y-3">
+              {TREASURER_EVENTS.map((event) => {
+                const isExpanded = printing || expandedEvent === event.id;
+                const panelId = `pekom-event-${event.id}`;
+                return (
+                  <div
+                    key={event.id}
+                    data-pekom-event
+                    className={`relative rounded-2xl border-3 border-ink transition-[box-shadow,transform,background-color] duration-200 ${
+                      isExpanded
+                        ? 'bg-white shadow-brutal'
+                        : 'bg-white shadow-brutal-xs hover:-translate-y-0.5 hover:shadow-brutal-sm'
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      aria-expanded={isExpanded}
+                      aria-controls={isExpanded ? panelId : undefined}
+                      onClick={() => setExpandedEvent(expandedEvent === event.id ? null : event.id)}
+                      className={`w-full text-left p-4 flex items-center justify-between gap-3 rounded-[9px] ${isExpanded ? 'bg-[#FFE3F1] border-b-3 border-ink rounded-b-none' : ''}`}
                     >
-                      <div className="px-3 xs:px-4 sm:px-5 pb-5 text-sm font-sans font-medium text-ink-soft leading-relaxed">
-                        {event.desc}
-                      </div>
-                    </m.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            );
-          })}
-        </div>
+                      <span className="font-mono text-xs sm:text-sm font-extrabold tracking-[0.02em] text-ink">
+                        {event.name}
+                      </span>
+                      <span className="grid place-items-center w-8 h-8 shrink-0 rounded-full border-2 border-ink bg-white">
+                        {/* FX-72: one chevron that turns, instead of two icons swapping */}
+                        <ChevronDown
+                          className={`fx-morph w-4 h-4 text-ink ${isExpanded ? 'rotate-180' : ''}`}
+                          strokeWidth={3}
+                          aria-hidden
+                        />
+                      </span>
+                    </button>
+
+                    <AnimatePresence initial={false}>
+                      {isExpanded && (
+                        <m.div
+                          id={panelId}
+                          initial={printing ? false : { height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="px-3 xs:px-4 sm:px-5 pb-5 text-sm font-sans font-medium text-ink-soft leading-relaxed">
+                            <div className="flex flex-col gap-1 pt-2">
+                              <div className="text-ink font-mono text-xs font-extrabold uppercase tracking-[0.1em]">
+                                Duration
+                              </div>
+                              <div className="text-ink-soft font-mono text-xs font-semibold">{event.period}</div>
+                            </div>
+                            {event.desc}
+                          </div>
+                        </m.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
     </div>
+  );
+}
+
+/**
+ * R104 treasurer card (LEADERSHIP track): one PEKOM treasurer role as its own record - a pink LEADERSHIP plate with the
+ * role number, the event as the title, the role line, the role's own text, and a ruled LEDGER of its figures beside it.
+ */
+function TreasurerCard({ event, index }: { event: TreasurerEvent; index: number }) {
+  const n = `02.${index + 1}`;
+  return (
+    <article data-treasurer={event.id} aria-labelledby={`tr-${event.id}`} className="tr-card">
+      <div className="nb-hatch tr-plate bg-pop-pink">
+        <div className="flex flex-wrap items-center gap-2 xs:gap-3 min-w-0">
+          <span className="tr-num">{n}</span>
+          <span className="rounded-md border-2 border-ink bg-white px-1.5 py-0.5 font-mono text-xs font-extrabold tracking-[0.14em] text-ink">
+            {SIGNAL.leadership.label}
+          </span>
+          <span className="font-mono text-xs font-extrabold uppercase tracking-[0.12em] text-ink">
+            Treasurer · PEKOM
+          </span>
+        </div>
+        <div className="flex items-center gap-2 font-mono text-sm font-extrabold text-ink">
+          <Calendar className="h-4 w-4" strokeWidth={2.5} aria-hidden />
+          <span>{event.period}</span>
+        </div>
+      </div>
+      <div className="grid gap-6 p-4 xs:p-6 sm:p-8 lg:grid-cols-12 lg:gap-8">
+        <div className="min-w-0 space-y-4 lg:col-span-8">
+          <h3
+            id={`tr-${event.id}`}
+            className="font-display text-[clamp(1.35rem,6.6vw,1.75rem)] sm:text-3xl font-extrabold uppercase leading-[1.02] tracking-[-0.02em] text-ink"
+          >
+            {event.event}
+          </h3>
+          <p className="tr-role">Treasurer · Persatuan Komputer Universiti Malaya (PEKOM)</p>
+          <div className="text-sm font-sans font-medium leading-relaxed text-ink-soft sm:text-[0.95rem]">
+            {event.desc}
+          </div>
+        </div>
+        <aside
+          aria-label={`${event.event} ledger`}
+          className="tr-ledger lg:col-span-4 lg:self-start lg:sticky lg:top-28"
+        >
+          <div className="tr-ledger-head">Ledger</div>
+          <dl>
+            {event.figures.map((f) => (
+              <div key={f.label} className="tr-ledger-row">
+                <dt>{f.label}</dt>
+                <dd>{f.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </aside>
+      </div>
+    </article>
   );
 }
 
@@ -780,7 +875,9 @@ export default function ExperienceSection() {
             <LayoutGroup id="exp-filter">
               {filters.map((f) => {
                 const count =
-                  f.id === 'all' ? experiences.length : experiences.filter((e) => e.category === f.id).length;
+                  (f.id === 'all' ? experiences.length : experiences.filter((e) => e.category === f.id).length) +
+                  // R104: the treasurer roles count on the LEADERSHIP track, where each has its own card
+                  (f.id === 'leadership' ? TREASURER_EVENTS.length : 0);
                 const isActive = selectedFilter === f.id;
 
                 return (
@@ -1079,12 +1176,27 @@ export default function ExperienceSection() {
                       </div>
 
                       {/* Specialized Dashboards */}
-                      {item.id === 'pekom' && <PekomTreasurerDashboard />}
+                      {item.id === 'pekom' && <PekomTreasurerDashboard split={selectedFilter === 'leadership'} />}
                     </div>
                   </div>
                 </m.div>
               );
             })}
+            {/* R104: on the LEADERSHIP track every PEKOM treasurer role is its own record, after the PEKOM card */}
+            {selectedFilter === 'leadership' &&
+              TREASURER_EVENTS.map((ev, i) => (
+                <m.div
+                  layout
+                  key={`tr-${ev.id}`}
+                  initial={{ opacity: 0, scale: 0.97, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.97, y: -20 }}
+                  transition={{ duration: 0.4, type: 'spring', bounce: 0.2 }}
+                  className="relative"
+                >
+                  <TreasurerCard event={ev} index={i} />
+                </m.div>
+              ))}
           </AnimatePresence>
         </div>
       </div>
