@@ -1300,10 +1300,10 @@ function ProjectCard({ project, index }: { project: ProjectData; index: number }
               </div>
 
               {/* Right Column: Visual Architecture / Gallery (5 Cols) — a physical "desk" for the polaroids */}
-              {/* R110 (owner: "don't leave a big blank space, move the gallery to the middle right"): the gallery sits in the
-                  middle of the card's height and stays beside the text while it is read (sticky; the card clips with
-                  overflow: clip, which keeps sticky working) */}
-              <div className="lg:col-span-5 lg:self-center lg:sticky lg:top-[calc(var(--header-h,5rem)+1.5rem)] min-w-0 -mx-2 xs:-mx-4 sm:mx-0 rounded-2xl border-3 border-ink bg-paper-deep bg-dots p-3 sm:p-6 space-y-4 flex flex-col shadow-[inset_0_3px_0_rgba(0,0,0,0.06)]">
+              {/* R110 / R113 (owner: "don't leave a big blank space ... start the gallery at the top, it sticks under the
+                  header and slides down with me to the end"): the gallery starts level with the card's text and stays
+                  beside it while it is read (sticky; the card clips with overflow: clip, which keeps sticky working) */}
+              <div className="lg:col-span-5 lg:self-start lg:sticky lg:top-[calc(var(--header-h,5rem)+1.5rem)] min-w-0 -mx-2 xs:-mx-4 sm:mx-0 rounded-2xl border-3 border-ink bg-paper-deep bg-dots p-3 sm:p-6 space-y-4 flex flex-col shadow-[inset_0_3px_0_rgba(0,0,0,0.06)]">
                 {/* Visualizer Header */}
                 <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 border-b-2 border-dashed border-ink pb-3">
                   <div className="flex items-center gap-2 text-xs font-mono font-extrabold text-ink">

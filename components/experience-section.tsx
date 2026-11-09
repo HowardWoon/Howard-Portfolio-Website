@@ -1153,7 +1153,7 @@ export default function ExperienceSection() {
                         {g && (
                           <div
                             data-gallery-desk
-                            className="lg:col-span-5 lg:self-center lg:sticky lg:top-[calc(var(--header-h,5rem)+1.5rem)] min-w-0 w-full max-w-md mx-auto lg:max-w-none rounded-2xl border-3 border-ink bg-paper-deep bg-dots p-3 sm:p-5 space-y-4 shadow-[inset_0_3px_0_rgba(0,0,0,0.06)]"
+                            className="lg:col-span-5 lg:self-start lg:sticky lg:top-[calc(var(--header-h,5rem)+1.5rem)] min-w-0 w-full max-w-md mx-auto lg:max-w-none rounded-2xl border-3 border-ink bg-paper-deep bg-dots p-3 sm:p-5 space-y-4 shadow-[inset_0_3px_0_rgba(0,0,0,0.06)]"
                           >
                             <div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-dashed border-ink pb-3">
                               <div className="flex items-center gap-2 text-xs font-mono font-extrabold text-ink">
