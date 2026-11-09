@@ -30,7 +30,7 @@ async function openDiorama(page: Page) {
   // R85: a FIXED street (R82): on a random one a walker heading south on the same line can meet the player head on in
   // the konbini doorway (street seeds 6 and 8): the walker waits for the player, the player is blocked by the walker,
   // and the walk measured a standstill instead of the camera
-  await page.goto('/?diorama-test&street-seed=1', { waitUntil: 'networkidle' });
+  await page.goto('/diorama?diorama-test&street-seed=1', { waitUntil: 'networkidle' });
   await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
   await expect(async () => {
     await page.evaluate(() => document.getElementById('diorama')?.scrollIntoView({ block: 'start' }));
@@ -161,24 +161,19 @@ test('the section signs stay up in walk mode, over the buildings in view, and gu
   }
 });
 
-test('the 3D street loads only when the section is on screen, and waits for START 3D on software graphics', async ({
+test('the home page never builds the 3D street; its own page waits for START 3D on software graphics', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
   await page.goto('/', { waitUntil: 'networkidle' });
   await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
-  // the section just below the window: nothing is built
-  await page.evaluate(() => {
-    const s = document.getElementById('diorama')!;
-    let y = 0;
-    for (let n: HTMLElement | null = s; n; n = n.offsetParent as HTMLElement | null) y += n.offsetTop;
-    window.scrollTo(0, y - innerHeight - 300);
-  });
+  // R107: the home page shows the teaser - scrolling past it builds nothing
+  await page.evaluate(() => document.getElementById('diorama')!.scrollIntoView({ block: 'start' }));
   await page.waitForTimeout(1500);
   expect(await page.locator('#diorama canvas').count()).toBe(0);
-  // on screen: this test browser draws WebGL in software (SwiftShader), so the street waits for a press
-  await page.evaluate(() => document.getElementById('diorama')!.scrollIntoView({ block: 'start' }));
+  await expect(page.locator('#diorama [data-diorama-cta]')).toHaveAttribute('href', '/diorama');
+  // its own page: this test browser draws WebGL in software (SwiftShader), so the street waits for a press
+  await page.goto('/diorama', { waitUntil: 'networkidle' });
   const start = page.getByRole('button', { name: 'START 3D' });
   await expect(start).toBeVisible({ timeout: 15_000 });
   expect(await page.locator('#diorama canvas').count()).toBe(0);

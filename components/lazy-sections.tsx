@@ -46,11 +46,10 @@ export const ContactSection = guard(
   dynamic(() => import('@/components/contact-section')),
   'ContactSection',
 );
-// Tokyo After Rain: walkable 3D diorama section. Its own chunk; three.js itself is fetched only when the
-// section comes near the viewport (components/tokyo-diorama/tokyo-diorama-section.tsx).
-export const TokyoDiorama = guard(
-  dynamic(() => import('@/components/tokyo-diorama/tokyo-diorama-section')),
-  'TokyoDiorama',
+// R107: the walkable 3D street lives on its own page (/diorama); the home page shows this teaser - no three.js here
+export const DioramaTeaser = guard(
+  dynamic(() => import('@/components/diorama-teaser')),
+  'DioramaTeaser',
 );
 // R49: the hero mascot (page-mascot cat) is client-only and mounts after the gate; its code stays out of First Load
 export const HeroMascot = guard(

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowUpRight,
@@ -108,6 +109,11 @@ export default function TokyoDioramaSection({
   const [near, setNear] = useState(false);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
+  // R107 (owner: "after I play it goes black and I cannot find my way"): the street stopped (its graphics context was
+  // lost and not given back, or it never finished building) - a card with RESTART 3D, never a silent black window
+  const [stopped, setStopped] = useState(false);
+  const lostRef = useRef(false);
+  const rebuilds = useRef(0);
   const [mode, setMode] = useState<Mode>('view');
   const [rain, setRain] = useState(true);
   const [sound, setSound] = useState(false);
@@ -172,7 +178,11 @@ export default function TokyoDioramaSection({
   const navigate = useCallback(async (h: Hotspot) => {
     if (!h.target) return;
     const el = document.querySelector(h.target);
-    if (!el) return;
+    // R107: on /diorama the sections live on the home page
+    if (!el) {
+      if (h.target.startsWith('#')) window.location.assign(`/${h.target}`);
+      return;
+    }
     if (document.fullscreenElement) await document.exitFullscreen().catch(() => undefined);
     setFull('off');
     const w = window as Win;
@@ -208,9 +218,15 @@ export default function TokyoDioramaSection({
     const seedParam = params.get('street-seed');
     const seed = seedParam && /^\d{1,10}$/.test(seedParam) ? Number(seedParam) : undefined;
     setHeld(false);
+    if (stopped) return;
     let disposed = false;
     let handle: DioramaHandle | null = null;
     let toastTimer = 0;
+    lostRef.current = false;
+    // R107: a build that has not shown the street in 45 s (a stalled download, a hung driver) offers RESTART 3D
+    const stall = window.setTimeout(() => {
+      if (!disposed && !handleRef.current) setStopped(true);
+    }, 45_000);
     import('./engine')
       .then(async ({ createTokyoDiorama }) => {
         if (disposed) return;
@@ -231,8 +247,24 @@ export default function TokyoDioramaSection({
               window.clearTimeout(toastTimer);
               toastTimer = window.setTimeout(() => setToast(null), 2800);
             },
-            onContextLost: () => setReady(false),
-            onContextRestored: () => setMountKey((k) => k + 1),
+            onContextLost: () => {
+              setReady(false);
+              lostRef.current = true;
+              // R107: browsers often never give a lost context back (a GPU reset, too many contexts): after 2.5 s the
+              // street is rebuilt on a fresh canvas; after three rebuilds the visitor gets RESTART 3D instead
+              window.setTimeout(() => {
+                if (disposed || !lostRef.current) return;
+                if (rebuilds.current >= 3) setStopped(true);
+                else {
+                  rebuilds.current++;
+                  setMountKey((k) => k + 1);
+                }
+              }, 2500);
+            },
+            onContextRestored: () => {
+              lostRef.current = false;
+              setMountKey((k) => k + 1);
+            },
             content: contentRef.current,
             onSeason: (s) => setSeasonState(s),
             onRoom: (st) => {
@@ -268,7 +300,8 @@ export default function TokyoDioramaSection({
         }
         handleRef.current = handle;
         // R73: a sign shows only while its section is really on the page
-        for (const [pid, el] of pinRefs.current) handle.bindPin(pid, document.getElementById(pid) ? el : null);
+        // R107: the street has its own page now - every door's sign shows (it opens that door's room)
+        for (const [pid, el] of pinRefs.current) handle.bindPin(pid, el);
         handle.setRain(rain);
         // R73: a rebuilt street (lost graphics context) keeps the visitor's sound choice
         if (sound) void handle.setSound(true);
@@ -280,6 +313,7 @@ export default function TokyoDioramaSection({
     return () => {
       disposed = true;
       window.clearTimeout(toastTimer);
+      window.clearTimeout(stall);
       handle?.dispose();
       handleRef.current = null;
       setReady(false);
@@ -291,7 +325,7 @@ export default function TokyoDioramaSection({
     };
     // the engine is created once per mount; later changes go through the handle
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [near, failed, mountKey, started]);
+  }, [near, failed, mountKey, started, stopped]);
 
   /* ---------- walk-in gallery: live extras (public/gallery/gallery.json + /api/gallery), once the street is up */
   useEffect(() => {
@@ -582,7 +616,7 @@ export default function TokyoDioramaSection({
             ))}
 
             {/* loading / failure */}
-            {!ready && !failed && !held && (
+            {!ready && !failed && !held && !stopped && (
               <div className="absolute inset-0 z-[7] grid place-items-center bg-[#0a0e1c]">
                 <div className="rounded-xl border-3 border-ink bg-white px-4 py-3 font-mono text-xs font-extrabold tracking-[0.14em] text-ink shadow-brutal-sm">
                   {near ? 'BUILDING THE BLOCK…' : 'SCROLL TO LOAD'}
@@ -615,6 +649,34 @@ export default function TokyoDioramaSection({
                 </div>
               </div>
             )}
+            {stopped && !failed && (
+              <div data-diorama-stopped className="absolute inset-0 z-[7] grid place-items-center bg-[#0a0e1c] p-6">
+                <div className="max-w-sm rounded-xl border-3 border-ink bg-white p-4 text-ink shadow-brutal">
+                  <p className="font-mono text-xs font-extrabold tracking-[0.12em]">THE 3D STREET STOPPED</p>
+                  <p className="mt-2 text-sm font-medium">
+                    The graphics chip let the street go. Start it again - it takes a few seconds.
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      data-diorama-restart
+                      onClick={() => {
+                        rebuilds.current = 0;
+                        lostRef.current = false;
+                        setStopped(false);
+                        setMountKey((k) => k + 1);
+                      }}
+                      className={keyBtn}
+                    >
+                      RESTART 3D
+                    </button>
+                    <Link href="/#diorama" className={keyBtn}>
+                      Return to Portfolio
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            )}
             {failed && (
               <div className="absolute inset-0 z-[7] grid place-items-center bg-[#0a0e1c] p-6">
                 <div className="max-w-sm rounded-xl border-3 border-ink bg-white p-4 text-ink shadow-brutal">
@@ -624,7 +686,7 @@ export default function TokyoDioramaSection({
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {PINS.map((p) => (
-                      <a key={p.id} href={`#${p.id}`} className={keyBtn}>
+                      <a key={p.id} href={`/#${p.id}`} className={keyBtn}>
                         {p.label}
                       </a>
                     ))}

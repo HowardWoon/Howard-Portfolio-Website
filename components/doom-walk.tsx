@@ -76,7 +76,11 @@ export default function DoomWalk() {
     // R95: the governor (FX-93) can switch to lite in the middle of a visit. A lite tier set before the walk is near
     // gives the still; switched on while the walk is near, the pinned walk stays until it is off screen - collapsing
     // its 320vh track under the reader moved the page by ~2,400 px and left the canvas black
-    const still = () => calm || reduce.matches || shortMq.matches || (lite() && (!!track.dataset.static || !near));
+    // R107: ... and never while the walk is ABOVE the reader either: collapsing it there (3,442 px at 2,880 px wide)
+    // pulled everything below up the page while the reader sat at Contact (tests/r62 zoom keeps the place)
+    const below = () => track.getBoundingClientRect().top > window.innerHeight;
+    const still = () =>
+      calm || reduce.matches || shortMq.matches || (lite() && (!!track.dataset.static || (!near && below())));
 
     let set: 'wide' | 'tall' = tallMq.matches ? 'tall' : 'wide';
     let imgs: (HTMLImageElement | null)[] = [];

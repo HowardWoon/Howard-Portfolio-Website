@@ -38,7 +38,7 @@ async function open(page: Page) {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(String(e)));
   await page.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
-  await page.goto('/?diorama-test&street-seed=93');
+  await page.goto('/diorama?diorama-test&street-seed=93');
   await expect(async () => {
     await page.evaluate(() => document.getElementById('diorama')?.scrollIntoView({ block: 'start' }));
     await page.waitForTimeout(250);

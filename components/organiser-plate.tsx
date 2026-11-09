@@ -92,10 +92,7 @@ export function OrganiserPlate({
         <span className="rounded-md bg-ink px-2 py-0.5 font-mono text-xs font-extrabold tracking-[0.16em] text-white">
           HOSTED BY
         </span>
-        <span
-          data-org-name
-          className="min-w-0 font-display text-base font-extrabold leading-tight text-ink [overflow-wrap:anywhere] sm:text-lg"
-        >
+        <span data-org-name className="min-w-0 font-display text-base font-extrabold leading-tight text-ink sm:text-lg">
           {o.name}
         </span>
       </span>

@@ -230,7 +230,9 @@ function measured<T>(name: string, run: () => T): T {
   }
 }
 
-type ProgramState = { currentProgram?: { id?: number; isReady(): boolean; getUniforms(): unknown } };
+type ProgramState = {
+  currentProgram?: { id?: number; program: WebGLProgram; isReady(): boolean; getUniforms(): unknown };
+};
 
 /**
  * R80 (owner: "when i scroll to this part ... it start lagging, crashing"): the street used to be built in ONE task of
@@ -877,7 +879,14 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
     simMs += (performance.now() - ts - simMs) * 0.05;
     // R80: while new shaders compile (a tier change) the street keeps moving but is not drawn: a draw would wait for
     // them. Nor is the frame rate counted.
-    if (warming > 0) return;
+    if (warming > 0) {
+      // R107 watchdog: a warm-up that has not finished in 8 s is not allowed to keep the street black - it is drawn
+      // (a frame or two may hitch while the last shaders link, which is far better than a black window)
+      if (!warmSince || performance.now() - warmSince < WARM_LIMIT) return;
+      console.warn('[tokyo-diorama] warm-up took over 8 s; drawing anyway');
+      warming = 0;
+      warmSince = 0;
+    }
     // walk-in gallery: a photo that has just arrived goes to the graphics card, one per frame
     const up = uploads.shift();
     if (up) renderer.initTexture(up);
@@ -1186,6 +1195,9 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
 
   // R80: nothing is drawn while shaders compile (a tier change, see tick); the loop starts once the first build is ready
   let warming = 0;
+  /** R107: when the current warm-up began (0 = none): the tick's watchdog draws anyway after WARM_LIMIT */
+  let warmSince = 0;
+  const WARM_LIMIT = 8000;
   let building = true;
   const setRunning = () => {
     const should = visible && pageVisible && !lost && !building && !disposed;
@@ -1368,6 +1380,7 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
   async function warmUp(root: THREE.Scene = scene) {
     const street = root === scene;
     warming++;
+    if (!warmSince) warmSince = performance.now();
     try {
       const t0 = performance.now();
       const drawTarget = composer ? composer.readBuffer : null;
@@ -1452,13 +1465,26 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
         if (disposed) return;
         slice = performance.now();
       }
-      if (parallel) while (!disposed && !lost && [...programs].some((p) => !p.isReady())) await wait(16);
+      // R107 (owner: "after I play, the whole screen goes black"): a program the renderer has since released (a tier
+      // change disposes the old composer's passes) never reports ready - the wait was endless and the street was never
+      // drawn again. A deleted program is skipped, and the wait has a deadline: past it the street is drawn anyway.
+      const g = renderer.getContext();
+      const until = performance.now() + 5000;
+      if (parallel)
+        while (
+          !disposed &&
+          !lost &&
+          performance.now() < until &&
+          [...programs].some((p) => g.isProgram(p.program) && !p.isReady())
+        )
+          await wait(16);
       while (programs.size && !disposed) {
         const s = performance.now();
         measured('first-use', () => {
           for (const p of programs) {
             if (performance.now() - s > 8) break;
-            p.getUniforms(); // first use: reads the link status and logs (instant once linked)
+            // first use: reads the link status and logs (instant once linked); a released program is skipped (R107)
+            if (g.isProgram(p.program)) p.getUniforms();
             programs.delete(p);
           }
         });
@@ -1563,7 +1589,8 @@ export async function createTokyoDiorama(opts: DioramaOptions): Promise<DioramaH
       performance.measure('diorama:warm', { start: t0, end: performance.now() });
       warmedAt.set(root, tier);
     } finally {
-      warming--;
+      warming = Math.max(0, warming - 1);
+      if (!warming) warmSince = 0;
     }
   }
 

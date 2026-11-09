@@ -30,7 +30,7 @@ async function open(page: Page) {
   page.on('pageerror', (e) => errors.push(String(e)));
   // a missing file (the Vercel analytics scripts exist only on Vercel) is not a script error
   page.on('console', (m) => m.type() === 'error' && !/Failed to load resource/.test(m.text()) && errors.push(m.text()));
-  await page.goto('/?diorama-test');
+  await page.goto('/diorama?diorama-test');
   await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
   await expect(async () => {
     await page.evaluate(() => document.getElementById('diorama')?.scrollIntoView({ block: 'start' }));

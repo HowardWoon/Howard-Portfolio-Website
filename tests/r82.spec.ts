@@ -49,7 +49,7 @@ type W = Window & { __diorama?: Handle };
 async function openStreet(page: Page, seed: number) {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(String(e)));
-  await page.goto(`/?diorama-test&street-seed=${seed}`);
+  await page.goto(`/diorama?diorama-test&street-seed=${seed}`);
   await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
   await expect(async () => {
     await page.evaluate(() => document.getElementById('diorama')?.scrollIntoView({ block: 'start' }));
@@ -260,7 +260,7 @@ test.describe('R82 3D street', () => {
 
   test('a fling past the street does not build it; resting on it does', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto('/?diorama-test');
+    await page.goto('/diorama?diorama-test');
     await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
     await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
     const top = await page.evaluate(() => document.getElementById('diorama')!.getBoundingClientRect().top + scrollY);

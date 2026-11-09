@@ -260,7 +260,23 @@ for (const [sel, from, to] of [
     }, sel);
     await page.mouse.move(from[0] / 2, from[1] / 2);
     await page.mouse.wheel(0, 40);
-    await page.waitForTimeout(700); // the place is remembered 120 ms after the scrolling stops
+    // the place is remembered 120 ms after the scrolling stops. R107: the smooth-scroll glide after a wheel can run past
+    // a fixed 700 ms on the longer page, so wait until the page has really stopped (no scroll for 400 ms), then 300 ms
+    await page.evaluate(
+      () =>
+        new Promise<void>((done) => {
+          let t = window.setTimeout(done, 400);
+          const again = () => {
+            window.clearTimeout(t);
+            t = window.setTimeout(() => {
+              window.removeEventListener('scroll', again);
+              done();
+            }, 400);
+          };
+          window.addEventListener('scroll', again, { passive: true });
+        }),
+    );
+    await page.waitForTimeout(300);
     // where the heading is AFTER each frame has been drawn (a timer queued from the frame callback runs after it)
     await page.evaluate((s) => {
       const el = document.querySelector(s)!;

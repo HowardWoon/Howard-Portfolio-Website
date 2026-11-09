@@ -57,6 +57,10 @@ export default function KeepPlace() {
         if (pos === 'fixed') return null;
         if (pos === 'sticky' && n.parentElement && n.parentElement !== main) pick = n.parentElement;
       }
+      // R107: a word inside a heading or paragraph moves to another LINE when the width changes (the line breaks
+      // differently), so its place drifts by lines; the block it flows in (the heading, the paragraph) is kept instead
+      while (pick.parentElement && pick.parentElement !== main && getComputedStyle(pick).display.startsWith('inline'))
+        pick = pick.parentElement;
       return pick;
     };
 

@@ -30,7 +30,7 @@ test.beforeEach(() => test.slow());
 async function openDiorama(page: Page, query = '') {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(String(e)));
-  await page.goto(`/?diorama-test${query}`);
+  await page.goto(`/diorama?diorama-test${query}`);
   await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
   await expect(async () => {
     await page.evaluate(() => document.getElementById('diorama')?.scrollIntoView({ block: 'start' }));
@@ -41,7 +41,7 @@ async function openDiorama(page: Page, query = '') {
   return errors;
 }
 
-test('diorama section mounts between Honors and the logo wall, with its pins', async ({ page }) => {
+test('the diorama page mounts the street with its pins', async ({ page }) => {
   const errors = await openDiorama(page);
   await expect(page.getByRole('heading', { name: /walk the block/i })).toBeVisible();
   await expect(page.locator('#diorama canvas')).toHaveCount(1);
@@ -57,13 +57,7 @@ test('diorama section mounts between Honors and the logo wall, with its pins', a
         .evaluateAll((b) => b.filter((x) => (x as HTMLElement).style.visibility === 'visible').length),
     )
     .toBeGreaterThanOrEqual(3);
-  // the other sections are untouched and still in page order
-  const order = await page.evaluate(() =>
-    ['about', 'projects', 'experience', 'honors', 'diorama', 'contact'].map(
-      (id) => document.getElementById(id)?.getBoundingClientRect().top ?? NaN,
-    ),
-  );
-  for (let i = 1; i < order.length; i++) expect(order[i]).toBeGreaterThan(order[i - 1]);
+  // R107: the street has its own page (/diorama); the home page keeps the teaser in place (tests/r107)
   expect(errors).toEqual([]);
 });
 

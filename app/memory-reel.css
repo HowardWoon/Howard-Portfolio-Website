@@ -116,7 +116,9 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  width: 170px;
+  width: max-content;
+  min-width: 170px;
+  max-width: 260px;
   height: var(--frame-h);
   padding: 12px;
   border: 3px solid #0a0a0a;
@@ -134,7 +136,9 @@
   line-height: 1.25;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  overflow-wrap: anywhere;
+  /* whole words only (tests/r62: no word split over two lines at any zoom); a slate grows with its longest word */
+  overflow-wrap: normal;
+  hyphens: none;
 }
 .mr-slate-count {
   align-self: flex-start;
@@ -147,7 +151,7 @@
 }
 @media (max-width: 640px) {
   .mr-slate {
-    width: 140px;
+    min-width: 140px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

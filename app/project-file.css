@@ -105,7 +105,7 @@
   font-weight: 500;
   line-height: 1.55;
   color: #0a0a0a;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 .pj-file-lines > li::before {
   content: '';

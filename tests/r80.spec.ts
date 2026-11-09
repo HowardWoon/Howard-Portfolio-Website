@@ -69,7 +69,7 @@ test('scrolling into the 3D street keeps painting while it is built (no multi-se
   page.on('pageerror', (e) => errors.push(String(e)));
   page.on('console', (m) => m.type() === 'error' && !/Failed to load resource/.test(m.text()) && errors.push(m.text()));
   await recordFrames(page);
-  await page.goto('/?diorama-test', { waitUntil: 'networkidle' });
+  await page.goto('/diorama?diorama-test', { waitUntil: 'networkidle' });
   await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
   await page.evaluate(() => {
     (window as W).__gapOn = true;
@@ -95,7 +95,7 @@ test('scrolling into the 3D street keeps painting while it is built (no multi-se
 test('changing the graphics tier never freezes the page while the shaders compile again', async ({ page }) => {
   await page.setViewportSize({ width: 800, height: 600 });
   await recordFrames(page);
-  await page.goto('/?diorama-test', { waitUntil: 'networkidle' });
+  await page.goto('/diorama?diorama-test', { waitUntil: 'networkidle' });
   await page.waitForFunction(() => (window as unknown as { __hwHydrated?: boolean }).__hwHydrated === true);
   await page.evaluate(() => document.querySelector('[data-diorama-root]')?.scrollIntoView({ block: 'center' }));
   await expect

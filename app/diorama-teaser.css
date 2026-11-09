@@ -1,0 +1,173 @@
+/* R107 3D diorama teaser (components/diorama-teaser.tsx, docs/R107-DIORAMA-PAGE.md). The home page shows the street as
+   a window with a real render and a way in; the rooms as a ruled ledger; how to play as keys. Square window keys (no
+   traffic-light dots: colour without a meaning), 3 px ink, hard offset shadows, mono labels. */
+.dt-window {
+  border: 3px solid #0a0a0a;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 8px 8px 0 0 #0a0a0a;
+  overflow: clip;
+}
+.dt-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 3px solid #0a0a0a;
+  padding: 10px 14px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+.dt-keys {
+  display: flex;
+  gap: 6px;
+}
+.dt-keys i {
+  width: 12px;
+  height: 12px;
+  border: 2px solid #0a0a0a;
+  border-radius: 2px;
+  background: #fff;
+}
+.dt-keys i:first-child {
+  background: #0a0a0a;
+}
+.dt-chip {
+  margin-left: auto;
+  flex: none;
+  border: 2px solid #0a0a0a;
+  border-radius: 6px;
+  background: var(--pop-yellow);
+  padding: 2px 8px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.dt-shot {
+  display: block;
+  background: #0a0a0a;
+  border-bottom: 3px solid #0a0a0a;
+}
+.dt-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 18px;
+  padding: 16px;
+  background: var(--paper-cream);
+}
+.dt-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  border: 3px solid #0a0a0a;
+  border-radius: 6px;
+  background: var(--pop-yellow);
+  padding: 0 18px;
+  box-shadow: 4px 4px 0 0 #0a0a0a;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #0a0a0a;
+  transition:
+    translate 0.12s steps(2, end),
+    box-shadow 0.12s steps(2, end);
+}
+.dt-cta:hover {
+  translate: -2px -2px;
+  box-shadow: 6px 6px 0 0 #0a0a0a;
+}
+.dt-cta:active {
+  translate: 4px 4px;
+  box-shadow: none;
+}
+.dt-cta:focus-visible {
+  outline: 3px solid var(--pop-blue);
+  outline-offset: 3px;
+}
+.dt-note {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #0a0a0a;
+}
+.dt-ledger {
+  border: 3px solid #0a0a0a;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 5px 5px 0 0 #0a0a0a;
+  overflow: clip;
+}
+.dt-ledger-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #0a0a0a;
+  color: #fff;
+  padding: 8px 14px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.dt-ledger li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+  padding: 10px 14px;
+}
+.dt-ledger li + li {
+  border-top: 2px solid #0a0a0a;
+}
+.dt-sign {
+  display: inline-flex;
+  flex-direction: column;
+  border: 2px solid #0a0a0a;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  line-height: 1.2;
+  text-align: center;
+}
+.dt-sign b {
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+.dt-sign small {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.dt-count,
+.dt-how {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #0a0a0a;
+}
+.dt-mode {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 6px;
+  background: #0a0a0a;
+  color: #fff;
+  padding: 4px 10px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+.dt-print {
+  border: 3px solid #0a0a0a;
+  border-radius: 6px;
+  background: #0a0a0a;
+  box-shadow: 4px 4px 0 0 #0a0a0a;
+  overflow: clip;
+}

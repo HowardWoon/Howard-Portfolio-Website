@@ -52,7 +52,7 @@ async function openDiorama(page: Page, query = '?diorama-test') {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(String(e)));
   page.on('console', (m) => m.type() === 'error' && !/Failed to load resource/.test(m.text()) && errors.push(m.text()));
-  await page.goto(`/${query}`);
+  await page.goto(`/diorama${query}`);
   await skipGate(page);
   await expect(async () => {
     await page.evaluate(() => document.getElementById('diorama')?.scrollIntoView({ block: 'start' }));
@@ -392,7 +392,7 @@ test.describe('3D street on phones', () => {
   test('touch: the street is not built in the middle of a scroll, it starts with START 3D', async ({ browser }) => {
     const ctx = await browser.newContext(PHONE);
     const page = await ctx.newPage();
-    await page.goto('/');
+    await page.goto('/diorama');
     await skipGate(page);
     const start = page.locator('[data-diorama-start]');
     // R82: the street is only prepared once the page has rested on it, and right after the gate the page may still be
