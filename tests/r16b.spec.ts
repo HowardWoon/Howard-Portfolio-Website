@@ -47,7 +47,7 @@ test('reduced motion: no sink, no recede, titles are plain ink', async ({ page }
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
-  expect(await animName(page, '#about')).toBe('none');
+  expect(await animName(page, '#experience')).toBe('none');
   expect(await animName(page, '.fx-project-shell')).toBe('none');
   const word = page.locator('#projects h2 .fx-ink-word').first();
   expect(await word.evaluate((e) => getComputedStyle(e).color)).toBe('rgb(10, 10, 10)');
@@ -95,7 +95,7 @@ test.describe('phone', () => {
     await home(page);
     await expect(page.locator('html[data-foundation]')).toHaveCount(0);
     expect(await page.locator('footer').evaluate((e) => getComputedStyle(e).position)).not.toBe('fixed');
-    expect(await animName(page, '#about')).toBe('none');
+    expect(await animName(page, '#experience')).toBe('none');
   });
 });
 

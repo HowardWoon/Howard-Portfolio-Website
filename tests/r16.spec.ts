@@ -30,7 +30,7 @@ test('the desk surface takes the tint of the section in view, and clears at the 
   await home(page);
   expect(await page.evaluate(() => document.documentElement.dataset.tide)).toBe('on');
   // the cream sections hand their colour to the desk; their dot texture stays
-  const bg = await page.locator('#about').evaluate((e) => getComputedStyle(e).backgroundColor);
+  const bg = await page.locator('#experience').evaluate((e) => getComputedStyle(e).backgroundColor);
   expect(bg).toBe('rgba(0, 0, 0, 0)');
   expect(await tint(page)).toBe(CREAM);
 
@@ -58,7 +58,7 @@ test('an overlay still covers the header with the page root as a stacking contex
 test('print restores the cream sections (FX-76)', async ({ page }) => {
   await home(page);
   await page.emulateMedia({ media: 'print' });
-  expect(await page.locator('#about').evaluate((e) => getComputedStyle(e).backgroundColor)).toBe(CREAM);
+  expect(await page.locator('#experience').evaluate((e) => getComputedStyle(e).backgroundColor)).toBe(CREAM);
   expect(await page.locator('.fx-tide-canvas').evaluate((e) => getComputedStyle(e).display)).toBe('none');
 });
 
@@ -71,9 +71,9 @@ test('desktop: the dot plane is scroll-driven, and the hero has no sun behind th
   // R77 (owner: every section background "clean and tidy"): the FX-77 sun is gone
   expect(await page.locator('.fx-sunset').count()).toBe(0);
   // R95: off screen the plane drops its scroll-driven animation (tests/r95), so read it with About on screen
-  await page.locator('#about').evaluate((e) => e.scrollIntoView({ block: 'start' }));
-  await expect(page.locator('#about[data-offscreen]')).toHaveCount(0);
-  const plane = await page.locator('#about').evaluate((e) => ({
+  await page.locator('#experience').evaluate((e) => e.scrollIntoView({ block: 'start' }));
+  await expect(page.locator('#experience[data-offscreen]')).toHaveCount(0);
+  const plane = await page.locator('#experience').evaluate((e) => ({
     own: getComputedStyle(e).backgroundImage,
     before: getComputedStyle(e, '::before').animationName,
     dots: getComputedStyle(e, '::before').backgroundImage,
@@ -87,7 +87,7 @@ test.describe('phone', () => {
   test.use((({ defaultBrowserType, ...d }) => d)(devices['iPhone 13']));
   test('phones keep the static dots and have no sun (FX-79; FX-77 retired)', async ({ page }) => {
     await home(page);
-    const about = await page.locator('#about').evaluate((e) => ({
+    const about = await page.locator('#experience').evaluate((e) => ({
       own: getComputedStyle(e).backgroundImage,
       before: getComputedStyle(e, '::before').content,
     }));
@@ -102,7 +102,7 @@ test('reduced motion: no dot plane, the tint changes without a glide', async ({ 
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
-  expect(await page.locator('#about').evaluate((e) => getComputedStyle(e, '::before').content)).toBe('none');
+  expect(await page.locator('#experience').evaluate((e) => getComputedStyle(e, '::before').content)).toBe('none');
   const dur = await page.evaluate(
     () => getComputedStyle(document.querySelector('.fx-tide-canvas')!, '::after').transitionDuration,
   );
@@ -113,7 +113,7 @@ test('Calm Mode switches the session-1 effects off', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
   await page.evaluate(() => (document.documentElement.dataset.motion = 'calm'));
-  expect(await page.locator('#about').evaluate((e) => getComputedStyle(e, '::before').content)).toBe('none');
+  expect(await page.locator('#experience').evaluate((e) => getComputedStyle(e, '::before').content)).toBe('none');
 });
 
 /* ---------------------------------------------------------------- FX-93 */
@@ -125,7 +125,7 @@ test('frame governor reports a tier, and ?fxtier=lite drops the heavy effects (F
   await home(page, '/?fxtier=lite');
   await expect.poll(() => page.evaluate(() => document.documentElement.dataset.fxTier ?? null)).toBe('lite');
   expect(await page.evaluate(() => window.__fxTier)).toBe('lite');
-  expect(await page.locator('#about').evaluate((e) => getComputedStyle(e, '::before').content)).toBe('none');
+  expect(await page.locator('#experience').evaluate((e) => getComputedStyle(e, '::before').content)).toBe('none');
   // the tint is cheap and stays in lite
   expect(await page.evaluate(() => document.documentElement.dataset.tide)).toBe('on');
 });

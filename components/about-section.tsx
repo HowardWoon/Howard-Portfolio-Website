@@ -420,9 +420,16 @@ export default function AboutSection() {
   return (
     <section
       id="about"
-      className="fx-tide-surface fx-dot-plane fx-sheet relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-28 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-clip border-t-3 border-ink"
+      // R112 (owner's Pinterest references, colour-block grounds): About paints its own flat yellow ground, edge to edge
+      // (it no longer hands a soft tint to the tide desk, and carries no dot texture); its cards stay paper
+      data-ground="yellow"
+      className="fx-sheet relative w-full bg-ground-yellow text-ink py-24 sm:py-28 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-clip border-t-3 border-ink"
     >
       <div className="relative max-w-7xl mx-auto space-y-16">
+        {/* R112: the section's number at poster scale, outlined ink on the ground (like the references' "06") */}
+        <span aria-hidden data-section-index className="ground-index -mb-8 sm:-mb-12">
+          01
+        </span>
         {/* R101 data plate (docs/R101-ABOUT-PLATE.md): the header, the words and the Build Sheet are ONE riveted plate -
             an ink label bar, the claim and the paragraph on the left, the four split-flap counters as a ruled grid on
             the right (stacked on phones). Same words, same links. */}

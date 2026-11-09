@@ -5208,3 +5208,17 @@ html[data-skip='on'] :is(#about, #projects, #experience, #honors) > * {
   line-height: 1.2;
   letter-spacing: -0.01em;
 }
+
+/* R112 poster-scale section number on a colour-block ground (components/about-section.tsx): outlined ink, no fill, no
+   shadow - type as the graphic (docs/R112-ABOUT-GROUND.md) */
+.ground-index {
+  display: block;
+  font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+  font-weight: 800;
+  font-size: clamp(5rem, 16vw, 11rem);
+  line-height: 0.8;
+  letter-spacing: -0.06em;
+  color: transparent;
+  -webkit-text-stroke: 3px #0a0a0a;
+  user-select: none;
+}
