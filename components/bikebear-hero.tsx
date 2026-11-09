@@ -193,6 +193,8 @@ function HireSticker() {
   return (
     <div
       data-hire-sticker
+      // words set on a ring are picture type (each letter its own line box): exempt from the reading-text checks
+      data-type-exempt
       role="img"
       aria-label="Available for 2026 roles"
       className="pointer-events-none absolute -left-3 top-16 z-50 h-28 w-28 sm:-left-10 sm:top-20 sm:h-32 sm:w-32"
