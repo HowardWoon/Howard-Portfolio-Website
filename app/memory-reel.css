@@ -1,0 +1,157 @@
+/* R102 Memory Reel (components/memory-reel.tsx, docs/R102-MEMORY-REEL.md). A paper film: ink sprocket squares above
+   and below, square-cut prints at their real shape (never cropped, AGENTS.md 8.4), slates in the chapter's SIGNAL
+   colour, an edge print per frame. Hard edges only: the sprockets are a stepped pattern, not a soft gradient. */
+.mr-key {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 2px solid #fff;
+  border-radius: 6px;
+  background: #0a0a0a;
+  color: #fff;
+}
+.mr-key:hover {
+  background: var(--pop-yellow);
+  color: #0a0a0a;
+  border-color: var(--pop-yellow);
+}
+.mr-key:active {
+  translate: 2px 2px;
+}
+.mr-key:focus-visible,
+.mr-chapters button:focus-visible,
+.mr-print:focus-visible,
+.mr-track:focus-visible {
+  outline: 3px solid var(--pop-blue);
+  outline-offset: 2px;
+}
+.mr-chapters {
+  scrollbar-width: thin;
+}
+
+.mr-track {
+  position: relative;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 12px;
+  cursor: grab;
+  background: var(--paper-cream);
+  scrollbar-width: thin;
+  scrollbar-color: #0a0a0a var(--paper-cream);
+  --frame-h: 240px;
+}
+.mr-track[data-mr-drag] {
+  cursor: grabbing;
+  scroll-snap-type: none; /* a hand-thrown film never fights the snap */
+  user-select: none;
+}
+@media (max-width: 640px) {
+  .mr-track {
+    --frame-h: 190px;
+  }
+}
+.mr-film {
+  display: flex;
+  align-items: stretch;
+  gap: 14px;
+  width: max-content;
+  padding: 34px 12px;
+  /* the sprocket rows: ink squares on the paper base, top and bottom */
+  background:
+    repeating-linear-gradient(90deg, #0a0a0a 0 12px, transparent 12px 26px) 0 9px / 100% 14px no-repeat,
+    repeating-linear-gradient(90deg, #0a0a0a 0 12px, transparent 12px 26px) 0 calc(100% - 9px) / 100% 14px no-repeat;
+}
+.mr-frame,
+.mr-slate {
+  scroll-snap-align: start;
+  flex: none;
+}
+.mr-frame {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.mr-print {
+  position: relative;
+  display: block;
+  height: var(--frame-h);
+  max-width: calc(var(--frame-h) * 2.2);
+  border: 3px solid #0a0a0a;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: 4px 4px 0 0 #0a0a0a;
+  overflow: clip;
+  transition:
+    translate 0.12s steps(2, end),
+    box-shadow 0.12s steps(2, end);
+}
+.mr-print img {
+  -webkit-user-drag: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .mr-track:not([data-mr-drag]) .mr-print:hover {
+    translate: -2px -2px;
+    box-shadow: 6px 6px 0 0 #0a0a0a;
+  }
+}
+.mr-edge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: #0a0a0a;
+}
+.mr-edge i {
+  width: 10px;
+  height: 10px;
+  border: 2px solid #0a0a0a;
+}
+.mr-slate {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 170px;
+  height: var(--frame-h);
+  padding: 12px;
+  border: 3px solid #0a0a0a;
+  border-radius: 4px;
+  box-shadow: 4px 4px 0 0 #0a0a0a;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  color: #0a0a0a;
+}
+.mr-slate.bg-ink {
+  color: #fff;
+}
+.mr-slate-name {
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+.mr-slate-count {
+  align-self: flex-start;
+  border: 2px solid currentColor;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+@media (max-width: 640px) {
+  .mr-slate {
+    width: 140px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mr-print {
+    transition: none;
+  }
+}

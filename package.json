@@ -6,6 +6,7 @@
   "scripts": {
     "verify": "node scripts/verify.mjs",
     "dev": "next dev",
+    "prebuild": "node scripts/gen-photo-manifest.mjs && node scripts/gen-photo-blur.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",

@@ -68,9 +68,14 @@ moving them breaks paths and tests for no visitor gain. Never add new files to t
 - [ ] Intake (B), folder (C), real `w` / `h`, factual `alt` (who, what, where - no adjectives).
 - [ ] Order (AGENTS.md 6.1): Howard with the award / on stage first, other event photos, product screens last.
       Numbered uploads (1.jpg, 2.jpg ...) keep the owner's numbering.
-- [ ] Event photos also join `FIELD_REEL` in build-story.tsx in time order under their chapter slate (SIGNAL colour of
-      the chapter); product screens join `BUILD_REEL` under the project slate.
-- [ ] `node scripts/gen-photo-blur.mjs` (its source list must name every file that holds photos).
+- [ ] R102 (owner: "auto update ... put the photos in yourself"): NOTHING else to type. The Memory Reel, The Build's
+      film reels (`FIELD_REEL` = Experience galleries + Field Archives, `BUILD_REEL` = project galleries) and the SYS
+      MAP docks READ `components/memory-data.ts`, which reads the galleries. A photo dropped into an existing gallery
+      folder joins that chapter by itself (its size comes from `lib/photo-manifest.ts`, made from the files before
+      every build); still give it its gallery entry (alt, order) in the same change. A new folder needs its project /
+      experience entry first. Never add a hand-kept photo or project list anywhere.
+- [ ] `npm run build` regenerates `lib/photo-manifest.ts` and `components/photo-blur.ts` (prebuild); commit both.
+      `tests/r102` fails when a typed `w` / `h` differs from the file or a folder photo is missing from the reel.
 - [ ] Guards: tests/r76 + r82 (lightbox), device-sweep.
 
 ### D2. Honour / award

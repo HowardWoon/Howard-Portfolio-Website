@@ -78,7 +78,11 @@ test('photo stack morphs into a contact sheet and opens the lightbox from it (FX
 
 test('field archive switches to a film strip and steps through records (FX-42)', async ({ page }) => {
   await page.goto('/', { waitUntil: 'networkidle' });
-  const acc = page.getByRole('button', { name: /mytech/i }).first();
+  // R102: the Memory Reel's chapter keys name MYTECH too; the archive is the Experience accordion's
+  const acc = page
+    .locator('#experience')
+    .getByRole('button', { name: /mytech/i })
+    .first();
   await acc.scrollIntoViewIfNeeded();
   await acc.click();
   const strip = page.getByRole('button', { name: 'Film strip view' });

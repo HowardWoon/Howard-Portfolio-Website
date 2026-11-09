@@ -6,6 +6,10 @@ import { PORTRAIT_GLYPHS } from '@/lib/story-glyphs';
 import { useCalm } from '@/lib/motion-pref';
 import { FieldReel, type ReelItem } from './field-reel';
 import { InstitutionSeal } from './institution-seal';
+import { MEMORY_CHAPTERS } from './memory-data';
+import { MemoryReel } from './memory-reel';
+import { projects } from './stacked-projects';
+import { SIGNAL } from '@/lib/signal';
 import { gapTime, publishStoryProgress, storyTime } from '@/lib/story-progress';
 import { rereadScroll, scrollFrame } from '@/lib/scroll-frame';
 import '@/app/build-story.css';
@@ -92,108 +96,68 @@ const NODES = [
 // never slide a tag over the box's own label again (it did when tags had their own x / y).
 // R30: a tag drops straight onto its own box (it used to fly in from up to 40 % of the stage away and crossed the
 // film reels, the wires and other boxes' labels on the way)
-// R83: all seven projects. A box carries at most one tag per edge: Monsun Bridge (ML on public data) takes the DATA
-// box's bottom edge, under Catfish Detector AI on its top edge.
-const DOCKS: { name: string; fill: string; on: string; a: number; edge?: 'b' }[] = [
-  { name: 'PROOFPAY', fill: 'bg-pop-yellow', on: 'client', a: 0.62 },
-  { name: 'SLOTIFY', fill: 'bg-pop-orange', on: 'services', a: 0.64 },
-  { name: 'CATFISH DETECTOR AI', fill: 'bg-pop-orange', on: 'data', a: 0.66 },
-  { name: 'SENSOR X SENSEI', fill: 'bg-pop-cyan', on: 'edge', a: 0.68 },
-  { name: 'BILAHUJAN', fill: 'bg-pop-cyan', on: 'hub', a: 0.7 },
-  { name: 'ZEROLAG', fill: 'bg-pop-yellow', on: 'guard', a: 0.72 },
-  { name: 'MONSUN BRIDGE', fill: 'bg-pop-yellow', on: 'data', a: 0.73, edge: 'b' },
-];
+// R83: a box carries at most one tag per edge: Monsun Bridge (ML on public data) takes the DATA box's bottom edge,
+// under Catfish Detector AI on its top edge.
+// R102 (owner: "why only these few projects? it must update by itself"): the tags are READ from `projects`
+// (stacked-projects.tsx) - name, SIGNAL colour and order - so a new project docks by itself. DOCK_ON only says which
+// part of the system each known project proves; a project without an entry takes the first free edge.
+const DOCK_ON: Record<string, { on: string; edge?: 'b' }> = {
+  proofpay: { on: 'client' },
+  slotify: { on: 'services' },
+  catfish: { on: 'data' },
+  'sensor-x-sensei': { on: 'edge' },
+  bilahujan: { on: 'hub' },
+  zerolag: { on: 'guard' },
+  'monsun-bridge': { on: 'data', edge: 'b' },
+};
+const DOCK_ORDER = ['proofpay', 'slotify', 'catfish', 'sensor-x-sensei', 'bilahujan', 'zerolag', 'monsun-bridge'];
+const DOCKS: { id: string; name: string; fill: string; on: string; a: number; edge?: 'b' }[] = (() => {
+  const known = [...projects].sort((x, y) => {
+    const i = (id: string) => (DOCK_ORDER.includes(id) ? DOCK_ORDER.indexOf(id) : DOCK_ORDER.length);
+    return i(x.id) - i(y.id);
+  });
+  const used = new Set(Object.values(DOCK_ON).map((d) => `${d.on}:${d.edge ?? 't'}`));
+  const free = ['hub', 'client', 'services', 'edge', 'guard', 'data'].flatMap((on) =>
+    (['t', 'b'] as const).map((edge) => ({ on, edge })).filter((d) => !used.has(`${d.on}:${d.edge}`)),
+  );
+  return known.map((p, i) => {
+    const spot =
+      DOCK_ON[p.id] ??
+      (({ on, edge }) => ({ on, edge: edge === 'b' ? ('b' as const) : undefined }))(
+        free.shift() ?? { on: 'hub', edge: 'b' },
+      );
+    return {
+      id: p.id,
+      name: p.title.toUpperCase(),
+      fill: SIGNAL[p.signal].fill,
+      on: spot.on,
+      edge: spot.edge,
+      // the tags drop one after another between 0.62 and 0.74 of the playhead
+      a: 0.62 + (0.11 * i) / Math.max(1, known.length - 1),
+    };
+  });
+})();
 
 function Dock({ on }: { on: string }) {
   return DOCKS.filter((d) => d.on === on).map((d) => (
-    <div key={d.name} data-edge={d.edge} className={`bs-seg bs-dock ${d.fill}`} style={seg(d.a, d.a + 0.05)}>
+    <div key={d.id} data-edge={d.edge} className={`bs-seg bs-dock ${d.fill}`} style={seg(d.a, d.a + 0.05)}>
       {d.name}
     </div>
   ));
 }
 
 // R24 Field Reels (owner: "compile my photo gallery showing my journey"): two film strips run past the diagram in
-// scenes 03-04. Left = the field (event photos, in time order), right = the builds (product screens). Every photo and
-// name is already on the site (Experience field archive, project galleries, honours); slates use the SIGNAL colours
-// (pink leadership, yellow podium, orange coursework). Decorative duplicates: aria-hidden, alt="".
-const FIELD_REEL: ReelItem[] = [
-  // R32: every uploaded event photo set joins the reel in time order (AGENTS.md photo checklist); KMNS 2024 first,
-  // orange = ACADEMIC (the PAL mentorship), Howard's own moments first inside each chapter
-  { slate: 'KMNS PAL Leader Club 2024', fill: 'bg-pop-orange' },
-  { src: '/images/experiences/kmns/kmns_03.jpg', w: 960, h: 1280 },
-  { src: '/images/experiences/kmns/kmns_05.jpg', w: 1280, h: 718 },
-  { src: '/images/experiences/kmns/kmns_01.jpg', w: 1280, h: 960 },
-  { src: '/images/experiences/kmns/kmns_06.jpg', w: 1280, h: 960 },
-  // R57: four of the fourteen photos added to the KMNS gallery (the leadership course, the MADANI session, the camp)
-  { src: '/images/experiences/kmns/kmns_09.jpg', w: 1280, h: 960 },
-  { src: '/images/experiences/kmns/kmns_11.jpg', w: 1280, h: 960 },
-  { src: '/images/experiences/kmns/kmns_07.jpg', w: 1280, h: 960 },
-  { src: '/images/experiences/kmns/kmns_13.jpg', w: 1280, h: 960 },
-  // R37: KRAIBURG TPE (Mar - Jun 2024, Jun - Sep 2025; R98 CV), ink = INDUSTRY; the photos with colleagues (the gallery's first four)
-  { slate: 'KRAIBURG TPE Technology (M) Sdn Bhd', fill: 'bg-ink' },
-  { src: '/images/experiences/kraiburg/kraiburg_01.jpg', w: 1280, h: 960 },
-  { src: '/images/experiences/kraiburg/kraiburg_02.jpg', w: 960, h: 1280 },
-  { src: '/images/experiences/kraiburg/kraiburg_03.jpg', w: 960, h: 1280 },
-  { src: '/images/experiences/kraiburg/kraiburg_04.jpg', w: 1280, h: 960 },
-  // R56: Mental Health Week 2025 & Share Your Love (Sep 2025 - Jun 2026), pink = LEADERSHIP like MYTECH; the group
-  // photos (the banner, the outreach) and the laptop session
-  { slate: 'MENTAL HEALTH WEEK 2025', fill: 'bg-pop-pink' },
-  { src: '/images/experience/mhw/01.jpg', w: 1280, h: 960 },
-  { src: '/images/experience/mhw/03.jpg', w: 1280, h: 960 },
-  { src: '/images/experience/mhw/04.jpg', w: 1280, h: 960 },
-  { src: '/images/experience/mhw/05.jpg', w: 1280, h: 960 },
-  { slate: 'MYTECH CAREER FAIR 2026', fill: 'bg-pop-pink' },
-  { src: '/images/experience/mytech/01.jpg', w: 1280, h: 853 },
-  { src: '/images/experience/mytech/02.jpg', w: 1280, h: 853 },
-  { src: '/images/experience/mytech/03.jpg', w: 1280, h: 853 },
-  { src: '/images/experience/mytech/04.jpg', w: 1280, h: 853 },
-  { src: '/images/experience/mytech/05.jpg', w: 720, h: 1280 },
-  // R61: UM Technothon 2026 (May 2026), cyan = QUALIFIER (Top 15 finalist); the two photos with the team
-  { slate: 'UM Technothon 2026', fill: 'bg-pop-cyan' },
-  { src: '/images/projects/sensor-x/01.jpg', w: 810, h: 1080 },
-  { src: '/images/projects/sensor-x/06.jpg', w: 810, h: 1080 },
-  { slate: 'Supervity AutoPilot Asia Hackathon 2026', fill: 'bg-pop-yellow' },
-  { src: '/images/projects/zerolag/supervity_standing.jpg', w: 960, h: 1280 },
-  { src: '/images/projects/zerolag/supervity_formal.jpg', w: 960, h: 1280 },
-  { src: '/images/projects/zerolag/supervity_selfie.jpg', w: 960, h: 1280 },
-  { src: '/images/projects/zerolag/supervity_with_apu.jpg', w: 1280, h: 960 },
-  { src: '/images/projects/zerolag/supervity_souvenir.jpg', w: 960, h: 1280 },
-  { src: '/images/projects/zerolag/supervity_present.jpg', w: 960, h: 1280 },
-  { slate: 'MUBA Blockchain Hackathon 2026', fill: 'bg-pop-yellow' },
-  { src: '/images/muba/4ppl_muba.jpg', w: 1280, h: 960 },
-  { src: '/images/muba/solo_muba.jpg', w: 960, h: 1280 },
-  { src: '/images/muba/gonka_4ppl_muba.jpg', w: 960, h: 472 },
-  { src: '/images/muba/zilian_muba.jpg', w: 960, h: 1280 },
-  // DOSM Datathon 2026 (19 - 20 Oct 2026), yellow = PODIUM (Top 5, Consolation Prize): the live-pitching day, then the
-  // results day with the award (Howard's own moments; the whole set is in the Monsun Bridge gallery)
-  { slate: 'DOSM Datathon 2026', fill: 'bg-pop-yellow' },
-  { src: '/images/projects/monsun-bridge/team-live-pitching.jpg', w: 1280, h: 960 },
-  { src: '/images/projects/monsun-bridge/pitch-live.jpg', w: 1280, h: 720 },
-  { src: '/images/projects/monsun-bridge/pitch-qa.jpg', w: 1280, h: 707 },
-  { src: '/images/projects/monsun-bridge/stage-holding-certificate.jpg', w: 960, h: 1280 },
-  { src: '/images/projects/monsun-bridge/stage-five.jpg', w: 960, h: 1280 },
-  { src: '/images/projects/monsun-bridge/team-certificates-selfie.jpg', w: 1280, h: 960 },
-  { src: '/images/projects/monsun-bridge/putrajaya-certificate-open.jpg', w: 960, h: 1280 },
-  { src: '/images/projects/monsun-bridge/perbadanan-putrajaya.jpg', w: 960, h: 1280 },
-];
-const BUILD_REEL: ReelItem[] = [
-  { slate: 'ZEROLAG', fill: 'bg-pop-yellow' },
-  { src: '/images/projects/zerolag/dashboard.jpeg', w: 1004, h: 520 },
-  { src: '/images/projects/zerolag/agent-flow.png', w: 689, h: 743 },
-  { src: '/images/projects/zerolag/ai_insight.jpeg', w: 1005, h: 515 },
-  { slate: 'PROOFPAY', fill: 'bg-pop-yellow' },
-  { src: '/images/muba/1789408409350.jpg', w: 1280, h: 654 },
-  { src: '/images/muba/1789408409711.jpg', w: 1280, h: 704 },
-  { slate: 'SLOTIFY', fill: 'bg-pop-orange' },
-  { src: '/images/projects/slotify/01.png', w: 862, h: 732 },
-  { src: '/images/projects/slotify/02.png', w: 861, h: 776 },
-  { slate: 'CATFISH DETECTOR AI', fill: 'bg-pop-orange' },
-  { src: '/images/projects/catfish/dashboard.png', w: 1210, h: 883 },
-  { src: '/images/projects/catfish/scanner.png', w: 613, h: 877 },
-  { slate: 'MONSUN BRIDGE', fill: 'bg-pop-yellow' },
-  { src: '/images/projects/monsun-bridge/site-hero.jpg', w: 1879, h: 912 },
-  { src: '/images/projects/monsun-bridge/dashboard-action-planner.png', w: 1902, h: 979 },
-];
+// scenes 03-04. Left = the field (Experience galleries and Field Archives, oldest first), right = the builds (every
+// project's gallery, its podium photos first). R102: both are READ from components/memory-data.ts, so every gallery
+// photo - and every new upload in a gallery folder - is on them; slates keep the chapter's SIGNAL colour.
+// Decorative duplicates: aria-hidden, alt="".
+const reel = (kind: 'build' | 'field'): ReelItem[] =>
+  MEMORY_CHAPTERS.filter((c) => c.kind === kind).flatMap<ReelItem>((c) => [
+    { slate: c.name, fill: c.fill },
+    ...c.photos.map((p) => ({ src: p.src, w: p.w, h: p.h })),
+  ]);
+const FIELD_REEL = reel('field');
+const BUILD_REEL = reel('build');
 
 const CODE = [
   ['$', './compile --student "HOWARD WOON HAO ZHE"'],
@@ -613,164 +577,168 @@ export default function BuildStory() {
   };
 
   return (
-    <section
-      aria-labelledby="build-story-title"
-      // R86: its scroll cue and REC dot pause while The Build is off screen (no section id: OffscreenPause skipped it)
-      data-offscreen-pause
-      className="bs-section relative w-full bg-paper text-ink"
-    >
-      {/* Screen readers get the story as text; the stage below is visual only */}
-      <ol className="sr-only">
-        {SCENES.map((s) => (
-          <li key={s.n}>
-            Scene {s.n}, {s.key}: {s.caption}
-          </li>
-        ))}
-      </ol>
+    <>
+      <section
+        aria-labelledby="build-story-title"
+        // R86: its scroll cue and REC dot pause while The Build is off screen (no section id: OffscreenPause skipped it)
+        data-offscreen-pause
+        className="bs-section relative w-full bg-paper text-ink"
+      >
+        {/* Screen readers get the story as text; the stage below is visual only */}
+        <ol className="sr-only">
+          {SCENES.map((s) => (
+            <li key={s.n}>
+              Scene {s.n}, {s.key}: {s.caption}
+            </li>
+          ))}
+        </ol>
 
-      <div ref={trackRef} className="bs-track relative">
-        <div ref={stageRef} data-scene="0" className="bs-stage" style={{ '--p': 0 } as CSSProperties}>
-          {/* ---------------------------------------------------------------- floor */}
-          <div aria-hidden className="bs-floor absolute inset-0" />
+        <div ref={trackRef} className="bs-track relative">
+          <div ref={stageRef} data-scene="0" className="bs-stage" style={{ '--p': 0 } as CSSProperties}>
+            {/* ---------------------------------------------------------------- floor */}
+            <div aria-hidden className="bs-floor absolute inset-0" />
 
-          {/* ---------------------------------------------------------------- title card (fades as the ID drops) */}
-          <div className="bs-seg bs-title absolute inset-x-0 z-20 px-5 text-center" style={seg(0.015, 0.07)}>
-            <p className="bs-kicker inline-flex items-center gap-2 rounded-md border-2 border-ink bg-pop-orange px-2.5 py-1 font-mono text-xs font-extrabold uppercase tracking-[0.14em] text-ink">
-              THE BUILD // SCROLL TO COMPILE
-            </p>
-            <h2
-              id="build-story-title"
-              className="mx-auto mt-4 max-w-4xl font-display text-[clamp(1.9rem,6.4vw,4.6rem)] font-extrabold uppercase leading-[0.95] tracking-[-0.03em]"
-            >
-              From student ID to <span className="bs-underline">shipped system.</span>
-            </h2>
-            <p className="mx-auto mt-4 max-w-xl font-mono text-sm font-semibold text-ink-soft">
-              A five-scene build log. Scroll down to compile, scroll up to rewind.
-            </p>
-            <span aria-hidden className="bs-scroll-cue mx-auto mt-6 block h-10 w-6 rounded-full border-2 border-ink" />
-            {/* R24 Build Manifest: the five scenes as a storyboard (owner: "fantastic, many details and info"). Each
+            {/* ---------------------------------------------------------------- title card (fades as the ID drops) */}
+            <div className="bs-seg bs-title absolute inset-x-0 z-20 px-5 text-center" style={seg(0.015, 0.07)}>
+              <p className="bs-kicker inline-flex items-center gap-2 rounded-md border-2 border-ink bg-pop-orange px-2.5 py-1 font-mono text-xs font-extrabold uppercase tracking-[0.14em] text-ink">
+                THE BUILD // SCROLL TO COMPILE
+              </p>
+              <h2
+                id="build-story-title"
+                className="mx-auto mt-4 max-w-4xl font-display text-[clamp(1.9rem,6.4vw,4.6rem)] font-extrabold uppercase leading-[0.95] tracking-[-0.03em]"
+              >
+                From student ID to <span className="bs-underline">shipped system.</span>
+              </h2>
+              <p className="mx-auto mt-4 max-w-xl font-mono text-sm font-semibold text-ink-soft">
+                A five-scene build log. Scroll down to compile, scroll up to rewind.
+              </p>
+              <span
+                aria-hidden
+                className="bs-scroll-cue mx-auto mt-6 block h-10 w-6 rounded-full border-2 border-ink"
+              />
+              {/* R24 Build Manifest: the five scenes as a storyboard (owner: "fantastic, many details and info"). Each
                 cell = scene colour, number, name, its frame range on the 1200-frame playhead and its caption (the same
                 words the caption bar shows). A click plays the story to that scene. */}
-            <ol ref={manifestRef} aria-label="Build manifest" className="bs-manifest">
-              {SCENES.map((s, i) => (
-                <li key={s.n}>
-                  <button
-                    type="button"
-                    onClick={() => playTo(i)}
-                    aria-label={`Play to scene ${s.n}, ${s.key}`}
-                    className="bs-manifest-cell"
-                  >
-                    <span aria-hidden className={`bs-manifest-band ${s.swatch}`} />
-                    <span className="bs-manifest-head">
-                      <span className="bs-manifest-n">{s.n}</span>
-                      <span className="bs-manifest-key">{s.key}</span>
-                      <span aria-hidden className="bs-manifest-go">
-                        ▸
+              <ol ref={manifestRef} aria-label="Build manifest" className="bs-manifest">
+                {SCENES.map((s, i) => (
+                  <li key={s.n}>
+                    <button
+                      type="button"
+                      onClick={() => playTo(i)}
+                      aria-label={`Play to scene ${s.n}, ${s.key}`}
+                      className="bs-manifest-cell"
+                    >
+                      <span aria-hidden className={`bs-manifest-band ${s.swatch}`} />
+                      <span className="bs-manifest-head">
+                        <span className="bs-manifest-n">{s.n}</span>
+                        <span className="bs-manifest-key">{s.key}</span>
+                        <span aria-hidden className="bs-manifest-go">
+                          ▸
+                        </span>
                       </span>
-                    </span>
-                    <span className="bs-manifest-frames">
-                      FRAME <span className="whitespace-nowrap">{frameRange(i)}</span>
-                    </span>
-                    <span className="bs-manifest-caption">{s.caption}</span>
-                  </button>
-                </li>
-              ))}
-            </ol>
-          </div>
+                      <span className="bs-manifest-frames">
+                        FRAME <span className="whitespace-nowrap">{frameRange(i)}</span>
+                      </span>
+                      <span className="bs-manifest-caption">{s.caption}</span>
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            </div>
 
-          {/* ---------------------------------------------------------------- 01 ENROL + 02 PARSE: the student ID */}
-          {/* R90: the student ID drops straight down (no turn), the ENROLLED stamp hits and the card dips under it
+            {/* ---------------------------------------------------------------- 01 ENROL + 02 PARSE: the student ID */}
+            {/* R90: the student ID drops straight down (no turn), the ENROLLED stamp hits and the card dips under it
               (.bs-id-press, the stamp's own window). Visual only, like the rest of the stage. */}
-          <div aria-hidden className="bs-seg bs-fade-out bs-layer" style={seg(0.8, 0.86)}>
-            <div className="bs-seg bs-id-move" style={seg(0.4, 0.5)}>
-              <div className="bs-seg bs-id-shift" style={seg(0.2, 0.27)}>
-                <div className="bs-seg bs-id-drop" style={seg(0.03, 0.15)}>
-                  <div className="bs-seg bs-id-press" style={seg(0.13, 0.19)}>
-                    {/* R96 (owner, with a photo of the real UM matric card: "must be similar and perfect"): the card's own
+            <div aria-hidden className="bs-seg bs-fade-out bs-layer" style={seg(0.8, 0.86)}>
+              <div className="bs-seg bs-id-move" style={seg(0.4, 0.5)}>
+                <div className="bs-seg bs-id-shift" style={seg(0.2, 0.27)}>
+                  <div className="bs-seg bs-id-drop" style={seg(0.03, 0.15)}>
+                    <div className="bs-seg bs-id-press" style={seg(0.13, 0.19)}>
+                      {/* R96 (owner, with a photo of the real UM matric card: "must be similar and perfect"): the card's own
                         layout in the site's ink - portrait, photo top left, crest and UNIVERSITI MALAYA top right, the
                         name and the programme lines as printed on the card, KL / session bottom left. Left out on
                         purpose (owner's choice): the bank / payment marks, the government crest and MySISWA, and the
                         matric number. The photo stays the pixel portrait. */}
-                    <div className="bs-idcard">
-                      <div className="bs-matric relative overflow-hidden rounded-lg border-3 border-ink bg-paper text-ink">
-                        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 border-b-3 border-ink bg-pop-orange px-3 py-2">
-                          <span className="shrink-0 whitespace-nowrap rounded border-2 border-ink bg-paper px-1.5 py-0.5 font-mono text-xs font-extrabold tracking-[0.06em]">
-                            STUDENT ID
-                          </span>
-                          <div className="flex shrink-0 items-center gap-2">
-                            <InstitutionSeal crest="um" size="badge" stampIn={false} />
-                            <span className="font-display text-[clamp(0.8rem,6cqw,0.95rem)] font-extrabold uppercase leading-[1.05] tracking-[0.04em]">
-                              Universiti
-                              <br />
-                              Malaya
+                      <div className="bs-idcard">
+                        <div className="bs-matric relative overflow-hidden rounded-lg border-3 border-ink bg-paper text-ink">
+                          <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 border-b-3 border-ink bg-pop-orange px-3 py-2">
+                            <span className="shrink-0 whitespace-nowrap rounded border-2 border-ink bg-paper px-1.5 py-0.5 font-mono text-xs font-extrabold tracking-[0.06em]">
+                              STUDENT ID
                             </span>
-                          </div>
-                        </div>
-                        {/* portrait on a desktop: photo | CGPA over the text; a phone lays the same card out wide (build-story.css) */}
-                        <div className="bs-matric-body">
-                          <div className="bs-matric-photo bs-photo relative aspect-[413/591] overflow-hidden rounded-md border-3 border-ink">
-                            <Portrait photoSeg={seg(0.22, 0.32)} mosaicSeg={seg(0.27, 0.37)} />
-                            <span className="bs-seg bs-scan" style={seg(0.22, 0.37)} />
-                          </div>
-                          <div className="bs-matric-cgpa flex min-w-0 flex-col justify-end gap-1 font-mono">
-                            <span className="text-xs font-bold text-ink-muted">CGPA</span>
-                            <span className="font-display text-[clamp(1rem,9cqw,1.5rem)] font-extrabold leading-none">
-                              4.00
-                            </span>
-                          </div>
-                          <div className="bs-matric-info space-y-1.5 font-mono text-[clamp(0.8rem,4.4cqw,0.85rem)] font-extrabold uppercase leading-tight">
-                            <p className="font-display text-[clamp(0.85rem,6cqw,1.05rem)]">HOWARD WOON HAO ZHE</p>
-                            <p>BACHELOR OF COMPUTER SCIENCE (SOFTWARE ENGINEERING)</p>
-                            <p>FACULTY OF COMPUTER SCIENCE AND INFORMATION TECHNOLOGY</p>
-                            <div className="flex items-end justify-between gap-3 pt-1">
-                              <p className="leading-snug">
-                                KL
+                            <div className="flex shrink-0 items-center gap-2">
+                              <InstitutionSeal crest="um" size="badge" stampIn={false} />
+                              <span className="font-display text-[clamp(0.8rem,6cqw,0.95rem)] font-extrabold uppercase leading-[1.05] tracking-[0.04em]">
+                                Universiti
                                 <br />
-                                2025/2026
-                              </p>
-                              <span className="bs-barcode h-7 w-[46%] shrink-0" />
+                                Malaya
+                              </span>
                             </div>
                           </div>
+                          {/* portrait on a desktop: photo | CGPA over the text; a phone lays the same card out wide (build-story.css) */}
+                          <div className="bs-matric-body">
+                            <div className="bs-matric-photo bs-photo relative aspect-[413/591] overflow-hidden rounded-md border-3 border-ink">
+                              <Portrait photoSeg={seg(0.22, 0.32)} mosaicSeg={seg(0.27, 0.37)} />
+                              <span className="bs-seg bs-scan" style={seg(0.22, 0.37)} />
+                            </div>
+                            <div className="bs-matric-cgpa flex min-w-0 flex-col justify-end gap-1 font-mono">
+                              <span className="text-xs font-bold text-ink-muted">CGPA</span>
+                              <span className="font-display text-[clamp(1rem,9cqw,1.5rem)] font-extrabold leading-none">
+                                4.00
+                              </span>
+                            </div>
+                            <div className="bs-matric-info space-y-1.5 font-mono text-[clamp(0.8rem,4.4cqw,0.85rem)] font-extrabold uppercase leading-tight">
+                              <p className="font-display text-[clamp(0.85rem,6cqw,1.05rem)]">HOWARD WOON HAO ZHE</p>
+                              <p>BACHELOR OF COMPUTER SCIENCE (SOFTWARE ENGINEERING)</p>
+                              <p>FACULTY OF COMPUTER SCIENCE AND INFORMATION TECHNOLOGY</p>
+                              <div className="flex items-end justify-between gap-3 pt-1">
+                                <p className="leading-snug">
+                                  KL
+                                  <br />
+                                  2025/2026
+                                </p>
+                                <span className="bs-barcode h-7 w-[46%] shrink-0" />
+                              </div>
+                            </div>
+                          </div>
+                          <span className="bs-seg bs-stamp bs-stamp-orange" style={seg(0.13, 0.19)}>
+                            ENROLLED
+                          </span>
                         </div>
-                        <span className="bs-seg bs-stamp bs-stamp-orange" style={seg(0.13, 0.19)}>
-                          ENROLLED
-                        </span>
                       </div>
                     </div>
-                  </div>
-                  <div aria-hidden className="bs-seg bs-source-tag" style={seg(0.46, 0.52)}>
-                    SOURCE · UM
+                    <div aria-hidden className="bs-seg bs-source-tag" style={seg(0.46, 0.52)}>
+                      SOURCE · UM
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* ---------------------------------------------------------------- 02 PARSE: the terminal */}
-          <div aria-hidden className="bs-seg bs-fade-out bs-layer" style={seg(0.39, 0.45)}>
-            <div className="bs-seg bs-code" style={seg(0.2, 0.27)}>
-              {/* R90: a type case, not a dark terminal: every line slides into its own ink-ruled lane */}
-              <div className="bs-card overflow-hidden rounded-lg border-3 border-ink bg-paper text-ink">
-                <div className="flex items-center gap-2 border-b-3 border-ink bg-pop-cyan px-3 py-2">
-                  <span className="font-mono text-xs font-extrabold tracking-[0.08em]">howard@um:~/build</span>
-                </div>
-                <div className="font-mono text-[clamp(0.8rem,1.9vw,0.9rem)] leading-snug">
-                  {CODE.map(([mark, line], i) => (
-                    <div key={line} className="bs-lane px-3 py-1 sm:px-4">
-                      <div className="bs-seg bs-type whitespace-nowrap font-semibold" style={typeSeg(i)}>
-                        <span className="bs-mark" data-ok={mark === '✓' ? '' : undefined}>
-                          {mark}
-                        </span>
-                        {line}
+            {/* ---------------------------------------------------------------- 02 PARSE: the terminal */}
+            <div aria-hidden className="bs-seg bs-fade-out bs-layer" style={seg(0.39, 0.45)}>
+              <div className="bs-seg bs-code" style={seg(0.2, 0.27)}>
+                {/* R90: a type case, not a dark terminal: every line slides into its own ink-ruled lane */}
+                <div className="bs-card overflow-hidden rounded-lg border-3 border-ink bg-paper text-ink">
+                  <div className="flex items-center gap-2 border-b-3 border-ink bg-pop-cyan px-3 py-2">
+                    <span className="font-mono text-xs font-extrabold tracking-[0.08em]">howard@um:~/build</span>
+                  </div>
+                  <div className="font-mono text-[clamp(0.8rem,1.9vw,0.9rem)] leading-snug">
+                    {CODE.map(([mark, line], i) => (
+                      <div key={line} className="bs-lane px-3 py-1 sm:px-4">
+                        <div className="bs-seg bs-type whitespace-nowrap font-semibold" style={typeSeg(i)}>
+                          <span className="bs-mark" data-ok={mark === '✓' ? '' : undefined}>
+                            {mark}
+                          </span>
+                          {line}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* ---------------------------------------------------------------- R31 CREST SCAN (02 -> 03)
+            {/* ---------------------------------------------------------------- R31 CREST SCAN (02 -> 03)
               A paper lid closes over the stage in a wave of columns, the UM crest lands on the scanner bed as pixel
               art, the scan bar decodes it into the real crest (with a live percentage), then it expands and the lid
               lifts away in the same wave, straight into the blueprint landing. Scroll-scrubbed (reversible), transform
@@ -778,257 +746,261 @@ export default function BuildStory() {
               R37 timeline (fractions of the gap): lid 0-0.24, crest lands 0.16-0.28, decode 0.28-0.52, HOLD 0.52-0.66
               (the decoded crest rests; the scanner's corner brackets snap out to frame it), grow 0.66-0.84, lid lifts
               from 0.72. */}
-          <div aria-hidden className="bs-layer bs-scan-layer">
-            <div className="bs-scan-cols">
-              {Array.from({ length: SCAN_COLS }, (_, i) => (
-                <span key={i} className="bs-seg bs-scan-col" style={gapSeg(0, 1, { '--i': i })} />
-              ))}
-            </div>
-            <div className="bs-seg bs-scan-in" style={gapSeg(0.16, 0.28)}>
-              <div className="bs-seg bs-scan-grow" style={gapSeg(0.66, 0.84)}>
-                <div className="bs-seg bs-scan-bed" style={gapSeg(0.52, 0.58)}>
-                  <span className="bs-scan-corner" data-c="tl" />
-                  <span className="bs-scan-corner" data-c="tr" />
-                  <span className="bs-scan-corner" data-c="bl" />
-                  <span className="bs-scan-corner" data-c="br" />
-                  <div className="bs-scan-crest">
-                    {/* the crest at 32 px, shown big and pixelated: the "raw" image the scanner reads */}
-                    <Image
-                      src="/images/logos/um_crest.png"
-                      alt=""
-                      width={32}
-                      height={32}
-                      sizes="32px"
-                      className="bs-scan-pixel h-full w-full"
-                    />
-                    <span className="bs-seg bs-scan-sharp" style={gapSeg(0.28, 0.52)}>
+            <div aria-hidden className="bs-layer bs-scan-layer">
+              <div className="bs-scan-cols">
+                {Array.from({ length: SCAN_COLS }, (_, i) => (
+                  <span key={i} className="bs-seg bs-scan-col" style={gapSeg(0, 1, { '--i': i })} />
+                ))}
+              </div>
+              <div className="bs-seg bs-scan-in" style={gapSeg(0.16, 0.28)}>
+                <div className="bs-seg bs-scan-grow" style={gapSeg(0.66, 0.84)}>
+                  <div className="bs-seg bs-scan-bed" style={gapSeg(0.52, 0.58)}>
+                    <span className="bs-scan-corner" data-c="tl" />
+                    <span className="bs-scan-corner" data-c="tr" />
+                    <span className="bs-scan-corner" data-c="bl" />
+                    <span className="bs-scan-corner" data-c="br" />
+                    <div className="bs-scan-crest">
+                      {/* the crest at 32 px, shown big and pixelated: the "raw" image the scanner reads */}
                       <Image
                         src="/images/logos/um_crest.png"
                         alt=""
-                        fill
-                        sizes="340px"
-                        quality={90}
-                        className="object-contain"
+                        width={32}
+                        height={32}
+                        sizes="32px"
+                        className="bs-scan-pixel h-full w-full"
                       />
-                    </span>
-                    <span className="bs-seg bs-scan-bar" style={gapSeg(0.28, 0.52)} />
+                      <span className="bs-seg bs-scan-sharp" style={gapSeg(0.28, 0.52)}>
+                        <Image
+                          src="/images/logos/um_crest.png"
+                          alt=""
+                          fill
+                          sizes="340px"
+                          quality={90}
+                          className="object-contain"
+                        />
+                      </span>
+                      <span className="bs-seg bs-scan-bar" style={gapSeg(0.28, 0.52)} />
+                    </div>
                   </div>
-                </div>
-                <div className="bs-seg bs-scan-readout" style={gapSeg(0.28, 0.52)}>
-                  <span className="bs-scan-chip">SCAN</span>
-                  <span className="font-mono text-xs font-extrabold tracking-[0.14em]">UNIVERSITI MALAYA</span>
-                  {/* a mechanical meter, not a counting number: a number that changes text every frame forces a
+                  <div className="bs-seg bs-scan-readout" style={gapSeg(0.28, 0.52)}>
+                    <span className="bs-scan-chip">SCAN</span>
+                    <span className="font-mono text-xs font-extrabold tracking-[0.14em]">UNIVERSITI MALAYA</span>
+                    {/* a mechanical meter, not a counting number: a number that changes text every frame forces a
                       layout per scroll frame (tests/r17 P0-01 phone budget) */}
-                  <span className="bs-scan-meter">
-                    <span className="bs-scan-meter-fill" />
-                  </span>
+                    <span className="bs-scan-meter">
+                      <span className="bs-scan-meter-fill" />
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* ---------------------------------------------------------------- 03 ARCHITECT + 04 ORCHESTRATE */}
-          <div aria-hidden className="bs-seg bs-fade-dim bs-layer bs-board-layer" style={seg(0.8, 0.86)}>
-            <FieldReel items={FIELD_REEL} side="l" no={1} seg={seg} />
-            <FieldReel items={BUILD_REEL} side="r" no={2} seg={seg} />
-            {/* R83: on desktop the diagram is a CSS-3D board (globals.css "R83 3D board"): its pose reads the playhead
+            {/* ---------------------------------------------------------------- 03 ARCHITECT + 04 ORCHESTRATE */}
+            <div aria-hidden className="bs-seg bs-fade-dim bs-layer bs-board-layer" style={seg(0.8, 0.86)}>
+              <FieldReel items={FIELD_REEL} side="l" no={1} seg={seg} />
+              <FieldReel items={BUILD_REEL} side="r" no={2} seg={seg} />
+              {/* R83: on desktop the diagram is a CSS-3D board (globals.css "R83 3D board"): its pose reads the playhead
                 over 03 + 04, the mouse turns it (diagramRef) */}
-            <div ref={diagramRef} className="bs-seg bs-diagram" style={seg(0.42, 0.8)}>
-              {/* R90: no radar, rings, circuit traces or sweep (the "dark dashboard" the owner rejected): a printed
+              <div ref={diagramRef} className="bs-seg bs-diagram" style={seg(0.42, 0.8)}>
+                {/* R90: no radar, rings, circuit traces or sweep (the "dark dashboard" the owner rejected): a printed
                   system readout, ink boxes and thick right-angled ink wires */}
-              <div className="bs-seg bs-hud-readout" style={seg(0.47, 0.52)}>
-                SYS MAP · {String(NODES.length).padStart(2, '0')} NODES · {String(DOCKS.length).padStart(2, '0')} BUILDS
-              </div>
+                <div className="bs-seg bs-hud-readout" style={seg(0.47, 0.52)}>
+                  SYS MAP · {String(NODES.length).padStart(2, '0')} NODES · {String(DOCKS.length).padStart(2, '0')}{' '}
+                  BUILDS
+                </div>
 
-              {/* R90: each wire is two ink bars, hub -> along the hub's row -> up / down into its box. Each bar is a
+                {/* R90: each wire is two ink bars, hub -> along the hub's row -> up / down into its box. Each bar is a
                   .bs-seg of the same window and grows by scale from the hub's side (compositor only). */}
-              <div className="bs-wires">
-                {NODES.map((n, i) => (
-                  <div key={n.id} className="bs-wire" data-node={i}>
-                    <span
-                      className="bs-seg bs-wire-h"
-                      style={seg(n.a - 0.02, n.a + 0.05, {
-                        left: `${Math.min(50, n.x)}%`,
-                        width: `${Math.abs(n.x - 50)}%`,
-                        transformOrigin: n.x < 50 ? '100% 50%' : '0 50%',
-                      })}
-                    />
-                    <span
-                      className="bs-seg bs-wire-v"
-                      style={seg(n.a - 0.02, n.a + 0.05, {
-                        left: `${n.x}%`,
-                        top: `${Math.min(50, n.y)}%`,
-                        height: `${Math.abs(n.y - 50)}%`,
-                        transformOrigin: n.y < 50 ? '50% 100%' : '50% 0',
-                      })}
-                    />
+                <div className="bs-wires">
+                  {NODES.map((n, i) => (
+                    <div key={n.id} className="bs-wire" data-node={i}>
+                      <span
+                        className="bs-seg bs-wire-h"
+                        style={seg(n.a - 0.02, n.a + 0.05, {
+                          left: `${Math.min(50, n.x)}%`,
+                          width: `${Math.abs(n.x - 50)}%`,
+                          transformOrigin: n.x < 50 ? '100% 50%' : '0 50%',
+                        })}
+                      />
+                      <span
+                        className="bs-seg bs-wire-v"
+                        style={seg(n.a - 0.02, n.a + 0.05, {
+                          left: `${n.x}%`,
+                          top: `${Math.min(50, n.y)}%`,
+                          height: `${Math.abs(n.y - 50)}%`,
+                          transformOrigin: n.y < 50 ? '50% 100%' : '50% 0',
+                        })}
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                {/* R30: ONE data packet runs hub -> node per wire while ORCHESTRATE plays (R90: a square riding the wire's right angle) (three per wire read as a
+                  cluttered, duplicated line; it also cuts the per-frame segment writes by 10) */}
+                {NODES.map((n) => (
+                  <span
+                    key={n.id}
+                    className="bs-seg bs-packet"
+                    style={seg(0.6 + n.a * 0.02, 0.7 + n.a * 0.02, {
+                      '--dx': n.x - 50,
+                      '--dy': n.y - 50,
+                    })}
+                  />
+                ))}
+
+                {/* R83: <i>, not <span>: the plate (the block's thickness) and the socket (on the board) are not text */}
+                <div className="bs-seg bs-hub" style={seg(0.44, 0.5)}>
+                  <i className="bs-socket" />
+                  <i className="bs-plate" />
+                  <div className="bs-seg bs-hub-core" style={seg(0.6, 0.66)}>
+                    <span className="font-mono text-xs font-extrabold tracking-[0.14em]">AI ORCHESTRATOR</span>
+                    <span className="font-display text-[clamp(0.8rem,1.6vw,1rem)] font-extrabold leading-tight">
+                      LangGraph · Gemini · MCP
+                    </span>
+                  </div>
+                  <Dock on="hub" />
+                </div>
+
+                {NODES.map((n) => (
+                  <div
+                    key={n.id}
+                    className="bs-seg bs-node"
+                    data-side={n.x < 50 ? 'l' : n.x > 50 ? 'r' : 'c'}
+                    style={seg(n.a, n.a + 0.05, { left: `${n.x}%`, top: `${n.y}%` })}
+                  >
+                    <i className="bs-socket" />
+                    <i className="bs-plate" />
+                    <span className="bs-node-label font-mono text-xs font-extrabold tracking-[0.14em] text-ink-muted">
+                      {n.label}
+                    </span>
+                    <span className="font-display text-[clamp(0.8rem,1.4vw,0.95rem)] font-extrabold leading-tight">
+                      {n.tech}
+                    </span>
+                    <Dock on={n.id} />
                   </div>
                 ))}
               </div>
-
-              {/* R30: ONE data packet runs hub -> node per wire while ORCHESTRATE plays (R90: a square riding the wire's right angle) (three per wire read as a
-                  cluttered, duplicated line; it also cuts the per-frame segment writes by 10) */}
-              {NODES.map((n) => (
-                <span
-                  key={n.id}
-                  className="bs-seg bs-packet"
-                  style={seg(0.6 + n.a * 0.02, 0.7 + n.a * 0.02, {
-                    '--dx': n.x - 50,
-                    '--dy': n.y - 50,
-                  })}
-                />
-              ))}
-
-              {/* R83: <i>, not <span>: the plate (the block's thickness) and the socket (on the board) are not text */}
-              <div className="bs-seg bs-hub" style={seg(0.44, 0.5)}>
-                <i className="bs-socket" />
-                <i className="bs-plate" />
-                <div className="bs-seg bs-hub-core" style={seg(0.6, 0.66)}>
-                  <span className="font-mono text-xs font-extrabold tracking-[0.14em]">AI ORCHESTRATOR</span>
-                  <span className="font-display text-[clamp(0.8rem,1.6vw,1rem)] font-extrabold leading-tight">
-                    LangGraph · Gemini · MCP
-                  </span>
-                </div>
-                <Dock on="hub" />
-              </div>
-
-              {NODES.map((n) => (
-                <div
-                  key={n.id}
-                  className="bs-seg bs-node"
-                  data-side={n.x < 50 ? 'l' : n.x > 50 ? 'r' : 'c'}
-                  style={seg(n.a, n.a + 0.05, { left: `${n.x}%`, top: `${n.y}%` })}
-                >
-                  <i className="bs-socket" />
-                  <i className="bs-plate" />
-                  <span className="bs-node-label font-mono text-xs font-extrabold tracking-[0.14em] text-ink-muted">
-                    {n.label}
-                  </span>
-                  <span className="font-display text-[clamp(0.8rem,1.4vw,0.95rem)] font-extrabold leading-tight">
-                    {n.tech}
-                  </span>
-                  <Dock on={n.id} />
-                </div>
-              ))}
             </div>
-          </div>
 
-          {/* ---------------------------------------------------------------- 05 SHIP: the release card */}
-          {/* R90: a shipping label slams down from above and dips at the hit (no rotation); a tear line under its header */}
-          <div className="bs-seg bs-release-in bs-layer" style={seg(0.82, 0.9)}>
-            <div className="bs-seg bs-release-press" style={seg(0.88, 0.92)}>
-              <div className="bs-card bs-release relative overflow-hidden rounded-lg border-3 border-ink bg-paper text-ink">
-                <div className="flex items-center justify-between gap-2 border-b-3 border-ink bg-pop-mint px-4 py-2">
-                  <span className="font-mono text-xs font-extrabold tracking-[0.14em]">RELEASE · v2026 · MAIN</span>
-                  <span className="font-mono text-xs font-extrabold tracking-[0.14em]">✓ DEPLOYED</span>
-                </div>
-                <span aria-hidden className="bs-tear block" />
-                <div className="grid grid-cols-[30%_1fr] items-start gap-3 p-3 sm:grid-cols-[34%_1fr] sm:gap-5 sm:p-5">
-                  <div className="relative" aria-hidden>
-                    <div className="relative aspect-[413/591] overflow-hidden rounded-xl border-3 border-ink">
-                      <MorphPortrait />
-                    </div>
-                    <PixelBurst />
-                    {/* R32: the UM Registrar Seal is pressed on the ID photo's top edge, centred, like an embossed certificate seal
+            {/* ---------------------------------------------------------------- 05 SHIP: the release card */}
+            {/* R90: a shipping label slams down from above and dips at the hit (no rotation); a tear line under its header */}
+            <div className="bs-seg bs-release-in bs-layer" style={seg(0.82, 0.9)}>
+              <div className="bs-seg bs-release-press" style={seg(0.88, 0.92)}>
+                <div className="bs-card bs-release relative overflow-hidden rounded-lg border-3 border-ink bg-paper text-ink">
+                  <div className="flex items-center justify-between gap-2 border-b-3 border-ink bg-pop-mint px-4 py-2">
+                    <span className="font-mono text-xs font-extrabold tracking-[0.14em]">RELEASE · v2026 · MAIN</span>
+                    <span className="font-mono text-xs font-extrabold tracking-[0.14em]">✓ DEPLOYED</span>
+                  </div>
+                  <span aria-hidden className="bs-tear block" />
+                  <div className="grid grid-cols-[30%_1fr] items-start gap-3 p-3 sm:grid-cols-[34%_1fr] sm:gap-5 sm:p-5">
+                    <div className="relative" aria-hidden>
+                      <div className="relative aspect-[413/591] overflow-hidden rounded-xl border-3 border-ink">
+                        <MorphPortrait />
+                      </div>
+                      <PixelBurst />
+                      {/* R32: the UM Registrar Seal is pressed on the ID photo's top edge, centred, like an embossed certificate seal
                       - upright, it takes no width from the text column, and stays clear of the CTA and SHIPPED.
                       R33: it is pressed once the new portrait has developed (the "stamp" of the pixel morph) */}
-                    <span
-                      className="bs-seg bs-crest absolute left-1/2 -top-5 z-10 -ml-7 sm:-top-7 sm:-ml-[38px]"
-                      style={seg(0.93, 0.96)}
-                    >
-                      <InstitutionSeal crest="um" size="stamp" stampIn={false} />
-                    </span>
+                      <span
+                        className="bs-seg bs-crest absolute left-1/2 -top-5 z-10 -ml-7 sm:-top-7 sm:-ml-[38px]"
+                        style={seg(0.93, 0.96)}
+                      >
+                        <InstitutionSeal crest="um" size="stamp" stampIn={false} />
+                      </span>
+                    </div>
+                    <div className="min-w-0 space-y-2">
+                      <p className="font-display text-[clamp(1rem,3.6vw,1.9rem)] font-extrabold uppercase leading-[0.95] tracking-[-0.02em]">
+                        Howard Woon Hao Zhe
+                      </p>
+                      <p className="inline-block rounded-md border-2 border-ink bg-white px-2 py-0.5 font-mono text-[clamp(0.8rem,1.8vw,0.9rem)] font-extrabold tracking-[0.1em]">
+                        SOFTWARE ENGINEER
+                      </p>
+                      <p className="font-mono text-[clamp(0.8rem,1.8vw,0.9rem)] font-bold text-ink-soft">
+                        B.Comp.Sc. (Software Engineering) · Universiti Malaya
+                      </p>
+                      <ul className="space-y-1.5 pt-1">
+                        {AWARDS.map((w, i) => (
+                          <li
+                            key={w.text}
+                            aria-hidden
+                            className={`bs-seg bs-award rounded-lg border-2 border-ink px-2 py-1 font-mono text-xs font-extrabold leading-tight ${w.fill}`}
+                            style={seg(0.9 + i * 0.02, 0.93 + i * 0.02)}
+                          >
+                            {w.text}
+                          </li>
+                        ))}
+                      </ul>
+                      <a
+                        href="#projects"
+                        className="bs-cta nb-btn nb-btn-ink nb-press mt-2 inline-flex px-4 py-2.5 text-xs"
+                      >
+                        SEE THE SYSTEMS ↓
+                      </a>
+                    </div>
                   </div>
-                  <div className="min-w-0 space-y-2">
-                    <p className="font-display text-[clamp(1rem,3.6vw,1.9rem)] font-extrabold uppercase leading-[0.95] tracking-[-0.02em]">
-                      Howard Woon Hao Zhe
-                    </p>
-                    <p className="inline-block rounded-md border-2 border-ink bg-white px-2 py-0.5 font-mono text-[clamp(0.8rem,1.8vw,0.9rem)] font-extrabold tracking-[0.1em]">
-                      SOFTWARE ENGINEER
-                    </p>
-                    <p className="font-mono text-[clamp(0.8rem,1.8vw,0.9rem)] font-bold text-ink-soft">
-                      B.Comp.Sc. (Software Engineering) · Universiti Malaya
-                    </p>
-                    <ul className="space-y-1.5 pt-1">
-                      {AWARDS.map((w, i) => (
-                        <li
-                          key={w.text}
-                          aria-hidden
-                          className={`bs-seg bs-award rounded-lg border-2 border-ink px-2 py-1 font-mono text-xs font-extrabold leading-tight ${w.fill}`}
-                          style={seg(0.9 + i * 0.02, 0.93 + i * 0.02)}
-                        >
-                          {w.text}
-                        </li>
-                      ))}
-                    </ul>
-                    <a
-                      href="#projects"
-                      className="bs-cta nb-btn nb-btn-ink nb-press mt-2 inline-flex px-4 py-2.5 text-xs"
-                    >
-                      SEE THE SYSTEMS ↓
-                    </a>
-                  </div>
+                  <span aria-hidden className="bs-seg bs-stamp bs-stamp-mint" style={seg(0.93, 0.98)}>
+                    SHIPPED
+                  </span>
                 </div>
-                <span aria-hidden className="bs-seg bs-stamp bs-stamp-mint" style={seg(0.93, 0.98)}>
-                  SHIPPED
-                </span>
               </div>
             </div>
-          </div>
 
-          {/* ---------------------------------------------------------------- HUD */}
-          <div
-            aria-hidden
-            className="bs-hud-top absolute inset-x-0 z-30 flex items-center justify-between gap-3 px-4 sm:px-8"
-          >
-            <div className="flex shrink-0 items-center gap-2 whitespace-nowrap font-mono text-xs font-extrabold tracking-[0.06em] sm:tracking-[0.14em]">
-              <span className="bs-rec h-2.5 w-2.5 rounded-full bg-pop-red" />
-              BUILD LOG
-              <span className="hidden text-ink-muted sm:inline">· FRAME</span>
-              <span ref={frameRef} className="hidden tabular-nums sm:inline">
-                0000
-              </span>
-              <span className="hidden text-ink-muted sm:inline">/ {FRAMES}</span>
+            {/* ---------------------------------------------------------------- HUD */}
+            <div
+              aria-hidden
+              className="bs-hud-top absolute inset-x-0 z-30 flex items-center justify-between gap-3 px-4 sm:px-8"
+            >
+              <div className="flex shrink-0 items-center gap-2 whitespace-nowrap font-mono text-xs font-extrabold tracking-[0.06em] sm:tracking-[0.14em]">
+                <span className="bs-rec h-2.5 w-2.5 rounded-full bg-pop-red" />
+                BUILD LOG
+                <span className="hidden text-ink-muted sm:inline">· FRAME</span>
+                <span ref={frameRef} className="hidden tabular-nums sm:inline">
+                  0000
+                </span>
+                <span className="hidden text-ink-muted sm:inline">/ {FRAMES}</span>
+              </div>
+              <ol className="flex items-center gap-1 sm:gap-1.5">
+                {SCENES.map((s, i) => (
+                  <li
+                    key={s.n}
+                    data-n={i + 1}
+                    className="bs-pill flex items-center gap-1 sm:gap-1.5 rounded-md border-2 border-ink px-1 py-0.5 font-mono text-xs font-extrabold tracking-[0.06em] sm:px-2 sm:tracking-[0.1em]"
+                  >
+                    <span className={`h-2 w-2 rounded-[2px] border border-ink ${s.swatch}`} />
+                    <span>{s.n}</span>
+                    <span className="bs-pill-label hidden lg:inline">{s.key}</span>
+                  </li>
+                ))}
+              </ol>
             </div>
-            <ol className="flex items-center gap-1 sm:gap-1.5">
+            <div aria-hidden className="bs-progress absolute inset-x-0 z-30 h-1.5 bg-paper">
+              <span className="bs-progress-bar block h-full origin-left" />
+            </div>
+
+            <div aria-hidden className="bs-captions absolute inset-x-0 z-30 px-4 sm:px-8">
               {SCENES.map((s, i) => (
-                <li
+                <p
                   key={s.n}
                   data-n={i + 1}
-                  className="bs-pill flex items-center gap-1 sm:gap-1.5 rounded-md border-2 border-ink px-1 py-0.5 font-mono text-xs font-extrabold tracking-[0.06em] sm:px-2 sm:tracking-[0.1em]"
+                  className="bs-caption mx-auto flex max-w-3xl items-start gap-3 rounded-xl border-3 border-ink bg-paper px-3 py-2.5 text-ink shadow-[5px_5px_0_0_var(--bs-c)] sm:px-4"
+                  style={{ '--bs-c': `var(--bs-c${i + 1})` } as CSSProperties}
                 >
-                  <span className={`h-2 w-2 rounded-[2px] border border-ink ${s.swatch}`} />
-                  <span>{s.n}</span>
-                  <span className="bs-pill-label hidden lg:inline">{s.key}</span>
-                </li>
+                  <span
+                    className={`shrink-0 rounded-md border-2 border-ink px-1.5 font-mono text-xs font-extrabold ${s.swatch}`}
+                  >
+                    {s.n} {s.key}
+                  </span>
+                  <span className="font-mono text-[clamp(0.8rem,2vw,0.9rem)] font-semibold leading-snug">
+                    {s.caption}
+                  </span>
+                </p>
               ))}
-            </ol>
-          </div>
-          <div aria-hidden className="bs-progress absolute inset-x-0 z-30 h-1.5 bg-paper">
-            <span className="bs-progress-bar block h-full origin-left" />
-          </div>
-
-          <div aria-hidden className="bs-captions absolute inset-x-0 z-30 px-4 sm:px-8">
-            {SCENES.map((s, i) => (
-              <p
-                key={s.n}
-                data-n={i + 1}
-                className="bs-caption mx-auto flex max-w-3xl items-start gap-3 rounded-xl border-3 border-ink bg-paper px-3 py-2.5 text-ink shadow-[5px_5px_0_0_var(--bs-c)] sm:px-4"
-                style={{ '--bs-c': `var(--bs-c${i + 1})` } as CSSProperties}
-              >
-                <span
-                  className={`shrink-0 rounded-md border-2 border-ink px-1.5 font-mono text-xs font-extrabold ${s.swatch}`}
-                >
-                  {s.n} {s.key}
-                </span>
-                <span className="font-mono text-[clamp(0.8rem,2vw,0.9rem)] font-semibold leading-snug">
-                  {s.caption}
-                </span>
-              </p>
-            ))}
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+      {/* R102: every photo on the site as one swipeable film, right after the story (outside the pinned stage) */}
+      <MemoryReel />
+    </>
   );
 }

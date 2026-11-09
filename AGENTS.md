@@ -267,6 +267,10 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
    highlight tape, command palette, 3D rooms) READS those registries; a hand-kept second list is a bug. When adding
    content, follow 50-content-updates and then check every consumer listed there; plan P7 in
    `docs/R87-NEO-BRUTALIST-REDESIGN-PLAN.md` adds the test that proves it.
+   R102 (owner, 9 Nov 2026: "why only these few projects ... must auto update ... put the photos in yourself"): every
+   photo on the site is ONE derived list (`components/memory-data.ts`, sizes from `lib/photo-manifest.ts`, generated
+   before every build) read by the Memory Reel after The Build (a swipeable film of every memory), both film reels and
+   the SYS MAP docks (from `projects`). An upload in a gallery folder appears by itself. Guard: `tests/r102`.
 6. **The hero headline is a torch (R86)** - see law 5.
 7. **One crashing section never takes the page down (R86):** every lazy section is `guard()`-ed
    (components/section-boundary.tsx), crashes reach `/api/client-error`. Guard: `tests/r86.spec.ts`.
