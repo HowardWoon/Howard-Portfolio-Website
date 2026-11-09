@@ -21,10 +21,23 @@ for (const width of [320, 390, 768, 1024, 1280, 1440, 1920]) {
     await page.setViewportSize({ width, height: 900 });
     await walk(page);
     const keys = page.getByRole('group', { name: 'Signal key: what each colour means' });
-    expect(await keys.count()).toBe(4); // projects, experience, honours, footer
+    expect(await keys.count()).toBe(4); // projects, experience, honours (strips, R100), footer (table)
+    await expect(page.locator('.signal-key-strip')).toHaveCount(3);
     const problems = await keys.evaluateAll((all) => {
       const out: string[] = [];
       for (const key of all) {
+        // R100 (docs/R100-SYSTEM.md): the sections print the key as one strip of chips; only the footer keeps the
+        // ruled table. A strip: every chip whole, nothing clipped, nothing off the screen.
+        if (key.classList.contains('signal-key-strip')) {
+          for (const t of key.querySelectorAll<HTMLElement>(':scope > span, :scope > span > span'))
+            if (t.textContent?.trim() && t.scrollWidth > t.clientWidth + 1) out.push(`"${t.textContent}" is clipped`);
+          for (const c of key.querySelectorAll(':scope > span')) {
+            const r = c.getBoundingClientRect();
+            if (r.right > document.documentElement.clientWidth || r.left < 0)
+              out.push(`"${c.textContent}" leaves the screen`);
+          }
+          continue;
+        }
         const grid = key.querySelector('ul')!;
         const g = grid.getBoundingClientRect();
         const box = key.getBoundingClientRect();
