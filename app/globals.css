@@ -3563,6 +3563,32 @@ html[data-xray-mode]
    from zero once, when the sheet is on screen and the scroll has stopped (lib/split-flap.ts). A focus card answers
    the press: its icon tile is stamped on (one hard slam) and its terminal line prints left to right (steps, a
    printer, not a fade). Transform / clip-path only; reduced motion and Calm end each one at its final frame. */
+/* R101 data plate (docs/R101-ABOUT-PLATE.md): the About header is one plate. Its label sits square in the ink bar
+   (no tilt, no shadow on ink); the rivets are paper squares - ink / paper decoration only, no colour meaning. */
+#about .ab-plate-bar .nb-kicker {
+  --tw-rotate: 0deg;
+  box-shadow: none;
+}
+#about .ab-rivets i {
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--paper-cream, #fff8e7);
+}
+#about .ab-sheet .ab-tile {
+  transition: background-color 0.12s steps(2, end);
+}
+#about .ab-sheet .ab-tile:hover {
+  background: var(--paper-cream, #fff8e7);
+}
+/* the counters take their size from their own cell (a 2 x 2 grid at every width): "4.00" is about 4.4 em wide */
+#about .ab-sheet .ab-cell {
+  container-type: inline-size; /* on the cell body, not the link: a size container cannot be a subgrid */
+}
+#about .ab-sheet .ab-flap {
+  font-size: clamp(1.25rem, 18cqi, 3.2rem);
+}
 .ab-flap {
   font-size: clamp(1.7rem, 3.4vw, 2.4rem);
   line-height: 1;

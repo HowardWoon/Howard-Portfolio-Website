@@ -49,6 +49,9 @@ Rules:
   icon keys). `shadow-clay` is the hard 4 px ink offset (pressed = 0); no inset or blurred clay shadow. Sections inside
   the page print the SIGNAL KEY as one strip (`<SignalKey strip only=[...] />`, only the colours they use); the full
   table lives once, in the footer.
+- R101 About is a data plate (docs/R101-ABOUT-PLATE.md): one plate holds the label bar, the claim, the paragraph and
+  the Build Sheet counters as a ruled 2 x 2 subgrid; a counter sizes to its cell (container query on `.ab-cell`, never
+  on the subgrid link). Never split it back into a tilted tag + headline + separate cards. Guard: `tests/r101`.
 - No AI-generated imagery. Use Howard's real photos (`public/images/`) and vector / CSS graphics. One owner-approved
   exception (R83, owner upload): the chibi Doom walking clip, cut into the frames of `public/images/doom-walk/` and shown only
   by `components/doom-walk.tsx`.

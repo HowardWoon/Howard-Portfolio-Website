@@ -194,17 +194,24 @@ function BuildSheet() {
   }, []);
 
   return (
-    <ul ref={listRef} aria-label="Build sheet" className="ab-sheet fx-rise flex flex-wrap gap-4 sm:gap-5">
+    <ul
+      ref={listRef}
+      aria-label="Build sheet"
+      className="ab-sheet fx-rise grid h-full grid-cols-2 gap-[3px] bg-ink lg:grid-rows-[auto_1fr_auto_1fr]"
+    >
       {LEDGER.map((x) => {
         const sig = x.signal ? SIGNAL[x.signal] : null;
         return (
-          <li key={x.label} className="flex-[1_1_220px]">
+          <li
+            key={x.label}
+            className="row-span-2 grid min-w-0 grid-cols-1 grid-rows-subgrid gap-0 overflow-clip bg-white"
+          >
             <a
               href={x.href}
-              className="ab-tile nb-press group flex h-full flex-col overflow-hidden rounded-2xl border-3 border-ink bg-white text-ink shadow-brutal focus-visible:outline focus-visible:outline-4 focus-visible:outline-pop-blue"
+              className="ab-tile group row-span-2 grid min-w-0 grid-cols-1 grid-rows-subgrid gap-0 bg-white text-ink focus-visible:outline focus-visible:outline-4 focus-visible:-outline-offset-4 focus-visible:outline-pop-blue"
             >
               <span
-                className={`flex items-center justify-between gap-2 border-b-3 border-ink px-4 py-2 font-mono text-xs font-extrabold uppercase tracking-[0.12em] ${sig ? sig.fill : 'bg-white'}`}
+                className={`flex items-center justify-between gap-2 border-b-3 border-ink px-3 py-2 font-mono text-xs font-extrabold uppercase tracking-[0.1em] sm:px-4 ${sig ? sig.fill : 'bg-white'}`}
               >
                 {x.label}
                 <ArrowUpRight
@@ -213,11 +220,11 @@ function BuildSheet() {
                   strokeWidth={3}
                 />
               </span>
-              <span className="flex flex-1 flex-col gap-2 px-4 pb-4 pt-3">
+              <span className="ab-cell flex flex-col gap-2 px-3 pb-4 pt-3 sm:px-4">
                 <span data-flap className="ab-flap font-mono font-extrabold">
                   {x.value}
                 </span>
-                <span className="font-mono text-xs font-bold leading-snug text-ink-soft">{x.note}</span>
+                <span className="font-mono text-xs font-bold leading-snug text-ink-soft lg:mt-auto">{x.note}</span>
               </span>
             </a>
           </li>
@@ -442,34 +449,50 @@ export default function AboutSection() {
       className="fx-tide-surface fx-dot-plane fx-sheet relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-28 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-clip border-t-3 border-ink"
     >
       <div className="relative max-w-7xl mx-auto space-y-16">
-        {/* Section Header */}
-        <div className="space-y-7">
-          <div className="nb-kicker fx-rise">
-            <Sparkles className="w-4 h-4" strokeWidth={2.5} />
-            <span>ABOUT // SOFTWARE ENGINEER</span>
+        {/* R101 data plate (docs/R101-ABOUT-PLATE.md): the header, the words and the Build Sheet are ONE riveted plate -
+            an ink label bar, the claim and the paragraph on the left, the four split-flap counters as a ruled grid on
+            the right (stacked on phones). Same words, same links. */}
+        <div
+          data-about-plate
+          className="ab-plate relative overflow-clip rounded-2xl border-3 border-ink bg-white shadow-brutal-lg"
+        >
+          <div className="ab-plate-bar flex items-center justify-between gap-3 border-b-3 border-ink bg-ink px-3 py-2.5 sm:px-5">
+            <div className="nb-kicker fx-rise">
+              <Sparkles className="w-4 h-4" strokeWidth={2.5} />
+              <span>ABOUT // SOFTWARE ENGINEER</span>
+            </div>
+            <span aria-hidden className="ab-rivets hidden sm:flex gap-2">
+              <i />
+              <i />
+              <i />
+            </span>
           </div>
+          <div className="grid lg:grid-cols-12">
+            <div className="space-y-6 p-5 xs:p-6 sm:p-8 lg:col-span-7 lg:p-10">
+              <h2 className="fx-rise nb-title text-[clamp(1.55rem,8.2vw,2.1rem)] sm:text-5xl lg:text-[3.1rem] xl:text-[3.4rem] leading-[1.02]">
+                <SplitWords text="I BUILD FULL-STACK SYSTEMS AND GOVERNED AI AGENTS, THEN SHIP THEM ON A HACKATHON CLOCK." />
+              </h2>
 
-          <h2 className="fx-rise nb-title text-[clamp(1.55rem,8.2vw,2.1rem)] sm:text-5xl lg:text-6xl max-w-5xl leading-[1.02]">
-            <SplitWords text="I BUILD FULL-STACK SYSTEMS AND GOVERNED AI AGENTS, THEN SHIP THEM ON A HACKATHON CLOCK." />
-          </h2>
-
-          <p className="fx-rise text-ink-soft text-lg sm:text-xl max-w-3xl leading-relaxed font-sans font-medium">
-            {/* R27: the words ink in as they scroll up (ScrollReveal / SplitText scrub, CSS scroll timeline) */}
-            <ScrollInk>
-              Software Engineering undergraduate at{' '}
-              <strong className="text-ink font-extrabold">Universiti Malaya</strong> (
-              <span className="inline-block bg-pop-yellow border-2 border-ink rounded-md px-1.5 text-ink font-mono font-extrabold text-[0.95em] leading-snug">
-                4.00 CGPA
-              </span>
-              ), on the Dean&apos;s Honours List. In 2026 four of my builds reached the podium: Supervity AutoPilot
-              Asia, MUBA Blockchain, the DOSM Datathon and UM Game Jam. I keep the books too, as Finance Lead at PEKOM
-              and in finance at KRAIBURG TPE.
-            </ScrollInk>
-          </p>
+              <p className="fx-rise text-ink-soft text-lg sm:text-xl leading-relaxed font-sans font-medium">
+                {/* R27: the words ink in as they scroll up (ScrollReveal / SplitText scrub, CSS scroll timeline) */}
+                <ScrollInk>
+                  Software Engineering undergraduate at{' '}
+                  <strong className="text-ink font-extrabold">Universiti Malaya</strong> (
+                  <span className="inline-block bg-pop-yellow border-2 border-ink rounded-md px-1.5 text-ink font-mono font-extrabold text-[0.95em] leading-snug">
+                    4.00 CGPA
+                  </span>
+                  ), on the Dean&apos;s Honours List. In 2026 four of my builds reached the podium: Supervity AutoPilot
+                  Asia, MUBA Blockchain, the DOSM Datathon and UM Game Jam. I keep the books too, as Finance Lead at
+                  PEKOM and in finance at KRAIBURG TPE.
+                </ScrollInk>
+              </p>
+            </div>
+            <div className="border-t-3 border-ink lg:col-span-5 lg:border-l-3 lg:border-t-0">
+              {/* R83 Build Sheet: four facts from this page as split-flap counters, each linking to its proof */}
+              <BuildSheet />
+            </div>
+          </div>
         </div>
-
-        {/* R83 Build Sheet: four facts from this page as split-flap counters, each linking to its proof */}
-        <BuildSheet />
 
         {/* Core Architecture Bento Grid (4 Pillars) — True Masonry Layout */}
         {isLg !== true && (
