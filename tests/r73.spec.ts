@@ -201,13 +201,15 @@ test('every section list on the site comes from the one registry (lib/sections.t
     expect(src, `${f} links no section by hand`).not.toMatch(/goTo\('#|target: '#/);
   }
   await page.setViewportSize({ width: 1440, height: 900 });
-  await open(page);
+  // R107: the header and the sections are on the home page, the street (its signs) on /diorama
+  await page.goto('/', { waitUntil: 'networkidle' });
   const ids = await page.evaluate(() =>
     [...document.querySelectorAll('main > section[id], main section[id]')].map((s) => s.id),
   );
   const nav = await page
     .locator('header.site-header nav a[href^="#"]')
     .evaluateAll((a) => a.map((x) => x.getAttribute('href')!.slice(1)));
+  await open(page);
   const pins = await page
     .locator('#diorama button[aria-label^="Go to"]')
     .evaluateAll((b) => b.map((x) => x.getAttribute('aria-label')!.replace('Go to ', '').toLowerCase()));
