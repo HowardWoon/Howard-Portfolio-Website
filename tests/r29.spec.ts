@@ -109,7 +109,8 @@ for (const [name, w] of [
 
 test.describe('honours seals (1440)', () => {
   test.use({ viewport: { width: 1440, height: 900 } });
-  test("Dean's List and KMNS awards carry upright seals beside the title", async ({ page }) => {
+  // R106 / R110: in the honours ticket wall the seal stands ABOVE the title (beside it the column squeezed the title)
+  test("Dean's List and KMNS awards carry upright seals above the title", async ({ page }) => {
     await open(page);
     const key = page.locator('[data-honor-category]').nth(1); // academic distinctions
     await key.scrollIntoViewIfNeeded();
@@ -121,9 +122,11 @@ test.describe('honours seals (1440)', () => {
       const r = await seal.evaluate((el) => {
         const s = el.getBoundingClientRect();
         const h3 = el.parentElement!.querySelector('h3')!.getBoundingClientRect();
-        return { right: s.left >= h3.right, top: Math.abs(s.top - h3.top) < 40 };
+        const m = getComputedStyle(el).transform;
+        const t = m === 'none' ? new DOMMatrix() : new DOMMatrix(m);
+        return { above: s.bottom <= h3.top + 1, upright: Math.abs(t.b) + Math.abs(t.c) < 0.001 };
       });
-      expect(r).toEqual({ right: true, top: true });
+      expect(r).toEqual({ above: true, upright: true });
     }
   });
 });
