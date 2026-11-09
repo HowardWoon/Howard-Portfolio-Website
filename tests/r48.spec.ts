@@ -169,7 +169,7 @@ test.describe('desktop 1440', () => {
   });
 
   // owner: the band beside the academic seals was "quite empty ... utilise the blank place to create huge impact"
-  test('the academic honours print their own figures beside the seal, computed from the card', async ({ page }) => {
+  test('the academic honours print their own figures under the seal, computed from the card', async ({ page }) => {
     await home(page);
     const key = page.locator('[data-honor-category]').nth(1);
     await key.scrollIntoViewIfNeeded();
@@ -202,9 +202,12 @@ test.describe('desktop 1440', () => {
         const tiles = [...ul.querySelectorAll('li')].map((li) => li.getBoundingClientRect());
         const s = { right: Math.max(...tiles.map((t) => t.right)), top: tiles[0].top, bottom: tiles[0].bottom };
         const seal = ul.closest('[data-crop]')!.querySelector('[data-seal-size="ring"]')!.getBoundingClientRect();
-        return { clear: s.right <= seal.left, beside: s.top < seal.bottom && s.bottom > seal.top };
+        // R110: in the honours ticket wall the seal stands ABOVE the title and its figures (beside, the column was
+        // too narrow); clear = no overlap
+        const hit = s.right > seal.left && tiles[0].left < seal.right && s.top < seal.bottom && s.bottom > seal.top;
+        return { clear: !hit, above: seal.bottom <= s.top + 1 };
       });
-      expect(fit).toEqual({ clear: true, beside: true });
+      expect(fit).toEqual({ clear: true, above: true });
     }
   });
 
