@@ -29,5 +29,11 @@ export function onStoryProgress(l: Listener): () => void {
  */
 export const STORY_GAP_AT = 0.36;
 export const STORY_GAP = 0.3;
-export const storyTime = (x: number) => (x <= STORY_GAP_AT ? x : x + STORY_GAP) / (1 + STORY_GAP);
-export const gapTime = (f: number) => (STORY_GAP_AT + f * STORY_GAP) / (1 + STORY_GAP);
+/**
+ * R109 (owner, of the 05 SHIP release card: "delete this frame, so awkward and ugly"): the story ends where 04
+ * ORCHESTRATE has settled, at story time 0.80 (05 SHIP was 0.80 - 1.00). The playhead's 1 is that end; the track
+ * shrank by the same factor (globals.css .bs-track 676vh -> 572vh), so every remaining scene keeps its scroll length.
+ */
+export const STORY_END = 0.8;
+export const storyTime = (x: number) => (x <= STORY_GAP_AT ? x : x + STORY_GAP) / (STORY_END + STORY_GAP);
+export const gapTime = (f: number) => (STORY_GAP_AT + f * STORY_GAP) / (STORY_END + STORY_GAP);

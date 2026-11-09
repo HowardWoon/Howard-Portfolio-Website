@@ -16,7 +16,7 @@ import '@/app/build-story.css';
 
 /**
  * R21 "The Build": a scroll-scrubbed storyboard between About and Projects. A Universiti Malaya student ID compiles
- * into a shipped system in five scenes (ENROL, PARSE, ARCHITECT, ORCHESTRATE, SHIP). Scrolling is the playhead:
+ * into a shipped system in four scenes (ENROL, PARSE, ARCHITECT, ORCHESTRATE; R109 deleted 05 SHIP). Scrolling is the playhead:
  * down plays, up rewinds, frame for frame.
  *
  * How it works (docs/R21-BUILD-STORY.md): a tall track (.bs-track) holds a sticky full-screen stage (.bs-stage).
@@ -53,19 +53,13 @@ const SCENES = [
     swatch: 'bg-pop-lilac',
     caption: 'AI agents with deterministic guardrails: orchestrated, audited, never left to guess.',
   },
-  {
-    n: '05',
-    key: 'SHIP',
-    swatch: 'bg-pop-mint',
-    caption: 'From UM lecture halls to hackathon podiums and production: a Software Engineer.',
-  },
 ] as const;
 
 const FRAMES = 1200;
 // R31: authored in story time, mapped to the playhead (the crest-scan gap sits inside scene 02 -> 03)
-const BOUNDS = [0.2, 0.4, 0.6, 0.8].map(storyTime);
+const BOUNDS = [0.2, 0.4, 0.6].map(storyTime);
 /** R24 Build Manifest: the frame where each scene has settled (a jump lands here, the story plays on from it) */
-const LAND = [0.16, 0.34, 0.55, 0.76, 1].map(storyTime);
+const LAND = [0.16, 0.34, 0.55, 0.8].map(storyTime);
 const frameRange = (i: number) => {
   const from = i === 0 ? 0 : BOUNDS[i - 1];
   const to = BOUNDS[i] ?? 1;
@@ -172,14 +166,6 @@ const CODE = [
 /** the window in which the terminal types line `i` (R90: the line slides into its ruled lane) */
 const typeSeg = (i: number) => seg(0.24 + i * 0.018, 0.255 + i * 0.018);
 
-const AWARDS = [
-  { text: '2ND PLACE · SUPERVITY AUTOPILOT ASIA HACKATHON', fill: 'bg-pop-yellow' },
-  { text: '2ND RUNNER UP (SUI) + TOP 6 (GONKA AI) · MUBA BLOCKCHAIN HACKATHON 2026', fill: 'bg-pop-yellow' },
-  // R83: three rows fit every phone (a fourth ran the card past the captions on a Galaxy S24); the Dean's List is on the
-  // student ID and in Victor's Ledger
-  { text: 'TOP 5 FINALIST · DOSM DATATHON 2026', fill: 'bg-pop-yellow' },
-] as const;
-
 /** photo -> pixel mosaic -> glyph portrait, stacked; `photoSeg` / `mosaicSeg` wipe the top two layers away */
 function Portrait({ photoSeg, mosaicSeg }: { photoSeg: CSSProperties; mosaicSeg: CSSProperties }) {
   return (
@@ -210,125 +196,6 @@ function Portrait({ photoSeg, mosaicSeg }: { photoSeg: CSSProperties; mosaicSeg:
           className="object-cover"
         />
       </div>
-    </div>
-  );
-}
-
-// R33 Pixel Morph (owner: "像素变身"): in 05 SHIP the student-ID photo is scanned into pixel blocks, the blocks lift off
-// in a wave, flip over in the air and land as the new portrait, which then develops sharp and gets the UM seal.
-// The grid is 7 x 10 blocks of 4 x 4 art pixels = the two 28 x 40 mosaics (howard-id-px / howard-ship-px, upscaled
-// x10 with nearest-neighbour, so the pixels stay hard on every browser). Flight paths are COMPUTED (seeded, same every
-// load): out from the photo's centre, biased upwards, in % of the block's own size so every screen gets the same
-// choreography. Story time windows below; scroll-scrubbed and reversible, transform / opacity only.
-const MORPH_COLS = 7;
-const MORPH_ROWS = 10;
-const MORPH_ID_WIPE = [0.835, 0.86] as const; // the sharp ID photo is scanned away: its pixel blocks remain
-const MORPH_BURST = [0.86, 0.92] as const; // the blocks lift, flip and land
-const MORPH_DEVELOP = [0.92, 0.945] as const; // the new portrait develops sharp over its blocks
-const MORPH = (() => {
-  let seed = 33033;
-  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  const r1 = (v: number) => Math.round(v * 10) / 10;
-  return Array.from({ length: MORPH_COLS * MORPH_ROWS }, (_, n) => {
-    const c = n % MORPH_COLS;
-    const r = Math.floor(n / MORPH_COLS);
-    const ox = c - (MORPH_COLS - 1) / 2;
-    const oy = r - (MORPH_ROWS - 1) / 2;
-    const len = Math.hypot(ox, oy) || 1;
-    const dist = 70 + rnd() * 90;
-    return {
-      c,
-      r,
-      dx: r1((ox / len) * dist + (rnd() - 0.5) * 50),
-      dy: r1((oy / len) * dist * 0.6 - 40 - rnd() * 50),
-      rot: r1((rnd() - 0.5) * 60),
-      // the wave runs top to bottom like the scanner, with a little seeded jitter
-      d: r1(((r / (MORPH_ROWS - 1)) * 0.75 + rnd() * 0.25) * 100) / 100,
-      // the four corner blocks follow the photo box's rounded corners (rounded-xl inside a 3 px border)
-      radius:
-        c === 0 && r === 0
-          ? '9px 0 0 0'
-          : c === MORPH_COLS - 1 && r === 0
-            ? '0 9px 0 0'
-            : c === 0 && r === MORPH_ROWS - 1
-              ? '0 0 0 9px'
-              : c === MORPH_COLS - 1 && r === MORPH_ROWS - 1
-                ? '0 0 9px 0'
-                : undefined,
-    };
-  });
-})();
-
-/** R33: what the release photo box shows outside the burst (ID photo -> its blocks ... new blocks -> new photo) */
-function MorphPortrait() {
-  return (
-    <div className="bs-portrait relative h-full w-full overflow-hidden bg-ink">
-      {/* the empty block tray, seen while the blocks are in the air */}
-      <span className="bs-morph-tray absolute inset-0" />
-      <span className="bs-seg bs-morph-before absolute inset-0" style={seg(...MORPH_BURST)}>
-        <Image
-          src="/images/story/howard-id-px.png"
-          alt=""
-          fill
-          sizes="160px"
-          unoptimized
-          className="object-cover [image-rendering:pixelated]"
-        />
-      </span>
-      <span className="bs-seg bs-morph-after absolute inset-0" style={seg(...MORPH_BURST)}>
-        <Image
-          src="/images/story/howard-ship-px.png"
-          alt=""
-          fill
-          sizes="160px"
-          unoptimized
-          className="object-cover [image-rendering:pixelated]"
-        />
-      </span>
-      <div className="bs-seg bs-wipe-in absolute inset-0" style={seg(...MORPH_DEVELOP)}>
-        <Image
-          src="/images/story/howard-ship.jpg"
-          alt=""
-          fill
-          sizes="(max-width: 767px) 30vw, 200px"
-          className="object-cover"
-        />
-      </div>
-      <div className="bs-seg bs-wipe absolute inset-0" style={seg(...MORPH_ID_WIPE)}>
-        <Image
-          src="/images/story/howard-id.jpg"
-          alt=""
-          fill
-          sizes="(max-width: 767px) 30vw, 200px"
-          className="object-cover"
-        />
-      </div>
-      <span className="bs-seg bs-scan" style={seg(...MORPH_ID_WIPE)} />
-      <span className="bs-seg bs-scan" style={seg(...MORPH_DEVELOP)} />
-    </div>
-  );
-}
-
-/** R33: the 70 flying blocks, laid over the photo box; visible only while the burst plays */
-function PixelBurst() {
-  return (
-    <div
-      className="bs-seg bs-morph"
-      style={seg(...MORPH_BURST, {
-        '--px-a': 'url(/images/story/howard-id-px.png)',
-        '--px-b': 'url(/images/story/howard-ship-px.png)',
-      })}
-    >
-      {MORPH.map((b) => (
-        <span
-          key={`${b.c}-${b.r}`}
-          className="bs-seg bs-px"
-          style={{
-            ...seg(...MORPH_BURST, { '--c': b.c, '--r': b.r, '--dx': b.dx, '--dy': b.dy, '--rot': b.rot, '--d': b.d }),
-            borderRadius: b.radius,
-          }}
-        />
-      ))}
     </div>
   );
 }
@@ -382,7 +249,7 @@ export default function BuildStory() {
       }
       if (showFrame.matches) frame.textContent = String(Math.round(p * FRAMES)).padStart(4, '0');
     };
-    // R28 P2: a landscape phone (<= 480 px tall) cannot hold a pinned five-scene stage: it gets the finished still
+    // R28 P2: a landscape phone (<= 480 px tall) cannot hold a pinned four-scene stage: it gets the finished still
     const shortLandscape = window.matchMedia('(orientation: landscape) and (max-height: 480px)');
     const narrow = window.matchMedia('(max-width: 1023px)');
     const still = () => calm || reduce.matches || shortLandscape.matches;
@@ -405,10 +272,9 @@ export default function BuildStory() {
     const fitMeasure = () => {
       const id = stage.querySelector<HTMLElement>('.bs-idcard');
       const code = stage.querySelector<HTMLElement>('.bs-code .bs-card');
-      const rel = stage.querySelector<HTMLElement>('.bs-release');
       const layer = stage.querySelector<HTMLElement>('.bs-layer');
-      const props = ['--fit', '--fit-rel', '--id2y', '--id3y', '--code-y'];
-      if (!narrow.matches || still() || !id || !code || !rel || !layer) {
+      const props = ['--fit', '--id2y', '--id3y', '--code-y'];
+      if (!narrow.matches || still() || !id || !code || !layer) {
         props.forEach((p) => stage.style.removeProperty(p));
         delete stage.dataset.tight;
         return;
@@ -420,10 +286,9 @@ export default function BuildStory() {
       const padB = parseFloat(cs.paddingBottom);
       const idH = id.offsetHeight;
       const codeH = code.offsetHeight;
-      const relH = rel.offsetHeight;
       const GAP = 18;
       const total = idH + GAP + codeH;
-      const need = Math.max(total, relH);
+      const need = total;
       // the band is measured from the real HUD bottom and caption-bar top: the layer padding alone under-counts the
       // caption bar on tall narrow phones (Galaxy S24 360x780: padding 124 px, caption bar 150 px -> code card cut)
       const s0 = stage.getBoundingClientRect().top;
@@ -439,7 +304,6 @@ export default function BuildStory() {
       const clampFit = (v: number) => Math.max(0.72, Math.min(1, v));
       const fit = clampFit(band / total);
       stage.style.setProperty('--fit', fit.toFixed(3));
-      stage.style.setProperty('--fit-rel', clampFit(band / relH).toFixed(3));
       // the stack around the band's centre, in unscaled px (the scale shrinks them with the cards). If even the
       // smallest readable scale (0.72) is too tall, the code card slides up over the ID card's barcode instead of
       // pushing the ID under the HUD (a dealt card on a stack).
@@ -610,13 +474,13 @@ export default function BuildStory() {
                 From student ID to <span className="bs-underline">shipped system.</span>
               </h2>
               <p className="mx-auto mt-4 max-w-xl font-mono text-sm font-semibold text-ink-soft">
-                A five-scene build log. Scroll down to compile, scroll up to rewind.
+                A four-scene build log. Scroll down to compile, scroll up to rewind.
               </p>
               <span
                 aria-hidden
                 className="bs-scroll-cue mx-auto mt-6 block h-10 w-6 rounded-full border-2 border-ink"
               />
-              {/* R24 Build Manifest: the five scenes as a storyboard (owner: "fantastic, many details and info"). Each
+              {/* R24 Build Manifest: the scenes as a storyboard (owner: "fantastic, many details and info"). Each
                 cell = scene colour, number, name, its frame range on the 1200-frame playhead and its caption (the same
                 words the caption bar shows). A click plays the story to that scene. */}
               <ol ref={manifestRef} aria-label="Build manifest" className="bs-manifest">
@@ -879,69 +743,6 @@ export default function BuildStory() {
                     <Dock on={n.id} />
                   </div>
                 ))}
-              </div>
-            </div>
-
-            {/* ---------------------------------------------------------------- 05 SHIP: the release card */}
-            {/* R90: a shipping label slams down from above and dips at the hit (no rotation); a tear line under its header */}
-            <div className="bs-seg bs-release-in bs-layer" style={seg(0.82, 0.9)}>
-              <div className="bs-seg bs-release-press" style={seg(0.88, 0.92)}>
-                <div className="bs-card bs-release relative overflow-hidden rounded-lg border-3 border-ink bg-paper text-ink">
-                  <div className="flex items-center justify-between gap-2 border-b-3 border-ink bg-pop-mint px-4 py-2">
-                    <span className="font-mono text-xs font-extrabold tracking-[0.14em]">RELEASE · v2026 · MAIN</span>
-                    <span className="font-mono text-xs font-extrabold tracking-[0.14em]">✓ DEPLOYED</span>
-                  </div>
-                  <span aria-hidden className="bs-tear block" />
-                  <div className="grid grid-cols-[30%_1fr] items-start gap-3 p-3 sm:grid-cols-[34%_1fr] sm:gap-5 sm:p-5">
-                    <div className="relative" aria-hidden>
-                      <div className="relative aspect-[413/591] overflow-hidden rounded-xl border-3 border-ink">
-                        <MorphPortrait />
-                      </div>
-                      <PixelBurst />
-                      {/* R32: the UM Registrar Seal is pressed on the ID photo's top edge, centred, like an embossed certificate seal
-                      - upright, it takes no width from the text column, and stays clear of the CTA and SHIPPED.
-                      R33: it is pressed once the new portrait has developed (the "stamp" of the pixel morph) */}
-                      <span
-                        className="bs-seg bs-crest absolute left-1/2 -top-5 z-10 -ml-7 sm:-top-7 sm:-ml-[38px]"
-                        style={seg(0.93, 0.96)}
-                      >
-                        <InstitutionSeal crest="um" size="stamp" stampIn={false} />
-                      </span>
-                    </div>
-                    <div className="min-w-0 space-y-2">
-                      <p className="font-display text-[clamp(1rem,3.6vw,1.9rem)] font-extrabold uppercase leading-[0.95] tracking-[-0.02em]">
-                        Howard Woon Hao Zhe
-                      </p>
-                      <p className="inline-block rounded-md border-2 border-ink bg-white px-2 py-0.5 font-mono text-[clamp(0.8rem,1.8vw,0.9rem)] font-extrabold tracking-[0.1em]">
-                        SOFTWARE ENGINEER
-                      </p>
-                      <p className="font-mono text-[clamp(0.8rem,1.8vw,0.9rem)] font-bold text-ink-soft">
-                        B.Comp.Sc. (Software Engineering) · Universiti Malaya
-                      </p>
-                      <ul className="space-y-1.5 pt-1">
-                        {AWARDS.map((w, i) => (
-                          <li
-                            key={w.text}
-                            aria-hidden
-                            className={`bs-seg bs-award rounded-lg border-2 border-ink px-2 py-1 font-mono text-xs font-extrabold leading-tight ${w.fill}`}
-                            style={seg(0.9 + i * 0.02, 0.93 + i * 0.02)}
-                          >
-                            {w.text}
-                          </li>
-                        ))}
-                      </ul>
-                      <a
-                        href="#projects"
-                        className="bs-cta nb-btn nb-btn-ink nb-press mt-2 inline-flex px-4 py-2.5 text-xs"
-                      >
-                        SEE THE SYSTEMS ↓
-                      </a>
-                    </div>
-                  </div>
-                  <span aria-hidden className="bs-seg bs-stamp bs-stamp-mint" style={seg(0.93, 0.98)}>
-                    SHIPPED
-                  </span>
-                </div>
               </div>
             </div>
 

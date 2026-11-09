@@ -74,10 +74,10 @@ async function storyTop(page: Page) {
 }
 
 for (const [width, height, cells, captions] of [
-  [1920, 875, 5, true],
-  [1366, 768, 5, false],
-  [768, 1024, 5, true],
-  [390, 844, 5, false],
+  [1920, 875, 4, true],
+  [1366, 768, 4, false],
+  [768, 1024, 4, true],
+  [390, 844, 4, false],
   [375, 667, 0, false],
 ] as const) {
   test(`build manifest on the title card fits and reads @${width}x${height}`, async ({ page }) => {
@@ -112,7 +112,7 @@ for (const [width, height, cells, captions] of [
       return { out, caps: caps.length };
     });
     expect(r.out).toEqual([]);
-    expect(r.caps).toBe(captions ? 5 : 0);
+    expect(r.caps).toBe(captions ? 4 : 0);
   });
 }
 

@@ -81,7 +81,7 @@ async function storyAt(page: Page, f: number) {
 test('The Build: the 03 / 04 diagram is a 3D board on desktop that the mouse turns', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
-  await storyAt(page, 0.81);
+  await storyAt(page, 0.955);
   const board = page.locator('.bs-diagram');
   expect(await board.evaluate((e) => getComputedStyle(e).transform)).toMatch(/^matrix3d/);
   expect(
@@ -101,7 +101,7 @@ test.describe('phone', () => {
   test.use((({ defaultBrowserType, ...d }) => d)(devices['iPhone 13']));
   test('The Build: the diagram stays flat on a phone', async ({ page }) => {
     await home(page);
-    await storyAt(page, 0.81);
+    await storyAt(page, 0.955);
     expect(await page.locator('.bs-diagram').evaluate((e) => getComputedStyle(e).transform)).toBe('none');
   });
 });
@@ -180,7 +180,7 @@ test('Doom Walk: the gate rolls up and back, the frame follows the scroll, the r
   const screen = (await page.locator('.dw-screen').boundingBox())!;
   const printer = (await page.locator('.dw-printer').boundingBox())!;
   expect(printer.x).toBeGreaterThanOrEqual(screen.x + screen.width + 12);
-  // The Build's 05 SHIP no longer carries the old still picture
+  // The Build no longer carries the old still picture (R109: 05 SHIP itself is deleted)
   await expect(page.locator('.bs-doom-card, .bs-doom-sticker')).toHaveCount(0);
 });
 

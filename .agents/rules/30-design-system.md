@@ -59,6 +59,10 @@ Rules:
   name, project tint). Honours results are a ticket wall of balanced columns, each card as tall as its content. On the
   LEADERSHIP track each PEKOM treasurer role is its own card with a ledger (ALL keeps the summary). No thick drawn
   underline under a phrase: a phrase that needs weight becomes printed keys. Guard: `tests/r103`.
+- R108 - R110 (docs/R108-R110-HD-CURSOR-SHIP-GALLERY.md): nothing blurs or tints what it passes over - the cursor ring
+  has no fill and no blend (a hard yellow offset marks a clickable thing), no blur behind a dialog, no pointer glare.
+  The Build has four scenes and ends on 04 (no release card). A gallery beside text stands in the middle right and
+  stays beside it (sticky, card `overflow: clip`) - never a tall blank column under it. Guards: `tests/r108`, `r109`.
 - No AI-generated imagery. Use Howard's real photos (`public/images/`) and vector / CSS graphics. One owner-approved
   exception (R83, owner upload): the chibi Doom walking clip, cut into the frames of `public/images/doom-walk/` and shown only
   by `components/doom-walk.tsx`.

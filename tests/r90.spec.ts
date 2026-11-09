@@ -79,30 +79,20 @@ test('the stage is paper with ink type, and the student ID drops and is stamped 
     expect(turns, `p=${p}`).toEqual([]);
   }
   // the card falls from above: higher while it drops than once it has landed
-  await playhead(page, 0.05);
+  await playhead(page, 0.06);
   const falling = (await page.locator('.bs-idcard').boundingBox())!.y;
-  await playhead(page, 0.2);
+  await playhead(page, 0.236);
   const landed = (await page.locator('.bs-idcard').boundingBox())!.y;
   expect(falling).toBeLessThan(landed - 100);
 });
 
-test('05 SHIP: the shipping label slams down from above, with its tear line', async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await home(page);
-  await playhead(page, 0.875);
-  const mid = (await page.locator('.bs-release').boundingBox())!.y;
-  await playhead(page, 1);
-  const end = (await page.locator('.bs-release').boundingBox())!.y;
-  expect(mid).toBeLessThan(end - 50);
-  await expect(page.locator('.bs-release .bs-tear')).toHaveCount(1);
-  expect(await page.locator('.bs-release-in').evaluate((e) => getComputedStyle(e).rotate)).toBe('none');
-});
+// R109: 05 SHIP (the shipping label) is deleted - owner: "delete this frame, so awkward and ugly"
 
 test.describe('phone', () => {
   test.use((({ defaultBrowserType, ...d }) => d)(devices['Pixel 7']));
   test('every wire runs at right angles from the hub into its box, packets are square', async ({ page }) => {
     await home(page);
-    await playhead(page, 0.8); // 04 ORCHESTRATE, everything drawn
+    await playhead(page, 0.95); // 04 ORCHESTRATE, everything drawn
     const r = await page.evaluate(() => {
       const box = (e: Element) => e.getBoundingClientRect();
       const hub = box(document.querySelector('.bs-hub-core')!);

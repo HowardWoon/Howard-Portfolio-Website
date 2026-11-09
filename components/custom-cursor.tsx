@@ -276,7 +276,9 @@ export function CustomCursor() {
           data-cursor-mode={
             customText ? 'tag' : locked ? 'lock' : caret ? 'caret' : onCard ? 'target' : isPointer ? 'pointer' : 'idle'
           }
-          className={`fx-cursor absolute left-0 top-0 w-11 h-11 rounded-full border-[3px] flex items-center justify-center ${onDark || customText || locked || caret || onCard ? '' : 'mix-blend-multiply'}`}
+          // R108 (owner: "the part my cursor hovers becomes blur ... everything must be HD"): the ring never tints or
+          // blends what is under it - no fill, no mix-blend; a clickable thing gets a hard yellow offset shadow instead
+          className="fx-cursor absolute left-0 top-0 w-11 h-11 rounded-full border-[3px] flex items-center justify-center"
           animate={{
             scaleX: shape(snapW, 0.12),
             scaleY: shape(snapH, 0.62),
@@ -289,9 +291,9 @@ export function CustomCursor() {
                 ? ink
                 : locked || onCard
                   ? 'rgba(255,255,255,0)'
-                  : isPointer
-                    ? 'rgba(255,199,0,0.45)'
-                    : 'rgba(255,199,0,0)',
+                  : 'rgba(255,199,0,0)',
+            boxShadow:
+              isPointer && !customText && !caret && !locked && !onCard ? '4px 4px 0 0 #FFC700' : '0px 0px 0 0 #FFC700',
           }}
           transition={{ type: 'spring', stiffness: 420, damping: 30 }}
           style={{ translateX: '-50%', translateY: '-50%' }}

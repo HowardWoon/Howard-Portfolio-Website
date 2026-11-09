@@ -104,13 +104,13 @@ async function storyFit(page) {
     await page.waitForTimeout(300);
     return page.evaluate(() => {
       const hud = document.querySelector('.bs-progress').getBoundingClientRect().bottom;
-      const card = document.querySelector('.bs-release').getBoundingClientRect().top;
-      return card < hud - 1 ? [`still: release card ${Math.round(card)} under the HUD ${Math.round(hud)}`] : [];
+      const card = document.querySelector('.bs-diagram').getBoundingClientRect().top;
+      return card < hud - 1 ? [`still: system map ${Math.round(card)} under the HUD ${Math.round(hud)}`] : [];
     });
   }
   const out = [];
-  // PARSE, ORCHESTRATE, SHIP (R37: story times 0.34 / 0.75 / 0.96 on the longer crest-scan track)
-  for (const f of [0.26, 0.81, 0.97]) {
+  // PARSE, ORCHESTRATE (R109: 05 SHIP deleted; story times 0.34 / 0.75)
+  for (const f of [0.3, 0.95]) {
     await page.evaluate((y) => window.scrollTo(0, y), at.top + (at.len - vh) * f + 2);
     await page.waitForTimeout(900);
     out.push(
@@ -119,7 +119,7 @@ async function storyFit(page) {
         const hud = document.querySelector('.bs-progress').getBoundingClientRect().bottom;
         const cap = document.querySelector('.bs-captions');
         const floor = getComputedStyle(cap).display === 'none' ? innerHeight : cap.getBoundingClientRect().top;
-        const sel = f < 0.4 ? ['.bs-idcard', '.bs-code .bs-card'] : f < 0.85 ? ['.bs-diagram'] : ['.bs-release'];
+        const sel = f < 0.4 ? ['.bs-idcard', '.bs-code .bs-card'] : ['.bs-diagram'];
         for (const s of sel) {
           const r = document.querySelector(s).getBoundingClientRect();
           if (r.top < hud - 1) o.push(`${f}: ${s} top ${Math.round(r.top)} under the HUD ${Math.round(hud)}`);

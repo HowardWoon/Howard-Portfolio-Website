@@ -29,18 +29,18 @@ async function playhead(page: Page, p: number) {
 }
 
 /* ---------------------------------------------------------------- The Build */
-test('The Build scrubs with the scroll: five scenes forward, and the same frames on the way back', async ({ page }) => {
+test('The Build scrubs with the scroll: four scenes forward, and the same frames on the way back', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
   await expect(page.getByRole('heading', { name: /from student id to shipped system/i })).toHaveCount(1);
   const seen: string[] = [];
-  // R37: scene bounds on the playhead are 0.154 / 0.538 / 0.692 / 0.846 (the crest-scan gap of 0.30 lies in scene 02)
-  for (const p of [0, 0.1, 0.3, 0.6, 0.77, 0.9, 1]) {
+  // R109: scene bounds on the playhead are 0.182 / 0.636 / 0.818 (05 SHIP deleted; the crest-scan gap lies in 02)
+  for (const p of [0, 0.1, 0.3, 0.7, 0.9, 1]) {
     const r = await playhead(page, p);
     expect(Math.abs(r.p - p)).toBeLessThan(0.01);
     seen.push(r.scene!);
   }
-  expect(seen).toEqual(['0', '1', '2', '3', '4', '5', '5']);
+  expect(seen).toEqual(['0', '1', '2', '3', '4', '4']);
 
   // reversible: scrolling back up to 0.3 shows exactly the frame it showed on the way down
   const idAt = () =>
@@ -54,12 +54,6 @@ test('The Build scrubs with the scroll: five scenes forward, and the same frames
   const back = await playhead(page, 0.3);
   expect(back.scene).toBe('2');
   expect(await idAt()).toEqual(down);
-
-  // SHIP: the release card is shown, its CTA is live only now
-  await playhead(page, 1);
-  await expect(page.locator('.bs-cta')).toHaveCSS('pointer-events', 'auto');
-  await playhead(page, 0.5);
-  await expect(page.locator('.bs-cta')).toHaveCSS('pointer-events', 'none');
 });
 
 test('The Build is self-contained: no section id, dock / spine sections unchanged, only facts from the site', async ({
@@ -83,7 +77,7 @@ test('The Build is self-contained: no section id, dock / spine sections unchange
   expect(order[0]).toBeLessThan(order[1]);
   expect(order[1]).toBeLessThan(order[2]);
   // the storyboard is readable without the visuals
-  await expect(section.locator('ol.sr-only li')).toHaveCount(5);
+  await expect(section.locator('ol.sr-only li')).toHaveCount(4);
 });
 
 test('reduced motion: The Build is a still of the finished frame, nothing pinned', async ({ page }) => {
@@ -94,14 +88,14 @@ test('reduced motion: The Build is a still of the finished frame, nothing pinned
   await expect(track).toHaveAttribute('data-static', 'on');
   expect(await track.evaluate((e) => e.getBoundingClientRect().height)).toBeLessThan(1400);
   await expect(page.locator('.bs-stage')).toHaveCSS('position', 'relative');
-  await expect(page.locator('.bs-stage')).toHaveAttribute('data-scene', '5');
+  await expect(page.locator('.bs-stage')).toHaveAttribute('data-scene', '4');
 });
 
 test.describe('phone', () => {
   test.use((({ defaultBrowserType, ...d }) => d)(devices['Pixel 7']));
   test('The Build fits a phone: no overflow, ID and terminal do not overlap in PARSE', async ({ page }) => {
     await home(page);
-    await playhead(page, 0.27); // story time 0.35: PARSE, just before the crest-scan gap (R37: gap starts at 0.277)
+    await playhead(page, 0.318); // story time 0.35: PARSE, just before the crest-scan gap (R109: gap starts at 0.327)
     const [a, b] = await Promise.all([
       page.locator('.bs-idcard').boundingBox(),
       page.locator('.bs-code .bs-card').boundingBox(),

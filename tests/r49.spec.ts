@@ -380,11 +380,11 @@ test.describe('zoomed out: the layout keeps its proportions', () => {
       // The Build's last card and an Experience card, as a share of the window
       await page.evaluate(() => {
         const t = document.querySelector<HTMLElement>('.bs-section')!;
-        scrollTo(0, t.getBoundingClientRect().top + scrollY + (t.offsetHeight - innerHeight) * 0.97);
+        scrollTo(0, t.getBoundingClientRect().top + scrollY + (t.offsetHeight - innerHeight) * 0.995);
       });
       await page.waitForTimeout(1200);
       const card = await page.evaluate(() => {
-        const r = document.querySelector('.bs-release')!.getBoundingClientRect();
+        const r = document.querySelector('.bs-diagram')!.getBoundingClientRect(); // R109: the story ends on 04
         return { w: +(r.width / innerWidth).toFixed(2), inView: r.top >= 0 && r.bottom <= innerHeight };
       });
       const rail = await page.evaluate(() => {

@@ -1,29 +1,13 @@
-import { test, expect, devices, type Page } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 
 // Round 29 (docs/R29-GALLERY-AND-CREST-PLAN.md): the UM / KMNS crests are upright Issuer Seals beside their
 // institution's name (no spinning, glowing or watermark crests, never over a control), and the KMNS gallery is a
 // compact desk like the project galleries, with the photos' real shapes, a caption and a working filmstrip.
 
-const strip = (d: (typeof devices)[string]) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { defaultBrowserType, ...o } = d;
-  return o;
-};
-
 async function open(page: Page) {
   await page.context().addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
   await page.goto('/', { waitUntil: 'networkidle' });
-}
-
-async function storyAt(page: Page, f: number) {
-  const at = await page.evaluate(() => {
-    const s = document.querySelector<HTMLElement>('.bs-section')!;
-    return { top: s.getBoundingClientRect().top + scrollY, len: s.offsetHeight };
-  });
-  const vh = page.viewportSize()!.height;
-  await page.evaluate((y) => window.scrollTo(0, y), at.top + (at.len - vh) * f + 2);
-  await page.waitForTimeout(900);
 }
 
 test('source: no crest is rotated, spun, glowing or a faint watermark', () => {
@@ -49,37 +33,7 @@ test('source: no crest is rotated, spun, glowing or a faint watermark', () => {
   expect(seal).not.toMatch(/\brotate-|opacity-\[|drop-shadow/);
 });
 
-for (const [name, size] of [
-  ['phone', devices['iPhone 13']],
-  ['desktop', { viewport: { width: 1440, height: 900 } }],
-] as const) {
-  test.describe(`release card seal (${name})`, () => {
-    test.use('defaultBrowserType' in size ? strip(size) : size);
-    test(`the UM seal is upright, inside the card and clear of the CTA (${name})`, async ({ page }) => {
-      await open(page);
-      await storyAt(page, 0.97);
-      const r = await page.evaluate(() => {
-        const seal = document.querySelector('.bs-release [data-seal="um"]')!.getBoundingClientRect();
-        const cta = document.querySelector('.bs-release .bs-cta')!.getBoundingClientRect();
-        const card = document.querySelector('.bs-release')!.getBoundingClientRect();
-        const hit = (a: DOMRect, b: DOMRect) =>
-          a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
-        const t = getComputedStyle(document.querySelector('.bs-release .bs-crest')!).transform;
-        const m = t === 'none' ? new DOMMatrix() : new DOMMatrix(t);
-        return {
-          overlap: hit(seal, cta),
-          inside: seal.left >= card.left && seal.right <= card.right && seal.top >= card.top,
-          skew: Math.abs(m.b) + Math.abs(m.c),
-          ctaTop: document.elementFromPoint(cta.right - 12, cta.top + cta.height / 2)?.closest('.bs-cta') !== null,
-        };
-      });
-      expect(r.overlap).toBe(false);
-      expect(r.inside).toBe(true);
-      expect(r.skew).toBeLessThan(0.001); // never rotated
-      expect(r.ctaTop).toBe(true); // nothing covers the button's arrow end
-    });
-  });
-}
+// R109: 05 SHIP and its release card are deleted (owner: "delete this frame"); the seal tests went with it
 
 test.describe('KMNS gallery desk (1440)', () => {
   test.use({ viewport: { width: 1440, height: 900 } });

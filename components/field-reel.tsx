@@ -31,9 +31,10 @@ type Row =
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const clamp = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
-// the track scrolls from 0.49 to 0.86 of the playhead (same as .bs-reel-track's seg in CSS)
+// the track scrolls from 0.49 to 0.79 of the playhead (same as .bs-reel-track's seg in CSS). R109: it ended at 0.86,
+// inside the deleted 05 SHIP; the story now ends at 0.80, so the film reaches its last frame just before the end
 const A = 0.49;
-const B = 0.86;
+const B = 0.79;
 
 export function FieldReel({
   items,

@@ -26,8 +26,8 @@ async function playhead(page: Page, p: number) {
   await page.waitForTimeout(900);
 }
 
-// R37: gap in story time = [0.36, 0.66] of 1.30 -> playhead [0.2769, 0.5077] (lib/story-progress.ts STORY_GAP 0.30)
-const gap = (f: number) => (0.36 + f * 0.3) / 1.3;
+// R109: gap in story time = [0.36, 0.66] of 1.10 -> playhead [0.327, 0.6] (lib/story-progress.ts, 05 SHIP deleted)
+const gap = (f: number) => (0.36 + f * 0.3) / 1.1;
 
 for (const [w, h] of [
   [1536, 730],
@@ -219,7 +219,7 @@ test.describe('orchestrate HUD (1920)', () => {
   // R90: the radar and the range rings are gone (the owner's "dark dashboard"); the printed readout stays
   test('the system readout is on the diagram, with no radar or range rings', async ({ page }) => {
     await open(page, '/?fxtier=full');
-    await playhead(page, (0.72 + 0.3) / 1.3); // story time 0.72 (lib/story-progress.ts storyTime)
+    await playhead(page, (0.72 + 0.3) / 1.1); // story time 0.72 (lib/story-progress.ts storyTime)
     const r = await page.evaluate(() => ({
       readout: document.querySelector('.bs-hud-readout')!.textContent?.replace(/\s+/g, ' ').trim(),
       radar: document.querySelectorAll('.bs-hud-radar, .bs-hud-rings').length,

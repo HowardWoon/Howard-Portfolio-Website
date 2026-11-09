@@ -72,13 +72,13 @@ export function OrganiserPlate({
   return (
     <div
       data-organiser={id}
-      className={`org-card flex w-full min-w-0 items-center gap-3 rounded-xl border-3 border-ink p-2.5 shadow-brutal-sm xs:gap-4 xs:p-3 ${
+      className={`org-card flex h-[6.5rem] w-full min-w-0 items-center gap-2.5 rounded-xl border-3 border-ink p-2 sm:h-[6rem] shadow-brutal-sm xs:gap-4 xs:p-3 ${
         signal ? SIGNAL[signal].soft : 'bg-white'
       }`}
     >
       <span
         data-org-logo
-        className="relative grid h-14 w-24 shrink-0 place-items-center rounded-lg border-2 border-ink bg-white xs:h-16 xs:w-32"
+        className="relative grid h-11 w-16 shrink-0 place-items-center rounded-lg border-2 border-ink bg-white xs:h-14 xs:w-24 sm:h-16 sm:w-32"
       >
         {o.dark ? (
           <span className="relative h-[78%] aspect-square rounded-[6px] bg-ink">
@@ -92,7 +92,10 @@ export function OrganiserPlate({
         <span className="rounded-md bg-ink px-2 py-0.5 font-mono text-xs font-extrabold tracking-[0.16em] text-white">
           HOSTED BY
         </span>
-        <span data-org-name className="min-w-0 font-display text-base font-extrabold leading-tight text-ink sm:text-lg">
+        <span
+          data-org-name
+          className="min-w-0 font-display text-sm font-extrabold leading-tight text-ink xs:text-base sm:text-lg"
+        >
           {o.name}
         </span>
       </span>

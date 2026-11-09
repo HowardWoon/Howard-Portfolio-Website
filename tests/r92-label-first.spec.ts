@@ -85,7 +85,20 @@ for (const width of [390, 1440]) {
     await more.evaluate((e) => e.scrollIntoView({ block: 'center' }));
     await expect.poll(() => reactLive(more)).toBe(true);
     await expect(more).toHaveAttribute('aria-expanded', 'false');
-    const before = (await more.boundingBox())!.y;
+    // R110: measured against its own block (the text opens below the key); a page shift above the block (a late font
+    // or photo under CI load) is not this key's doing
+    const rel = async () => (await more.boundingBox())!.y - (await block.boundingBox())!.y;
+    // the section's entrance (a stepped rise) may still be playing under load: measure once the key stands still
+    let last = NaN;
+    await expect
+      .poll(async () => {
+        const v = await rel();
+        const still = Math.abs(v - last) < 0.5;
+        last = v;
+        return still;
+      })
+      .toBe(true);
+    const before = await rel();
     await more.focus();
     await page.keyboard.press('Enter');
     await expect(more).toHaveAttribute('aria-expanded', 'true');
@@ -93,7 +106,7 @@ for (const width of [390, 1440]) {
     await expect(full).not.toHaveClass(/sr-only/);
     await expect(full).not.toBeEmpty();
     // the key did not move (the text opens below it)
-    expect(Math.abs((await more.boundingBox())!.y - before)).toBeLessThan(2);
+    expect(Math.abs((await rel()) - before)).toBeLessThan(2);
     const size = await more.boundingBox();
     expect(size!.height).toBeGreaterThanOrEqual(44);
     await more.click();

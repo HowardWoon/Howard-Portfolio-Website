@@ -29,7 +29,7 @@ async function fitProblems(page: Page, f: number) {
     const hud = document.querySelector('.bs-progress')!.getBoundingClientRect().bottom;
     const cap = document.querySelector<HTMLElement>('.bs-captions')!;
     const floor = getComputedStyle(cap).display === 'none' ? innerHeight : cap.getBoundingClientRect().top;
-    const sel = f < 0.4 ? ['.bs-idcard', '.bs-code .bs-card'] : f < 0.85 ? ['.bs-diagram'] : ['.bs-release'];
+    const sel = f < 0.4 ? ['.bs-idcard', '.bs-code .bs-card'] : ['.bs-diagram'];
     for (const s of sel) {
       const r = document.querySelector(s)!.getBoundingClientRect();
       if (r.top < hud - 1) out.push(`${s} top ${Math.round(r.top)} is under the HUD (${Math.round(hud)})`);
@@ -53,8 +53,8 @@ for (const name of ['iPhone SE', 'iPhone 13', 'Pixel 7', 'iPad Mini'] as const) 
     test(`settled scenes stay between the HUD and the captions (${name})`, async ({ page, context }) => {
       await context.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
       await page.goto('/', { waitUntil: 'networkidle' });
-      // PARSE, ORCHESTRATE, SHIP (R37: story times 0.34 / 0.75 / 0.96 on the longer track)
-      for (const f of [0.26, 0.81, 0.97]) expect(await fitProblems(page, f), `at ${f}`).toEqual([]);
+      // PARSE, ORCHESTRATE (R109: 05 SHIP deleted; story times 0.34 / 0.75)
+      for (const f of [0.3, 0.95]) expect(await fitProblems(page, f), `at ${f}`).toEqual([]);
     });
   });
 }
@@ -67,7 +67,7 @@ test.describe('landscape phone', () => {
     await expect(page.locator('.bs-track')).toHaveAttribute('data-static', 'on');
     const r = await page.evaluate(() => ({
       hud: document.querySelector('.bs-progress')!.getBoundingClientRect().bottom,
-      card: document.querySelector('.bs-release')!.getBoundingClientRect().top,
+      card: document.querySelector('.bs-diagram')!.getBoundingClientRect().top,
     }));
     expect(r.card).toBeGreaterThanOrEqual(r.hud);
   });
@@ -94,10 +94,13 @@ test.describe('touch phone scrolls natively (B7)', () => {
 
 test.describe('desktop field reels', () => {
   test.use({ viewport: { width: 1920, height: 940 } });
-  test('projector gate, counter, chapter and loupe; the reels leave in scene 05', async ({ page, context }) => {
+  test('projector gate, counter, chapter and loupe; the reels stay to the end of the story', async ({
+    page,
+    context,
+  }) => {
     await context.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
     await page.goto('/?fxtier=full', { waitUntil: 'networkidle' });
-    await storyAt(page, 0.78); // story time 0.71 (R37: playhead = (s + 0.30) / 1.30)
+    await storyAt(page, 0.92); // story time 0.71 (R109: playhead = (s + 0.30) / 1.10)
     const reels = page.locator('.bs-reel:visible');
     await expect(reels).toHaveCount(2);
     for (let i = 0; i < 2; i++) {
@@ -108,7 +111,7 @@ test.describe('desktop field reels', () => {
     }
     // the gate follows the playhead
     const before = await reels.first().locator('.bs-reel-count').getAttribute('data-text');
-    await storyAt(page, 0.66); // story time 0.55
+    await storyAt(page, 0.77); // story time 0.55
     await expect.poll(() => reels.first().locator('.bs-reel-count').getAttribute('data-text')).not.toBe(before);
     // loupe on the gated frame, gone when the pointer leaves
     const gated = reels.first().locator('.bs-reel-frame.is-gate');
@@ -120,13 +123,13 @@ test.describe('desktop field reels', () => {
       await page.mouse.move(960, 470);
       await expect(page.locator('.bs-reel-loupe')).toHaveCount(0);
     }
-    // scene 05: the reels slide out instead of lingering behind the release card
-    await storyAt(page, 0.97);
+    // R109: 05 SHIP is gone - the story ends on 04, the reels stay beside the system map to the last frame
+    await storyAt(page, 0.99);
     const op = await page.locator('.bs-reel-exit').evaluateAll((es) => es.map((e) => +getComputedStyle(e).opacity));
-    expect(Math.max(...op)).toBeLessThan(0.05);
+    expect(Math.min(...op)).toBeGreaterThan(0.95);
   });
 
-  test('the faded title card no longer catches the pointer in scenes 01-05', async ({ page, context }) => {
+  test('the faded title card no longer catches the pointer in scenes 01-04', async ({ page, context }) => {
     await context.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
     await page.goto('/', { waitUntil: 'networkidle' });
     await storyAt(page, 0.5);

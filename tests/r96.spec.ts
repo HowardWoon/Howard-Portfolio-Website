@@ -46,7 +46,7 @@ for (const [name, w, h] of [
   }) => {
     await page.setViewportSize({ width: w, height: h });
     await home(page);
-    await buildAt(page, 0.19);
+    await buildAt(page, 0.225); // R109: story times x 1.30 / 1.10
     const card = page.locator('.bs-matric');
     for (const line of [
       'UNIVERSITI',
@@ -76,7 +76,7 @@ for (const [name, w, h] of [
 test('desktop: the parked card is a whole label under the HUD (scene 03)', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
-  await buildAt(page, 0.6);
+  await buildAt(page, 0.71);
   const card = (await page.locator('.bs-idcard').boundingBox())!;
   const hud = (await page.locator('.bs-progress').boundingBox())!;
   expect(card.y).toBeGreaterThanOrEqual(hud.y + hud.height);

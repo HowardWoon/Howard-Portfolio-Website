@@ -695,7 +695,7 @@ export default function HonorsSection() {
                 data-honor-wall
                 className={
                   activeItems.length > 2
-                    ? 'columns-1 md:columns-2 xl:columns-3 gap-7'
+                    ? 'columns-1 lg:columns-2 xl:columns-3 gap-7'
                     : 'grid grid-cols-1 lg:grid-cols-2 items-start gap-7'
                 }
               >
@@ -763,7 +763,9 @@ export default function HonorsSection() {
                         {/* Title & Body. R30: an institution's own award carries its Registrar Seal beside the title
                             (above it on phones, where the title needs the full width) */}
                         <div
-                          className={`flex gap-4 justify-between items-start mb-4 ${SEAL[item.id] || orgLogoFor(item.issuingBody) ? 'flex-col-reverse sm:flex-row' : ''}`}
+                          // R106: in the ticket wall a column is narrow - the seal / logo always stands above the title (beside it, it
+                          // squeezed the title to 84 px and split its words)
+                          className={`flex gap-4 justify-between items-start mb-4 ${SEAL[item.id] || orgLogoFor(item.issuingBody) ? 'flex-col-reverse' : ''}`}
                         >
                           <div className="min-w-0 space-y-2">
                             <h3 className="font-display text-2xl font-extrabold uppercase tracking-[-0.02em] leading-[1.05] text-ink">

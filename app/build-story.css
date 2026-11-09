@@ -311,49 +311,7 @@
 }
 
 /* ---- 05 SHIP: a shipping label slams down from above, dips at the hit */
-.bs-section .bs-release-in {
-  /* the label's grid row can be taller than the layer on a short phone (it is scaled by --fit-rel): centre the row in
-     the band between the HUD and the bottom, instead of starting it at the top padding (tests/r28 iPhone SE) */
-  align-content: center;
-  opacity: min(1, calc(var(--t) * 4));
-  transform: translate3d(0, calc((1 - var(--e)) * -70vh), 0) scale(calc(1 + (1 - var(--e)) * 0.12));
-}
-.bs-section .bs-release {
-  border-radius: 8px;
-  box-shadow: 10px 10px 0 0 var(--ink);
-}
-.bs-section .bs-release-press {
-  transform: translate3d(0, calc(var(--t) * (1 - var(--t)) * 40px), 0);
-}
 /* the tear line under the header, with a punched notch at each end */
-.bs-section .bs-tear {
-  position: relative;
-  height: 0;
-  border-top: 3px dashed var(--ink);
-  /* it takes no height (the phone fit measures the card, tests/r28 iPhone SE); translate drops it under the header */
-  margin: 0 14px -3px;
-  translate: 0 7px;
-}
-.bs-section .bs-tear::before,
-.bs-section .bs-tear::after {
-  content: '';
-  position: absolute;
-  top: -12px;
-  width: 20px;
-  height: 20px;
-  border: 3px solid var(--ink);
-  border-radius: 50%;
-  background: var(--paper);
-}
-.bs-section .bs-tear::before {
-  left: -28px;
-}
-.bs-section .bs-tear::after {
-  right: -28px;
-}
-.bs-section .bs-award {
-  border-radius: 4px;
-}
 
 /* ---- Field reels: ink contact strips (same photos, order, loupe) */
 @media (min-width: 1024px) and (min-height: 640px) {
