@@ -36,7 +36,7 @@ export default async function MessagesPage() {
 
   return (
     <section className="space-y-6">
-      <div className="glass-panel rounded-[2rem] p-6 sm:p-8">
+      <div className="glass-panel rounded-2xl p-6 sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="muted-label mb-2">Inbox</p>
@@ -53,14 +53,14 @@ export default async function MessagesPage() {
 
       <div className="grid gap-4">
         {messages.length === 0 ? (
-          <div className="glass-panel rounded-[2rem] p-8 text-center text-fog-500">
+          <div className="glass-panel rounded-2xl p-8 text-center text-fog-500">
             {error ? 'Failed to load messages or Supabase is not configured.' : 'No contact submissions yet.'}
           </div>
         ) : (
           messages.map((message) => (
             <article
               key={message.id}
-              className={`glass-panel rounded-[2rem] p-6 sm:p-7 transition-all ${!message.is_read ? 'border-amber-500/30 bg-[#0E121B]' : 'opacity-80'}`}
+              className={`glass-panel rounded-2xl p-6 sm:p-7 transition-all ${!message.is_read ? 'border-amber-500/30 bg-[#0E121B]' : 'opacity-80'}`}
             >
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>

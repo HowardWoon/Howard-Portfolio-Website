@@ -68,9 +68,9 @@ export function ControlDeck({
         aria-modal="true"
         aria-label="Control deck"
         data-control-deck
-        className="relative max-h-[calc(100dvh-0.5rem)] w-full max-w-md overflow-y-auto overscroll-contain rounded-t-[28px] border-3 border-b-0 border-ink bg-paper-cream pb-[max(1rem,var(--safe-bottom))] pl-[var(--safe-left)] pr-[var(--safe-right)] shadow-brutal-lg sm:mb-6 sm:rounded-[28px] sm:border-b-3 sm:pb-4 landscape-short:mb-2 landscape-short:max-w-2xl"
+        className="relative max-h-[calc(100dvh-0.5rem)] w-full max-w-md overflow-y-auto overscroll-contain rounded-t-2xl border-3 border-b-0 border-ink bg-paper-cream pb-[max(1rem,var(--safe-bottom))] pl-[var(--safe-left)] pr-[var(--safe-right)] shadow-brutal-lg sm:mb-6 sm:rounded-2xl sm:border-b-3 sm:pb-4 landscape-short:mb-2 landscape-short:max-w-2xl"
       >
-        <div className="nb-hatch flex items-center justify-between gap-3 rounded-t-[25px] border-b-3 border-ink bg-paper-deep px-4 py-3">
+        <div className="nb-hatch flex items-center justify-between gap-3 rounded-t-2xl border-b-3 border-ink bg-paper-deep px-4 py-3">
           <span className="font-mono text-xs font-extrabold uppercase tracking-[0.14em] text-ink">CONTROL DECK</span>
           <button
             type="button"

@@ -84,11 +84,22 @@ const config: Config = {
         brutal: '5px 5px 0 0 #0A0A0A',
         'brutal-lg': '8px 8px 0 0 #0A0A0A',
         'brutal-xl': '12px 12px 0 0 #0A0A0A',
-        clay: 'inset 3px 3px 6px rgba(255,255,255,0.65), inset -4px -4px 8px rgba(0,0,0,0.18), 3px 3px 0 0 #0A0A0A',
-        'clay-pressed': 'inset 4px 4px 8px rgba(0,0,0,0.22), inset -2px -2px 6px rgba(255,255,255,0.5)',
+        // R100 (docs/R100-SYSTEM.md): the "clay" keys were a blurred inset glow (law 5: no soft shadows). They are now the
+        // one hard key shadow - 4 px of ink at rest, gone when pressed (the key sinks into it)
+        clay: '4px 4px 0 0 #0A0A0A',
+        'clay-pressed': '0 0 0 0 #0A0A0A',
       },
       borderWidth: {
         3: '3px',
+      },
+      // R100: one radius scale - controls 6 px, containers at most 12 px (the old scale ran to 24 px and pages used
+      // 18 - 44 px one-offs); rounded-full stays for true circles (dots, avatars, round icon keys)
+      borderRadius: {
+        md: '6px',
+        lg: '8px',
+        xl: '10px',
+        '2xl': '12px',
+        '3xl': '12px',
       },
       keyframes: {
         'spin-slow': {

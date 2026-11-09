@@ -482,7 +482,7 @@ function CertificateModal({ url, onClose }: { url: string; onClose: () => void }
         transition={FX.documentSettle ? { ...SPRING_STAMP, opacity: { duration: 0.2 } } : undefined}
         style={{ transformOrigin: '50% 0%' }}
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-5xl mx-auto flex-1 min-h-0 bg-white rounded-[18px] sm:rounded-[22px] border-3 border-ink shadow-brutal-lg sm:shadow-brutal-xl flex items-center justify-center p-2 sm:p-3"
+        className="relative w-full max-w-5xl mx-auto flex-1 min-h-0 bg-white rounded-2xl sm:rounded-2xl border-3 border-ink shadow-brutal-lg sm:shadow-brutal-xl flex items-center justify-center p-2 sm:p-3"
       >
         <span className="tape w-24 sm:w-32 h-6 sm:h-7" aria-hidden />
         {isPdf ? (
@@ -612,7 +612,7 @@ export default function HonorsSection() {
         {/* R26: the colour key and the certificate deck (CardSwap + PixelTransition, after React Bits) side by side */}
         <div className="flex flex-col items-start gap-8 lg:flex-row lg:justify-between">
           <div className="flex w-full flex-col gap-6 lg:w-fit">
-            <SignalKey only={['podium', 'qualifier', 'academic']} className="w-fit max-w-full" />
+            <SignalKey strip only={['podium', 'qualifier', 'academic']} className="w-fit max-w-full" />
             {/* R31: the pixel trophy + one block per honour, per category (counts already on the keys below) */}
             <HonorsTally
               rows={categories.map((c) => ({ id: c.id, label: c.label, count: c.count, fill: c.fill }))}
@@ -636,7 +636,7 @@ export default function HonorsSection() {
                 data-honor-category
                 data-fx-stamp-target
                 onClick={() => pick(isActive ? null : cat.id)}
-                className={`fx-rise group relative w-full flex flex-col items-start text-left p-6 rounded-[26px] border-3 border-ink transition-[transform,box-shadow,background-color] duration-150 ${
+                className={`fx-rise group relative w-full flex flex-col items-start text-left p-6 rounded-2xl border-3 border-ink transition-[transform,box-shadow,background-color] duration-150 ${
                   isActive
                     ? `${cat.fill} shadow-clay-pressed translate-x-[3px] translate-y-[3px]`
                     : 'bg-white shadow-clay hover:-translate-y-1'
@@ -723,7 +723,7 @@ export default function HonorsSection() {
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.4, delay: itemIdx * 0.08 }}
-                      className={`relative group rounded-[28px] border-3 border-ink bg-white overflow-hidden flex flex-col ${span} ${activeItems.length > 2 ? 'h-full' : ''} transition-[transform,box-shadow] duration-200 hover:-translate-x-1 hover:-translate-y-1 ${
+                      className={`relative group rounded-2xl border-3 border-ink bg-white overflow-hidden flex flex-col ${span} ${activeItems.length > 2 ? 'h-full' : ''} transition-[transform,box-shadow] duration-200 hover:-translate-x-1 hover:-translate-y-1 ${
                         isFeatured
                           ? `shadow-brutal-lg hover:shadow-brutal-xl ${FX.podiumGlint ? 'fx-glint' : ''}`
                           : 'shadow-brutal hover:shadow-brutal-lg'

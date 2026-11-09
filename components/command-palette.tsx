@@ -160,7 +160,7 @@ export function CommandPalette() {
 
             <Command
               label="Command Palette"
-              className="relative w-full max-w-[560px] bg-white rounded-[22px] border-3 border-ink shadow-brutal-xl overflow-hidden flex flex-col font-sans"
+              className="relative w-full max-w-[560px] bg-white rounded-2xl border-3 border-ink shadow-brutal-xl overflow-hidden flex flex-col font-sans"
               shouldFilter={true}
             >
               <div className="flex items-center border-b-3 border-ink px-4 py-3.5 bg-paper-cream">

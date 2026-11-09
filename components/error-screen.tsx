@@ -45,7 +45,7 @@ export function ErrorScreen({
     >
       <div
         role="alert"
-        className="w-full max-w-md overflow-hidden rounded-[22px] border-3 border-ink bg-white shadow-brutal"
+        className="w-full max-w-md overflow-hidden rounded-2xl border-3 border-ink bg-white shadow-brutal"
       >
         <div className="flex items-center justify-between gap-3 border-b-3 border-ink bg-pop-red px-4 py-2">
           <span className="font-mono text-xs font-extrabold tracking-[0.14em] text-ink">{code}</span>

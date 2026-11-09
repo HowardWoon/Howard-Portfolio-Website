@@ -63,7 +63,7 @@ export function SiteFooter() {
         {/* Left: System of Record / Title Block (blueprint-style drawing frame) */}
         <div
           data-tear-frame
-          className="flex-1 w-full border-3 border-white rounded-[22px] overflow-hidden flex flex-col relative bg-ink shadow-[5px_5px_0_0_#FFFFFF] sm:shadow-[8px_8px_0_0_#FFFFFF]"
+          className="flex-1 w-full border-3 border-white rounded-2xl overflow-hidden flex flex-col relative bg-ink shadow-[5px_5px_0_0_#FFFFFF] sm:shadow-[8px_8px_0_0_#FFFFFF]"
         >
           {/* Header Bar */}
           <div className="flex flex-wrap items-center justify-between border-b-3 border-white bg-white/[0.04] px-6 py-5 gap-4">

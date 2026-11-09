@@ -86,7 +86,7 @@ export function ProofTray() {
         data-proof-tray
         className="fixed z-[9100] left-[max(1rem,var(--safe-left))] right-[max(1rem,var(--safe-right))] bottom-[calc(max(1rem,var(--safe-bottom))+4.5rem)] sm:right-auto sm:w-[min(26rem,calc(100%-2rem))] lg:bottom-[max(1rem,var(--safe-bottom))] flex max-h-[calc(100dvh-var(--header-h,5rem)-6rem)] flex-col rounded-2xl border-3 border-ink bg-paper-cream shadow-brutal landscape-short:bottom-[max(0.5rem,var(--safe-bottom))] landscape-short:!w-[min(40rem,calc(100%-2rem))] landscape-short:max-h-[calc(100dvh-var(--header-h,4rem)-1.5rem)]"
       >
-        <div className="nb-hatch flex items-center justify-between gap-2 rounded-t-[13px] border-b-3 border-ink bg-paper-deep px-3 py-1.5">
+        <div className="nb-hatch flex items-center justify-between gap-2 rounded-t-[9px] border-b-3 border-ink bg-paper-deep px-3 py-1.5">
           <button
             type="button"
             aria-expanded={open}
@@ -211,9 +211,9 @@ function SpecSheet({ a, b, onClose }: { a: PinFacts; b: PinFacts; onClose: () =>
         aria-modal="true"
         aria-label={`Spec sheet: ${a.title} and ${b.title}`}
         data-spec-sheet
-        className="relative flex max-h-[calc(100dvh-0.5rem)] w-full max-w-4xl flex-col rounded-t-[28px] border-3 border-b-0 border-ink bg-paper-cream pb-[var(--safe-bottom)] shadow-brutal-lg sm:max-h-[calc(100dvh-3rem)] sm:rounded-[28px] sm:border-b-3"
+        className="relative flex max-h-[calc(100dvh-0.5rem)] w-full max-w-4xl flex-col rounded-t-2xl border-3 border-b-0 border-ink bg-paper-cream pb-[var(--safe-bottom)] shadow-brutal-lg sm:max-h-[calc(100dvh-3rem)] sm:rounded-2xl sm:border-b-3"
       >
-        <div className="nb-hatch flex items-center justify-between gap-3 rounded-t-[25px] border-b-3 border-ink bg-paper-deep px-4 py-3">
+        <div className="nb-hatch flex items-center justify-between gap-3 rounded-t-2xl border-b-3 border-ink bg-paper-deep px-4 py-3">
           <span className="font-mono text-xs font-extrabold uppercase tracking-[0.14em] text-ink">
             SPEC SHEET · COMPARE
           </span>

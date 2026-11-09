@@ -296,12 +296,12 @@ export default function BikebearHero() {
               <TiltCard
                 maxTilt={6}
                 glare
-                glareRadius="rounded-[28px] xs:rounded-[36px] sm:rounded-[44px]"
+                glareRadius="rounded-2xl xs:rounded-2xl sm:rounded-2xl"
                 className="w-full max-w-[350px] sm:w-auto sm:max-w-none"
               >
                 <div
                   data-xray
-                  className="hero-photo relative w-full max-w-[350px] sm:max-w-none sm:w-[460px] lg:w-[460px] xl:w-[520px] aspect-[5/6] xs:aspect-[6/7] sm:aspect-auto sm:h-[560px] lg:h-[600px] xl:h-[660px] rounded-[28px] xs:rounded-[36px] sm:rounded-[44px] border-3 border-ink bg-pop-yellow overflow-hidden shadow-brutal-lg sm:shadow-brutal-xl fx-shadow-follow transition-colors duration-300 hover:border-pop-red pointer-events-auto cursor-crosshair"
+                  className="hero-photo relative w-full max-w-[350px] sm:max-w-none sm:w-[460px] lg:w-[460px] xl:w-[520px] aspect-[5/6] xs:aspect-[6/7] sm:aspect-auto sm:h-[560px] lg:h-[600px] xl:h-[660px] rounded-2xl xs:rounded-2xl sm:rounded-2xl border-3 border-ink bg-pop-yellow overflow-hidden shadow-brutal-lg sm:shadow-brutal-xl fx-shadow-follow transition-colors duration-300 hover:border-pop-red pointer-events-auto cursor-crosshair"
                 >
                   <Image
                     src="/images/howard-solid.jpeg"

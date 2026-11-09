@@ -321,10 +321,10 @@ html[data-motion='calm'] *::after {
 
   /* ===== NEO-BRUTALIST SURFACES ===== */
   .nb-card {
-    @apply relative bg-white border-3 border-ink rounded-[22px] shadow-brutal;
+    @apply relative bg-white border-3 border-ink rounded-2xl shadow-brutal;
   }
   .nb-card-lg {
-    @apply relative bg-white border-3 border-ink rounded-[28px] shadow-brutal-lg;
+    @apply relative bg-white border-3 border-ink rounded-2xl shadow-brutal-lg;
   }
   .nb-lift {
     @apply transition-[transform,box-shadow] duration-200 ease-out hover:-translate-x-1 hover:-translate-y-1 hover:shadow-brutal-xl;
@@ -353,7 +353,8 @@ html[data-motion='calm'] *::after {
 
   /* ===== CLAY / TACTILE CONTROLS ===== */
   .nb-btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border-3 border-ink px-6 py-3 font-mono text-xs font-extrabold uppercase tracking-[0.1em] text-ink text-center max-w-full shadow-clay transition-[transform,box-shadow,background-color] duration-150 ease-out hover:-translate-y-0.5 hover:shadow-[inset_3px_3px_6px_rgba(255,255,255,0.65),inset_-4px_-4px_8px_rgba(0,0,0,0.18),5px_5px_0_0_#0A0A0A] active:translate-x-[3px] active:translate-y-[3px] active:shadow-clay-pressed disabled:opacity-60 disabled:pointer-events-none;
+    /* R100: a key, not a pill - 6 px corners, a hard 4 px ink shadow; hover lifts it to 6 px, a press sinks it flat */
+    @apply inline-flex items-center justify-center gap-2 rounded-md border-3 border-ink px-6 py-3 font-mono text-xs font-extrabold uppercase tracking-[0.1em] text-ink text-center max-w-full shadow-clay transition-[transform,box-shadow,background-color] duration-150 ease-out hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0_0_#0A0A0A] active:translate-x-[4px] active:translate-y-[4px] active:shadow-clay-pressed disabled:opacity-60 disabled:pointer-events-none;
   }
   /* FX-28 text roll (see components/fx/text-roll.tsx) */
   .fx-roll {
@@ -415,7 +416,7 @@ html[data-motion='calm'] *::after {
   }
 
   .nb-chip {
-    @apply inline-flex items-center gap-1.5 rounded-full border-2 border-ink bg-white px-3 py-1 font-mono text-xs font-semibold text-ink max-w-full [overflow-wrap:anywhere];
+    @apply inline-flex items-center gap-1.5 rounded-md border-2 border-ink bg-white px-3 py-1 font-mono text-xs font-semibold text-ink max-w-full [overflow-wrap:anywhere];
   }
   .nb-tag {
     @apply inline-flex items-center gap-1.5 rounded-md border-2 border-ink px-2.5 py-1 font-mono text-xs font-bold uppercase tracking-[0.08em] text-ink max-w-full [overflow-wrap:anywhere];
@@ -605,7 +606,7 @@ html[data-motion='calm'] *::after {
      Open: the column becomes a fixed-height drafting stage; the model (.bp-fit > .fx-stack > .fx-layer plates)
      is driven by inline transforms written in rAF, so the CSS only styles plates and chrome. */
   .fx-blueprint {
-    border-radius: 20px;
+    border-radius: 12px; /* R100: containers at most 12 px */
     transition: background-color 0.5s ease;
   }
   .fx-blueprint[data-open='true'] {
@@ -631,7 +632,7 @@ html[data-motion='calm'] *::after {
   /* full-screen sheet: page scroll is locked, so one-finger drags orbit in both axes */
   .fx-blueprint[data-open='true'][data-sheet] {
     touch-action: none;
-    border-radius: 16px;
+    border-radius: 12px; /* R100: containers at most 12 px */
   }
   .fx-blueprint[data-open='true'][data-tool='pan'] {
     touch-action: none;
@@ -2054,7 +2055,7 @@ html.fx-portal .fx-sim-screen {
 ::view-transition-group(sim-screen) {
   animation-duration: 560ms;
   animation-timing-function: var(--ease-soft);
-  border-radius: 24px;
+  border-radius: 12px; /* R100: containers at most 12 px */
   overflow: clip;
 }
 ::view-transition-old(sim-screen),
@@ -2083,7 +2084,7 @@ html.fx-portal::view-transition-new(root) {
 .fx-portal-home {
   outline: 4px solid var(--pop-blue);
   outline-offset: 8px;
-  border-radius: 34px;
+  border-radius: 12px; /* R100: containers at most 12 px */
 }
 
 /* FX-87 Directional Ink (header nav): the underline grows from the side the mouse entered and leaves the way it
@@ -3018,7 +3019,7 @@ html[data-xray-mode]
   text-align: center;
   padding: 12px 16px;
   border: 3px solid var(--ink);
-  border-radius: 18px;
+  border-radius: 12px; /* R100: containers at most 12 px */
   background: #fff;
   color: var(--ink);
   box-shadow: 6px 6px 0 0 #b8a4ff;
@@ -3029,7 +3030,7 @@ html[data-xray-mode]
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: 15px;
+  border-radius: 12px; /* R100: containers at most 12 px */
   background: #b8a4ff;
   opacity: var(--t);
 }
@@ -3038,7 +3039,7 @@ html[data-xray-mode]
   position: absolute;
   inset: -10px;
   border: 3px solid #b8a4ff;
-  border-radius: 24px;
+  border-radius: 12px; /* R100: containers at most 12 px */
   opacity: calc(var(--t) * (1 - var(--t)) * 4);
   transform: scale(calc(1 + var(--t) * 0.35));
 }
@@ -3052,7 +3053,7 @@ html[data-xray-mode]
   max-width: 30cqw;
   padding: 16px 12px 8px;
   border: 3px solid var(--ink);
-  border-radius: 14px;
+  border-radius: 12px; /* R100: containers at most 12 px */
   background: #fff;
   color: var(--ink);
   box-shadow: 5px 5px 0 0 var(--pop-blue);
@@ -3510,11 +3511,11 @@ html[data-xray-mode]
   }
   html:not([data-fx-tier='lite']) .bs-track:not([data-static]) .bs-node > .bs-plate,
   html:not([data-fx-tier='lite']) .bs-track:not([data-static]) .bs-node > .bs-socket {
-    border-radius: 14px;
+    border-radius: 12px; /* R100: containers at most 12 px */
   }
   html:not([data-fx-tier='lite']) .bs-track:not([data-static]) .bs-hub > .bs-plate,
   html:not([data-fx-tier='lite']) .bs-track:not([data-static]) .bs-hub > .bs-socket {
-    border-radius: 18px;
+    border-radius: 12px; /* R100: containers at most 12 px */
   }
   /* the block's own thickness: an ink slab just under the card face */
   html:not([data-fx-tier='lite']) .bs-track:not([data-static]) .bs-plate {
@@ -3714,7 +3715,7 @@ html[data-motion='calm'] .honors-tally .tally-trophy g:first-child {
   aspect-ratio: 1;
   padding: 7%;
   border: 3px solid var(--ink);
-  border-radius: 22px;
+  border-radius: 12px; /* R100: containers at most 12 px */
   background: #fff;
   box-shadow: 8px 8px 0 0 var(--ink);
 }
@@ -4189,7 +4190,7 @@ html[data-motion='calm'] .honors-tally .tally-trophy g:first-child {
   flex-direction: column;
   overflow: hidden;
   border: 3px solid var(--ink);
-  border-radius: 16px;
+  border-radius: 12px; /* R100: containers at most 12 px */
   background: #fff;
   box-shadow: 5px 5px 0 0 var(--ink);
   text-align: left;

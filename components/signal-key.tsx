@@ -9,16 +9,45 @@ import { SIGNAL, type Signal } from '@/lib/signal';
  * (lib/signal.ts). Columns: phones 1 (up to 3 keys) or 2, tablets up to 4, desktop one row (6-7 keys: from 1280 px).
  */
 /** `compact` (the footer colophon): no hex line, so the footer stays under 85 % of a 900 px screen (FX-83 reveal) */
+/**
+ * `strip` (R100, docs/R100-SYSTEM.md): the key a SECTION carries - one ink KEY stub and a wrapping row of chips (swatch,
+ * label, meaning word for word), about 40 px tall instead of the ~180 px table, which three sections used to repeat
+ * before their content. The full table stays in the footer colophon.
+ */
 export function SignalKey({
   only,
   className = '',
   compact = false,
+  strip = false,
 }: {
   only?: Signal[];
   className?: string;
   compact?: boolean;
+  strip?: boolean;
 }) {
   const keys = only ?? (Object.keys(SIGNAL) as Signal[]);
+  if (strip)
+    return (
+      <div
+        role="group"
+        aria-label="Signal key: what each colour means"
+        className={`signal-key signal-key-strip flex flex-wrap items-stretch gap-2 ${className}`}
+      >
+        <span className="inline-flex items-center rounded-md bg-ink px-2.5 py-1 font-mono text-xs font-extrabold uppercase tracking-[0.18em] text-white">
+          Signal key
+        </span>
+        {keys.map((k) => (
+          <span
+            key={k}
+            className="inline-flex items-center gap-2 rounded-md border-2 border-ink bg-white px-2 py-1 font-mono text-xs"
+          >
+            <span aria-hidden className={`h-3 w-3 shrink-0 border-2 border-ink ${SIGNAL[k].fill}`} />
+            <span className="font-extrabold tracking-[0.1em] text-ink">{SIGNAL[k].label}</span>
+            <span className="font-semibold text-ink-soft">{SIGNAL[k].meaning}</span>
+          </span>
+        ))}
+      </div>
+    );
   const n = keys.length;
   const c1 = n <= 3 ? 1 : 2;
   const c2 = n <= 4 ? n : Math.ceil(n / 2);

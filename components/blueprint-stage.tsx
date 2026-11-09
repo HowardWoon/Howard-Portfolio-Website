@@ -1028,7 +1028,7 @@ export function BlueprintStage({
         <div
           aria-hidden
           style={{ height: placeholderH }}
-          className="rounded-[20px] border-3 border-dashed border-ink/40 grid place-items-center font-mono text-xs font-extrabold tracking-[0.1em] text-ink/60"
+          className="rounded-2xl border-3 border-dashed border-ink/40 grid place-items-center font-mono text-xs font-extrabold tracking-[0.1em] text-ink/60"
         >
           BLUEPRINT OPEN
         </div>

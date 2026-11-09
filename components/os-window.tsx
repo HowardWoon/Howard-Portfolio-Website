@@ -290,7 +290,7 @@ export function OsWindow({
       {isMin || maximized ? (
         <div
           data-window-placeholder={id}
-          className="flex min-h-[72px] items-center justify-center rounded-[28px] border-3 border-dashed border-ink/40 p-4 text-center font-mono text-xs font-extrabold uppercase tracking-[0.14em] text-ink-muted"
+          className="flex min-h-[72px] items-center justify-center rounded-2xl border-3 border-dashed border-ink/40 p-4 text-center font-mono text-xs font-extrabold uppercase tracking-[0.14em] text-ink-muted"
         >
           {isMin ? `▭ ${title} · minimised to the taskbar` : `▢ ${title} · open full screen`}
         </div>

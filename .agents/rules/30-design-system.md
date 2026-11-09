@@ -43,6 +43,12 @@ Rules:
 - Coloured strips get the quiet `.nb-hatch` texture and a white label chip saying what the colour means.
 - Grids must not leave an orphan card alone on a row at 1024 / 1280 / 1440 (see honours 12-col grid).
 - Every card header must carry information (signal chip, index, name, date); never empty colour bars.
+- R100 one system (docs/R100-SYSTEM.md): radius scale md 6 px (keys, chips, buttons), lg 8, xl 10, 2xl = 3xl = 12 px
+  (cards, windows); never an arbitrary `rounded-[18px+]` or a CSS radius above 12 px on a container. Buttons and chips are
+  square keys (`rounded-md`), never pills; `rounded-full` only for things that ARE round (index discs, dots, the cat,
+  icon keys). `shadow-clay` is the hard 4 px ink offset (pressed = 0); no inset or blurred clay shadow. Sections inside
+  the page print the SIGNAL KEY as one strip (`<SignalKey strip only=[...] />`, only the colours they use); the full
+  table lives once, in the footer.
 - No AI-generated imagery. Use Howard's real photos (`public/images/`) and vector / CSS graphics. One owner-approved
   exception (R83, owner upload): the chibi Doom walking clip, cut into the frames of `public/images/doom-walk/` and shown only
   by `components/doom-walk.tsx`.

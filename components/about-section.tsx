@@ -201,7 +201,7 @@ function BuildSheet() {
           <li key={x.label} className="flex-[1_1_220px]">
             <a
               href={x.href}
-              className="ab-tile nb-press group flex h-full flex-col overflow-hidden rounded-[22px] border-3 border-ink bg-white text-ink shadow-brutal focus-visible:outline focus-visible:outline-4 focus-visible:outline-pop-blue"
+              className="ab-tile nb-press group flex h-full flex-col overflow-hidden rounded-2xl border-3 border-ink bg-white text-ink shadow-brutal focus-visible:outline focus-visible:outline-4 focus-visible:outline-pop-blue"
             >
               <span
                 className={`flex items-center justify-between gap-2 border-b-3 border-ink px-4 py-2 font-mono text-xs font-extrabold uppercase tracking-[0.12em] ${sig ? sig.fill : 'bg-white'}`}
@@ -331,7 +331,7 @@ function PillarCard({
       tabIndex={0}
       role="button"
       aria-pressed={isActive}
-      className={`fx-rise relative group cursor-pointer rounded-[26px] p-4 xs:p-6 sm:p-8 border-3 border-ink flex flex-col justify-between gap-6 transition-[translate,box-shadow,background-color] duration-200 focus-visible:outline focus-visible:outline-4 focus-visible:outline-pop-blue ${
+      className={`fx-rise relative group cursor-pointer rounded-2xl p-4 xs:p-6 sm:p-8 border-3 border-ink flex flex-col justify-between gap-6 transition-[translate,box-shadow,background-color] duration-200 focus-visible:outline focus-visible:outline-4 focus-visible:outline-pop-blue ${
         isActive
           ? `${c.soft} shadow-brutal-lg [translate:-4px_-4px]`
           : 'bg-white shadow-brutal hover:[translate:0_-4px] hover:shadow-brutal-lg'

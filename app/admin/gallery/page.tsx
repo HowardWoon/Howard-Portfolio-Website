@@ -37,7 +37,7 @@ export default async function GalleryAdminPage() {
 
   return (
     <section className="space-y-6">
-      <div className="glass-panel rounded-[2rem] p-6 sm:p-8">
+      <div className="glass-panel rounded-2xl p-6 sm:p-8">
         <p className="muted-label mb-2">3D gallery</p>
         <h1 className="text-3xl font-semibold text-white">Rooms behind the street doors</h1>
         <p className="mt-3 text-sm leading-7 text-fog-500">
@@ -53,7 +53,7 @@ export default async function GalleryAdminPage() {
 
       <ExhibitForm />
 
-      <div className="glass-panel space-y-3 rounded-[2rem] p-6 sm:p-8">
+      <div className="glass-panel space-y-3 rounded-2xl p-6 sm:p-8">
         <h2 className="text-2xl font-semibold text-white">Saved exhibits</h2>
         {items.length === 0 ? (
           <p className="text-sm text-fog-500">Nothing saved yet.</p>

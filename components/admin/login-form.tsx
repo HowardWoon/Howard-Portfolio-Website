@@ -34,7 +34,7 @@ export function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="glass-panel w-full max-w-md rounded-[2rem] p-6 sm:p-8">
+    <form onSubmit={handleSubmit} className="glass-panel w-full max-w-md rounded-2xl p-6 sm:p-8">
       <div>
         <p className="muted-label mb-3">Admin access</p>
         <h1 className="text-3xl font-semibold text-white">Sign in</h1>

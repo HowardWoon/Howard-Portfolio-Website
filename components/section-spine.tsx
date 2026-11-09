@@ -248,7 +248,7 @@ export function SectionSpine() {
         keyRefs.current[branch]?.focus();
         setBranch(null);
       }}
-      className={`fixed right-[max(1rem,var(--safe-right))] top-1/2 -translate-y-1/2 z-[9000] hidden min-[1400px]:flex flex-col items-center gap-0.5 rounded-[18px] border-3 border-ink bg-white px-1 py-1.5 shadow-brutal-sm transition-[opacity,translate] duration-300 ${
+      className={`fixed right-[max(1rem,var(--safe-right))] top-1/2 -translate-y-1/2 z-[9000] hidden min-[1400px]:flex flex-col items-center gap-0.5 rounded-2xl border-3 border-ink bg-white px-1 py-1.5 shadow-brutal-sm transition-[opacity,translate] duration-300 ${
         atFooter ? 'pointer-events-none opacity-0 translate-x-4' : ''
       }`}
     >

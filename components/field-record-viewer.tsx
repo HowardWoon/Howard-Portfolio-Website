@@ -94,7 +94,7 @@ export function FieldRecordViewer({ records, currentIndex, onClose, onNavigate }
         initial={{ scale: 0.97, y: 16 }}
         animate={{ scale: 1, y: 0 }}
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-6xl mx-auto flex-1 min-h-0 flex flex-col lg:flex-row landscape-short:flex-row bg-white rounded-[22px] sm:rounded-[26px] border-3 border-ink shadow-brutal-lg sm:shadow-brutal-xl overflow-hidden"
+        className="relative w-full max-w-6xl mx-auto flex-1 min-h-0 flex flex-col lg:flex-row landscape-short:flex-row bg-white rounded-2xl sm:rounded-2xl border-3 border-ink shadow-brutal-lg sm:shadow-brutal-xl overflow-hidden"
       >
         {/* Image — fixed share of the height on phones (it used to collapse to 0px inside the flex column) */}
         <div

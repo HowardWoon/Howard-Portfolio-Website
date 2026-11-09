@@ -621,7 +621,7 @@ function PekomTreasurerDashboard() {
   ];
 
   return (
-    <div className="mt-8 rounded-[22px] sm:rounded-[26px] border-3 border-ink bg-paper-cream shadow-brutal-sm sm:shadow-brutal overflow-hidden">
+    <div className="mt-8 rounded-2xl sm:rounded-2xl border-3 border-ink bg-paper-cream shadow-brutal-sm sm:shadow-brutal overflow-hidden">
       {/* Title bar */}
       <div className="nb-hatch flex items-center gap-2.5 px-5 sm:px-6 py-3 border-b-3 border-ink bg-pop-pink">
         <span className="relative inline-flex w-2.5 h-2.5" aria-hidden>
@@ -676,7 +676,7 @@ function PekomTreasurerDashboard() {
                   aria-expanded={isExpanded}
                   aria-controls={isExpanded ? panelId : undefined}
                   onClick={() => setExpandedEvent(expandedEvent === event.id ? null : event.id)}
-                  className={`w-full text-left p-4 flex items-center justify-between gap-3 rounded-[13px] ${isExpanded ? 'bg-[#FFE3F1] border-b-3 border-ink rounded-b-none' : ''}`}
+                  className={`w-full text-left p-4 flex items-center justify-between gap-3 rounded-[9px] ${isExpanded ? 'bg-[#FFE3F1] border-b-3 border-ink rounded-b-none' : ''}`}
                 >
                   <span className="font-mono text-xs sm:text-sm font-extrabold tracking-[0.02em] text-ink">
                     {event.name}
@@ -769,7 +769,7 @@ export default function ExperienceSection() {
           <m.div
             role="group"
             aria-label="Filter experience"
-            className="grid grid-cols-1 min-[360px]:grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 p-2 bg-white border-3 border-ink rounded-[22px] shadow-brutal-sm w-full sm:w-fit max-w-full"
+            className="grid grid-cols-1 min-[360px]:grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 p-2 bg-white border-3 border-ink rounded-2xl shadow-brutal-sm w-full sm:w-fit max-w-full"
           >
             <span
               aria-hidden
@@ -815,7 +815,7 @@ export default function ExperienceSection() {
               })}
             </LayoutGroup>
           </m.div>
-          <SignalKey only={['industry', 'leadership', 'academic']} className="w-full sm:w-fit max-w-full" />
+          <SignalKey strip only={['industry', 'leadership', 'academic']} className="w-full sm:w-fit max-w-full" />
         </div>
 
         {/* Experience Cards */}
@@ -841,7 +841,7 @@ export default function ExperienceSection() {
                   transition={{ duration: 0.4, type: 'spring', bounce: 0.2 }}
                   data-folder={item.id}
                   data-trail-stop={trailIds?.includes(`exp:${item.id}`) ? '' : undefined}
-                  className={`relative ${trailIds?.includes(`exp:${item.id}`) ? 'fx-trail-hit rounded-[28px]' : ''}`}
+                  className={`relative ${trailIds?.includes(`exp:${item.id}`) ? 'fx-trail-hit rounded-2xl' : ''}`}
                 >
                   {/* R22 folder tab (lecturer pattern 3): pressing it slides this folder to the front (filters to its
                       track); pressing it again brings every folder back.
@@ -875,7 +875,7 @@ export default function ExperienceSection() {
                   </div>
                   <div
                     data-crop
-                    className="relative group rounded-[30px] border-3 border-ink bg-white shadow-brutal-lg overflow-hidden"
+                    className="relative group rounded-2xl border-3 border-ink bg-white shadow-brutal-lg overflow-hidden"
                   >
                     <span aria-hidden className="fx-crop" />
                     {/* Top Bar: Number + Category Tag + Period */}
@@ -1056,7 +1056,7 @@ export default function ExperienceSection() {
                         {g && (
                           <div
                             data-gallery-desk
-                            className="lg:col-span-5 min-w-0 w-full max-w-md mx-auto lg:max-w-none rounded-[26px] border-3 border-ink bg-paper-deep bg-dots p-3 sm:p-5 space-y-4 shadow-[inset_0_3px_0_rgba(0,0,0,0.06)]"
+                            className="lg:col-span-5 min-w-0 w-full max-w-md mx-auto lg:max-w-none rounded-2xl border-3 border-ink bg-paper-deep bg-dots p-3 sm:p-5 space-y-4 shadow-[inset_0_3px_0_rgba(0,0,0,0.06)]"
                           >
                             <div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-dashed border-ink pb-3">
                               <div className="flex items-center gap-2 text-xs font-mono font-extrabold text-ink">

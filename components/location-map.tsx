@@ -20,7 +20,7 @@ export const mapsDirectionsUrl = (q: string) =>
 export const mapsEmbedUrl = (q: string) => `https://www.google.com/maps?q=${encodeURIComponent(q)}&output=embed`;
 
 const key =
-  'nb-key inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border-2 border-ink px-3 font-mono text-xs font-extrabold tracking-[0.12em]';
+  'nb-key inline-flex min-h-[44px] items-center justify-center gap-2 rounded-md border-2 border-ink px-3 font-mono text-xs font-extrabold tracking-[0.12em]';
 
 function MapDialog({ place, onClose }: { place: string; onClose: () => void }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -46,7 +46,7 @@ function MapDialog({ place, onClose }: { place: string; onClose: () => void }) {
         aria-modal="true"
         aria-label={`Map: ${place}`}
         data-map-dialog
-        className="relative flex h-full w-full max-w-3xl flex-col overflow-hidden border-3 border-ink bg-paper-cream sm:h-[min(640px,100%)] sm:rounded-[22px] sm:shadow-brutal-lg"
+        className="relative flex h-full w-full max-w-3xl flex-col overflow-hidden border-3 border-ink bg-paper-cream sm:h-[min(640px,100%)] sm:rounded-2xl sm:shadow-brutal-lg"
       >
         <div className="nb-hatch flex items-center justify-between gap-3 border-b-3 border-ink bg-ink px-4 py-3 text-white">
           <span className="flex min-w-0 items-center gap-2 font-mono text-xs font-extrabold uppercase tracking-[0.12em]">

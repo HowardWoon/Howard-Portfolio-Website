@@ -48,7 +48,7 @@ export function ExhibitForm() {
   return (
     <form
       ref={formRef}
-      className="glass-panel grid gap-4 rounded-[2rem] p-6 sm:grid-cols-2 sm:p-8"
+      className="glass-panel grid gap-4 rounded-2xl p-6 sm:grid-cols-2 sm:p-8"
       onSubmit={async (e) => {
         e.preventDefault();
         const form = new FormData(e.currentTarget);
@@ -204,7 +204,7 @@ export function ExhibitForm() {
 export function BuiltInList({ hidden }: { hidden: string[] }) {
   const content = buildGalleryContent();
   return (
-    <div className="glass-panel space-y-5 rounded-[2rem] p-6 sm:p-8">
+    <div className="glass-panel space-y-5 rounded-2xl p-6 sm:p-8">
       <div>
         <p className="muted-label mb-2">From the page</p>
         <h2 className="text-2xl font-semibold text-white">Built-in exhibits</h2>

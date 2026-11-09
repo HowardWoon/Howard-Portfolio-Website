@@ -421,9 +421,9 @@ function ShortcutSheet() {
         aria-modal="true"
         aria-label="Keyboard shortcuts"
         onClick={(e) => e.stopPropagation()}
-        className="fx-hinge w-full max-w-md max-h-[85%] overflow-y-auto overscroll-contain bg-white border-3 border-ink rounded-[22px] shadow-brutal-lg"
+        className="fx-hinge w-full max-w-md max-h-[85%] overflow-y-auto overscroll-contain bg-white border-3 border-ink rounded-2xl shadow-brutal-lg"
       >
-        <div className="flex items-center justify-between gap-3 px-5 py-3 border-b-3 border-ink bg-pop-yellow rounded-t-[19px]">
+        <div className="flex items-center justify-between gap-3 px-5 py-3 border-b-3 border-ink bg-pop-yellow rounded-t-2xl">
           <span className="flex items-center gap-2 font-mono text-xs font-extrabold uppercase tracking-[0.12em] text-ink">
             <Keyboard className="w-4 h-4" strokeWidth={2.75} aria-hidden /> Keyboard shortcuts
           </span>
