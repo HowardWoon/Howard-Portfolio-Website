@@ -17,6 +17,8 @@ const CONTROL = 'a[href], button, input, textarea, select, label, [role="button"
 // teaser stills), so the last ones were never read and the cat could sit on one. Rectangle reads after one layout cost
 // ~1 µs each, once per rest: 2,000 stays far under a frame.
 const MAX_CONTROLS = 2000;
+/** endless marquee tapes (Arena Wall rows, ticker / skill tapes): a few elements, read once per rest */
+const TAPES = '.fx-wall-track, [class*="animate-[marquee"]';
 
 /**
  * R49 mascot (owner: "i want this to be implemented into my website ... i want the cat", koboyo.com/page-mascot):
@@ -53,6 +55,7 @@ export default function HeroMascot() {
     const wide = window.matchMedia('(min-width: 1536px)');
     const PEEK = 12;
     let timer = 0;
+    let settleTries = 0;
     const check = () => {
       if (wide.matches) {
         delete wrap.dataset.tucked;
@@ -68,6 +71,25 @@ export default function HeroMascot() {
       wrap.style.translate = was;
       void wrap.offsetWidth;
       wrap.style.transition = '';
+      // R116 (CI r86 B4, 4x CPU: a gallery still rising into place under the cat was read before it arrived, and nothing
+      // read it again): while a finite animation overlaps the cat, look again shortly (at most 6 x 250 ms)
+      if (settleTries < 6) {
+        const busy = document.getAnimations().some((a) => {
+          if (a.playState !== 'running') return false;
+          const t = a.effect?.getComputedTiming();
+          if (!t || t.iterations === Infinity || a.timeline !== document.timeline) return false;
+          const el = (a.effect as KeyframeEffect | null)?.target as Element | null;
+          if (!el || wrap.contains(el)) return false;
+          const r = el.getBoundingClientRect();
+          return !(r.right <= b.left || r.left >= b.right || r.bottom <= b.top || r.top >= b.bottom);
+        });
+        if (busy) {
+          settleTries++;
+          timer = window.setTimeout(check, 250);
+          return;
+        }
+      }
+      settleTries = 0;
       // the leftmost control under the cat: the strip left showing must end before it
       // 3 x 3 points (each is a full hit test: 7 x 7 cost 8 s of hit testing per phone scroll at 4x CPU)
       let edge = Infinity;
@@ -103,12 +125,20 @@ export default function HeroMascot() {
           edge = Math.min(edge, r.left);
         }
       }
+      // R116 (CI r86 B4: a print of the Arena Wall slid under the resting cat): a moving tape (an endless marquee of
+      // controls) always brings a control under the cat sooner or later, so over one the cat tucks
+      for (const t of document.querySelectorAll(TAPES)) {
+        const r = t.getBoundingClientRect();
+        if (r.right <= b.left || r.left >= b.right || r.bottom <= b.top || r.top >= b.bottom) continue;
+        if (t.querySelector(CONTROL)) edge = Math.min(edge, b.left);
+      }
       const peek = Math.max(0, Math.min(PEEK, Math.floor(edge) - 2));
       wrap.style.setProperty('--tuck', `${Math.max(0, Math.round(b.right - peek))}px`);
       if (edge < Infinity) wrap.dataset.tucked = '';
       else delete wrap.dataset.tucked;
     };
     const rest = () => {
+      settleTries = 0;
       window.clearTimeout(timer);
       timer = window.setTimeout(check, 300);
     };
