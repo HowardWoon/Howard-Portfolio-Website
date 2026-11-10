@@ -6,6 +6,7 @@ import { test, expect, devices, type Page } from '@playwright/test';
 
 const CREAM = 'rgb(255, 247, 224)';
 const CYAN_SOFT = 'rgb(217, 251, 255)';
+const LILAC = 'rgb(201, 188, 255)'; // ground.lilac (R117: Experience)
 
 test.beforeEach(async ({ context }) => {
   await context.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
@@ -29,9 +30,10 @@ test('the desk surface takes the tint of the section in view, and clears at the 
   await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
   expect(await page.evaluate(() => document.documentElement.dataset.tide)).toBe('on');
-  // the cream sections hand their colour to the desk; their dot texture stays
-  const bg = await page.locator('#experience').evaluate((e) => getComputedStyle(e).backgroundColor);
-  expect(bg).toBe('rgba(0, 0, 0, 0)');
+  // R111 - R117 (owner: colour-block grounds, section by section): every home section paints its own flat ground, so
+  // none hands its colour to the desk any more; the desk itself still follows the section in view
+  expect(await page.locator('main section.fx-tide-surface').count()).toBe(0);
+  expect(await page.locator('#experience').evaluate((e) => getComputedStyle(e).backgroundColor)).toBe(LILAC);
   expect(await tint(page)).toBe(CREAM);
 
   await centre(page, 'projects');
@@ -55,43 +57,42 @@ test('an overlay still covers the header with the page root as a stacking contex
   await page.keyboard.press('Escape');
 });
 
-test('print restores the cream sections (FX-76)', async ({ page }) => {
+test('print hides the desk and keeps each section on its own ground (FX-76; R117 grounds)', async ({ page }) => {
   await home(page);
   await page.emulateMedia({ media: 'print' });
-  expect(await page.locator('#experience').evaluate((e) => getComputedStyle(e).backgroundColor)).toBe(CREAM);
+  expect(await page.locator('#experience').evaluate((e) => getComputedStyle(e).backgroundColor)).toBe(LILAC);
   expect(await page.locator('.fx-tide-canvas').evaluate((e) => getComputedStyle(e).display)).toBe('none');
 });
 
 /* ---------------------------------------------------------------- FX-77, FX-79 desktop */
-test('desktop: the dot plane is scroll-driven, and the hero has no sun behind the portrait (FX-79; FX-77 retired)', async ({
+test('desktop: no section carries a dot plane, and the hero has no sun behind the portrait (FX-79 and FX-77 retired)', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await home(page);
   // R77 (owner: every section background "clean and tidy"): the FX-77 sun is gone
   expect(await page.locator('.fx-sunset').count()).toBe(0);
-  // R95: off screen the plane drops its scroll-driven animation (tests/r95), so read it with About on screen
+  // R111 - R117 (owner: colour-block grounds): every section is one flat ground, so the FX-79 dot plane is retired
+  expect(await page.locator('main .fx-dot-plane').count()).toBe(0);
   await page.locator('#experience').evaluate((e) => e.scrollIntoView({ block: 'start' }));
   await expect(page.locator('#experience[data-offscreen]')).toHaveCount(0);
   const plane = await page.locator('#experience').evaluate((e) => ({
     own: getComputedStyle(e).backgroundImage,
     before: getComputedStyle(e, '::before').animationName,
-    dots: getComputedStyle(e, '::before').backgroundImage,
   }));
   expect(plane.own).toBe('none');
-  expect(plane.before).toBe('fx-dot-plane');
-  expect(plane.dots).toContain('radial-gradient');
+  expect(plane.before).toBe('none');
 });
 
 test.describe('phone', () => {
   test.use((({ defaultBrowserType, ...d }) => d)(devices['iPhone 13']));
-  test('phones keep the static dots and have no sun (FX-79; FX-77 retired)', async ({ page }) => {
+  test('phones show a flat ground (no dots) and no sun (FX-79 and FX-77 retired)', async ({ page }) => {
     await home(page);
     const about = await page.locator('#experience').evaluate((e) => ({
       own: getComputedStyle(e).backgroundImage,
       before: getComputedStyle(e, '::before').content,
     }));
-    expect(about.own).toContain('radial-gradient');
+    expect(about.own).toBe('none');
     expect(about.before).toBe('none');
     expect(await page.locator('.fx-sunset').count()).toBe(0);
   });

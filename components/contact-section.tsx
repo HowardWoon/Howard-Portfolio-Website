@@ -261,7 +261,10 @@ export default function ContactSection() {
     <section
       id="contact"
       onPointerDownCapture={markStart}
-      className="fx-tide-surface fx-dot-plane relative w-full bg-paper-cream bg-dots text-ink pt-24 sm:pt-32 pb-0 overflow-clip border-t-3 border-ink"
+      // R117 (owner's Pinterest references, colour-block grounds, section by section): Contact paints its own flat lime
+      // ground edge to edge (no dot texture, out of the soft tide wash); the form and cards stay paper
+      data-ground="lime"
+      className="relative w-full bg-ground-lime text-ink pt-24 sm:pt-32 pb-0 overflow-clip border-t-3 border-ink"
     >
       <div className="relative max-w-7xl mx-auto space-y-14 px-4 xs:px-5 sm:px-10 lg:px-16">
         {/* Section Header (R114: every section carries its poster number, 01 - 05) */}

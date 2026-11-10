@@ -845,7 +845,10 @@ export default function ExperienceSection() {
   return (
     <section
       id="experience"
-      className="fx-tide-surface fx-dot-plane fx-sheet relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-clip border-t-3 border-ink"
+      // R117 (owner's Pinterest references, colour-block grounds, section by section): Experience paints its own flat
+      // lilac ground edge to edge (no dot texture, out of the soft tide wash); the cards stay paper with ink shadows
+      data-ground="lilac"
+      className="fx-sheet relative w-full bg-ground-lilac text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-clip border-t-3 border-ink"
     >
       <div className="relative max-w-6xl mx-auto space-y-12">
         {/* Section Header (R114: every section carries its poster number, 01 - 05) */}

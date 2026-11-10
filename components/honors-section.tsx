@@ -588,7 +588,10 @@ export default function HonorsSection() {
   return (
     <section
       id="honors"
-      className="fx-tide-surface fx-dot-plane fx-sheet relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-clip border-t-3 border-ink flex flex-col"
+      // R117 (owner's Pinterest references, colour-block grounds, section by section): Honours paints its own flat
+      // yellow ground edge to edge (no dot texture, out of the soft tide wash); the tickets and cards stay paper
+      data-ground="yellow"
+      className="fx-sheet relative w-full bg-ground-yellow text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-clip border-t-3 border-ink flex flex-col"
     >
       <div className="relative max-w-7xl mx-auto space-y-12 w-full flex-1 flex flex-col">
         {/* Section Header (R114: every section carries its poster number, 01 - 05) */}
