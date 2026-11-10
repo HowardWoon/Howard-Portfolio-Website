@@ -884,8 +884,9 @@ export default function StackedProjects() {
       id="projects"
       // R116 (owner's Pinterest references, colour-block grounds, section by section): Projects paints its own flat lime
       // ground edge to edge (no dot texture, out of the soft tide wash); the cards stay paper with ink shadows
+      // R118 (owner: About and Projects "joined, smoother"): the same vertical rhythm as About above it (py-24 / sm:py-28)
       data-ground="lime"
-      className="fx-sheet relative w-full bg-ground-lime text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-x-clip border-t-3 border-ink"
+      className="fx-sheet relative w-full bg-ground-lime text-ink py-24 sm:py-28 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-x-clip border-t-3 border-ink"
     >
       <div className="relative max-w-7xl mx-auto space-y-16 sm:space-y-20">
         {/* Section Header (R114: every section carries its poster number, 01 - 05) */}

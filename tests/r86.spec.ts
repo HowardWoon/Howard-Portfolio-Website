@@ -67,8 +67,8 @@ test.describe('phone', () => {
           .filter((a) => a.playState === 'running' && a.effect?.getTiming().iterations === Infinity)
           .filter((a) => {
             const t = (a.effect as KeyframeEffect).target as Element | null;
-            // Projects (18,000 px on a phone) and The Build (no section id)
-            if (!t?.closest('#projects, .bs-section')) return false;
+            // Projects (18,000 px on a phone)
+            if (!t?.closest('#projects')) return false;
             const r = t.getBoundingClientRect();
             return r.bottom < -400 || r.top > innerHeight + 400;
           }).length,

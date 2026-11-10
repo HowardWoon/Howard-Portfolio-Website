@@ -110,11 +110,9 @@ test('dispatch rail follows the form: name, a VALID email, message', async ({ pa
   await expect(rail.locator('[aria-current="step"]')).toContainText('DISPATCH');
 });
 
-// R77 (owner: "make my whole website, every section background clean and tidy"): the footer dot field and the
-// contour field behind The Build title are retired; the footer and the title card sit on plain surfaces
-test('no dot field in the footer and no contour field behind the story title (R26 backgrounds retired in R77)', async ({
-  page,
-}) => {
+// R77 (owner: "make my whole website, every section background clean and tidy"): the footer dot field is retired
+// (the contour field behind The Build title went with The Build in R118)
+test('no dot field in the footer (R26 backgrounds retired in R77)', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await walk(page);
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
@@ -122,11 +120,6 @@ test('no dot field in the footer and no contour field behind the story title (R2
   await page.mouse.move(f!.x + f!.width - 150, f!.y + 140);
   await page.mouse.move(f!.x + f!.width - 190, f!.y + 170, { steps: 4 });
   expect(await page.locator('footer canvas, canvas.dot-field').count()).toBe(0);
-  await page.evaluate(() => {
-    const s = document.querySelector('.bs-section')!;
-    window.scrollTo(0, s.getBoundingClientRect().top + scrollY + 2);
-  });
-  expect(await page.locator('canvas.bs-contour, .bs-contour-layer').count()).toBe(0);
 });
 
 test('reduced motion: the living backgrounds stay empty and nothing cycles', async ({ page }) => {

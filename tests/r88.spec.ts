@@ -42,15 +42,7 @@ const unskipped = (page: Page) =>
 test('P8: off-screen sections skip rendering, and the page keeps exactly the same geometry', async ({ browser }) => {
   const { ctx, page } = await phone(browser);
   const cv = (sel: string) => page.locator(sel).evaluate((e) => getComputedStyle(e).contentVisibility);
-  for (const sel of [
-    '#about > *',
-    '#projects > *',
-    '#experience > *',
-    '#honors > *',
-    '.bs-section',
-    '.dw-section',
-    '.fx-wall',
-  ])
+  for (const sel of ['#about > *', '#projects > *', '#experience > *', '#honors > *', '.fx-wall'])
     expect(await cv(sel), sel).toBe('auto');
   // the hero, the 3D street (fixed pseudo-fullscreen frame) and Contact (tape over the edge) never skip; About,
   // Projects, Experience and Honours keep their own ::before / ::after view() animations, which crash Chrome when the

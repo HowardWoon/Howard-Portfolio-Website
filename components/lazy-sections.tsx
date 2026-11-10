@@ -13,16 +13,6 @@ export const StackedProjects = guard(
   dynamic(() => import('@/components/stacked-projects')),
   'StackedProjects',
 );
-// R21 "The Build": scroll-scrubbed storyboard between About and Projects (self-contained, no section id)
-export const BuildStory = guard(
-  dynamic(() => import('@/components/build-story')),
-  'BuildStory',
-);
-// R83: the Doom Walk (scroll-scrubbed walking clip + Victor's Ledger) right after The Build (no section id)
-export const DoomWalk = guard(
-  dynamic(() => import('@/components/doom-walk')),
-  'DoomWalk',
-);
 // R22: System Status Bar (KL clock, ping, X-ray mode) under the hero tape
 export const SystemStatusBar = guard(
   dynamic(() => import('@/components/system-status-bar')),

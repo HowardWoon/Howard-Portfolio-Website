@@ -2,8 +2,6 @@ import { SkipLink } from '@/components/skip-link';
 import BikebearInspiredHero from '@/components/bikebear-hero';
 import AboutSection from '@/components/about-section';
 import {
-  BuildStory,
-  DoomWalk,
   SystemStatusBar,
   ResumeDrawer,
   StackedProjects,
@@ -100,10 +98,8 @@ export function PortfolioPage() {
           <SystemStatusBar />
 
           <AboutSection />
-          {/* R21: scroll-scrubbed storyboard (student ID -> shipped system); owns no section id */}
-          <BuildStory />
-          {/* R83: the owner's Doom walks toward the viewer as the page scrolls, his honours print beside him */}
-          <DoomWalk />
+          {/* R118 (owner: "delete the whole scrolling part, from student ID to Doom ... section 1 and section 2 joined"):
+              The Build and the Doom Walk are gone; About hands straight over to Projects */}
           <StackedProjects />
           <ExperienceSection />
           <HonorsSection />

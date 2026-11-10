@@ -32,27 +32,3 @@ test('every typed photo size matches the real file (the manifest is read from th
     }
   expect(bad).toEqual([]);
 });
-
-test('The Build two film reels hold every photo in the gallery folders, once; the SYS MAP docks every project', async ({
-  page,
-}) => {
-  // R114 (owner: "delete the memory gallery ... keep the ARCHITECT / ORCHESTRATE reels updating by themselves"): the
-  // Memory Reel is gone; the two reels read components/memory-data.ts, which reads every gallery and every upload
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto('/', { waitUntil: 'networkidle' });
-  const srcs = await page
-    .locator('.bs-reel .bs-reel-frame img')
-    .evaluateAll((imgs) =>
-      imgs.map((i) => decodeURIComponent(new URL((i as HTMLImageElement).src).searchParams.get('url') ?? '')),
-    );
-  const want = Object.keys(manifest()).filter((src) => !src.startsWith('/images/diorama/'));
-  expect([...new Set(srcs)].sort()).toEqual(want.sort());
-  // the SYS MAP: one tag per project card, and its count says so
-  const cards = await page.locator('[id^="project-"]').evaluateAll((els) => els.map((e) => e.id));
-  const projects = [...new Set(cards)].length;
-  await expect(page.locator('.bs-dock')).toHaveCount(projects);
-  await expect(
-    page.getByText(new RegExp('SYS MAP · [0-9]+ NODES · ' + String(projects).padStart(2, '0') + ' BUILDS')),
-  ).toHaveCount(1);
-  await expect(page.locator('[data-memory-reel]')).toHaveCount(0);
-});

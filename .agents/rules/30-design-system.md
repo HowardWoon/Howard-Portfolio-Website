@@ -61,14 +61,16 @@ Rules:
   underline under a phrase: a phrase that needs weight becomes printed keys. Guard: `tests/r103`.
 - R108 - R110 (docs/R108-R110-HD-CURSOR-SHIP-GALLERY.md): nothing blurs or tints what it passes over - the cursor ring
   has no fill and no blend (a hard yellow offset marks a clickable thing), no blur behind a dialog, no pointer glare.
-  The Build has four scenes and ends on 04 (no release card). A gallery beside text starts at the top, level with the
+  (R118: The Build is deleted.) A gallery beside text starts at the top, level with the
   text, and stays beside it as you scroll (sticky under the header, card `overflow: clip`; R113 replaced the R110 middle
   placement) - never a blank column above or under it. Guards: `tests/r108`, `r109`.
-- No AI-generated imagery. Use Howard's real photos (`public/images/`) and vector / CSS graphics. One owner-approved
-  exception (R83, owner upload): the chibi Doom walking clip, cut into the frames of `public/images/doom-walk/` and shown only
-  by `components/doom-walk.tsx`.
+- No AI-generated imagery. Use Howard's real photos (`public/images/`) and vector / CSS graphics. (The one R83
+  exception, the chibi Doom walking clip, was deleted with the Doom Walk in R118.)
 
-## C. Scroll storytelling pattern (`components/build-story.tsx`, docs/R21-BUILD-STORY.md)
+## C. Scroll storytelling pattern (HISTORY: `components/build-story.tsx` and the Doom Walk were deleted in R118 at the
+
+owner's request - About joins Projects directly; never rebuild a pinned storyboard between them. The notes below stay
+as engineering lessons for any future scroll-driven effect.)
 
 - Sticky stage inside a tall track. ONE JS scroll listener (IntersectionObserver-gated) writes ONE custom property
   `--p` on the stage and on the `.bs-seg` elements whose `[a, b]` window it entered or crossed (R28 B6: `--p / --t /

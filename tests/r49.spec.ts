@@ -377,15 +377,12 @@ test.describe('zoomed out: the layout keeps its proportions', () => {
       await page.goto('/', { waitUntil: 'networkidle' });
       await expect(page.locator('html[data-after-boot="done"]')).toHaveCount(1, { timeout: 45_000 });
       const s = await share(page);
-      // The Build's last card and an Experience card, as a share of the window
-      await page.evaluate(() => {
-        const t = document.querySelector<HTMLElement>('.bs-section')!;
-        scrollTo(0, t.getBoundingClientRect().top + scrollY + (t.offsetHeight - innerHeight) * 0.995);
-      });
+      // the first project card, as a share of the window (R118: The Build, measured here before, is deleted)
+      await page.locator('#project-zerolag').evaluate((e) => e.scrollIntoView({ block: 'start' }));
       await page.waitForTimeout(1200);
       const card = await page.evaluate(() => {
-        const r = document.querySelector('.bs-diagram')!.getBoundingClientRect(); // R109: the story ends on 04
-        return { w: +(r.width / innerWidth).toFixed(2), inView: r.top >= 0 && r.bottom <= innerHeight };
+        const r = document.querySelector('#project-zerolag')!.getBoundingClientRect();
+        return { w: +(r.width / innerWidth).toFixed(2), inView: r.left >= 0 && r.right <= innerWidth };
       });
       const rail = await page.evaluate(() => {
         const n = document.querySelector('nav[aria-label="Section navigation"]')!;
@@ -411,8 +408,8 @@ test.describe('zoomed out: the layout keeps its proportions', () => {
         0.08,
       );
       expect(Math.abs(s.photo - base.photo), `${z}: portrait`).toBeLessThan(0.07);
-      expect(Math.abs(s.card.w - base.card.w), `${z}: The Build card ${s.card.w} vs ${base.card.w}`).toBeLessThan(0.07);
-      expect(s.card.inView, `${z}: The Build card is whole`).toBe(true);
+      expect(Math.abs(s.card.w - base.card.w), `${z}: project card ${s.card.w} vs ${base.card.w}`).toBeLessThan(0.07);
+      expect(s.card.inView, `${z}: the project card is whole across`).toBe(true);
       expect(Math.abs(s.header - base.header), `${z}: header height`).toBeLessThan(0.03);
       expect(s.rail.text).toEqual(['01', '02', '03', '04', '05']);
       expect(s.rail.fits).toBe(true);

@@ -75,10 +75,10 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
 
 - `app/` routes: `page.tsx` (home), `simulators/[type]` (only `agentic`, `flood`, `energy` exist), `admin/` (inbox only), `api/contact` (contact form), `layout.tsx` (fonts, metadata, JSON-LD, boot-gate script).
 - `components/` one file per section: `bikebear-hero`, `about-section`, `stacked-projects`, `experience-section`, `honors-section`, `contact-section`, `site-footer` (rendered after `</main>` in `portfolio-page.tsx`), plus shared UI (`site-header`, `boot-sequence`, `interactive-photo-stack` (its top-level `photos` array is the ZeroLag gallery; other projects pass `galleryPhotos` in `stacked-projects.tsx`), `field-archive*`, `command-palette`, `section-dock`, `scroll-to-top`, `tilt-card`, `reveal`, `motion-provider` (all animations use `m.*` from framer-motion inside `<LazyMotion>`), `lazy-sections` (below-the-fold sections, code-split), `fx/route-wipe`, `fx/press-stamp` (R37: every click / tap / Enter stamps a shape on every page; mounted in `app/layout.tsx`), `custom-cursor` (ring + the R37 `[data-cursor]` tag), ...).
-- R21: `build-story` (scroll storyboard between About and Projects, docs/R21-BUILD-STORY.md), `signal-key` (colour legend), `honor-emblem` (medal / seal / ticket emblems), `marquees` (two-deck highlight tape + crossing slogan tapes).
+- R21: `signal-key` (colour legend), `honor-emblem` (medal / seal / ticket emblems), `marquees` (two-deck highlight tape + crossing slogan tapes).
 - R63-R70 layers: `spider-reveal` + `lib/water.ts` (the portrait's calm WebGL2 water, R78) and `lib/liquid.ts` (the
   headline's water, R63),
-  `app/build-story.css` (R90: The Build as a paper spec sheet; the R64 `flip-card` is deleted), `tear-stub` (footer Document Metadata counterfoil -> resume),
+  `tear-stub` (footer Document Metadata counterfoil -> resume),
   `spine-branches` (section rail panels listing each section's headings), `tokyo-diorama/**` (R68 walkable 3D
   section `#diorama`: three.js 0.180.0, owner-approved; the kit's source stays OUTSIDE the repo in
   `Documents/tokyo-diorama-kit`; R70 engine fixes are listed in 30-design-system), `input-modality` (keyboard ring
@@ -91,7 +91,7 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
   `playwright-report/` - delete it when lint suddenly reports hundreds of errors in minified files.
 - `tests/smoke.spec.ts` Playwright tests. `.github/workflows/ci.yml` CI. `scripts/` verify.mjs, audit-ui.mjs, check-encoding.mjs. `audit/` is output only and is git-ignored.
 
-## 6. Owner standing rules added R29-R32 (read before touching photos, crests or The Build)
+## 6. Owner standing rules added R29-R32 (read before touching photos or crests)
 
 1. **Gallery order (every gallery, every time):** photos of Howard first - him holding the award / on stage /
    with the team at the result - then other event photos, then product screens (website, dashboards, backend,
@@ -99,8 +99,7 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
    ProofPay starts with the Sui "Team Chain Reaction" stage photo, the four interface screens come last.
 2. **New photos checklist (do ALL of it in the same change):** copy into `public/images/...` (lowercase, no
    spaces), read the REAL pixel size with `sharp().metadata()` (never guess `w` / `h`), add to the right gallery in
-   the order of rule 1 with a factual alt, add the event photos to the Build Story Field Reel in time order
-   (`FIELD_REEL` in `build-story.tsx`, slate in the SIGNAL colour of the chapter), run
+   the order of rule 1 with a factual alt, run
    `node scripts/gen-photo-blur.mjs` (its sources list must include every file that holds photos), and never
    leave the original upload folder in the repo root.
 3. **Crests:** institution logos only through `components/institution-seal.tsx` (Registrar Seal), with one exception
@@ -108,7 +107,6 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
    (`lib/organisers.ts`) - the same white tag plate for every project, on its card and its index tile. Use the
    trimmed, centred HD asset (`public/images/logos/um_crest.png`, `kmns_logo_clear.png`); a logo with uneven
    transparent margins looks off-centre and blurry. Never rotate, glow, spin or put a faint logo behind text.
-   The raw crest appears in The Build only inside the Crest Scan beat.
 4. **Neo-brutalism, never "vibe coded":** hard ink borders, hard offset shadows, flat SIGNAL colours, mono labels,
    printed / mechanical effects (stamps, scan bars, split-flap, circuit traces, pixel art). No glow, blur, glass,
    soft gradients, AI imagery or stock 3D.
@@ -212,11 +210,9 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
     (`components/brand-icons.tsx`), never lucide brand icons; `scripts/device-sweep.mjs` covers 23 profiles (incl. Android
     landscape, a 600 px tablet, 1366 - 2560 px desktops) and the admin sign-in + 404 pages; both scripts accept
     `--base URL` and `--base=URL`. The full audit with every finding and its evidence: `docs/R82-FULL-AUDIT-AND-PLAN.md`.
-14. **R83 (owner):** About is rebuilt from the page's own facts (split-flap Build Sheet, no invented figures); The
-    Build's 03 / 04 diagram is a CSS-3D board on desktop; after it the Doom Walk (components/doom-walk.tsx): the owner's chibi Doom clip (the one allowed AI-art source)
-    walks toward the viewer frame by frame with the scroll (back when scrolling up) while Victor's Ledger prints every
-    honour;
-    all seven projects dock on the diagram. Never register `--u` (the zoom unit). Guard: `tests/r83`.
+14. **R83 (owner):** About is rebuilt from the page's own facts (split-flap Build Sheet, no invented figures). Never
+    register `--u` (the zoom unit). Guard: `tests/r83`. (The Build's 3D diagram and the Doom Walk were deleted in R118,
+    see section 8.9.)
 15. **The section doors open rooms (R84 walk-in gallery, owner: "walk into the shop ... show all my achievements ...
     instead of sending the user to the section"; replaces the R68 - R73 "every lit door leads back into this
     portfolio"):** a sign, E at a door or the directory opens that section's ROOM (its own scene and colliders,
@@ -267,7 +263,7 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
 5. **One registry, every place, automatically (R87, owner: "whenever I upload a project / gallery / achievement it
    must update in EVERY section ... including the 3D diorama, without me telling you").** A project lives only in
    `projects` (stacked-projects.tsx), a photo only in its gallery list / `ARCHIVE_DATA`, an honour only in `honorsList`.
-   Every other place (The Build docks and reels, Doom Walk ledger, About counts, Arena Wall rows above Contact,
+   Every other place (About counts, Arena Wall rows above Contact,
    highlight tape, command palette, 3D rooms) READS those registries; a hand-kept second list is a bug. When adding
    content, follow 50-content-updates and then check every consumer listed there; plan P7 in
    `docs/R87-NEO-BRUTALIST-REDESIGN-PLAN.md` adds the test that proves it.
@@ -278,10 +274,10 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
    once the window has RESTED on screen, waiting for START 3D on phones and software graphics - never the full street
    with walking / rooms on the home page. The street never shows a silent black window: a lost context is rebuilt on a fresh canvas, a
    stuck shader warm-up is drawn after 8 s, and otherwise RESTART 3D is offered. Guard: `tests/r107`.
-   R102 (owner, 9 Nov 2026: "why only these few projects ... must auto update ... put the photos in yourself"): every
-   photo on the site is ONE derived list (`components/memory-data.ts`, sizes from `lib/photo-manifest.ts`, generated
-   before every build) read by the Memory Reel after The Build (a swipeable film of every memory), both film reels and
-   the SYS MAP docks (from `projects`). An upload in a gallery folder appears by itself. Guard: `tests/r102`.
+   R102 (owner, 9 Nov 2026: "must auto update ... put the photos in yourself"): photo sizes come from
+   `lib/photo-manifest.ts`, generated from the files before every build, so an upload needs no typed size. Guard:
+   `tests/r102`. (The Memory Reel, the film reels and the SYS MAP docks that read `memory-data.ts` are deleted, R114 /
+   R118.)
 6. **The hero headline is a torch (R86)** - see law 5.
 7. **One crashing section never takes the page down (R86):** every lazy section is `guard()`-ed
    (components/section-boundary.tsx), crashes reach `/api/client-error`. Guard: `tests/r86.spec.ts`.
@@ -293,3 +289,10 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
    extrusion that falls away from the pointer; on load the lines drop into their slots in hard steps, the type rises off
    the paper, SYSTEMS TO is stamped; the rest of the hero arrives as a stepped wipe; no fade on scroll. Guards:
    `tests/smoke.spec.ts` (no gate), `tests/r98.spec.ts` (the forme), `scripts/validate-plans.mjs` R98.
+9. **No scroll storyboard between About and Projects (R118, owner, 11 Nov 2026: "delete the whole scrolling effect
+   part, from 'from student ID' to Dr. Doom ... section 1 and section 2 joined, smoother, clean ... more premium
+   neo-brutalism"; replaces R21 The Build, R83 / R89 Doom Walk, R90, R96, R109).** `components/build-story.tsx`,
+   `field-reel.tsx`, `doom-walk.tsx`, `memory-data.ts`, their CSS, `lib/story-progress.ts`, `lib/story-glyphs.ts` and
+   `public/images/{story,doom-walk}` are deleted. About (01) hands straight over to Projects (02): never put a pinned /
+   scroll-scrubbed storyboard, a walking clip or a dark full-screen stage back between them. `lib/ledger.ts` stays (the
+   3D rooms read it). Guard: `tests/r118.spec.ts`. docs/R118-ABOUT-TO-PROJECTS.md.

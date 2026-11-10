@@ -51,13 +51,11 @@ function klDifference(date = new Date()) {
   return `KL ${diff > 0 ? '+' : '-'}${Math.abs(diff)}h`;
 }
 
-const XRAY_TARGETS =
-  '.site-header, main section[id], .bs-section, [data-project-shell], .nb-card-lg, [data-pill-pit], footer';
+const XRAY_TARGETS = '.site-header, main section[id], [data-project-shell], .nb-card-lg, [data-pill-pit], footer';
 
 function labelFor(el: HTMLElement) {
   if (el.id) return `${el.tagName.toLowerCase()}#${el.id}`;
   if (el.matches('.site-header')) return 'header.site-header';
-  if (el.matches('.bs-section')) return 'section.the-build';
   if (el.dataset.projectId) return `card#${el.dataset.projectId}`;
   if (el.dataset.osWindow) return `window#${el.dataset.osWindow}`;
   if (el.matches('[data-pill-pit]')) return 'div.pill-pit';

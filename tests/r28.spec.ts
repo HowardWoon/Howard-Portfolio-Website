@@ -1,77 +1,14 @@
-import { test, expect, devices, type Page } from '@playwright/test';
+import { test, expect, devices } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 
-// Round 28 (docs/R28-DIAGNOSIS-AND-PLAN.md): The Build fits real phone browser viewports (390x664, 320x568 - not the
-// 390x844 the old tests used), landscape phones get the still, the Field Reels redesign works, the faded title no
-// longer swallows the pointer, the APIs are hardened, and the frame loops never read layout.
+// Round 28 (docs/R28-DIAGNOSIS-AND-PLAN.md): touch phones scroll natively, the APIs are hardened, and the frame loops
+// never read layout (R118: The Build and its fit / Field Reel checks are deleted).
 
 const strip = (d: (typeof devices)[string]) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { defaultBrowserType, ...o } = d;
   return o;
 };
-
-async function storyAt(page: Page, f: number) {
-  const at = await page.evaluate(() => {
-    const s = document.querySelector<HTMLElement>('.bs-section')!;
-    return { top: s.getBoundingClientRect().top + scrollY, len: s.offsetHeight };
-  });
-  const vh = page.viewportSize()!.height;
-  await page.evaluate((y) => window.scrollTo(0, y), at.top + (at.len - vh) * f + 2);
-  await page.waitForTimeout(900);
-}
-
-/** every scene box lies between the HUD and the caption bar (or the screen bottom when the captions step aside) */
-async function fitProblems(page: Page, f: number) {
-  await storyAt(page, f);
-  return page.evaluate((f) => {
-    const out: string[] = [];
-    const hud = document.querySelector('.bs-progress')!.getBoundingClientRect().bottom;
-    const cap = document.querySelector<HTMLElement>('.bs-captions')!;
-    const floor = getComputedStyle(cap).display === 'none' ? innerHeight : cap.getBoundingClientRect().top;
-    const sel = f < 0.4 ? ['.bs-idcard', '.bs-code .bs-card'] : ['.bs-diagram'];
-    for (const s of sel) {
-      const r = document.querySelector(s)!.getBoundingClientRect();
-      if (r.top < hud - 1) out.push(`${s} top ${Math.round(r.top)} is under the HUD (${Math.round(hud)})`);
-      if (r.bottom > floor + 1) out.push(`${s} bottom ${Math.round(r.bottom)} runs past ${Math.round(floor)}`);
-      if (r.left < -1 || r.right > innerWidth + 1) out.push(`${s} leaves the screen sideways`);
-    }
-    if (f < 0.4) {
-      const card = document.querySelector('.bs-code .bs-card')!.getBoundingClientRect();
-      for (const l of document.querySelectorAll('.bs-code .bs-type')) {
-        const r = l.getBoundingClientRect();
-        if (r.right > card.right + 1) out.push(`terminal line cut: "${(l.textContent ?? '').slice(0, 24)}"`);
-      }
-    }
-    return out;
-  }, f);
-}
-
-for (const name of ['iPhone SE', 'iPhone 13', 'Pixel 7', 'iPad Mini'] as const) {
-  test.describe(`story fits a real ${name} viewport`, () => {
-    test.use(strip(devices[name]));
-    test(`settled scenes stay between the HUD and the captions (${name})`, async ({ page, context }) => {
-      await context.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
-      await page.goto('/', { waitUntil: 'networkidle' });
-      // PARSE, ORCHESTRATE (R109: 05 SHIP deleted; story times 0.34 / 0.75)
-      for (const f of [0.3, 0.95]) expect(await fitProblems(page, f), `at ${f}`).toEqual([]);
-    });
-  });
-}
-
-test.describe('landscape phone', () => {
-  test.use(strip(devices['iPhone 13 landscape']));
-  test('a 342 px tall landscape phone gets the readable still, nothing over the card', async ({ page, context }) => {
-    await context.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
-    await page.goto('/', { waitUntil: 'networkidle' });
-    await expect(page.locator('.bs-track')).toHaveAttribute('data-static', 'on');
-    const r = await page.evaluate(() => ({
-      hud: document.querySelector('.bs-progress')!.getBoundingClientRect().bottom,
-      card: document.querySelector('.bs-diagram')!.getBoundingClientRect().top,
-    }));
-    expect(r.card).toBeGreaterThanOrEqual(r.hud);
-  });
-});
 
 test.describe('touch phone scrolls natively (B7)', () => {
   test.use(strip(devices['Pixel 7']));
@@ -89,53 +26,6 @@ test.describe('touch phone scrolls natively (B7)', () => {
     await page.evaluate(() => window.scrollBy(0, -200)); // the button shows while scrolling up
     await page.getByRole('button', { name: 'Scroll to top' }).click();
     await expect.poll(() => page.evaluate(() => scrollY), { timeout: 6000 }).toBeLessThan(5);
-  });
-});
-
-test.describe('desktop field reels', () => {
-  test.use({ viewport: { width: 1920, height: 940 } });
-  test('projector gate, counter, chapter and loupe; the reels stay to the end of the story', async ({
-    page,
-    context,
-  }) => {
-    await context.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
-    await page.goto('/?fxtier=full', { waitUntil: 'networkidle' });
-    await storyAt(page, 0.92); // story time 0.71 (R109: playhead = (s + 0.30) / 1.10)
-    const reels = page.locator('.bs-reel:visible');
-    await expect(reels).toHaveCount(2);
-    for (let i = 0; i < 2; i++) {
-      const reel = reels.nth(i);
-      await expect(reel.locator('.is-gate')).toHaveCount(1);
-      await expect(reel.locator('.bs-reel-count')).toHaveAttribute('data-text', /^\d{2}\/\d{2}$/);
-      await expect(reel.locator('.bs-reel-chapter')).not.toHaveText('');
-    }
-    // the gate follows the playhead
-    const before = await reels.first().locator('.bs-reel-count').getAttribute('data-text');
-    await storyAt(page, 0.77); // story time 0.55
-    await expect.poll(() => reels.first().locator('.bs-reel-count').getAttribute('data-text')).not.toBe(before);
-    // loupe on the gated frame, gone when the pointer leaves
-    const gated = reels.first().locator('.bs-reel-frame.is-gate');
-    if ((await gated.count()) === 1) {
-      const b = (await gated.boundingBox())!;
-      await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
-      await expect(page.locator('.bs-reel-loupe')).toHaveCount(1);
-      await expect(page.locator('.bs-reel-loupe')).toContainText(/FRAME \d{2} \/ \d{2}/);
-      await page.mouse.move(960, 470);
-      await expect(page.locator('.bs-reel-loupe')).toHaveCount(0);
-    }
-    // R109: 05 SHIP is gone - the story ends on 04, the reels stay beside the system map to the last frame
-    await storyAt(page, 0.99);
-    const op = await page.locator('.bs-reel-exit').evaluateAll((es) => es.map((e) => +getComputedStyle(e).opacity));
-    expect(Math.min(...op)).toBeGreaterThan(0.95);
-  });
-
-  test('the faded title card no longer catches the pointer in scenes 01-04', async ({ page, context }) => {
-    await context.addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
-    await page.goto('/', { waitUntil: 'networkidle' });
-    await storyAt(page, 0.5);
-    expect(await page.locator('.bs-title').evaluate((e) => getComputedStyle(e).pointerEvents)).toBe('none');
-    await storyAt(page, 0);
-    expect(await page.locator('.bs-title').evaluate((e) => getComputedStyle(e).pointerEvents)).not.toBe('none');
   });
 });
 
@@ -162,11 +52,8 @@ test('CSP sink accepts the Reporting API array format', async ({ request }) => {
   expect(r.status()).toBe(204);
 });
 
-test('frame loops are write-only: no layout reads inside the Section Clock / Build Story frames', () => {
+test('frame loops are write-only: no layout reads inside the Section Clock frame', () => {
   const clock = readFileSync('components/fx/section-clock.tsx', 'utf8');
   const frame = clock.slice(clock.indexOf('const frame = () => {'), clock.indexOf('const request = () => {'));
   expect(frame).not.toMatch(/window\.scrollY|innerHeight|getBoundingClientRect/);
-  const story = readFileSync('components/build-story.tsx', 'utf8');
-  const update = story.slice(story.indexOf('const update = () => {'), story.indexOf('const schedule = () => {'));
-  expect(update).not.toMatch(/window\.scrollY|innerHeight|getBoundingClientRect/);
 });

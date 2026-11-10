@@ -44,19 +44,17 @@ The owner drops uploads in the repo root (often with spaces, `.ico` / `.webp` / 
 
 ## C. Where each kind of file lives (new files go ONLY here)
 
-| Kind                                  | Folder / file                                  | Format                                                          | Registered in                                         |
-| ------------------------------------- | ---------------------------------------------- | --------------------------------------------------------------- | ----------------------------------------------------- |
-| Project photo / screen                | `public/images/projects/<project-id>/`         | JPEG q86, long edge <= 1600 px (screens: PNG if text is small)  | the project's `galleryPhotos` (stacked-projects.tsx)  |
-| Experience photo                      | `public/images/experiences/<experience-id>/`   | JPEG q86, long edge <= 1600 px                                  | the role's `galleryPhotos` (experience-section.tsx)   |
-| Project organiser logo                | `public/images/logos/organisers/<id>.png`      | trimmed to its ink, 160 px tall, PNG                            | `lib/organisers.ts`                                   |
-| Experience organisation wordmark      | `public/images/logos/<org>_logo.png`           | trimmed, white or transparent ground                            | `ORG_LOGOS` (components/org-logo.tsx)                 |
-| Institution crest (UM, KMNS)          | `public/images/logos/<name>_crest.png`         | trimmed, centred, HD                                            | `components/institution-seal.tsx` only                |
-| Certificate                           | `public/certificates/<kebab-name>.png`         | PNG picture, long edge <= 2000 px                               | `certificateUrl` + `CERT_SIZE` (honors-section.tsx)   |
-| Certificate PDF (text layer verified) | `public/certificates/<kebab-name>.pdf`         | PDF + a preview PNG in `public/certificates/previews/`          | `certificateUrl`                                      |
-| CV                                    | `public/resume.pdf` (this exact name, always)  | the owner's PDF, unmodified                                     | `RESUME_URL` (lib/resume.ts) - every control reads it |
-| Pitch deck / document                 | `public/documents/<kebab-name>.pdf`            | PDF                                                             | the project's `deckUrl`                               |
-| The Build story art                   | `public/images/build/`, `public/images/story/` | JPEG / PNG                                                      | build-story.tsx                                       |
-| Scroll-scrubbed clip (Doom Walk)      | `public/images/doom-walk/{wide,tall}/NN.webp`  | ffmpeg: every frame, wide 960x540 + tall 432x540 crop, WebP q72 | `FRAMES` in doom-walk.tsx                             |
+| Kind                                  | Folder / file                                 | Format                                                         | Registered in                                         |
+| ------------------------------------- | --------------------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------- |
+| Project photo / screen                | `public/images/projects/<project-id>/`        | JPEG q86, long edge <= 1600 px (screens: PNG if text is small) | the project's `galleryPhotos` (stacked-projects.tsx)  |
+| Experience photo                      | `public/images/experiences/<experience-id>/`  | JPEG q86, long edge <= 1600 px                                 | the role's `galleryPhotos` (experience-section.tsx)   |
+| Project organiser logo                | `public/images/logos/organisers/<id>.png`     | trimmed to its ink, 160 px tall, PNG                           | `lib/organisers.ts`                                   |
+| Experience organisation wordmark      | `public/images/logos/<org>_logo.png`          | trimmed, white or transparent ground                           | `ORG_LOGOS` (components/org-logo.tsx)                 |
+| Institution crest (UM, KMNS)          | `public/images/logos/<name>_crest.png`        | trimmed, centred, HD                                           | `components/institution-seal.tsx` only                |
+| Certificate                           | `public/certificates/<kebab-name>.png`        | PNG picture, long edge <= 2000 px                              | `certificateUrl` + `CERT_SIZE` (honors-section.tsx)   |
+| Certificate PDF (text layer verified) | `public/certificates/<kebab-name>.pdf`        | PDF + a preview PNG in `public/certificates/previews/`         | `certificateUrl`                                      |
+| CV                                    | `public/resume.pdf` (this exact name, always) | the owner's PDF, unmodified                                    | `RESUME_URL` (lib/resume.ts) - every control reads it |
+| Pitch deck / document                 | `public/documents/<kebab-name>.pdf`           | PDF                                                            | the project's `deckUrl`                               |
 
 Legacy folders (`images/muba/`, `images/experience/mhw|mytech/`, certificate names in UPPER_CASE) stay where they are:
 moving them breaks paths and tests for no visitor gain. Never add new files to them.
@@ -68,11 +66,9 @@ moving them breaks paths and tests for no visitor gain. Never add new files to t
 - [ ] Intake (B), folder (C), real `w` / `h`, factual `alt` (who, what, where - no adjectives).
 - [ ] Order (AGENTS.md 6.1): Howard with the award / on stage first, other event photos, product screens last.
       Numbered uploads (1.jpg, 2.jpg ...) keep the owner's numbering.
-- [ ] R102 (owner: "auto update ... put the photos in yourself"): NOTHING else to type. The Memory Reel, The Build's
-      film reels (`FIELD_REEL` = Experience galleries + Field Archives, `BUILD_REEL` = project galleries) and the SYS
-      MAP docks READ `components/memory-data.ts`, which reads the galleries. A photo dropped into an existing gallery
-      folder joins that chapter by itself (its size comes from `lib/photo-manifest.ts`, made from the files before
-      every build); still give it its gallery entry (alt, order) in the same change. A new folder needs its project /
+- [ ] R102: a photo's size comes from `lib/photo-manifest.ts`, made from the files before every build (never type
+      it); give it its gallery entry (alt, order) in the same change. (R118: The Build's film reels, the SYS MAP docks
+      and `memory-data.ts` are deleted - there is no second photo list to update.) A new folder needs its project /
       experience entry first. Never add a hand-kept photo or project list anywhere.
 - [ ] `npm run build` regenerates `lib/photo-manifest.ts` and `components/photo-blur.ts` (prebuild); commit both.
       `tests/r102` fails when a typed `w` / `h` differs from the file or a folder photo is missing from the reel.
@@ -83,8 +79,7 @@ moving them breaks paths and tests for no visitor gain. Never add new files to t
 - [ ] `honorsList` (honors-section.tsx): copy the nearest sibling. `signal` by SIGNAL KEY (podium = won, qualifier =
       finalist / qualified, academic = grades); `emblem` by kind (gold / silver / bronze / star / finalist / seal /
       ticket / badge); `statCallout.value` <= 6 characters (it is drawn on the emblem); certificate per D6.
-- [ ] Every place that repeats honours: Victor's Ledger `LEDGER` (lib/ledger.ts, printed row by row on the Doom Walk receipt, same order as Honours; a new row needs no other change), the release
-      card `AWARDS` (max three rows, the newest podiums), the About Build Sheet podium counter (about-section.tsx, this
+- [ ] Every place that repeats honours: `LEDGER` (lib/ledger.ts, read by the 3D rooms; same order as Honours), the About Build Sheet podium counter (about-section.tsx, this
       year's podiums), the hero ticker (bikebear-hero.tsx: ONLY the newest result, tagged LATEST), the logo wall
       `REEL_ROWS` ticket (arena-reel.tsx), the highlight tape (portfolio-page.tsx), and the project's `badge` when the
       honour belongs to a project.
@@ -94,15 +89,14 @@ moving them breaks paths and tests for no visitor gain. Never add new files to t
 
 - [ ] `projects` (stacked-projects.tsx): copy a sibling; `number` follows the order the owner wants; `signal`, `badge`,
       `organiser` (D5), `tags` that match the skills matrix names, `galleryPhotos` (D1), `deckUrl` (C).
-- [ ] Every place that repeats projects: the diagram `DOCKS` (build-story.tsx: one tag per box edge), `BUILD_REEL` slate,
-      the About Build Sheet project count, the logo wall ticket, About pillar text when the project is a pillar's proof.
-- [ ] Guards: tests/r83 (7 docks, organiser plates), r18 (focus neighbours follow the order), r10.
+- [ ] Every place that repeats projects: the About Build Sheet project count, the logo wall ticket, About pillar text when the project is a pillar's proof.
+- [ ] Guards: tests/r83 (organiser plates), r18 (focus neighbours follow the order), r10.
 
 ### D4. Experience / role
 
 - [ ] `experiences` (experience-section.tsx): copy a sibling; dates exactly as the owner states them; `logo` through
       `ORG_LOGOS` (never a raw `<img>`); photos per D1.
-- [ ] Repeats: About Build Sheet roles count, About "Finance & Leadership" pillar, FIELD_REEL slate, highlight tape.
+- [ ] Repeats: About Build Sheet roles count, About "Finance & Leadership" pillar, highlight tape.
 
 ### D5. Organiser logo (projects)
 

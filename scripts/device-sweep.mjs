@@ -6,7 +6,6 @@
  * so lazy sections mount, and fails on:
  *   - horizontal page overflow (anything wider than the screen)
  *   - visible text crossing the screen edge outside an intentional scroller / clipper (a crop)
- *   - The Build (pinned story) not fitting the screen height at a settled scene (R28 P9)
  *   - page errors, console errors, or any request >= 400 (the Vercel-only /_vercel/* scripts are 404 locally: skipped)
  *
  * Usage (a production server must already be running, see 06-stability B):
@@ -89,50 +88,6 @@ const PROFILES = [
   ]),
 ];
 
-async function storyFit(page) {
-  const at = await page.evaluate(() => {
-    const s = document.querySelector('.bs-section');
-    const t = document.querySelector('.bs-track');
-    return (
-      s && { top: s.getBoundingClientRect().top + scrollY, len: s.offsetHeight, still: t?.dataset.static === 'on' }
-    );
-  });
-  if (!at) return ['.bs-section missing'];
-  const vh = page.viewportSize().height;
-  if (at.still) {
-    await page.evaluate((y) => window.scrollTo(0, y), at.top);
-    await page.waitForTimeout(300);
-    return page.evaluate(() => {
-      const hud = document.querySelector('.bs-progress').getBoundingClientRect().bottom;
-      const card = document.querySelector('.bs-diagram').getBoundingClientRect().top;
-      return card < hud - 1 ? [`still: system map ${Math.round(card)} under the HUD ${Math.round(hud)}`] : [];
-    });
-  }
-  const out = [];
-  // PARSE, ORCHESTRATE (R109: 05 SHIP deleted; story times 0.34 / 0.75)
-  for (const f of [0.3, 0.95]) {
-    await page.evaluate((y) => window.scrollTo(0, y), at.top + (at.len - vh) * f + 2);
-    await page.waitForTimeout(900);
-    out.push(
-      ...(await page.evaluate((f) => {
-        const o = [];
-        const hud = document.querySelector('.bs-progress').getBoundingClientRect().bottom;
-        const cap = document.querySelector('.bs-captions');
-        const floor = getComputedStyle(cap).display === 'none' ? innerHeight : cap.getBoundingClientRect().top;
-        const sel = f < 0.4 ? ['.bs-idcard', '.bs-code .bs-card'] : ['.bs-diagram'];
-        for (const s of sel) {
-          const r = document.querySelector(s).getBoundingClientRect();
-          if (r.top < hud - 1) o.push(`${f}: ${s} top ${Math.round(r.top)} under the HUD ${Math.round(hud)}`);
-          if (r.bottom > floor + 1) o.push(`${f}: ${s} bottom ${Math.round(r.bottom)} past ${Math.round(floor)}`);
-          if (r.left < -1 || r.right > innerWidth + 1) o.push(`${f}: ${s} leaves the screen sideways`);
-        }
-        return o;
-      }, f)),
-    );
-  }
-  return out;
-}
-
 const browser = await chromium.launch();
 let problems = 0;
 for (const [name, profile] of PROFILES) {
@@ -194,18 +149,14 @@ for (const [name, profile] of PROFILES) {
       }
       return { overflow: document.documentElement.scrollWidth - vw, crops: [...new Set(crops)].slice(0, 5) };
     });
-    // R28 P9: The Build (pinned story) must fit this screen's height at every settled scene: each card / diagram
-    // between the HUD and the caption bar (or the screen bottom when the captions step aside); landscape phones get
-    // the static still, where the release card must start below the HUD.
-    const fit = path === '/' ? await storyFit(page) : [];
-    const bad = r.overflow > 0 || r.crops.length > 0 || errors.length > 0 || fit.length > 0;
+    // R118: The Build (the pinned story R28 P9 fitted to each screen) is deleted, so its fit check went with it
+    const bad = r.overflow > 0 || r.crops.length > 0 || errors.length > 0;
     if (bad) problems++;
     console.log(
-      `${bad ? 'FAIL' : 'ok  '} ${name.padEnd(26)} ${path.padEnd(20)} overflow=${r.overflow} crops=${r.crops.length} errors=${errors.length}${path === '/' ? ` storyfit=${fit.length}` : ''}`,
+      `${bad ? 'FAIL' : 'ok  '} ${name.padEnd(26)} ${path.padEnd(20)} overflow=${r.overflow} crops=${r.crops.length} errors=${errors.length}`,
     );
     for (const c of r.crops) console.log(`       crop: ${c}`);
     for (const e of errors) console.log(`       error: ${e}`);
-    for (const e of fit) console.log(`       story: ${e}`);
     await page.close();
   }
   await ctx.close();

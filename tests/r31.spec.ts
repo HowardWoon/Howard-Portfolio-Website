@@ -2,8 +2,8 @@ import { test, expect, devices, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 
 // Round 31 (docs/R29-GALLERY-AND-CREST-PLAN.md, section R31): the hero fits the real laptop height, the badge pit
-// settles and stays still, the UM Crest Scan beat plays in its own slot of The Build, the Honours Tally fills the
-// space under the Signal Key with real counts, and the 03 / 04 diagram carries the HUD.
+// settles and stays still, and the Honours Tally fills the space under the Signal Key with real counts (R118: The
+// Build, its Crest Scan beat and its diagram HUD are deleted).
 
 const strip = (d: (typeof devices)[string]) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -15,19 +15,6 @@ async function open(page: Page, path = '/') {
   await page.context().addInitScript(() => sessionStorage.setItem('hw-booted', '1'));
   await page.goto(path, { waitUntil: 'networkidle' });
 }
-
-/** scroll The Build so the stage playhead reads `p` (the track, not the section, drives --p) */
-async function playhead(page: Page, p: number) {
-  await page.evaluate((p) => {
-    const t = document.querySelector<HTMLElement>('.bs-track')!;
-    const top = t.getBoundingClientRect().top + scrollY;
-    window.scrollTo(0, top + (t.offsetHeight - innerHeight) * p);
-  }, p);
-  await page.waitForTimeout(900);
-}
-
-// R109: gap in story time = [0.36, 0.66] of 1.10 -> playhead [0.327, 0.6] (lib/story-progress.ts, 05 SHIP deleted)
-const gap = (f: number) => (0.36 + f * 0.3) / 1.1;
 
 for (const [w, h] of [
   [1536, 730],
@@ -110,14 +97,11 @@ for (const [name, size] of [
   });
 }
 
-test('source: nothing in the crest scan / HUD lays out per scroll frame', () => {
+test('source: no style lays out per scroll frame (the R31 crest scan went with The Build in R118)', () => {
   const css = readFileSync('app/globals.css', 'utf8');
-  const scan = css.slice(css.indexOf('R31 CREST SCAN'), css.indexOf('R30 Registrar Seal'));
-  // a scroll-driven top / left / counter re-lays out the page every frame (+layouts per phone fling, r17 P0-01)
-  expect(scan).not.toMatch(/top:\s*calc\(var\(--t\)/);
-  expect(scan).not.toMatch(/counter-reset/);
-  // R90: the diagram's wires are HTML bars scaled by transform; no per-frame SVG stroke offset is left in the story
-  expect(readFileSync('app/build-story.css', 'utf8')).not.toMatch(/stroke-dashoffset/);
+  // a scroll-driven top / left re-lays out the page every frame (+layouts per phone fling, r17 P0-01)
+  expect(css).not.toMatch(/top:\s*calc\(var\(--t\)/);
+  expect(css).not.toMatch(/R31 CREST SCAN/);
 });
 
 test('source: the pit sleeps settled badges and never kicks them at random', () => {
@@ -125,68 +109,6 @@ test('source: the pit sleeps settled badges and never kicks them at random', () 
   expect(src).toMatch(/asleep/);
   expect(src).not.toMatch(/Math\.random\(\) - 0\.5\) \* 500/);
 });
-
-for (const [name, size] of [
-  ['phone', devices['iPhone 13']],
-  ['desktop', { viewport: { width: 1920, height: 900 } }],
-] as const) {
-  test.describe(`crest scan (${name})`, () => {
-    test.use('defaultBrowserType' in size ? strip(size) : size);
-    test(`the UM crest is scanned in its own slot, under the HUD, and gone on both sides of it (${name})`, async ({
-      page,
-    }) => {
-      await open(page);
-      const state = () =>
-        page.evaluate(() => {
-          const bed = document.querySelector('.bs-scan-bed')!.getBoundingClientRect();
-          const cols = [...document.querySelectorAll('.bs-scan-col')].map((c) => c.getBoundingClientRect());
-          const hud = document.querySelector('.bs-progress')!.getBoundingClientRect().bottom;
-          const inStage = cols.filter((c) => c.bottom > hud + 20).length;
-          const op = parseFloat(getComputedStyle(document.querySelector('.bs-scan-in')!).opacity);
-          const grow = parseFloat(getComputedStyle(document.querySelector('.bs-scan-grow')!).opacity);
-          // the readout's meter fills with the scan (a transform, never a changing number: no layout per frame)
-          const fill = getComputedStyle(document.querySelector('.bs-scan-meter-fill')!).transform;
-          const pct = fill === 'none' ? 100 : new DOMMatrix(fill).a * 100;
-          const colsTop = document.querySelector('.bs-scan-cols')!.getBoundingClientRect().top;
-          const g = getComputedStyle(document.querySelector('.bs-scan-grow')!).transform;
-          return {
-            growScale: g === 'none' ? 1 : new DOMMatrix(g).a,
-            visible: op * grow,
-            cover: inStage,
-            n: cols.length,
-            centred: Math.abs(bed.left + bed.width / 2 - innerWidth / 2) < 40,
-            pct,
-            underHud: colsTop >= hud - 2,
-          };
-        });
-      await playhead(page, gap(-0.2)); // before the slot: terminal still on
-      let s = await state();
-      expect(s.visible).toBeLessThan(0.05);
-      expect(s.cover).toBe(0);
-      await playhead(page, gap(0.48)); // mid scan
-      s = await state();
-      expect(s.cover).toBe(s.n); // the paper lid covers the stage
-      expect(s.visible).toBeGreaterThan(0.95);
-      expect(s.centred).toBe(true);
-      expect(s.underHud).toBe(true);
-      expect(s.pct).toBeGreaterThan(0); // a live percentage, part-way
-      expect(s.pct).toBeLessThan(100);
-      // R37 hold: the decoded crest rests in the bed before it grows (it used to grow 0.02 of the gap after decoding)
-      for (const f of [0.55, 0.62]) {
-        await playhead(page, gap(f));
-        s = await state();
-        expect(s.pct, `decoded at ${f}`).toBe(100);
-        expect(s.growScale, `not growing yet at ${f}`).toBe(1);
-        expect(s.visible, `crest shown at ${f}`).toBeGreaterThan(0.95);
-        expect(s.cover, `lid still closed at ${f}`).toBe(s.n);
-      }
-      await playhead(page, gap(1.25)); // after: blueprint scene, the lid has lifted
-      s = await state();
-      expect(s.visible).toBeLessThan(0.05);
-      expect(s.cover).toBe(0);
-    });
-  });
-}
 
 test.describe('honours tally (1440)', () => {
   test.use({ viewport: { width: 1440, height: 900 } });
@@ -211,21 +133,6 @@ test.describe('honours tally (1440)', () => {
     await tally.locator('.tally-row').nth(1).click();
     await expect(page.locator('[data-honor-category]').nth(1)).toHaveAttribute('aria-expanded', 'true');
     await expect(page.locator('#honors [data-seal="um"]')).toBeInViewport({ timeout: 4000 });
-  });
-});
-
-test.describe('orchestrate HUD (1920)', () => {
-  test.use({ viewport: { width: 1920, height: 900 } });
-  // R90: the radar and the range rings are gone (the owner's "dark dashboard"); the printed readout stays
-  test('the system readout is on the diagram, with no radar or range rings', async ({ page }) => {
-    await open(page, '/?fxtier=full');
-    await playhead(page, (0.72 + 0.3) / 1.1); // story time 0.72 (lib/story-progress.ts storyTime)
-    const r = await page.evaluate(() => ({
-      readout: document.querySelector('.bs-hud-readout')!.textContent?.replace(/\s+/g, ' ').trim(),
-      radar: document.querySelectorAll('.bs-hud-radar, .bs-hud-rings').length,
-    }));
-    expect(r.readout).toBe('SYS MAP · 05 NODES · 07 BUILDS'); // R83: all seven projects dock (Monsun Bridge on DATA)
-    expect(r.radar).toBe(0);
   });
 });
 

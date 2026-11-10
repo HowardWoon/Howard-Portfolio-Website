@@ -266,28 +266,6 @@ test.describe('desktop 1440', () => {
       )
       .toBe(true);
   });
-
-  // R48 asked for a waving pixel field behind The Build title; R77 (owner: "make my whole website, every section
-  // background clean and tidy") retired it. The title card stands on the plain floor, and a press still never jumps
-  // the story.
-  test('no contour field behind The Build title, and a press on the stage does not jump the story', async ({
-    page,
-  }) => {
-    await home(page);
-    await page.evaluate(() => {
-      const s = document.querySelector('.bs-section')!;
-      window.scrollTo(0, s.getBoundingClientRect().top + window.scrollY + 4);
-    });
-    await expect(page.locator('[data-scene="0"]')).toHaveCount(1);
-    expect(await page.locator('canvas.bs-contour, .bs-contour-layer').count()).toBe(0);
-    const at = await page.evaluate(() => {
-      const r = document.querySelector('.bs-stage')!.getBoundingClientRect();
-      return { x: r.left + 90, y: r.bottom - 70 };
-    });
-    await page.mouse.click(at.x, at.y);
-    await page.waitForTimeout(350);
-    await expect(page.locator('[data-scene="0"]')).toHaveCount(1);
-  });
 });
 
 // R52: found by measuring the bigger pile, not by a visitor. A badge left above a full pile was steered to the MIDDLE of

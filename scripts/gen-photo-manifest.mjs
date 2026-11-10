@@ -2,8 +2,8 @@
 /**
  * R102 (owner: "when I upload new photos, set a rule ... auto update, plan it yourself, put the photos in yourself"):
  * writes lib/photo-manifest.ts, the REAL pixel size (sharp().metadata(), AGENTS.md 6.2) of every photo in the photo
- * folders below. components/memory-data.ts reads it, so a photo dropped into a gallery's folder joins that gallery's
- * memory chapter (Memory Reel, The Build's film reels) without anyone typing its size. Runs before every build
+ * folders below. The diorama teaser's gallery reads it (R118: the film reels and their memory registry are deleted
+ * with The Build), so a new render joins without anyone typing its size. Runs before every build
  * (package.json "prebuild") and by hand: node scripts/gen-photo-manifest.mjs
  * Uses `sharp`, which ships with Next.js (no new dependency).
  */
@@ -14,7 +14,7 @@ import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
 const sharp = require('sharp');
 
-/** the folders that hold gallery / event photos (logos, story art, the Doom frames and portraits are not memories) */
+/** the folders that hold gallery / event photos (logos and portraits are not memories) */
 export const PHOTO_DIRS = [
   'images/projects',
   'images/experience',

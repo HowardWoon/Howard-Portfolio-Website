@@ -18,8 +18,8 @@ A task is DONE only when every applicable item below has actually been executed 
 - `npm run test:e2e` -> all pass. The test file must load (no `test.use({ ...devices[...] })` inside `describe` blocks: destructure `defaultBrowserType` out first, or define a separate project in `playwright.config.ts`).
 - When you fix a bug, add or extend a test that fails without the fix.
 - Never remove an assertion. A test without an `expect` is not a test.
-- `tests/r24.spec.ts` is the permanent guard for the type floor, the three fonts, emblem geometry, build-story
-  collisions and the phone header. When it fails, fix the site, never loosen the thresholds.
+- `tests/r24.spec.ts` is the permanent guard for the type floor, the three fonts, emblem geometry and the phone
+  header. When it fails, fix the site, never loosen the thresholds.
 - Local runs use 3 workers, CI and the pre-push hook use 1. A test that fails with 3 workers but passes
   `--workers 1 --repeat-each 3` is load-sensitive; to blame a change, rebuild WITHOUT the change and run the same
   set (R67: r53 "proof card" / "reading-progress ring" failed with 3 workers with and without the change).
@@ -50,7 +50,7 @@ Playwright's Chromium is already installed (the e2e tests use it), so screenshot
    a 600 px tablet, iPads and Android tablets in both orientations, 1366 - 2560 px desktops; 6 pages incl. the admin
    sign-in and the 404 page): overflow, cropped text, page / console errors, failed requests. Must print ALL PASS.
 4. Open at least the 390x844 and 1440x900 screenshots of every page you changed and say what you checked. For type
-   or spacing changes also look at 375x667 and 844x390, and at the pinned build-story frames (10 / 45 / 80 / 97 %).
+   or spacing changes also look at 375x667 and 844x390.
 5. For a "no visual change" claim, compare before/after screenshots of the same viewport (build main, then your branch).
 6. Overlays: dialog box equals the viewport, close button inside it, Escape closes, scroll works afterwards, focus returns.
 7. `@axe-core/cli` needs a matching ChromeDriver and often fails; do not use it. audit-ui.mjs runs axe inside Playwright.
