@@ -1,5 +1,6 @@
 'use client';
 
+import { SectionIndex } from './section-index';
 import React, { useEffect, useRef, useState } from 'react';
 import { m, LayoutGroup } from 'framer-motion';
 import { Server, Cpu, GitBranch, ShieldCheck, Activity, Sparkles, ArrowUpRight, Layers, Code2 } from 'lucide-react';
@@ -427,9 +428,7 @@ export default function AboutSection() {
     >
       <div className="relative max-w-7xl mx-auto space-y-16">
         {/* R112: the section's number at poster scale, outlined ink on the ground (like the references' "06") */}
-        <span aria-hidden data-section-index className="ground-index -mb-8 sm:-mb-12">
-          01
-        </span>
+        <SectionIndex id="about" className="-mb-8 sm:-mb-12" />
         {/* R101 data plate (docs/R101-ABOUT-PLATE.md): the header, the words and the Build Sheet are ONE riveted plate -
             an ink label bar, the claim and the paragraph on the left, the four split-flap counters as a ruled grid on
             the right (stacked on phones). Same words, same links. */}

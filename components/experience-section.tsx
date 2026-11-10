@@ -1,5 +1,6 @@
 'use client';
 
+import { SectionIndex } from './section-index';
 import React, { useState } from 'react';
 import '@/app/treasurer.css';
 import { FieldArchive } from './field-archive';
@@ -847,8 +848,9 @@ export default function ExperienceSection() {
       className="fx-tide-surface fx-dot-plane fx-sheet relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-clip border-t-3 border-ink"
     >
       <div className="relative max-w-6xl mx-auto space-y-12">
-        {/* Section Header */}
+        {/* Section Header (R114: every section carries its poster number, 01 - 05) */}
         <div className="space-y-7">
+          <SectionIndex id="experience" className="-mb-2" />
           <m.div className="fx-rise nb-kicker">
             <Sparkles className="w-4 h-4" strokeWidth={2.5} />
             <span>EXPERIENCE // CAREER & INSTITUTIONAL GOVERNANCE</span>

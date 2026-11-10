@@ -1,5 +1,6 @@
 'use client';
 
+import { SectionIndex } from './section-index';
 import React from 'react';
 import { ProjectIndex, type ProjectIndexItem } from './project-index';
 import { OrganiserPlate } from './organiser-plate';
@@ -884,8 +885,9 @@ export default function StackedProjects() {
       className="fx-tide-surface fx-dot-plane fx-sheet relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-x-clip border-t-3 border-ink"
     >
       <div className="relative max-w-7xl mx-auto space-y-16 sm:space-y-20">
-        {/* Section Header */}
+        {/* Section Header (R114: every section carries its poster number, 01 - 05) */}
         <div className="space-y-7">
+          <SectionIndex id="projects" className="-mb-2" />
           <div className="nb-kicker">
             <Layers className="w-4 h-4" strokeWidth={2.5} />
             <span>PROJECTS // PRODUCTION & ARCHITECTURE</span>
@@ -1136,7 +1138,7 @@ function ProjectCard({ project, index }: { project: ProjectData; index: number }
                     </ol>
                   </div>
 
-                  <section data-tech-file aria-label={`${project.title} technical file`} className="pj-file fx-layer">
+                  <section data-tech-file aria-label={`${project.title} technical file`} className="pj-file">
                     <header className="pj-file-bar">
                       <span>Technical file</span>
                       <span className="pj-file-count">{String(project.file.length).padStart(2, '0')} sections</span>

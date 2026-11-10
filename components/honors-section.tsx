@@ -1,5 +1,6 @@
 'use client';
 
+import { SectionIndex } from './section-index';
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { m, AnimatePresence } from 'framer-motion';
@@ -590,8 +591,9 @@ export default function HonorsSection() {
       className="fx-tide-surface fx-dot-plane fx-sheet relative w-full bg-paper-cream bg-dots text-ink py-24 sm:py-32 px-4 xs:px-5 sm:px-10 lg:px-16 overflow-clip border-t-3 border-ink flex flex-col"
     >
       <div className="relative max-w-7xl mx-auto space-y-12 w-full flex-1 flex flex-col">
-        {/* Section Header */}
+        {/* Section Header (R114: every section carries its poster number, 01 - 05) */}
         <div className="space-y-7">
+          <SectionIndex id="honors" className="-mb-2" />
           <m.div className="fx-rise nb-kicker">
             <Sparkles className="w-4 h-4" strokeWidth={2.5} />
             <span>HONORS // ACADEMIC & COMPETITION DISTINCTIONS</span>

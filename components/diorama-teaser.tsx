@@ -1,7 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
-import { ArrowUpRight, DoorOpen, Eye, Footprints } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
+import { ArrowUpRight, DoorOpen, Eye, Footprints, Images } from 'lucide-react';
+import { DioramaPreview } from './diorama-preview';
+import { PhotoLightbox, type Photo } from './interactive-photo-stack';
+import { PHOTO_MANIFEST } from '@/lib/photo-manifest';
 import { WipeLink } from './fx/route-wipe';
 import { buildGalleryContent } from './tokyo-diorama/gallery/content';
 import { SECTION_DOORS, SECTION_JP } from './tokyo-diorama/engine/doors';
@@ -15,16 +20,28 @@ import '@/app/diorama-teaser.css';
  * holds (counted from the same gallery content the rooms are built from), how to play, and the way in: /diorama.
  * No three.js, no canvas here - scrolling past costs nothing.
  */
-const STILLS = {
-  street: {
-    src: '/images/diorama/street.jpg',
-    w: 1600,
-    h: 900,
-    alt: 'The 3D street corner after rain, seen from above',
-  },
-  room: { src: '/images/diorama/room.jpg', w: 1354, h: 721, alt: 'Inside a room of the 3D gallery' },
-  walk: { src: '/images/diorama/walk.jpg', w: 1354, h: 721, alt: 'Walking up to a lit door in the 3D street' },
-} as const;
+// R114 (owner: "not just two photos - a whole gallery"): every render in public/images/diorama is a still, read from
+// the photo manifest (made from the files before every build), so a new render dropped there joins by itself. The
+// street overview is the live window's stand-in; the rest form the gallery, captioned from their file names.
+const ALT: Record<string, string> = {
+  street: 'The 3D street corner after rain, seen from above',
+  'street-sakura': 'The 3D street in sakura season',
+  'street-snow': 'The 3D street in the snow',
+  walk: 'Walking up to a lit door in the 3D street',
+  'room-about': 'Inside the About room: the framed portrait',
+  'room-projects': 'Inside the Projects room: the project kiosks',
+  'room-experience': 'Inside the Experience room: a role booth with its photos',
+  'room-honors': 'Inside the Honours room: certificates and trophies',
+  'room-contact': 'Inside the Contact room: the post box and the channels',
+};
+const STILLS: Photo[] = Object.entries(PHOTO_MANIFEST)
+  .filter(([src]) => src.startsWith('/images/diorama/'))
+  .map(([src, [w, h]]) => {
+    const name = src.slice(src.lastIndexOf('/') + 1).replace(/\.[a-z]+$/i, '');
+    return { src, w, h, rotation: 0, alt: ALT[name] ?? 'Tokyo After Rain, the 3D diorama' };
+  });
+const POSTER = STILLS.find((x) => x.src.endsWith('/street.jpg')) ?? STILLS[0];
+const GALLERY = STILLS.filter((x) => x !== POSTER);
 
 const content = buildGalleryContent();
 const ROOMS = SECTIONS.filter((s) => s.id in SECTION_DOORS).map((s) => ({
@@ -35,6 +52,7 @@ const ROOMS = SECTIONS.filter((s) => s.id in SECTION_DOORS).map((s) => ({
 }));
 
 export default function DioramaTeaser() {
+  const [open, setOpen] = useState<number | null>(null);
   return (
     <section
       id="diorama"
@@ -61,9 +79,10 @@ export default function DioramaTeaser() {
           </div>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-12 lg:items-start">
+        {/* R114: both columns are as tall as the taller one - the window bottom row and the gallery end on one line */}
+        <div className="grid gap-8 lg:grid-cols-12 lg:items-stretch">
           {/* the window: a real render, and the way in */}
-          <div className="dt-window min-w-0 lg:col-span-8">
+          <div className="dt-window flex min-w-0 flex-col lg:col-span-8">
             <div className="dt-bar">
               <span aria-hidden className="dt-keys">
                 <i />
@@ -73,16 +92,8 @@ export default function DioramaTeaser() {
               <span className="min-w-0 truncate">夜雨の街角 · TOKYO_AFTER_RAIN</span>
               <span className="dt-chip">Own page</span>
             </div>
-            <WipeLink href="/diorama" portal="out" tabIndex={-1} aria-hidden className="dt-shot">
-              <Image
-                src={STILLS.street.src}
-                alt=""
-                width={STILLS.street.w}
-                height={STILLS.street.h}
-                sizes="(max-width: 1024px) 100vw, 860px"
-                className="h-auto w-full"
-              />
-            </WipeLink>
+            {/* R114: the real 3D street, drag to turn it (view mode); the button below opens the full page */}
+            <div className="dt-shot flex flex-1 flex-col">{POSTER ? <DioramaPreview poster={POSTER} /> : null}</div>
             <div className="dt-foot">
               <WipeLink href="/diorama" portal="out" data-diorama-cta className="dt-cta">
                 <span>Enter the 3D block</span>
@@ -92,7 +103,7 @@ export default function DioramaTeaser() {
             </div>
           </div>
 
-          <div className="min-w-0 space-y-6 lg:col-span-4">
+          <div className="flex min-w-0 flex-col gap-6 lg:col-span-4">
             {/* the doors and what each room holds, counted from the rooms' own content */}
             <div className="dt-ledger">
               <div className="dt-ledger-head">
@@ -132,16 +143,40 @@ export default function DioramaTeaser() {
               </ul>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              {[STILLS.room, STILLS.walk].map((s) => (
-                <figure key={s.src} className="dt-print">
-                  <Image src={s.src} alt={s.alt} width={s.w} height={s.h} sizes="200px" className="h-auto w-full" />
-                </figure>
-              ))}
+            {/* R114 gallery: every still; a tap opens it whole (the shared lightbox walks through all of them) */}
+            <div data-teaser-gallery className="dt-ledger lg:mt-auto">
+              <div className="dt-ledger-head">
+                <Images className="h-4 w-4" strokeWidth={2.75} aria-hidden />
+                <span>{String(GALLERY.length).padStart(2, '0')} stills from the street</span>
+              </div>
+              <ul className="dt-gallery">
+                {GALLERY.map((x, i) => (
+                  <li key={x.src}>
+                    <button
+                      type="button"
+                      onClick={() => setOpen(i)}
+                      aria-label={`Open still ${i + 1} of ${GALLERY.length}: ${x.alt}`}
+                      className="dt-thumb"
+                    >
+                      <Image
+                        src={x.src}
+                        alt=""
+                        width={x.w}
+                        height={x.h}
+                        sizes="120px"
+                        className="h-full w-full object-cover"
+                      />
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
       </div>
+      <AnimatePresence>
+        {open !== null && <PhotoLightbox list={GALLERY} index={open} onIndex={setOpen} onClose={() => setOpen(null)} />}
+      </AnimatePresence>
     </section>
   );
 }

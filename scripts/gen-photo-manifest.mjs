@@ -15,7 +15,13 @@ const require = createRequire(import.meta.url);
 const sharp = require('sharp');
 
 /** the folders that hold gallery / event photos (logos, story art, the Doom frames and portraits are not memories) */
-export const PHOTO_DIRS = ['images/projects', 'images/experience', 'images/experiences', 'images/muba'];
+export const PHOTO_DIRS = [
+  'images/projects',
+  'images/experience',
+  'images/experiences',
+  'images/muba',
+  'images/diorama',
+];
 
 const walk = (dir) =>
   readdirSync(dir).flatMap((f) => {

@@ -8,7 +8,7 @@ import { test, expect } from '@playwright/test';
  */
 type W = Window & { __diorama?: { debug: { warming(): boolean } }; __hwHydrated?: boolean };
 
-test('home: the 3D section is a teaser - real stills, the rooms, how to play, the way in; nothing 3D is built', async ({
+test('home: the 3D section is a teaser - real stills, the rooms, how to play, the way in; no street is built on software graphics', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -31,7 +31,7 @@ test('home: the 3D section is a teaser - real stills, the rooms, how to play, th
     .evaluateAll((imgs) =>
       imgs.map((i) => (i as HTMLImageElement).complete && (i as HTMLImageElement).naturalWidth > 0),
     );
-  expect(loaded.length).toBe(3);
+  expect(loaded.length).toBeGreaterThanOrEqual(3); // R114: the window's stand-in + the gallery of stills
   expect(loaded.every(Boolean)).toBe(true);
   // the window bar uses square keys, not traffic-light dots
   await expect(teaser.locator('.dt-keys i')).toHaveCount(3);

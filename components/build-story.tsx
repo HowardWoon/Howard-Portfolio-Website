@@ -7,7 +7,6 @@ import { useCalm } from '@/lib/motion-pref';
 import { FieldReel, type ReelItem } from './field-reel';
 import { InstitutionSeal } from './institution-seal';
 import { MEMORY_CHAPTERS } from './memory-data';
-import { MemoryReel } from './memory-reel';
 import { projects } from './stacked-projects';
 import { SIGNAL } from '@/lib/signal';
 import { gapTime, publishStoryProgress, storyTime } from '@/lib/story-progress';
@@ -800,8 +799,6 @@ export default function BuildStory() {
           </div>
         </div>
       </section>
-      {/* R102: every photo on the site as one swipeable film, right after the story (outside the pinned stage) */}
-      <MemoryReel />
     </>
   );
 }

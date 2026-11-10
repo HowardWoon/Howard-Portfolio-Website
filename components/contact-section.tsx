@@ -1,5 +1,6 @@
 'use client';
 
+import { SectionIndex } from '@/components/section-index';
 import React, { useEffect, useRef, useState } from 'react';
 import { m } from 'framer-motion';
 import { SplitWords } from './fx/split-words';
@@ -263,8 +264,9 @@ export default function ContactSection() {
       className="fx-tide-surface fx-dot-plane relative w-full bg-paper-cream bg-dots text-ink pt-24 sm:pt-32 pb-0 overflow-clip border-t-3 border-ink"
     >
       <div className="relative max-w-7xl mx-auto space-y-14 px-4 xs:px-5 sm:px-10 lg:px-16">
-        {/* Section Header */}
+        {/* Section Header (R114: every section carries its poster number, 01 - 05) */}
         <div className="space-y-7">
+          <SectionIndex id="contact" className="-mb-2" />
           <m.div className="fx-rise nb-kicker">
             <Sparkles className="w-4 h-4" strokeWidth={2.5} />
             <span>CONTACT // RECRUITER & PARTNERSHIP HUB</span>

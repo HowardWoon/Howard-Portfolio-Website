@@ -273,8 +273,10 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
    `docs/R87-NEO-BRUTALIST-REDESIGN-PLAN.md` adds the test that proves it.
    R107 (owner, 9 Nov 2026: "make the 3D diorama a segment ... its own page ... scrolling is not affected"; "it goes
    black after I play"): the walkable street lives on `/diorama`; the home page keeps only its teaser
-   (`components/diorama-teaser.tsx`: real renders, doors with counts, ENTER THE 3D BLOCK) - never mount the 3D engine
-   on the home page again. The street never shows a silent black window: a lost context is rebuilt on a fresh canvas, a
+   (`components/diorama-teaser.tsx`: doors with counts, a gallery of real renders, ENTER THE 3D BLOCK). R114 (owner:
+   "put the real 3D in, drag it like Roblox"): the teaser window runs the street in VIEW mode only (drag to turn), built
+   once the window has RESTED on screen, waiting for START 3D on phones and software graphics - never the full street
+   with walking / rooms on the home page. The street never shows a silent black window: a lost context is rebuilt on a fresh canvas, a
    stuck shader warm-up is drawn after 8 s, and otherwise RESTART 3D is offered. Guard: `tests/r107`.
    R102 (owner, 9 Nov 2026: "why only these few projects ... must auto update ... put the photos in yourself"): every
    photo on the site is ONE derived list (`components/memory-data.ts`, sizes from `lib/photo-manifest.ts`, generated

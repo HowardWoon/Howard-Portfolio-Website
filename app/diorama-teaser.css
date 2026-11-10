@@ -44,7 +44,9 @@
   text-transform: uppercase;
 }
 .dt-shot {
-  display: block;
+  /* R114: a column, so the live street fills the window's height when it is stretched to the gallery column */
+  display: flex;
+  flex-direction: column;
   background: #0a0a0a;
   border-bottom: 3px solid #0a0a0a;
 }
@@ -128,12 +130,16 @@
 .dt-sign {
   display: inline-flex;
   flex-direction: column;
+  align-items: flex-start;
+  /* R114 (owner: "EXPERIENCE's Japanese sits in the middle, the others left - make them all one, left aligned"): one
+     width for every door sign, every line left aligned */
+  min-width: 9.5rem;
   border: 2px solid #0a0a0a;
   border-radius: 4px;
   padding: 2px 8px;
   font-family: var(--font-mono), ui-monospace, monospace;
   line-height: 1.2;
-  text-align: center;
+  text-align: left;
 }
 .dt-sign b {
   font-size: 0.8rem;
@@ -170,4 +176,41 @@
   background: #0a0a0a;
   box-shadow: 4px 4px 0 0 #0a0a0a;
   overflow: clip;
+}
+
+/* R114 gallery of stills: a ruled grid of square-cut thumbnails (the whole still opens in the lightbox) */
+.dt-gallery {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  padding: 12px;
+}
+.dt-ledger .dt-gallery > li {
+  display: block;
+  border-top: 0;
+  padding: 0;
+}
+.dt-thumb {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: clip;
+  border: 2px solid #0a0a0a;
+  border-radius: 4px;
+  background: #0a0a0a;
+  box-shadow: 2px 2px 0 0 #0a0a0a;
+  transition:
+    translate 0.12s steps(2, end),
+    box-shadow 0.12s steps(2, end);
+}
+.dt-thumb:hover {
+  translate: -1px -1px;
+  box-shadow: 3px 3px 0 0 #0a0a0a;
+}
+.dt-thumb:focus-visible {
+  outline: 3px solid var(--pop-blue);
+  outline-offset: 2px;
+}
+.dt-shot {
+  border-bottom: 3px solid #0a0a0a;
 }

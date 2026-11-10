@@ -133,3 +133,9 @@
     border-bottom: 2px solid #0a0a0a;
   }
 }
+
+/* R114 (CI r12): the technical file is not one of the blueprint's six layers - while the blueprint is open it steps
+   aside, so the bench keeps its readable scale on a short landscape phone */
+.fx-blueprint[data-open='true'] [data-tech-file] {
+  display: none;
+}

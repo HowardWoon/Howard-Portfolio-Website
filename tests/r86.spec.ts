@@ -120,7 +120,9 @@ test.describe('phone', () => {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.setAttribute('aria-label', 'r88 corner probe');
-        btn.style.cssText = 'position:absolute;width:10px;height:10px;margin:0;padding:0;border:0;left:0;top:0;';
+        // a real control: hittable even inside a block whose decoration turns pointer events off (CI on ca1491c)
+        btn.style.cssText =
+          'position:absolute;width:10px;height:10px;margin:0;padding:0;border:0;left:0;top:0;pointer-events:auto;z-index:1;';
         box.append(btn);
         // between the points: left + 3 < x < mid, top + 3 < y < mid
         const want = { left: b.left + 7, top: b.top + 7 };

@@ -23,6 +23,7 @@ import {
   VolumeX,
 } from 'lucide-react';
 import type { DioramaHandle, Hotspot, Mode, RoomState, Season, Tier } from './engine';
+import { prefersCalm, softwareWebgl, webglAvailable } from './webgl-check';
 import { SECTIONS } from '@/lib/sections';
 import { SECTION_DOORS, SECTION_JP } from './engine/doors';
 import { useScrollLock } from '@/lib/use-scroll-lock';
@@ -53,45 +54,6 @@ type Win = Window & {
     start?: () => void;
   };
 };
-
-function prefersCalm() {
-  if (typeof window === 'undefined') return false;
-  return (
-    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true ||
-    document.documentElement.dataset.motion === 'calm'
-  );
-}
-
-/**
- * R70: true when WebGL is drawn by the CPU (SwiftShader, llvmpipe, Microsoft Basic Render Driver: no graphics chip, or
- * graphics turned off). The street runs at a few frames a second there and slows the whole page down (the full test
- * suite took 13 minutes longer and CI hit its 1-hour limit), so it waits for the visitor to start it.
- */
-function softwareWebgl() {
-  try {
-    const c = document.createElement('canvas');
-    const gl = (c.getContext('webgl2') || c.getContext('webgl')) as WebGLRenderingContext | null;
-    if (!gl) return false;
-    const ext = gl.getExtension('WEBGL_debug_renderer_info');
-    const name = String(gl.getParameter(ext ? ext.UNMASKED_RENDERER_WEBGL : gl.RENDERER));
-    gl.getExtension('WEBGL_lose_context')?.loseContext();
-    return /swiftshader|llvmpipe|softpipe|software|basic render/i.test(name);
-  } catch {
-    return false;
-  }
-}
-
-function webglAvailable() {
-  try {
-    const c = document.createElement('canvas');
-    const gl = (c.getContext('webgl2') || c.getContext('webgl')) as WebGLRenderingContext | null;
-    // R80: let the test context go at once (a browser keeps ~16 live contexts and drops the oldest - maybe the street's)
-    gl?.getExtension('WEBGL_lose_context')?.loseContext();
-    return !!gl;
-  } catch {
-    return false;
-  }
-}
 
 export default function TokyoDioramaSection({
   id = 'diorama',
