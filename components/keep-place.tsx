@@ -51,6 +51,9 @@ export default function KeepPlace() {
     /** the element to remember for a hit: never a fixed layer; for a sticky scene, the track it is pinned in */
     const stable = (hit: Element | undefined, main: Element): Element | null => {
       if (!hit) return null;
+      // R115 (CI r53 zoom 100 % -> 200 %: the title drifted 0.15 window): a decoration (aria-hidden: the poster section
+      // number, a sticker) scales by its own clamp(), not with the text - never a place to keep
+      if (hit.closest('[aria-hidden="true"]')) return null;
       let pick: Element = hit;
       for (let n: Element | null = hit; n && n !== main; n = n.parentElement) {
         const pos = getComputedStyle(n).position;

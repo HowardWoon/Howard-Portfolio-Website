@@ -139,3 +139,16 @@
 .fx-blueprint[data-open='true'] [data-tech-file] {
   display: none;
 }
+/* R115 (CI r12 on Linux fonts: the bench text 12.3 px on an 844 x 390 phone): the blueprint is an X-ray of the card's
+   STRUCTURE - while it is open, the role line steps aside and the long texts show their first lines, so the bench keeps
+   its readable scale. The card itself always prints them in full. */
+.fx-blueprint[data-open='true'] .pj-role {
+  display: none;
+}
+.fx-blueprint[data-open='true'] [data-bp-label^='L3'] > p,
+.fx-blueprint[data-open='true'] .pj-built-list > li > span:last-child {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}

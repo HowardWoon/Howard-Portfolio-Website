@@ -13,7 +13,10 @@ const CENTER = 4;
 const DEAD_ZONE = 70;
 const cellPos = (i: number) => `${(i % 3) * 50}% ${Math.floor(i / 3) * 50}%`;
 const CONTROL = 'a[href], button, input, textarea, select, label, [role="button"], [tabindex="0"]';
-const MAX_CONTROLS = 300;
+// R115 (CI r86 B5 on 3 commits): a whole section now holds more than 300 controls (technical files, galleries, the
+// teaser stills), so the last ones were never read and the cat could sit on one. Rectangle reads after one layout cost
+// ~1 µs each, once per rest: 2,000 stays far under a frame.
+const MAX_CONTROLS = 2000;
 
 /**
  * R49 mascot (owner: "i want this to be implemented into my website ... i want the cat", koboyo.com/page-mascot):
