@@ -22,6 +22,12 @@ test('ENTER THE 3D BLOCK: an ink cover that says what is loading at once, no fro
   page.on('pageerror', (e) => errors.push(e.message));
   await page.setViewportSize({ width: 1440, height: 900 });
   await toTeaser(page);
+  // the teaser is a lazy section: click ENTER only once React has hydrated the link (CI clicked a plain <a> before that,
+  // a full page load that took the recorder below with it - an ordinary navigation, not a hang)
+  await page.waitForFunction(() => {
+    const a = document.querySelector('[data-diorama-cta]');
+    return !!a && Object.keys(a).some((k) => k.startsWith('__reactProps'));
+  });
   type Seen = { portal: boolean; cover: null | { text: string; bg: string; ms: number }; t0: number };
   await page.evaluate(() => {
     const w = window as unknown as { __seen: Seen };
@@ -43,11 +49,12 @@ test('ENTER THE 3D BLOCK: an ink cover that says what is loading at once, no fro
   });
   await page.locator('[data-diorama-cta]').click();
   await expect(page).toHaveURL(/\/diorama$/, { timeout: 20_000 });
-  const seen = await page.evaluate(() => (window as unknown as { __seen: Seen }).__seen);
-  expect(seen.portal).toBe(false);
-  expect(seen.cover?.text).toBe('LOADING THE 3D STREET');
-  expect(seen.cover?.bg).toBe(INK);
-  expect(seen.cover!.ms).toBeLessThan(500); // the click is answered at once
+  const seen = await page.evaluate(() => (window as unknown as { __seen?: Seen }).__seen);
+  expect(seen, 'a client-side route change (the recorder survives it)').toBeTruthy();
+  expect(seen!.portal).toBe(false);
+  expect(seen!.cover?.text).toBe('LOADING THE 3D STREET');
+  expect(seen!.cover?.bg).toBe(INK);
+  expect(seen!.cover!.ms).toBeLessThan(500); // the click is answered at once
   // the street page: the same ink loading screen while it builds (software graphics waits for START 3D first)
   const start = page.locator('[data-diorama-start]');
   const loading = page.locator('#diorama .dl-stage');
