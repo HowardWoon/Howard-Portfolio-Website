@@ -214,3 +214,97 @@
 .dt-shot {
   border-bottom: 3px solid #0a0a0a;
 }
+
+/* R119 loading card (components/diorama-preview.tsx): the street takes a few seconds to build, so the window says so.
+   Paper card, 3 px ink, hard offset shadow, mono keys; done steps are ink, the current one is outlined and counts,
+   the next ones are dashed. The bar is an ink block stepping across a ruled track: a transform-only animation the
+   compositor runs, so it keeps moving while the page's main thread is busy building the street. Ink / paper only - no
+   SIGNAL colour. */
+.dp-loading {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  display: flex;
+  width: min(92%, 420px);
+  flex-direction: column;
+  gap: 10px;
+  transform: translate(-50%, -50%);
+  border: 3px solid #0a0a0a;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 6px 6px 0 0 #0a0a0a;
+  padding: 12px 14px 14px;
+  color: #0a0a0a;
+  font-family: var(--font-mono), ui-monospace, monospace;
+}
+.dp-loading-title {
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+.dp-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.dp-steps li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 2px solid #0a0a0a;
+  border-radius: 6px;
+  padding: 3px 7px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+.dp-steps li[data-state='done'] {
+  background: #0a0a0a;
+  color: #fff;
+}
+.dp-steps li[data-state='now'] {
+  box-shadow: 3px 3px 0 0 #0a0a0a;
+}
+.dp-steps li[data-state='next'] {
+  border-style: dashed;
+}
+.dp-steps b {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.dp-bar {
+  position: relative;
+  display: block;
+  height: 14px;
+  overflow: hidden;
+  border: 2px solid #0a0a0a;
+  border-radius: 4px;
+  background: repeating-linear-gradient(90deg, #fff 0 10px, #0a0a0a 10px 12px);
+}
+.dp-bar i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 25%;
+  background: #0a0a0a;
+  animation: dp-run 1.2s steps(6, end) infinite;
+}
+@keyframes dp-run {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(400%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dp-bar i {
+    animation: none;
+    width: 50%;
+  }
+}
+html[data-motion='calm'] .dp-bar i {
+  animation: none;
+  width: 50%;
+}

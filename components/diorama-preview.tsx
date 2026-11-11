@@ -17,10 +17,29 @@ import { prefersCalm, softwareWebgl, webglAvailable } from './tokyo-diorama/webg
  */
 type Phase = 'poster' | 'loading' | 'live' | 'held';
 
+/**
+ * R119 (owner: "when I scroll to this section the 3D freezes, then it is smooth - if it is loading, show an interface
+ * that says it is loading, with a little animation, so the user knows"). The street takes ~4.8 s to build on a laptop
+ * (measured: BUILD ~1.1 s in parts of up to 150 ms, then shaders, textures and a warm-up draw per material). The steps
+ * below are read from the engine's own `diorama:*` performance measures - real progress, never a made-up percentage -
+ * and the stepped ink bar is a transform animation the compositor runs, so it keeps moving through a busy frame.
+ */
+const STEPS = ['BUILD', 'SHADERS', 'TEXTURES', 'WARM-UP'] as const;
+const stepOf = (name: string): number | null => {
+  const n = name.slice('diorama:'.length);
+  if (n === 'compile-request' || n === 'link' || n === 'first-use') return 1;
+  if (n === 'texture') return 2;
+  if (n === 'warm-draw') return 3;
+  if (n === 'first-frame' || n === 'warm') return null;
+  return 0; // renderer, environment, world-N, traffic, weather, seasons, life, tier
+};
+
 export function DioramaPreview({ poster }: { poster: { src: string; w: number; h: number; alt: string } }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const [phase, setPhase] = useState<Phase>('poster');
   const [start, setStart] = useState(0);
+  const [step, setStep] = useState(0);
+  const [count, setCount] = useState(0);
 
   useEffect(() => {
     const stage = stageRef.current;
@@ -34,12 +53,41 @@ export function DioramaPreview({ poster }: { poster: { src: string; w: number; h
     let handle: DioramaHandle | null = null;
     let rest = 0;
     let begun = false;
+    let progress: PerformanceObserver | null = null;
     const begin = () => {
       if (begun || disposed) return;
       begun = true;
       io.disconnect();
       window.removeEventListener('scroll', arm);
       setPhase('loading');
+      setStep(0);
+      setCount(0);
+      // the engine's stage measures drive the loading card (one state update per observer batch, not per entry)
+      let at = 0;
+      let n = 0;
+      if (typeof PerformanceObserver !== 'undefined') {
+        progress = new PerformanceObserver((list) => {
+          for (const e of list.getEntries()) {
+            if (!e.name.startsWith('diorama:')) continue;
+            const s = stepOf(e.name);
+            if (s === null) continue;
+            if (s > at) {
+              at = s;
+              n = 0;
+            }
+            if (s === at) n++;
+          }
+          if (!disposed) {
+            setStep(at);
+            setCount(n);
+          }
+        });
+        try {
+          progress.observe({ type: 'measure' });
+        } catch {
+          progress = null;
+        }
+      }
       import('./tokyo-diorama/engine')
         .then(async ({ createTokyoDiorama }) => {
           if (disposed) return;
@@ -48,7 +96,10 @@ export function DioramaPreview({ poster }: { poster: { src: string; w: number; h
             reducedMotion: prefersCalm(),
             tier: 'auto',
             content: buildGalleryContent(),
-            onReady: () => !disposed && setPhase('live'),
+            onReady: () => {
+              progress?.disconnect();
+              if (!disposed) setPhase('live');
+            },
             onContextLost: () => !disposed && setPhase('poster'),
           });
           if (disposed) {
@@ -83,6 +134,7 @@ export function DioramaPreview({ poster }: { poster: { src: string; w: number; h
       io.disconnect();
       window.removeEventListener('scroll', arm);
       window.clearTimeout(rest);
+      progress?.disconnect();
       handle?.dispose();
     };
   }, [start]);
@@ -107,6 +159,25 @@ export function DioramaPreview({ poster }: { poster: { src: string; w: number; h
           className="z-[1] object-contain"
           priority={false}
         />
+      )}
+      {phase === 'loading' && (
+        <div className="dp-loading" role="status" aria-live="polite" data-loading-step={STEPS[step]}>
+          <span className="dp-loading-title">LOADING THE 3D STREET</span>
+          <ol className="dp-steps" aria-label="Loading steps">
+            {STEPS.map((name, i) => (
+              <li key={name} data-state={i < step ? 'done' : i === step ? 'now' : 'next'}>
+                <span aria-hidden>{String(i + 1).padStart(2, '0')}</span> {name}
+                {i === step && count > 0 ? <b> {count}</b> : null}
+              </li>
+            ))}
+          </ol>
+          <span className="dp-bar" aria-hidden>
+            <i />
+          </span>
+          <span className="sr-only">
+            Step {step + 1} of {STEPS.length}: {STEPS[step]}
+          </span>
+        </div>
       )}
       {phase === 'live' && (
         <span className="pointer-events-none absolute left-3 top-3 z-[2] inline-flex items-center gap-1.5 rounded-md border-2 border-ink bg-white px-2 py-1 font-mono text-xs font-extrabold tracking-[0.1em] text-ink">

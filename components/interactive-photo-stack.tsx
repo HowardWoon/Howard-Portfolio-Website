@@ -858,7 +858,9 @@ export function InteractivePhotoStack({
       };
       setRoom((o) => (o && (Object.keys(next) as (keyof typeof next)[]).every((k) => o[k] === next[k]) ? o : next));
     };
-    read();
+    // R119: no read at mount. The observer's first report comes right after the browser's own layout, so the boxes it
+    // reads are already clean; reading at mount forced a style + layout of the whole page per gallery while the page
+    // was hydrating (663 + 355 ms at 4x CPU, during the hero's intro).
     const ro = new ResizeObserver(read);
     ro.observe(el);
     return () => ro.disconnect();

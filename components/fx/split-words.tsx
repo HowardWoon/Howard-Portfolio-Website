@@ -25,8 +25,18 @@ export function SplitWords({ text, delay = 0 }: { text: string; delay?: number }
   // rises when it scrolls in; a title already on screen simply stays.
   const [tucked, setTucked] = useState(false);
   useEffect(() => {
-    const r = ref.current?.getBoundingClientRect();
-    if (r && r.top > window.innerHeight) setTucked(true);
+    const el = ref.current;
+    if (!el) return;
+    // R119: one IntersectionObserver reading instead of getBoundingClientRect() at mount. Every title read its box while
+    // its section was hydrating, which forced a style + layout of the whole page each time (565 ms on the first title
+    // at 4x CPU, ~2 s in all, while the hero's intro was playing). The observer answers from the next frame's own
+    // layout. Not intersecting and not above the window = below the fold (a skipped section reports an empty box).
+    const io = new IntersectionObserver(([e]) => {
+      io.disconnect();
+      if (!e.isIntersecting && e.boundingClientRect.top >= 0) setTucked(true);
+    });
+    io.observe(el);
+    return () => io.disconnect();
   }, []);
   if (!FX.titleWipe) return <>{text}</>;
   const shown = !tucked || inView;

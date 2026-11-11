@@ -255,8 +255,15 @@ export default function KeepPlace() {
     // capture phase: the button's place is read BEFORE its own handler changes the page
     window.addEventListener('click', onPress, { capture: true, passive: true });
     document.documentElement.dataset.keepPlace = 'on'; // listeners are live (tests wait for this)
-    capture();
+    // R119: the first capture waits for the next frame's layout. Run at mount it read scrollY on a page still being
+    // hydrated, which forced a full style + layout (~190 ms at 4x CPU) in the middle of the hero's intro.
+    let firstCapture = 0;
+    const firstFrame = requestAnimationFrame(() => {
+      firstCapture = window.setTimeout(capture, 0);
+    });
     return () => {
+      cancelAnimationFrame(firstFrame);
+      window.clearTimeout(firstCapture);
       window.clearTimeout(idle);
       timers.forEach((t) => window.clearTimeout(t));
       thaw();

@@ -296,3 +296,11 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
    `public/images/{story,doom-walk}` are deleted. About (01) hands straight over to Projects (02): never put a pinned /
    scroll-scrubbed storyboard, a walking clip or a dark full-screen stage back between them. `lib/ledger.ts` stays (the
    3D rooms read it). Guard: `tests/r118.spec.ts`. docs/R118-ABOUT-TO-PROJECTS.md.
+10. **The first screen loads without stalling; the 3D window says when it is loading (R119, owner, 11 Nov 2026: "when
+    loading the hero ... suddenly very laggy"; "if it is loading, show that it is loading, with a little animation").**
+    No component may read layout (`getBoundingClientRect`, `scrollY`, `offsetWidth` ...) while it mounts: use an
+    IntersectionObserver / ResizeObserver or wait a frame (each such read forced a style + layout of the whole page
+    during hydration). A page-wide `content-visibility` skip below the hero was tried and REJECTED: it broke jumps,
+    the badge pit, the phone dock and touch taps (16 tests). The 3D teaser shows its loading card (four real steps from
+    the engine's `diorama:*` measures, a compositor-run stepped bar) from the first build step until the live street.
+    Guard: `tests/r119.spec.ts`. docs/R119-LOAD-AND-3D-LOADING.md.
