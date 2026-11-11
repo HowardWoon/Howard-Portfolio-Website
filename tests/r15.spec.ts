@@ -92,7 +92,10 @@ test('stage curtains part to reveal the Arena Wall title (FX-75)', async ({ page
   const pseudo = (which: '::before' | '::after') =>
     page.evaluate((w) => {
       const s = getComputedStyle(document.querySelector('#arena-wall-title')!, w);
-      return { name: s.animationName, x: new DOMMatrix(`translate(${s.translate.split(' ')[0] || '0px'})`).m41 };
+      // R118: right after a jump the wall can still carry its off-screen mark for a frame (no animation, translate
+      // none); NaN then, and the polls below wait for the curtain to come back
+      const t = s.translate === 'none' ? '' : s.translate.split(' ')[0] || '0px';
+      return { name: s.animationName, x: t ? new DOMMatrix(`translate(${t})`).m41 : NaN };
     }, which);
   expect((await pseudo('::before')).name).toBe('fx-curtain-l');
   expect((await pseudo('::after')).name).toBe('fx-curtain-r');
@@ -101,12 +104,11 @@ test('stage curtains part to reveal the Arena Wall title (FX-75)', async ({ page
     const e = document.querySelector('#arena-wall-title')!;
     window.scrollTo(0, e.getBoundingClientRect().top + window.scrollY - window.innerHeight + 10);
   });
-  await page.waitForTimeout(300);
-  expect(Math.abs((await pseudo('::before')).x)).toBeLessThan(50);
+  await expect.poll(async () => Math.abs((await pseudo('::before')).x), { timeout: 5000 }).toBeLessThan(50);
   // title in the middle: curtains fully open, off-screen on either side
   await centre(page, '#arena-wall-title');
-  expect((await pseudo('::before')).x).toBeLessThan(-1000);
-  expect((await pseudo('::after')).x).toBeGreaterThan(1000);
+  await expect.poll(async () => (await pseudo('::before')).x, { timeout: 5000 }).toBeLessThan(-1000);
+  await expect.poll(async () => (await pseudo('::after')).x, { timeout: 5000 }).toBeGreaterThan(1000);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
 
