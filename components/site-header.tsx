@@ -136,11 +136,11 @@ export function SiteHeader() {
     >
       {/* R71: the header is a drawing's title strip: a printed millimetre ruler along its bottom edge */}
       {FX.headerRuler ? <span aria-hidden className="hdr-ruler" style={{ backgroundImage: HEADER_RULER }} /> : null}
-      <m.div
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.6 }}
-        className="flex items-center gap-2 min-[400px]:gap-3 sm:gap-4 min-w-0 xl:shrink-0"
+      {/* R121: the slide-in is CSS (.hdr-in, globals.css) - it plays from the first paint on the compositor. As framer
+          motion it waited for hydration, so the header stayed blank for 1.6 s+ on a slow phone while the hero played */}
+      <div
+        className="hdr-in flex items-center gap-2 min-[400px]:gap-3 sm:gap-4 min-w-0 xl:shrink-0"
+        style={{ '--hdr-from': '-20px' } as React.CSSProperties}
       >
         <a href="#" aria-label="Back to top" className="shrink-0 rounded-2xl p-1 -m-1">
           <Image
@@ -165,13 +165,11 @@ export function SiteHeader() {
           </p>
         </div>
         {FX.pressCounter ? <PressCounter /> : null}
-      </m.div>
+      </div>
 
-      <m.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.6 }}
-        className="flex items-center gap-2 sm:gap-4 shrink-0"
+      <div
+        className="hdr-in flex items-center gap-2 sm:gap-4 shrink-0"
+        style={{ '--hdr-from': '20px' } as React.CSSProperties}
       >
         <div className="fx-hire-pill relative overflow-hidden hidden lg:flex xl:hidden min-[1680px]:flex items-center gap-2.5 bg-white px-4 py-2 rounded-full border-3 border-ink shadow-brutal-sm">
           {/* FX-105: the LED sends a soft ping ring; hovering the pill passes one lamp glint across it */}
@@ -254,7 +252,7 @@ export function SiteHeader() {
         >
           <Search className="w-4 h-4 md:w-5 md:h-5" strokeWidth={2.75} />
         </button>
-      </m.div>
+      </div>
     </header>
   );
 }

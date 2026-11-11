@@ -924,6 +924,24 @@ html[data-motion='calm'] *::after {
   }
 }
 
+/* R121 header entrance (components/site-header.tsx): the two halves slide in from their sides once, from the first
+   paint, as a compositor animation (opacity + translate), not after hydration */
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion='calm']) .hdr-in {
+    animation: hdr-in 0.6s cubic-bezier(0.2, 0.9, 0.1, 1) both;
+  }
+}
+@keyframes hdr-in {
+  from {
+    opacity: 0;
+    translate: var(--hdr-from, 0) 0;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
 /* D5: infinite decorative animations pause while their section is off-screen (see fx/offscreen-pause.tsx) */
 [data-offscreen] :is(.animate-pulse, .animate-ping, .animate-spin-slow, .animate-wobble, [class*='animate-[marquee']) {
   animation-play-state: paused !important;
@@ -1772,18 +1790,18 @@ html:not(.fx-off-arenaPinboard) :where(.fx-seal:nth-child(even)) {
     animation: fx-stamp-in 0.6s cubic-bezier(0.2, 0.9, 0.1, 1.4) 0.55s both;
   }
 }
+/* R121: opacity / scale / rotate only, so the compositor plays it while the page is still loading (box-shadow kept it on
+   the main thread: on a slow phone SYSTEMS TO was missing for 1.6 s+); the chip keeps its own hard shadow throughout */
 @keyframes fx-stamp-in {
   from {
     opacity: 0;
     scale: 1.35;
     rotate: -8deg;
-    box-shadow: 0 0 0 0 #0a0a0a;
   }
   to {
     opacity: 1;
     scale: 1;
     rotate: 0deg;
-    box-shadow: 5px 5px 0 0 #0a0a0a;
   }
 }
 

@@ -286,8 +286,8 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
    `hw-booted` in the server HTML; there is no overlay, boot log, Skip / Initialize key or pre-gate cover - never add a
    loading or intro screen in front of the hero again. The hero is a letterpress forme (`app/hero-forme.css`, owner:
    "astonishing ... avoid all ai slop ... neo brutalism"): paper-faced block letters with an ink rim and a solid ink
-   extrusion that falls away from the pointer; on load the lines drop into their slots in hard steps, the type rises off
-   the paper, SYSTEMS TO is stamped; the rest of the hero arrives as a stepped wipe; no fade on scroll. Guards:
+   extrusion that falls away from the pointer; on load the lines drop into their slots in hard steps, SYSTEMS TO is
+   stamped (R121: the six-step rise of the extrusion is gone - it repainted on the main thread); the rest of the hero arrives as a stepped wipe; no fade on scroll. Guards:
    `tests/smoke.spec.ts` (no gate), `tests/r98.spec.ts` (the forme), `scripts/validate-plans.mjs` R98.
 9. **No scroll storyboard between About and Projects (R118, owner, 11 Nov 2026: "delete the whole scrolling effect
    part, from 'from student ID' to Dr. Doom ... section 1 and section 2 joined, smoother, clean ... more premium
@@ -311,3 +311,10 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
     held a frozen picture for 3.2 s. The teaser window and the /diorama frame share ONE loading screen
     (`components/tokyo-diorama/loading-screen.tsx`): solid ink, nothing of the still behind it, the four real steps, a
     stepped bar. Guard: `tests/r120.spec.ts`. docs/R120-ENTER-3D-AND-LOADING.md.
+12. **The hero's entrance runs on the compositor (R121, owner, 12 Nov 2026: "when I click the link or refresh, the hero
+    loading part is still laggy, the in effect is not smooth at all").** Every intro animation of the hero and the header
+    animates only `transform` / `translate` / `scale` / `rotate` / `opacity` / `clip-path` (Chrome composites these), and
+    nothing above the fold starts hidden behind framer-motion's `initial` (it waits for hydration: the header was blank
+    1.6 s+ on a slow phone). Never animate `box-shadow`, a registered custom property, `text-shadow` or colours in the
+    intro. Proof: block the main thread for 1.2 s after the first paint - the header and the headline must keep
+    moving. Guard: `tests/r121.spec.ts`. docs/R121-HERO-INTRO-COMPOSITOR.md.

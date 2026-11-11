@@ -2,9 +2,11 @@
    section, must be astonishing, cool effect ... avoid all ai slop, must be neo brutalism style". The headline is cast
    type locked in a forme: paper-faced block letters with an ink rim and a SOLID ink extrusion of 1 px slices that falls
    away from the pointer like light raking across a press bed (mouse; touch and Calm keep a fixed angle). On load the
-   four lines drop into their slots as slugs in hard steps, then the type rises off the paper in six steps, then
-   SYSTEMS TO is stamped (FX-05). The kicker, the bio, the keys and the portrait arrive as a stepped print-head wipe.
-   No fade, no blur, no glow: transform / clip-path / one registered number. */
+   four lines drop into their slots as slugs in hard steps, then SYSTEMS TO is stamped (FX-05). The kicker, the bio,
+   the keys and the portrait arrive as a stepped print-head wipe. No fade, no blur, no glow: transform / clip-path.
+   R121 (owner: "the hero's in effect is not smooth at all"): every intro animation runs on the compositor, so the
+   page's loading work cannot stall it. The six-step rise of the extrusion (a registered number repainting eight text
+   shadows of the whole headline on the main thread) is gone: the type stands off the paper from the first frame. */
 
 @property --hx-depth {
   syntax: '<number>';
@@ -55,9 +57,6 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  html:not([data-motion='calm']) .hx-forme {
-    animation: hx-rise 0.42s steps(6, end) 0.62s both;
-  }
   /* each line drops from above into its own slot (the slot clips only while it drops: the extrusion is free after) */
   html:not([data-motion='calm']) .hx-line {
     animation: hx-slot 0.62s linear backwards;
@@ -72,14 +71,6 @@
   }
   html:not([data-motion='calm']) .hx-wipe-down {
     animation: hx-wipe-down 0.42s steps(7, end) 0.3s backwards;
-  }
-}
-@keyframes hx-rise {
-  from {
-    --hx-depth: 0;
-  }
-  to {
-    --hx-depth: 1;
   }
 }
 @keyframes hx-slot {
