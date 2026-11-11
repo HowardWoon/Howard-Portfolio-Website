@@ -1,0 +1,138 @@
+/* R120 loading screen (components/tokyo-diorama/loading-screen.tsx): one look for the home teaser window and the
+   /diorama street frame. Owner: "only these messages - behind them, black, all the way - and more premium".
+   A solid ink stage (nothing of the street's still shows through), white display type, mono keys with 3 px white rules
+   and hard white offsets, a stepped white bar. Ink / paper only - no SIGNAL colour. The bar is a transform-only
+   animation, so the compositor keeps it stepping while the main thread is busy building the street. */
+.dl-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  display: grid;
+  place-items: center;
+  background: #0a0a0a;
+  padding: 16px;
+  color: #fff;
+  /* its own height decides how much of the screen fits (a phone's teaser window is ~190 px tall) */
+  container-type: size;
+}
+.dl-stage .dp-loading {
+  display: flex;
+  width: min(100%, 560px);
+  flex-direction: column;
+  gap: 14px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+}
+.dl-kicker {
+  align-self: flex-start;
+  border: 2px solid #fff;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+.dl-stage .dp-loading-title {
+  font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+  font-size: clamp(1.45rem, 4.2vw, 2.6rem);
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.01em;
+}
+.dl-stage[data-size='stage'] .dp-loading-title {
+  font-size: clamp(1.6rem, 5vw, 3.4rem);
+}
+.dl-stage .dp-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.dl-stage .dp-steps li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 3px solid #fff;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+.dl-stage .dp-steps li[data-state='done'] {
+  background: #fff;
+  color: #0a0a0a;
+}
+.dl-stage .dp-steps li[data-state='now'] {
+  box-shadow: 4px 4px 0 0 #fff;
+}
+.dl-stage .dp-steps li[data-state='next'] {
+  border-style: dashed;
+}
+.dl-stage .dp-steps b {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.dl-stage .dp-bar {
+  position: relative;
+  display: block;
+  height: 16px;
+  overflow: hidden;
+  border: 3px solid #fff;
+  border-radius: 4px;
+  background: repeating-linear-gradient(90deg, #0a0a0a 0 12px, #fff 12px 14px);
+}
+.dl-stage .dp-bar i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 25%;
+  background: #fff;
+  animation: dp-run 1.2s steps(6, end) infinite;
+}
+.dl-count {
+  align-self: flex-end;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  font-variant-numeric: tabular-nums;
+}
+/* a short window (the teaser on a phone): the title, the steps and the bar - the name and the step count step aside */
+@container (max-height: 300px) {
+  .dl-kicker,
+  .dl-count {
+    display: none;
+  }
+  .dl-stage .dp-loading {
+    gap: 8px;
+  }
+  .dl-stage .dp-loading-title,
+  .dl-stage[data-size='stage'] .dp-loading-title {
+    font-size: 1.2rem;
+  }
+  .dl-stage .dp-steps {
+    gap: 6px;
+  }
+  .dl-stage .dp-steps li {
+    padding: 2px 6px;
+  }
+  .dl-stage .dp-bar {
+    height: 12px;
+  }
+}
+@keyframes dp-run {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(400%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dl-stage .dp-bar i {
+    animation: none;
+    width: 50%;
+  }
+}
+html[data-motion='calm'] .dl-stage .dp-bar i {
+  animation: none;
+  width: 50%;
+}

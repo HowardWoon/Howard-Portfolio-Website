@@ -17,17 +17,43 @@ import { canViewTransition } from '@/lib/view-transition';
 const WIPE_MS = 380;
 const EASE = 'cubic-bezier(0.2, 0.9, 0.1, 1)';
 
-function coverScreen(): void {
+/**
+ * R120 'ink' cover (owner: "when I press ENTER THE 3D BLOCK it hangs, no interface"): the way into the 3D street is an
+ * ink panel that names what is loading, from the very click; the street page then shows the same ink loading screen
+ * (tokyo-diorama/loading-screen.tsx). It replaced the FX-85 portal morph there, which held a frozen picture of the old
+ * page for 3.2 s (the View Transition waited for a frame the browser does not run during it, then timed out).
+ */
+function coverScreen(variant: 'wipe' | 'ink' = 'wipe'): void {
   if (document.querySelector('[data-fx-wipe]')) return;
+  const ink = variant === 'ink';
   const el = document.createElement('div');
-  el.setAttribute('data-fx-wipe', '');
+  el.setAttribute('data-fx-wipe', variant);
   el.setAttribute('aria-hidden', 'true');
+  if (ink) {
+    const label = document.createElement('span');
+    label.textContent = 'LOADING THE 3D STREET';
+    Object.assign(label.style, {
+      position: 'absolute',
+      left: '50%',
+      top: '50%',
+      transform: 'translate(-50%, -50%)',
+      border: '3px solid #FFFFFF',
+      borderRadius: '6px',
+      boxShadow: '4px 4px 0 0 #FFFFFF',
+      padding: '8px 12px',
+      color: '#FFFFFF',
+      font: '800 0.85rem/1.2 var(--font-mono), ui-monospace, monospace',
+      letterSpacing: '0.12em',
+      whiteSpace: 'nowrap',
+    });
+    el.appendChild(label);
+  }
   Object.assign(el.style, {
     position: 'fixed',
     inset: '0',
     zIndex: '100000',
-    background: '#FFC700',
-    borderTop: '6px solid #0A0A0A',
+    background: ink ? '#0A0A0A' : '#FFC700',
+    borderTop: `6px solid ${ink ? '#FFFFFF' : '#0A0A0A'}`,
     transform: 'scaleY(0)',
     transformOrigin: '50% 100%',
     transition: `transform ${WIPE_MS}ms ${EASE}`,
@@ -127,9 +153,17 @@ type WipeLinkProps<T extends string> = Omit<ComponentProps<typeof Link>, 'href'>
   href: Route<T>;
   /** FX-85: 'out' = this link morphs into the simulator screen, 'back' = the screen morphs back into its card */
   portal?: 'out' | 'back';
+  /** R120: 'ink' = an ink panel that says what is loading (the way into the 3D street) */
+  cover?: 'wipe' | 'ink';
 };
 
-export function WipeLink<T extends string>({ onClick, href, portal: mode, ...props }: WipeLinkProps<T>) {
+export function WipeLink<T extends string>({
+  onClick,
+  href,
+  portal: mode,
+  cover = 'wipe',
+  ...props
+}: WipeLinkProps<T>) {
   const router = useRouter();
   const handle = (e: MouseEvent<HTMLAnchorElement>) => {
     onClick?.(e);
@@ -161,7 +195,9 @@ export function WipeLink<T extends string>({ onClick, href, portal: mode, ...pro
     }
     if (!FX.routeWipe || prefersReducedMotion()) return;
     e.preventDefault();
-    coverScreen();
+    coverScreen(cover);
+    // R120: going into the 3D street - the home teaser's own street stops drawing now (diorama-preview.tsx)
+    if (cover === 'ink') window.dispatchEvent(new Event('hw:leave-3d'));
     window.setTimeout(() => router.push(href), WIPE_MS);
   };
   return <Link {...props} href={href} onClick={handle} />;
@@ -182,7 +218,7 @@ export function RouteWipeClear({ home = false }: { home?: boolean }) {
     if (!el) return;
     el.style.transformOrigin = '50% 0%';
     el.style.borderTop = '0';
-    el.style.borderBottom = '6px solid #0A0A0A';
+    el.style.borderBottom = `6px solid ${el.dataset.fxWipe === 'ink' ? '#FFFFFF' : '#0A0A0A'}`;
     requestAnimationFrame(() => (el.style.transform = 'scaleY(0)'));
     const t = window.setTimeout(() => el.remove(), WIPE_MS + 80);
     return () => window.clearTimeout(t);

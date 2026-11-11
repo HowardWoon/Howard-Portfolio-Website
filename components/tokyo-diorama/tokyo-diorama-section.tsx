@@ -31,6 +31,7 @@ import { buildGalleryContent } from './gallery/content';
 import { loadExtras, mergeExtras } from './gallery/live';
 import type { GalleryContent } from './gallery/types';
 import { InspectPanel, RoomDirectory } from './gallery/inspect-panel';
+import { DioramaLoading, useBuildProgress } from './loading-screen';
 
 /**
  * 夜雨の街角 — Tokyo After Rain. A walkable 3D diorama section.
@@ -102,6 +103,8 @@ export default function TokyoDioramaSection({
   const [dirOpen, setDirOpen] = useState(false);
   const inRoom = roomState?.phase === 'inside' ? roomState.id : null;
   const shutter = roomState?.phase === 'closing';
+  const building = near && !ready && !failed && !held && !stopped;
+  const progress = useBuildProgress(building);
   const roomContent = inRoom ? content[inRoom] : null;
   const inspected = roomContent && inspectId ? roomContent.exhibits.find((e) => e.id === inspectId) : null;
 
@@ -578,10 +581,12 @@ export default function TokyoDioramaSection({
             ))}
 
             {/* loading / failure */}
-            {!ready && !failed && !held && !stopped && (
-              <div className="absolute inset-0 z-[7] grid place-items-center bg-[#0a0e1c]">
+            {/* R120: while the street builds, the ink loading screen (the four real steps, a stepped bar) */}
+            {building && <DioramaLoading step={progress.step} count={progress.count} size="stage" />}
+            {!near && !ready && !failed && !held && !stopped && (
+              <div className="absolute inset-0 z-[7] grid place-items-center bg-[#0a0a0a]">
                 <div className="rounded-xl border-3 border-ink bg-white px-4 py-3 font-mono text-xs font-extrabold tracking-[0.14em] text-ink shadow-brutal-sm">
-                  {near ? 'BUILDING THE BLOCK…' : 'SCROLL TO LOAD'}
+                  SCROLL TO LOAD
                 </div>
               </div>
             )}

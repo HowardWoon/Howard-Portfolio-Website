@@ -95,7 +95,7 @@ export default function DioramaTeaser() {
             {/* R114: the real 3D street, drag to turn it (view mode); the button below opens the full page */}
             <div className="dt-shot flex flex-1 flex-col">{POSTER ? <DioramaPreview poster={POSTER} /> : null}</div>
             <div className="dt-foot">
-              <WipeLink href="/diorama" portal="out" data-diorama-cta className="dt-cta">
+              <WipeLink href="/diorama" cover="ink" data-diorama-cta className="dt-cta">
                 <span>Enter the 3D block</span>
                 <ArrowUpRight className="h-5 w-5" strokeWidth={3} aria-hidden />
               </WipeLink>

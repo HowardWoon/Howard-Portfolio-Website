@@ -304,3 +304,10 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
     the badge pit, the phone dock and touch taps (16 tests). The 3D teaser shows its loading card (four real steps from
     the engine's `diorama:*` measures, a compositor-run stepped bar) from the first build step until the live street.
     Guard: `tests/r119.spec.ts`. docs/R119-LOAD-AND-3D-LOADING.md.
+11. **Going into the 3D street never freezes the page; it loads on ink (R120, owner, 12 Nov 2026: "when I press ENTER
+    THE 3D BLOCK ... no interface, the whole website hangs"; "behind the messages, black ... more premium").** ENTER THE
+    3D BLOCK is a `WipeLink cover="ink"`: an ink panel says LOADING THE 3D STREET from the click and the teaser's own
+    street is disposed (`hw:leave-3d`). Never a View Transition (FX-85 portal) into a page that loads a 3D bundle: it
+    held a frozen picture for 3.2 s. The teaser window and the /diorama frame share ONE loading screen
+    (`components/tokyo-diorama/loading-screen.tsx`): solid ink, nothing of the still behind it, the four real steps, a
+    stepped bar. Guard: `tests/r120.spec.ts`. docs/R120-ENTER-3D-AND-LOADING.md.

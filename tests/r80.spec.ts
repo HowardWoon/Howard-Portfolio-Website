@@ -79,7 +79,8 @@ test('scrolling into the 3D street keeps painting while it is built (no multi-se
   await expect
     .poll(() => page.evaluate(() => ((window as W).__diorama?.debug.cam().frames ?? 0) > 2), { timeout: 120_000 })
     .toBe(true);
-  await expect(page.locator('#diorama').getByText('BUILDING THE BLOCK')).toHaveCount(0);
+  // R120: the build's loading screen (it replaced the BUILDING THE BLOCK card) is gone once the street draws
+  await expect(page.locator('#diorama .dl-stage')).toHaveCount(0);
   const build = await takeGaps(page);
   await page.evaluate(() => (window as W).__diorama!.debug.quiet());
   const frame = await steadyFrame(page);
