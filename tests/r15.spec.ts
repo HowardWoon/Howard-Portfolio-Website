@@ -97,13 +97,15 @@ test('stage curtains part to reveal the Arena Wall title (FX-75)', async ({ page
       const t = s.translate === 'none' ? '' : s.translate.split(' ')[0] || '0px';
       return { name: s.animationName, x: t ? new DOMMatrix(`translate(${t})`).m41 : NaN };
     }, which);
-  expect((await pseudo('::before')).name).toBe('fx-curtain-l');
-  expect((await pseudo('::after')).name).toBe('fx-curtain-r');
-  // title just below the fold: curtains closed
+  // title just below the fold: curtains closed. The names are read here, near the wall: off screen (the top of the page)
+  // R95 takes the animation off while the wall carries its off-screen mark, which is set as soon as OffscreenPause
+  // runs - the read at the top raced it
   await page.evaluate(() => {
     const e = document.querySelector('#arena-wall-title')!;
     window.scrollTo(0, e.getBoundingClientRect().top + window.scrollY - window.innerHeight + 10);
   });
+  await expect.poll(async () => (await pseudo('::before')).name, { timeout: 5000 }).toBe('fx-curtain-l');
+  await expect.poll(async () => (await pseudo('::after')).name, { timeout: 5000 }).toBe('fx-curtain-r');
   await expect.poll(async () => Math.abs((await pseudo('::before')).x), { timeout: 5000 }).toBeLessThan(50);
   // title in the middle: curtains fully open, off-screen on either side
   await centre(page, '#arena-wall-title');
