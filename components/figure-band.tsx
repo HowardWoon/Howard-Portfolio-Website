@@ -16,7 +16,7 @@ import { SIGNAL } from '@/lib/signal';
 export function FigureBand() {
   return (
     <section aria-label="Figures" data-figure-band className="relative border-y-3 border-ink bg-ground-lime">
-      <ul className="mx-auto grid max-w-[1440px] grid-cols-1 gap-x-4 gap-y-6 px-4 py-8 xs:grid-cols-2 sm:gap-x-6 sm:gap-y-8 sm:px-8 sm:py-12 lg:grid-cols-4 min-[1400px]:pr-20">
+      <ul className="mx-auto grid max-w-[90rem] grid-cols-1 gap-x-4 gap-y-6 px-4 py-8 xs:grid-cols-2 sm:gap-x-6 sm:gap-y-8 sm:px-8 sm:py-12 lg:grid-cols-4 min-[1400px]:pr-20">
         {LEDGER.map((x) => {
           const sig = x.signal ? SIGNAL[x.signal] : null;
           return (

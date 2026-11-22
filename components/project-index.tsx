@@ -70,7 +70,11 @@ export function ProjectIndex({ items }: { items: readonly ProjectIndexItem[] }) 
     <nav
       ref={navRef}
       aria-label="Project index"
-      className="fx-tilt3d-grid relative grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3"
+      // R122 (owner: "messy ... jumbled"; 30-design-system B: no orphan card alone on a row): seven tiles in a six-column
+      // grid left 07 alone under the row at 1024 - 1440. A wrapping flex row (AGENTS 6.7): four a row from lg (4 + 3, the
+      // organiser names stay whole), every tile in one row from xl (--n = how many projects the registry holds)
+      className="fx-tilt3d-grid relative flex flex-wrap justify-center gap-3"
+      style={{ '--n': items.length } as React.CSSProperties}
     >
       {wire ? (
         <>
@@ -106,7 +110,7 @@ export function ProjectIndex({ items }: { items: readonly ProjectIndexItem[] }) 
               // on the card's shell under the header; a second scroll here used to race it
               if (focus) setFocus(p.id); // in Focus Mode, the index moves the spotlight
             }}
-            className={`fx-tilt3d relative z-[1] flex flex-col gap-1 min-h-[64px] min-w-0 p-3 rounded-2xl border-3 border-ink text-ink transition-opacity duration-300 ${
+            className={`fx-tilt3d relative z-[1] flex flex-col gap-1 min-h-[64px] min-w-0 p-3 basis-[calc((100%-0.75rem)/2)] sm:basis-[calc((100%-1.5rem)/3)] lg:basis-[calc((100%-2.25rem)/4)] xl:basis-[calc((100%-(var(--n)-1)*0.75rem)/var(--n))] grow-0 shrink-0 rounded-2xl border-3 border-ink text-ink transition-opacity duration-300 ${
               on ? `${p.fill} shadow-none translate-x-[3px] translate-y-[3px]` : 'nb-press bg-white shadow-brutal-sm'
             } ${dim ? 'opacity-40' : ''} ${hit ? 'fx-trail-hit' : ''}`}
           >

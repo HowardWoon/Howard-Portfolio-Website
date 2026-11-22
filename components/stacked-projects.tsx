@@ -901,7 +901,8 @@ export default function StackedProjects() {
             <h2 className="nb-title text-[clamp(1.55rem,8.2vw,2.1rem)] sm:text-5xl lg:text-6xl max-w-3xl leading-[1.02]">
               <SplitWords text="SCALABLE SYSTEMS & AUTONOMOUS ARCHITECTURES." />
             </h2>
-            <p className="text-ink-soft text-sm sm:text-base font-mono font-semibold max-w-md bg-white border-3 border-ink rounded-2xl p-4 shadow-brutal-sm rotate-1">
+            <p className="text-ink text-sm sm:text-base font-sans font-semibold leading-relaxed max-w-md bg-white border-3 border-ink rounded-2xl p-4 shadow-brutal rotate-1">
+              {/* R122: the note is read, so it is set in the reading face (Inter), ink on paper, a full 5 px block */}
               Scroll through the stack to deconstruct high-throughput backends, deterministic multi-agent LLM pipelines,
               and hardware-integrated IoT networks built from 0 to 1.
             </p>

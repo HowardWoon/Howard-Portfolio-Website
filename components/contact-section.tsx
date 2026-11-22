@@ -301,7 +301,8 @@ export default function ContactSection() {
             >
               <div className="space-y-6">
                 {/* Recruiter Live Status Pill */}
-                <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#DCFAEC] border-2 border-ink text-ink text-xs font-mono font-extrabold tracking-[0.06em]">
+                <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-md bg-[#DCFAEC] border-2 border-ink text-ink text-xs font-mono font-extrabold tracking-[0.06em] shadow-brutal-xs">
+                  {/* R122: a status is a square key with a hard edge (30-design-system B: chips are never pills) */}
                   <span className="nb-led" aria-hidden />
                   <span>AVAILABLE FOR 2026 ROLES</span>
                 </div>

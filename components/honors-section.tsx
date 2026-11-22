@@ -607,7 +607,7 @@ export default function HonorsSection() {
               <SplitWords text="HONORS & COMPETITIVE ACHIEVEMENTS." />
             </m.h2>
 
-            <m.p className="fx-rise text-sm font-mono font-semibold text-ink-soft max-w-sm leading-relaxed bg-white border-3 border-ink rounded-2xl p-4 shadow-brutal-sm -rotate-1">
+            <m.p className="fx-rise text-sm sm:text-base font-sans font-semibold text-ink max-w-sm leading-relaxed bg-white border-3 border-ink rounded-2xl p-4 shadow-brutal -rotate-1">
               A curated log of regional hackathon podiums, 4.00 CGPA academic distinctions, and engineering competition
               finals.
             </m.p>

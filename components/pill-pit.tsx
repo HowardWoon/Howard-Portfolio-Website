@@ -826,7 +826,7 @@ export function PillPit({ badges, title }: { badges: PitBadge[]; title: string }
                   // scroll the page; a sideways drag still picks the badge up and flings it. No will-change (see paint)
                   'absolute left-0 top-0 cursor-grab touch-pan-y data-[held]:cursor-grabbing'
                 : ''
-            } inline-flex items-center whitespace-nowrap rounded-full border-3 border-ink px-2.5 py-1.5 font-mono text-xs font-extrabold uppercase tracking-[0.06em] text-ink shadow-brutal-sm sm:px-4 sm:py-2 sm:text-sm sm:tracking-[0.08em] ${b.fill}`}
+            } inline-flex items-center whitespace-nowrap rounded-md border-3 border-ink px-2.5 py-1.5 font-mono text-xs font-extrabold uppercase tracking-[0.06em] text-ink shadow-brutal-sm sm:px-4 sm:py-2 sm:text-sm sm:tracking-[0.08em] ${b.fill}`}
           >
             {b.label}
           </span>

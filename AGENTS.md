@@ -323,5 +323,8 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
     R112's hollow outlined section numbers).** The figure band is four sticker cards on the lime ground (paper face,
     3 px ink, a hard ink block behind, a slight alternating tilt, the label on an ink chip with its SIGNAL square, the
     figure in display type with a hard extrusion, the arrow as an ink key; hover / press move only the face). Poster
-    section numbers are a paper face with an ink rim and a hard ink extrusion. Every later round restyles one section
+    section numbers are a paper face with an ink rim and a hard ink extrusion. Round 2 (23 Nov, owner: "don't make me
+    point them out one by one"): section titles (`.nb-title`) carry a hard paper + ink edge, section notes are Inter on
+    paper with a 5 px block, the project index runs 4 + 3 from 1024 px and one row from 1280 px (never an orphan tile), chips
+    and statuses are square keys (the skill pit too). Every later round restyles one section
     this way, words untouched, pushed one at a time. Guard: `tests/r122.spec.ts`. docs/R122-NEO-BRUTALIST-TASTE.md.

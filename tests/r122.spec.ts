@@ -75,3 +75,35 @@ test('section numbers are solid letterpress type: paper face, ink rim, hard ink 
   expect(s.color).toBe('rgb(255, 255, 255)');
   expect(s.shadow).toContain('rgb(10, 10, 10) 8px 8px 0px');
 });
+
+// Round 2 (owner: "messy, jumbled ... don't make me point them out one by one")
+for (const w of [1024, 1280, 1440]) {
+  test(`project index: no tile alone on a row @${w}`, async ({ page }) => {
+    await page.setViewportSize({ width: w, height: 900 });
+    await page.goto('/', { waitUntil: 'networkidle' });
+    const tiles = page.getByRole('navigation', { name: 'Project index' }).locator('a');
+    await tiles.first().scrollIntoViewIfNeeded();
+    const tops = await tiles.evaluateAll((els) => els.map((e) => (e as HTMLElement).offsetTop));
+    const rows = new Map<number, number>();
+    for (const t of tops) rows.set(t, (rows.get(t) ?? 0) + 1);
+    // never one tile alone on a row; from xl every project sits in one row
+    for (const n of rows.values()) expect(n).toBeGreaterThan(1);
+    if (w >= 1280) expect(rows.size).toBe(1);
+  });
+}
+
+test('section titles are printed (hard paper + ink edge); the skill pit keys are square', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/', { waitUntil: 'networkidle' });
+  const title = page.locator('#projects .nb-title').first();
+  expect(await title.evaluate((e) => getComputedStyle(e).textShadow)).toBe(
+    'rgb(255, 255, 255) 3px 3px 0px, rgb(10, 10, 10) 4px 4px 0px',
+  );
+  const pit = page.locator('[data-pill-pit]');
+  await pit.scrollIntoViewIfNeeded();
+  const radii = await pit
+    .locator('> div[aria-hidden] > span')
+    .evaluateAll((els) => els.map((e) => parseFloat(getComputedStyle(e).borderTopLeftRadius)));
+  expect(radii.length).toBeGreaterThan(10);
+  for (const r of radii) expect(r).toBeLessThanOrEqual(6);
+});

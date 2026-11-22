@@ -348,6 +348,11 @@ html[data-motion='calm'] *::after {
   }
   .nb-title {
     @apply font-display font-extrabold uppercase tracking-[-0.03em] text-ink;
+    /* R122: printed, not flat - a paper offset closed by a hard ink edge (two zero-blur copies), the hero forme's
+       letterpress read at section scale */
+    text-shadow:
+      3px 3px 0 #fff,
+      4px 4px 0 #0a0a0a;
   }
   .nb-marker {
     /* highlighter-pen stripe behind a word */

@@ -64,7 +64,7 @@ for (const [name, size] of [
       await pit.scrollIntoViewIfNeeded();
       const read = () =>
         page.evaluate(() =>
-          [...document.querySelectorAll<HTMLElement>('[data-pill-pit] span[class*="rounded-full"]')]
+          [...document.querySelectorAll<HTMLElement>('[data-pill-pit] > div[aria-hidden] > span')]
             .map((e) => e.style.transform)
             .join('|'),
         );

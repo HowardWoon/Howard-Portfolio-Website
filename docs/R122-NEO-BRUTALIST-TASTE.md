@@ -51,11 +51,30 @@ type treatment, framing and interaction change, built from the existing tokens (
 - From 1400 px the band keeps an 80 px right gutter: the fixed section spine sat on the last card.
 - Owner's approval: AskUserQuestion, 22 Nov 2026, "Yes, do round 1"; skills "Both, text only".
 
-Next rounds (one push each, after Howard sees round 1 live): section titles, project / experience / honour card
-headers, buttons and keys, footer.
+## Round 2 - whole-site taste audit (owner, 23 Nov 2026: "it's not just that one part ... boring colours and messy,
+
+jumbled text ... don't make me point them out one by one")
+
+Audit of the live site at 1440 x 900 and 390 x 664 (screenshots of every section), judged against the research above
+and 30-design-system B. Weak spots, worst first:
+
+| #   | Where                                | Weak spot                                                                                                                     | Round 2 change                                                                                                                    |
+| --- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Projects index                       | 7 tiles in a 6-column grid: 07 SENSOR X SENSEI alone on a second row at 1024 - 1440 (breaks "no orphan card") - reads jumbled | a wrapping flex row: 4 + 3 from 1024 px, all tiles in one row from 1280 px (`--n` = the registry's count), last row centred below |
+| 2   | Every section title (`.nb-title`)    | flat ink type beside a hero that has depth; the sections read like a different site                                           | printed edge: a 3 px paper offset closed by a 1 px ink edge (zero blur)                                                           |
+| 3   | Section notes (Projects, Honours)    | reading text set in small mono, ink-soft, a 3 px shadow: cramped and grey                                                     | Inter semibold, ink, a full 5 px block                                                                                            |
+| 4   | Contact skill pit + AVAILABLE status | pills (`rounded-full`), the one round shape left among square keys (B: chips are never pills)                                 | square keys (`rounded-md`), hard edge                                                                                             |
+| 5   | Section numbers, figure band         | flat / hollow                                                                                                                 | round 1                                                                                                                           |
+
+Seen and left for a later round (each needs its own look on the live site): the About tooling matrix (many small
+chips), experience card headers, the footer signal key strip.
 
 ## Guard
 
 `tests/r122.spec.ts`: four cards, each a link with the build-sheet values, a hard (zero-blur) shadow, no text under the
 type floor, cards inside the viewport and the figure on one line at 280 / 390 / 1024 / 1440; the section numbers are a paper face
 with an 8 px ink extrusion. tests/r111 now reads the figures by `[data-figure]`.
+
+Round 2: `tests/r122` also checks the index (one row at 1440, no tile alone on a row at 1024 / 1280 / 1440), the printed
+title edge and the square pit keys. tests/r31 reads the pit badges by structure (`> div[aria-hidden] > span`), not by
+their old round class.
