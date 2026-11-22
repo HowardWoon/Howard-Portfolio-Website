@@ -56,6 +56,11 @@ export default function HeroMascot() {
     const PEEK = 12;
     let timer = 0;
     let settleTries = 0;
+    let alive = true;
+    // R122 (pre-push r86 B4 on d475d1f, 1 of 3 runs: at the top of the page EXPLORE PROJECTS was still wiping in after
+    // the 6 x 250 ms of re-checks, and with no scroll nothing looked again): every finite animation found over the cat
+    // also re-runs the check once it has FINISHED, so a slow intro is never read half-way and then forgotten.
+    const awaited = new WeakSet<Animation>();
     const check = () => {
       if (wide.matches) {
         delete wrap.dataset.tucked;
@@ -74,7 +79,7 @@ export default function HeroMascot() {
       // R116 (CI r86 B4, 4x CPU: a gallery still rising into place under the cat was read before it arrived, and nothing
       // read it again): while a finite animation overlaps the cat, look again shortly (at most 6 x 250 ms)
       if (settleTries < 6) {
-        const busy = document.getAnimations().some((a) => {
+        const busy = document.getAnimations().filter((a) => {
           if (a.playState !== 'running') return false;
           const t = a.effect?.getComputedTiming();
           if (!t || t.iterations === Infinity || a.timeline !== document.timeline) return false;
@@ -83,7 +88,15 @@ export default function HeroMascot() {
           const r = el.getBoundingClientRect();
           return !(r.right <= b.left || r.left >= b.right || r.bottom <= b.top || r.top >= b.bottom);
         });
-        if (busy) {
+        for (const a of busy) {
+          if (awaited.has(a)) continue;
+          awaited.add(a);
+          a.finished.then(
+            () => alive && rest(),
+            () => {},
+          );
+        }
+        if (busy.length) {
           settleTries++;
           timer = window.setTimeout(check, 250);
           return;
@@ -150,6 +163,7 @@ export default function HeroMascot() {
     // a panel that opens or closes under the cat (accordion, gallery) changes what lies there without a scroll
     window.addEventListener('pointerup', rest, { passive: true });
     return () => {
+      alive = false;
       window.clearTimeout(timer);
       wrap.removeEventListener('animationend', rest);
       window.removeEventListener('scroll', rest);
