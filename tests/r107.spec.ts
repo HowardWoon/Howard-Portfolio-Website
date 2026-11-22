@@ -41,6 +41,9 @@ test('the diorama page: a way back, and every door sign shows once the street is
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/diorama?diorama-test&street-seed=7', { waitUntil: 'networkidle' });
   await expect(page.getByRole('link', { name: 'Return to Portfolio' }).first()).toHaveAttribute('href', '/#diorama');
+  // one h1 per page (20-responsive-a11y F): the street's own title
+  await expect(page.locator('h1')).toHaveCount(1);
+  await expect(page.locator('h1')).toHaveText('Walk the block.');
   await expect.poll(() => page.evaluate(() => !!(window as W).__diorama), { timeout: 90_000 }).toBe(true);
   await expect
     .poll(() => page.evaluate(() => !(window as W).__diorama!.debug.warming()), { timeout: 90_000 })

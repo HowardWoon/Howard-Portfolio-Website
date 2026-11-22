@@ -420,12 +420,13 @@ export default function TokyoDioramaSection({
             <span>AFTER HOURS // 3D DIORAMA</span>
           </div>
           <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
-            <h2
+            {/* the page's one h1: since R107 this section is the whole /diorama page (20-responsive-a11y F) */}
+            <h1
               id={`${id}-title`}
               className="nb-title max-w-3xl text-[clamp(1.55rem,8.2vw,2.1rem)] leading-[1.02] sm:text-5xl lg:text-6xl"
             >
               Walk the block.
-            </h2>
+            </h1>
             <p className="max-w-md text-base font-medium leading-relaxed text-ink-soft">
               A hand-built Tokyo street corner after rain. Look around, or switch to walk and explore. Every lit door
               opens a room you can walk into: the awards, the projects, the story.
