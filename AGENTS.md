@@ -318,3 +318,10 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
     1.6 s+ on a slow phone). Never animate `box-shadow`, a registered custom property, `text-shadow` or colours in the
     intro. Proof: block the main thread for 1.2 s after the first paint - the header and the headline must keep
     moving. Guard: `tests/r121.spec.ts`. docs/R121-HERO-INTRO-COMPOSITOR.md.
+13. **Facts and numbers are printed OBJECTS, never flat type in a ruled table (R122, owner, 22 Nov 2026: "the text is
+    flat and ugly ... not neo-brutalist at all ... like Pinterest templates"; replaces R111's ruled figure cells and
+    R112's hollow outlined section numbers).** The figure band is four sticker cards on the lime ground (paper face,
+    3 px ink, a hard ink block behind, a slight alternating tilt, the label on an ink chip with its SIGNAL square, the
+    figure in display type with a hard extrusion, the arrow as an ink key; hover / press move only the face). Poster
+    section numbers are a paper face with an ink rim and a hard ink extrusion. Every later round restyles one section
+    this way, words untouched, pushed one at a time. Guard: `tests/r122.spec.ts`. docs/R122-NEO-BRUTALIST-TASTE.md.

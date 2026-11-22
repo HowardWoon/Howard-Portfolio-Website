@@ -3883,16 +3883,134 @@ html[data-skip='on'] :is(#about, #projects, #experience, #honors) > * {
   letter-spacing: -0.01em;
 }
 
-/* R112 poster-scale section number on a colour-block ground (components/about-section.tsx): outlined ink, no fill, no
-   shadow - type as the graphic (docs/R112-ABOUT-GROUND.md) */
+/* R112 poster-scale section number on a colour-block ground (components/section-index.tsx) - type as the graphic.
+   R122 (owner: "flat ... not neo-brutalist"; replaces R112's hollow outline): a solid paper face, an ink rim and a hard
+   ink extrusion falling to the lower right, the hero forme's letterpress language (docs/R122-NEO-BRUTALIST-TASTE.md) */
 .ground-index {
   display: block;
   font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
   font-weight: 800;
   font-size: clamp(5rem, 16vw, 11rem);
   line-height: 0.8;
-  letter-spacing: -0.06em;
-  color: transparent;
+  letter-spacing: -0.04em;
+  color: #fff;
   -webkit-text-stroke: 3px #0a0a0a;
+  paint-order: stroke fill;
+  text-shadow:
+    2px 2px 0 #0a0a0a,
+    4px 4px 0 #0a0a0a,
+    6px 6px 0 #0a0a0a,
+    8px 8px 0 #0a0a0a;
+  padding: 0 8px 8px 0;
   user-select: none;
+}
+
+/* R122 figure band (components/figure-band.tsx): sticker cards on the lime ground. The hard shadow is an ink block
+   (::before) behind the face, so hover / press move only the face (transform) - nothing repaints a shadow. */
+.fb-card {
+  position: relative;
+  transform: rotate(var(--fb-tilt, 0deg));
+}
+.fb-card:nth-child(odd) {
+  --fb-tilt: -1.25deg;
+}
+.fb-card:nth-child(even) {
+  --fb-tilt: 1deg;
+}
+@media (max-width: 374.98px) {
+  .fb-card {
+    --fb-tilt: 0deg !important;
+  }
+}
+.fb-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  background: #0a0a0a;
+  transform: translate(8px, 8px);
+}
+.fb-face {
+  position: relative;
+  border: 3px solid #0a0a0a;
+  border-radius: 10px;
+  background: #fff;
+  transition: transform 140ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+@media (hover: hover) and (pointer: fine) {
+  .fb-card {
+    transition: transform 160ms ease-out;
+  }
+  .fb-card:hover {
+    transform: rotate(0deg);
+  }
+  .fb-card:hover .fb-face {
+    transform: translate(3px, 3px);
+  }
+  .fb-card:hover .fb-key {
+    transform: translate(2px, -2px);
+  }
+}
+.fb-face:focus-visible {
+  transform: translate(3px, 3px);
+}
+.fb-face:active {
+  transform: translate(8px, 8px);
+  transition-duration: 60ms;
+}
+.fb-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 100%;
+  border-radius: 6px;
+  background: #0a0a0a;
+  color: #fff;
+  padding: 0.3rem 0.6rem;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.fb-figure {
+  display: block;
+  font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+  font-weight: 800;
+  font-size: clamp(2.25rem, 9.5vw, 5rem);
+  white-space: nowrap;
+  line-height: 0.9;
+  letter-spacing: -0.045em;
+  color: #0a0a0a;
+  padding: 0.1em 6px 6px 0;
+  text-shadow:
+    1px 1px 0 #d4ff3a,
+    2px 2px 0 #d4ff3a,
+    3px 3px 0 #d4ff3a,
+    4px 4px 0 #d4ff3a,
+    5px 5px 0 #0a0a0a,
+    6px 6px 0 #0a0a0a;
+}
+@media (min-width: 1024px) {
+  .fb-figure {
+    font-size: clamp(2.75rem, 4.6vw, 5rem);
+  }
+}
+.fb-key {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 6px;
+  background: #0a0a0a;
+  color: #fff;
+  transition: transform 140ms ease-out;
+}
+@media (max-width: 639.98px) {
+  .fb-key {
+    width: 2rem;
+    height: 2rem;
+  }
 }

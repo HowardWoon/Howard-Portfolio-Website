@@ -19,7 +19,7 @@ for (const [w, h] of [
     await expect(band.locator('a')).toHaveCount(4);
     await band.scrollIntoViewIfNeeded();
     // the same figures as the About plate (one list: lib/build-sheet.ts)
-    const figures = await band.locator('a > span:first-child > span:first-child').allTextContents();
+    const figures = await band.locator('a [data-figure]').allTextContents();
     expect(figures).toEqual(['4.00', '07', '05', '03']);
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth),

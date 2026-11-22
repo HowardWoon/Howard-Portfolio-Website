@@ -64,6 +64,11 @@ Rules:
   (R118: The Build is deleted.) A gallery beside text starts at the top, level with the
   text, and stays beside it as you scroll (sticky under the header, card `overflow: clip`; R113 replaced the R110 middle
   placement) - never a blank column above or under it. Guards: `tests/r108`, `r109`.
+- R122 (docs/R122-NEO-BRUTALIST-TASTE.md; replaces R111's ruled figure cells and R112's hollow section numbers): a
+  figure or fact is a printed object - a card with a 3 px ink border and a hard ink block behind it (a `::before`, so
+  hover / press translate the face only, never repaint a shadow), its label on an ink chip, its number in display type
+  with a stacked zero-blur extrusion that never wraps. `.ground-index` is a paper face + ink rim + 8 px ink extrusion.
+  Guard: `tests/r122`.
 - No AI-generated imagery. Use Howard's real photos (`public/images/`) and vector / CSS graphics. (The one R83
   exception, the chibi Doom walking clip, was deleted with the Doom Walk in R118.)
 
