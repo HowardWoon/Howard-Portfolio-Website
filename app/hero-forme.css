@@ -56,21 +56,33 @@
   display: block;
 }
 
+/* R123 (owner, 24 Nov 2026: "the hero's in effect is laggy, slow, sluggish, not silky ... messy, no rhythm"; replaces
+   R98's hard steps, docs/R123-HERO-INTRO-RHYTHM.md). Measured: every part already ran on the compositor, but steps(5 /
+   6 / 7) showed 5 - 7 still pictures per move (17 - 19 fps by design) and the parts arrived out of reading order over
+   1.3 s (lines 3 - 4 before SYSTEMS TO, the portrait before the kicker, the squiggle alone on an empty screen). Now
+   ONE curve (--hx-ease, a fast decelerating ease-out: no linear, no steps), ONE rhythm in reading order - kicker 0 s,
+   the four lines every 70 ms from 0.06 s, the portrait 0.1 s, squiggle / bio / keys every 100 ms from 0.3 s (--d) -
+   and everything at rest by 1.0 s. Same effects (slug drop, print-head wipe, stamp), compositor properties only. */
+.hx-forme,
+.hx-wipe,
+.hx-wipe-down {
+  --hx-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
 @media (prefers-reduced-motion: no-preference) {
   /* each line drops from above into its own slot (the slot clips only while it drops: the extrusion is free after) */
   html:not([data-motion='calm']) .hx-line {
-    animation: hx-slot 0.62s linear backwards;
+    animation: hx-slot 0.9s linear backwards;
   }
   html:not([data-motion='calm']) .hx-slug {
     display: inline-block;
-    animation: hx-drop 0.26s steps(5, end) calc(var(--i, 0) * 0.11s) backwards;
+    animation: hx-drop 0.55s var(--hx-ease) calc(0.06s + var(--i, 0) * 0.07s) backwards;
   }
-  /* stepped print-head wipe for the rest of the hero, in reading order (--d) */
+  /* print-head wipe for the rest of the hero, in reading order (--d x 100 ms) */
   html:not([data-motion='calm']) .hx-wipe {
-    animation: hx-wipe 0.36s steps(6, end) calc(0.5s + var(--d, 0) * 0.09s) backwards;
+    animation: hx-wipe 0.5s var(--hx-ease) calc(var(--d, 0) * 0.1s) backwards;
   }
   html:not([data-motion='calm']) .hx-wipe-down {
-    animation: hx-wipe-down 0.42s steps(7, end) 0.3s backwards;
+    animation: hx-wipe-down 0.7s var(--hx-ease) 0.1s backwards;
   }
 }
 @keyframes hx-slot {
@@ -95,12 +107,14 @@
     clip-path: inset(-12px -12px -12px -12px);
   }
 }
+/* the sides reach 72 px out: the 2026 sticker hangs 40 px (+ its tilt and offset) left of the portrait and must not be
+   cut by the wipe and then pop in when the clip is dropped */
 @keyframes hx-wipe-down {
   from {
-    clip-path: inset(-24px -24px 100% -24px);
+    clip-path: inset(-24px -72px 100% -72px);
   }
   to {
-    clip-path: inset(-24px -24px -24px -24px);
+    clip-path: inset(-24px -72px -24px -72px);
   }
 }
 @media print {

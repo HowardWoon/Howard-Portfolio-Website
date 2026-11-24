@@ -167,8 +167,9 @@ function MagnifiedHeadline() {
         </div>
       </div>
 
-      {/* Decorative squiggle */}
-      <div className="w-48 sm:w-64 pt-3 relative z-10" aria-hidden>
+      {/* Decorative squiggle. R123: printed in the same wipe and rhythm as the bio (it stood alone on an empty screen
+          before the headline arrived) */}
+      <div className="hx-wipe w-48 sm:w-64 pt-3 relative z-10" style={{ '--d': 3 } as React.CSSProperties} aria-hidden>
         <svg
           viewBox="0 0 200 16"
           fill="none"
@@ -265,9 +266,10 @@ export default function BikebearHero() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center w-full">
           {/* Left Column: Vision & Narrative (7 cols) */}
           <div className="lg:col-span-7 flex flex-col items-start space-y-7 lg:space-y-[clamp(0.9rem,3.2svh,1.75rem)] relative z-30 pointer-events-auto">
-            {/* Brand Pill Badge. FX-61 / R98: the hero entrance is CSS (a stepped print-head wipe, .hx-wipe), so the
-                server HTML is visible and the entrance starts at first paint instead of after hydration. */}
-            <div className="nb-kicker hx-wipe" style={{ '--d': 1 } as React.CSSProperties}>
+            {/* Brand Pill Badge. FX-61 / R98: the hero entrance is CSS (a print-head wipe, .hx-wipe), so the server
+                HTML is visible and the entrance starts at first paint instead of after hydration. R123: one smooth
+                curve, in reading order (--d x 100 ms), see app/hero-forme.css. */}
+            <div className="nb-kicker hx-wipe" style={{ '--d': 0 } as React.CSSProperties}>
               <Sparkles className="w-4 h-4" strokeWidth={2.5} />
               <span>ABOUT // VISION & SYSTEMS ARCHITECTURE</span>
             </div>
@@ -279,7 +281,7 @@ export default function BikebearHero() {
 
             {/* Sub-narrative Bio Copy */}
             <p
-              style={{ '--d': 3 } as React.CSSProperties}
+              style={{ '--d': 4 } as React.CSSProperties}
               className="hx-wipe text-ink-soft text-lg sm:text-xl lg:text-[clamp(1.0625rem,2.6svh,1.25rem)] max-w-xl leading-relaxed font-sans font-medium [overflow-wrap:anywhere]"
             >
               Architecting robust,{' '}
@@ -290,7 +292,7 @@ export default function BikebearHero() {
 
             {/* Call to Action Buttons */}
             <div
-              style={{ '--d': 4 } as React.CSSProperties}
+              style={{ '--d': 5 } as React.CSSProperties}
               className="hx-wipe flex flex-wrap items-center gap-3 xs:gap-4 pt-2 w-full"
             >
               <Magnetic strength={0.3} stretch>

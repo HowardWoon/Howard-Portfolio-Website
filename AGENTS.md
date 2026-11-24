@@ -286,8 +286,9 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
    `hw-booted` in the server HTML; there is no overlay, boot log, Skip / Initialize key or pre-gate cover - never add a
    loading or intro screen in front of the hero again. The hero is a letterpress forme (`app/hero-forme.css`, owner:
    "astonishing ... avoid all ai slop ... neo brutalism"): paper-faced block letters with an ink rim and a solid ink
-   extrusion that falls away from the pointer; on load the lines drop into their slots in hard steps, SYSTEMS TO is
-   stamped (R121: the six-step rise of the extrusion is gone - it repainted on the main thread); the rest of the hero arrives as a stepped wipe; no fade on scroll. Guards:
+   extrusion that falls away from the pointer; on load the lines drop into their slots and SYSTEMS TO is pressed as its
+   line lands (R121: the six-step rise of the extrusion is gone - it repainted on the main thread; R123: no hard steps,
+   see rule 14); the rest of the hero arrives as a print-head wipe; no fade on scroll. Guards:
    `tests/smoke.spec.ts` (no gate), `tests/r98.spec.ts` (the forme), `scripts/validate-plans.mjs` R98.
 9. **No scroll storyboard between About and Projects (R118, owner, 11 Nov 2026: "delete the whole scrolling effect
    part, from 'from student ID' to Dr. Doom ... section 1 and section 2 joined, smoother, clean ... more premium
@@ -328,3 +329,13 @@ The detailed, binding rules live in `.agents/rules/`. Read ALL of them before do
     paper with a 5 px block, the project index runs 4 + 3 from 1024 px and one row from 1280 px (never an orphan tile), chips
     and statuses are square keys (the skill pit too). Every later round restyles one section
     this way, words untouched, pushed one at a time. Guard: `tests/r122.spec.ts`. docs/R122-NEO-BRUTALIST-TASTE.md.
+14. **The hero's entrance is one smooth curve in one rhythm, in reading order (R123, owner, 24 Nov 2026: "the hero's in
+    animation is very laggy, slow, sluggish, not silky ... messy, no rhythm"; replaces R98's "hard steps" / "stepped
+    wipe" for the hero intro).** Measured: the parts already ran on the compositor, but `steps(5 / 6 / 7)` showed 5 - 7
+    still pictures per move (17 - 19 fps by design) and the parts came out of order over 1.3 s. Every hero intro move
+    uses ONE decelerating curve (`--hx-ease`, `cubic-bezier(0.16, 1, 0.3, 1)`; never `steps()` or `linear` for motion),
+    in reading order on one beat - kicker 0 s, the four lines every 70 ms from 0.06 s, portrait 0.1 s, squiggle / bio /
+    keys every 100 ms from 0.3 s - and all of it at rest by 1.0 s. Nothing in the hero appears outside that sequence
+    (the squiggle stood alone on an empty screen), and SYSTEMS TO is never a hole in its line. Stepped motion stays
+    allowed elsewhere (stamps, shutters, the 3D loading bar). Guard: `tests/r123-hero-intro-rhythm.spec.ts`.
+    docs/R123-HERO-INTRO-RHYTHM.md.

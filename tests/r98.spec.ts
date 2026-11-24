@@ -56,7 +56,11 @@ test('the extrusion falls away from the pointer and never flattens (mouse)', asy
   expect(fromBottomRight.y).toBeGreaterThanOrEqual(4);
 });
 
-test('on load the lines drop into their slots in hard steps; reduced motion stands still', async ({ browser }) => {
+// R123 (owner, 24 Nov 2026: "laggy, not silky"): the drop is ONE smooth decelerating curve, no longer hard steps
+// (tests/r123-hero-intro-rhythm.spec.ts guards the rhythm and the reading order)
+test('on load the lines drop into their slots on one smooth curve; reduced motion stands still', async ({
+  browser,
+}) => {
   for (const reducedMotion of ['no-preference', 'reduce'] as const) {
     const ctx = await browser.newContext({ reducedMotion, viewport: { width: 1440, height: 900 } });
     const page = await ctx.newPage();
@@ -70,7 +74,7 @@ test('on load the lines drop into their slots in hard steps; reduced motion stan
     if (reducedMotion === 'reduce') expect(anim.name).toBe('none');
     else {
       expect(anim.name).toBe('hx-drop');
-      expect(anim.timing).toMatch(/^steps\(5(, end)?\)$/);
+      expect(anim.timing).toBe('cubic-bezier(0.16, 1, 0.3, 1)');
     }
     await ctx.close();
   }

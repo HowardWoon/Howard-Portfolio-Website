@@ -1792,19 +1792,24 @@ html:not(.fx-off-arenaPinboard) :where(.fx-seal:nth-child(even)) {
    scale/rotate properties compose with the chip's own -rotate-1; the overshoot curve gives the stamp its bounce. */
 @media (prefers-reduced-motion: no-preference) {
   html.hw-booted:not([data-motion='calm']):not(.fx-off-headlineStamp) .fx-stamp-in {
-    animation: fx-stamp-in 0.6s cubic-bezier(0.2, 0.9, 0.1, 1.4) 0.55s both;
+    animation: fx-stamp-in 0.45s cubic-bezier(0.2, 0.9, 0.1, 1.4) 0.33s both;
   }
 }
-/* R121: opacity / scale / rotate only, so the compositor plays it while the page is still loading (box-shadow kept it on
-   the main thread: on a slow phone SYSTEMS TO was missing for 1.6 s+); the chip keeps its own hard shadow throughout */
+/* R121: scale / rotate only, so the compositor plays it while the page is still loading (box-shadow kept it on the main
+   thread); the chip keeps its own hard shadow throughout. R123 (owner: "messy, no rhythm"): the chip no longer waits
+   invisible while lines 3 - 4 land (a hole in line 2 for 0.55 s) - it drops WITH its line at its own size and is
+   pressed once the moment the line lands (0.13 s line delay + its drop's visual landing): a short swell and settle, so
+   nothing oversized or tilted pokes out of its slot while the lines fall. */
 @keyframes fx-stamp-in {
   from {
-    opacity: 0;
-    scale: 1.35;
-    rotate: -8deg;
+    scale: 1;
+    rotate: 0deg;
+  }
+  35% {
+    scale: 1.07;
+    rotate: -2deg;
   }
   to {
-    opacity: 1;
     scale: 1;
     rotate: 0deg;
   }
